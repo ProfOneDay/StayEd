@@ -1,0 +1,135 @@
+/*
+==================================================
+StayEd — Notifications
+==================================================
+*/
+
+.st-notif-toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    align-items:center;
+    gap:16px;
+    margin-bottom:16px;
+}
+
+.st-notif-tabs{
+    display:flex;
+    gap:8px;
+}
+
+.st-notif-tab{
+    padding:8px 16px;
+    border-radius:999px;
+    background:var(--st-surface-container-low);
+    border:none;
+    color:var(--st-on-surface-variant);
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    transition:var(--st-transition);
+}
+
+.st-notif-tab:hover{
+    background:var(--st-surface-container);
+}
+
+.st-notif-tab.is-active{
+    background:var(--st-primary);
+    color:#fff;
+}
+
+.st-notif-tab .count{
+    margin-left:6px;
+    opacity:.75;
+}
+
+.st-notif-actions{
+    display:flex;
+    gap:8px;
+}
+
+.st-notif-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.st-notif-item{
+    display:flex;
+    gap:16px;
+    align-items:flex-start;
+    background:#fff;
+    border:1px solid rgba(195,198,207,.30);
+    border-radius:var(--st-radius-lg);
+    padding:16px;
+    box-shadow:var(--st-shadow-xs);
+    transition:var(--st-transition);
+    position:relative;
+}
+
+.st-notif-item:hover{
+    box-shadow:var(--st-shadow-sm);
+}
+
+.st-notif-item.is-unread{
+    background:rgba(0,106,104,.03);
+    border-left:3px solid var(--st-secondary);
+}
+
+.st-notif-icon{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+}
+
+.st-notif-icon--alert{ background:var(--st-risk-high-soft); color:var(--st-risk-high); }
+.st-notif-icon--intervention{ background:rgba(0,106,104,.10); color:var(--st-secondary); }
+.st-notif-icon--registration{ background:var(--st-primary-fixed); color:var(--st-primary); }
+.st-notif-icon--system{ background:var(--st-surface-container); color:var(--st-on-surface-variant); }
+
+.st-notif-body{
+    flex:1;
+}
+
+.st-notif-title-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.st-notif-title{
+    font-size:14px;
+    font-weight:700;
+    color:var(--st-on-surface);
+}
+
+.st-notif-unread-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--st-secondary);
+    flex-shrink:0;
+}
+
+.st-notif-text{
+    font-size:13px;
+    color:var(--st-on-surface-variant);
+    margin-top:2px;
+}
+
+.st-notif-time{
+    font-size:11px;
+    color:var(--st-outline);
+    margin-top:6px;
+}
+
+.st-notif-item-actions{
+    display:flex;
+    gap:4px;
+    flex-shrink:0;
+}

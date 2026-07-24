@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StayEd | Setup — Create Class</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="icon" type="image/x-icon" href="../../assets/img/brand/favicon.ico">
+    <link rel="apple-touch-icon" href="../../assets/img/brand/apple-touch-icon.png">
+</head>
+<body class="setup-page" data-wizard="2">
+
+    <header class="setup-topbar">
+        <div class="setup-topbar-inner">
+            <div class="setup-topbar-brand">
+                <img src="../../assets/img/brand/logo-dark.png" alt="StayEd logo">
+                <h1>StayEd</h1>
+            </div>
+            <div class="setup-progress">
+                <div class="setup-progress-track">
+                    <div class="setup-progress-fill" style="width:40%;"></div>
+                </div>
+                <div class="setup-progress-steps">
+                    <span class="is-done">1. Welcome</span>
+                    <span class="is-active">2. Create Class</span>
+                    <span>3. Upload</span>
+                    <span>4. Preview</span>
+                    <span>5. Complete</span>
+                </div>
+            </div>
+            <button type="button" class="setup-topbar-support">
+                <span class="material-symbols-outlined">help</span>
+                Support
+            </button>
+        </div>
+    </header>
+
+    <main class="setup-main">
+
+        <div class="setup-shell">
+
+            <div class="setup-heading">
+                <h1>Create Your First Class</h1>
+                <p>
+                    Define the learning cohort information before importing learner
+                    records. You can create additional cohorts later.
+                </p>
+            </div>
+
+            <form class="setup-form" id="classForm">
+
+                <div class="setup-field">
+                    <label for="clc">Community Learning Center (CLC)</label>
+                    <select id="clc">
+                        <option value="">Select CLC</option>
+                        <option value="San Felipe Sur CLC">San Felipe Sur CLC</option>
+                        <option value="Davao City Central CLC">Davao City Central CLC</option>
+                        <option value="Talomo District CLC">Talomo District CLC</option>
+                        <option value="Agdao Community Hub">Agdao Community Hub</option>
+                    </select>
+                </div>
+
+                <div class="setup-field-row">
+                    <div class="setup-field">
+                        <label for="schoolYear">School Year</label>
+                        <select id="schoolYear">
+                            <option value="2025-2026">2025-2026</option>
+                            <option value="2026-2027" selected>2026-2027</option>
+                        </select>
+                    </div>
+                    <div class="setup-field">
+                        <label for="semester">Semester</label>
+                        <select id="semester">
+                            <option value="First Trimester">First Trimester</option>
+                            <option value="Second Trimester">Second Trimester</option>
+                            <option value="Third Trimester">Third Trimester</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="setup-field">
+                    <label for="learningLevel">Learning Level</label>
+                    <select id="learningLevel">
+                        <option value="">Select Level</option>
+                        <option value="Basic Literacy Program">Basic Literacy Program (BLP)</option>
+                        <option value="Elementary A&amp;E">Elementary A&amp;E</option>
+                        <option value="Junior High School A&amp;E">Junior High School A&amp;E</option>
+                        <option value="Senior High School A&amp;E">Senior High School A&amp;E</option>
+                    </select>
+                </div>
+
+                <!-- Class summary -->
+                <div class="setup-summary">
+                    <h3>Class Summary</h3>
+                    <div class="setup-summary-grid">
+                        <div class="setup-summary-item">
+                            <p>Community Learning Center</p>
+                            <p id="summaryCLC">—</p>
+                        </div>
+                        <div class="setup-summary-item">
+                            <p>Learning Level</p>
+                            <p id="summaryLevel">—</p>
+                        </div>
+                        <div class="setup-summary-item">
+                            <p>School Year</p>
+                            <p id="summaryYear">2026-2027</p>
+                        </div>
+                        <div class="setup-summary-item">
+                            <p>Semester</p>
+                            <p id="summarySemester">First Trimester</p>
+                        </div>
+                    </div>
+                    <div class="setup-summary-status">
+                        <span class="dot"></span>
+                        Status: Ready for learner import
+                    </div>
+                </div>
+
+            </form>
+
+        </div>
+
+    </main>
+
+    <footer class="setup-footer">
+        <div class="setup-footer-inner">
+            <button type="button" id="backBtn" class="setup-footer-back">
+                <span class="material-symbols-outlined">arrow_back</span>
+                Back
+            </button>
+            <div class="setup-footer-right">
+                <span class="setup-footer-note">All changes are saved automatically</span>
+                <button type="button" id="nextBtn" class="st-btn st-btn-primary">
+                    Continue
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <div data-component="layout/toast"></div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/mock/mock-db.js"></script>
+    <script src="../../assets/js/mock/mock-api.js"></script>
+    <script src="../../assets/js/core/utils.js"></script>
+    <script src="../../assets/js/core/router.js"></script>
+    <script src="../../assets/js/core/api.js"></script>
+    <script src="../../assets/js/demo/demo-auth-service.js"></script>
+
+    <script src="../../assets/js/core/auth.js"></script>
+    <script src="../../assets/js/components/component-loader.js"></script>
+    <script src="../../assets/js/components/toast.js"></script>
+    <script src="../../assets/js/setup/setup.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,59 @@
+<section class="st-filter-bar">
+
+    <div class="st-filter-row">
+
+        <div class="st-filter-group">
+
+            <label class="st-filter-label" id="filterLevelLabel">Learning Level</label>
+
+            <div class="st-segment" data-filter-level role="group" aria-labelledby="filterLevelLabel">
+                <button type="button" class="is-active" data-level="Basic Literacy">Basic Literacy</button>
+                <button type="button" data-level="Elementary">Elementary</button>
+                <button type="button" data-level="Junior High">Junior High</button>
+                <button type="button" data-level="Senior High">Senior High</button>
+            </div>
+
+        </div>
+
+        <div class="st-filter-controls">
+
+            <div class="st-filter-group">
+                <label class="st-filter-label" for="filterClc">CLC Location</label>
+                <select id="filterClc" data-filter-clc>
+                    <option>All CLCs</option>
+                    <option>Central ALS Center</option>
+                    <option>San Felipe Sur CLC</option>
+                </select>
+            </div>
+
+            <div class="st-filter-group">
+                <label class="st-filter-label" for="filterModality">Modality</label>
+                <select id="filterModality" data-filter-modality>
+                    <option>All Modalities</option>
+                    <option>Face-to-Face</option>
+                    <option>Modular</option>
+                    <option>Blended</option>
+                </select>
+            </div>
+
+            <div class="st-filter-group">
+                <label class="st-filter-label" for="filterSection">Section</label>
+                <select id="filterSection" data-filter-section>
+                    <option>All Sections</option>
+                    <option>Section A - Morning</option>
+                    <option>Section B - Afternoon</option>
+                </select>
+            </div>
+
+            <div class="st-filter-apply">
+                <button type="button" class="st-btn st-btn-primary st-btn-block" data-filter-apply>
+                    <span class="material-symbols-outlined">filter_list</span>
+                    Apply Filters
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>

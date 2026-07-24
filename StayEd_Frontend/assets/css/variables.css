@@ -1,0 +1,473 @@
+/*
+==================================================
+StayEd
+Design System Variables
+Based on Approved Prototype
+==================================================
+*/
+
+:root{
+
+    /* ==================================================
+       PRIMARY PALETTE
+    ================================================== */
+
+    --st-primary:#12355B;
+    --st-primary-container:#12355B;
+    --st-primary-fixed:#D3E3FF;
+    --st-primary-fixed-dim:#AAC8F6;
+    --st-primary-light:#4C6F95;
+    --st-primary-dark:#0D2846;
+
+    --st-on-primary:#FFFFFF;
+    --st-on-primary-container:#809ECA;
+    --st-on-primary-fixed:#001C39;
+    --st-on-primary-fixed-variant:#28486F;
+
+    /* ==================================================
+       SECONDARY
+    ================================================== */
+
+    --st-secondary:#006A68;
+    --st-secondary-container:#8DF0EE;
+    --st-secondary-fixed:#90F3F1;
+    --st-secondary-fixed-dim:#73D6D4;
+
+    --st-on-secondary:#FFFFFF;
+    --st-on-secondary-container:#006E6D;
+    --st-on-secondary-fixed:#00201F;
+    --st-on-secondary-fixed-variant:#00504F;
+
+    /* ==================================================
+       TERTIARY
+    ================================================== */
+
+    --st-tertiary:#002230;
+    --st-tertiary-container:#00384E;
+    --st-tertiary-fixed:#C3E7FF;
+    --st-tertiary-fixed-dim:#8DCFF4;
+
+    --st-on-tertiary:#FFFFFF;
+    --st-on-tertiary-container:#62A4C8;
+    --st-on-tertiary-fixed:#001E2C;
+    --st-on-tertiary-fixed-variant:#004C69;
+
+    /* ==================================================
+       ERROR
+    ================================================== */
+
+    --st-error:#BA1A1A;
+    --st-error-container:#FFDAD6;
+
+    --st-on-error:#FFFFFF;
+    --st-on-error-container:#93000A;
+
+    /* ==================================================
+       RISK LEVELS (Predictive Analytics)
+       Exact values from approved prototype
+    ================================================== */
+
+    --st-risk-high:#BA1A1A;
+    --st-risk-high-soft:rgba(186,26,26,.10);
+    --st-risk-high-border:rgba(186,26,26,.20);
+
+    --st-risk-moderate:#F39422;
+    --st-risk-moderate-soft:rgba(243,148,34,.10);
+    --st-risk-moderate-border:rgba(243,148,34,.20);
+
+    --st-risk-low:#6BBF59;
+    --st-risk-low-soft:rgba(107,191,89,.12);
+    --st-risk-low-border:rgba(107,191,89,.22);
+
+    /* Deep navy used on auth screens (prototype auth palette) */
+    --st-primary-deep:#001F3F;
+
+    /* ==================================================
+       GLASSMORPHISM (Auth screens)
+    ================================================== */
+
+    --st-glass-bg:rgba(255,255,255,.85);
+    --st-glass-border:1px solid rgba(255,255,255,.30);
+    --st-glass-blur:blur(12px);
+    --st-glass-shadow:0 24px 48px -12px rgba(0,31,63,.35);
+
+    /* ==================================================
+       SURFACE
+    ================================================== */
+
+    --st-background:#F4F6F8;
+
+    --st-surface:#FAF8FF;
+    --st-surface-dim:#D0D9FD;
+    --st-surface-bright:#FAF8FF;
+
+    --st-surface-container-lowest:#FFFFFF;
+    --st-surface-container-low:#F2F3FF;
+    --st-surface-container:#EBEDFF;
+    --st-surface-container-high:#E3E7FF;
+    --st-surface-container-highest:#DBE1FF;
+
+    --st-surface-variant:#DBE1FF;
+
+    --st-on-surface:#111A36;
+    --st-on-surface-variant:#43474E;
+
+    --st-inverse-surface:#262F4C;
+    --st-inverse-on-surface:#EFF0FF;
+    --st-inverse-primary:#AAC8F6;
+
+    /* ==================================================
+       OUTLINES
+    ================================================== */
+
+    --st-outline:#73777F;
+    --st-outline-variant:#C3C6CF;
+
+    /* ==================================================
+       TYPOGRAPHY
+    ================================================== */
+
+    --st-font-heading:
+        "Libre Franklin",
+        sans-serif;
+
+    --st-font-body:
+        "Inter",
+        sans-serif;
+
+    --st-font-size-display:32px;
+    --st-font-size-title:24px;
+    --st-font-size-heading:20px;
+
+    --st-font-size-body-lg:18px;
+    --st-font-size-body:16px;
+    --st-font-size-small:14px;
+    --st-font-size-caption:12px;
+
+    --st-font-weight-regular:400;
+    --st-font-weight-medium:500;
+    --st-font-weight-semibold:600;
+    --st-font-weight-bold:700;
+
+    --st-line-height-display:1.2;
+    --st-line-height-heading:1.3;
+    --st-line-height-body:1.5;
+
+    /* ==================================================
+       SPACING
+    ================================================== */
+
+    --st-space-2:2px;
+    --st-space-4:4px;
+    --st-space-8:8px;
+    --st-space-12:12px;
+    --st-space-16:16px;
+    --st-space-20:20px;
+    --st-space-24:24px;
+    --st-space-32:32px;
+    --st-space-40:40px;
+    --st-space-48:48px;
+    --st-space-64:64px;
+
+    --st-container-max:1440px;
+
+    --st-margin-mobile:16px;
+    --st-margin-tablet:24px;
+    --st-margin-desktop:40px;
+
+    /*
+     * Semantic "stack" spacing (content-block gaps),
+     * aliased to the 8px scale above per the design
+     * reference: stack-sm=8, stack-md=16, stack-lg=24.
+     */
+    --st-stack-sm:var(--st-space-8);
+    --st-stack-md:var(--st-space-16);
+    --st-stack-lg:var(--st-space-24);
+
+    /* ==================================================
+       BORDER RADIUS
+    ================================================== */
+
+    --st-radius-xs:2px;
+    --st-radius-sm:4px;
+    --st-radius-md:6px;
+    --st-radius-lg:8px;
+    --st-radius-xl:12px;
+    --st-radius-2xl:16px;
+    --st-radius-full:999px;
+
+    --st-card-radius:5px;
+    --st-button-radius:4px;
+
+    /* ==================================================
+       SIDEBAR
+    ================================================== */
+
+    --st-sidebar-width:280px;
+    --st-sidebar-width-collapsed:80px;
+
+    --st-sidebar-background:var(--st-primary);
+
+    --st-sidebar-color:var(--st-on-primary);
+
+    --st-sidebar-active:rgba(255,255,255,.10);
+
+    --st-sidebar-hover:rgba(255,255,255,.05);
+
+    --st-sidebar-border:4px solid
+        var(--st-secondary-container);
+
+    /* ==================================================
+       NAVBAR
+    ================================================== */
+
+    --st-navbar-height:80px;
+
+    --st-navbar-background:#FFFFFF;
+
+    --st-navbar-border:1px solid
+        var(--st-outline-variant);
+
+    /* ==================================================
+       FOOTER
+    ================================================== */
+
+    --st-footer-height:64px;
+
+    --st-footer-background:
+        var(--st-surface-container-low);
+
+    --st-footer-border:
+        1px solid var(--st-outline-variant);
+
+    /* ==================================================
+       BUTTONS
+    ================================================== */
+
+    --st-button-height:44px;
+
+    --st-button-padding:
+        0 20px;
+
+    --st-button-font:
+        var(--st-font-size-small);
+
+    --st-button-weight:
+        var(--st-font-weight-semibold);
+
+    /* ==================================================
+       INPUTS
+    ================================================== */
+
+    --st-input-height:44px;
+
+    --st-input-radius:
+        var(--st-button-radius);
+
+    --st-input-border:
+        1px solid var(--st-outline-variant);
+
+    --st-input-background:#FFFFFF;
+
+    --st-input-focus:
+        var(--st-secondary);
+
+    /* ==================================================
+       TABLES
+    ================================================== */
+
+    --st-table-header:#F8F9FB;
+
+    --st-table-hover:#F6F9FF;
+
+    --st-table-border:
+        1px solid var(--st-outline-variant);
+
+    /* ==================================================
+       SHADOWS
+    ================================================== */
+
+    --st-shadow-xs:
+        0 1px 2px rgba(18,53,91,.05);
+
+    --st-shadow-sm:
+        0 2px 8px rgba(18,53,91,.08);
+
+    --st-shadow-md:
+        0 4px 16px rgba(18,53,91,.12);
+
+    --st-shadow-lg:
+        0 12px 32px rgba(18,53,91,.16);
+
+    /* ==================================================
+       Z-INDEX
+    ================================================== */
+
+    --st-z-sidebar:100;
+
+    --st-z-navbar:200;
+
+    --st-z-dropdown:400;
+
+    --st-z-modal:900;
+
+    --st-z-toast:1000;
+
+    /* ==================================================
+       TRANSITIONS
+    ================================================== */
+
+    --st-transition-fast:
+        .15s ease;
+
+    --st-transition:
+        .25s ease;
+
+    --st-transition-slow:
+        .35s ease;
+
+    /* ==================================================
+       COMPONENT SIZES
+    ================================================== */
+
+    --st-avatar-sm:36px;
+
+    --st-avatar-md:42px;
+
+    --st-avatar-lg:56px;
+
+    --st-icon-sm:18px;
+
+    --st-icon-md:22px;
+
+    --st-icon-lg:28px;
+
+    --st-card-padding:24px;
+
+    --st-card-gap:24px;
+
+    --st-section-gap:32px;
+
+    --st-grid-gap:24px;
+
+    --st-content-padding:40px;
+
+    /* ==================================================
+       BREAKPOINTS
+    ================================================== */
+
+    --st-breakpoint-sm:576px;
+    --st-breakpoint-md:768px;
+    --st-breakpoint-lg:992px;
+    --st-breakpoint-xl:1200px;
+    --st-breakpoint-2xl:1440px;
+
+    /* ==================================================
+       LAYOUT
+    ================================================== */
+
+    --st-content-width:calc(
+        100% - var(--st-sidebar-width)
+    );
+
+    --st-page-max-width:1600px;
+
+    --st-card-background:#FFFFFF;
+
+    --st-card-border:
+        1px solid rgba(195,198,207,.35);
+
+    /* ==================================================
+       STATUS COLORS
+    ================================================== */
+
+    --st-success:#2E7D32;
+    --st-success-light:#E8F5E9;
+
+    --st-warning:#ED6C02;
+    --st-warning-light:#FFF3E0;
+
+    --st-danger:#D32F2F;
+    --st-danger-light:#FDECEA;
+
+    --st-info:#0288D1;
+    --st-info-light:#E1F5FE;
+
+    /* ==================================================
+       CHART COLORS
+    ================================================== */
+
+    --st-chart-primary:#12355B;
+    --st-chart-secondary:#006A68;
+    --st-chart-tertiary:#4F83CC;
+    --st-chart-warning:#ED6C02;
+    --st-chart-danger:#D32F2F;
+    --st-chart-success:#2E7D32;
+
+    /* ==================================================
+       ANIMATIONS
+    ================================================== */
+
+    --st-hover-scale:1.02;
+
+    --st-active-scale:.98;
+
+    --st-transition-default:
+        all .25s ease;
+
+    --st-transition-transform:
+        transform .2s ease;
+
+    --st-transition-color:
+        color .2s ease,
+        background-color .2s ease,
+        border-color .2s ease;
+
+    /* ==================================================
+       SCROLLBAR
+    ================================================== */
+
+    --st-scrollbar-width:8px;
+
+    --st-scrollbar-thumb:#C3C6CF;
+
+    --st-scrollbar-track:#F4F6F8;
+
+    /* ==================================================
+       ELEVATION
+    ================================================== */
+
+    --st-elevation-0:none;
+
+    --st-elevation-1:
+        0 1px 3px rgba(0,0,0,.08);
+
+    --st-elevation-2:
+        0 4px 12px rgba(0,0,0,.10);
+
+    --st-elevation-3:
+        0 10px 24px rgba(0,0,0,.14);
+
+    /* ==================================================
+       APP
+    ================================================== */
+
+    --st-app-background:
+        var(--st-background);
+
+    --st-page-background:
+        var(--st-background);
+
+    --st-text-primary:
+        var(--st-on-surface);
+
+    --st-text-secondary:
+        var(--st-on-surface-variant);
+
+    --st-border-color:
+        var(--st-outline-variant);
+
+    --st-focus-ring:
+        0 0 0 3px rgba(0,106,104,.18);
+
+}

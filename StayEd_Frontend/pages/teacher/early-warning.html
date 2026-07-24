@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StayEd | Early Warning Alerts</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="icon" type="image/x-icon" href="../../assets/img/brand/favicon.ico">
+    <link rel="apple-touch-icon" href="../../assets/img/brand/apple-touch-icon.png">
+</head>
+<body class="st-app" data-page="Early Warning Alerts">
+
+    <div data-component="layout/sidebar"></div>
+
+    <div class="st-main">
+        <div data-component="layout/navbar"></div>
+
+        <main class="st-content">
+
+            <div class="st-page-header">
+                <div>
+                    <h1 class="st-page-header-title">Early Warning Alerts</h1>
+                    <p class="st-page-header-subtitle">
+                        Monitor learners requiring immediate intervention to prevent potential dropout.
+                    </p>
+                </div>
+                <div class="st-page-header-actions">
+                    <button type="button" class="st-btn st-btn-outline" data-ewa-export>
+                        <span class="material-symbols-outlined">download</span>
+                        Export
+                    </button>
+                </div>
+            </div>
+
+            <!-- Summary strip -->
+            <div class="st-ewa-summary">
+
+                <div class="st-ewa-summary-card st-ewa-summary-card--total">
+                    <p class="st-ewa-summary-label">Total Alerts</p>
+                    <div class="st-ewa-summary-row">
+                        <span class="st-ewa-summary-value" style="color:var(--st-primary);" data-ewa-total>--</span>
+                        <span class="material-symbols-outlined st-ewa-summary-icon" style="color:var(--st-primary);">notifications_active</span>
+                    </div>
+                </div>
+
+                <div class="st-ewa-summary-card st-ewa-summary-card--high">
+                    <p class="st-ewa-summary-label">High Risk</p>
+                    <div class="st-ewa-summary-row">
+                        <span class="st-ewa-summary-value" style="color:var(--st-risk-high);" data-ewa-high>--</span>
+                        <span class="material-symbols-outlined st-ewa-summary-icon" style="color:var(--st-risk-high);">priority_high</span>
+                    </div>
+                </div>
+
+                <div class="st-ewa-summary-card st-ewa-summary-card--moderate">
+                    <p class="st-ewa-summary-label">Medium Risk</p>
+                    <div class="st-ewa-summary-row">
+                        <span class="st-ewa-summary-value" style="color:var(--st-risk-moderate);" data-ewa-moderate>--</span>
+                        <span class="material-symbols-outlined st-ewa-summary-icon" style="color:var(--st-risk-moderate);">warning</span>
+                    </div>
+                </div>
+
+                <div class="st-ewa-summary-card st-ewa-summary-card--low">
+                    <p class="st-ewa-summary-label">Low Risk</p>
+                    <div class="st-ewa-summary-row">
+                        <span class="st-ewa-summary-value" style="color:var(--st-risk-low);" data-ewa-low>--</span>
+                        <span class="material-symbols-outlined st-ewa-summary-icon" style="color:var(--st-risk-low);">check_circle</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Filter bar -->
+            <div class="st-ewa-filter-bar">
+
+                <div class="st-search st-ewa-search">
+                    <span class="material-symbols-outlined">search</span>
+                    <input type="text" placeholder="Search learner by name or LRN..." data-ewa-search aria-label="Search alerts">
+                </div>
+
+                <input type="date" data-ewa-date-from aria-label="From date">
+                <input type="date" data-ewa-date-to aria-label="To date">
+
+                <select data-ewa-filter-risk aria-label="Filter by risk level">
+                    <option value="">All Risk Levels</option>
+                    <option value="High">High Risk</option>
+                    <option value="Moderate">Medium Risk</option>
+                    <option value="Low">Low Risk</option>
+                </select>
+
+                <select data-ewa-filter-clc aria-label="Filter by CLC">
+                    <option value="">All CLCs</option>
+                    <option>Manila North CLC</option>
+                    <option>Quezon City Central CLC</option>
+                    <option>Davao South Hub</option>
+                    <option>Cebu East ALS</option>
+                    <option>Pasig Integrated</option>
+                    <option>Zamboanga West Hub</option>
+                </select>
+
+                <button type="button" class="st-ewa-clear-btn" data-ewa-clear>
+                    <span class="material-symbols-outlined">filter_list_off</span>
+                    Clear Filters
+                </button>
+
+            </div>
+
+            <!-- Table -->
+            <div class="st-panel col-12">
+
+                <div class="st-panel-head" style="padding:20px 24px;margin-bottom:0;">
+                    <h4 class="st-panel-title">Learners Requiring Attention</h4>
+                    <span class="st-panel-subtitle" data-ewa-count>0 alerts</span>
+                </div>
+
+                <div class="st-table-scroll st-table-scroll--sticky">
+                    <table class="st-data-table">
+                        <thead>
+                            <tr>
+                                <th>Learner</th>
+                                <th>Program</th>
+                                <th>CLC</th>
+                                <th class="is-center">Risk Score</th>
+                                <th>Risk Level</th>
+                                <th>Status</th>
+                                <th>Date Generated</th>
+                                <th>Assigned Teacher</th>
+                                <th class="is-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody data-ewa-body>
+                            <tr>
+                                <td colspan="9" class="st-table-empty-cell">Loading alerts…</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="st-pagination">
+                    <span class="st-pagination-info" data-ewa-info>Showing 0 alerts</span>
+                    <div class="st-pagination-controls" data-ewa-pages></div>
+                </div>
+
+            </div>
+
+        </main>
+
+        <div data-component="layout/footer"></div>
+    </div>
+
+    <div data-component="layout/toast"></div>
+    <div data-component="layout/modal"></div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/mock/mock-db.js"></script>
+    <script src="../../assets/js/mock/mock-dashboard.js"></script>
+    <script src="../../assets/js/mock/mock-learners.js"></script>
+    <script src="../../assets/js/mock/mock-api.js"></script>
+    <script src="../../assets/js/core/utils.js"></script>
+    <script src="../../assets/js/core/router.js"></script>
+    <script src="../../assets/js/core/api.js"></script>
+    <script src="../../assets/js/core/auth.js"></script>
+    <script src="../../assets/js/core/guards.js"></script>
+    <script src="../../assets/js/core/layout.js"></script>
+    <script src="../../assets/js/core/skeletons.js"></script>
+    <script src="../../assets/js/core/app.js"></script>
+    <script src="../../assets/js/components/component-loader.js"></script>
+    <script src="../../assets/js/components/toast.js"></script>
+    <script src="../../assets/js/components/modal.js"></script>
+    <script src="../../assets/js/teacher/early-warning.js"></script>
+
+</body>
+</html>

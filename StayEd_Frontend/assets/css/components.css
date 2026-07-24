@@ -1,0 +1,2080 @@
+/*
+==================================================
+StayEd
+Reusable Components
+Based on Approved Prototype
+==================================================
+*/
+
+/* ==========================================
+   BUTTONS
+========================================== */
+
+.st-btn{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:8px;
+
+    height:44px;
+
+    padding:0 20px;
+
+    border:none;
+
+    border-radius:var(--st-button-radius);
+
+    font-size:14px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:var(--st-transition-default);
+
+    text-decoration:none;
+
+}
+
+.st-btn:hover{
+
+    transform:translateY(-1px);
+
+}
+
+.st-btn:active{
+
+    transform:scale(.98);
+
+}
+
+.st-btn-primary{
+
+    background:var(--st-primary);
+
+    color:#FFF;
+
+}
+
+.st-btn-primary:hover{
+
+    background:var(--st-primary-dark);
+
+}
+
+.st-btn-secondary{
+
+    background:var(--st-secondary);
+
+    color:#FFF;
+
+}
+
+.st-btn-secondary:hover{
+
+    opacity:.95;
+
+}
+
+.st-btn-outline{
+
+    background:#FFF;
+
+    border:1px solid var(--st-outline-variant);
+
+    color:var(--st-primary);
+
+}
+
+.st-btn-outline:hover{
+
+    background:var(--st-surface-container-low);
+
+}
+
+.st-btn-danger{
+
+    background:var(--st-error);
+
+    color:#FFF;
+
+}
+
+.st-btn-danger:hover{
+
+    opacity:.92;
+
+}
+
+.st-btn-icon{
+
+    width:44px;
+
+    padding:0;
+
+}
+
+/* ==========================================
+   CARDS
+========================================== */
+
+.st-card{
+
+    background:#FFF;
+
+    border:1px solid rgba(195,198,207,.35);
+
+    border-radius:var(--st-card-radius);
+
+    box-shadow:var(--st-shadow-sm);
+
+    padding:24px;
+
+}
+
+.st-card-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:20px;
+
+}
+
+.st-card-title{
+
+    font-family:var(--st-font-heading);
+
+    font-size:20px;
+
+    font-weight:600;
+
+    color:var(--st-primary);
+
+}
+
+.st-card-body{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:20px;
+
+}
+
+.st-card-footer{
+
+    margin-top:24px;
+
+}
+
+/* ==========================================
+   METRIC CARD
+========================================== */
+
+.st-metric{
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:space-between;
+
+    min-height:140px;
+
+}
+
+.st-metric-top{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+}
+
+.st-metric-label{
+
+    font-size:13px;
+
+    color:var(--st-text-secondary);
+
+}
+
+.st-metric-icon{
+
+    font-size:24px;
+
+    color:var(--st-outline);
+
+}
+
+.st-metric-value{
+
+    margin-top:auto;
+
+    font-size:36px;
+
+    font-weight:700;
+
+    color:var(--st-primary);
+
+    font-family:var(--st-font-heading);
+
+}
+
+.st-metric-caption{
+
+    margin-top:8px;
+
+    font-size:13px;
+
+    color:var(--st-text-secondary);
+
+}
+
+/* ==========================================
+   QUICK ACTION CARDS
+========================================== */
+
+.st-action-card{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:16px;
+
+    padding:18px;
+
+    background:#FFF;
+
+    border:1px solid rgba(195,198,207,.35);
+
+    border-radius:var(--st-card-radius);
+
+    cursor:pointer;
+
+    transition:var(--st-transition-default);
+
+}
+
+.st-action-card:hover{
+
+    border-color:var(--st-secondary);
+
+    transform:translateY(-2px);
+
+    box-shadow:var(--st-shadow-md);
+
+}
+
+.st-action-left{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+}
+
+.st-action-icon{
+
+    width:46px;
+
+    height:46px;
+
+    border-radius:12px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    background:var(--st-primary-fixed);
+
+    color:var(--st-primary);
+
+}
+
+.st-action-title{
+
+    font-size:15px;
+
+    font-weight:600;
+
+    color:var(--st-text-primary);
+
+}
+
+.st-action-arrow{
+
+    color:var(--st-outline);
+
+    transition:.2s;
+
+}
+
+.st-action-card:hover .st-action-arrow{
+
+    transform:translateX(4px);
+
+}
+
+/* ==========================================
+   BADGES
+========================================== */
+
+.st-badge{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    padding:4px 10px;
+
+    border-radius:999px;
+
+    font-size:12px;
+
+    font-weight:600;
+
+    white-space:nowrap;
+
+}
+
+.st-badge-primary{
+
+    background:var(--st-primary-fixed);
+
+    color:var(--st-primary);
+
+}
+
+.st-badge-success{
+
+    background:var(--st-success-light);
+
+    color:var(--st-success);
+
+}
+
+.st-badge-warning{
+
+    background:var(--st-warning-light);
+
+    color:var(--st-warning);
+
+}
+
+.st-badge-danger{
+
+    background:var(--st-danger-light);
+
+    color:var(--st-danger);
+
+}
+
+.st-badge-info{
+
+    background:var(--st-info-light);
+
+    color:var(--st-info);
+
+}
+
+/* ==========================================
+   RISK BADGES (Predictive Analytics)
+   Reusable across dashboard, records, alerts
+========================================== */
+
+.st-risk-badge{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    padding:2px 10px;
+
+    border-radius:999px;
+
+    font-size:11px;
+
+    font-weight:700;
+
+    line-height:1.6;
+
+    white-space:nowrap;
+
+    border:1px solid transparent;
+
+}
+
+.st-risk-badge .st-risk-dot{
+
+    width:6px;
+
+    height:6px;
+
+    border-radius:50%;
+
+    flex-shrink:0;
+
+}
+
+.st-risk-badge--high{
+
+    background:var(--st-risk-high-soft);
+
+    color:var(--st-risk-high);
+
+    border-color:var(--st-risk-high-border);
+
+}
+
+.st-risk-badge--high .st-risk-dot{
+
+    background:var(--st-risk-high);
+
+}
+
+.st-risk-badge--moderate{
+
+    background:var(--st-risk-moderate-soft);
+
+    color:var(--st-risk-moderate);
+
+    border-color:var(--st-risk-moderate-border);
+
+}
+
+.st-risk-badge--moderate .st-risk-dot{
+
+    background:var(--st-risk-moderate);
+
+}
+
+.st-risk-badge--low{
+
+    background:var(--st-risk-low-soft);
+
+    color:var(--st-risk-low);
+
+    border-color:var(--st-risk-low-border);
+
+}
+
+.st-risk-badge--low .st-risk-dot{
+
+    background:var(--st-risk-low);
+
+}
+
+/* Neutral modality / status pill */
+.st-pill{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    padding:2px 10px;
+
+    border-radius:999px;
+
+    font-size:10px;
+
+    font-weight:700;
+
+    background:var(--st-surface-container);
+
+    color:var(--st-on-surface-variant);
+
+    white-space:nowrap;
+
+}
+
+.st-pill--teal{
+
+    background:rgba(0,106,104,.10);
+
+    color:var(--st-secondary);
+
+}
+
+/* ==========================================
+   AVATAR (initials)
+========================================== */
+
+.st-avatar-initials{
+
+    width:32px;
+
+    height:32px;
+
+    border-radius:50%;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:12px;
+
+    font-weight:700;
+
+    background:rgba(18,53,91,.10);
+
+    color:var(--st-primary);
+
+    border:1px solid rgba(18,53,91,.10);
+
+}
+
+.st-avatar-initials--teal{
+
+    background:rgba(0,106,104,.10);
+
+    color:var(--st-secondary);
+
+    border-color:rgba(0,106,104,.10);
+
+}
+
+.st-avatar-initials--blue{
+
+    background:#DBEAFE;
+
+    color:#2563EB;
+
+    border-color:#BFDBFE;
+
+}
+
+/* ==========================================
+   CHIPS
+========================================== */
+
+.st-chip{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    padding:8px 14px;
+
+    background:var(--st-surface-container-low);
+
+    border:1px solid var(--st-outline-variant);
+
+    border-radius:999px;
+
+    cursor:pointer;
+
+    transition:var(--st-transition-default);
+
+    font-size:13px;
+
+    font-weight:600;
+
+}
+
+.st-chip:hover{
+
+    background:var(--st-primary-fixed);
+
+}
+
+.st-chip.active{
+
+    background:var(--st-primary);
+
+    border-color:var(--st-primary);
+
+    color:#FFF;
+
+}
+
+/* ==========================================
+   EMPTY STATES
+   Canonical definition lives in
+   pages/dashboard.css (.st-empty/-title/-text)
+   since every page actually uses that version.
+========================================== */
+
+/* ==========================================
+   ALERTS
+========================================== */
+
+.st-alert{
+
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:12px;
+
+    padding:16px 18px;
+
+    border-radius:var(--st-card-radius);
+
+    border-left:4px solid transparent;
+
+}
+
+.st-alert-success{
+
+    background:var(--st-success-light);
+
+    border-left-color:var(--st-success);
+
+}
+
+.st-alert-warning{
+
+    background:var(--st-warning-light);
+
+    border-left-color:var(--st-warning);
+
+}
+
+.st-alert-danger{
+
+    background:var(--st-danger-light);
+
+    border-left-color:var(--st-danger);
+
+}
+
+.st-alert-info{
+
+    background:var(--st-info-light);
+
+    border-left-color:var(--st-info);
+
+}
+
+.st-alert-icon{
+
+    font-size:22px;
+
+}
+
+.st-alert-content{
+
+    flex:1;
+
+}
+
+.st-alert-title{
+
+    font-weight:700;
+
+    margin-bottom:4px;
+
+}
+
+.st-alert-message{
+
+    font-size:14px;
+
+    line-height:1.5;
+
+}
+
+/* ==========================================
+   NOTIFICATION DOT
+========================================== */
+
+.st-dot{
+
+    width:10px;
+
+    height:10px;
+
+    border-radius:50%;
+
+    display:inline-block;
+
+}
+
+.st-dot-success{
+
+    background:var(--st-success);
+
+}
+
+.st-dot-warning{
+
+    background:var(--st-warning);
+
+}
+
+.st-dot-danger{
+
+    background:var(--st-danger);
+
+}
+
+.st-dot-info{
+
+    background:var(--st-info);
+
+}
+
+/* ==========================================
+   FILTER BAR
+========================================== */
+
+.st-filter-bar{
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:16px;
+
+    align-items:flex-end;
+
+    padding:20px 24px;
+
+    background:#FFF;
+
+    border:1px solid rgba(195,198,207,.35);
+
+    border-radius:var(--st-card-radius);
+
+    box-shadow:var(--st-shadow-sm);
+
+}
+
+.st-filter-group{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:8px;
+
+    min-width:180px;
+
+    flex:1;
+
+}
+
+.st-filter-label{
+
+    font-size:12px;
+
+    font-weight:600;
+
+    color:var(--st-text-secondary);
+
+}
+
+.st-filter-actions{
+
+    display:flex;
+
+    gap:12px;
+
+    align-items:center;
+
+    margin-left:auto;
+
+}
+
+/* ==========================================
+   SEARCH
+========================================== */
+
+.st-search{
+
+    position:relative;
+
+    width:100%;
+
+}
+
+.st-search input{
+
+    width:100%;
+
+    height:44px;
+
+    padding:0 18px 0 48px;
+
+    border:1px solid var(--st-outline-variant);
+
+    border-radius:var(--st-button-radius);
+
+    background:#FFF;
+
+    outline:none;
+
+    transition:var(--st-transition-default);
+
+}
+
+.st-search input:focus{
+
+    border-color:var(--st-secondary);
+
+    box-shadow:var(--st-focus-ring);
+
+}
+
+.st-search .material-symbols-outlined{
+
+    position:absolute;
+
+    top:50%;
+
+    left:14px;
+
+    transform:translateY(-50%);
+
+    color:var(--st-outline);
+
+    font-size:20px;
+
+}
+
+/* ==========================================
+   TABLE
+========================================== */
+
+.st-table-wrapper{
+
+    width:100%;
+
+    overflow:auto;
+
+    border-radius:var(--st-card-radius);
+
+    border:1px solid rgba(195,198,207,.35);
+
+}
+
+.st-table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    background:#FFF;
+
+}
+
+.st-table thead{
+
+    background:var(--st-table-header);
+
+}
+
+.st-table th{
+
+    text-align:left;
+
+    padding:16px;
+
+    font-size:13px;
+
+    font-weight:700;
+
+    color:var(--st-primary);
+
+    border-bottom:1px solid var(--st-outline-variant);
+
+    white-space:nowrap;
+
+}
+
+.st-table td{
+
+    padding:16px;
+
+    border-bottom:1px solid rgba(195,198,207,.35);
+
+    font-size:14px;
+
+    color:var(--st-text-primary);
+
+    vertical-align:middle;
+
+}
+
+.st-table tbody tr{
+
+    transition:var(--st-transition-default);
+
+}
+
+.st-table tbody tr:hover{
+
+    background:var(--st-table-hover);
+
+}
+
+.st-table tbody tr:last-child td{
+
+    border-bottom:none;
+
+}
+
+/* ==========================================
+   DROPDOWN
+========================================== */
+
+.st-dropdown{
+
+    width:100%;
+
+    height:44px;
+
+    padding:0 14px;
+
+    border:1px solid var(--st-outline-variant);
+
+    border-radius:var(--st-button-radius);
+
+    background:#FFF;
+
+    outline:none;
+
+    font-size:14px;
+
+    transition:var(--st-transition-default);
+
+}
+
+.st-dropdown:focus{
+
+    border-color:var(--st-secondary);
+
+    box-shadow:var(--st-focus-ring);
+
+}
+
+/* ==========================================
+   PAGINATION
+========================================== */
+
+.st-pagination{
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    align-items:center;
+
+    gap:8px;
+
+    margin-top:24px;
+
+}
+
+.st-page-button{
+
+    width:38px;
+
+    height:38px;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:#FFF;
+
+    cursor:pointer;
+
+    transition:var(--st-transition-default);
+
+    box-shadow:var(--st-shadow-xs);
+
+}
+
+.st-page-button:hover{
+
+    background:var(--st-primary-fixed);
+
+}
+
+.st-page-button.active{
+
+    background:var(--st-primary);
+
+    color:#FFF;
+
+}
+
+/* ==========================================
+   LOADING SKELETON
+========================================== */
+
+.st-skeleton{
+
+    background:linear-gradient(
+
+        90deg,
+
+        #ececec 25%,
+
+        #f6f6f6 50%,
+
+        #ececec 75%
+
+    );
+
+    background-size:200% 100%;
+
+    animation:stSkeleton 1.4s infinite;
+
+    border-radius:8px;
+
+}
+
+.st-skeleton-text{
+
+    height:14px;
+
+    width:100%;
+
+}
+
+.st-skeleton-title{
+
+    height:24px;
+
+    width:220px;
+
+}
+
+.st-skeleton-card{
+
+    width:100%;
+
+    height:180px;
+
+}
+
+/* ==========================================
+   SKELETON PATTERNS
+   Ready-made composites for the loading states
+   pages use most: table rows, stat cards, and
+   content cards. Built on the .st-skeleton
+   shimmer primitives above.
+========================================== */
+
+.st-skeleton-row{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:16px;
+
+    padding:16px 24px;
+
+    border-top:1px solid rgba(195,198,207,.15);
+
+}
+
+.st-skeleton-avatar{
+
+    width:36px;
+
+    height:36px;
+
+    border-radius:50%;
+
+    flex-shrink:0;
+
+}
+
+.st-skeleton-row-lines{
+
+    flex:1;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:8px;
+
+}
+
+.st-skeleton-row-lines .st-skeleton:first-child{
+
+    width:45%;
+
+}
+
+.st-skeleton-row-lines .st-skeleton:last-child{
+
+    width:25%;
+
+    height:11px;
+
+}
+
+.st-skeleton-stat-card{
+
+    background:#fff;
+
+    border:1px solid rgba(195,198,207,.30);
+
+    border-radius:var(--st-card-radius);
+
+    box-shadow:var(--st-shadow-sm);
+
+    padding:16px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:12px;
+
+}
+
+.st-skeleton-stat-card .st-skeleton:first-child{
+
+    width:60%;
+
+    height:11px;
+
+}
+
+.st-skeleton-stat-card .st-skeleton:last-child{
+
+    width:40%;
+
+    height:26px;
+
+}
+
+@keyframes stSkeleton{
+
+    0%{
+
+        background-position:200% 0;
+
+    }
+
+    100%{
+
+        background-position:-200% 0;
+
+    }
+
+}
+
+/* ==========================================
+   MODAL
+========================================== */
+
+.st-modal{
+
+    position:fixed;
+
+    inset:0;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    background:rgba(17,26,54,.45);
+
+    backdrop-filter:blur(4px);
+
+    z-index:var(--st-z-modal);
+
+}
+
+/*
+ * Modal.show()/.hide() (assets/js/components/modal.js)
+ * toggle the .hidden class on #st-modal. Some legacy
+ * callers instead toggle .open on show — support both.
+ */
+.st-modal.hidden{
+
+    display:none;
+
+}
+
+.st-modal.open{
+
+    display:flex;
+
+}
+
+.st-modal-dialog,
+.st-modal-card{
+
+    width:min(640px,90vw);
+
+    max-height:85vh;
+
+    overflow-y:auto;
+
+    background:#FFF;
+
+    border-radius:var(--st-radius-xl);
+
+    box-shadow:var(--st-shadow-lg);
+
+    animation:stModalIn .2s ease;
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+/* ==========================================
+   STANDARDIZED MODAL WIDTH SYSTEM
+   Applied to #st-modal via a size modifier
+   class (st-modal--sm/md/lg/xl) so every
+   modal in the app picks from the same scale
+   instead of inventing one-off widths.
+========================================== */
+
+.st-modal--sm .st-modal-dialog,
+.st-modal--sm .st-modal-card{
+    width:min(440px,90vw);
+}
+
+.st-modal--md .st-modal-dialog,
+.st-modal--md .st-modal-card{
+    width:min(640px,90vw);
+}
+
+.st-modal--lg .st-modal-dialog,
+.st-modal--lg .st-modal-card{
+    width:min(860px,92vw);
+}
+
+.st-modal--xl .st-modal-dialog,
+.st-modal--xl .st-modal-card{
+    width:min(1040px,94vw);
+}
+
+.st-modal-backdrop{
+
+    position:fixed;
+
+    inset:0;
+
+    z-index:-1;
+
+}
+
+.st-modal-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:20px 24px;
+
+    border-bottom:1px solid var(--st-outline-variant);
+
+}
+
+.st-modal-close{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    width:32px;
+
+    height:32px;
+
+    border:none;
+
+    background:transparent;
+
+    border-radius:50%;
+
+    color:var(--st-on-surface-variant);
+
+    cursor:pointer;
+
+    transition:var(--st-transition);
+
+    flex-shrink:0;
+
+}
+
+.st-modal-close:hover{
+
+    background:var(--st-surface-container-low);
+
+    color:var(--st-primary);
+
+}
+
+.st-modal-close .material-symbols-outlined{
+
+    font-size:20px;
+
+}
+
+.st-modal-title{
+
+    font-family:var(--st-font-heading);
+
+    font-size:20px;
+
+    font-weight:700;
+
+    color:var(--st-primary);
+
+}
+
+.st-modal-body{
+
+    padding:24px;
+
+}
+
+.st-modal-footer{
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    gap:12px;
+
+    padding:20px 24px;
+
+    border-top:1px solid var(--st-outline-variant);
+
+}
+
+@keyframes stModalIn{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(12px) scale(.98);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0) scale(1);
+
+    }
+
+}
+
+/* ==========================================
+   TOAST
+========================================== */
+
+.st-toast-container{
+
+    position:fixed;
+
+    top:24px;
+
+    right:24px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:12px;
+
+    z-index:var(--st-z-toast);
+
+}
+
+.st-toast{
+
+    min-width:320px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    padding:16px 18px;
+
+    background:#FFF;
+
+    border-left:4px solid var(--st-primary);
+
+    border-radius:var(--st-card-radius);
+
+    box-shadow:var(--st-shadow-md);
+
+    opacity:1;
+
+    transition:opacity .3s ease, transform .3s ease;
+
+}
+
+.st-toast.show{
+
+    animation:stToast .25s ease;
+
+}
+
+.st-toast:not(.show){
+
+    opacity:0;
+
+    transform:translateX(24px);
+
+}
+
+.st-toast-success{
+
+    border-left-color:var(--st-success);
+
+}
+
+.st-toast-warning{
+
+    border-left-color:var(--st-warning);
+
+}
+
+.st-toast-danger,
+.st-toast-error{
+
+    border-left-color:var(--st-danger);
+
+}
+
+.st-toast-info{
+
+    border-left-color:var(--st-info);
+
+}
+
+@keyframes stToast{
+
+    from{
+
+        opacity:0;
+
+        transform:translateX(24px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateX(0);
+
+    }
+
+}
+
+/* ==========================================
+   PROGRESS
+========================================== */
+
+.st-progress{
+
+    width:100%;
+
+    height:8px;
+
+    overflow:hidden;
+
+    border-radius:999px;
+
+    background:var(--st-surface-container);
+
+}
+
+.st-progress-bar{
+
+    height:100%;
+
+    background:var(--st-primary);
+
+    border-radius:999px;
+
+    transition:width .3s ease;
+
+}
+
+/* ==========================================
+   TABS
+========================================== */
+
+.st-tabs{
+
+    display:flex;
+
+    gap:8px;
+
+    border-bottom:1px solid var(--st-outline-variant);
+
+}
+
+.st-tab{
+
+    padding:12px 18px;
+
+    border:none;
+
+    background:none;
+
+    cursor:pointer;
+
+    color:var(--st-text-secondary);
+
+    font-weight:600;
+
+    transition:var(--st-transition-default);
+
+}
+
+.st-tab:hover{
+
+    color:var(--st-primary);
+
+}
+
+.st-tab.active{
+
+    color:var(--st-primary);
+
+    border-bottom:3px solid var(--st-primary);
+
+}
+
+/* ==========================================
+   DASHBOARD WIDGET
+========================================== */
+
+.st-widget{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:20px;
+
+    min-height:280px;
+
+}
+
+.st-widget-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
+
+.st-widget-title{
+
+    font-family:var(--st-font-heading);
+
+    font-size:20px;
+
+    color:var(--st-primary);
+
+    font-weight:700;
+
+}
+
+.st-widget-body{
+
+    flex:1;
+
+}
+
+/* ==========================================
+   CHART PLACEHOLDER
+========================================== */
+
+.st-chart-placeholder{
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    min-height:320px;
+
+    border:2px dashed var(--st-outline-variant);
+
+    border-radius:var(--st-radius-xl);
+
+    background:var(--st-surface);
+
+    color:var(--st-text-secondary);
+
+    text-align:center;
+
+    gap:12px;
+
+}
+
+.st-chart-placeholder .material-symbols-outlined{
+
+    font-size:56px;
+
+    color:var(--st-outline);
+
+}
+
+/* ==========================================
+   UTILITIES
+========================================== */
+
+.st-text-primary{
+
+    color:var(--st-primary);
+
+}
+
+.st-text-secondary{
+
+    color:var(--st-text-secondary);
+
+}
+
+.st-text-danger{
+
+    color:var(--st-danger);
+
+}
+
+.st-text-success{
+
+    color:var(--st-success);
+
+}
+
+.st-bg-primary{
+
+    background:var(--st-primary);
+
+    color:#FFF;
+
+}
+
+.st-bg-surface{
+
+    background:var(--st-surface);
+
+}
+
+.st-rounded{
+
+    border-radius:var(--st-card-radius);
+
+}
+
+.st-shadow{
+
+    box-shadow:var(--st-shadow-sm);
+
+}
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+@media (max-width:992px){
+
+    .st-filter-bar{
+
+        flex-direction:column;
+
+        align-items:stretch;
+
+    }
+
+    .st-filter-group{
+
+        width:100%;
+
+        min-width:100%;
+
+    }
+
+    .st-filter-actions{
+
+        width:100%;
+
+        margin-left:0;
+
+    }
+
+    .st-filter-actions .st-btn{
+
+        flex:1;
+
+    }
+
+}
+
+@media (max-width:768px){
+
+    .st-card{
+
+        padding:18px;
+
+    }
+
+    .st-card-header{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+        gap:12px;
+
+    }
+
+    .st-action-card{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+    }
+
+    .st-table{
+
+        min-width:720px;
+
+    }
+
+    .st-toast{
+
+        min-width:auto;
+
+        width:calc(100vw - 32px);
+
+    }
+
+    .st-modal-dialog{
+
+        width:calc(100vw - 24px);
+
+    }
+
+}
+/* ==========================================
+   ERROR PAGES (403 / 404)
+========================================== */
+
+.st-error-page{
+
+    min-height:100vh;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    padding:24px;
+
+    background:var(--st-background);
+
+    font-family:var(--st-font-body);
+
+}
+
+.st-error-shell{
+
+    max-width:480px;
+
+    text-align:center;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    gap:16px;
+
+}
+
+.st-error-icon{
+
+    width:88px;
+
+    height:88px;
+
+    border-radius:50%;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    margin-bottom:8px;
+
+}
+
+.st-error-icon .material-symbols-outlined{
+
+    font-size:48px;
+
+}
+
+.st-error-icon--warn{
+
+    background:var(--st-risk-moderate-soft);
+
+    color:var(--st-risk-moderate);
+
+}
+
+.st-error-icon--info{
+
+    background:var(--st-primary-fixed);
+
+    color:var(--st-primary);
+
+}
+
+.st-error-code{
+
+    font-family:var(--st-font-heading);
+
+    font-size:64px;
+
+    font-weight:800;
+
+    line-height:1;
+
+    color:var(--st-primary);
+
+    letter-spacing:-.02em;
+
+}
+
+.st-error-title{
+
+    font-family:var(--st-font-heading);
+
+    font-size:24px;
+
+    font-weight:700;
+
+    color:var(--st-on-surface);
+
+}
+
+.st-error-text{
+
+    font-size:15px;
+
+    line-height:1.6;
+
+    color:var(--st-on-surface-variant);
+
+}
+
+.st-error-actions{
+
+    margin-top:16px;
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:12px;
+
+    justify-content:center;
+
+}
+
+/* ==========================================
+   SPACING & LAYOUT UTILITIES
+   Small reusable helpers so common one-off
+   layout tweaks don't need inline styles.
+   Follows the 8px spacing scale.
+========================================== */
+
+.st-mt-xs{ margin-top:var(--st-space-4); }
+.st-mt-sm{ margin-top:var(--st-space-8); }
+.st-mt-md{ margin-top:var(--st-space-16); }
+.st-mt-lg{ margin-top:var(--st-space-24); }
+
+.st-mb-xs{ margin-bottom:var(--st-space-4); }
+.st-mb-sm{ margin-bottom:var(--st-space-8); }
+.st-mb-md{ margin-bottom:var(--st-space-16); }
+.st-mb-lg{ margin-bottom:var(--st-space-24); }
+
+.st-items-center{ align-items:center; }
+.st-justify-center{ justify-content:center; }
+
+.st-upload-status-text{
+    font-size:12px;
+    color:var(--st-on-surface-variant);
+    margin-top:6px;
+}
+
+.st-search--wide{
+    min-width:280px;
+}
+
+.st-table-empty-cell{
+    text-align:center;
+    padding:32px;
+    color:var(--st-outline);
+    font-style:italic;
+}
+
+/* ==========================================
+   FAQ LIST (Help page)
+========================================== */
+
+.st-faq-list{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+}
+
+.st-faq-question{
+    font-weight:600;
+    color:var(--st-on-surface);
+    margin-bottom:4px;
+}
+
+.st-faq-answer{
+    color:var(--st-on-surface-variant);
+    font-size:14px;
+    line-height:1.6;
+}
+
+/* ==========================================
+   PROFILE PAGE
+========================================== */
+
+.st-profile-card{
+    align-items:center;
+    text-align:center;
+}
+
+.st-profile-avatar-lg{
+    width:96px;
+    height:96px;
+    font-size:32px;
+    margin-bottom:16px;
+}
+
+.st-profile-school{
+    margin-top:4px;
+}
+
+.st-align-self-start{
+    align-self:flex-start;
+}
+
+/* ==========================================
+   ABOUT PAGE
+========================================== */
+
+.st-about-text{
+    font-size:15px;
+    line-height:1.7;
+    color:var(--st-on-surface-variant);
+}
+
+/* ==========================================
+   TEMPLATE LINK (data-upload page)
+========================================== */
+
+.st-template-link-spaced{
+    margin-top:20px;
+    display:inline-flex;
+}
+
+/* ==========================================
+   ALERTS LIST (early-warning page)
+========================================== */
+
+.st-alerts-list{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+}
+
+/* ==========================================
+   KEYBOARD FOCUS VISIBILITY
+   Ensures every interactive element has a
+   clearly visible focus indicator for keyboard
+   navigation, on top of any :focus border/ring
+   changes already defined per-component above.
+========================================== */
+
+a:focus-visible,
+button:focus-visible,
+.st-btn:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible{
+
+    outline:2px solid var(--st-secondary);
+
+    outline-offset:2px;
+
+}
+
+/* Checkboxes/radios already show a native focus
+   ring in most browsers, but keep it consistent
+   with the rest of the app's teal focus color. */
+input[type="checkbox"]:focus-visible,
+input[type="radio"]:focus-visible{
+
+    outline:2px solid var(--st-secondary);
+
+    outline-offset:1px;
+
+}

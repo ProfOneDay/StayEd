@@ -1,0 +1,645 @@
+/*
+==================================================
+StayEd — Learner Records
+Full records management page. Reuses dashboard
+table, badge, pagination and panel components.
+==================================================
+*/
+
+/* Page header */
+.st-page-header{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:16px;
+    margin-bottom:8px;
+}
+
+.st-page-header-title{
+    font-family:var(--st-font-heading);
+    font-size:28px;
+    font-weight:700;
+    color:var(--st-primary);
+    line-height:1.2;
+}
+
+.st-page-header-subtitle{
+    margin-top:4px;
+    font-size:15px;
+    color:var(--st-on-surface-variant);
+}
+
+.st-page-header-actions{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+/* Compact stat strip */
+.st-records-stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+}
+
+.st-records-stat{
+    background:#fff;
+    border:1px solid rgba(195,198,207,.30);
+    border-radius:var(--st-card-radius);
+    box-shadow:var(--st-shadow-sm);
+    padding:16px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.st-records-stat-icon{
+    width:44px;
+    height:44px;
+    border-radius:var(--st-radius-lg);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+}
+
+.st-records-stat-icon .material-symbols-outlined{ font-size:22px; }
+
+.st-records-stat--total .st-records-stat-icon{ background:var(--st-primary-fixed); color:var(--st-primary); }
+.st-records-stat--high .st-records-stat-icon{ background:var(--st-risk-high-soft); color:var(--st-risk-high); }
+.st-records-stat--moderate .st-records-stat-icon{ background:var(--st-risk-moderate-soft); color:var(--st-risk-moderate); }
+.st-records-stat--low .st-records-stat-icon{ background:var(--st-risk-low-soft); color:var(--st-risk-low); }
+
+.st-records-stat-value{
+    font-size:22px;
+    font-weight:700;
+    color:var(--st-on-surface);
+    line-height:1.1;
+}
+
+.st-records-stat-label{
+    font-size:12px;
+    color:var(--st-on-surface-variant);
+}
+
+/* Toolbar */
+.st-records-toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding:16px 24px;
+    border-bottom:1px solid rgba(195,198,207,.20);
+}
+
+.st-records-toolbar-filters{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:8px;
+}
+
+.st-records-toolbar select{
+    height:40px;
+    padding:0 12px;
+    border:1px solid var(--st-outline-variant);
+    border-radius:var(--st-button-radius);
+    background:#fff;
+    font-family:var(--st-font-body);
+    font-size:13px;
+    color:var(--st-on-surface);
+    cursor:pointer;
+}
+
+.st-records-toolbar select:focus{
+    outline:none;
+    border-color:var(--st-secondary);
+    box-shadow:var(--st-focus-ring);
+}
+
+/* Sortable header cells */
+.st-data-table th.is-sortable{
+    cursor:pointer;
+    user-select:none;
+}
+
+.st-data-table th.is-sortable:hover{
+    color:var(--st-primary);
+}
+
+.st-data-table th .st-sort-icon{
+    font-size:14px;
+    vertical-align:middle;
+    opacity:.4;
+}
+
+.st-data-table th.is-sorted .st-sort-icon{ opacity:1; color:var(--st-primary); }
+
+/* ==================================================
+   LEARNER DETAIL MODAL
+================================================== */
+
+.st-learner-modal-header{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-bottom:24px;
+}
+
+.st-learner-modal-avatar{
+    width:64px;
+    height:64px;
+    border-radius:50%;
+    background:var(--st-primary-fixed);
+    color:var(--st-primary);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    font-weight:700;
+    flex-shrink:0;
+}
+
+.st-learner-modal-name{
+    font-family:var(--st-font-heading);
+    font-size:20px;
+    font-weight:600;
+    color:var(--st-on-surface);
+}
+
+.st-learner-modal-id{
+    font-size:13px;
+    color:var(--st-on-surface-variant);
+}
+
+.st-learner-modal-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px 24px;
+    margin-bottom:24px;
+}
+
+.st-learner-modal-field-label{
+    font-size:11px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.02em;
+    color:var(--st-outline);
+    margin-bottom:2px;
+}
+
+.st-learner-modal-field-value{
+    font-size:14px;
+    font-weight:500;
+    color:var(--st-on-surface);
+}
+
+/* Risk probability meter */
+.st-risk-meter{
+    margin-top:8px;
+    height:8px;
+    border-radius:999px;
+    background:var(--st-surface-container);
+    overflow:hidden;
+}
+
+.st-risk-meter-fill{
+    height:100%;
+    border-radius:999px;
+    transition:width .6s cubic-bezier(.16,1,.3,1);
+}
+
+.st-risk-meter-fill--high{ background:var(--st-risk-high); }
+.st-risk-meter-fill--moderate{ background:var(--st-risk-moderate); }
+.st-risk-meter-fill--low{ background:var(--st-risk-low); }
+
+.st-learner-modal-section-title{
+    font-size:13px;
+    font-weight:700;
+    color:var(--st-primary);
+    margin-bottom:12px;
+    padding-bottom:8px;
+    border-bottom:1px solid rgba(195,198,207,.20);
+}
+
+/* ==================================================
+   STICKY TABLE HEADER (Learner Management)
+================================================== */
+
+.st-table-scroll--sticky{
+    max-height:640px;
+    overflow-y:auto;
+}
+
+.st-table-scroll--sticky .st-data-table thead th{
+    position:sticky;
+    top:0;
+    z-index:2;
+    background:var(--st-surface-container-low);
+    box-shadow:0 1px 0 rgba(195,198,207,.40);
+}
+
+.st-data-table th.checkbox-col,
+.st-data-table td.checkbox-col{
+    width:40px;
+    text-align:center;
+}
+
+.st-data-table input[type="checkbox"]{
+    width:16px;
+    height:16px;
+    accent-color:var(--st-primary);
+    cursor:pointer;
+}
+
+/* Row selected state */
+.st-data-table tbody tr.is-selected{
+    background:rgba(18,53,91,.04);
+}
+
+/* ==================================================
+   BULK ACTIONS BAR
+================================================== */
+
+.st-bulk-bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding:12px 24px;
+    background:var(--st-primary-fixed);
+    border-bottom:1px solid rgba(18,53,91,.12);
+    animation:st-bulk-in .2s ease;
+}
+
+@keyframes st-bulk-in{
+    from{ opacity:0; transform:translateY(-6px); }
+    to{ opacity:1; transform:translateY(0); }
+}
+
+.st-bulk-bar-count{
+    font-size:13px;
+    font-weight:700;
+    color:var(--st-primary);
+}
+
+.st-bulk-bar-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.st-bulk-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 14px;
+    border-radius:var(--st-button-radius);
+    border:1px solid var(--st-outline-variant);
+    background:#fff;
+    color:var(--st-on-surface-variant);
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    transition:var(--st-transition);
+}
+
+.st-bulk-btn:hover{
+    background:var(--st-surface);
+    border-color:var(--st-primary);
+    color:var(--st-primary);
+}
+
+.st-bulk-btn--danger:hover{
+    border-color:var(--st-error);
+    color:var(--st-error);
+}
+
+.st-bulk-btn .material-symbols-outlined{
+    font-size:16px;
+}
+
+/* Confidence meter cell */
+.st-confidence-value{
+    font-size:14px;
+    font-weight:700;
+    color:var(--st-primary);
+    text-align:center;
+}
+
+.st-confidence-label{
+    font-size:10px;
+    color:var(--st-outline);
+    text-align:center;
+}
+
+/* ==================================================
+   RESPONSIVE
+================================================== */
+
+@media (max-width:992px){
+    .st-records-stats{ grid-template-columns:1fr 1fr; }
+}
+
+@media (max-width:768px){
+    .st-page-header-title{ font-size:24px; }
+    .st-records-toolbar{ padding:16px; }
+    .st-learner-modal-grid{ grid-template-columns:1fr; }
+}
+
+@media (max-width:520px){
+    .st-records-stats{ grid-template-columns:1fr; }
+}
+
+/* ==================================================
+   IMPORT / ENROLL SEGMENTED TABS
+================================================== */
+
+.st-entry-tabs{
+    display:inline-flex;
+    padding:4px;
+    background:var(--st-surface-container-low);
+    border-radius:var(--st-radius-lg);
+    gap:4px;
+    margin-bottom:24px;
+}
+
+.st-entry-tab{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 20px;
+    border:none;
+    background:transparent;
+    border-radius:var(--st-radius-md);
+    font-size:14px;
+    font-weight:600;
+    color:var(--st-on-surface-variant);
+    cursor:pointer;
+    transition:var(--st-transition);
+}
+
+.st-entry-tab:hover{
+    color:var(--st-primary);
+}
+
+.st-entry-tab.is-active{
+    background:#fff;
+    color:var(--st-primary);
+    box-shadow:var(--st-shadow-xs);
+}
+
+.st-entry-tab .material-symbols-outlined{
+    font-size:20px;
+}
+
+.st-entry-panel{
+    display:none;
+}
+
+.st-entry-panel.is-active{
+    display:block;
+    animation:st-fade-in .25s ease;
+}
+
+@keyframes st-fade-in{
+    from{ opacity:0; transform:translateY(4px); }
+    to{ opacity:1; transform:translateY(0); }
+}
+
+/* ==================================================
+   MANUAL ENROLLMENT FORM
+================================================== */
+
+.st-enroll-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px;
+}
+
+@media (max-width:900px){
+    .st-enroll-grid{ grid-template-columns:1fr; }
+}
+
+.st-enroll-card{
+    background:#fff;
+    border-radius:var(--st-radius-lg);
+    border:1px solid rgba(195,198,207,.30);
+    box-shadow:var(--st-shadow-sm);
+    padding:20px;
+}
+
+.st-enroll-card--full{
+    grid-column:1/-1;
+}
+
+.st-enroll-card-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:15px;
+    font-weight:600;
+    color:var(--st-on-surface);
+    margin-bottom:16px;
+    padding-bottom:12px;
+    border-bottom:1px solid rgba(195,198,207,.20);
+}
+
+.st-enroll-card-title .material-symbols-outlined{
+    color:var(--st-primary);
+}
+
+.st-enroll-fields{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+}
+
+@media (max-width:520px){
+    .st-enroll-fields{ grid-template-columns:1fr; }
+}
+
+.st-enroll-field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.st-enroll-field label{
+    font-size:12px;
+    font-weight:600;
+    color:var(--st-on-surface-variant);
+}
+
+.st-enroll-field .required{ color:var(--st-error); }
+
+.st-enroll-field input,
+.st-enroll-field select,
+.st-enroll-field textarea{
+    height:40px;
+    padding:0 12px;
+    border:1px solid var(--st-outline-variant);
+    border-radius:var(--st-radius-md);
+    background:#fff;
+    font-family:var(--st-font-body);
+    font-size:14px;
+    color:var(--st-on-surface);
+    transition:var(--st-transition);
+}
+
+.st-enroll-field textarea{
+    height:auto;
+    padding:10px 12px;
+    resize:vertical;
+}
+
+.st-enroll-field input:focus,
+.st-enroll-field select:focus,
+.st-enroll-field textarea:focus{
+    outline:none;
+    border-color:var(--st-secondary);
+    box-shadow:var(--st-focus-ring);
+}
+
+.st-enroll-field input.has-error,
+.st-enroll-field select.has-error{
+    border-color:var(--st-error);
+}
+
+.st-enroll-radio-row{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    height:40px;
+}
+
+.st-enroll-radio-row label{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:13px;
+    font-weight:500;
+    color:var(--st-on-surface);
+    cursor:pointer;
+}
+
+.st-enroll-radio-row input[type="radio"]{
+    width:16px;
+    height:16px;
+    accent-color:var(--st-primary);
+}
+
+/* Segmented toggle (Learning Level / Modality) */
+.st-enroll-segment{
+    display:flex;
+    border:1px solid var(--st-outline-variant);
+    border-radius:var(--st-radius-md);
+    overflow:hidden;
+    height:40px;
+}
+
+.st-enroll-segment button{
+    flex:1;
+    border:none;
+    background:#fff;
+    color:var(--st-on-surface-variant);
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    transition:var(--st-transition);
+    border-right:1px solid var(--st-outline-variant);
+}
+
+.st-enroll-segment button:last-child{ border-right:none; }
+
+.st-enroll-segment button.is-active{
+    background:var(--st-primary-container);
+    color:#fff;
+}
+
+.st-enroll-footer{
+    grid-column:1/-1;
+    display:flex;
+    justify-content:flex-end;
+    gap:12px;
+    padding-top:8px;
+}
+
+/* ==================================================
+   IMPORT PANEL INTRO BLOCK (utility, avoids inline)
+================================================== */
+
+.st-import-intro{
+    text-align:center;
+    padding:48px 24px;
+}
+
+.st-import-intro-icon{
+    margin:0 auto 20px;
+}
+
+.st-import-intro-title{
+    font-family:var(--st-font-heading);
+    font-size:20px;
+    font-weight:600;
+    color:var(--st-primary);
+    margin-bottom:8px;
+}
+
+.st-import-intro-text{
+    color:var(--st-on-surface-variant);
+    max-width:480px;
+    margin:0 auto 24px;
+}
+
+.st-import-intro-guide{
+    max-width:520px;
+    margin:32px auto 0;
+    text-align:left;
+}
+
+/* Full-width field span inside a 2-col enrollment grid */
+.st-enroll-field--full{
+    grid-column:1/-1;
+}
+
+.st-enroll-age-badge{
+    color:var(--st-secondary);
+    font-weight:600;
+}
+
+.st-enroll-field input[readonly]{
+    background:var(--st-surface-container-low);
+    cursor:not-allowed;
+}
+
+/* ==================================================
+   CLICKABLE AVATAR / NAME (View Profile triggers)
+   Reset button chrome so the avatar and learner name
+   look identical to before, but are real, keyboard
+   accessible buttons that open the Learner Profile.
+================================================== */
+
+.st-avatar-btn{
+    border:none;
+    cursor:pointer;
+    padding:0;
+    font-family:inherit;
+}
+
+.st-learner-name-link{
+    background:none;
+    border:none;
+    padding:0;
+    cursor:pointer;
+    font-family:inherit;
+    text-align:left;
+    display:block;
+}
+
+.st-learner-name-link:hover,
+.st-avatar-btn:hover{
+    text-decoration:underline;
+}

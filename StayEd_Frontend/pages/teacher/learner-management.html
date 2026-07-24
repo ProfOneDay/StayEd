@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StayEd | Learner Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="icon" type="image/x-icon" href="../../assets/img/brand/favicon.ico">
+    <link rel="apple-touch-icon" href="../../assets/img/brand/apple-touch-icon.png">
+</head>
+<body class="st-app" data-page="Learner Management">
+
+    <div data-component="layout/sidebar"></div>
+
+    <div class="st-main">
+        <div data-component="layout/navbar"></div>
+
+        <main class="st-content">
+
+            <div class="st-page-header">
+                <div>
+                    <h1 class="st-page-header-title">Learner Management</h1>
+                    <p class="st-page-header-subtitle">
+                        Manage enrolled learners, monitor prediction status, and take bulk actions
+                        across your assigned Community Learning Centers.
+                    </p>
+                </div>
+                <div class="st-page-header-actions">
+                    <button type="button" class="st-btn st-btn-outline" data-mgmt-export-all>
+                        <span class="material-symbols-outlined">ios_share</span>
+                        Export
+                    </button>
+                    <a href="add-learner.html" class="st-btn st-btn-primary">
+                        <span class="material-symbols-outlined">person_add</span>
+                        Add New Learner
+                    </a>
+                </div>
+            </div>
+
+            <div class="st-records-stats">
+
+                <div class="st-records-stat st-records-stat--total">
+                    <div class="st-records-stat-icon">
+                        <span class="material-symbols-outlined">groups</span>
+                    </div>
+                    <div>
+                        <p class="st-records-stat-value" data-mgmt-total>--</p>
+                        <p class="st-records-stat-label">Registered Learners</p>
+                    </div>
+                </div>
+
+                <div class="st-records-stat st-records-stat--high">
+                    <div class="st-records-stat-icon">
+                        <span class="material-symbols-outlined">warning</span>
+                    </div>
+                    <div>
+                        <p class="st-records-stat-value" data-mgmt-high>--</p>
+                        <p class="st-records-stat-label">High Risk</p>
+                    </div>
+                </div>
+
+                <div class="st-records-stat st-records-stat--moderate">
+                    <div class="st-records-stat-icon">
+                        <span class="material-symbols-outlined">notification_important</span>
+                    </div>
+                    <div>
+                        <p class="st-records-stat-value" data-mgmt-moderate>--</p>
+                        <p class="st-records-stat-label">Moderate Risk</p>
+                    </div>
+                </div>
+
+                <div class="st-records-stat st-records-stat--low">
+                    <div class="st-records-stat-icon">
+                        <span class="material-symbols-outlined">verified_user</span>
+                    </div>
+                    <div>
+                        <p class="st-records-stat-value" data-mgmt-low>--</p>
+                        <p class="st-records-stat-label">Low Risk</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="st-dash-grid">
+
+                <div class="st-panel col-12">
+
+                    <!-- Toolbar -->
+                    <div class="st-records-toolbar">
+
+                        <div class="st-search st-search--wide">
+                            <span class="material-symbols-outlined">search</span>
+                            <input type="text" placeholder="Search learner by name or LRN..." data-mgmt-search aria-label="Search learners by name or LRN">
+                        </div>
+
+                        <div class="st-records-toolbar-filters">
+
+                            <select data-mgmt-filter-level aria-label="Filter by learning level">
+                                <option value="">All Levels</option>
+                                <option value="Basic Literacy">Basic Literacy</option>
+                                <option value="Elementary">Elementary</option>
+                                <option value="Junior High">Junior High</option>
+                                <option value="Senior High">Senior High</option>
+                            </select>
+
+                            <select data-mgmt-filter-risk aria-label="Filter by risk level">
+                                <option value="">All Risk Levels</option>
+                                <option value="High">High Risk</option>
+                                <option value="Moderate">Moderate Risk</option>
+                                <option value="Low">Low Risk</option>
+                            </select>
+
+                            <select data-mgmt-filter-status aria-label="Filter by status">
+                                <option value="">All Status</option>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Archived">Archived</option>
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Bulk actions bar (shown only when rows are selected) -->
+                    <div class="st-bulk-bar st-hidden" data-mgmt-bulk-bar>
+                        <span class="st-bulk-bar-count" data-mgmt-bulk-count>0 selected</span>
+                        <div class="st-bulk-bar-actions">
+                            <button type="button" class="st-bulk-btn" data-mgmt-bulk-export>
+                                <span class="material-symbols-outlined">download</span>
+                                Export
+                            </button>
+                            <button type="button" class="st-bulk-btn" data-mgmt-bulk-archive>
+                                <span class="material-symbols-outlined">archive</span>
+                                Archive
+                            </button>
+                            <button type="button" class="st-bulk-btn st-bulk-btn--danger" data-mgmt-bulk-delete>
+                                <span class="material-symbols-outlined">delete</span>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="st-table-scroll st-table-scroll--sticky">
+                        <table class="st-data-table">
+                            <thead>
+                                <tr>
+                                    <th class="checkbox-col">
+                                        <input type="checkbox" data-mgmt-select-all aria-label="Select all learners">
+                                    </th>
+                                    <th class="is-sortable" data-sort="lrn">
+                                        LRN <span class="material-symbols-outlined st-sort-icon">unfold_more</span>
+                                    </th>
+                                    <th class="is-sortable" data-sort="name">
+                                        Learner <span class="material-symbols-outlined st-sort-icon">unfold_more</span>
+                                    </th>
+                                    <th>Level</th>
+                                    <th>Modality</th>
+                                    <th class="is-sortable" data-sort="risk">
+                                        Risk Level <span class="material-symbols-outlined st-sort-icon">unfold_more</span>
+                                    </th>
+                                    <th class="is-center">Confidence</th>
+                                    <th>Status</th>
+                                    <th class="is-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody data-mgmt-body>
+                                <tr>
+                                    <td colspan="9" class="st-table-empty-cell">
+                                        Loading learners…
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="st-pagination">
+                        <span class="st-pagination-info" data-mgmt-info>Showing 0 learners</span>
+                        <div class="st-pagination-controls" data-mgmt-pages></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+
+        <div data-component="layout/footer"></div>
+    </div>
+
+    <div data-component="layout/toast"></div>
+    <div data-component="layout/modal"></div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/mock/mock-db.js"></script>
+    <script src="../../assets/js/mock/mock-learners.js"></script>
+    <script src="../../assets/js/mock/mock-api.js"></script>
+    <script src="../../assets/js/core/utils.js"></script>
+    <script src="../../assets/js/core/router.js"></script>
+    <script src="../../assets/js/core/api.js"></script>
+    <script src="../../assets/js/core/auth.js"></script>
+    <script src="../../assets/js/core/guards.js"></script>
+    <script src="../../assets/js/core/layout.js"></script>
+    <script src="../../assets/js/core/skeletons.js"></script>
+    <script src="../../assets/js/core/app.js"></script>
+    <script src="../../assets/js/components/component-loader.js"></script>
+    <script src="../../assets/js/components/toast.js"></script>
+    <script src="../../assets/js/components/modal.js"></script>
+    <script src="../../assets/js/teacher/learner-management.js"></script>
+
+</body>
+</html>

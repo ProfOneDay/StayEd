@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StayEd | System Settings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="icon" type="image/x-icon" href="../../assets/img/brand/favicon.ico">
+    <link rel="apple-touch-icon" href="../../assets/img/brand/apple-touch-icon.png">
+</head>
+<body class="st-app" data-page="System Settings">
+
+    <div data-component="layout/sidebar"></div>
+
+    <div class="st-main">
+        <div data-component="layout/navbar"></div>
+
+        <main class="st-content">
+
+            <div class="st-page-header">
+                <div>
+                    <h1 class="st-page-header-title">System Settings</h1>
+                    <p class="st-page-header-subtitle">
+                        Configure organization-wide defaults, users, and system behavior.
+                    </p>
+                </div>
+            </div>
+
+            <div class="st-settings-bento">
+
+                <!-- LEFT COLUMN (8-col): editable configuration -->
+                <div class="st-settings-bento-left">
+
+                    <!-- General Settings -->
+                    <div class="st-bento-card">
+                        <div class="st-bento-card-head">
+                            <span class="material-symbols-outlined">calendar_today</span>
+                            <h3 class="st-bento-card-title">General Settings</h3>
+                        </div>
+                        <div class="st-bento-form-grid">
+                            <div class="st-bento-field">
+                                <label for="sysSchoolYear">School Year</label>
+                                <select id="sysSchoolYear">
+                                    <option selected>2026-2027</option>
+                                    <option>2025-2026</option>
+                                </select>
+                            </div>
+                            <div class="st-bento-field">
+                                <label for="sysTrimester">Semester / Trimester</label>
+                                <select id="sysTrimester">
+                                    <option selected>First Trimester</option>
+                                    <option>Second Trimester</option>
+                                    <option>Third Trimester</option>
+                                </select>
+                            </div>
+                            <div class="st-bento-field">
+                                <label for="sysAppName">Application Name</label>
+                                <input id="sysAppName" type="text" value="StayEd">
+                            </div>
+                            <div class="st-bento-field">
+                                <label for="sysDefaultLanding">Default Landing Page</label>
+                                <select id="sysDefaultLanding">
+                                    <option>Dashboard</option>
+                                    <option>Learner Management</option>
+                                    <option>Early Warning Alerts</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Organization Settings -->
+                    <div class="st-bento-card">
+                        <div class="st-bento-card-head">
+                            <span class="material-symbols-outlined">corporate_fare</span>
+                            <h3 class="st-bento-card-title">Organization Settings</h3>
+                        </div>
+                        <div class="st-bento-form-grid">
+                            <div class="st-bento-field" style="grid-column:1/-1;">
+                                <label for="sysOrgName">Organization Name</label>
+                                <input id="sysOrgName" type="text" value="Department of Education - Alternative Learning System">
+                            </div>
+                            <div class="st-bento-field">
+                                <label for="sysDivision">Division Office</label>
+                                <input id="sysDivision" type="text" value="Division of San Felipe">
+                            </div>
+                            <div class="st-bento-field">
+                                <label for="sysRegion">Region</label>
+                                <input id="sysRegion" type="text" value="Region III">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Learning Strands (read-only table) -->
+                    <div class="st-bento-card">
+                        <div class="st-bento-card-head">
+                            <span class="material-symbols-outlined">book</span>
+                            <h3 class="st-bento-card-title">Learning Strands</h3>
+                        </div>
+                        <div class="st-table-scroll">
+                            <table class="st-strand-table" style="width:100%;border-collapse:collapse;">
+                                <thead>
+                                    <tr><th>Code</th><th>Strand Name</th><th class="is-center">Status</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td style="font-weight:700;">LS1</td><td>Communication Skills (English/Filipino)</td><td class="is-center"><span class="st-strand-status">Active</span></td></tr>
+                                    <tr><td style="font-weight:700;">LS2</td><td>Scientific Literacy and Critical Thinking Skills</td><td class="is-center"><span class="st-strand-status">Active</span></td></tr>
+                                    <tr><td style="font-weight:700;">LS3</td><td>Mathematical and Problem Solving Skills</td><td class="is-center"><span class="st-strand-status">Active</span></td></tr>
+                                    <tr><td style="font-weight:700;">BLP</td><td>Basic Literacy Program</td><td class="is-center"><span class="st-strand-status">Active</span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- User Management -->
+                    <div class="st-bento-card">
+                        <div class="st-bento-card-head" style="justify-content:space-between;">
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <span class="material-symbols-outlined">group</span>
+                                <h3 class="st-bento-card-title">User Management</h3>
+                            </div>
+                            <button type="button" class="st-btn st-btn-primary st-btn-xs" data-invite-user>
+                                <span class="material-symbols-outlined">person_add</span>
+                                Invite User
+                            </button>
+                        </div>
+                        <div class="st-table-scroll">
+                            <table class="st-data-table">
+                                <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th class="is-center">Actions</th></tr></thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="font-weight:600;">Trisha Santos</td>
+                                        <td>trisha.santos@deped.gov.ph</td>
+                                        <td><span class="st-pill">Teacher</span></td>
+                                        <td><span class="st-risk-badge st-risk-badge--low"><span class="st-risk-dot"></span>Active</span></td>
+                                        <td class="is-center"><button class="st-icon-btn-sm" aria-label="Edit user"><span class="material-symbols-outlined">edit</span></button></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight:600;">Ricardo Dalisay</td>
+                                        <td>ricardo.dalisay@deped.gov.ph</td>
+                                        <td><span class="st-pill">Teacher</span></td>
+                                        <td><span class="st-risk-badge st-risk-badge--low"><span class="st-risk-dot"></span>Active</span></td>
+                                        <td class="is-center"><button class="st-icon-btn-sm" aria-label="Edit user"><span class="material-symbols-outlined">edit</span></button></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight:600;">Elena Cruz</td>
+                                        <td>elena.cruz@deped.gov.ph</td>
+                                        <td><span class="st-pill">Division Admin</span></td>
+                                        <td><span class="st-risk-badge st-risk-badge--moderate"><span class="st-risk-dot"></span>Pending</span></td>
+                                        <td class="is-center"><button class="st-icon-btn-sm" aria-label="Edit user"><span class="material-symbols-outlined">edit</span></button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Notification Settings -->
+                    <div class="st-bento-card">
+                        <div class="st-bento-card-head">
+                            <span class="material-symbols-outlined">notifications_active</span>
+                            <h3 class="st-bento-card-title">Notification Settings</h3>
+                        </div>
+                        <div class="st-toggle-row">
+                            <div>
+                                <p class="st-toggle-row-title">Enable Early Warning Alerts</p>
+                                <p class="st-toggle-row-sub">Notify administrators of high-risk learner activities.</p>
+                            </div>
+                            <label class="st-toggle">
+                                <input type="checkbox" checked data-settings-toggle-pref="ewa-alerts">
+                                <span class="st-toggle-track"><span class="st-toggle-thumb"></span></span>
+                            </label>
+                        </div>
+                        <div class="st-toggle-row">
+                            <div>
+                                <p class="st-toggle-row-title">Enable Attendance Reminders</p>
+                                <p class="st-toggle-row-sub">Automated alerts for learners with consecutive absences.</p>
+                            </div>
+                            <label class="st-toggle">
+                                <input type="checkbox" checked data-settings-toggle-pref="attendance-reminders">
+                                <span class="st-toggle-track"><span class="st-toggle-thumb"></span></span>
+                            </label>
+                        </div>
+                        <div class="st-toggle-row">
+                            <div>
+                                <p class="st-toggle-row-title">Enable Email Notifications</p>
+                                <p class="st-toggle-row-sub">Send system reports and critical updates via email.</p>
+                            </div>
+                            <label class="st-toggle">
+                                <input type="checkbox" data-settings-toggle-pref="email-notifications">
+                                <span class="st-toggle-track"><span class="st-toggle-thumb"></span></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Appearance -->
+                    <div class="st-bento-card">
+                        <div class="st-bento-card-head">
+                            <span class="material-symbols-outlined">palette</span>
+                            <h3 class="st-bento-card-title">Appearance</h3>
+                        </div>
+                        <div class="st-bento-form-grid">
+                            <div class="st-bento-field">
+                                <label for="sysTheme">Theme</label>
+                                <select id="sysTheme">
+                                    <option selected>Light</option>
+                                    <option>Dark</option>
+                                    <option>System</option>
+                                </select>
+                            </div>
+                            <div class="st-bento-field">
+                                <label for="sysAccentColor">Accent Color</label>
+                                <select id="sysAccentColor">
+                                    <option selected>Navy &amp; Teal (Default)</option>
+                                    <option>Navy &amp; Amber</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security -->
+                    <div class="st-bento-card">
+                        <div class="st-bento-card-head">
+                            <span class="material-symbols-outlined">security</span>
+                            <h3 class="st-bento-card-title">Security</h3>
+                        </div>
+                        <div class="st-toggle-row">
+                            <div>
+                                <p class="st-toggle-row-title">Require Approval for New Teachers</p>
+                                <p class="st-toggle-row-sub">New registrations must be approved by a Division Administrator.</p>
+                            </div>
+                            <label class="st-toggle">
+                                <input type="checkbox" checked data-settings-toggle-pref="require-approval">
+                                <span class="st-toggle-track"><span class="st-toggle-thumb"></span></span>
+                            </label>
+                        </div>
+                        <div class="st-toggle-row">
+                            <div>
+                                <p class="st-toggle-row-title">Require Two-Factor Authentication</p>
+                                <p class="st-toggle-row-sub">All users must verify with a one-time code at login (UI only).</p>
+                            </div>
+                            <label class="st-toggle">
+                                <input type="checkbox" data-settings-toggle-pref="require-2fa">
+                                <span class="st-toggle-track"><span class="st-toggle-thumb"></span></span>
+                            </label>
+                        </div>
+                        <div class="st-bento-form-grid st-mt-md">
+                            <div class="st-bento-field">
+                                <label for="sysSessionTimeout">Session Timeout</label>
+                                <select id="sysSessionTimeout">
+                                    <option>30 minutes</option>
+                                    <option selected>1 hour</option>
+                                    <option>4 hours</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;justify-content:flex-end;">
+                        <button type="button" class="st-btn st-btn-primary" data-save-all-settings>
+                            <span class="material-symbols-outlined">save</span>
+                            Save All Changes
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT COLUMN (4-col): system info + management actions -->
+                <div class="st-settings-bento-right">
+
+                    <!-- Prediction Information -->
+                    <div class="st-prediction-info-card">
+                        <div class="st-prediction-info-head">
+                            <h3>Prediction Information</h3>
+                            <span class="st-prediction-status-chip">
+                                <span class="st-prediction-status-dot"></span>
+                                Active
+                            </span>
+                        </div>
+                        <div class="st-prediction-info-row">
+                            <span class="label">Algorithm</span>
+                            <span>Random Forest</span>
+                        </div>
+                        <div class="st-prediction-info-row">
+                            <span class="label">Training Dataset</span>
+                            <span>SY 2023–2026</span>
+                        </div>
+                        <div class="st-prediction-info-row">
+                            <span class="label">Last Model Training</span>
+                            <span>July 2026</span>
+                        </div>
+                        <div class="st-prediction-info-row">
+                            <span class="label">Prediction Status</span>
+                            <span>Active</span>
+                        </div>
+                    </div>
+
+                    <!-- System Preferences -->
+                    <div class="st-bento-card">
+                        <div class="st-bento-card-head">
+                            <span class="material-symbols-outlined">tune</span>
+                            <h3 class="st-bento-card-title">System Preferences</h3>
+                        </div>
+                        <div class="st-bento-form-grid" style="grid-template-columns:1fr;">
+                            <div class="st-bento-field">
+                                <label for="sysLanguage">Language</label>
+                                <select id="sysLanguage">
+                                    <option>English</option>
+                                    <option>Tagalog</option>
+                                    <option>Cebuano</option>
+                                </select>
+                            </div>
+                            <div class="st-bento-field">
+                                <label for="sysTimezone">Time Zone</label>
+                                <select id="sysTimezone">
+                                    <option selected>(GMT+8:00) Manila</option>
+                                    <option>(GMT+0:00) UTC</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Management -->
+                    <div class="st-bento-card">
+                        <h3 class="st-bento-card-title" style="margin-bottom:16px;">Data Management</h3>
+                        <div class="st-data-action-list">
+                            <button type="button" class="st-data-action-btn" data-action="backup">
+                                <div class="st-data-action-btn-left">
+                                    <span class="material-symbols-outlined">backup</span>
+                                    <span>Backup System Data</span>
+                                </div>
+                                <span class="material-symbols-outlined st-data-action-btn-chevron">chevron_right</span>
+                            </button>
+                            <button type="button" class="st-data-action-btn" data-action="restore">
+                                <div class="st-data-action-btn-left">
+                                    <span class="material-symbols-outlined">restore</span>
+                                    <span>Restore from Backup</span>
+                                </div>
+                                <span class="material-symbols-outlined st-data-action-btn-chevron">chevron_right</span>
+                            </button>
+                            <button type="button" class="st-data-action-btn" data-action="audit-logs">
+                                <div class="st-data-action-btn-left">
+                                    <span class="material-symbols-outlined">history</span>
+                                    <span>Audit Logs</span>
+                                </div>
+                                <span class="material-symbols-outlined st-data-action-btn-chevron">chevron_right</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+
+        <div data-component="layout/footer"></div>
+    </div>
+
+    <div data-component="layout/toast"></div>
+    <div data-component="layout/modal"></div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/mock/mock-db.js"></script>
+    <script src="../../assets/js/mock/mock-api.js"></script>
+    <script src="../../assets/js/core/utils.js"></script>
+    <script src="../../assets/js/core/router.js"></script>
+    <script src="../../assets/js/core/api.js"></script>
+    <script src="../../assets/js/core/auth.js"></script>
+    <script src="../../assets/js/core/guards.js"></script>
+    <script src="../../assets/js/core/layout.js"></script>
+    <script src="../../assets/js/core/unsaved-changes.js"></script>
+    <script src="../../assets/js/core/app.js"></script>
+    <script src="../../assets/js/components/component-loader.js"></script>
+    <script src="../../assets/js/components/toast.js"></script>
+    <script src="../../assets/js/components/modal.js"></script>
+    <script src="../../assets/js/teacher/system-settings.js"></script>
+
+</body>
+</html>

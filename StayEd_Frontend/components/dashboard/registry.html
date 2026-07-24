@@ -1,0 +1,66 @@
+<div class="st-panel col-12">
+
+    <div class="st-registry-head">
+
+        <div>
+            <h3 class="st-panel-title">Student Registry Summary</h3>
+            <p class="st-panel-subtitle">
+                A quick overview of learners belonging to the currently selected class.
+            </p>
+        </div>
+
+        <div class="st-registry-tools">
+
+            <div class="st-search">
+                <span class="material-symbols-outlined">search</span>
+                <input type="text" placeholder="Search learner..." data-registry-search aria-label="Search learner by name or LRN">
+            </div>
+
+            <button class="st-tool-btn" data-registry-filter>
+                <span class="material-symbols-outlined">filter_alt</span>
+                Filter
+            </button>
+
+            <button class="st-tool-btn" data-registry-sort>
+                <span class="material-symbols-outlined">swap_vert</span>
+                Sort: Risk Level
+            </button>
+
+            <a class="st-btn st-btn-outline st-btn-xs" href="learner-management.html"
+               style="padding:8px 16px;font-size:14px;">
+                View Full Registry
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="st-table-scroll">
+        <table class="st-data-table">
+            <thead>
+                <tr>
+                    <th>Profile</th>
+                    <th>Learner Name</th>
+                    <th>Learning Level</th>
+                    <th>Modality</th>
+                    <th>Risk Level</th>
+                    <th>Latest Activity</th>
+                    <th class="is-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody data-registry-body>
+                <tr>
+                    <td colspan="7" style="text-align:center;padding:32px;color:var(--st-outline);font-style:italic;">
+                        Loading learners…
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="st-pagination" data-registry-pagination>
+        <span class="st-pagination-info" data-registry-info>Showing 0 learners</span>
+        <div class="st-pagination-controls" data-registry-pages></div>
+    </div>
+
+</div>

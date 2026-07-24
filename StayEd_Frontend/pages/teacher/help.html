@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StayEd | Help &amp; User Manual</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="icon" type="image/x-icon" href="../../assets/img/brand/favicon.ico">
+    <link rel="apple-touch-icon" href="../../assets/img/brand/apple-touch-icon.png">
+</head>
+<body class="st-app" data-page="Help &amp; User Manual">
+
+    <div data-component="layout/sidebar"></div>
+
+    <div class="st-main">
+        <div data-component="layout/navbar"></div>
+
+        <main class="st-content">
+
+            <div class="st-page-header">
+                <div>
+                    <h1 class="st-page-header-title">Help &amp; User Manual</h1>
+                    <p class="st-page-header-subtitle">Answers to common questions about using StayEd.</p>
+                </div>
+            </div>
+
+            <div class="st-dash-grid">
+
+                <div class="st-panel st-panel-pad col-12">
+                    <h3 class="st-panel-title st-mb-md">Frequently Asked Questions</h3>
+
+                    <div class="st-faq-list">
+                        <div>
+                            <h4 class="st-faq-question">How is a learner's risk level calculated?</h4>
+                            <p class="st-faq-answer">StayEd's prediction model considers attendance, module completion, and assessment scores to estimate each learner's probability of dropping out. Results are grouped into Low, Moderate, and High risk tiers.</p>
+                        </div>
+                        <div>
+                            <h4 class="st-faq-question">How do I import learner records?</h4>
+                            <p class="st-faq-answer">Go to Data Upload, then drag and drop a CSV or Excel masterlist. You'll be able to review and confirm the import before it's finalized.</p>
+                        </div>
+                        <div>
+                            <h4 class="st-faq-question">What should I do with a High Risk alert?</h4>
+                            <p class="st-faq-answer">Visit Early Warning Alerts to see recommended interventions for each flagged learner, such as home visits or remedial modules.</p>
+                        </div>
+                        <div>
+                            <h4 class="st-faq-question">Who can see my learners' data?</h4>
+                            <p class="st-faq-answer">Only you and authorized Division Administrators can access learner records tied to your assigned classes.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+
+        <div data-component="layout/footer"></div>
+    </div>
+
+    <div data-component="layout/toast"></div>
+    <div data-component="layout/modal"></div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/mock/mock-db.js"></script>
+    <script src="../../assets/js/mock/mock-api.js"></script>
+    <script src="../../assets/js/core/utils.js"></script>
+    <script src="../../assets/js/core/router.js"></script>
+    <script src="../../assets/js/core/api.js"></script>
+    <script src="../../assets/js/core/auth.js"></script>
+    <script src="../../assets/js/core/guards.js"></script>
+    <script src="../../assets/js/core/layout.js"></script>
+    <script src="../../assets/js/core/app.js"></script>
+    <script src="../../assets/js/components/component-loader.js"></script>
+    <script src="../../assets/js/components/toast.js"></script>
+    <script src="../../assets/js/components/modal.js"></script>
+    <script>document.addEventListener("DOMContentLoaded",()=>Guards?.teacher?.());</script>
+
+</body>
+</html>
