@@ -1,98 +1,101 @@
-<div class="st-panel st-panel-pad col-8" style="min-height:400px;">
+<div class="st-panel st-panel-pad col-8" style="min-height: 400px">
+  <div class="st-panel-head">
+    <div>
+      <h3 class="st-panel-title">Risk Distribution</h3>
+      <p class="st-panel-subtitle">
+        Distribution of learners based on the latest prediction results.
+      </p>
+    </div>
+    <a class="st-panel-link" href="early-warning.html">
+      View Details
+      <span class="material-symbols-outlined">arrow_forward</span>
+    </a>
+  </div>
 
-    <div class="st-panel-head">
-        <div>
-            <h3 class="st-panel-title">Risk Distribution</h3>
-            <p class="st-panel-subtitle">
-                Distribution of learners based on the latest prediction results.
-            </p>
+  <div class="st-riskchart">
+    <!-- Plot -->
+    <div class="st-riskchart-plot">
+      <div class="st-riskchart-bars" data-riskchart>
+        <div class="st-riskchart-yaxis" data-riskchart-yaxis>
+          <span>25</span><span>20</span><span>15</span> <span>10</span
+          ><span>5</span><span>0</span>
         </div>
-        <a class="st-panel-link" href="early-warning.html">
-            View Details
-            <span class="material-symbols-outlined">arrow_forward</span>
-        </a>
+
+        <div class="st-riskchart-grid">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+
+        <div class="st-riskchart-bar-wrap">
+          <div
+            class="st-riskchart-bar st-riskchart-bar--high"
+            data-bar="high"
+            style="height: 0%"
+          ></div>
+        </div>
+
+        <div class="st-riskchart-bar-wrap">
+          <div
+            class="st-riskchart-bar st-riskchart-bar--moderate"
+            data-bar="moderate"
+            style="height: 0%"
+          ></div>
+        </div>
+
+        <div class="st-riskchart-bar-wrap">
+          <div
+            class="st-riskchart-bar st-riskchart-bar--low"
+            data-bar="low"
+            style="height: 0%"
+          ></div>
+        </div>
+      </div>
+
+      <div class="st-riskchart-xaxis">
+        <span>High</span>
+        <span>Moderate</span>
+        <span>Low</span>
+      </div>
     </div>
 
-    <div class="st-riskchart">
+    <!-- Insights -->
+    <div class="st-riskchart-side">
+      <div class="st-insights">
+        <h4 class="st-insights-title">Risk Insights</h4>
+        <ul data-risk-insights>
+          <li>
+            <span class="st-bullet">•</span>
+            Most learners are currently classified as Low Risk
+          </li>
+          <li>
+            <span class="st-bullet st-bullet--error">•</span>
+            Three learners recently moved from Moderate to High Risk
+          </li>
+        </ul>
+      </div>
 
-        <!-- Plot -->
-        <div class="st-riskchart-plot">
-
-            <div class="st-riskchart-bars" data-riskchart>
-
-                <div class="st-riskchart-yaxis" data-riskchart-yaxis>
-                    <span>25</span><span>20</span><span>15</span>
-                    <span>10</span><span>5</span><span>0</span>
-                </div>
-
-                <div class="st-riskchart-grid">
-                    <div></div><div></div><div></div>
-                    <div></div><div></div><div></div>
-                </div>
-
-                <div class="st-riskchart-bar-wrap">
-                    <div class="st-riskchart-bar st-riskchart-bar--high"
-                        data-bar="high" style="height:0%"></div>
-                </div>
-
-                <div class="st-riskchart-bar-wrap">
-                    <div class="st-riskchart-bar st-riskchart-bar--moderate"
-                        data-bar="moderate" style="height:0%"></div>
-                </div>
-
-                <div class="st-riskchart-bar-wrap">
-                    <div class="st-riskchart-bar st-riskchart-bar--low"
-                        data-bar="low" style="height:0%"></div>
-                </div>
-
-            </div>
-
-            <div class="st-riskchart-xaxis">
-                <span>High</span>
-                <span>Moderate</span>
-                <span>Low</span>
-            </div>
-
+      <div class="st-meta-grid">
+        <div class="st-meta-grid-item">
+          <p>Date</p>
+          <p data-risk-date>--</p>
         </div>
-
-        <!-- Insights -->
-        <div class="st-riskchart-side">
-
-            <div class="st-insights">
-                <h4 class="st-insights-title">Risk Insights</h4>
-                <ul data-risk-insights>
-                    <li>
-                        <span class="st-bullet">•</span>
-                        Most learners are currently classified as Low Risk
-                    </li>
-                    <li>
-                        <span class="st-bullet st-bullet--error">•</span>
-                        Three learners recently moved from Moderate to High Risk
-                    </li>
-                </ul>
-            </div>
-
-            <div class="st-meta-grid">
-                <div class="st-meta-grid-item">
-                    <p>Date</p>
-                    <p data-risk-date>--</p>
-                </div>
-                <div class="st-meta-grid-item">
-                    <p>Coverage</p>
-                    <p data-risk-coverage>--</p>
-                </div>
-                <div class="st-meta-grid-item">
-                    <p>Model</p>
-                    <p data-risk-model>--</p>
-                </div>
-                <div class="st-meta-grid-item">
-                    <p>Confidence</p>
-                    <p class="is-teal" data-risk-confidence>--</p>
-                </div>
-            </div>
-
+        <div class="st-meta-grid-item">
+          <p>Coverage</p>
+          <p data-risk-coverage>--</p>
         </div>
-
+        <div class="st-meta-grid-item">
+          <p>Model</p>
+          <p data-risk-model>--</p>
+        </div>
+        <div class="st-meta-grid-item">
+          <p>Confidence</p>
+          <p class="is-teal" data-risk-confidence>--</p>
+        </div>
+      </div>
     </div>
-
+  </div>
 </div>

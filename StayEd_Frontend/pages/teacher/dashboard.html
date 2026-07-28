@@ -1,66 +1,70 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>StayEd | Teacher Dashboard</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
 
-    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/main.css" />
 
-    <link rel="icon" type="image/x-icon" href="../../assets/img/brand/favicon.ico">
-    <link rel="apple-touch-icon" href="../../assets/img/brand/apple-touch-icon.png">
-</head>
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="../../assets/img/brand/favicon.ico"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="../../assets/img/brand/apple-touch-icon.png"
+    />
+  </head>
 
-<body class="st-app" data-page="Teacher Dashboard">
-
+  <body class="st-app" data-page="Teacher Dashboard">
     <!-- Sidebar -->
 
     <div data-component="layout/sidebar"></div>
 
     <div class="st-main">
+      <!-- Contextual notification banner -->
 
-        <!-- Contextual notification banner -->
+      <div data-component="dashboard/notification-banner"></div>
 
-        <div data-component="dashboard/notification-banner"></div>
+      <!-- Navbar -->
 
-        <!-- Navbar -->
+      <div data-component="layout/navbar"></div>
 
-        <div data-component="layout/navbar"></div>
+      <!-- Page content -->
 
-        <!-- Page content -->
+      <main class="st-content">
+        <div data-component="dashboard/welcome"></div>
 
-        <main class="st-content">
+        <div data-component="dashboard/filter-bar"></div>
 
-            <div data-component="dashboard/welcome"></div>
+        <div class="st-dash-grid">
+          <div data-component="dashboard/statistics"></div>
 
-            <div data-component="dashboard/filter-bar"></div>
+          <div data-component="dashboard/analytics"></div>
 
-            <div class="st-dash-grid">
+          <div data-component="dashboard/quick-actions"></div>
 
-                <div data-component="dashboard/statistics"></div>
+          <div data-component="dashboard/registry"></div>
+        </div>
+      </main>
 
-                <div data-component="dashboard/analytics"></div>
+      <!-- Footer -->
 
-                <div data-component="dashboard/quick-actions"></div>
-
-                <div data-component="dashboard/registry"></div>
-
-            </div>
-
-        </main>
-
-        <!-- Footer -->
-
-        <div data-component="layout/footer"></div>
-
+      <div data-component="layout/footer"></div>
     </div>
 
     <!-- Shared Components -->
@@ -99,7 +103,5 @@
     <!-- Dashboard -->
 
     <script src="../../assets/js/teacher/dashboard.js"></script>
-
-</body>
-
+  </body>
 </html>

@@ -1,131 +1,63 @@
-
-
 class ComponentLoader {
+  static BASE = "../../components";
 
-    static BASE = "../../components";
+  static async load() {
+    const components = document.querySelectorAll("[data-component]");
 
-    static async load() {
+    for (const element of components) {
+      const component = element.dataset.component;
 
-        const components = document.querySelectorAll(
+      try {
+        const response = await fetch(`${this.BASE}/${component}.html`);
 
-            "[data-component]"
+        if (!response.ok) {
+          throw new Error(`${component}.html not found.`);
+        }
 
+        element.innerHTML = await response.text();
+      } catch (error) {
+        console.error(
+          "[ComponentLoader]",
+
+          error.message,
         );
+      }
+    }
+  }
 
-        for (const element of components) {
+  static async loadInto(selector, component) {
+    const container = document.querySelector(selector);
 
-            const component =
-
-                element.dataset.component;
-
-            try {
-
-                const response = await fetch(
-
-                    `${this.BASE}/${component}.html`
-
-                );
-
-                if (!response.ok) {
-
-                    throw new Error(
-
-                        `${component}.html not found.`
-
-                    );
-
-                }
-
-                element.innerHTML =
-
-                    await response.text();
-
-            }
-
-            catch (error) {
-
-                console.error(
-
-                    "[ComponentLoader]",
-
-                    error.message
-
-                );
-
-            }
-
-        }
-
+    if (!container) {
+      return;
     }
 
-    static async loadInto(selector, component) {
+    try {
+      const response = await fetch(`${this.BASE}/${component}.html`);
 
-        const container =
+      if (!response.ok) {
+        throw new Error(`${component}.html not found.`);
+      }
 
-            document.querySelector(selector);
+      container.innerHTML = await response.text();
+    } catch (error) {
+      console.error(
+        "[ComponentLoader]",
 
-        if (!container) {
-
-            return;
-
-        }
-
-        try {
-
-            const response = await fetch(
-
-                `${this.BASE}/${component}.html`
-
-            );
-
-            if (!response.ok) {
-
-                throw new Error(
-
-                    `${component}.html not found.`
-
-                );
-
-            }
-
-            container.innerHTML =
-
-                await response.text();
-
-        }
-
-        catch (error) {
-
-            console.error(
-
-                "[ComponentLoader]",
-
-                error.message
-
-            );
-
-        }
-
+        error.message,
+      );
     }
-
+  }
 }
 
 window.ComponentLoader = ComponentLoader;
 
 document.addEventListener(
+  "DOMContentLoaded",
 
-    "DOMContentLoaded",
+  async () => {
+    await ComponentLoader.load();
 
-    async () => {
-
-        await ComponentLoader.load();
-
-        document.dispatchEvent(
-
-            new CustomEvent("components:loaded")
-
-        );
-
-    }
-
+    document.dispatchEvent(new CustomEvent("components:loaded"));
+  },
 );

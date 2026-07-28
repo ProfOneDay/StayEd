@@ -1,23 +1,13 @@
-
-
 class PendingPage {
-
-    static init() {
-
-        ComponentLoader.load();
-
-    }
-
+  static init() {
+    ComponentLoader.load();
+  }
 }
 
 document.addEventListener(
+  "DOMContentLoaded",
 
-    "DOMContentLoaded",
-
-    () => {
-
-        PendingPage.init();
-
-    }
-
+  () => {
+    PendingPage.init();
+  },
 );

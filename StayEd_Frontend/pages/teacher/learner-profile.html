@@ -1,339 +1,537 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StayEd | Learner Profile</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
-    <link rel="stylesheet" href="../../assets/css/main.css">
-    <link rel="icon" type="image/x-icon" href="../../assets/img/brand/favicon.ico">
-    <link rel="apple-touch-icon" href="../../assets/img/brand/apple-touch-icon.png">
-</head>
-<body class="st-app" data-page="Learner Profile">
-
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/css/main.css" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="../../assets/img/brand/favicon.ico"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="../../assets/img/brand/apple-touch-icon.png"
+    />
+  </head>
+  <body class="st-app" data-page="Learner Profile">
     <div data-component="layout/sidebar"></div>
 
     <div class="st-main">
-        <div data-component="layout/navbar"></div>
+      <div data-component="layout/navbar"></div>
 
-        <main class="st-content">
+      <main class="st-content">
+        <div class="st-page-header">
+          <div>
+            <h1 class="st-page-header-title">Learner Profile</h1>
+            <p class="st-page-header-subtitle">
+              View learner information, monitoring history, prediction insights,
+              and intervention recommendations.
+            </p>
+          </div>
+        </div>
 
-            <div class="st-page-header">
-                <div>
-                    <h1 class="st-page-header-title">Learner Profile</h1>
-                    <p class="st-page-header-subtitle">
-                        View learner information, monitoring history, prediction insights, and
-                        intervention recommendations.
+        <!-- Profile Hero -->
+        <div class="st-profile-hero" data-profile-hero>
+          <div class="st-profile-hero-identity">
+            <div class="st-profile-hero-avatar" data-profile-avatar>?</div>
+            <div>
+              <h2 class="st-profile-hero-name" data-profile-name>Loading…</h2>
+              <div class="st-profile-hero-meta">
+                <p>LRN: <span data-profile-lrn>—</span></p>
+                <p>CLC: <span data-profile-clc>—</span></p>
+                <p>Level: <span data-profile-level>—</span></p>
+                <p>Modality: <span data-profile-modality>—</span></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="st-profile-hero-risk">
+            <p class="st-profile-hero-risk-label">Current Prediction</p>
+            <div data-profile-risk-badge></div>
+            <div class="st-profile-hero-risk-stats">
+              <div class="st-profile-hero-risk-row">
+                <span>Probability</span>
+                <span class="value" data-profile-probability>—</span>
+              </div>
+              <div class="st-profile-hero-risk-row">
+                <span>Confidence</span>
+                <span class="value" data-profile-confidence>—</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="st-profile-hero-actions">
+            <button
+              type="button"
+              class="st-btn st-btn-primary"
+              data-profile-assign-btn
+            >
+              <span class="material-symbols-outlined">person_add</span>
+              Assign Intervention
+            </button>
+            <a href="student-registry.html" class="st-btn st-btn-outline">
+              <span class="material-symbols-outlined">visibility</span>
+              View Student Registry
+            </a>
+            <button
+              type="button"
+              class="st-btn st-btn-outline"
+              data-profile-edit-btn
+            >
+              <span class="material-symbols-outlined">edit</span>
+              Edit Learner
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="st-profile-tabs" role="tablist">
+          <button
+            type="button"
+            class="st-profile-tab is-active"
+            data-profile-tab="overview"
+            role="tab"
+            aria-selected="true"
+          >
+            Overview
+          </button>
+          <button
+            type="button"
+            class="st-profile-tab"
+            data-profile-tab="monitoring"
+            role="tab"
+            aria-selected="false"
+          >
+            Monitoring History
+          </button>
+          <button
+            type="button"
+            class="st-profile-tab"
+            data-profile-tab="risk"
+            role="tab"
+            aria-selected="false"
+          >
+            Risk Explanation
+          </button>
+          <button
+            type="button"
+            class="st-profile-tab"
+            data-profile-tab="interventions"
+            role="tab"
+            aria-selected="false"
+          >
+            Interventions
+          </button>
+        </div>
+
+        <!-- OVERVIEW PANEL -->
+        <div class="st-profile-panel is-active" data-profile-panel="overview">
+          <div class="st-profile-metrics">
+            <div class="st-metric-card">
+              <p class="st-metric-card-label">Attendance Rate</p>
+              <span class="st-metric-card-value" data-metric-attendance>—</span>
+              <span
+                class="st-metric-card-delta is-down"
+                data-metric-attendance-delta
+              ></span>
+            </div>
+            <div class="st-metric-card">
+              <p class="st-metric-card-label">Module Completion</p>
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: baseline;
+                "
+              >
+                <span
+                  class="st-metric-card-value"
+                  style="font-size: 16px"
+                  data-metric-modules
+                  >—</span
+                >
+                <span
+                  style="
+                    font-size: 11px;
+                    font-weight: 700;
+                    color: var(--st-secondary);
+                  "
+                  data-metric-modules-pct
+                  >—</span
+                >
+              </div>
+              <div class="st-metric-card-progress">
+                <div
+                  class="st-metric-card-progress-fill"
+                  data-metric-modules-bar
+                  style="width: 0%"
+                ></div>
+              </div>
+            </div>
+            <div class="st-metric-card">
+              <p class="st-metric-card-label">Submission Timeliness</p>
+              <span class="st-metric-card-value" data-metric-timeliness>—</span>
+            </div>
+            <div class="st-metric-card">
+              <p class="st-metric-card-label">Consultations</p>
+              <span class="st-metric-card-value" data-metric-consultations
+                >—</span
+              >
+            </div>
+          </div>
+
+          <div class="st-risk-trend-card">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+              "
+            >
+              <div>
+                <h4 class="st-panel-title" style="font-size: 18px">
+                  Risk Trend Over Time
+                </h4>
+                <p class="st-panel-subtitle">
+                  Probability of dropout/low engagement (0-100%)
+                </p>
+              </div>
+              <div class="st-risk-trend-legend">
+                <div class="st-risk-trend-legend-item">
+                  <span
+                    class="st-risk-trend-legend-dot"
+                    style="background: var(--st-risk-high)"
+                  ></span
+                  >High
+                </div>
+                <div class="st-risk-trend-legend-item">
+                  <span
+                    class="st-risk-trend-legend-dot"
+                    style="background: var(--st-risk-moderate)"
+                  ></span
+                  >Moderate
+                </div>
+                <div class="st-risk-trend-legend-item">
+                  <span
+                    class="st-risk-trend-legend-dot"
+                    style="background: var(--st-risk-low)"
+                  ></span
+                  >Low
+                </div>
+              </div>
+            </div>
+            <div class="st-risk-trend-chart" data-risk-trend-chart>
+              <div class="st-risk-trend-zone st-risk-trend-zone--high">
+                <span style="color: var(--st-risk-high)">High Risk</span>
+              </div>
+              <div class="st-risk-trend-zone st-risk-trend-zone--moderate">
+                <span style="color: var(--st-risk-moderate)"
+                  >Moderate Risk</span
+                >
+              </div>
+              <div class="st-risk-trend-zone st-risk-trend-zone--low">
+                <span style="color: var(--st-risk-low)">Low Risk</span>
+              </div>
+              <svg
+                class="st-risk-trend-svg"
+                preserveAspectRatio="none"
+                data-risk-trend-svg
+              ></svg>
+            </div>
+            <div class="st-risk-trend-xaxis" data-risk-trend-xaxis></div>
+          </div>
+
+          <div class="st-profile-grid">
+            <div class="st-stack-col-lg">
+              <div class="st-panel st-panel-pad">
+                <h4 class="st-panel-title" style="margin-bottom: 16px">
+                  Recommended Actions
+                </h4>
+                <div
+                  class="st-profile-metrics st-recommend-actions-grid"
+                  data-recommended-actions
+                ></div>
+              </div>
+
+              <div class="st-panel">
+                <div class="st-panel-head st-panel-head--flush">
+                  <h4 class="st-panel-title">Recent Monitoring Summary</h4>
+                  <button
+                    type="button"
+                    class="st-panel-link"
+                    data-view-all-monitoring
+                  >
+                    View All
+                  </button>
+                </div>
+                <div class="st-table-scroll">
+                  <table class="st-data-table">
+                    <thead>
+                      <tr>
+                        <th>Category</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                      </tr>
+                    </thead>
+                    <tbody data-monitoring-summary-body></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="st-stack-col-lg">
+              <div class="st-sidebar-info-card">
+                <h4 class="st-sidebar-info-title">Background Information</h4>
+                <div data-background-info></div>
+              </div>
+
+              <div class="st-sidebar-info-card st-activity-panel">
+                <h4 class="st-sidebar-info-title">Recent Activity</h4>
+                <div class="st-activity-feed" data-activity-feed></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MONITORING HISTORY PANEL -->
+        <div class="st-profile-panel" data-profile-panel="monitoring">
+          <div class="st-panel st-panel-pad">
+            <div style="margin-bottom: 24px">
+              <h3 class="st-panel-title">Monitoring History</h3>
+              <p class="st-panel-subtitle">
+                Review the learner's attendance and module monitoring records
+                over time.
+              </p>
+            </div>
+
+            <div class="st-history-filters">
+              <div class="st-history-chips" data-history-chips>
+                <button
+                  type="button"
+                  class="st-history-chip is-active"
+                  data-history-filter="all"
+                >
+                  All Records
+                </button>
+                <button
+                  type="button"
+                  class="st-history-chip"
+                  data-history-filter="month"
+                >
+                  This Month
+                </button>
+                <button
+                  type="button"
+                  class="st-history-chip"
+                  data-history-filter="semester"
+                >
+                  This Semester
+                </button>
+              </div>
+              <div class="st-search" style="min-width: 280px">
+                <span class="material-symbols-outlined">search</span>
+                <input
+                  type="text"
+                  placeholder="Search by date or module name..."
+                  data-history-search
+                  aria-label="Search monitoring history"
+                />
+              </div>
+            </div>
+
+            <div class="st-timeline" data-monitoring-timeline></div>
+          </div>
+        </div>
+
+        <!-- RISK EXPLANATION PANEL -->
+        <div class="st-profile-panel" data-profile-panel="risk">
+          <div class="st-profile-grid st-risk-panel-single-col">
+            <div
+              style="display: grid; grid-template-columns: 1fr; gap: 24px"
+              class="st-profile-grid"
+            >
+              <div class="st-stack-col-lg">
+                <div class="st-prediction-card">
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    <h4 class="st-panel-title">Current Prediction</h4>
+                    <div data-risk-current-badge></div>
+                  </div>
+                  <div class="st-prediction-stats">
+                    <div class="st-prediction-stat">
+                      <p class="st-prediction-stat-label">Probability</p>
+                      <p
+                        class="st-prediction-stat-value"
+                        style="color: var(--st-risk-high)"
+                        data-risk-probability
+                      >
+                        —
+                      </p>
+                    </div>
+                    <div class="st-prediction-stat">
+                      <p class="st-prediction-stat-label">Confidence</p>
+                      <p
+                        class="st-prediction-stat-value"
+                        style="color: var(--st-secondary)"
+                        data-risk-confidence
+                      >
+                        —
+                      </p>
+                    </div>
+                    <div class="st-prediction-stat">
+                      <p class="st-prediction-stat-label">Last Prediction</p>
+                      <p
+                        class="st-prediction-stat-value"
+                        style="font-size: 14px"
+                        data-risk-last
+                      >
+                        —
+                      </p>
+                    </div>
+                    <div class="st-prediction-stat">
+                      <p class="st-prediction-stat-label">Model</p>
+                      <p
+                        class="st-prediction-stat-value"
+                        style="font-size: 14px"
+                        data-risk-model
+                      >
+                        —
+                      </p>
+                    </div>
+                  </div>
+                  <p class="st-prediction-summary-box" data-risk-summary></p>
+                </div>
+
+                <div class="st-prediction-card">
+                  <h4 class="st-panel-title" style="margin-bottom: 16px">
+                    Prediction Change Summary
+                  </h4>
+                  <div class="st-change-summary">
+                    <div class="st-change-box st-change-box--previous">
+                      <p class="st-change-box-label">Previous</p>
+                      <p class="st-text-risk-moderate" data-risk-previous>—</p>
+                    </div>
+                    <span
+                      class="material-symbols-outlined"
+                      style="color: var(--st-outline)"
+                      >arrow_forward</span
+                    >
+                    <div class="st-change-box st-change-box--current">
+                      <p class="st-change-box-label">Current</p>
+                      <p class="st-text-risk-high" data-risk-current>—</p>
+                    </div>
+                  </div>
+                  <ul class="st-change-list" data-risk-changes></ul>
+                </div>
+              </div>
+
+              <div class="st-stack-col-lg">
+                <div class="st-sidebar-info-card">
+                  <h4 class="st-sidebar-info-title">Top Risk Contributors</h4>
+                  <div class="st-stack-col-md" data-risk-contributors></div>
+                </div>
+
+                <div class="st-sidebar-info-card">
+                  <h4 class="st-sidebar-info-title">Prediction Details</h4>
+                  <div data-risk-details></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- INTERVENTIONS PANEL -->
+        <div class="st-profile-panel" data-profile-panel="interventions">
+          <div class="st-profile-grid">
+            <div class="st-stack-col-lg">
+              <div class="st-panel st-panel-pad">
+                <div class="st-panel-head">
+                  <div>
+                    <h4 class="st-panel-title">AI-Recommended Interventions</h4>
+                    <p class="st-panel-subtitle">
+                      Suggested actions based on learner's current risk factors.
                     </p>
+                  </div>
+                  <button
+                    type="button"
+                    class="st-btn st-btn-primary st-btn-xs"
+                    data-add-intervention-btn
+                  >
+                    <span class="material-symbols-outlined">add</span>
+                    Add Intervention
+                  </button>
                 </div>
+                <div
+                  class="st-stack-col-md"
+                  data-intervention-recommendations
+                ></div>
+              </div>
+
+              <div class="st-panel st-panel-pad">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin-bottom: 20px;
+                  "
+                >
+                  <span
+                    class="material-symbols-outlined"
+                    style="color: var(--st-secondary)"
+                    >assignment_turned_in</span
+                  >
+                  <h4 class="st-panel-title">Active Intervention</h4>
+                </div>
+                <div data-active-intervention></div>
+              </div>
+
+              <div class="st-panel">
+                <div class="st-panel-head st-panel-head--flush">
+                  <h4 class="st-panel-title">Intervention History</h4>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                    padding: 16px;
+                  "
+                  data-intervention-history
+                ></div>
+              </div>
             </div>
 
-            <!-- Profile Hero -->
-            <div class="st-profile-hero" data-profile-hero>
-
-                <div class="st-profile-hero-identity">
-                    <div class="st-profile-hero-avatar" data-profile-avatar>?</div>
-                    <div>
-                        <h2 class="st-profile-hero-name" data-profile-name>Loading…</h2>
-                        <div class="st-profile-hero-meta">
-                            <p>LRN: <span data-profile-lrn>—</span></p>
-                            <p>CLC: <span data-profile-clc>—</span></p>
-                            <p>Level: <span data-profile-level>—</span></p>
-                            <p>Modality: <span data-profile-modality>—</span></p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="st-profile-hero-risk">
-                    <p class="st-profile-hero-risk-label">Current Prediction</p>
-                    <div data-profile-risk-badge></div>
-                    <div class="st-profile-hero-risk-stats">
-                        <div class="st-profile-hero-risk-row">
-                            <span>Probability</span>
-                            <span class="value" data-profile-probability>—</span>
-                        </div>
-                        <div class="st-profile-hero-risk-row">
-                            <span>Confidence</span>
-                            <span class="value" data-profile-confidence>—</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="st-profile-hero-actions">
-                    <button type="button" class="st-btn st-btn-primary" data-profile-assign-btn>
-                        <span class="material-symbols-outlined">person_add</span>
-                        Assign Intervention
-                    </button>
-                    <a href="student-registry.html" class="st-btn st-btn-outline">
-                        <span class="material-symbols-outlined">visibility</span>
-                        View Student Registry
-                    </a>
-                    <button type="button" class="st-btn st-btn-outline" data-profile-edit-btn>
-                        <span class="material-symbols-outlined">edit</span>
-                        Edit Learner
-                    </button>
-                </div>
-
+            <div class="st-stack-col-lg">
+              <div class="st-sidebar-info-card">
+                <h4 class="st-sidebar-info-title">Current Risk Factors</h4>
+                <div data-current-risk-factors></div>
+              </div>
             </div>
+          </div>
+        </div>
+      </main>
 
-            <!-- Tabs -->
-            <div class="st-profile-tabs" role="tablist">
-                <button type="button" class="st-profile-tab is-active" data-profile-tab="overview" role="tab" aria-selected="true">Overview</button>
-                <button type="button" class="st-profile-tab" data-profile-tab="monitoring" role="tab" aria-selected="false">Monitoring History</button>
-                <button type="button" class="st-profile-tab" data-profile-tab="risk" role="tab" aria-selected="false">Risk Explanation</button>
-                <button type="button" class="st-profile-tab" data-profile-tab="interventions" role="tab" aria-selected="false">Interventions</button>
-            </div>
-
-            <!-- OVERVIEW PANEL -->
-            <div class="st-profile-panel is-active" data-profile-panel="overview">
-
-                <div class="st-profile-metrics">
-                    <div class="st-metric-card">
-                        <p class="st-metric-card-label">Attendance Rate</p>
-                        <span class="st-metric-card-value" data-metric-attendance>—</span>
-                        <span class="st-metric-card-delta is-down" data-metric-attendance-delta></span>
-                    </div>
-                    <div class="st-metric-card">
-                        <p class="st-metric-card-label">Module Completion</p>
-                        <div style="display:flex;justify-content:space-between;align-items:baseline;">
-                            <span class="st-metric-card-value" style="font-size:16px;" data-metric-modules>—</span>
-                            <span style="font-size:11px;font-weight:700;color:var(--st-secondary);" data-metric-modules-pct>—</span>
-                        </div>
-                        <div class="st-metric-card-progress">
-                            <div class="st-metric-card-progress-fill" data-metric-modules-bar style="width:0%;"></div>
-                        </div>
-                    </div>
-                    <div class="st-metric-card">
-                        <p class="st-metric-card-label">Submission Timeliness</p>
-                        <span class="st-metric-card-value" data-metric-timeliness>—</span>
-                    </div>
-                    <div class="st-metric-card">
-                        <p class="st-metric-card-label">Consultations</p>
-                        <span class="st-metric-card-value" data-metric-consultations>—</span>
-                    </div>
-                </div>
-
-                <div class="st-risk-trend-card">
-                    <div style="display:flex;justify-content:space-between;align-items:center;">
-                        <div>
-                            <h4 class="st-panel-title" style="font-size:18px;">Risk Trend Over Time</h4>
-                            <p class="st-panel-subtitle">Probability of dropout/low engagement (0-100%)</p>
-                        </div>
-                        <div class="st-risk-trend-legend">
-                            <div class="st-risk-trend-legend-item"><span class="st-risk-trend-legend-dot" style="background:var(--st-risk-high);"></span>High</div>
-                            <div class="st-risk-trend-legend-item"><span class="st-risk-trend-legend-dot" style="background:var(--st-risk-moderate);"></span>Moderate</div>
-                            <div class="st-risk-trend-legend-item"><span class="st-risk-trend-legend-dot" style="background:var(--st-risk-low);"></span>Low</div>
-                        </div>
-                    </div>
-                    <div class="st-risk-trend-chart" data-risk-trend-chart>
-                        <div class="st-risk-trend-zone st-risk-trend-zone--high"><span style="color:var(--st-risk-high);">High Risk</span></div>
-                        <div class="st-risk-trend-zone st-risk-trend-zone--moderate"><span style="color:var(--st-risk-moderate);">Moderate Risk</span></div>
-                        <div class="st-risk-trend-zone st-risk-trend-zone--low"><span style="color:var(--st-risk-low);">Low Risk</span></div>
-                        <svg class="st-risk-trend-svg" preserveAspectRatio="none" data-risk-trend-svg></svg>
-                    </div>
-                    <div class="st-risk-trend-xaxis" data-risk-trend-xaxis></div>
-                </div>
-
-                <div class="st-profile-grid">
-
-                    <div class="st-stack-col-lg">
-
-                        <div class="st-panel st-panel-pad">
-                            <h4 class="st-panel-title" style="margin-bottom:16px;">Recommended Actions</h4>
-                            <div class="st-profile-metrics st-recommend-actions-grid" data-recommended-actions></div>
-                        </div>
-
-                        <div class="st-panel">
-                            <div class="st-panel-head st-panel-head--flush">
-                                <h4 class="st-panel-title">Recent Monitoring Summary</h4>
-                                <button type="button" class="st-panel-link" data-view-all-monitoring>View All</button>
-                            </div>
-                            <div class="st-table-scroll">
-                                <table class="st-data-table">
-                                    <thead>
-                                        <tr><th>Category</th><th>Date</th><th>Status</th><th>Details</th></tr>
-                                    </thead>
-                                    <tbody data-monitoring-summary-body></tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="st-stack-col-lg">
-
-                        <div class="st-sidebar-info-card">
-                            <h4 class="st-sidebar-info-title">Background Information</h4>
-                            <div data-background-info></div>
-                        </div>
-
-                        <div class="st-sidebar-info-card st-activity-panel">
-                            <h4 class="st-sidebar-info-title">Recent Activity</h4>
-                            <div class="st-activity-feed" data-activity-feed></div>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            <!-- MONITORING HISTORY PANEL -->
-            <div class="st-profile-panel" data-profile-panel="monitoring">
-
-                <div class="st-panel st-panel-pad">
-
-                    <div style="margin-bottom:24px;">
-                        <h3 class="st-panel-title">Monitoring History</h3>
-                        <p class="st-panel-subtitle">Review the learner's attendance and module monitoring records over time.</p>
-                    </div>
-
-                    <div class="st-history-filters">
-                        <div class="st-history-chips" data-history-chips>
-                            <button type="button" class="st-history-chip is-active" data-history-filter="all">All Records</button>
-                            <button type="button" class="st-history-chip" data-history-filter="month">This Month</button>
-                            <button type="button" class="st-history-chip" data-history-filter="semester">This Semester</button>
-                        </div>
-                        <div class="st-search" style="min-width:280px;">
-                            <span class="material-symbols-outlined">search</span>
-                            <input type="text" placeholder="Search by date or module name..." data-history-search aria-label="Search monitoring history">
-                        </div>
-                    </div>
-
-                    <div class="st-timeline" data-monitoring-timeline></div>
-
-                </div>
-
-            </div>
-
-            <!-- RISK EXPLANATION PANEL -->
-            <div class="st-profile-panel" data-profile-panel="risk">
-
-                <div class="st-profile-grid st-risk-panel-single-col">
-                    <div style="display:grid;grid-template-columns:1fr;gap:24px;" class="st-profile-grid">
-
-                        <div class="st-stack-col-lg">
-
-                            <div class="st-prediction-card">
-                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                                    <h4 class="st-panel-title">Current Prediction</h4>
-                                    <div data-risk-current-badge></div>
-                                </div>
-                                <div class="st-prediction-stats">
-                                    <div class="st-prediction-stat">
-                                        <p class="st-prediction-stat-label">Probability</p>
-                                        <p class="st-prediction-stat-value" style="color:var(--st-risk-high);" data-risk-probability>—</p>
-                                    </div>
-                                    <div class="st-prediction-stat">
-                                        <p class="st-prediction-stat-label">Confidence</p>
-                                        <p class="st-prediction-stat-value" style="color:var(--st-secondary);" data-risk-confidence>—</p>
-                                    </div>
-                                    <div class="st-prediction-stat">
-                                        <p class="st-prediction-stat-label">Last Prediction</p>
-                                        <p class="st-prediction-stat-value" style="font-size:14px;" data-risk-last>—</p>
-                                    </div>
-                                    <div class="st-prediction-stat">
-                                        <p class="st-prediction-stat-label">Model</p>
-                                        <p class="st-prediction-stat-value" style="font-size:14px;" data-risk-model>—</p>
-                                    </div>
-                                </div>
-                                <p class="st-prediction-summary-box" data-risk-summary></p>
-                            </div>
-
-                            <div class="st-prediction-card">
-                                <h4 class="st-panel-title" style="margin-bottom:16px;">Prediction Change Summary</h4>
-                                <div class="st-change-summary">
-                                    <div class="st-change-box st-change-box--previous">
-                                        <p class="st-change-box-label">Previous</p>
-                                        <p class="st-text-risk-moderate" data-risk-previous>—</p>
-                                    </div>
-                                    <span class="material-symbols-outlined" style="color:var(--st-outline);">arrow_forward</span>
-                                    <div class="st-change-box st-change-box--current">
-                                        <p class="st-change-box-label">Current</p>
-                                        <p class="st-text-risk-high" data-risk-current>—</p>
-                                    </div>
-                                </div>
-                                <ul class="st-change-list" data-risk-changes></ul>
-                            </div>
-
-                        </div>
-
-                        <div class="st-stack-col-lg">
-
-                            <div class="st-sidebar-info-card">
-                                <h4 class="st-sidebar-info-title">Top Risk Contributors</h4>
-                                <div class="st-stack-col-md" data-risk-contributors></div>
-                            </div>
-
-                            <div class="st-sidebar-info-card">
-                                <h4 class="st-sidebar-info-title">Prediction Details</h4>
-                                <div data-risk-details></div>
-                            </div>
-
-                        </div>
-
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- INTERVENTIONS PANEL -->
-            <div class="st-profile-panel" data-profile-panel="interventions">
-
-                <div class="st-profile-grid">
-
-                    <div class="st-stack-col-lg">
-
-                        <div class="st-panel st-panel-pad">
-                            <div class="st-panel-head">
-                                <div>
-                                    <h4 class="st-panel-title">AI-Recommended Interventions</h4>
-                                    <p class="st-panel-subtitle">Suggested actions based on learner's current risk factors.</p>
-                                </div>
-                                <button type="button" class="st-btn st-btn-primary st-btn-xs" data-add-intervention-btn>
-                                    <span class="material-symbols-outlined">add</span>
-                                    Add Intervention
-                                </button>
-                            </div>
-                            <div class="st-stack-col-md" data-intervention-recommendations></div>
-                        </div>
-
-                        <div class="st-panel st-panel-pad">
-                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;">
-                                <span class="material-symbols-outlined" style="color:var(--st-secondary);">assignment_turned_in</span>
-                                <h4 class="st-panel-title">Active Intervention</h4>
-                            </div>
-                            <div data-active-intervention></div>
-                        </div>
-
-                        <div class="st-panel">
-                            <div class="st-panel-head st-panel-head--flush">
-                                <h4 class="st-panel-title">Intervention History</h4>
-                            </div>
-                            <div style="display:flex;flex-direction:column;gap:8px;padding:16px;" data-intervention-history></div>
-                        </div>
-
-                    </div>
-
-                    <div class="st-stack-col-lg">
-
-                        <div class="st-sidebar-info-card">
-                            <h4 class="st-sidebar-info-title">Current Risk Factors</h4>
-                            <div data-current-risk-factors></div>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </main>
-
-        <div data-component="layout/footer"></div>
+      <div data-component="layout/footer"></div>
     </div>
 
     <div data-component="layout/toast"></div>
@@ -357,6 +555,5 @@
     <script src="../../assets/js/components/toast.js"></script>
     <script src="../../assets/js/components/modal.js"></script>
     <script src="../../assets/js/teacher/learner-profile.js"></script>
-
-</body>
+  </body>
 </html>

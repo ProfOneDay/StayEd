@@ -1,185 +1,188 @@
-
 class EarlyWarningPage {
+  static state = {
+    all: [],
+    filtered: [],
+    page: 1,
+    perPage: 8,
+    search: "",
+    riskLevel: "",
+    clc: "",
+    dateFrom: "",
+    dateTo: "",
+  };
 
-    static state = {
-        all: [],
-        filtered: [],
-        page: 1,
-        perPage: 8,
-        search: "",
-        riskLevel: "",
-        clc: "",
-        dateFrom: "",
-        dateTo: ""
-    };
+  static async init() {
+    if (window.Guards) Guards.teacher();
 
-    static async init() {
+    this.bindControls();
 
-        if (window.Guards) Guards.teacher();
+    await this.load();
+  }
 
-        this.bindControls();
+  static async load() {
+    if (window.Layout) Layout.showLoader();
 
-        await this.load();
+    this.showSkeleton();
 
+    try {
+      const res = await API.getLearners();
+
+      const learners = res.data || [];
+
+      this.state.all = learners
+        .filter((l) => l.risk === "High" || l.risk === "Moderate")
+        .map((l) => ({
+          ...l,
+          program: l.level,
+          clc: l.clc || this.clcFor(l.id),
+          dateGenerated: l.date_generated || "July 8, 2026",
+          assignedTeacher: l.assigned_teacher || "Trisha Santos",
+          status: l.status === "Archived" ? "Archived" : "Active",
+        }))
+        .sort((a, b) => (b.risk_probability || 0) - (a.risk_probability || 0));
+
+      this.renderSummary(learners);
+
+      this.apply();
+    } catch (error) {
+      console.error("[EarlyWarning]", error);
+      Toast?.error("Unable to load early warning alerts.");
+    } finally {
+      if (window.Layout) Layout.hideLoader();
+    }
+  }
+
+  static clcFor(id) {
+    const clcs = MockDB.clcs || [];
+
+    if (!clcs.length) return "San Felipe Sur CLC";
+
+    return clcs[id % clcs.length].name;
+  }
+
+  static bindControls() {
+    document
+      .querySelector("[data-ewa-search]")
+      ?.addEventListener("input", (e) => {
+        this.state.search = e.target.value.toLowerCase();
+        this.state.page = 1;
+        this.apply();
+      });
+
+    document
+      .querySelector("[data-ewa-filter-risk]")
+      ?.addEventListener("change", (e) => {
+        this.state.riskLevel = e.target.value;
+        this.state.page = 1;
+        this.apply();
+      });
+
+    document
+      .querySelector("[data-ewa-filter-clc]")
+      ?.addEventListener("change", (e) => {
+        this.state.clc = e.target.value;
+        this.state.page = 1;
+        this.apply();
+      });
+
+    document
+      .querySelector("[data-ewa-date-from]")
+      ?.addEventListener("change", (e) => {
+        this.state.dateFrom = e.target.value;
+        this.apply();
+      });
+
+    document
+      .querySelector("[data-ewa-date-to]")
+      ?.addEventListener("change", (e) => {
+        this.state.dateTo = e.target.value;
+        this.apply();
+      });
+
+    document
+      .querySelector("[data-ewa-clear]")
+      ?.addEventListener("click", () => {
+        this.state.search = "";
+        this.state.riskLevel = "";
+        this.state.clc = "";
+        this.state.dateFrom = "";
+        this.state.dateTo = "";
+        this.state.page = 1;
+
+        document.querySelector("[data-ewa-search]").value = "";
+        document.querySelector("[data-ewa-filter-risk]").value = "";
+        document.querySelector("[data-ewa-filter-clc]").value = "";
+        document.querySelector("[data-ewa-date-from]").value = "";
+        document.querySelector("[data-ewa-date-to]").value = "";
+
+        this.apply();
+      });
+
+    document
+      .querySelector("[data-ewa-export]")
+      ?.addEventListener("click", () => {
+        Toast?.info("Export will be available once connected to the server.");
+      });
+  }
+
+  static renderSummary(allLearners) {
+    this.set("[data-ewa-total]", this.state.all.length);
+    this.set(
+      "[data-ewa-high]",
+      allLearners.filter((l) => l.risk === "High").length,
+    );
+    this.set(
+      "[data-ewa-moderate]",
+      allLearners.filter((l) => l.risk === "Moderate").length,
+    );
+    this.set(
+      "[data-ewa-low]",
+      allLearners.filter((l) => l.risk === "Low").length,
+    );
+  }
+
+  static apply() {
+    let rows = [...this.state.all];
+
+    if (this.state.search) {
+      rows = rows.filter(
+        (l) =>
+          (l.name || "").toLowerCase().includes(this.state.search) ||
+          (l.lrn || "").toLowerCase().includes(this.state.search),
+      );
     }
 
-    static async load() {
-
-        if (window.Layout) Layout.showLoader();
-
-        this.showSkeleton();
-
-        try {
-
-            const res = await API.getLearners();
-
-            const learners = res.data || [];
-
-            this.state.all = learners
-                .filter(l => l.risk === "High" || l.risk === "Moderate")
-                .map(l => ({
-                    ...l,
-                    program: l.level,
-                    clc: l.clc || this.clcFor(l.id),
-                    dateGenerated: l.date_generated || "July 8, 2026",
-                    assignedTeacher: l.assigned_teacher || "Trisha Santos",
-                    status: l.status === "Archived" ? "Archived" : "Active"
-                }))
-                .sort((a, b) => (b.risk_probability || 0) - (a.risk_probability || 0));
-
-            this.renderSummary(learners);
-
-            this.apply();
-
-        } catch (error) {
-
-            console.error("[EarlyWarning]", error);
-            Toast?.error("Unable to load early warning alerts.");
-
-        } finally {
-
-            if (window.Layout) Layout.hideLoader();
-
-        }
-
+    if (this.state.riskLevel) {
+      rows = rows.filter((l) => l.risk === this.state.riskLevel);
     }
 
-    static clcFor(id) {
-
-        const clcs = MockDB.clcs || [];
-
-        if (!clcs.length) return "San Felipe Sur CLC";
-
-        return clcs[id % clcs.length].name;
-
+    if (this.state.clc) {
+      rows = rows.filter((l) => l.clc === this.state.clc);
     }
 
-    static bindControls() {
+    this.state.filtered = rows;
 
-        document.querySelector("[data-ewa-search]")?.addEventListener("input", e => {
-            this.state.search = e.target.value.toLowerCase();
-            this.state.page = 1;
-            this.apply();
-        });
+    this.set(
+      "[data-ewa-count]",
+      `${rows.length} alert${rows.length === 1 ? "" : "s"}`,
+    );
 
-        document.querySelector("[data-ewa-filter-risk]")?.addEventListener("change", e => {
-            this.state.riskLevel = e.target.value;
-            this.state.page = 1;
-            this.apply();
-        });
+    this.renderPage();
+  }
 
-        document.querySelector("[data-ewa-filter-clc]")?.addEventListener("change", e => {
-            this.state.clc = e.target.value;
-            this.state.page = 1;
-            this.apply();
-        });
+  static renderPage() {
+    const body = document.querySelector("[data-ewa-body]");
 
-        document.querySelector("[data-ewa-date-from]")?.addEventListener("change", e => {
-            this.state.dateFrom = e.target.value;
-            this.apply();
-        });
+    if (!body) return;
 
-        document.querySelector("[data-ewa-date-to]")?.addEventListener("change", e => {
-            this.state.dateTo = e.target.value;
-            this.apply();
-        });
+    const { filtered, page, perPage } = this.state;
 
-        document.querySelector("[data-ewa-clear]")?.addEventListener("click", () => {
+    const start = (page - 1) * perPage;
 
-            this.state.search = "";
-            this.state.riskLevel = "";
-            this.state.clc = "";
-            this.state.dateFrom = "";
-            this.state.dateTo = "";
-            this.state.page = 1;
+    const pageRows = filtered.slice(start, start + perPage);
 
-            document.querySelector("[data-ewa-search]").value = "";
-            document.querySelector("[data-ewa-filter-risk]").value = "";
-            document.querySelector("[data-ewa-filter-clc]").value = "";
-            document.querySelector("[data-ewa-date-from]").value = "";
-            document.querySelector("[data-ewa-date-to]").value = "";
-
-            this.apply();
-
-        });
-
-        document.querySelector("[data-ewa-export]")?.addEventListener("click", () => {
-            Toast?.info("Export will be available once connected to the server.");
-        });
-
-    }
-
-    static renderSummary(allLearners) {
-
-        this.set("[data-ewa-total]", this.state.all.length);
-        this.set("[data-ewa-high]", allLearners.filter(l => l.risk === "High").length);
-        this.set("[data-ewa-moderate]", allLearners.filter(l => l.risk === "Moderate").length);
-        this.set("[data-ewa-low]", allLearners.filter(l => l.risk === "Low").length);
-
-    }
-
-    static apply() {
-
-        let rows = [...this.state.all];
-
-        if (this.state.search) {
-            rows = rows.filter(l =>
-                (l.name || "").toLowerCase().includes(this.state.search) ||
-                (l.lrn || "").toLowerCase().includes(this.state.search)
-            );
-        }
-
-        if (this.state.riskLevel) {
-            rows = rows.filter(l => l.risk === this.state.riskLevel);
-        }
-
-        if (this.state.clc) {
-            rows = rows.filter(l => l.clc === this.state.clc);
-        }
-
-        this.state.filtered = rows;
-
-        this.set("[data-ewa-count]", `${rows.length} alert${rows.length === 1 ? "" : "s"}`);
-
-        this.renderPage();
-
-    }
-
-    static renderPage() {
-
-        const body = document.querySelector("[data-ewa-body]");
-
-        if (!body) return;
-
-        const { filtered, page, perPage } = this.state;
-
-        const start = (page - 1) * perPage;
-
-        const pageRows = filtered.slice(start, start + perPage);
-
-        if (!pageRows.length) {
-
-            body.innerHTML = `
+    if (!pageRows.length) {
+      body.innerHTML = `
                 <tr>
                     <td colspan="9">
                         <div class="st-empty" style="border:none;background:transparent;">
@@ -190,33 +193,33 @@ class EarlyWarningPage {
                     </td>
                 </tr>
             `;
+    } else {
+      body.innerHTML = pageRows.map((l) => this.row(l)).join("");
 
-        } else {
-
-            body.innerHTML = pageRows.map(l => this.row(l)).join("");
-
-            body.querySelectorAll("[data-open-profile]").forEach(el => {
-                el.addEventListener("click", () => {
-                    window.location.href =
-                        `learner-profile.html?id=${encodeURIComponent(el.dataset.openProfile)}`;
-                });
-            });
-
-        }
-
-        this.renderPagination();
-
+      body.querySelectorAll("[data-open-profile]").forEach((el) => {
+        el.addEventListener("click", () => {
+          window.location.href = `learner-profile.html?id=${encodeURIComponent(el.dataset.openProfile)}`;
+        });
+      });
     }
 
-    static row(l) {
+    this.renderPagination();
+  }
 
-        const cls = { High: "high", Moderate: "moderate", Low: "low" }[l.risk] || "low";
+  static row(l) {
+    const cls =
+      { High: "high", Moderate: "moderate", Low: "low" }[l.risk] || "low";
 
-        const initials = (l.name || "?").split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase();
+    const initials = (l.name || "?")
+      .split(" ")
+      .map((w) => w[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
 
-        const score = Math.round((l.risk_probability || 0.5) * 100);
+    const score = Math.round((l.risk_probability || 0.5) * 100);
 
-        return `
+    return `
             <tr>
                 <td>
                     <div class="st-ewa-table-name-cell">
@@ -243,94 +246,106 @@ class EarlyWarningPage {
                 </td>
             </tr>
         `;
+  }
 
-    }
+  static renderPagination() {
+    const { filtered, page, perPage } = this.state;
 
-    static renderPagination() {
+    const total = filtered.length;
 
-        const { filtered, page, perPage } = this.state;
+    const pages = Math.max(1, Math.ceil(total / perPage));
 
-        const total = filtered.length;
+    const start = total ? (page - 1) * perPage + 1 : 0;
 
-        const pages = Math.max(1, Math.ceil(total / perPage));
+    const end = Math.min(page * perPage, total);
 
-        const start = total ? (page - 1) * perPage + 1 : 0;
+    this.set(
+      "[data-ewa-info]",
+      `Showing ${start}\u2013${end} of ${total} alerts`,
+    );
 
-        const end = Math.min(page * perPage, total);
+    const container = document.querySelector("[data-ewa-pages]");
 
-        this.set("[data-ewa-info]", `Showing ${start}\u2013${end} of ${total} alerts`);
+    if (!container) return;
 
-        const container = document.querySelector("[data-ewa-pages]");
-
-        if (!container) return;
-
-        let html = `
+    let html = `
             <button class="st-page-btn" ${page === 1 ? "disabled" : ""} data-prev>
                 <span class="material-symbols-outlined" style="font-size:16px;">chevron_left</span>
             </button>
         `;
 
-        for (let p = 1; p <= pages; p++) {
-            html += `<button class="st-page-btn ${p === page ? "is-active" : ""}" data-go="${p}">${p}</button>`;
-        }
+    for (let p = 1; p <= pages; p++) {
+      html += `<button class="st-page-btn ${p === page ? "is-active" : ""}" data-go="${p}">${p}</button>`;
+    }
 
-        html += `
+    html += `
             <button class="st-page-btn" ${page === pages ? "disabled" : ""} data-next>
                 <span class="material-symbols-outlined" style="font-size:16px;">chevron_right</span>
             </button>
         `;
 
-        container.innerHTML = html;
+    container.innerHTML = html;
 
-        container.querySelector("[data-prev]")?.addEventListener("click", () => {
-            if (this.state.page > 1) { this.state.page--; this.renderPage(); }
-        });
+    container.querySelector("[data-prev]")?.addEventListener("click", () => {
+      if (this.state.page > 1) {
+        this.state.page--;
+        this.renderPage();
+      }
+    });
 
-        container.querySelector("[data-next]")?.addEventListener("click", () => {
-            if (this.state.page < pages) { this.state.page++; this.renderPage(); }
-        });
+    container.querySelector("[data-next]")?.addEventListener("click", () => {
+      if (this.state.page < pages) {
+        this.state.page++;
+        this.renderPage();
+      }
+    });
 
-        container.querySelectorAll("[data-go]").forEach(btn => {
-            btn.addEventListener("click", () => {
-                this.state.page = Number(btn.dataset.go);
-                this.renderPage();
-            });
-        });
+    container.querySelectorAll("[data-go]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        this.state.page = Number(btn.dataset.go);
+        this.renderPage();
+      });
+    });
+  }
 
+  static showSkeleton() {
+    const body = document.querySelector("[data-ewa-body]");
+
+    if (body && window.Skeletons) {
+      body.innerHTML = Skeletons.tableRows(6, 9);
     }
+  }
 
-    static showSkeleton() {
+  static riskBadge(risk) {
+    const cls =
+      { High: "high", Moderate: "moderate", Low: "low" }[risk] || "low";
+    const label =
+      risk === "High"
+        ? "High Risk"
+        : risk === "Moderate"
+          ? "Medium Risk"
+          : "Low Risk";
+    return `<span class="st-risk-badge st-risk-badge--${cls}"><span class="st-risk-dot"></span>${label}</span>`;
+  }
 
-        const body = document.querySelector("[data-ewa-body]");
-
-        if (body && window.Skeletons) {
-
-            body.innerHTML = Skeletons.tableRows(6, 9);
-
-        }
-
+  static set(selector, value) {
+    const el = document.querySelector(selector);
+    if (el && value !== undefined && value !== null) {
+      el.textContent = value;
     }
-
-    static riskBadge(risk) {
-        const cls = { High: "high", Moderate: "moderate", Low: "low" }[risk] || "low";
-        const label = risk === "High" ? "High Risk" : risk === "Moderate" ? "Medium Risk" : "Low Risk";
-        return `<span class="st-risk-badge st-risk-badge--${cls}"><span class="st-risk-dot"></span>${label}</span>`;
-    }
-
-    static set(selector, value) {
-        const el = document.querySelector(selector);
-        if (el && value !== undefined && value !== null) {
-            el.textContent = value;
-        }
-    }
-
+  }
 }
 
 (function bootAlerts() {
-    let started = false;
-    const start = () => { if (!started) { started = true; EarlyWarningPage.init(); } };
-    document.addEventListener("components:loaded", start);
-    document.addEventListener("DOMContentLoaded", () => setTimeout(start, 400));
+  let started = false;
+  const start = () => {
+    if (!started) {
+      started = true;
+      EarlyWarningPage.init();
+    }
+  };
+  document.addEventListener("components:loaded", start);
+  document.addEventListener("DOMContentLoaded", () => setTimeout(start, 400));
 })();
 
 window.EarlyWarningPage = EarlyWarningPage;

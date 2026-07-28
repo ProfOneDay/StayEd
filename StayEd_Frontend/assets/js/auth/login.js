@@ -1,324 +1,176 @@
-
-
 class LoginPage {
+  static initialize() {
+    this.form = document.getElementById("loginForm");
 
-    static initialize() {
-
-        this.form =
-            document.getElementById("loginForm");
-
-        if (!this.form) {
-
-            return;
-
-        }
-
-        this.email =
-            document.getElementById("email");
-
-        this.password =
-            document.getElementById("password");
-
-        this.remember =
-            this.form.querySelector(
-                "input[type='checkbox']"
-            );
-
-        this.submitButton =
-            this.form.querySelector(
-                "button[type='submit']"
-            );
-
-        this.toggleButton =
-            document.getElementById(
-                "togglePassword"
-            );
-
-        this.createAccountLink =
-            document.getElementById(
-                "createAccountLink"
-            );
-
-        this.restoreRememberedEmail();
-
-        this.initializePasswordToggle();
-
-        this.initializeCreateAccountDemo();
-
-        this.form.addEventListener(
-
-            "submit",
-
-            this.submit.bind(this)
-
-        );
-
+    if (!this.form) {
+      return;
     }
 
-    static initializeCreateAccountDemo() {
+    this.email = document.getElementById("email");
 
-        if (!this.createAccountLink) {
+    this.password = document.getElementById("password");
 
-            return;
+    this.remember = this.form.querySelector("input[type='checkbox']");
 
-        }
+    this.submitButton = this.form.querySelector("button[type='submit']");
 
-        if (!window.DemoAuthService || !DemoAuthService.isEnabled()) {
+    this.toggleButton = document.getElementById("togglePassword");
 
-            return;
+    this.createAccountLink = document.getElementById("createAccountLink");
 
-        }
+    this.restoreRememberedEmail();
 
-        this.createAccountLink.addEventListener(
+    this.initializePasswordToggle();
 
-            "click",
+    this.initializeCreateAccountDemo();
 
-            async event => {
+    this.form.addEventListener(
+      "submit",
 
-                event.preventDefault();
+      this.submit.bind(this),
+    );
+  }
 
-                const link = event.currentTarget;
-
-                const originalText = link.textContent;
-
-                link.textContent = "Starting demo…";
-
-                link.style.pointerEvents = "none";
-
-                try {
-
-                    await DemoAuthService.createAccount({
-                        full_name: "Demo Teacher",
-                        email: "demo.teacher@deped.gov.ph"
-                    });
-
-                    Toast?.success(
-                        "Demo account created — let's set up your class."
-                    );
-
-                    setTimeout(
-                        () => DemoAuthService.startDemo(),
-                        500
-                    );
-
-                }
-
-                catch (error) {
-
-                    console.error(error);
-
-                    link.textContent = originalText;
-
-                    link.style.pointerEvents = "";
-
-                }
-
-            }
-
-        );
-
+  static initializeCreateAccountDemo() {
+    if (!this.createAccountLink) {
+      return;
     }
 
-static initializePasswordToggle() {
-
-        if (!this.toggleButton) {
-
-            return;
-
-        }
-
-        this.toggleButton.addEventListener(
-
-            "click",
-
-            () => {
-
-                const hidden =
-
-                    this.password.type ===
-
-                    "password";
-
-                this.password.type =
-
-                    hidden
-
-                        ? "text"
-
-                        : "password";
-
-                this.toggleButton
-                    .querySelector("span")
-                    .textContent =
-
-                    hidden
-
-                        ? "visibility_off"
-
-                        : "visibility";
-
-            }
-
-        );
-
+    if (!window.DemoAuthService || !DemoAuthService.isEnabled()) {
+      return;
     }
 
-    static async submit(event) {
+    this.createAccountLink.addEventListener(
+      "click",
 
+      async (event) => {
         event.preventDefault();
 
-        const email =
+        const link = event.currentTarget;
 
-            this.email.value.trim();
+        const originalText = link.textContent;
 
-        const password =
+        link.textContent = "Starting demo…";
 
-            this.password.value;
-
-        if (!email || !password) {
-
-            Toast.warning(
-
-                "Please enter your email and password."
-
-            );
-
-            return;
-
-        }
-
-        this.loading(true);
+        link.style.pointerEvents = "none";
 
         try {
+          await DemoAuthService.createAccount({
+            full_name: "Demo Teacher",
+            email: "demo.teacher@deped.gov.ph",
+          });
 
-            const response =
+          Toast?.success("Demo account created — let's set up your class.");
 
-                await Auth.login({
+          setTimeout(() => DemoAuthService.startDemo(), 500);
+        } catch (error) {
+          console.error(error);
 
-                    email,
+          link.textContent = originalText;
 
-                    password
-
-                });
-
-            if (this.remember.checked) {
-
-                localStorage.setItem(
-
-                    "stayed_remember_email",
-
-                    email
-
-                );
-
-            }
-
-            else {
-
-                localStorage.removeItem(
-
-                    "stayed_remember_email"
-
-                );
-
-            }
-
-            Toast.success(
-
-                `Welcome back, ${response.user.full_name}!`
-
-            );
-
-            setTimeout(
-
-                () => {
-
-                    Auth.redirectAfterLogin();
-
-                },
-
-                600
-
-            );
-
+          link.style.pointerEvents = "";
         }
+      },
+    );
+  }
 
-        catch (error) {
-
-            Toast.error(
-
-                error.message ||
-
-                "Invalid email or password."
-
-            );
-
-        }
-
-        finally {
-
-            this.loading(false);
-
-        }
-
+  static initializePasswordToggle() {
+    if (!this.toggleButton) {
+      return;
     }
 
-    static loading(state) {
+    this.toggleButton.addEventListener(
+      "click",
 
-        if (!this.submitButton) {
+      () => {
+        const hidden = this.password.type === "password";
 
-            return;
+        this.password.type = hidden ? "text" : "password";
 
-        }
+        this.toggleButton.querySelector("span").textContent = hidden
+          ? "visibility_off"
+          : "visibility";
+      },
+    );
+  }
 
-        this.submitButton.disabled = state;
+  static async submit(event) {
+    event.preventDefault();
 
-        this.submitButton.textContent =
+    const email = this.email.value.trim();
 
-            state
+    const password = this.password.value;
 
-                ? "Signing In..."
+    if (!email || !password) {
+      Toast.warning("Please enter your email and password.");
 
-                : "Log In";
-
+      return;
     }
 
-    static restoreRememberedEmail() {
+    this.loading(true);
 
-        const email =
+    try {
+      const response = await Auth.login({
+        email,
 
-            localStorage.getItem(
+        password,
+      });
 
-                "stayed_remember_email"
+      if (this.remember.checked) {
+        localStorage.setItem(
+          "stayed_remember_email",
 
-            );
+          email,
+        );
+      } else {
+        localStorage.removeItem("stayed_remember_email");
+      }
 
-        if (!email) {
+      Toast.success(`Welcome back, ${response.user.full_name}!`);
 
-            return;
+      setTimeout(
+        () => {
+          Auth.redirectAfterLogin();
+        },
 
-        }
+        600,
+      );
+    } catch (error) {
+      Toast.error(error.message || "Invalid email or password.");
+    } finally {
+      this.loading(false);
+    }
+  }
 
-        this.email.value = email;
-
-        if (this.remember) {
-
-            this.remember.checked = true;
-
-        }
-
+  static loading(state) {
+    if (!this.submitButton) {
+      return;
     }
 
+    this.submitButton.disabled = state;
+
+    this.submitButton.textContent = state ? "Signing In..." : "Log In";
+  }
+
+  static restoreRememberedEmail() {
+    const email = localStorage.getItem("stayed_remember_email");
+
+    if (!email) {
+      return;
+    }
+
+    this.email.value = email;
+
+    if (this.remember) {
+      this.remember.checked = true;
+    }
+  }
 }
 
 document.addEventListener(
+  "DOMContentLoaded",
 
-    "DOMContentLoaded",
-
-    () => {
-
-        LoginPage.initialize();
-
-    }
-
+  () => {
+    LoginPage.initialize();
+  },
 );

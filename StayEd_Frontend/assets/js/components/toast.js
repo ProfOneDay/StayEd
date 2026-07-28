@@ -1,40 +1,22 @@
-
-
 class Toast {
+  static show(
+    message,
 
-    static show(
+    type = "success",
 
-        message,
+    duration = 3000,
+  ) {
+    const container = document.getElementById("st-toast-container");
 
-        type = "success",
+    if (!container) {
+      return;
+    }
 
-        duration = 3000
+    const toast = document.createElement("div");
 
-    ) {
+    toast.className = `st-toast st-toast-${type}`;
 
-        const container =
-
-            document.getElementById(
-
-                "st-toast-container"
-
-            );
-
-        if (!container) {
-
-            return;
-
-        }
-
-        const toast =
-
-            document.createElement("div");
-
-        toast.className =
-
-            `st-toast st-toast-${type}`;
-
-        toast.innerHTML = `
+    toast.innerHTML = `
 
             <span class="material-symbols-outlined">
 
@@ -46,76 +28,52 @@ class Toast {
 
         `;
 
-        container.appendChild(toast);
+    container.appendChild(toast);
 
-        requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      toast.classList.add("show");
+    });
 
-            toast.classList.add("show");
+    setTimeout(() => {
+      toast.classList.remove("show");
 
-        });
+      setTimeout(() => {
+        toast.remove();
+      }, 300);
+    }, duration);
+  }
 
-        setTimeout(() => {
+  static success(message) {
+    this.show(message, "success");
+  }
 
-            toast.classList.remove("show");
+  static error(message) {
+    this.show(message, "error");
+  }
 
-            setTimeout(() => {
+  static warning(message) {
+    this.show(message, "warning");
+  }
 
-                toast.remove();
+  static info(message) {
+    this.show(message, "info");
+  }
 
-            }, 300);
+  static icon(type) {
+    switch (type) {
+      case "success":
+        return "check_circle";
 
-        }, duration);
+      case "error":
+        return "error";
 
+      case "warning":
+        return "warning";
+
+      default:
+        return "info";
     }
-
-    static success(message) {
-
-        this.show(message, "success");
-
-    }
-
-    static error(message) {
-
-        this.show(message, "error");
-
-    }
-
-    static warning(message) {
-
-        this.show(message, "warning");
-
-    }
-
-    static info(message) {
-
-        this.show(message, "info");
-
-    }
-
-    static icon(type) {
-
-        switch (type) {
-
-            case "success":
-
-                return "check_circle";
-
-            case "error":
-
-                return "error";
-
-            case "warning":
-
-                return "warning";
-
-            default:
-
-                return "info";
-
-        }
-
-    }
-
+  }
 }
 
 window.Toast = Toast;

@@ -1,158 +1,101 @@
-
 const AuthPage = {
+  init() {
+    this.bindPasswordToggles();
 
-    init() {
+    this.bindPasswordRules();
 
-        this.bindPasswordToggles();
+    this.stampYear();
+  },
 
-        this.bindPasswordRules();
+  bindPasswordToggles() {
+    const toggles = document.querySelectorAll(".password-toggle");
 
-        this.stampYear();
+    toggles.forEach((toggle) => {
+      toggle.addEventListener("click", () => {
+        let input = null;
 
-    },
+        const targetId = toggle.dataset.toggle;
 
-    bindPasswordToggles() {
+        if (targetId) {
+          input = document.getElementById(targetId);
+        } else {
+          input = toggle.closest(".password-wrapper")?.querySelector("input");
+        }
 
-        const toggles =
-            document.querySelectorAll(".password-toggle");
+        if (!input) return;
 
-        toggles.forEach(toggle => {
+        const icon = toggle.querySelector(".material-symbols-outlined");
 
-            toggle.addEventListener("click", () => {
+        if (input.type === "password") {
+          input.type = "text";
 
-                let input = null;
+          if (icon) icon.textContent = "visibility_off";
 
-                const targetId = toggle.dataset.toggle;
+          toggle.setAttribute("aria-label", "Hide password");
+        } else {
+          input.type = "password";
 
-                if (targetId) {
+          if (icon) icon.textContent = "visibility";
 
-                    input = document.getElementById(targetId);
+          toggle.setAttribute("aria-label", "Show password");
+        }
+      });
+    });
+  },
 
-                } else {
+  bindPasswordRules() {
+    const rulesList = document.querySelector(".auth-password-rules");
 
-                    input =
-                        toggle
-                            .closest(".password-wrapper")
-                            ?.querySelector("input");
+    const password = document.getElementById("password");
 
-                }
+    if (!rulesList || !password) return;
 
-                if (!input) return;
+    const rules = {
+      length: (v) => v.length >= 8,
 
-                const icon =
-                    toggle.querySelector(
-                        ".material-symbols-outlined"
-                    );
+      upper: (v) => /[A-Z]/.test(v),
 
-                if (input.type === "password") {
+      lower: (v) => /[a-z]/.test(v),
 
-                    input.type = "text";
+      number: (v) => /[0-9]/.test(v),
+    };
 
-                    if (icon) icon.textContent = "visibility_off";
+    const evaluate = () => {
+      const value = password.value;
 
-                    toggle.setAttribute(
-                        "aria-label",
-                        "Hide password"
-                    );
+      Object.keys(rules).forEach((key) => {
+        const item = rulesList.querySelector(`[data-rule="${key}"]`);
 
-                } else {
+        if (!item) return;
 
-                    input.type = "password";
+        const valid = rules[key](value);
 
-                    if (icon) icon.textContent = "visibility";
+        item.classList.toggle("is-valid", valid);
 
-                    toggle.setAttribute(
-                        "aria-label",
-                        "Show password"
-                    );
+        const icon = item.querySelector(".material-symbols-outlined");
 
-                }
+        if (icon) {
+          icon.textContent = valid ? "check_circle" : "circle";
+        }
+      });
+    };
 
-            });
+    password.addEventListener("input", evaluate);
+  },
 
-        });
+  stampYear() {
+    const year = new Date().getFullYear();
 
-    },
-
-    bindPasswordRules() {
-
-        const rulesList =
-            document.querySelector(".auth-password-rules");
-
-        const password =
-            document.getElementById("password");
-
-        if (!rulesList || !password) return;
-
-        const rules = {
-
-            length: v => v.length >= 8,
-
-            upper: v => /[A-Z]/.test(v),
-
-            lower: v => /[a-z]/.test(v),
-
-            number: v => /[0-9]/.test(v)
-
-        };
-
-        const evaluate = () => {
-
-            const value = password.value;
-
-            Object.keys(rules).forEach(key => {
-
-                const item =
-                    rulesList.querySelector(
-                        `[data-rule="${key}"]`
-                    );
-
-                if (!item) return;
-
-                const valid = rules[key](value);
-
-                item.classList.toggle("is-valid", valid);
-
-                const icon =
-                    item.querySelector(
-                        ".material-symbols-outlined"
-                    );
-
-                if (icon) {
-
-                    icon.textContent =
-                        valid ? "check_circle" : "circle";
-
-                }
-
-            });
-
-        };
-
-        password.addEventListener("input", evaluate);
-
-    },
-
-    stampYear() {
-
-        const year = new Date().getFullYear();
-
-        document
-            .querySelectorAll("[data-year]")
-            .forEach(el => {
-                el.textContent = year;
-            });
-
-    }
-
+    document.querySelectorAll("[data-year]").forEach((el) => {
+      el.textContent = year;
+    });
+  },
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+  AuthPage.init();
 
-    AuthPage.init();
-
-    setTimeout(() => AuthPage.init(), 250);
-
+  setTimeout(() => AuthPage.init(), 250);
 });
 
 window.AuthPage = AuthPage;

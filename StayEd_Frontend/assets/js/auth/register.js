@@ -1,137 +1,65 @@
-
-
 class RegisterPage {
+  static init() {
+    Guards.guest();
 
-    static init(){
+    this.form = document.getElementById("registrationForm");
 
-        Guards.guest();
-
-        this.form=document.getElementById(
-
-            "registrationForm"
-
-        );
-
-        if(!this.form){
-
-            return;
-
-        }
-
-        this.bind();
-
+    if (!this.form) {
+      return;
     }
 
-    static bind(){
+    this.bind();
+  }
 
-        this.form.addEventListener(
+  static bind() {
+    this.form.addEventListener(
+      "submit",
 
-            "submit",
+      (event) => {
+        event.preventDefault();
 
-            event=>{
+        this.submit();
+      },
+    );
+  }
 
-                event.preventDefault();
+  static async submit() {
+    const form = Utils.serialize(this.form);
 
-                this.submit();
+    if (form.password !== form.confirm_password) {
+      Toast.error("Passwords do not match.");
 
-            }
-
-        );
-
+      return;
     }
 
-    static async submit(){
+    try {
+      Layout.showLoader();
 
-        const form=Utils.serialize(
+      await Auth.register({
+        full_name: form.full_name,
 
-            this.form
+        email: form.email,
 
-        );
+        password: form.password,
+      });
 
-        if(
+      Toast.success("Registration submitted.");
 
-            form.password!==
-
-            form.confirm_password
-
-        ){
-
-            Toast.error(
-
-                "Passwords do not match."
-
-            );
-
-            return;
-
-        }
-
-        try{
-
-            Layout.showLoader();
-
-            await Auth.register({
-
-                full_name:
-
-                    form.full_name,
-
-                email:
-
-                    form.email,
-
-                password:
-
-                    form.password
-
-            });
-
-            Toast.success(
-
-                "Registration submitted."
-
-            );
-
-            setTimeout(()=>{
-
-                window.location.href=
-
-                "pending.html";
-
-            },1200);
-
-        }
-
-        catch(error){
-
-            Toast.error(
-
-                error.data?.message ||
-
-                "Registration failed."
-
-            );
-
-        }
-
-        finally{
-
-            Layout.hideLoader();
-
-        }
-
+      setTimeout(() => {
+        window.location.href = "pending.html";
+      }, 1200);
+    } catch (error) {
+      Toast.error(error.data?.message || "Registration failed.");
+    } finally {
+      Layout.hideLoader();
     }
-
+  }
 }
 
 document.addEventListener(
+  "DOMContentLoaded",
 
-    "DOMContentLoaded",
-
-    ()=>{
-
-        RegisterPage.init();
-
-    }
-
+  () => {
+    RegisterPage.init();
+  },
 );

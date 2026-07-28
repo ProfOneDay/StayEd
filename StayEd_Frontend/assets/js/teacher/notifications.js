@@ -1,126 +1,103 @@
-
 class NotificationsPage {
+  static all = [];
 
-    static all = [];
+  static filter = "all";
 
-    static filter = "all";
+  static async init() {
+    if (window.Guards) Guards.teacher();
 
-    static async init() {
+    this.bindTabs();
 
-        if (window.Guards) Guards.teacher();
+    this.bindMarkAll();
 
-        this.bindTabs();
+    await this.load();
+  }
 
-        this.bindMarkAll();
+  static async load() {
+    if (window.Layout) Layout.showLoader();
 
-        await this.load();
+    this.showSkeleton();
 
+    try {
+      const res = await API.getNotifications();
+
+      this.all = res.data || [];
+
+      this.renderCounts();
+
+      this.render();
+    } catch (error) {
+      console.error("[Notifications]", error);
+      Toast?.error("Unable to load notifications.");
+    } finally {
+      if (window.Layout) Layout.hideLoader();
     }
+  }
 
-    static async load() {
+  static bindTabs() {
+    document.querySelectorAll("[data-notif-filter]").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        document
+          .querySelectorAll("[data-notif-filter]")
+          .forEach((t) => t.classList.remove("is-active"));
 
-        if (window.Layout) Layout.showLoader();
+        tab.classList.add("is-active");
 
-        this.showSkeleton();
+        this.filter = tab.dataset.notifFilter;
 
+        this.render();
+      });
+    });
+  }
+
+  static bindMarkAll() {
+    document
+      .querySelector("[data-notif-mark-all]")
+      ?.addEventListener("click", async () => {
         try {
+          await API.markAllNotificationsRead();
 
-            const res = await API.getNotifications();
+          this.all.forEach((n) => {
+            n.read = true;
+          });
 
-            this.all = res.data || [];
+          this.renderCounts();
 
-            this.renderCounts();
+          this.render();
 
-            this.render();
-
+          Toast?.success("All notifications marked as read.");
         } catch (error) {
-
-            console.error("[Notifications]", error);
-            Toast?.error("Unable to load notifications.");
-
-        } finally {
-
-            if (window.Layout) Layout.hideLoader();
-
+          console.error(error);
+          Toast?.error("Unable to update notifications.");
         }
+      });
+  }
 
-    }
+  static renderCounts() {
+    this.set("[data-notif-count-all]", this.all.length);
+    this.set(
+      "[data-notif-count-unread]",
+      this.all.filter((n) => !n.read).length,
+    );
+  }
 
-    static bindTabs() {
+  static filtered() {
+    if (this.filter === "all") return this.all;
 
-        document.querySelectorAll("[data-notif-filter]").forEach(tab => {
+    if (this.filter === "unread") return this.all.filter((n) => !n.read);
 
-            tab.addEventListener("click", () => {
+    return this.all.filter((n) => n.category === this.filter);
+  }
 
-                document.querySelectorAll("[data-notif-filter]").forEach(t => t.classList.remove("is-active"));
+  static render() {
+    const container = document.querySelector("[data-notif-list]");
 
-                tab.classList.add("is-active");
+    if (!container) return;
 
-                this.filter = tab.dataset.notifFilter;
+    const rows = this.filtered();
 
-                this.render();
-
-            });
-
-        });
-
-    }
-
-    static bindMarkAll() {
-
-        document.querySelector("[data-notif-mark-all]")?.addEventListener("click", async () => {
-
-            try {
-
-                await API.markAllNotificationsRead();
-
-                this.all.forEach(n => { n.read = true; });
-
-                this.renderCounts();
-
-                this.render();
-
-                Toast?.success("All notifications marked as read.");
-
-            } catch (error) {
-
-                console.error(error);
-                Toast?.error("Unable to update notifications.");
-
-            }
-
-        });
-
-    }
-
-    static renderCounts() {
-
-        this.set("[data-notif-count-all]", this.all.length);
-        this.set("[data-notif-count-unread]", this.all.filter(n => !n.read).length);
-
-    }
-
-    static filtered() {
-
-        if (this.filter === "all") return this.all;
-
-        if (this.filter === "unread") return this.all.filter(n => !n.read);
-
-        return this.all.filter(n => n.category === this.filter);
-
-    }
-
-    static render() {
-
-        const container = document.querySelector("[data-notif-list]");
-
-        if (!container) return;
-
-        const rows = this.filtered();
-
-        if (!rows.length) {
-
-            container.innerHTML = `
+    if (!rows.length) {
+      container.innerHTML = `
                 <div class="st-empty">
                     <span class="material-symbols-outlined">notifications_off</span>
                     <p class="st-empty-title">No notifications here</p>
@@ -128,16 +105,19 @@ class NotificationsPage {
                 </div>
             `;
 
-            return;
+      return;
+    }
 
-        }
+    const iconMap = {
+      alert: "warning",
+      intervention: "support_agent",
+      registration: "person_add",
+      system: "settings_suggest",
+    };
 
-        const iconMap = {
-            alert: "warning", intervention: "support_agent",
-            registration: "person_add", system: "settings_suggest"
-        };
-
-        container.innerHTML = rows.map(n => `
+    container.innerHTML = rows
+      .map(
+        (n) => `
             <div class="st-notif-item ${n.read ? "" : "is-unread"}" data-notif-id="${n.id}">
                 <div class="st-notif-icon st-notif-icon--${n.category}">
                     <span class="material-symbols-outlined">${iconMap[n.category] || "notifications"}</span>
@@ -157,105 +137,91 @@ class NotificationsPage {
                     </button>
                 </div>
             </div>
-        `).join("");
+        `,
+      )
+      .join("");
 
-        this.bindItemActions(container);
+    this.bindItemActions(container);
+  }
 
-    }
+  static bindItemActions(container) {
+    container.querySelectorAll("[data-notif-open]").forEach((el) => {
+      el.addEventListener("click", () => {
+        window.location.href = `learner-profile.html?id=${encodeURIComponent(el.dataset.notifOpen)}`;
+      });
+    });
 
-    static bindItemActions(container) {
+    container.querySelectorAll("[data-notif-mark-read]").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        e.stopPropagation();
 
-        container.querySelectorAll("[data-notif-open]").forEach(el => {
-            el.addEventListener("click", () => {
-                window.location.href =
-                    `learner-profile.html?id=${encodeURIComponent(el.dataset.notifOpen)}`;
-            });
-        });
+        const id = btn.dataset.notifMarkRead;
 
-        container.querySelectorAll("[data-notif-mark-read]").forEach(btn => {
-            btn.addEventListener("click", async e => {
+        try {
+          await API.markNotificationRead(id);
 
-                e.stopPropagation();
+          const notif = this.all.find((n) => String(n.id) === String(id));
 
-                const id = btn.dataset.notifMarkRead;
+          if (notif) notif.read = true;
 
-                try {
-
-                    await API.markNotificationRead(id);
-
-                    const notif = this.all.find(n => String(n.id) === String(id));
-
-                    if (notif) notif.read = true;
-
-                    this.renderCounts();
-                    this.render();
-
-                } catch (error) {
-
-                    console.error(error);
-                    Toast?.error("Unable to mark as read.");
-
-                }
-
-            });
-        });
-
-        container.querySelectorAll("[data-notif-delete]").forEach(btn => {
-            btn.addEventListener("click", async e => {
-
-                e.stopPropagation();
-
-                const id = btn.dataset.notifDelete;
-
-                try {
-
-                    await API.deleteNotification(id);
-
-                    this.all = this.all.filter(n => String(n.id) !== String(id));
-
-                    this.renderCounts();
-                    this.render();
-
-                    Toast?.success("Notification removed.");
-
-                } catch (error) {
-
-                    console.error(error);
-                    Toast?.error("Unable to remove notification.");
-
-                }
-
-            });
-        });
-
-    }
-
-    static showSkeleton() {
-
-        const container = document.querySelector("[data-notif-list]");
-
-        if (container && window.Skeletons) {
-
-            container.innerHTML = Skeletons.listItems(5);
-
+          this.renderCounts();
+          this.render();
+        } catch (error) {
+          console.error(error);
+          Toast?.error("Unable to mark as read.");
         }
+      });
+    });
 
-    }
+    container.querySelectorAll("[data-notif-delete]").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        e.stopPropagation();
 
-    static set(selector, value) {
-        const el = document.querySelector(selector);
-        if (el && value !== undefined && value !== null) {
-            el.textContent = value;
+        const id = btn.dataset.notifDelete;
+
+        try {
+          await API.deleteNotification(id);
+
+          this.all = this.all.filter((n) => String(n.id) !== String(id));
+
+          this.renderCounts();
+          this.render();
+
+          Toast?.success("Notification removed.");
+        } catch (error) {
+          console.error(error);
+          Toast?.error("Unable to remove notification.");
         }
-    }
+      });
+    });
+  }
 
+  static showSkeleton() {
+    const container = document.querySelector("[data-notif-list]");
+
+    if (container && window.Skeletons) {
+      container.innerHTML = Skeletons.listItems(5);
+    }
+  }
+
+  static set(selector, value) {
+    const el = document.querySelector(selector);
+    if (el && value !== undefined && value !== null) {
+      el.textContent = value;
+    }
+  }
 }
 
 (function bootNotifications() {
-    let started = false;
-    const start = () => { if (!started) { started = true; NotificationsPage.init(); } };
-    document.addEventListener("components:loaded", start);
-    document.addEventListener("DOMContentLoaded", () => setTimeout(start, 400));
+  let started = false;
+  const start = () => {
+    if (!started) {
+      started = true;
+      NotificationsPage.init();
+    }
+  };
+  document.addEventListener("components:loaded", start);
+  document.addEventListener("DOMContentLoaded", () => setTimeout(start, 400));
 })();
 
 window.NotificationsPage = NotificationsPage;

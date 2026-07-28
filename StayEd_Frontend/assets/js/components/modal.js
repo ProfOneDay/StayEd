@@ -1,228 +1,191 @@
-
 class Modal {
+  static _escapeBound = false;
 
-    static _escapeBound = false;
+  static show({
+    title = "Confirmation",
 
-    static show({
+    message = "",
 
-        title = "Confirmation",
+    onConfirm = null,
 
-        message = "",
+    onCancel = null,
 
-        onConfirm = null,
+    onClose = null,
 
-        onCancel = null,
+    confirmLabel = "Confirm",
 
-        onClose = null,
+    cancelLabel = "Cancel",
 
-        confirmLabel = "Confirm",
+    size = "md",
 
-        cancelLabel = "Cancel",
+    hideCancel = false,
 
-        size = "md",
+    hideConfirm = false,
 
-        hideCancel = false,
+    closeOnBackdrop = true,
+  } = {}) {
+    const modal = document.getElementById("st-modal");
 
-        hideConfirm = false,
+    if (!modal) return;
 
-        closeOnBackdrop = true
+    modal.className = modal.className
+      .split(" ")
+      .filter((c) => !c.startsWith("st-modal--"))
+      .join(" ");
 
-    } = {}) {
+    modal.classList.add(`st-modal--${size}`);
 
-        const modal = document.getElementById("st-modal");
+    modal.classList.remove("hidden");
 
-        if (!modal) return;
+    document.getElementById("st-modal-title").textContent = title;
 
-        modal.className = modal.className
-            .split(" ")
-            .filter(c => !c.startsWith("st-modal--"))
-            .join(" ");
+    document.getElementById("st-modal-body").innerHTML = message;
 
-        modal.classList.add(`st-modal--${size}`);
+    const confirmBtn = document.getElementById("st-modal-confirm");
 
-        modal.classList.remove("hidden");
+    const cancelBtn = document.getElementById("st-modal-cancel");
 
-        document.getElementById("st-modal-title").textContent = title;
+    confirmBtn.textContent = confirmLabel;
 
-        document.getElementById("st-modal-body").innerHTML = message;
+    confirmBtn.style.display = hideConfirm ? "none" : "";
 
-        const confirmBtn = document.getElementById("st-modal-confirm");
+    confirmBtn.onclick = () => {
+      if (onConfirm) onConfirm();
 
-        const cancelBtn = document.getElementById("st-modal-cancel");
+      this.hide();
+    };
 
-        confirmBtn.textContent = confirmLabel;
+    cancelBtn.textContent = cancelLabel;
 
-        confirmBtn.style.display = hideConfirm ? "none" : "";
+    cancelBtn.style.display = hideCancel ? "none" : "";
 
-        confirmBtn.onclick = () => {
+    cancelBtn.onclick = () => {
+      if (onCancel) onCancel();
 
-            if (onConfirm) onConfirm();
+      this.hide();
+    };
 
+    const closeBtn = document.getElementById("st-modal-close");
+
+    if (closeBtn) {
+      closeBtn.onclick = () => {
+        if (onClose) onClose();
+
+        this.hide();
+      };
+    }
+
+    const backdrop = modal.querySelector(".st-modal-backdrop");
+
+    if (backdrop) {
+      backdrop.onclick = closeOnBackdrop
+        ? () => {
+            if (onClose) onClose();
             this.hide();
+          }
+        : null;
+    }
 
-        };
+    this._bindEscape();
+  }
 
-        cancelBtn.textContent = cancelLabel;
+  static showCustom({
+    title = "",
 
-        cancelBtn.style.display = hideCancel ? "none" : "";
+    bodyHtml = "",
+    bodyElement = null,
 
-        cancelBtn.onclick = () => {
+    size = "lg",
 
-            if (onCancel) onCancel();
+    onClose = null,
 
+    closeOnBackdrop = true,
+
+    hideFooter = true,
+  } = {}) {
+    const modal = document.getElementById("st-modal");
+
+    if (!modal) return;
+
+    modal.className = modal.className
+      .split(" ")
+      .filter((c) => !c.startsWith("st-modal--"))
+      .join(" ");
+
+    modal.classList.add(`st-modal--${size}`);
+
+    modal.classList.remove("hidden");
+
+    document.getElementById("st-modal-title").textContent = title;
+
+    const body = document.getElementById("st-modal-body");
+
+    if (bodyElement) {
+      body.innerHTML = "";
+
+      body.appendChild(bodyElement);
+    } else {
+      body.innerHTML = bodyHtml;
+    }
+
+    const footer = modal.querySelector(".st-modal-footer");
+
+    if (footer) {
+      footer.style.display = hideFooter ? "none" : "";
+    }
+
+    const closeBtn = document.getElementById("st-modal-close");
+
+    if (closeBtn) {
+      closeBtn.onclick = () => {
+        if (onClose) onClose();
+        this.hide();
+      };
+    }
+
+    const backdrop = modal.querySelector(".st-modal-backdrop");
+
+    if (backdrop) {
+      backdrop.onclick = closeOnBackdrop
+        ? () => {
+            if (onClose) onClose();
             this.hide();
-
-        };
-
-        const closeBtn = document.getElementById("st-modal-close");
-
-        if (closeBtn) {
-
-            closeBtn.onclick = () => {
-
-                if (onClose) onClose();
-
-                this.hide();
-
-            };
-
-        }
-
-        const backdrop = modal.querySelector(".st-modal-backdrop");
-
-        if (backdrop) {
-
-            backdrop.onclick = closeOnBackdrop
-                ? () => {
-                    if (onClose) onClose();
-                    this.hide();
-                }
-                : null;
-
-        }
-
-        this._bindEscape();
-
+          }
+        : null;
     }
 
-    static showCustom({
+    this._bindEscape();
 
-        title = "",
+    return body;
+  }
 
-        bodyHtml = "",
-        bodyElement = null,
+  static hide() {
+    const modal = document.getElementById("st-modal");
 
-        size = "lg",
+    if (!modal) return;
 
-        onClose = null,
+    modal.classList.add("hidden");
 
-        closeOnBackdrop = true,
+    const footer = modal.querySelector(".st-modal-footer");
 
-        hideFooter = true
+    if (footer) footer.style.display = "";
+  }
 
-    } = {}) {
+  static _bindEscape() {
+    if (this._escapeBound) return;
 
-        const modal = document.getElementById("st-modal");
+    this._escapeBound = true;
 
-        if (!modal) return;
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
 
-        modal.className = modal.className
-            .split(" ")
-            .filter(c => !c.startsWith("st-modal--"))
-            .join(" ");
+      const modal = document.getElementById("st-modal");
 
-        modal.classList.add(`st-modal--${size}`);
-
-        modal.classList.remove("hidden");
-
-        document.getElementById("st-modal-title").textContent = title;
-
-        const body = document.getElementById("st-modal-body");
-
-        if (bodyElement) {
-
-            body.innerHTML = "";
-
-            body.appendChild(bodyElement);
-
-        } else {
-
-            body.innerHTML = bodyHtml;
-
-        }
-
-        const footer = modal.querySelector(".st-modal-footer");
-
-        if (footer) {
-            footer.style.display = hideFooter ? "none" : "";
-        }
-
-        const closeBtn = document.getElementById("st-modal-close");
-
-        if (closeBtn) {
-
-            closeBtn.onclick = () => {
-                if (onClose) onClose();
-                this.hide();
-            };
-
-        }
-
-        const backdrop = modal.querySelector(".st-modal-backdrop");
-
-        if (backdrop) {
-
-            backdrop.onclick = closeOnBackdrop
-                ? () => {
-                    if (onClose) onClose();
-                    this.hide();
-                }
-                : null;
-
-        }
-
-        this._bindEscape();
-
-        return body;
-
-    }
-
-    static hide() {
-
-        const modal = document.getElementById("st-modal");
-
-        if (!modal) return;
-
-        modal.classList.add("hidden");
-
-        const footer = modal.querySelector(".st-modal-footer");
-
-        if (footer) footer.style.display = "";
-
-    }
-
-    static _bindEscape() {
-
-        if (this._escapeBound) return;
-
-        this._escapeBound = true;
-
-        document.addEventListener("keydown", event => {
-
-            if (event.key !== "Escape") return;
-
-            const modal = document.getElementById("st-modal");
-
-            if (modal && !modal.classList.contains("hidden")) {
-
-                this.hide();
-
-            }
-
-        });
-
-    }
-
+      if (modal && !modal.classList.contains("hidden")) {
+        this.hide();
+      }
+    });
+  }
 }
 
 window.Modal = Modal;

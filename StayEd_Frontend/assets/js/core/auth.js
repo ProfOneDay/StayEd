@@ -1,581 +1,347 @@
-
-
 class Auth {
+  static TOKEN_KEY = "stayed_token";
 
-    static TOKEN_KEY = "stayed_token";
+  static USER_KEY = "stayed_user";
 
-    static USER_KEY = "stayed_user";
+  static async login(credentials) {
+    const response = await API.post(
+      "/auth/login",
 
-    static async login(credentials) {
+      credentials,
+    );
 
-        const response = await API.post(
-
-            "/auth/login",
-
-            credentials
-
-        );
-
-        if (!response.token) {
-
-            throw new Error(
-
-                "Invalid login response."
-
-            );
-
-        }
-
-        this.saveSession(
-
-            response.token,
-
-            response.user
-
-        );
-
-        return response;
-
+    if (!response.token) {
+      throw new Error("Invalid login response.");
     }
 
-    static saveSession(token, user) {
+    this.saveSession(
+      response.token,
 
-        Utils.storage.set(
+      response.user,
+    );
 
-            this.TOKEN_KEY,
+    return response;
+  }
 
-            token
+  static saveSession(token, user) {
+    Utils.storage.set(
+      this.TOKEN_KEY,
 
-        );
+      token,
+    );
 
-        Utils.storage.set(
+    Utils.storage.set(
+      this.USER_KEY,
 
-            this.USER_KEY,
+      user,
+    );
+  }
 
-            user
+  static seedDemoSession(account) {
+    account = account || {};
 
-        );
+    const header = { alg: "HS256", typ: "JWT" };
 
+    const payload = {
+      id: account.id || "demo",
+      role: "teacher",
+      exp: Math.floor(Date.now() / 1000) + 86400,
+    };
+
+    const encode = (obj) => btoa(JSON.stringify(obj)).replace(/=+$/, "");
+
+    const token = `${encode(header)}.${encode(payload)}.demo`;
+
+    this.saveSession(token, {
+      id: payload.id,
+      role: "teacher",
+      full_name: account.full_name || "Demo Teacher",
+      email: account.email || "demo.teacher@deped.gov.ph",
+      status: "approved",
+    });
+  }
+
+  static clearSession() {
+    Utils.storage.remove(this.TOKEN_KEY);
+
+    Utils.storage.remove(this.USER_KEY);
+  }
+
+  static token() {
+    return Utils.storage.get(this.TOKEN_KEY);
+  }
+
+  static user() {
+    return Utils.storage.get(this.USER_KEY);
+  }
+
+  static authenticated() {
+    return Boolean(this.token());
+  }
+
+  static role() {
+    const user = this.user();
+
+    return user ? user.role : null;
+  }
+
+  static id() {
+    const user = this.user();
+
+    return user ? user.id : null;
+  }
+
+  static name() {
+    const user = this.user();
+
+    if (!user) {
+      return "";
     }
 
-    static seedDemoSession(account) {
+    return (
+      user.full_name ||
+      [user.first_name, user.last_name]
 
-        account = account || {};
+        .filter(Boolean)
 
-        const header = { alg: "HS256", typ: "JWT" };
+        .join(" ")
+    );
+  }
 
-        const payload = {
-            id: account.id || "demo",
-            role: "teacher",
-            exp: Math.floor(Date.now() / 1000) + 86400
-        };
-
-        const encode = obj =>
-            btoa(JSON.stringify(obj))
-                .replace(/=+$/, "");
-
-        const token =
-            `${encode(header)}.${encode(payload)}.demo`;
-
-        this.saveSession(token, {
-            id: payload.id,
-            role: "teacher",
-            full_name: account.full_name || "Demo Teacher",
-            email: account.email || "demo.teacher@deped.gov.ph",
-            status: "approved"
-        });
-
+  static async logout() {
+    try {
+      if (window.API) {
+        await API.post("/auth/logout");
+      }
+    } catch (error) {
+      console.warn(error);
     }
 
-    static clearSession() {
+    this.clearSession();
 
-        Utils.storage.remove(
+    window.location.href = "../auth/login.html";
+  }
 
-            this.TOKEN_KEY
-
-        );
-
-        Utils.storage.remove(
-
-            this.USER_KEY
-
-        );
-
+  static restore() {
+    if (!this.authenticated()) {
+      return null;
     }
 
-    static token() {
+    return this.user();
+  }
 
-        return Utils.storage.get(
+  static async refresh() {
+    const user = await API.get("/auth/me");
 
-            this.TOKEN_KEY
+    Utils.storage.set(
+      this.USER_KEY,
 
-        );
+      user,
+    );
 
-    }
+    return user;
+  }
 
-    static user() {
+  static updateUser(data = {}) {
+    const current = this.user() || {};
 
-        return Utils.storage.get(
+    const updated = {
+      ...current,
 
-            this.USER_KEY
+      ...data,
+    };
 
-        );
+    Utils.storage.set(
+      this.USER_KEY,
 
-    }
+      updated,
+    );
 
-    static authenticated() {
+    return updated;
+  }
 
-        return Boolean(
+  static redirectAfterLogin() {
+    const role = this.role();
 
-            this.token()
+    switch (role) {
+      case "admin":
+        window.location.href = "../admin/dashboard.html";
 
-        );
+        break;
 
-    }
+      case "teacher":
+        window.location.href = "../teacher/dashboard.html";
 
-    static role() {
+        break;
 
-        const user = this.user();
-
-        return user
-
-            ? user.role
-
-            : null;
-
-    }
-
-    static id() {
-
-        const user = this.user();
-
-        return user
-
-            ? user.id
-
-            : null;
-
-    }
-
-    static name() {
-
-        const user = this.user();
-
-        if (!user) {
-
-            return "";
-
-        }
-
-        return (
-
-            user.full_name ||
-
-            [
-
-                user.first_name,
-
-                user.last_name
-
-            ]
-
-            .filter(Boolean)
-
-            .join(" ")
-
-        );
-
-    }
-
-static async logout() {
-
-        try {
-
-            if (window.API) {
-
-                await API.post("/auth/logout");
-
-            }
-
-        }
-
-        catch (error) {
-
-            console.warn(error);
-
-        }
-
-        this.clearSession();
-
+      default:
         window.location.href = "../auth/login.html";
+    }
+  }
 
+  static requireAuth() {
+    if (!this.authenticated()) {
+      window.location.href = "../auth/login.html";
+    }
+  }
+
+  static requireRole(...roles) {
+    if (!roles.includes(this.role())) {
+      window.location.href = "../auth/login.html";
+    }
+  }
+
+  static tokenExpired() {
+    const token = this.token();
+
+    if (!token) {
+      return true;
     }
 
-    static restore() {
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
 
-        if (!this.authenticated()) {
+      return Date.now() >= payload.exp * 1000;
+    } catch {
+      return true;
+    }
+  }
 
-            return null;
-
-        }
-
-        return this.user();
-
+  static validateSession() {
+    if (!this.authenticated()) {
+      return false;
     }
 
-    static async refresh() {
+    if (this.tokenExpired()) {
+      this.clearSession();
 
-        const user = await API.get(
-
-            "/auth/me"
-
-        );
-
-        Utils.storage.set(
-
-            this.USER_KEY,
-
-            user
-
-        );
-
-        return user;
-
+      return false;
     }
 
-    static updateUser(data = {}) {
+    return true;
+  }
 
-        const current =
+  static async changePassword(data) {
+    return API.post(
+      "/auth/change-password",
 
-            this.user() || {};
+      data,
+    );
+  }
 
-        const updated = {
+  static async forgotPassword(email) {
+    return API.post(
+      "/auth/forgot-password",
 
-            ...current,
+      {
+        email,
+      },
+    );
+  }
 
-            ...data
+  static async resetPassword(data) {
+    return API.post(
+      "/auth/reset-password",
 
-        };
+      data,
+    );
+  }
 
-        Utils.storage.set(
+  static async register(data) {
+    return API.post(
+      "/auth/register",
 
-            this.USER_KEY,
+      data,
+    );
+  }
 
-            updated
+  static async verifyEmail(token) {
+    return API.post(
+      "/auth/verify-email",
 
-        );
+      {
+        token,
+      },
+    );
+  }
 
-        return updated;
+  static async updateProfile(data) {
+    const user = await API.put(
+      "/users/profile",
 
+      data,
+    );
+
+    this.updateUser(user);
+
+    return user;
+  }
+
+  static initialize() {
+    if (!this.validateSession()) {
+      return;
     }
 
-    static redirectAfterLogin() {
+    const user = this.restore();
 
-        const role = this.role();
+    if (user) {
+      console.log(
+        `%cWelcome back, ${this.name()}`,
 
-        switch (role) {
+        "color:#12355B;font-weight:bold;",
+      );
+    }
+  }
 
-            case "admin":
-
-                window.location.href =
-                    "../admin/dashboard.html";
-
-                break;
-
-            case "teacher":
-
-                window.location.href =
-                    "../teacher/dashboard.html";
-
-                break;
-
-            default:
-
-                window.location.href =
-                    "../auth/login.html";
-
-        }
-
+  static redirectIfAuthenticated() {
+    if (!this.validateSession()) {
+      return;
     }
 
-    static requireAuth() {
+    const path = window.location.pathname.toLowerCase();
 
-        if (!this.authenticated()) {
-
-            window.location.href =
-
-                "../auth/login.html";
-
-        }
-
+    if (
+      path.includes("/auth/login") ||
+      path.includes("/auth/register") ||
+      path.includes("/auth/forgot")
+    ) {
+      this.redirectAfterLogin();
     }
+  }
 
-    static requireRole(...roles) {
+  static avatar() {
+    const user = this.user();
 
-        if (
+    return user?.avatar || "";
+  }
 
-            !roles.includes(
+  static email() {
+    const user = this.user();
 
-                this.role()
+    return user?.email || "";
+  }
 
-            )
+  static school() {
+    const user = this.user();
 
-        ) {
-
-            window.location.href =
-
-                "../auth/login.html";
-
-        }
-
-    }
-
-    static tokenExpired() {
-
-        const token = this.token();
-
-        if (!token) {
-
-            return true;
-
-        }
-
-        try {
-
-            const payload = JSON.parse(
-
-                atob(token.split(".")[1])
-
-            );
-
-            return (
-
-                Date.now() >=
-
-                payload.exp * 1000
-
-            );
-
-        }
-
-        catch {
-
-            return true;
-
-        }
-
-    }
-
-    static validateSession() {
-
-        if (
-
-            !this.authenticated()
-
-        ) {
-
-            return false;
-
-        }
-
-        if (
-
-            this.tokenExpired()
-
-        ) {
-
-            this.clearSession();
-
-            return false;
-
-        }
-
-        return true;
-
-    }
-
-    static async changePassword(data) {
-
-        return API.post(
-
-            "/auth/change-password",
-
-            data
-
-        );
-
-    }
-
-    static async forgotPassword(email) {
-
-        return API.post(
-
-            "/auth/forgot-password",
-
-            {
-
-                email
-
-            }
-
-        );
-
-    }
-
-    static async resetPassword(data) {
-
-        return API.post(
-
-            "/auth/reset-password",
-
-            data
-
-        );
-
-    }
-
-    static async register(data){
-
-        return API.post(
-
-            "/auth/register",
-
-            data
-
-        );
-
-    }
-
-    static async verifyEmail(token) {
-
-        return API.post(
-
-            "/auth/verify-email",
-
-            {
-
-                token
-
-            }
-
-        );
-
-    }
-
-    static async updateProfile(data) {
-
-        const user = await API.put(
-
-            "/users/profile",
-
-            data
-
-        );
-
-        this.updateUser(user);
-
-        return user;
-
-    }
-
-    static initialize() {
-
-        if (!this.validateSession()) {
-
-            return;
-
-        }
-
-        const user = this.restore();
-
-        if (user) {
-
-            console.log(
-
-                `%cWelcome back, ${this.name()}`,
-
-                "color:#12355B;font-weight:bold;"
-
-            );
-
-        }
-
-    }
-
-    static redirectIfAuthenticated() {
-
-        if (!this.validateSession()) {
-
-            return;
-
-        }
-
-        const path =
-
-            window.location.pathname.toLowerCase();
-
-        if (
-
-            path.includes("/auth/login") ||
-
-            path.includes("/auth/register") ||
-
-            path.includes("/auth/forgot")
-
-        ) {
-
-            this.redirectAfterLogin();
-
-        }
-
-    }
-
-    static avatar() {
-
-        const user = this.user();
-
-        return user?.avatar || "";
-
-    }
-
-    static email() {
-
-        const user = this.user();
-
-        return user?.email || "";
-
-    }
-
-    static school() {
-
-        const user = this.user();
-
-        return user?.school || "";
-
-    }
-
+    return user?.school || "";
+  }
 }
 
 window.Auth = Auth;
 
 document.addEventListener(
+  "DOMContentLoaded",
 
-    "DOMContentLoaded",
+  () => {
+    Auth.initialize();
 
-    () => {
+    Auth.redirectIfAuthenticated();
 
-        Auth.initialize();
+    console.log(
+      "%cStayEd Authentication Ready",
 
-        Auth.redirectIfAuthenticated();
-
-        console.log(
-
-            "%cStayEd Authentication Ready",
-
-            "color:#006A68;font-weight:bold;"
-
-        );
-
-    }
-
+      "color:#006A68;font-weight:bold;",
+    );
+  },
 );

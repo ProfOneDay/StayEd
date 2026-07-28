@@ -1,127 +1,111 @@
-
 class ClcOverview {
+  static state = {
+    all: [],
+    filtered: [],
+    search: "",
+    municipality: "",
+  };
 
-    static state = {
-        all: [],
-        filtered: [],
-        search: "",
-        municipality: ""
-    };
+  static async init() {
+    if (window.Guards) Guards.teacher();
 
-    static async init() {
+    this.bindControls();
 
-        if (window.Guards) Guards.teacher();
+    await this.load();
+  }
 
-        this.bindControls();
+  static async load() {
+    if (window.Layout) Layout.showLoader();
 
-        await this.load();
+    this.showSkeleton();
 
+    try {
+      const response = await API.getClcs();
+
+      this.state.all = response.data || [];
+
+      this.renderStats();
+
+      this.apply();
+    } catch (error) {
+      console.error("[ClcOverview]", error);
+      Toast?.error("Unable to load Community Learning Centers.");
+    } finally {
+      if (window.Layout) Layout.hideLoader();
+    }
+  }
+
+  static bindControls() {
+    this.populateMunicipalityFilter();
+
+    document
+      .querySelector("[data-clc-search]")
+      ?.addEventListener("input", (e) => {
+        this.state.search = e.target.value.toLowerCase();
+        this.apply();
+      });
+
+    document
+      .querySelector("[data-clc-filter-municipality]")
+      ?.addEventListener("change", (e) => {
+        this.state.municipality = e.target.value;
+        this.apply();
+      });
+  }
+
+  static renderStats() {
+    const all = this.state.all;
+
+    this.set("[data-clc-count]", all.length);
+
+    this.set(
+      "[data-clc-learners]",
+      all.reduce((sum, c) => sum + (c.totalLearners || 0), 0).toLocaleString(),
+    );
+
+    this.set(
+      "[data-clc-teachers]",
+      all.reduce((sum, c) => sum + (c.teachers || 0), 0),
+    );
+
+    this.set(
+      "[data-clc-active]",
+      all.filter((c) => c.status === "Active").length,
+    );
+  }
+
+  static apply() {
+    let rows = [...this.state.all];
+
+    if (this.state.search) {
+      rows = rows.filter((c) =>
+        (c.name || "").toLowerCase().includes(this.state.search),
+      );
     }
 
-    static async load() {
-
-        if (window.Layout) Layout.showLoader();
-
-        this.showSkeleton();
-
-        try {
-
-            const response = await API.getClcs();
-
-            this.state.all = response.data || [];
-
-            this.renderStats();
-
-            this.apply();
-
-        } catch (error) {
-
-            console.error("[ClcOverview]", error);
-            Toast?.error("Unable to load Community Learning Centers.");
-
-        } finally {
-
-            if (window.Layout) Layout.hideLoader();
-
-        }
-
+    if (this.state.municipality) {
+      rows = rows.filter((c) => c.municipality === this.state.municipality);
     }
 
-    static bindControls() {
+    this.state.filtered = rows;
 
-        this.populateMunicipalityFilter();
+    this.set(
+      "[data-clc-showing]",
+      `Showing ${rows.length} Community Learning Center${rows.length === 1 ? "" : "s"}`,
+    );
 
-        document.querySelector("[data-clc-search]")?.addEventListener("input", e => {
-            this.state.search = e.target.value.toLowerCase();
-            this.apply();
-        });
+    this.render();
+  }
 
-        document.querySelector("[data-clc-filter-municipality]")?.addEventListener("change", e => {
-            this.state.municipality = e.target.value;
-            this.apply();
-        });
+  static render() {
+    const grid = document.querySelector("[data-clc-grid]");
 
-    }
+    if (!grid) return;
 
-    static renderStats() {
+    const rows = this.state.filtered;
 
-        const all = this.state.all;
-
-        this.set("[data-clc-count]", all.length);
-
-        this.set(
-            "[data-clc-learners]",
-            all.reduce((sum, c) => sum + (c.totalLearners || 0), 0).toLocaleString()
-        );
-
-        this.set(
-            "[data-clc-teachers]",
-            all.reduce((sum, c) => sum + (c.teachers || 0), 0)
-        );
-
-        this.set(
-            "[data-clc-active]",
-            all.filter(c => c.status === "Active").length
-        );
-
-    }
-
-    static apply() {
-
-        let rows = [...this.state.all];
-
-        if (this.state.search) {
-            rows = rows.filter(c =>
-                (c.name || "").toLowerCase().includes(this.state.search)
-            );
-        }
-
-        if (this.state.municipality) {
-            rows = rows.filter(c => c.municipality === this.state.municipality);
-        }
-
-        this.state.filtered = rows;
-
-        this.set(
-            "[data-clc-showing]",
-            `Showing ${rows.length} Community Learning Center${rows.length === 1 ? "" : "s"}`
-        );
-
-        this.render();
-
-    }
-
-    static render() {
-
-        const grid = document.querySelector("[data-clc-grid]");
-
-        if (!grid) return;
-
-        const rows = this.state.filtered;
-
-        if (!rows.length) {
-
-            grid.innerHTML = `
+    if (!rows.length) {
+      grid.innerHTML = `
                 <div class="st-empty col-12" style="grid-column:1/-1;">
                     <span class="material-symbols-outlined">search_off</span>
                     <p class="st-empty-title">No Community Learning Centers found</p>
@@ -129,36 +113,33 @@ class ClcOverview {
                 </div>
             `;
 
-            return;
-
-        }
-
-        grid.innerHTML = rows.map(clc => this.card(clc)).join("");
-
-        grid.querySelectorAll("[data-clc-view]").forEach(btn => {
-            btn.addEventListener("click", () => {
-                window.location.href =
-                    `learner-records.html?clc=${encodeURIComponent(btn.dataset.clcView)}`;
-            });
-        });
-
+      return;
     }
 
-    static card(clc) {
+    grid.innerHTML = rows.map((clc) => this.card(clc)).join("");
 
-        const initials = ["AR", "MC", "JD", "LP"];
+    grid.querySelectorAll("[data-clc-view]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        window.location.href = `learner-records.html?clc=${encodeURIComponent(btn.dataset.clcView)}`;
+      });
+    });
+  }
 
-        const avatarCount = Math.min(clc.teachers || 0, 3);
+  static card(clc) {
+    const initials = ["AR", "MC", "JD", "LP"];
 
-        const avatars = Array.from({ length: avatarCount }, (_, i) =>
-            `<div>${initials[i % initials.length]}</div>`
-        ).join("");
+    const avatarCount = Math.min(clc.teachers || 0, 3);
 
-        const extra = (clc.teachers || 0) - avatarCount;
+    const avatars = Array.from(
+      { length: avatarCount },
+      (_, i) => `<div>${initials[i % initials.length]}</div>`,
+    ).join("");
 
-        const extraChip = extra > 0 ? `<div>+${extra}</div>` : "";
+    const extra = (clc.teachers || 0) - avatarCount;
 
-        return `
+    const extraChip = extra > 0 ? `<div>+${extra}</div>` : "";
+
+    return `
             <div class="st-clc-card">
 
                 <div class="st-clc-card-head">
@@ -206,49 +187,46 @@ class ClcOverview {
 
             </div>
         `;
+  }
 
+  static showSkeleton() {
+    const grid = document.querySelector("[data-clc-grid]");
+
+    if (grid && window.Skeletons) {
+      grid.innerHTML = Skeletons.cards(6);
     }
+  }
 
-    static showSkeleton() {
+  static populateMunicipalityFilter() {
+    const select = document.querySelector("[data-clc-filter-municipality]");
 
-        const grid = document.querySelector("[data-clc-grid]");
+    if (!select || !window.MockDB?.getMunicipalities) return;
 
-        if (grid && window.Skeletons) {
+    const list = MockDB.getMunicipalities();
 
-            grid.innerHTML = Skeletons.cards(6);
+    select.innerHTML =
+      `<option value="">All Municipalities</option>` +
+      list.map((m) => `<option value="${m}">${m}</option>`).join("");
+  }
 
-        }
-
+  static set(selector, value) {
+    const el = document.querySelector(selector);
+    if (el && value !== undefined && value !== null) {
+      el.textContent = value;
     }
-
-    static populateMunicipalityFilter() {
-
-        const select = document.querySelector("[data-clc-filter-municipality]");
-
-        if (!select || !window.MockDB?.getMunicipalities) return;
-
-        const list = MockDB.getMunicipalities();
-
-        select.innerHTML =
-            `<option value="">All Municipalities</option>` +
-            list.map(m => `<option value="${m}">${m}</option>`).join("");
-
-    }
-
-    static set(selector, value) {
-        const el = document.querySelector(selector);
-        if (el && value !== undefined && value !== null) {
-            el.textContent = value;
-        }
-    }
-
+  }
 }
 
 (function bootClcOverview() {
-    let started = false;
-    const start = () => { if (!started) { started = true; ClcOverview.init(); } };
-    document.addEventListener("components:loaded", start);
-    document.addEventListener("DOMContentLoaded", () => setTimeout(start, 400));
+  let started = false;
+  const start = () => {
+    if (!started) {
+      started = true;
+      ClcOverview.init();
+    }
+  };
+  document.addEventListener("components:loaded", start);
+  document.addEventListener("DOMContentLoaded", () => setTimeout(start, 400));
 })();
 
 window.ClcOverview = ClcOverview;

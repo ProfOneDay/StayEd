@@ -1,416 +1,387 @@
-
 class LearnerEnrollWizard {
+  static currentStep = 1;
 
-    static currentStep = 1;
+  static totalSteps = 9;
 
-    static totalSteps = 9;
+  static async init() {
+    if (window.Guards) Guards.teacher();
 
-    static async init() {
+    this.form = document.getElementById("enrollWizardForm");
 
-        if (window.Guards) Guards.teacher();
+    if (!this.form) return;
 
-        this.form = document.getElementById("enrollWizardForm");
+    window.UnsavedChanges?.track(this.form);
 
-        if (!this.form) return;
+    this.bindSegments();
 
-        window.UnsavedChanges?.track(this.form);
+    this.bindLrnLookup();
 
-        this.bindSegments();
+    this.bindNav();
 
-        this.bindLrnLookup();
+    this.bindConfirmActions();
 
-        this.bindNav();
+    this.updateProgress();
+  }
 
-        this.bindConfirmActions();
-
-        this.updateProgress();
-
-    }
-
-    static bindSegments() {
-
-        document.querySelectorAll("[data-segment]").forEach(group => {
-
-            group.querySelectorAll("button").forEach(btn => {
-
-                btn.addEventListener("click", () => {
-                    group.querySelectorAll("button").forEach(b => b.classList.remove("is-active"));
-                    btn.classList.add("is-active");
-                });
-
-            });
-
+  static bindSegments() {
+    document.querySelectorAll("[data-segment]").forEach((group) => {
+      group.querySelectorAll("button").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          group
+            .querySelectorAll("button")
+            .forEach((b) => b.classList.remove("is-active"));
+          btn.classList.add("is-active");
         });
+      });
+    });
+  }
 
-    }
+  static getSegmentValue(name) {
+    const group = document.querySelector(`[data-segment="${name}"]`);
 
-    static getSegmentValue(name) {
+    return group?.querySelector(".is-active")?.dataset.value || null;
+  }
 
-        const group = document.querySelector(`[data-segment="${name}"]`);
+  static bindLrnLookup() {
+    const lrnInput = document.getElementById("wLrn");
 
-        return group?.querySelector(".is-active")?.dataset.value || null;
+    if (!lrnInput) return;
 
-    }
+    lrnInput.addEventListener("blur", () => this.checkReenrolleeStatus());
 
-    static bindLrnLookup() {
+    lrnInput.addEventListener("input", () => {
+      const hidden = document.getElementById("wReenrollee");
 
-        const lrnInput = document.getElementById("wLrn");
+      if (hidden) hidden.value = "No";
+    });
+  }
 
-        if (!lrnInput) return;
+  static checkReenrolleeStatus() {
+    const lrnInput = document.getElementById("wLrn");
 
-        lrnInput.addEventListener("blur", () => this.checkReenrolleeStatus());
+    const statusBox = document.querySelector("[data-reenrollee-status]");
 
-        lrnInput.addEventListener("input", () => {
+    const hidden = document.getElementById("wReenrollee");
 
-            const hidden = document.getElementById("wReenrollee");
+    if (!lrnInput || !statusBox || !hidden) return;
 
-            if (hidden) hidden.value = "No";
+    const lrn = lrnInput.value.trim();
 
-        });
-
-    }
-
-    static checkReenrolleeStatus() {
-
-        const lrnInput = document.getElementById("wLrn");
-
-        const statusBox = document.querySelector("[data-reenrollee-status]");
-
-        const hidden = document.getElementById("wReenrollee");
-
-        if (!lrnInput || !statusBox || !hidden) return;
-
-        const lrn = lrnInput.value.trim();
-
-        if (!lrn) {
-
-            statusBox.innerHTML = `
+    if (!lrn) {
+      statusBox.innerHTML = `
                 <span class="material-symbols-outlined">person_search</span>
                 <p>Enter a Learner Reference Number in Step 1 to automatically check enrollment history.</p>
             `;
 
-            hidden.value = "No";
+      hidden.value = "No";
 
-            return;
+      return;
+    }
 
-        }
+    const existing = window.MockDB?.findLearnerByLrn
+      ? MockDB.findLearnerByLrn(lrn)
+      : null;
 
-        const existing = window.MockDB?.findLearnerByLrn
-            ? MockDB.findLearnerByLrn(lrn)
-            : null;
+    if (existing) {
+      hidden.value = "Yes";
 
-        if (existing) {
-
-            hidden.value = "Yes";
-
-            statusBox.innerHTML = `
+      statusBox.innerHTML = `
                 <span class="material-symbols-outlined" style="color:var(--st-secondary);">check_circle</span>
                 <p><strong>Re-enrollee detected.</strong> This LRN matches ${existing.name}, already known to the system. Marked as a re-enrollee automatically.</p>
             `;
+    } else {
+      hidden.value = "No";
 
-        } else {
-
-            hidden.value = "No";
-
-            statusBox.innerHTML = `
+      statusBox.innerHTML = `
                 <span class="material-symbols-outlined">person_add</span>
                 <p>No existing record found for this LRN. This will be enrolled as a new learner.</p>
             `;
+    }
+  }
 
+  static bindNav() {
+    document
+      .querySelector("[data-wizard-prev]")
+      ?.addEventListener("click", () => {
+        if (this.currentStep > 1) {
+          this.goToStep(this.currentStep - 1);
+        }
+      });
+
+    document
+      .querySelector("[data-wizard-next]")
+      ?.addEventListener("click", () => {
+        if (!this.validateStep(this.currentStep)) {
+          return;
         }
 
-    }
-
-    static bindNav() {
-
-        document.querySelector("[data-wizard-prev]")?.addEventListener("click", () => {
-
-            if (this.currentStep > 1) {
-                this.goToStep(this.currentStep - 1);
-            }
-
-        });
-
-        document.querySelector("[data-wizard-next]")?.addEventListener("click", () => {
-
-            if (!this.validateStep(this.currentStep)) {
-                return;
-            }
-
-            if (this.currentStep === this.totalSteps - 1) {
-                
-                this.submit();
-                return;
-            }
-
-            if (this.currentStep < this.totalSteps) {
-                this.goToStep(this.currentStep + 1);
-            }
-
-        });
-
-    }
-
-    static goToStep(step) {
-
-        this.currentStep = step;
-
-        document.querySelectorAll("[data-enroll-step]").forEach(el => {
-            el.classList.toggle("is-active", Number(el.dataset.enrollStep) === step);
-        });
-
-        this.updateProgress();
-
-        if (step === 7) {
-            this.checkReenrolleeStatus();
+        if (this.currentStep === this.totalSteps - 1) {
+          this.submit();
+          return;
         }
 
-        if (step === this.totalSteps - 1) {
-            this.renderReview();
+        if (this.currentStep < this.totalSteps) {
+          this.goToStep(this.currentStep + 1);
         }
+      });
+  }
 
-        const nav = document.querySelector("[data-wizard-nav]");
+  static goToStep(step) {
+    this.currentStep = step;
 
-        const prevBtn = document.querySelector("[data-wizard-prev]");
+    document.querySelectorAll("[data-enroll-step]").forEach((el) => {
+      el.classList.toggle("is-active", Number(el.dataset.enrollStep) === step);
+    });
 
-        const nextBtn = document.querySelector("[data-wizard-next]");
+    this.updateProgress();
 
-        if (prevBtn) prevBtn.disabled = step === 1;
-
-        if (nav) nav.style.display = step === this.totalSteps ? "none" : "flex";
-
-        if (nextBtn) {
-            nextBtn.innerHTML = step === this.totalSteps - 1
-                ? `<span class="material-symbols-outlined">how_to_reg</span> Confirm &amp; Enroll`
-                : `Next <span class="material-symbols-outlined">arrow_forward</span>`;
-        }
-
+    if (step === 7) {
+      this.checkReenrolleeStatus();
     }
 
-    static updateProgress() {
-
-        document.querySelectorAll("[data-progress-step]").forEach(el => {
-
-            const step = Number(el.dataset.progressStep);
-
-            el.classList.toggle("is-active", step === this.currentStep);
-
-            el.classList.toggle("is-complete", step < this.currentStep);
-
-        });
-
+    if (step === this.totalSteps - 1) {
+      this.renderReview();
     }
 
-    static validateStep(step) {
+    const nav = document.querySelector("[data-wizard-nav]");
 
-        const requiredByStep = {
-            1: ["wFullName", "wSex", "wBirthdate"],
-            2: ["wAddress"]
-        };
+    const prevBtn = document.querySelector("[data-wizard-prev]");
 
-        const ids = requiredByStep[step];
+    const nextBtn = document.querySelector("[data-wizard-next]");
 
-        if (!ids) return true;
+    if (prevBtn) prevBtn.disabled = step === 1;
 
-        let valid = true;
+    if (nav) nav.style.display = step === this.totalSteps ? "none" : "flex";
 
-        ids.forEach(id => {
+    if (nextBtn) {
+      nextBtn.innerHTML =
+        step === this.totalSteps - 1
+          ? `<span class="material-symbols-outlined">how_to_reg</span> Confirm &amp; Enroll`
+          : `Next <span class="material-symbols-outlined">arrow_forward</span>`;
+    }
+  }
 
-            const el = document.getElementById(id);
+  static updateProgress() {
+    document.querySelectorAll("[data-progress-step]").forEach((el) => {
+      const step = Number(el.dataset.progressStep);
 
-            const isEmpty = !el.value || el.value.trim() === "";
+      el.classList.toggle("is-active", step === this.currentStep);
 
-            el.classList.toggle("has-error", isEmpty);
+      el.classList.toggle("is-complete", step < this.currentStep);
+    });
+  }
 
-            if (isEmpty) valid = false;
+  static validateStep(step) {
+    const requiredByStep = {
+      1: ["wFullName", "wSex", "wBirthdate"],
+      2: ["wAddress"],
+    };
 
-        });
+    const ids = requiredByStep[step];
 
-        if (!valid) {
-            Toast?.error("Please complete all required fields before continuing.");
-        }
+    if (!ids) return true;
 
-        return valid;
+    let valid = true;
 
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+
+      const isEmpty = !el.value || el.value.trim() === "";
+
+      el.classList.toggle("has-error", isEmpty);
+
+      if (isEmpty) valid = false;
+    });
+
+    if (!valid) {
+      Toast?.error("Please complete all required fields before continuing.");
     }
 
-    static renderReview() {
+    return valid;
+  }
 
-        const container = document.querySelector("[data-review-content]");
+  static renderReview() {
+    const container = document.querySelector("[data-review-content]");
 
-        if (!container) return;
+    if (!container) return;
 
-        const val = id => document.getElementById(id)?.value || "\u2014";
+    const val = (id) => document.getElementById(id)?.value || "\u2014";
 
-        const sections = [
-            {
-                title: "Personal Information",
-                rows: [
-                    ["Full Name", val("wFullName")],
-                    ["LRN", val("wLrn")],
-                    ["Sex", val("wSex")],
-                    ["Birthdate", val("wBirthdate")],
-                    ["Civil Status", val("wCivilStatus")]
-                ]
-            },
-            {
-                title: "Contact Information",
-                rows: [
-                    ["Contact Number", val("wPhone")],
-                    ["Email", val("wEmail")],
-                    ["Address", val("wAddress")]
-                ]
-            },
-            {
-                title: "Guardian Information",
-                rows: [
-                    ["Guardian Name", val("wGuardianName")],
-                    ["Relationship", val("wGuardianRelation")],
-                    ["Guardian Contact", val("wGuardianContact")]
-                ]
-            },
-            {
-                title: "Learning Modality",
-                rows: [
-                    ["Learning Level", this.getSegmentValue("level")],
-                    ["Modality", this.getSegmentValue("modality")]
-                ]
-            },
-            {
-                title: "Class Context",
-                rows: [
-                    ["CLC", val("wClc")],
-                    ["Distance Category", val("wDistance")],
-                    ["School Year", val("wSchoolYear")]
-                ]
-            },
-            {
-                title: "Program Assignment",
-                rows: [
-                    ["Program", val("wProgram")],
-                    ["Semester", val("wSemester")],
-                    ["Assigned Teacher", val("wAssignedTeacher")]
-                ]
-            },
-            {
-                title: "Educational Background",
-                rows: [
-                    ["Re-enrollee", val("wReenrollee")],
-                    ["Employment Status", val("wEmployment")],
-                    ["Last Grade Completed", val("wLastGrade")]
-                ]
-            }
-        ];
+    const sections = [
+      {
+        title: "Personal Information",
+        rows: [
+          ["Full Name", val("wFullName")],
+          ["LRN", val("wLrn")],
+          ["Sex", val("wSex")],
+          ["Birthdate", val("wBirthdate")],
+          ["Civil Status", val("wCivilStatus")],
+        ],
+      },
+      {
+        title: "Contact Information",
+        rows: [
+          ["Contact Number", val("wPhone")],
+          ["Email", val("wEmail")],
+          ["Address", val("wAddress")],
+        ],
+      },
+      {
+        title: "Guardian Information",
+        rows: [
+          ["Guardian Name", val("wGuardianName")],
+          ["Relationship", val("wGuardianRelation")],
+          ["Guardian Contact", val("wGuardianContact")],
+        ],
+      },
+      {
+        title: "Learning Modality",
+        rows: [
+          ["Learning Level", this.getSegmentValue("level")],
+          ["Modality", this.getSegmentValue("modality")],
+        ],
+      },
+      {
+        title: "Class Context",
+        rows: [
+          ["CLC", val("wClc")],
+          ["Distance Category", val("wDistance")],
+          ["School Year", val("wSchoolYear")],
+        ],
+      },
+      {
+        title: "Program Assignment",
+        rows: [
+          ["Program", val("wProgram")],
+          ["Semester", val("wSemester")],
+          ["Assigned Teacher", val("wAssignedTeacher")],
+        ],
+      },
+      {
+        title: "Educational Background",
+        rows: [
+          ["Re-enrollee", val("wReenrollee")],
+          ["Employment Status", val("wEmployment")],
+          ["Last Grade Completed", val("wLastGrade")],
+        ],
+      },
+    ];
 
-        container.innerHTML = sections.map(section => `
+    container.innerHTML = sections
+      .map(
+        (section) => `
             <div class="st-enroll-review-section">
                 <p class="st-enroll-review-section-title">${section.title}</p>
                 <div class="st-enroll-review-grid">
-                    ${section.rows.map(([label, value]) => `
+                    ${section.rows
+                      .map(
+                        ([label, value]) => `
                         <div class="st-enroll-review-row">
                             <label>${label}</label>
                             <span>${value}</span>
                         </div>
-                    `).join("")}
+                    `,
+                      )
+                      .join("")}
                 </div>
             </div>
-        `).join("");
+        `,
+      )
+      .join("");
+  }
 
+  static async submit() {
+    const nextBtn = document.querySelector("[data-wizard-next]");
+
+    const originalHtml = nextBtn.innerHTML;
+
+    nextBtn.disabled = true;
+
+    nextBtn.innerHTML = `<span class="material-symbols-outlined">progress_activity</span> Enrolling…`;
+
+    const payload = {
+      name: document.getElementById("wFullName").value.trim(),
+      lrn: document.getElementById("wLrn").value.trim(),
+      sex: document.getElementById("wSex").value,
+      birthdate: document.getElementById("wBirthdate").value,
+      reenrollee: document.getElementById("wReenrollee")?.value === "Yes",
+      level: this.getSegmentValue("level"),
+      modality: this.getSegmentValue("modality"),
+      clc: document.getElementById("wClc").value,
+      status: "Active",
+      risk: "Low",
+    };
+
+    try {
+      await API.createLearner(payload);
+
+      window.UnsavedChanges?.clear(this.form);
+
+      this.set(
+        "[data-confirm-summary]",
+        `${payload.name} has been added to ${payload.clc} under the ${payload.modality} modality.`,
+      );
+
+      this.goToStep(this.totalSteps);
+
+      Toast?.success("Learner enrolled successfully.");
+    } catch (error) {
+      console.error(error);
+
+      Toast?.error("Unable to enroll learner. Please try again.");
+
+      nextBtn.disabled = false;
+
+      nextBtn.innerHTML = originalHtml;
     }
+  }
 
-static async submit() {
+  static bindConfirmActions() {
+    document
+      .querySelector("[data-enroll-another]")
+      ?.addEventListener("click", () => {
+        this.form.reset();
+
+        document.querySelectorAll("[data-segment]").forEach((group) => {
+          group.querySelectorAll("button").forEach((b, i) => {
+            b.classList.toggle(
+              "is-active",
+              i === (group.dataset.segment === "level" ? 2 : 0),
+            );
+          });
+        });
+
+        this.checkReenrolleeStatus();
 
         const nextBtn = document.querySelector("[data-wizard-next]");
 
-        const originalHtml = nextBtn.innerHTML;
-
-        nextBtn.disabled = true;
-
-        nextBtn.innerHTML = `<span class="material-symbols-outlined">progress_activity</span> Enrolling…`;
-
-        const payload = {
-            name: document.getElementById("wFullName").value.trim(),
-            lrn: document.getElementById("wLrn").value.trim(),
-            sex: document.getElementById("wSex").value,
-            birthdate: document.getElementById("wBirthdate").value,
-            reenrollee: document.getElementById("wReenrollee")?.value === "Yes",
-            level: this.getSegmentValue("level"),
-            modality: this.getSegmentValue("modality"),
-            clc: document.getElementById("wClc").value,
-            status: "Active",
-            risk: "Low"
-        };
-
-        try {
-
-            await API.createLearner(payload);
-
-            window.UnsavedChanges?.clear(this.form);
-
-            this.set(
-                "[data-confirm-summary]",
-                `${payload.name} has been added to ${payload.clc} under the ${payload.modality} modality.`
-            );
-
-            this.goToStep(this.totalSteps);
-
-            Toast?.success("Learner enrolled successfully.");
-
-        } catch (error) {
-
-            console.error(error);
-
-            Toast?.error("Unable to enroll learner. Please try again.");
-
-            nextBtn.disabled = false;
-
-            nextBtn.innerHTML = originalHtml;
-
+        if (nextBtn) {
+          nextBtn.disabled = false;
+          nextBtn.innerHTML = `Next <span class="material-symbols-outlined">arrow_forward</span>`;
         }
 
+        this.goToStep(1);
+      });
+  }
+
+  static set(selector, value) {
+    const el = document.querySelector(selector);
+    if (el && value !== undefined && value !== null) {
+      el.textContent = value;
     }
-
-    static bindConfirmActions() {
-
-        document.querySelector("[data-enroll-another]")?.addEventListener("click", () => {
-
-            this.form.reset();
-
-            document.querySelectorAll("[data-segment]").forEach(group => {
-                group.querySelectorAll("button").forEach((b, i) => {
-                    b.classList.toggle("is-active", i === (group.dataset.segment === "level" ? 2 : 0));
-                });
-            });
-
-            this.checkReenrolleeStatus();
-
-            const nextBtn = document.querySelector("[data-wizard-next]");
-
-            if (nextBtn) {
-                nextBtn.disabled = false;
-                nextBtn.innerHTML = `Next <span class="material-symbols-outlined">arrow_forward</span>`;
-            }
-
-            this.goToStep(1);
-
-        });
-
-    }
-
-    static set(selector, value) {
-        const el = document.querySelector(selector);
-        if (el && value !== undefined && value !== null) {
-            el.textContent = value;
-        }
-    }
-
+  }
 }
 
 (function bootEnrollWizard() {
-    let started = false;
-    const start = () => { if (!started) { started = true; LearnerEnrollWizard.init(); } };
-    document.addEventListener("components:loaded", start);
-    document.addEventListener("DOMContentLoaded", () => setTimeout(start, 300));
+  let started = false;
+  const start = () => {
+    if (!started) {
+      started = true;
+      LearnerEnrollWizard.init();
+    }
+  };
+  document.addEventListener("components:loaded", start);
+  document.addEventListener("DOMContentLoaded", () => setTimeout(start, 300));
 })();
 
 window.LearnerEnrollWizard = LearnerEnrollWizard;

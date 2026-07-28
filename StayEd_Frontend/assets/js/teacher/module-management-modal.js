@@ -1,45 +1,38 @@
-
 class ModuleManagementModal {
+  static learner = null;
 
-    static learner = null;
+  static activeTab = "active";
 
-    static activeTab = "active";
+  static open(learner) {
+    this.learner = learner;
 
-    static open(learner) {
+    this.activeTab = "active";
 
-        this.learner = learner;
+    const body = Modal.showCustom({
+      title: "",
 
-        this.activeTab = "active";
+      size: "xl",
 
-        const body = Modal.showCustom({
+      hideFooter: true,
+    });
 
-            title: "",
+    if (!body) return;
 
-            size: "xl",
+    body.parentElement.classList.add("st-module-modal");
 
-            hideFooter: true
+    body.innerHTML = this.render();
 
-        });
+    this.bind(body.parentElement);
+  }
 
-        if (!body) return;
+  static render() {
+    const l = this.learner;
 
-        body.parentElement.classList.add("st-module-modal");
+    const m = l.modules || {};
 
-        body.innerHTML = this.render();
+    const pct = Math.round((m.completed / m.total) * 100) || 0;
 
-        this.bind(body.parentElement);
-
-    }
-
-    static render() {
-
-        const l = this.learner;
-
-        const m = l.modules || {};
-
-        const pct = Math.round((m.completed / m.total) * 100) || 0;
-
-        return `
+    return `
             <div class="st-module-modal-header">
                 <div class="st-module-modal-title-row">
                     <div>
@@ -93,24 +86,24 @@ class ModuleManagementModal {
                 <button type="button" class="st-btn st-btn-primary" data-module-modal-done>Done</button>
             </div>
         `;
+  }
 
-    }
+  static renderActiveTab() {
+    const groups = this.learner.moduleGroups || [];
 
-    static renderActiveTab() {
-
-        const groups = this.learner.moduleGroups || [];
-
-        if (!groups.length) {
-            return `
+    if (!groups.length) {
+      return `
                 <div class="st-empty" style="border:none;background:transparent;">
                     <span class="material-symbols-outlined">menu_book</span>
                     <p class="st-empty-title">No active modules</p>
                     <p class="st-empty-text">Release a new module to get started.</p>
                 </div>
             `;
-        }
+    }
 
-        return groups.map((group, gi) => `
+    return groups
+      .map(
+        (group, gi) => `
             <div class="st-module-group" data-module-group>
                 <button type="button" class="st-module-group-header" data-module-group-toggle>
                     <div class="st-module-group-header-left">
@@ -124,15 +117,15 @@ class ModuleManagementModal {
                     ${group.modules.map((mod, mi) => this.renderModuleItem(mod, gi, mi)).join("")}
                 </div>
             </div>
-        `).join("");
+        `,
+      )
+      .join("");
+  }
 
-    }
+  static renderModuleItem(mod, gi, mi) {
+    const overdue = mod.overdueDays > 0;
 
-    static renderModuleItem(mod, gi, mi) {
-
-        const overdue = mod.overdueDays > 0;
-
-        return `
+    return `
             <div class="st-module-item ${overdue ? "st-module-item--overdue" : ""}">
                 <div class="st-module-item-main">
                     <div class="st-module-item-icon">
@@ -174,23 +167,21 @@ class ModuleManagementModal {
                 </div>
             </div>
         `;
+  }
 
-    }
+  static renderHistoryTab() {
+    const history = this.learner.moduleHistory || [];
 
-    static renderHistoryTab() {
-
-        const history = this.learner.moduleHistory || [];
-
-        if (!history.length) {
-            return `
+    if (!history.length) {
+      return `
                 <div class="st-empty" style="border:none;background:transparent;">
                     <span class="material-symbols-outlined">history</span>
                     <p class="st-empty-title">No completed modules yet</p>
                 </div>
             `;
-        }
+    }
 
-        return `
+    return `
             <table class="st-module-history-table" style="width:100%;border-collapse:collapse;">
                 <thead>
                     <tr>
@@ -201,76 +192,81 @@ class ModuleManagementModal {
                     </tr>
                 </thead>
                 <tbody>
-                    ${history.map(h => `
+                    ${history
+                      .map(
+                        (h) => `
                         <tr>
                             <td style="font-weight:600;">${h.module}</td>
                             <td>${h.strand}</td>
                             <td>${h.completedDate}</td>
                             <td style="color:var(--st-secondary);font-weight:700;">${h.score}</td>
                         </tr>
-                    `).join("")}
+                    `,
+                      )
+                      .join("")}
                 </tbody>
             </table>
         `;
+  }
 
-    }
+  static bind(container) {
+    container.querySelectorAll("[data-module-tab]").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        container
+          .querySelectorAll("[data-module-tab]")
+          .forEach((t) => t.classList.remove("is-active"));
 
-    static bind(container) {
+        tab.classList.add("is-active");
 
-        container.querySelectorAll("[data-module-tab]").forEach(tab => {
+        this.activeTab = tab.dataset.moduleTab;
 
-            tab.addEventListener("click", () => {
+        const content = container.querySelector("[data-module-modal-content]");
 
-                container.querySelectorAll("[data-module-tab]").forEach(t => t.classList.remove("is-active"));
+        if (content) {
+          content.innerHTML =
+            this.activeTab === "active"
+              ? this.renderActiveTab()
+              : this.renderHistoryTab();
+          this.bindGroupToggles(content);
+        }
+      });
+    });
 
-                tab.classList.add("is-active");
+    this.bindGroupToggles(container);
 
-                this.activeTab = tab.dataset.moduleTab;
+    container
+      .querySelector("[data-module-modal-done]")
+      ?.addEventListener("click", () => {
+        Toast?.success("Module updates saved.");
+        Modal.hide();
+      });
 
-                const content = container.querySelector("[data-module-modal-content]");
+    container
+      .querySelector("[data-release-module]")
+      ?.addEventListener("click", () => {
+        Toast?.info("Release New Module form will open here.");
+      });
 
-                if (content) {
-                    content.innerHTML = this.activeTab === "active"
-                        ? this.renderActiveTab()
-                        : this.renderHistoryTab();
-                    this.bindGroupToggles(content);
-                }
-
-            });
-
+    container
+      .querySelectorAll("[data-module-status], [data-module-return-date]")
+      .forEach((el) => {
+        el.addEventListener("change", () => {
+          Toast?.success("Module status updated.");
         });
+      });
+  }
 
-        this.bindGroupToggles(container);
-
-        container.querySelector("[data-module-modal-done]")?.addEventListener("click", () => {
-            Toast?.success("Module updates saved.");
-            Modal.hide();
+  static bindGroupToggles(container) {
+    container
+      .querySelectorAll("[data-module-group-toggle]")
+      .forEach((header) => {
+        header.addEventListener("click", () => {
+          header
+            .closest("[data-module-group]")
+            ?.classList.toggle("is-collapsed");
         });
-
-        container.querySelector("[data-release-module]")?.addEventListener("click", () => {
-            Toast?.info("Release New Module form will open here.");
-        });
-
-        container.querySelectorAll("[data-module-status], [data-module-return-date]").forEach(el => {
-            el.addEventListener("change", () => {
-                Toast?.success("Module status updated.");
-            });
-        });
-
-    }
-
-    static bindGroupToggles(container) {
-
-        container.querySelectorAll("[data-module-group-toggle]").forEach(header => {
-
-            header.addEventListener("click", () => {
-                header.closest("[data-module-group]")?.classList.toggle("is-collapsed");
-            });
-
-        });
-
-    }
-
+      });
+  }
 }
 
 window.ModuleManagementModal = ModuleManagementModal;

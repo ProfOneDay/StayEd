@@ -1,116 +1,124 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StayEd | Setup — Import Preview</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
-    <link rel="stylesheet" href="../../assets/css/main.css">
-    <link rel="icon" type="image/x-icon" href="../../assets/img/brand/favicon.ico">
-    <link rel="apple-touch-icon" href="../../assets/img/brand/apple-touch-icon.png">
-</head>
-<body class="setup-page" data-wizard="4">
-
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/css/main.css" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="../../assets/img/brand/favicon.ico"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="../../assets/img/brand/apple-touch-icon.png"
+    />
+  </head>
+  <body class="setup-page" data-wizard="4">
     <header class="setup-topbar">
-        <div class="setup-topbar-inner">
-            <div class="setup-topbar-brand">
-                <img src="../../assets/img/brand/logo-dark.png" alt="StayEd logo">
-                <h1>StayEd</h1>
-            </div>
-            <div class="setup-progress">
-                <div class="setup-progress-track">
-                    <div class="setup-progress-fill" style="width:80%;"></div>
-                </div>
-                <div class="setup-progress-steps">
-                    <span class="is-done">1. Welcome</span>
-                    <span class="is-done">2. Create Class</span>
-                    <span class="is-done">3. Upload</span>
-                    <span class="is-active">4. Preview</span>
-                    <span>5. Complete</span>
-                </div>
-            </div>
-            <button type="button" class="setup-topbar-support">
-                <span class="material-symbols-outlined">help</span>
-                Support
-            </button>
+      <div class="setup-topbar-inner">
+        <div class="setup-topbar-brand">
+          <img src="../../assets/img/brand/logo-dark.png" alt="StayEd logo" />
+          <h1>StayEd</h1>
         </div>
+        <div class="setup-progress">
+          <div class="setup-progress-track">
+            <div class="setup-progress-fill" style="width: 80%"></div>
+          </div>
+          <div class="setup-progress-steps">
+            <span class="is-done">1. Welcome</span>
+            <span class="is-done">2. Create Class</span>
+            <span class="is-done">3. Upload</span>
+            <span class="is-active">4. Preview</span>
+            <span>5. Complete</span>
+          </div>
+        </div>
+        <button type="button" class="setup-topbar-support">
+          <span class="material-symbols-outlined">help</span>
+          Support
+        </button>
+      </div>
     </header>
 
     <main class="setup-main">
-
-        <div class="setup-shell">
-
-            <div class="setup-heading">
-                <h1>Import Preview</h1>
-                <p>
-                    Review the validation results below. Rows with warnings can still
-                    be imported, but we recommend correcting them first.
-                </p>
-            </div>
-
-            <!-- Import stats -->
-            <div class="setup-import-stats">
-                <div class="setup-import-stat">
-                    <p class="setup-import-stat-value" id="statTotal">0</p>
-                    <p class="setup-import-stat-label">Total Rows</p>
-                </div>
-                <div class="setup-import-stat setup-import-stat--ok">
-                    <p class="setup-import-stat-value" id="statImported">0</p>
-                    <p class="setup-import-stat-label">Valid</p>
-                </div>
-                <div class="setup-import-stat setup-import-stat--warn">
-                    <p class="setup-import-stat-value" id="statDuplicates">0</p>
-                    <p class="setup-import-stat-label">Duplicates</p>
-                </div>
-                <div class="setup-import-stat setup-import-stat--err">
-                    <p class="setup-import-stat-value" id="statInvalid">0</p>
-                    <p class="setup-import-stat-label">Invalid</p>
-                </div>
-            </div>
-
-            <!-- Preview table -->
-            <div class="setup-preview-table-wrap setup-mt-lg">
-                <table class="setup-preview-table">
-                    <thead>
-                        <tr>
-                            <th>LRN</th>
-                            <th>Last Name</th>
-                            <th>First Name</th>
-                            <th>Sex</th>
-                            <th>Level</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="learnerTable">
-                        <tr>
-                            <td colspan="6" class="setup-preview-empty-cell">
-                                Loading preview…
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
+      <div class="setup-shell">
+        <div class="setup-heading">
+          <h1>Import Preview</h1>
+          <p>
+            Review the validation results below. Rows with warnings can still be
+            imported, but we recommend correcting them first.
+          </p>
         </div>
 
+        <!-- Import stats -->
+        <div class="setup-import-stats">
+          <div class="setup-import-stat">
+            <p class="setup-import-stat-value" id="statTotal">0</p>
+            <p class="setup-import-stat-label">Total Rows</p>
+          </div>
+          <div class="setup-import-stat setup-import-stat--ok">
+            <p class="setup-import-stat-value" id="statImported">0</p>
+            <p class="setup-import-stat-label">Valid</p>
+          </div>
+          <div class="setup-import-stat setup-import-stat--warn">
+            <p class="setup-import-stat-value" id="statDuplicates">0</p>
+            <p class="setup-import-stat-label">Duplicates</p>
+          </div>
+          <div class="setup-import-stat setup-import-stat--err">
+            <p class="setup-import-stat-value" id="statInvalid">0</p>
+            <p class="setup-import-stat-label">Invalid</p>
+          </div>
+        </div>
+
+        <!-- Preview table -->
+        <div class="setup-preview-table-wrap setup-mt-lg">
+          <table class="setup-preview-table">
+            <thead>
+              <tr>
+                <th>LRN</th>
+                <th>Last Name</th>
+                <th>First Name</th>
+                <th>Sex</th>
+                <th>Level</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="learnerTable">
+              <tr>
+                <td colspan="6" class="setup-preview-empty-cell">
+                  Loading preview…
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </main>
 
     <footer class="setup-footer">
-        <div class="setup-footer-inner">
-            <button type="button" id="reuploadBtn" class="setup-footer-back">
-                <span class="material-symbols-outlined">upload_file</span>
-                Re-upload File
-            </button>
-            <div class="setup-footer-right">
-                <button type="button" id="finishBtn" class="st-btn st-btn-primary">
-                    Confirm Import
-                    <span class="material-symbols-outlined">arrow_forward</span>
-                </button>
-            </div>
+      <div class="setup-footer-inner">
+        <button type="button" id="reuploadBtn" class="setup-footer-back">
+          <span class="material-symbols-outlined">upload_file</span>
+          Re-upload File
+        </button>
+        <div class="setup-footer-right">
+          <button type="button" id="finishBtn" class="st-btn st-btn-primary">
+            Confirm Import
+            <span class="material-symbols-outlined">arrow_forward</span>
+          </button>
         </div>
+      </div>
     </footer>
 
     <div data-component="layout/toast"></div>
@@ -128,6 +136,5 @@
     <script src="../../assets/js/components/component-loader.js"></script>
     <script src="../../assets/js/components/toast.js"></script>
     <script src="../../assets/js/setup/setup.js"></script>
-
-</body>
+  </body>
 </html>

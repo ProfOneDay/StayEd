@@ -1,1100 +1,750 @@
-
-
 class MockAPI {
+  static async request(endpoint, options = {}) {
+    await Utils.sleep(CONFIG.MOCK_DELAY);
 
-    static async request(endpoint, options = {}) {
+    const method = (options.method || "GET").toUpperCase();
 
-        await Utils.sleep(CONFIG.MOCK_DELAY);
+    const body = this.parseBody(options.body);
 
-        const method = (options.method || "GET").toUpperCase();
+    switch (`${method} ${endpoint}`) {
+      case "POST /auth/login":
+        return this.login(body);
 
-        const body = this.parseBody(options.body);
+      case "POST /auth/logout":
+        return this.logout();
 
-        switch (`${method} ${endpoint}`) {
+      case "GET /auth/me":
+        return this.currentUser();
 
-            case "POST /auth/login":
-                return this.login(body);
+      case "POST /auth/forgot-password":
+        return this.forgotPassword(body);
 
-            case "POST /auth/logout":
-                return this.logout();
+      case "POST /auth/reset-password":
+        return this.resetPassword(body);
 
-            case "GET /auth/me":
-                return this.currentUser();
+      case "POST /auth/change-password":
+        return this.changePassword(body);
 
-            case "POST /auth/forgot-password":
-                return this.forgotPassword(body);
+      case "POST /auth/register":
+        return this.register(body);
 
-            case "POST /auth/reset-password":
-                return this.resetPassword(body);
+      case "GET /teacher/dashboard":
+        return this.teacherDashboard();
 
-            case "POST /auth/change-password":
-                return this.changePassword(body);
+      case "GET /predictions/summary":
+        return this.predictionSummary();
 
-            case "POST /auth/register":
-                return this.register(body);
+      case "GET /predictions/risk-distribution":
+        return this.riskDistribution();
 
-            case "GET /teacher/dashboard":
-                return this.teacherDashboard();
+      case "GET /interventions":
+        return this.interventions();
 
-            case "GET /predictions/summary":
-                return this.predictionSummary();
+      case "GET /classes":
+        return this.classes();
 
-            case "GET /predictions/risk-distribution":
-                return this.riskDistribution();
+      case "GET /classes/current":
+        return this.currentClass();
 
-            case "GET /interventions":
-                return this.interventions();
+      case "POST /classes":
+        return this.createClass(body);
 
-            case "GET /classes":
-                return this.classes();
+      case "POST /learners/import/preview":
+        return this.importPreview(body?.filename);
 
-            case "GET /classes/current":
-                return this.currentClass();
+      case "POST /learners/import":
+        return this.importLearners(body);
 
-            case "POST /classes":
-                return this.createClass(body);
+      case "GET /learners/import/summary":
+        return this.importSummary();
 
-            case "POST /learners/import/preview":
-                return this.importPreview(body?.filename);
+      case "GET /teacher-classes":
+        return this.teacherClasses();
 
-            case "POST /learners/import":
-                return this.importLearners(body);
+      case "GET /clcs":
+        return this.clcs();
 
-            case "GET /learners/import/summary":
-                return this.importSummary();
+      case "GET /notifications":
+        return this.notifications();
 
-            case "GET /teacher-classes":
-                return this.teacherClasses();
+      case "POST /notifications/read-all":
+        return this.markAllNotificationsRead();
 
-            case "GET /clcs":
-                return this.clcs();
+      case "GET /clcs/current":
+        return this.currentClc();
 
-            case "GET /notifications":
-                return this.notifications();
+      case "POST /clcs":
+        return this.createClc(body);
 
-            case "POST /notifications/read-all":
-                return this.markAllNotificationsRead();
+      case "GET /learners":
+        return this.learners();
 
-            case "GET /clcs/current":
-                return this.currentClc();
+      case "POST /learners":
+        return this.createLearner(body);
 
-            case "POST /clcs":
-                return this.createClc(body);
+      default:
+        return this.dynamicRoute(method, endpoint, body);
+    }
+  }
 
-            case "GET /learners":
-                return this.learners();
+  static dynamicRoute(method, endpoint, body) {
+    const notifReadMatch = endpoint.match(/^\/notifications\/([^/]+)\/read$/);
 
-            case "POST /learners":
-                return this.createLearner(body);
-
-            default:
-
-                return this.dynamicRoute(method, endpoint, body);
-
-        }
-
+    if (notifReadMatch && method === "POST") {
+      return this.markNotificationRead(notifReadMatch[1]);
     }
 
-    static dynamicRoute(method, endpoint, body) {
+    const notifMatch = endpoint.match(/^\/notifications\/([^/]+)$/);
 
-        const notifReadMatch =
-            endpoint.match(/^\/notifications\/([^/]+)\/read$/);
-
-        if (notifReadMatch && method === "POST") {
-
-            return this.markNotificationRead(notifReadMatch[1]);
-
-        }
-
-        const notifMatch =
-            endpoint.match(/^\/notifications\/([^/]+)$/);
-
-        if (notifMatch && method === "DELETE") {
-
-            return this.deleteNotification(notifMatch[1]);
-
-        }
-
-        const profileMatch =
-            endpoint.match(/^\/learners\/([^/]+)\/profile$/);
-
-        if (profileMatch && method === "GET") {
-
-            return this.learnerProfile(profileMatch[1]);
-
-        }
-
-        const recordsDetailMatch =
-            endpoint.match(/^\/learners\/([^/]+)\/records-detail$/);
-
-        if (recordsDetailMatch && method === "GET") {
-
-            return MockDB.getRecordsHubDetail(recordsDetailMatch[1]);
-
-        }
-
-        const learnerMatch =
-            endpoint.match(/^\/learners\/([^/]+)$/);
-
-        if (learnerMatch) {
-
-            const id = learnerMatch[1];
-
-            if (method === "GET") {
-                return this.learner(id);
-            }
-
-            if (method === "PUT" || method === "PATCH") {
-                return this.updateLearner(id, body);
-            }
-
-            if (method === "DELETE") {
-                return this.deleteLearner(id);
-            }
-
-        }
-
-        throw {
-
-            status: 404,
-
-            data: {
-
-                message: `Mock endpoint not found: ${method} ${endpoint}`
-
-            }
-
-        };
-
+    if (notifMatch && method === "DELETE") {
+      return this.deleteNotification(notifMatch[1]);
     }
 
-    static parseBody(body) {
+    const profileMatch = endpoint.match(/^\/learners\/([^/]+)\/profile$/);
 
-        if (!body) {
-
-            return {};
-
-        }
-
-        if (typeof body === "string") {
-
-            try {
-
-                return JSON.parse(body);
-
-            }
-
-            catch {
-
-                return {};
-
-            }
-
-        }
-
-        return body;
-
+    if (profileMatch && method === "GET") {
+      return this.learnerProfile(profileMatch[1]);
     }
 
-    static generateToken(user) {
+    const recordsDetailMatch = endpoint.match(
+      /^\/learners\/([^/]+)\/records-detail$/,
+    );
 
-        const payload = {
-
-            id: user.id,
-
-            role: user.role,
-
-            exp:
-
-                Math.floor(Date.now() / 1000)
-
-                +
-
-                (60 * 60 * 24)
-
-        };
-
-        return [
-
-            "mock",
-
-            btoa(JSON.stringify(payload)),
-
-            "signature"
-
-        ].join(".");
-
+    if (recordsDetailMatch && method === "GET") {
+      return MockDB.getRecordsHubDetail(recordsDetailMatch[1]);
     }
 
-    static decodeToken(token) {
+    const learnerMatch = endpoint.match(/^\/learners\/([^/]+)$/);
 
-        try {
+    if (learnerMatch) {
+      const id = learnerMatch[1];
 
-            return JSON.parse(
+      if (method === "GET") {
+        return this.learner(id);
+      }
 
-                atob(
+      if (method === "PUT" || method === "PATCH") {
+        return this.updateLearner(id, body);
+      }
 
-                    token.split(".")[1]
-
-                )
-
-            );
-
-        }
-
-        catch {
-
-            return {};
-
-        }
-
+      if (method === "DELETE") {
+        return this.deleteLearner(id);
+      }
     }
 
-    static login(credentials = {}) {
+    throw {
+      status: 404,
 
-        const user = MockDB.findUser(
+      data: {
+        message: `Mock endpoint not found: ${method} ${endpoint}`,
+      },
+    };
+  }
 
-            credentials.email
-
-        );
-
-        if (
-
-            !user ||
-
-            user.password !== credentials.password
-
-        ) {
-
-            throw {
-
-                status: 401,
-
-                data: {
-
-                    message: "Invalid email or password."
-
-                }
-
-            };
-
-        }
-
-        const {
-
-            password,
-
-            ...safeUser
-
-        } = user;
-
-        return {
-
-            token: this.generateToken(user),
-
-            user: MockDB.clone(safeUser)
-
-        };
-
+  static parseBody(body) {
+    if (!body) {
+      return {};
     }
 
-    static logout() {
-
-        return {
-
-            success: true,
-
-            message: "Logged out."
-
-        };
-
+    if (typeof body === "string") {
+      try {
+        return JSON.parse(body);
+      } catch {
+        return {};
+      }
     }
 
-    static currentUser() {
+    return body;
+  }
 
-        const token = Auth.token();
+  static generateToken(user) {
+    const payload = {
+      id: user.id,
 
-        if (!token) {
+      role: user.role,
 
-            throw {
+      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
+    };
 
-                status: 401,
+    return ["mock", btoa(JSON.stringify(payload)), "signature"].join(".");
+  }
 
-                data: {
+  static decodeToken(token) {
+    try {
+      return JSON.parse(atob(token.split(".")[1]));
+    } catch {
+      return {};
+    }
+  }
 
-                    message: "Unauthenticated."
+  static login(credentials = {}) {
+    const user = MockDB.findUser(credentials.email);
 
-                }
+    if (!user || user.password !== credentials.password) {
+      throw {
+        status: 401,
 
-            };
-
-        }
-
-        const payload =
-
-            this.decodeToken(token);
-
-        const user =
-
-            MockDB.findUserById(payload.id);
-
-        if (!user) {
-
-            throw {
-
-                status: 401,
-
-                data: {
-
-                    message: "User not found."
-
-                }
-
-            };
-
-        }
-
-        const {
-
-            password,
-
-            ...safeUser
-
-        } = user;
-
-        return MockDB.clone(safeUser);
-
+        data: {
+          message: "Invalid email or password.",
+        },
+      };
     }
 
-    static forgotPassword(data) {
+    const {
+      password,
 
-        const user = MockDB.findUser(
+      ...safeUser
+    } = user;
 
-            data.email
+    return {
+      token: this.generateToken(user),
 
-        );
+      user: MockDB.clone(safeUser),
+    };
+  }
 
-        if (!user) {
+  static logout() {
+    return {
+      success: true,
 
-            throw {
+      message: "Logged out.",
+    };
+  }
 
-                status: 404,
+  static currentUser() {
+    const token = Auth.token();
 
-                data: {
+    if (!token) {
+      throw {
+        status: 401,
 
-                    message:
-
-                        "Email address not found."
-
-                }
-
-            };
-
-        }
-
-        return {
-
-            success: true,
-
-            message:
-
-                "Password reset email sent."
-
-        };
-
+        data: {
+          message: "Unauthenticated.",
+        },
+      };
     }
 
-    static resetPassword(data) {
+    const payload = this.decodeToken(token);
 
-        if (
+    const user = MockDB.findUserById(payload.id);
 
-            !data.password ||
+    if (!user) {
+      throw {
+        status: 401,
 
-            data.password.length < 8
-
-        ) {
-
-            throw {
-
-                status: 400,
-
-                data: {
-
-                    message:
-
-                        "Password is too short."
-
-                }
-
-            };
-
-        }
-
-        return {
-
-            success: true,
-
-            message:
-
-                "Password updated successfully."
-
-        };
-
+        data: {
+          message: "User not found.",
+        },
+      };
     }
 
-    static changePassword() {
+    const {
+      password,
 
-        return {
+      ...safeUser
+    } = user;
 
-            success: true,
+    return MockDB.clone(safeUser);
+  }
 
-            message:
+  static forgotPassword(data) {
+    const user = MockDB.findUser(data.email);
 
-                "Password successfully changed."
+    if (!user) {
+      throw {
+        status: 404,
 
-        };
-
+        data: {
+          message: "Email address not found.",
+        },
+      };
     }
 
-    static register(data = {}) {
+    return {
+      success: true,
 
-        const exists = MockDB.users.find(
+      message: "Password reset email sent.",
+    };
+  }
 
-            user =>
+  static resetPassword(data) {
+    if (!data.password || data.password.length < 8) {
+      throw {
+        status: 400,
 
-                user.email.toLowerCase() ===
-
-                data.email.toLowerCase()
-
-        );
-
-        if (exists) {
-
-            throw {
-
-                status:409,
-
-                data:{
-
-                    message:"Email already exists."
-
-                }
-
-            };
-
-        }
-
-        const teacher = {
-
-            id: MockDB.nextId(MockDB.users),
-
-            role:"teacher",
-
-            status:"pending",
-
-            full_name:data.full_name,
-
-            first_name:data.full_name.split(" ")[0],
-
-            last_name:data.full_name.split(" ").slice(1).join(" "),
-
-            email:data.email,
-
-            password:data.password,
-
-            school:"",
-
-            avatar:"../../assets/images/avatar.png"
-
-        };
-
-        MockDB.users.push(teacher);
-
-        return {
-
-            success:true,
-
-            message:
-
-                "Registration submitted."
-
-        };
-
+        data: {
+          message: "Password is too short.",
+        },
+      };
     }
 
-    static teacherDashboard() {
+    return {
+      success: true,
 
-        const learners = MockDB.learners;
+      message: "Password updated successfully.",
+    };
+  }
 
-        const countRisk = level =>
-            learners.filter(l => l.risk === level).length;
+  static changePassword() {
+    return {
+      success: true,
 
-        return {
+      message: "Password successfully changed.",
+    };
+  }
 
-            context:
-                MockDB.clone(MockDB.dashboard.context),
+  static register(data = {}) {
+    const exists = MockDB.users.find(
+      (user) => user.email.toLowerCase() === data.email.toLowerCase(),
+    );
 
-            statistics: {
+    if (exists) {
+      throw {
+        status: 409,
 
-                registered:
-                    MockDB.dashboard.context.registered_learners,
-
-                high: countRisk("High"),
-
-                moderate: countRisk("Moderate"),
-
-                low: countRisk("Low"),
-
-                high_delta:
-                    MockDB.dashboard.statistics.high_delta,
-
-                moderate_trend:
-                    MockDB.dashboard.statistics.moderate_trend,
-
-                low_trend:
-                    MockDB.dashboard.statistics.low_trend
-
-            },
-
-            riskDistribution:
-                MockDB.clone(MockDB.riskDistribution),
-
-            predictionSummary:
-                MockDB.clone(MockDB.predictionSummary),
-
-            learners:
-                MockDB.clone(learners),
-
-            interventions:
-                MockDB.clone(MockDB.interventions)
-
-        };
-
+        data: {
+          message: "Email already exists.",
+        },
+      };
     }
 
-    static predictionSummary() {
+    const teacher = {
+      id: MockDB.nextId(MockDB.users),
 
-        return MockDB.clone(MockDB.predictionSummary);
+      role: "teacher",
 
+      status: "pending",
+
+      full_name: data.full_name,
+
+      first_name: data.full_name.split(" ")[0],
+
+      last_name: data.full_name.split(" ").slice(1).join(" "),
+
+      email: data.email,
+
+      password: data.password,
+
+      school: "",
+
+      avatar: "../../assets/images/avatar.png",
+    };
+
+    MockDB.users.push(teacher);
+
+    return {
+      success: true,
+
+      message: "Registration submitted.",
+    };
+  }
+
+  static teacherDashboard() {
+    const learners = MockDB.learners;
+
+    const countRisk = (level) =>
+      learners.filter((l) => l.risk === level).length;
+
+    return {
+      context: MockDB.clone(MockDB.dashboard.context),
+
+      statistics: {
+        registered: MockDB.dashboard.context.registered_learners,
+
+        high: countRisk("High"),
+
+        moderate: countRisk("Moderate"),
+
+        low: countRisk("Low"),
+
+        high_delta: MockDB.dashboard.statistics.high_delta,
+
+        moderate_trend: MockDB.dashboard.statistics.moderate_trend,
+
+        low_trend: MockDB.dashboard.statistics.low_trend,
+      },
+
+      riskDistribution: MockDB.clone(MockDB.riskDistribution),
+
+      predictionSummary: MockDB.clone(MockDB.predictionSummary),
+
+      learners: MockDB.clone(learners),
+
+      interventions: MockDB.clone(MockDB.interventions),
+    };
+  }
+
+  static predictionSummary() {
+    return MockDB.clone(MockDB.predictionSummary);
+  }
+
+  static riskDistribution() {
+    return MockDB.clone(MockDB.riskDistribution);
+  }
+
+  static interventions() {
+    return {
+      total: MockDB.interventions.length,
+
+      data: MockDB.clone(MockDB.interventions),
+    };
+  }
+
+  static classes() {
+    const list = MockDB.classes || [];
+
+    return {
+      total: list.length,
+
+      data: MockDB.clone(list),
+    };
+  }
+
+  static createClass(data = {}) {
+    if (!MockDB.classes) {
+      MockDB.classes = [];
     }
 
-    static riskDistribution() {
+    const record = {
+      id: MockDB.classes.length
+        ? Math.max(...MockDB.classes.map((c) => c.id)) + 1
+        : 1,
 
-        return MockDB.clone(MockDB.riskDistribution);
+      created_at: new Date().toISOString(),
 
+      ...data,
+    };
+
+    MockDB.classes.push(record);
+
+    MockDB.currentClass = record;
+    MockDB.rememberCurrent("currentClass", record);
+
+    return {
+      message: "Class created successfully.",
+
+      data: MockDB.clone(record),
+    };
+  }
+
+  static notifications() {
+    const list = MockDB.notifications || [];
+
+    return {
+      total: list.length,
+
+      unread: list.filter((n) => !n.read).length,
+
+      data: MockDB.clone(list),
+    };
+  }
+
+  static markNotificationRead(id) {
+    const notif = (MockDB.notifications || []).find(
+      (n) => String(n.id) === String(id),
+    );
+
+    if (notif) {
+      notif.read = true;
     }
 
-    static interventions() {
+    return { message: "Notification marked as read." };
+  }
 
-        return {
+  static markAllNotificationsRead() {
+    (MockDB.notifications || []).forEach((n) => {
+      n.read = true;
+    });
 
-            total: MockDB.interventions.length,
+    return { message: "All notifications marked as read." };
+  }
 
-            data: MockDB.clone(MockDB.interventions)
+  static deleteNotification(id) {
+    if (!MockDB.notifications) return { message: "Notification removed." };
 
-        };
+    const index = MockDB.notifications.findIndex(
+      (n) => String(n.id) === String(id),
+    );
 
+    if (index !== -1) {
+      MockDB.notifications.splice(index, 1);
     }
 
-    static classes() {
+    return { message: "Notification removed." };
+  }
 
-        const list = MockDB.classes || [];
+  static teacherClasses() {
+    const list = MockDB.classes || [];
 
-        return {
+    return {
+      total: list.length,
 
-            total: list.length,
+      data: MockDB.clone(list),
+    };
+  }
 
-            data: MockDB.clone(list)
+  static clcs() {
+    const list = MockDB.clcs || [];
 
-        };
+    return {
+      total: list.length,
 
+      data: MockDB.clone(list),
+    };
+  }
+
+  static createClc(data = {}) {
+    if (!MockDB.clcs) {
+      MockDB.clcs = [];
     }
 
-    static createClass(data = {}) {
+    const record = {
+      id: MockDB.clcs.length
+        ? Math.max(...MockDB.clcs.map((c) => c.id)) + 1
+        : 1,
 
-        if (!MockDB.classes) {
+      status: "Active",
 
-            MockDB.classes = [];
+      icon: "account_balance",
 
-        }
+      totalLearners: 0,
 
-        const record = {
+      teachers: 0,
 
-            id:
-                MockDB.classes.length
-                    ? Math.max(...MockDB.classes.map(c => c.id)) + 1
-                    : 1,
+      created_at: new Date().toISOString(),
 
-            created_at:
-                new Date().toISOString(),
+      ...data,
+    };
 
-            ...data
+    MockDB.clcs.push(record);
 
-        };
+    MockDB.rememberCurrent("currentClc", record);
 
-        MockDB.classes.push(record);
+    return {
+      message: "CLC registered successfully.",
 
-        MockDB.currentClass = record;
-        MockDB.rememberCurrent("currentClass", record);
+      data: MockDB.clone(record),
+    };
+  }
 
-        return {
+  static currentClc() {
+    const fallback = {
+      municipality: "Quezon City",
+      name: "San Felipe Sur CLC",
+      schoolYear: "2023-2024",
+      learningLevel: "A&E - Secondary",
+    };
 
-            message: "Class created successfully.",
+    return MockDB.clone(MockDB.recallCurrent("currentClc") || fallback);
+  }
 
-            data: MockDB.clone(record)
+  static currentClass() {
+    const fallback = {
+      municipality: "Binalonan",
+      communityLearningCenter: "San Felipe Sur CLC",
+      schoolYear: "2026-2027",
+      learningLevel: "Basic Literacy Program",
+    };
 
-        };
+    return MockDB.clone(MockDB.recallCurrent("currentClass") || fallback);
+  }
 
+  static importPreview(filename) {
+    const sample = MockDB.learners.slice(0, 6);
+
+    const rows = sample.map((l, i) => {
+      const status = i === 1 ? "duplicate" : i === 4 ? "error" : "valid";
+
+      return {
+        lrn: l.lrn,
+        name: l.name,
+        level: l.level,
+        modality: l.modality,
+        status,
+        issue:
+          status === "duplicate"
+            ? "LRN already exists in the system"
+            : status === "error"
+              ? "Missing required field: Birthdate"
+              : null,
+      };
+    });
+
+    const summary = {
+      total: rows.length,
+      valid: rows.filter((r) => r.status === "valid").length,
+      duplicates: rows.filter((r) => r.status === "duplicate").length,
+      errors: rows.filter((r) => r.status === "error").length,
+      filename: filename || "learners_import.csv",
+      rows,
+    };
+
+    MockDB.rememberCurrent("importPreview", summary);
+
+    return summary;
+  }
+
+  static importLearners(data = {}) {
+    const rows = Array.isArray(data.learners) ? data.learners : [];
+
+    const imported = rows.length || 40;
+
+    const previewLearners = rows.length
+      ? rows
+      : MockDB.learners.slice(0, 5).map((l) => ({
+          lrn: l.lrn,
+          name: l.name,
+          level: l.level,
+        }));
+
+    MockDB.rememberCurrent("importSummary", {
+      total: imported + 2,
+      imported: imported,
+      duplicates: 1,
+      invalid: 1,
+      learners: previewLearners,
+    });
+
+    return {
+      message: "Learners imported successfully.",
+
+      imported: imported,
+
+      skipped: 2,
+    };
+  }
+
+  static importSummary() {
+    const fallback = {
+      total: 42,
+      imported: 40,
+      duplicates: 1,
+      invalid: 1,
+      learners: MockDB.learners.slice(0, 5).map((l) => ({
+        lrn: l.lrn,
+        name: l.name,
+        level: l.level,
+      })),
+    };
+
+    return MockDB.clone(MockDB.recallCurrent("importSummary") || fallback);
+  }
+
+  static learners() {
+    return {
+      total: MockDB.learners.length,
+
+      data: MockDB.clone(MockDB.learners),
+    };
+  }
+
+  static learner(id) {
+    const learner = MockDB.findLearner(id);
+
+    if (!learner) {
+      throw {
+        status: 404,
+
+        data: {
+          message: "Learner not found.",
+        },
+      };
     }
 
-    static notifications() {
+    return learner;
+  }
 
-        const list = MockDB.notifications || [];
+  static learnerProfile(id) {
+    const profile = MockDB.getLearnerProfile(id);
 
-        return {
+    if (!profile) {
+      throw {
+        status: 404,
 
-            total: list.length,
-
-            unread: list.filter(n => !n.read).length,
-
-            data: MockDB.clone(list)
-
-        };
-
+        data: {
+          message: "Learner not found.",
+        },
+      };
     }
 
-    static markNotificationRead(id) {
+    return profile;
+  }
 
-        const notif = (MockDB.notifications || []).find(
-            n => String(n.id) === String(id)
-        );
+  static createLearner(data = {}) {
+    const learner = {
+      id: MockDB.nextId(MockDB.learners),
 
-        if (notif) {
-            notif.read = true;
-        }
+      ...data,
+    };
 
-        return { message: "Notification marked as read." };
+    MockDB.insert(
+      MockDB.learners,
 
+      learner,
+    );
+
+    return MockDB.clone(learner);
+  }
+
+  static updateLearner(id, data = {}) {
+    const learner = MockDB.update(
+      MockDB.learners,
+
+      id,
+
+      data,
+    );
+
+    if (!learner) {
+      throw {
+        status: 404,
+
+        data: {
+          message: "Learner not found.",
+        },
+      };
     }
 
-    static markAllNotificationsRead() {
+    return MockDB.clone(learner);
+  }
 
-        (MockDB.notifications || []).forEach(n => { n.read = true; });
+  static deleteLearner(id) {
+    const success = MockDB.remove(
+      MockDB.learners,
 
-        return { message: "All notifications marked as read." };
+      id,
+    );
 
+    if (!success) {
+      throw {
+        status: 404,
+
+        data: {
+          message: "Learner not found.",
+        },
+      };
     }
 
-    static deleteNotification(id) {
-
-        if (!MockDB.notifications) return { message: "Notification removed." };
-
-        const index = MockDB.notifications.findIndex(
-            n => String(n.id) === String(id)
-        );
-
-        if (index !== -1) {
-            MockDB.notifications.splice(index, 1);
-        }
-
-        return { message: "Notification removed." };
-
-    }
-
-    static teacherClasses() {
-
-        const list = MockDB.classes || [];
-
-        return {
-
-            total: list.length,
-
-            data: MockDB.clone(list)
-
-        };
-
-    }
-
-    static clcs() {
-
-        const list = MockDB.clcs || [];
-
-        return {
-
-            total: list.length,
-
-            data: MockDB.clone(list)
-
-        };
-
-    }
-
-    static createClc(data = {}) {
-
-        if (!MockDB.clcs) {
-
-            MockDB.clcs = [];
-
-        }
-
-        const record = {
-
-            id:
-                MockDB.clcs.length
-                    ? Math.max(...MockDB.clcs.map(c => c.id)) + 1
-                    : 1,
-
-            status: "Active",
-
-            icon: "account_balance",
-
-            totalLearners: 0,
-
-            teachers: 0,
-
-            created_at: new Date().toISOString(),
-
-            ...data
-
-        };
-
-        MockDB.clcs.push(record);
-
-        MockDB.rememberCurrent("currentClc", record);
-
-        return {
-
-            message: "CLC registered successfully.",
-
-            data: MockDB.clone(record)
-
-        };
-
-    }
-
-    static currentClc() {
-
-        const fallback = {
-            municipality: "Quezon City",
-            name: "San Felipe Sur CLC",
-            schoolYear: "2023-2024",
-            learningLevel: "A&E - Secondary"
-        };
-
-        return MockDB.clone(MockDB.recallCurrent("currentClc") || fallback);
-
-    }
-
-    static currentClass() {
-
-        const fallback = {
-            municipality: "Binalonan",
-            communityLearningCenter: "San Felipe Sur CLC",
-            schoolYear: "2026-2027",
-            learningLevel: "Basic Literacy Program"
-        };
-
-        return MockDB.clone(MockDB.recallCurrent("currentClass") || fallback);
-
-    }
-
-    static importPreview(filename) {
-
-        const sample = MockDB.learners.slice(0, 6);
-
-        const rows = sample.map((l, i) => {
-
-            const status =
-                i === 1 ? "duplicate" :
-                i === 4 ? "error" : "valid";
-
-            return {
-                lrn: l.lrn,
-                name: l.name,
-                level: l.level,
-                modality: l.modality,
-                status,
-                issue:
-                    status === "duplicate" ? "LRN already exists in the system" :
-                    status === "error" ? "Missing required field: Birthdate" :
-                    null
-            };
-
-        });
-
-        const summary = {
-            total: rows.length,
-            valid: rows.filter(r => r.status === "valid").length,
-            duplicates: rows.filter(r => r.status === "duplicate").length,
-            errors: rows.filter(r => r.status === "error").length,
-            filename: filename || "learners_import.csv",
-            rows
-        };
-
-        MockDB.rememberCurrent("importPreview", summary);
-
-        return summary;
-
-    }
-
-    static importLearners(data = {}) {
-
-        const rows =
-            Array.isArray(data.learners)
-                ? data.learners
-                : [];
-
-        const imported = rows.length || 40;
-
-        const previewLearners =
-            rows.length
-                ? rows
-                : MockDB.learners.slice(0, 5).map(l => ({
-                    lrn: l.lrn,
-                    name: l.name,
-                    level: l.level
-                }));
-
-        MockDB.rememberCurrent("importSummary", {
-            total: imported + 2,
-            imported: imported,
-            duplicates: 1,
-            invalid: 1,
-            learners: previewLearners
-        });
-
-        return {
-
-            message: "Learners imported successfully.",
-
-            imported: imported,
-
-            skipped: 2
-
-        };
-
-    }
-
-    static importSummary() {
-
-        const fallback = {
-            total: 42,
-            imported: 40,
-            duplicates: 1,
-            invalid: 1,
-            learners: MockDB.learners.slice(0, 5).map(l => ({
-                lrn: l.lrn,
-                name: l.name,
-                level: l.level
-            }))
-        };
-
-        return MockDB.clone(MockDB.recallCurrent("importSummary") || fallback);
-
-    }
-
-    static learners() {
-
-        return {
-
-            total:
-
-                MockDB.learners.length,
-
-            data:
-
-                MockDB.clone(
-
-                    MockDB.learners
-
-                )
-
-        };
-
-    }
-
-    static learner(id) {
-
-        const learner =
-
-            MockDB.findLearner(id);
-
-        if (!learner) {
-
-            throw {
-
-                status: 404,
-
-                data: {
-
-                    message:
-
-                        "Learner not found."
-
-                }
-
-            };
-
-        }
-
-        return learner;
-
-    }
-
-    static learnerProfile(id) {
-
-        const profile = MockDB.getLearnerProfile(id);
-
-        if (!profile) {
-
-            throw {
-
-                status: 404,
-
-                data: {
-
-                    message: "Learner not found."
-
-                }
-
-            };
-
-        }
-
-        return profile;
-
-    }
-
-    static createLearner(data = {}) {
-
-        const learner = {
-
-            id:
-
-                MockDB.nextId(
-
-                    MockDB.learners
-
-                ),
-
-            ...data
-
-        };
-
-        MockDB.insert(
-
-            MockDB.learners,
-
-            learner
-
-        );
-
-        return MockDB.clone(learner);
-
-    }
-
-    static updateLearner(id, data = {}) {
-
-        const learner =
-
-            MockDB.update(
-
-                MockDB.learners,
-
-                id,
-
-                data
-
-            );
-
-        if (!learner) {
-
-            throw {
-
-                status: 404,
-
-                data: {
-
-                    message:
-
-                        "Learner not found."
-
-                }
-
-            };
-
-        }
-
-        return MockDB.clone(learner);
-
-    }
-
-    static deleteLearner(id) {
-
-        const success =
-
-            MockDB.remove(
-
-                MockDB.learners,
-
-                id
-
-            );
-
-        if (!success) {
-
-            throw {
-
-                status: 404,
-
-                data: {
-
-                    message:
-
-                        "Learner not found."
-
-                }
-
-            };
-
-        }
-
-        return {
-
-            success: true
-
-        };
-
-    }
-
+    return {
+      success: true,
+    };
+  }
 }
 
 window.MockAPI = MockAPI;
 
 document.addEventListener(
+  "DOMContentLoaded",
 
-    "DOMContentLoaded",
-
-    () => {
-
-        if (
-
-            CONFIG.MODE !== "development"
-
-        ) {
-
-            return;
-
-        }
-
-        console.log(
-
-            "%cStayEd Mock API Ready",
-
-            "color:#006A68;font-weight:bold;"
-
-        );
-
+  () => {
+    if (CONFIG.MODE !== "development") {
+      return;
     }
 
+    console.log(
+      "%cStayEd Mock API Ready",
+
+      "color:#006A68;font-weight:bold;",
+    );
+  },
 );

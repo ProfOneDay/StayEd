@@ -1,129 +1,61 @@
-
-
 class ResetPasswordPage {
+  static initialize() {
+    this.form = document.getElementById("resetPasswordForm");
 
-    static initialize() {
-
-        this.form = document.getElementById(
-
-            "resetPasswordForm"
-
-        );
-
-        if (!this.form) {
-
-            return;
-
-        }
-
-        this.form.addEventListener(
-
-            "submit",
-
-            this.submit.bind(this)
-
-        );
-
+    if (!this.form) {
+      return;
     }
 
-    static async submit(event) {
+    this.form.addEventListener(
+      "submit",
 
-        event.preventDefault();
+      this.submit.bind(this),
+    );
+  }
 
-        const password =
+  static async submit(event) {
+    event.preventDefault();
 
-            document.getElementById(
+    const password = document.getElementById("password").value;
 
-                "password"
+    const confirm = document.getElementById("confirmPassword").value;
 
-            ).value;
+    if (password.length < 8) {
+      Toast.warning("Password must be at least 8 characters.");
 
-        const confirm =
-
-            document.getElementById(
-
-                "confirmPassword"
-
-            ).value;
-
-        if (password.length < 8) {
-
-            Toast.warning(
-
-                "Password must be at least 8 characters."
-
-            );
-
-            return;
-
-        }
-
-        if (password !== confirm) {
-
-            Toast.warning(
-
-                "Passwords do not match."
-
-            );
-
-            return;
-
-        }
-
-        try {
-
-            await Auth.resetPassword({
-
-                password
-
-            });
-
-            Toast.success(
-
-                "Password successfully changed."
-
-            );
-
-            setTimeout(
-
-                () => {
-
-                    window.location.href =
-
-                        "login.html";
-
-                },
-
-                1500
-
-            );
-
-        }
-
-        catch (error) {
-
-            Toast.error(
-
-                error.message ||
-
-                "Unable to reset password."
-
-            );
-
-        }
-
+      return;
     }
 
+    if (password !== confirm) {
+      Toast.warning("Passwords do not match.");
+
+      return;
+    }
+
+    try {
+      await Auth.resetPassword({
+        password,
+      });
+
+      Toast.success("Password successfully changed.");
+
+      setTimeout(
+        () => {
+          window.location.href = "login.html";
+        },
+
+        1500,
+      );
+    } catch (error) {
+      Toast.error(error.message || "Unable to reset password.");
+    }
+  }
 }
 
 document.addEventListener(
+  "DOMContentLoaded",
 
-    "DOMContentLoaded",
-
-    () => {
-
-        ResetPasswordPage.initialize();
-
-    }
-
+  () => {
+    ResetPasswordPage.initialize();
+  },
 );

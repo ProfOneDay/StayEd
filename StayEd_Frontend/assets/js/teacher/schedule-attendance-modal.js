@@ -1,25 +1,21 @@
-
 class ScheduleAttendanceModal {
+  static learner = null;
 
-    static learner = null;
+  static open(learner) {
+    this.learner = learner;
 
-    static open(learner) {
+    const a = learner.attendance || {};
 
-        this.learner = learner;
+    const nextDate = this.toDateInputValue(a.nextSession?.date);
 
-        const a = learner.attendance || {};
+    Modal.show({
+      title: "Session Schedule and Attendance",
 
-        const nextDate = this.toDateInputValue(a.nextSession?.date);
+      size: "sm",
 
-        Modal.show({
+      confirmLabel: "Save Changes",
 
-            title: "Session Schedule and Attendance",
-
-            size: "sm",
-
-            confirmLabel: "Save Changes",
-
-            message: `
+      message: `
                 <div class="st-schedule-modal-field">
                     <label>Learner</label>
                     <p class="st-schedule-modal-learner">${learner.name}</p>
@@ -53,42 +49,33 @@ class ScheduleAttendanceModal {
                 </div>
             `,
 
-            onConfirm: () => this.save()
+      onConfirm: () => this.save(),
+    });
+  }
 
-        });
+  static save() {
+    const date = document.getElementById("scheduleNextDate")?.value;
 
+    const status = document.getElementById("scheduleStatus")?.value;
+
+    if (!date) {
+      Toast?.error("Please choose a session date.");
+
+      return;
     }
 
-    static save() {
+    Toast?.success(`Session schedule saved for ${this.learner?.name}.`);
+  }
 
-        const date = document.getElementById("scheduleNextDate")?.value;
+  static toDateInputValue(displayDate) {
+    if (!displayDate) return "";
 
-        const status = document.getElementById("scheduleStatus")?.value;
+    const parsed = new Date(displayDate);
 
-        if (!date) {
+    if (isNaN(parsed.getTime())) return "";
 
-            Toast?.error("Please choose a session date.");
-
-            return;
-
-        }
-
-        Toast?.success(`Session schedule saved for ${this.learner?.name}.`);
-
-}
-
-    static toDateInputValue(displayDate) {
-
-        if (!displayDate) return "";
-
-        const parsed = new Date(displayDate);
-
-        if (isNaN(parsed.getTime())) return "";
-
-        return parsed.toISOString().split("T")[0];
-
-    }
-
+    return parsed.toISOString().split("T")[0];
+  }
 }
 
 window.ScheduleAttendanceModal = ScheduleAttendanceModal;

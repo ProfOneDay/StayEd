@@ -1,93 +1,59 @@
-
-
 class Guards {
-
-    static auth() {
-
-        if (!Auth.validateSession()) {
-
-            window.location.href = "../auth/login.html";
-
-        }
-
+  static auth() {
+    if (!Auth.validateSession()) {
+      window.location.href = "../auth/login.html";
     }
+  }
 
-    static guest() {
-
-        if (Auth.validateSession()) {
-
-            Auth.redirectAfterLogin();
-
-        }
-
+  static guest() {
+    if (Auth.validateSession()) {
+      Auth.redirectAfterLogin();
     }
+  }
 
-    static teacher() {
+  static teacher() {
+    this.auth();
 
-        this.auth();
-
-        if (Auth.role() !== "teacher") {
-
-            this.unauthorized();
-
-        }
-
+    if (Auth.role() !== "teacher") {
+      this.unauthorized();
     }
+  }
 
-    static admin() {
+  static admin() {
+    this.auth();
 
-        this.auth();
-
-        if (Auth.role() !== "admin") {
-
-            this.unauthorized();
-
-        }
-
+    if (Auth.role() !== "admin") {
+      this.unauthorized();
     }
+  }
 
-    static roles(...roles) {
+  static roles(...roles) {
+    this.auth();
 
-        this.auth();
-
-        if (!roles.includes(Auth.role())) {
-
-            this.unauthorized();
-
-        }
-
+    if (!roles.includes(Auth.role())) {
+      this.unauthorized();
     }
+  }
 
-    static unauthorized() {
+  static unauthorized() {
+    window.location.href = "../errors/403.html";
+  }
 
-        window.location.href = "../errors/403.html";
-
-    }
-
-    static notFound() {
-
-        window.location.href = "../errors/404.html";
-
-    }
-
+  static notFound() {
+    window.location.href = "../errors/404.html";
+  }
 }
 
 window.Guards = Guards;
 
 document.addEventListener(
+  "DOMContentLoaded",
 
-    "DOMContentLoaded",
+  () => {
+    console.log(
+      "%cStayEd Guards Ready",
 
-    () => {
-
-        console.log(
-
-            "%cStayEd Guards Ready",
-
-            "color:#12355B;font-weight:bold;"
-
-        );
-
-    }
-
+      "color:#12355B;font-weight:bold;",
+    );
+  },
 );

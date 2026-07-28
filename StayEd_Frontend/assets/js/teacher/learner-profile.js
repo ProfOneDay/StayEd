@@ -1,222 +1,219 @@
-
 class LearnerProfilePage {
+  static profile = null;
 
-    static profile = null;
+  static async init() {
+    if (window.Guards) Guards.teacher();
 
-    static async init() {
+    this.bindTabs();
 
-        if (window.Guards) Guards.teacher();
+    this.bindHistoryFilters();
 
-        this.bindTabs();
+    await this.load();
+  }
 
-        this.bindHistoryFilters();
+  static getLearnerId() {
+    const params = new URLSearchParams(window.location.search);
 
-        await this.load();
+    return params.get("id") || "1";
+  }
 
+  static async load() {
+    if (window.Layout) Layout.showLoader();
+
+    this.showSkeleton();
+
+    try {
+      const id = this.getLearnerId();
+
+      this.profile = await API.getLearnerProfile(id);
+
+      this.renderHero();
+
+      this.renderOverview();
+
+      this.renderMonitoringHistory();
+
+      this.renderRiskExplanation();
+
+      this.renderInterventions();
+
+      this.updatePageBreadcrumb();
+    } catch (error) {
+      console.error("[LearnerProfile]", error);
+
+      Toast?.error("Unable to load learner profile.");
+    } finally {
+      if (window.Layout) Layout.hideLoader();
     }
+  }
 
-    static getLearnerId() {
+  static updatePageBreadcrumb() {
+    if (!window.Layout || !this.profile) return;
 
-        const params = new URLSearchParams(window.location.search);
+    Layout.options.breadcrumb = [
+      { label: "Dashboard", href: "dashboard.html" },
+      { label: "Learner", href: "student-registry.html" },
+      { label: "Student Registry", href: "student-registry.html" },
+      { label: this.profile.name },
+    ];
 
-        return params.get("id") || "1";
+    Layout.updateBreadcrumb();
+  }
 
-    }
+  static bindTabs() {
+    document.querySelectorAll("[data-profile-tab]").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const target = tab.dataset.profileTab;
 
-    static async load() {
-
-        if (window.Layout) Layout.showLoader();
-
-        this.showSkeleton();
-
-        try {
-
-            const id = this.getLearnerId();
-
-            this.profile = await API.getLearnerProfile(id);
-
-            this.renderHero();
-
-            this.renderOverview();
-
-            this.renderMonitoringHistory();
-
-            this.renderRiskExplanation();
-
-            this.renderInterventions();
-
-            this.updatePageBreadcrumb();
-
-        } catch (error) {
-
-            console.error("[LearnerProfile]", error);
-
-            Toast?.error("Unable to load learner profile.");
-
-        } finally {
-
-            if (window.Layout) Layout.hideLoader();
-
-        }
-
-    }
-
-    static updatePageBreadcrumb() {
-
-        if (!window.Layout || !this.profile) return;
-
-        Layout.options.breadcrumb = [
-            { label: "Dashboard", href: "dashboard.html" },
-            { label: "Learner", href: "student-registry.html" },
-            { label: "Student Registry", href: "student-registry.html" },
-            { label: this.profile.name }
-        ];
-
-        Layout.updateBreadcrumb();
-
-    }
-
-    static bindTabs() {
-
-        document.querySelectorAll("[data-profile-tab]").forEach(tab => {
-
-            tab.addEventListener("click", () => {
-
-                const target = tab.dataset.profileTab;
-
-                document.querySelectorAll("[data-profile-tab]").forEach(t => {
-                    const active = t === tab;
-                    t.classList.toggle("is-active", active);
-                    t.setAttribute("aria-selected", active ? "true" : "false");
-                });
-
-                document.querySelectorAll("[data-profile-panel]").forEach(panel => {
-                    panel.classList.toggle("is-active", panel.dataset.profilePanel === target);
-                });
-
-            });
-
+        document.querySelectorAll("[data-profile-tab]").forEach((t) => {
+          const active = t === tab;
+          t.classList.toggle("is-active", active);
+          t.setAttribute("aria-selected", active ? "true" : "false");
         });
 
+        document.querySelectorAll("[data-profile-panel]").forEach((panel) => {
+          panel.classList.toggle(
+            "is-active",
+            panel.dataset.profilePanel === target,
+          );
+        });
+      });
+    });
+  }
+
+  static renderHero() {
+    const p = this.profile;
+
+    const initials = (p.name || "?")
+      .split(" ")
+      .map((w) => w[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
+
+    this.set("[data-profile-avatar]", initials);
+    this.set("[data-profile-name]", p.name);
+    this.set("[data-profile-lrn]", p.lrn);
+    this.set("[data-profile-clc]", p.clc || "San Felipe Sur CLC");
+    this.set("[data-profile-level]", p.level);
+    this.set("[data-profile-modality]", p.modality);
+    this.set(
+      "[data-profile-probability]",
+      `${Math.round((p.risk_probability || 0.5) * 100)}%`,
+    );
+    this.set(
+      "[data-profile-confidence]",
+      p.riskExplanation?.confidence || "High",
+    );
+
+    const badge = document.querySelector("[data-profile-risk-badge]");
+
+    if (badge) badge.innerHTML = this.riskPill(p.risk);
+
+    document
+      .querySelector("[data-profile-assign-btn]")
+      ?.addEventListener("click", () => {
+        document.querySelector('[data-profile-tab="interventions"]')?.click();
+      });
+
+    document
+      .querySelector("[data-profile-edit-btn]")
+      ?.addEventListener("click", () => {
+        Toast?.info(
+          "Learner editing will open the enrollment form once connected.",
+        );
+      });
+  }
+
+  static renderOverview() {
+    const p = this.profile;
+    const m = p.metrics || {};
+
+    this.set("[data-metric-attendance]", `${m.attendanceRate}%`);
+
+    const deltaEl = document.querySelector("[data-metric-attendance-delta]");
+
+    if (deltaEl && m.attendanceDelta != null) {
+      const isDown = m.attendanceDelta < 0;
+
+      deltaEl.classList.toggle("is-down", isDown);
+      deltaEl.classList.toggle("is-up", !isDown);
+      deltaEl.innerHTML = `<span class="material-symbols-outlined" style="font-size:12px;">${isDown ? "trending_down" : "trending_up"}</span>${m.attendanceDelta}%`;
     }
 
-    static renderHero() {
+    this.set(
+      "[data-metric-modules]",
+      `${m.modulesCompleted} of ${m.modulesTotal} Modules`,
+    );
 
-        const p = this.profile;
+    const modulesPct =
+      Math.round((m.modulesCompleted / m.modulesTotal) * 100) || 0;
 
-        const initials = (p.name || "?").split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase();
+    this.set("[data-metric-modules-pct]", `${modulesPct}%`);
 
-        this.set("[data-profile-avatar]", initials);
-        this.set("[data-profile-name]", p.name);
-        this.set("[data-profile-lrn]", p.lrn);
-        this.set("[data-profile-clc]", p.clc || "San Felipe Sur CLC");
-        this.set("[data-profile-level]", p.level);
-        this.set("[data-profile-modality]", p.modality);
-        this.set("[data-profile-probability]", `${Math.round((p.risk_probability || 0.5) * 100)}%`);
-        this.set("[data-profile-confidence]", p.riskExplanation?.confidence || "High");
+    const bar = document.querySelector("[data-metric-modules-bar]");
 
-        const badge = document.querySelector("[data-profile-risk-badge]");
+    if (bar)
+      requestAnimationFrame(() => {
+        bar.style.width = `${modulesPct}%`;
+      });
 
-        if (badge) badge.innerHTML = this.riskPill(p.risk);
+    this.set("[data-metric-timeliness]", `${m.submissionTimeliness}%`);
+    this.set(
+      "[data-metric-consultations]",
+      `${m.consultationsAttended} of ${m.consultationsTotal}`,
+    );
 
-        document.querySelector("[data-profile-assign-btn]")?.addEventListener("click", () => {
+    this.renderRiskTrendChart(p.riskTrend || []);
 
-            document.querySelector('[data-profile-tab="interventions"]')?.click();
+    this.renderRecommendedActions(p.recommendedActions || []);
 
-        });
+    this.renderMonitoringSummaryTable();
 
-        document.querySelector("[data-profile-edit-btn]")?.addEventListener("click", () => {
+    this.renderBackgroundInfo(p.background || {});
 
-            Toast?.info("Learner editing will open the enrollment form once connected.");
+    this.renderActivityFeed(p.recentActivity || []);
+  }
 
-        });
+  static renderRiskTrendChart(trend) {
+    const svg = document.querySelector("[data-risk-trend-svg]");
+    const xaxis = document.querySelector("[data-risk-trend-xaxis]");
 
-    }
+    if (!svg || !trend.length) return;
 
-    static renderOverview() {
+    const w = 600,
+      h = 220;
 
-        const p = this.profile;
-        const m = p.metrics || {};
+    const max = 100;
 
-        this.set("[data-metric-attendance]", `${m.attendanceRate}%`);
+    const points = trend.map((pt, i) => {
+      const x = (i / (trend.length - 1)) * w;
+      const y = h - (pt.value / max) * h;
+      return `${x},${y}`;
+    });
 
-        const deltaEl = document.querySelector("[data-metric-attendance-delta]");
+    const path = `M ${points.join(" L ")}`;
 
-        if (deltaEl && m.attendanceDelta != null) {
+    svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
 
-            const isDown = m.attendanceDelta < 0;
-
-            deltaEl.classList.toggle("is-down", isDown);
-            deltaEl.classList.toggle("is-up", !isDown);
-            deltaEl.innerHTML =
-                `<span class="material-symbols-outlined" style="font-size:12px;">${isDown ? "trending_down" : "trending_up"}</span>${m.attendanceDelta}%`;
-
-        }
-
-        this.set("[data-metric-modules]", `${m.modulesCompleted} of ${m.modulesTotal} Modules`);
-
-        const modulesPct = Math.round((m.modulesCompleted / m.modulesTotal) * 100) || 0;
-
-        this.set("[data-metric-modules-pct]", `${modulesPct}%`);
-
-        const bar = document.querySelector("[data-metric-modules-bar]");
-
-        if (bar) requestAnimationFrame(() => { bar.style.width = `${modulesPct}%`; });
-
-        this.set("[data-metric-timeliness]", `${m.submissionTimeliness}%`);
-        this.set("[data-metric-consultations]", `${m.consultationsAttended} of ${m.consultationsTotal}`);
-
-        this.renderRiskTrendChart(p.riskTrend || []);
-
-        this.renderRecommendedActions(p.recommendedActions || []);
-
-        this.renderMonitoringSummaryTable();
-
-        this.renderBackgroundInfo(p.background || {});
-
-        this.renderActivityFeed(p.recentActivity || []);
-
-    }
-
-    static renderRiskTrendChart(trend) {
-
-        const svg = document.querySelector("[data-risk-trend-svg]");
-        const xaxis = document.querySelector("[data-risk-trend-xaxis]");
-
-        if (!svg || !trend.length) return;
-
-        const w = 600, h = 220;
-
-        const max = 100;
-
-        const points = trend.map((pt, i) => {
-            const x = (i / (trend.length - 1)) * w;
-            const y = h - (pt.value / max) * h;
-            return `${x},${y}`;
-        });
-
-        const path = `M ${points.join(" L ")}`;
-
-        svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
-
-        svg.innerHTML = `
+    svg.innerHTML = `
             <path d="${path}" fill="none" stroke="#12355B" stroke-linecap="round" stroke-width="3"/>
             <circle cx="${points[points.length - 1].split(",")[0]}" cy="${points[points.length - 1].split(",")[1]}" r="5" fill="#12355B"/>
         `;
 
-        if (xaxis) {
-            xaxis.innerHTML = trend.map(pt => `<span>${pt.month}</span>`).join("");
-        }
-
+    if (xaxis) {
+      xaxis.innerHTML = trend.map((pt) => `<span>${pt.month}</span>`).join("");
     }
+  }
 
-    static renderRecommendedActions(actions) {
+  static renderRecommendedActions(actions) {
+    const container = document.querySelector("[data-recommended-actions]");
 
-        const container = document.querySelector("[data-recommended-actions]");
+    if (!container) return;
 
-        if (!container) return;
-
-        container.innerHTML = actions.map(a => `
+    container.innerHTML = actions
+      .map(
+        (a) => `
             <div class="st-recommend-card">
                 <div class="st-recommend-card-head">
                     <span class="st-priority-chip st-priority-chip--${a.priority}">${a.priority} priority</span>
@@ -225,76 +222,91 @@ class LearnerProfilePage {
                 <p style="font-weight:700;font-size:13px;">${a.title}</p>
                 <p style="font-size:11px;color:var(--st-on-surface-variant);">${a.text}</p>
             </div>
-        `).join("");
+        `,
+      )
+      .join("");
 
-        container.querySelectorAll("[data-assign-action]").forEach(btn => {
-            btn.addEventListener("click", () => Toast?.success("Action assigned to your task list."));
-        });
+    container.querySelectorAll("[data-assign-action]").forEach((btn) => {
+      btn.addEventListener("click", () =>
+        Toast?.success("Action assigned to your task list."),
+      );
+    });
+  }
 
-    }
+  static renderMonitoringSummaryTable() {
+    const body = document.querySelector("[data-monitoring-summary-body]");
 
-    static renderMonitoringSummaryTable() {
+    if (!body) return;
 
-        const body = document.querySelector("[data-monitoring-summary-body]");
+    const timeline = (this.profile.monitoringHistory?.timeline || []).slice(
+      0,
+      4,
+    );
 
-        if (!body) return;
-
-        const timeline = (this.profile.monitoringHistory?.timeline || []).slice(0, 4);
-
-        body.innerHTML = timeline.map(item => `
+    body.innerHTML = timeline
+      .map(
+        (item) => `
             <tr>
                 <td style="font-weight:600;color:var(--st-primary);">${this.capitalize(item.type)}</td>
                 <td>${item.date}</td>
                 <td>${this.statusBadge(item.type)}</td>
                 <td>${item.text}</td>
             </tr>
-        `).join("");
+        `,
+      )
+      .join("");
 
-        document.querySelector("[data-view-all-monitoring]")?.addEventListener("click", () => {
-            document.querySelector('[data-profile-tab="monitoring"]')?.click();
-        });
+    document
+      .querySelector("[data-view-all-monitoring]")
+      ?.addEventListener("click", () => {
+        document.querySelector('[data-profile-tab="monitoring"]')?.click();
+      });
+  }
 
-    }
+  static renderBackgroundInfo(bg) {
+    const container = document.querySelector("[data-background-info]");
 
-    static renderBackgroundInfo(bg) {
+    if (!container) return;
 
-        const container = document.querySelector("[data-background-info]");
+    const rows = {
+      "Age / Sex": `${this.profile.age || "—"} / ${this.profile.sex || "—"}`,
+      "Civil Status": bg.civilStatus,
+      Employment: bg.employment,
+      "Distance Category": bg.distanceCategory,
+      Modality: this.profile.modality,
+      "Learning Level": this.profile.level,
+      "Re-enrollee": bg.reenrollee,
+      "Years Enrolled": bg.yearsEnrolled,
+      "4Ps Beneficiary": bg.beneficiary4Ps,
+    };
 
-        if (!container) return;
-
-        const rows = {
-            "Age / Sex": `${this.profile.age || "—"} / ${this.profile.sex || "—"}`,
-            "Civil Status": bg.civilStatus,
-            "Employment": bg.employment,
-            "Distance Category": bg.distanceCategory,
-            "Modality": this.profile.modality,
-            "Learning Level": this.profile.level,
-            "Re-enrollee": bg.reenrollee,
-            "Years Enrolled": bg.yearsEnrolled,
-            "4Ps Beneficiary": bg.beneficiary4Ps
-        };
-
-        container.innerHTML = Object.entries(rows).map(([label, value]) => `
+    container.innerHTML = Object.entries(rows)
+      .map(
+        ([label, value]) => `
             <div class="st-sidebar-info-row">
                 <span>${label}</span>
                 <span>${value ?? "—"}</span>
             </div>
-        `).join("");
+        `,
+      )
+      .join("");
+  }
 
-    }
+  static renderActivityFeed(activity) {
+    const container = document.querySelector("[data-activity-feed]");
 
-    static renderActivityFeed(activity) {
+    if (!container) return;
 
-        const container = document.querySelector("[data-activity-feed]");
+    const iconMap = {
+      trending_up: "trending_up",
+      "file-check": "task_alt",
+      users: "groups",
+      mail: "mail",
+    };
 
-        if (!container) return;
-
-        const iconMap = {
-            trending_up: "trending_up", "file-check": "task_alt",
-            users: "groups", mail: "mail"
-        };
-
-        container.innerHTML = activity.map(item => `
+    container.innerHTML = activity
+      .map(
+        (item) => `
             <div class="st-activity-item">
                 <div class="st-activity-dot st-activity-dot--${item.tone}">
                     <span class="material-symbols-outlined">${iconMap[item.icon] || "circle"}</span>
@@ -303,45 +315,45 @@ class LearnerProfilePage {
                 <p class="st-activity-sub">${item.sub}</p>
                 ${item.date ? `<p class="st-activity-date">${item.date}</p>` : ""}
             </div>
-        `).join("");
+        `,
+      )
+      .join("");
+  }
 
-    }
+  static renderMonitoringHistory() {
+    const timeline = this.profile.monitoringHistory?.timeline || [];
 
-static renderMonitoringHistory() {
+    this.allTimelineItems = timeline;
 
-        const timeline = this.profile.monitoringHistory?.timeline || [];
+    this.renderTimeline(timeline);
+  }
 
-        this.allTimelineItems = timeline;
+  static renderTimeline(items) {
+    const container = document.querySelector("[data-monitoring-timeline]");
 
-        this.renderTimeline(timeline);
+    if (!container) return;
 
-    }
-
-    static renderTimeline(items) {
-
-        const container = document.querySelector("[data-monitoring-timeline]");
-
-        if (!container) return;
-
-        if (!items.length) {
-
-            container.innerHTML = `
+    if (!items.length) {
+      container.innerHTML = `
                 <div class="st-empty">
                     <span class="material-symbols-outlined">history</span>
                     <p class="st-empty-title">No monitoring records yet</p>
                 </div>
             `;
 
-            return;
+      return;
+    }
 
-        }
+    const iconMap = {
+      attendance: "event_busy",
+      module: "assignment_late",
+      intervention: "support_agent",
+      note: "sticky_note_2",
+    };
 
-        const iconMap = {
-            attendance: "event_busy", module: "assignment_late",
-            intervention: "support_agent", note: "sticky_note_2"
-        };
-
-        container.innerHTML = items.map(item => `
+    container.innerHTML = items
+      .map(
+        (item) => `
             <div class="st-timeline-item">
                 <div class="st-timeline-dot st-timeline-dot--${item.type}">
                     <span class="material-symbols-outlined">${iconMap[item.type] || "circle"}</span>
@@ -354,72 +366,70 @@ static renderMonitoringHistory() {
                     <p class="st-timeline-card-text">${item.text}</p>
                 </div>
             </div>
-        `).join("");
+        `,
+      )
+      .join("");
+  }
 
-    }
+  static bindHistoryFilters() {
+    document.querySelectorAll("[data-history-filter]").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        document
+          .querySelectorAll("[data-history-filter]")
+          .forEach((c) => c.classList.remove("is-active"));
 
-    static bindHistoryFilters() {
+        chip.classList.add("is-active");
 
-        document.querySelectorAll("[data-history-filter]").forEach(chip => {
+        const filter = chip.dataset.historyFilter;
 
-            chip.addEventListener("click", () => {
+        const all = this.allTimelineItems || [];
 
-                document.querySelectorAll("[data-history-filter]").forEach(c => c.classList.remove("is-active"));
+        const filtered = filter === "all" ? all : all.slice(-3);
 
-                chip.classList.add("is-active");
+        this.renderTimeline(filtered);
+      });
+    });
 
-                const filter = chip.dataset.historyFilter;
+    document
+      .querySelector("[data-history-search]")
+      ?.addEventListener("input", (e) => {
+        const q = e.target.value.toLowerCase();
 
-                const all = this.allTimelineItems || [];
+        const all = this.allTimelineItems || [];
 
-                const filtered =
-                    filter === "all" ? all : all.slice(-3);
+        const filtered = q
+          ? all.filter(
+              (item) =>
+                item.title.toLowerCase().includes(q) ||
+                item.date.toLowerCase().includes(q),
+            )
+          : all;
 
-                this.renderTimeline(filtered);
+        this.renderTimeline(filtered);
+      });
+  }
 
-            });
+  static renderRiskExplanation() {
+    const r = this.profile.riskExplanation || {};
 
-        });
+    const badge = document.querySelector("[data-risk-current-badge]");
 
-        document.querySelector("[data-history-search]")?.addEventListener("input", e => {
+    if (badge) badge.innerHTML = this.riskPill(this.profile.risk);
 
-            const q = e.target.value.toLowerCase();
+    this.set("[data-risk-probability]", `${r.probability}%`);
+    this.set("[data-risk-confidence]", r.confidence);
+    this.set("[data-risk-last]", r.lastPrediction);
+    this.set("[data-risk-model]", r.model);
+    this.set("[data-risk-summary]", r.summary);
+    this.set("[data-risk-previous]", r.previousRisk);
+    this.set("[data-risk-current]", r.currentRisk);
 
-            const all = this.allTimelineItems || [];
+    const changesList = document.querySelector("[data-risk-changes]");
 
-            const filtered = q
-                ? all.filter(item =>
-                    item.title.toLowerCase().includes(q) ||
-                    item.date.toLowerCase().includes(q))
-                : all;
-
-            this.renderTimeline(filtered);
-
-        });
-
-    }
-
-static renderRiskExplanation() {
-
-        const r = this.profile.riskExplanation || {};
-
-        const badge = document.querySelector("[data-risk-current-badge]");
-
-        if (badge) badge.innerHTML = this.riskPill(this.profile.risk);
-
-        this.set("[data-risk-probability]", `${r.probability}%`);
-        this.set("[data-risk-confidence]", r.confidence);
-        this.set("[data-risk-last]", r.lastPrediction);
-        this.set("[data-risk-model]", r.model);
-        this.set("[data-risk-summary]", r.summary);
-        this.set("[data-risk-previous]", r.previousRisk);
-        this.set("[data-risk-current]", r.currentRisk);
-
-        const changesList = document.querySelector("[data-risk-changes]");
-
-        if (changesList) {
-
-            changesList.innerHTML = (r.changes || []).map(c => `
+    if (changesList) {
+      changesList.innerHTML = (r.changes || [])
+        .map(
+          (c) => `
                 <li>
                     <span class="st-change-list-label">
                         <span class="material-symbols-outlined" style="color:var(--st-risk-${c.tone === "error" ? "high" : c.tone === "moderate" ? "moderate" : "low"});">${c.icon}</span>
@@ -427,15 +437,17 @@ static renderRiskExplanation() {
                     </span>
                     <span style="font-weight:700;color:var(--st-risk-${c.tone === "error" ? "high" : c.tone === "moderate" ? "moderate" : "low"});">${c.severity}</span>
                 </li>
-            `).join("");
+            `,
+        )
+        .join("");
+    }
 
-        }
+    const contributors = document.querySelector("[data-risk-contributors]");
 
-        const contributors = document.querySelector("[data-risk-contributors]");
-
-        if (contributors) {
-
-            contributors.innerHTML = (r.contributors || []).map(c => `
+    if (contributors) {
+      contributors.innerHTML = (r.contributors || [])
+        .map(
+          (c) => `
                 <div class="st-contributor-item">
                     <span class="material-symbols-outlined" style="color:var(--st-risk-${c.tone === "error" ? "high" : c.tone === "moderate" ? "moderate" : "low"});font-size:18px;">${c.icon}</span>
                     <div>
@@ -446,34 +458,32 @@ static renderRiskExplanation() {
                         <p class="st-contributor-text">${c.text}</p>
                     </div>
                 </div>
-            `).join("");
+            `,
+        )
+        .join("");
+    }
 
-        }
+    const details = document.querySelector("[data-risk-details]");
 
-        const details = document.querySelector("[data-risk-details]");
-
-        if (details) {
-
-            details.innerHTML = `
+    if (details) {
+      details.innerHTML = `
                 <div class="st-sidebar-info-row"><span>Model</span><span>${r.model || "—"}</span></div>
                 <div class="st-sidebar-info-row"><span>Confidence</span><span style="color:var(--st-secondary);">${r.confidence || "—"}</span></div>
                 <div class="st-sidebar-info-row"><span>Last Updated</span><span>${r.lastPrediction || "—"}</span></div>
                 <div class="st-sidebar-info-row"><span>Records Used</span><span style="text-align:right;">${r.recordsUsed || "—"}</span></div>
             `;
-
-        }
-
     }
+  }
 
-static renderInterventions() {
+  static renderInterventions() {
+    const iv = this.profile.interventions || {};
 
-        const iv = this.profile.interventions || {};
+    const recs = document.querySelector("[data-intervention-recommendations]");
 
-        const recs = document.querySelector("[data-intervention-recommendations]");
-
-        if (recs) {
-
-            recs.innerHTML = (iv.recommended || []).map(r => `
+    if (recs) {
+      recs.innerHTML = (iv.recommended || [])
+        .map(
+          (r) => `
                 <div class="st-intervention-card">
                     <div class="st-intervention-card-head">
                         <div class="st-intervention-card-title-row">
@@ -489,21 +499,23 @@ static renderInterventions() {
                         <button type="button" class="st-btn st-btn-primary st-btn-xs" data-select-intervention="${r.rank}">Select Intervention</button>
                     </div>
                 </div>
-            `).join("");
+            `,
+        )
+        .join("");
 
-            recs.querySelectorAll("[data-select-intervention]").forEach(btn => {
-                btn.addEventListener("click", () => {
-                    Toast?.success("Intervention selected and added to Active Interventions.");
-                });
-            });
+      recs.querySelectorAll("[data-select-intervention]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          Toast?.success(
+            "Intervention selected and added to Active Interventions.",
+          );
+        });
+      });
+    }
 
-        }
+    const active = document.querySelector("[data-active-intervention]");
 
-        const active = document.querySelector("[data-active-intervention]");
-
-        if (active && iv.active) {
-
-            active.innerHTML = `
+    if (active && iv.active) {
+      active.innerHTML = `
                 <div class="st-active-intervention">
                     <div>
                         <div style="display:flex;align-items:center;gap:8px;">
@@ -525,21 +537,25 @@ static renderInterventions() {
                 </div>
             `;
 
-            active.querySelector("[data-update-status]")?.addEventListener("click", () => {
-                Toast?.info("Status update form will open here.");
-            });
+      active
+        .querySelector("[data-update-status]")
+        ?.addEventListener("click", () => {
+          Toast?.info("Status update form will open here.");
+        });
 
-            active.querySelector("[data-add-outcome]")?.addEventListener("click", () => {
-                Toast?.info("Outcome logging will open here.");
-            });
+      active
+        .querySelector("[data-add-outcome]")
+        ?.addEventListener("click", () => {
+          Toast?.info("Outcome logging will open here.");
+        });
+    }
 
-        }
+    const history = document.querySelector("[data-intervention-history]");
 
-        const history = document.querySelector("[data-intervention-history]");
-
-        if (history) {
-
-            history.innerHTML = (iv.history || []).map((h, i) => `
+    if (history) {
+      history.innerHTML = (iv.history || [])
+        .map(
+          (h, i) => `
                 <div class="st-expand-card" data-history-card>
                     <div class="st-expand-card-header" data-history-toggle>
                         <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
@@ -562,30 +578,37 @@ static renderInterventions() {
                         </div>
                     </div>
                 </div>
-            `).join("");
+            `,
+        )
+        .join("");
 
-            history.querySelectorAll("[data-history-toggle]").forEach(header => {
-                header.addEventListener("click", () => {
-                    header.closest(".st-expand-card")?.classList.toggle("is-open");
-                });
-            });
+      history.querySelectorAll("[data-history-toggle]").forEach((header) => {
+        header.addEventListener("click", () => {
+          header.closest(".st-expand-card")?.classList.toggle("is-open");
+        });
+      });
 
-            history.querySelectorAll("[data-history-archive]").forEach(btn => {
-                btn.addEventListener("click", e => {
-                    e.stopPropagation();
-                    Toast?.success("Intervention archived.");
-                });
-            });
+      history.querySelectorAll("[data-history-archive]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          Toast?.success("Intervention archived.");
+        });
+      });
+    }
 
-        }
+    const factors = document.querySelector("[data-current-risk-factors]");
 
-        const factors = document.querySelector("[data-current-risk-factors]");
+    if (factors) {
+      const toneMap = {
+        error: "var(--st-risk-high)",
+        moderate: "var(--st-risk-moderate)",
+        neutral: "#60a5fa",
+      };
 
-        if (factors) {
-
-            const toneMap = { error: "var(--st-risk-high)", moderate: "var(--st-risk-moderate)", neutral: "#60a5fa" };
-
-            factors.innerHTML = (this.profile.riskExplanation?.contributors || []).slice(0, 3).map(c => `
+      factors.innerHTML = (this.profile.riskExplanation?.contributors || [])
+        .slice(0, 3)
+        .map(
+          (c) => `
                 <div class="st-risk-factor-item">
                     <span class="st-risk-factor-dot" style="background:${toneMap[c.tone] || "var(--st-outline)"};"></span>
                     <div>
@@ -593,65 +616,69 @@ static renderInterventions() {
                         <p style="font-size:11px;color:var(--st-on-surface-variant);">${c.text}</p>
                     </div>
                 </div>
-            `).join("");
+            `,
+        )
+        .join("");
+    }
+  }
 
-        }
+  static showSkeleton() {
+    const monitoringBody = document.querySelector(
+      "[data-monitoring-summary-body]",
+    );
 
+    if (monitoringBody && window.Skeletons) {
+      monitoringBody.innerHTML = Skeletons.tableRows(3, 4);
     }
 
-static showSkeleton() {
+    const timeline = document.querySelector("[data-monitoring-timeline]");
 
-        const monitoringBody = document.querySelector("[data-monitoring-summary-body]");
-
-        if (monitoringBody && window.Skeletons) {
-
-            monitoringBody.innerHTML = Skeletons.tableRows(3, 4);
-
-        }
-
-        const timeline = document.querySelector("[data-monitoring-timeline]");
-
-        if (timeline && window.Skeletons) {
-
-            timeline.innerHTML = Skeletons.listItems(4);
-
-        }
-
+    if (timeline && window.Skeletons) {
+      timeline.innerHTML = Skeletons.listItems(4);
     }
+  }
 
-    static riskPill(risk) {
-        const cls = { High: "high", Moderate: "moderate", Low: "low" }[risk] || "low";
-        return `<span class="st-risk-badge st-risk-badge--${cls}" style="padding:4px 16px;font-size:12px;"><span class="st-risk-dot"></span>${risk} Risk</span>`;
+  static riskPill(risk) {
+    const cls =
+      { High: "high", Moderate: "moderate", Low: "low" }[risk] || "low";
+    return `<span class="st-risk-badge st-risk-badge--${cls}" style="padding:4px 16px;font-size:12px;"><span class="st-risk-dot"></span>${risk} Risk</span>`;
+  }
+
+  static statusBadge(type) {
+    const map = {
+      attendance:
+        '<span class="st-risk-badge st-risk-badge--high"><span class="st-risk-dot"></span>Flagged</span>',
+      module:
+        '<span class="st-risk-badge st-risk-badge--moderate"><span class="st-risk-dot"></span>Late</span>',
+      intervention:
+        '<span class="st-risk-badge st-risk-badge--low"><span class="st-risk-dot"></span>Resolved</span>',
+      note: '<span class="st-pill">Note</span>',
+    };
+    return map[type] || '<span class="st-pill">—</span>';
+  }
+
+  static capitalize(s) {
+    return s ? s[0].toUpperCase() + s.slice(1) : s;
+  }
+
+  static set(selector, value) {
+    const el = document.querySelector(selector);
+    if (el && value !== undefined && value !== null) {
+      el.textContent = value;
     }
-
-    static statusBadge(type) {
-        const map = {
-            attendance: '<span class="st-risk-badge st-risk-badge--high"><span class="st-risk-dot"></span>Flagged</span>',
-            module: '<span class="st-risk-badge st-risk-badge--moderate"><span class="st-risk-dot"></span>Late</span>',
-            intervention: '<span class="st-risk-badge st-risk-badge--low"><span class="st-risk-dot"></span>Resolved</span>',
-            note: '<span class="st-pill">Note</span>'
-        };
-        return map[type] || '<span class="st-pill">—</span>';
-    }
-
-    static capitalize(s) {
-        return s ? s[0].toUpperCase() + s.slice(1) : s;
-    }
-
-    static set(selector, value) {
-        const el = document.querySelector(selector);
-        if (el && value !== undefined && value !== null) {
-            el.textContent = value;
-        }
-    }
-
+  }
 }
 
 (function bootLearnerProfile() {
-    let started = false;
-    const start = () => { if (!started) { started = true; LearnerProfilePage.init(); } };
-    document.addEventListener("components:loaded", start);
-    document.addEventListener("DOMContentLoaded", () => setTimeout(start, 400));
+  let started = false;
+  const start = () => {
+    if (!started) {
+      started = true;
+      LearnerProfilePage.init();
+    }
+  };
+  document.addEventListener("components:loaded", start);
+  document.addEventListener("DOMContentLoaded", () => setTimeout(start, 400));
 })();
 
 window.LearnerProfilePage = LearnerProfilePage;

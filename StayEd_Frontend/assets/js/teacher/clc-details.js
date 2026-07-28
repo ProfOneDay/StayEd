@@ -1,121 +1,116 @@
-
 class ClcDetails {
+  static async init() {
+    if (window.Guards) Guards.teacher();
 
-    static async init() {
+    this.form = document.getElementById("clcDetailsForm");
 
-        if (window.Guards) Guards.teacher();
+    if (!this.form) return;
 
-        this.form = document.getElementById("clcDetailsForm");
+    window.UnsavedChanges?.track(this.form);
 
-        if (!this.form) return;
+    this.form.addEventListener("submit", this.submit.bind(this));
+  }
 
-        window.UnsavedChanges?.track(this.form);
+  static async submit(event) {
+    event.preventDefault();
 
-        this.form.addEventListener("submit", this.submit.bind(this));
+    const fields = [
+      { id: "clcMunicipality", label: "Municipality" },
+      { id: "clcName", label: "CLC Name" },
+      { id: "clcLevel", label: "Learning Level" },
+      { id: "clcPhone", label: "Contact Number" },
+      { id: "clcAddress", label: "Address" },
+      { id: "clcCoordinatorName", label: "Coordinator Name" },
+    ];
 
+    let valid = true;
+
+    fields.forEach(({ id }) => {
+      const el = document.getElementById(id);
+
+      const group = el.closest(".st-clc-field");
+
+      const isEmpty = !el.value || el.value.trim() === "";
+
+      group.classList.toggle("is-invalid", isEmpty);
+
+      if (el.classList) {
+        el.classList.toggle("has-error", isEmpty);
+      }
+
+      if (isEmpty) valid = false;
+    });
+
+    if (!valid) {
+      Toast?.error("Please complete all required fields.");
+
+      return;
     }
 
-    static async submit(event) {
+    const submitBtn = document.getElementById("clcNextBtn");
 
-        event.preventDefault();
+    const originalHtml = submitBtn.innerHTML;
 
-        const fields = [
-            { id: "clcMunicipality", label: "Municipality" },
-            { id: "clcName", label: "CLC Name" },
-            { id: "clcLevel", label: "Learning Level" },
-            { id: "clcPhone", label: "Contact Number" },
-            { id: "clcAddress", label: "Address" },
-            { id: "clcCoordinatorName", label: "Coordinator Name" }
-        ];
+    submitBtn.disabled = true;
 
-        let valid = true;
+    submitBtn.innerHTML = `<span class="material-symbols-outlined">progress_activity</span> Saving…`;
 
-        fields.forEach(({ id }) => {
+    const payload = {
+      municipality: document.getElementById("clcMunicipality").value,
+      name: document.getElementById("clcName").value.trim(),
+      schoolYear: document.getElementById("clcSchoolYear").value,
+      learningLevel: document.getElementById("clcLevel").value,
+      phone: document.getElementById("clcPhone").value.trim(),
+      email: document.getElementById("clcEmail").value.trim(),
+      address: document.getElementById("clcAddress").value.trim(),
+      province: document.getElementById("clcProvince").value.trim(),
+      zip: document.getElementById("clcZip").value.trim(),
+      coordinatorName: document
+        .getElementById("clcCoordinatorName")
+        .value.trim(),
+      coordinatorEmail: document
+        .getElementById("clcCoordinatorEmail")
+        .value.trim(),
+      location: [
+        document.getElementById("clcAddress").value.trim(),
+        document.getElementById("clcMunicipality").value,
+      ]
+        .filter(Boolean)
+        .join(", "),
+    };
 
-            const el = document.getElementById(id);
+    try {
+      await API.createClc(payload);
 
-            const group = el.closest(".st-clc-field");
+      window.UnsavedChanges?.clear(this.form);
 
-            const isEmpty = !el.value || el.value.trim() === "";
+      Toast?.success("CLC details saved. Continue to upload learner records.");
 
-            group.classList.toggle("is-invalid", isEmpty);
+      setTimeout(() => {
+        window.location.href = "clc-upload.html";
+      }, 600);
+    } catch (error) {
+      console.error(error);
 
-            if (el.classList) {
-                el.classList.toggle("has-error", isEmpty);
-            }
+      Toast?.error("Unable to save CLC details.");
 
-            if (isEmpty) valid = false;
+      submitBtn.disabled = false;
 
-        });
-
-        if (!valid) {
-
-            Toast?.error("Please complete all required fields.");
-
-            return;
-
-        }
-
-        const submitBtn = document.getElementById("clcNextBtn");
-
-        const originalHtml = submitBtn.innerHTML;
-
-        submitBtn.disabled = true;
-
-        submitBtn.innerHTML =
-            `<span class="material-symbols-outlined">progress_activity</span> Saving…`;
-
-        const payload = {
-            municipality: document.getElementById("clcMunicipality").value,
-            name: document.getElementById("clcName").value.trim(),
-            schoolYear: document.getElementById("clcSchoolYear").value,
-            learningLevel: document.getElementById("clcLevel").value,
-            phone: document.getElementById("clcPhone").value.trim(),
-            email: document.getElementById("clcEmail").value.trim(),
-            address: document.getElementById("clcAddress").value.trim(),
-            province: document.getElementById("clcProvince").value.trim(),
-            zip: document.getElementById("clcZip").value.trim(),
-            coordinatorName: document.getElementById("clcCoordinatorName").value.trim(),
-            coordinatorEmail: document.getElementById("clcCoordinatorEmail").value.trim(),
-            location: [
-                document.getElementById("clcAddress").value.trim(),
-                document.getElementById("clcMunicipality").value
-            ].filter(Boolean).join(", ")
-        };
-
-        try {
-
-            await API.createClc(payload);
-
-            window.UnsavedChanges?.clear(this.form);
-
-            Toast?.success("CLC details saved. Continue to upload learner records.");
-
-            setTimeout(() => {
-                window.location.href = "clc-upload.html";
-            }, 600);
-
-        } catch (error) {
-
-            console.error(error);
-
-            Toast?.error("Unable to save CLC details.");
-
-            submitBtn.disabled = false;
-
-            submitBtn.innerHTML = originalHtml;
-
-        }
-
+      submitBtn.innerHTML = originalHtml;
     }
-
+  }
 }
 
 (function bootClcDetails() {
-    let started = false;
-    const start = () => { if (!started) { started = true; ClcDetails.init(); } };
-    document.addEventListener("components:loaded", start);
-    document.addEventListener("DOMContentLoaded", () => setTimeout(start, 300));
+  let started = false;
+  const start = () => {
+    if (!started) {
+      started = true;
+      ClcDetails.init();
+    }
+  };
+  document.addEventListener("components:loaded", start);
+  document.addEventListener("DOMContentLoaded", () => setTimeout(start, 300));
 })();
 
 window.ClcDetails = ClcDetails;

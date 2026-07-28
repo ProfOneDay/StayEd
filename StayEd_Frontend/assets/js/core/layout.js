@@ -1,1066 +1,601 @@
-
-
 class Layout {
+  static init(options = {}) {
+    this.options = {
+      role: "teacher",
 
-    static init(options = {}) {
+      page: "",
 
-        this.options = {
+      title: "",
 
-            role: "teacher",
+      breadcrumb: [],
 
-            page: "",
+      ...options,
+    };
 
-            title: "",
+    this.cache();
 
-            breadcrumb: [],
+    this.restoreUser();
 
-            ...options
+    this.initializeSidebar();
 
-        };
+    this.initializeNavbar();
 
-        this.cache();
+    this.initializeFooter();
 
-        this.restoreUser();
+    this.initializeResponsiveSidebar();
 
-        this.initializeSidebar();
+    this.initializeLogout();
 
-        this.initializeNavbar();
+    this.highlightCurrentPage();
 
-        this.initializeFooter();
+    this.initializeSubmenus();
 
-        this.initializeResponsiveSidebar();
+    this.updateBreadcrumb();
+  }
 
-        this.initializeLogout();
+  static cache() {
+    this.sidebar = document.querySelector(".st-sidebar");
 
-        this.highlightCurrentPage();
+    this.navbar = document.querySelector(".st-navbar");
 
-        this.initializeSubmenus();
+    this.footer = document.querySelector(".st-footer");
 
-        this.updateBreadcrumb();
+    this.main = document.querySelector(".st-main");
 
-    }
+    this.content = document.querySelector(".st-content");
+  }
 
-static cache() {
+  static restoreUser() {
+    const user = Utils.storage.get(
+      "stayed_user",
 
-        this.sidebar = document.querySelector(".st-sidebar");
+      {},
+    );
 
-        this.navbar = document.querySelector(".st-navbar");
+    const fullName =
+      user.full_name ||
+      [user.first_name, user.last_name]
 
-        this.footer = document.querySelector(".st-footer");
+        .filter(Boolean)
 
-        this.main = document.querySelector(".st-main");
+        .join(" ") ||
+      "Teacher";
 
-        this.content = document.querySelector(".st-content");
+    document
 
-    }
+      .querySelectorAll("[data-st-user-name]")
 
-    static restoreUser() {
+      .forEach((element) => {
+        element.textContent = fullName;
+      });
 
-        const user = Utils.storage.get(
+    document
 
-            "stayed_user",
+      .querySelectorAll("[data-st-user-role]")
 
-            {}
+      .forEach((element) => {
+        element.textContent = user.role || "ALS Teacher";
+      });
 
-        );
+    document
 
-        const fullName =
+      .querySelectorAll("[data-st-user-avatar]")
 
-            user.full_name ||
-
-            [
-
-                user.first_name,
-
-                user.last_name
-
-            ]
-
-            .filter(Boolean)
-
-            .join(" ")
-
-            ||
-
-            "Teacher";
-
-        document
-
-            .querySelectorAll(
-
-                "[data-st-user-name]"
-
-            )
-
-            .forEach(element => {
-
-                element.textContent = fullName;
-
-            });
-
-        document
-
-            .querySelectorAll(
-
-                "[data-st-user-role]"
-
-            )
-
-            .forEach(element => {
-
-                element.textContent =
-
-                    user.role ||
-
-                    "ALS Teacher";
-
-            });
-
-        document
-
-            .querySelectorAll(
-
-                "[data-st-user-avatar]"
-
-            )
-
-            .forEach(image => {
-
-                if (
-
-                    user.avatar
-
-                ) {
-
-                    image.src =
-
-                        user.avatar;
-
-                }
-
-            });
-
-    }
-
-    static initializeSidebar() {
-
-        if (!this.sidebar) {
-
-            return;
-
+      .forEach((image) => {
+        if (user.avatar) {
+          image.src = user.avatar;
         }
+      });
+  }
 
-        const toggle =
-
-            document.getElementById(
-
-                "sidebarToggle"
-
-            );
-
-        if (!toggle) {
-
-            return;
-
-        }
-
-        this.restoreSidebarCollapsedState();
-
-        toggle.addEventListener(
-
-            "click",
-
-            () => {
-
-                if (window.innerWidth > 992) {
-
-                    this.toggleSidebarCollapsed();
-
-                } else {
-
-                    this.sidebar.classList.toggle(
-
-                        "open"
-
-                    );
-
-                }
-
-            }
-
-        );
-
+  static initializeSidebar() {
+    if (!this.sidebar) {
+      return;
     }
 
-    static SIDEBAR_COLLAPSED_KEY = "stayed_sidebar_collapsed";
+    const toggle = document.getElementById("sidebarToggle");
 
-    static toggleSidebarCollapsed() {
-
-        const collapsed =
-            this.sidebar.classList.toggle("is-collapsed");
-
-        document.querySelector(".st-app")
-            ?.classList.toggle("is-sidebar-collapsed", collapsed);
-
-        document.getElementById("sidebarToggle")
-            ?.setAttribute("aria-expanded", collapsed ? "false" : "true");
-
-        try {
-
-            localStorage.setItem(
-                this.SIDEBAR_COLLAPSED_KEY,
-                collapsed ? "1" : "0"
-            );
-
-        } catch {
-
-}
-
+    if (!toggle) {
+      return;
     }
 
-    static restoreSidebarCollapsedState() {
+    this.restoreSidebarCollapsedState();
 
-        let collapsed = false;
+    toggle.addEventListener(
+      "click",
 
-        try {
-
-            collapsed =
-                localStorage.getItem(this.SIDEBAR_COLLAPSED_KEY) === "1";
-
-        } catch {
-
-            collapsed = false;
-
-        }
-
-        if (collapsed) {
-
-            this.sidebar.classList.add("is-collapsed");
-
-            document.querySelector(".st-app")
-                ?.classList.add("is-sidebar-collapsed");
-
-        }
-
-        document.getElementById("sidebarToggle")
-            ?.setAttribute("aria-expanded", collapsed ? "false" : "true");
-
-    }
-
-    static initializeSubmenus() {
-
-        document.querySelectorAll("[data-submenu]").forEach(submenu => {
-
-            const key = submenu.dataset.submenu;
-
-            const trigger = submenu.querySelector("[data-submenu-trigger]");
-
-            const hasActiveChild =
-                Boolean(submenu.querySelector(".st-submenu-list a.active"));
-
-            const remembered = this.getSubmenuExpanded(key);
-
-            const shouldExpand = hasActiveChild || remembered;
-
-            if (shouldExpand) {
-
-                submenu.classList.add("is-expanded");
-
-            }
-
-            trigger?.setAttribute("aria-expanded", shouldExpand ? "true" : "false");
-
-            if (hasActiveChild) {
-
-                trigger?.classList.add("has-active-child");
-
-            }
-
-            trigger?.addEventListener("click", () => {
-
-                if (this.sidebar.classList.contains("is-collapsed")) {
-
-                    this.toggleSidebarCollapsed();
-
-                    submenu.classList.add("is-expanded");
-
-                    trigger.setAttribute("aria-expanded", "true");
-
-                    this.setSubmenuExpanded(key, true);
-
-                    return;
-
-                }
-
-                const expanded = submenu.classList.toggle("is-expanded");
-
-                trigger.setAttribute("aria-expanded", expanded ? "true" : "false");
-
-                this.setSubmenuExpanded(key, expanded);
-
-            });
-
-        });
-
-    }
-
-    static getSubmenuExpanded(key) {
-
-        try {
-
-            return localStorage.getItem(`stayed_submenu_${key}`) === "1";
-
-        } catch {
-
-            return false;
-
-        }
-
-    }
-
-    static setSubmenuExpanded(key, expanded) {
-
-        try {
-
-            localStorage.setItem(
-                `stayed_submenu_${key}`,
-                expanded ? "1" : "0"
-            );
-
-        } catch {
-
-}
-
-    }
-
-    static initializeNavbar() {
-
-        this.updatePageTitle();
-
-        this.initializeNotifications();
-
-        this.initializeUserMenu();
-
-    }
-
-    static updatePageTitle() {
-
-        const titleElements = document.querySelectorAll(
-
-            "[data-st-page-title]"
-
-        );
-
-        titleElements.forEach(element => {
-
-            element.textContent =
-
-                this.options.title ||
-
-                document.title ||
-
-                "StayEd";
-
-        });
-
-        if (this.options.title) {
-
-            document.title = `StayEd | ${this.options.title}`;
-
-        }
-
-    }
-
-    static initializeNotifications() {
-
-        const button = document.querySelector(
-
-            "[data-st-notifications]"
-
-        );
-
-        if (button) {
-
-            button.addEventListener("click", () => {
-
-                Router?.go("/notifications") ??
-                    (window.location.href = "notifications.html");
-
-            });
-
-        }
-
-        const settingsButton = document.querySelector(
-
-            "[data-st-settings]"
-
-        );
-
-        settingsButton?.addEventListener("click", () => {
-
-            Router?.go("/settings") ??
-                (window.location.href = "settings.html");
-
-        });
-
-    }
-
-    static initializeUserMenu() {
-
-        const trigger = document.querySelector(
-
-            "[data-st-user-menu]"
-
-        );
-
-        const menu = document.querySelector(
-
-            "[data-st-user-dropdown]"
-
-        );
-
-        if (!trigger || !menu) {
-
-            return;
-
-        }
-
-        trigger.addEventListener("click", event => {
-
-            event.stopPropagation();
-
-            menu.classList.toggle("st-hidden");
-
-        });
-
-        document.addEventListener("click", () => {
-
-            menu.classList.add("st-hidden");
-
-        });
-
-    }
-
-    static highlightCurrentPage() {
-
-        const current =
-
-            this.options.page ||
-
-            window.location.pathname
-
-                .split("/")
-
-                .pop();
-
-        document
-
-            .querySelectorAll(
-
-                ".st-sidebar a"
-
-            )
-
-            .forEach(link => {
-
-                link.classList.remove(
-
-                    "active"
-
-                );
-
-                const href =
-
-                    link.getAttribute("href");
-
-                if (!href) {
-
-                    return;
-
-                }
-
-                if (
-
-                    href.endsWith(current)
-
-                ) {
-
-                    link.classList.add(
-
-                        "active"
-
-                    );
-
-                }
-
-            });
-
-    }
-
-    static updateBreadcrumb() {
-
-        const container = document.querySelector(
-
-            "[data-st-breadcrumb]"
-
-        );
-
-        if (!container) {
-
-            return;
-
-        }
-
-        const filename =
-            this.options.page ||
-            window.location.pathname.split("/").pop();
-
-        let items;
-
-        if (this.options.breadcrumb.length) {
-
-            items = this.options.breadcrumb.map(entry =>
-                typeof entry === "string"
-                    ? { label: entry }
-                    : entry
-            );
-
-        } else if (window.Router) {
-
-            items = Router.breadcrumbFor(filename, this.options.title);
-
+      () => {
+        if (window.innerWidth > 992) {
+          this.toggleSidebarCollapsed();
         } else {
+          this.sidebar.classList.toggle("open");
+        }
+      },
+    );
+  }
 
-            items = [
-                { label: "Dashboard", href: "dashboard.html" },
-                { label: this.options.title || filename }
-            ];
+  static SIDEBAR_COLLAPSED_KEY = "stayed_sidebar_collapsed";
 
+  static toggleSidebarCollapsed() {
+    const collapsed = this.sidebar.classList.toggle("is-collapsed");
+
+    document
+      .querySelector(".st-app")
+      ?.classList.toggle("is-sidebar-collapsed", collapsed);
+
+    document
+      .getElementById("sidebarToggle")
+      ?.setAttribute("aria-expanded", collapsed ? "false" : "true");
+
+    try {
+      localStorage.setItem(this.SIDEBAR_COLLAPSED_KEY, collapsed ? "1" : "0");
+    } catch {}
+  }
+
+  static restoreSidebarCollapsedState() {
+    let collapsed = false;
+
+    try {
+      collapsed = localStorage.getItem(this.SIDEBAR_COLLAPSED_KEY) === "1";
+    } catch {
+      collapsed = false;
+    }
+
+    if (collapsed) {
+      this.sidebar.classList.add("is-collapsed");
+
+      document.querySelector(".st-app")?.classList.add("is-sidebar-collapsed");
+    }
+
+    document
+      .getElementById("sidebarToggle")
+      ?.setAttribute("aria-expanded", collapsed ? "false" : "true");
+  }
+
+  static initializeSubmenus() {
+    document.querySelectorAll("[data-submenu]").forEach((submenu) => {
+      const key = submenu.dataset.submenu;
+
+      const trigger = submenu.querySelector("[data-submenu-trigger]");
+
+      const hasActiveChild = Boolean(
+        submenu.querySelector(".st-submenu-list a.active"),
+      );
+
+      const remembered = this.getSubmenuExpanded(key);
+
+      const shouldExpand = hasActiveChild || remembered;
+
+      if (shouldExpand) {
+        submenu.classList.add("is-expanded");
+      }
+
+      trigger?.setAttribute("aria-expanded", shouldExpand ? "true" : "false");
+
+      if (hasActiveChild) {
+        trigger?.classList.add("has-active-child");
+      }
+
+      trigger?.addEventListener("click", () => {
+        if (this.sidebar.classList.contains("is-collapsed")) {
+          this.toggleSidebarCollapsed();
+
+          submenu.classList.add("is-expanded");
+
+          trigger.setAttribute("aria-expanded", "true");
+
+          this.setSubmenuExpanded(key, true);
+
+          return;
         }
 
-        container.innerHTML = "";
+        const expanded = submenu.classList.toggle("is-expanded");
 
-        items.forEach((item, index) => {
+        trigger.setAttribute("aria-expanded", expanded ? "true" : "false");
 
-            const isLast = index === items.length - 1;
+        this.setSubmenuExpanded(key, expanded);
+      });
+    });
+  }
 
-            let node;
+  static getSubmenuExpanded(key) {
+    try {
+      return localStorage.getItem(`stayed_submenu_${key}`) === "1";
+    } catch {
+      return false;
+    }
+  }
 
-            if (!isLast && item.href) {
+  static setSubmenuExpanded(key, expanded) {
+    try {
+      localStorage.setItem(`stayed_submenu_${key}`, expanded ? "1" : "0");
+    } catch {}
+  }
 
-                node = document.createElement("a");
+  static initializeNavbar() {
+    this.updatePageTitle();
 
-                node.href = item.href;
+    this.initializeNotifications();
 
-                node.className = "st-breadcrumb-link";
+    this.initializeUserMenu();
+  }
 
-            } else {
+  static updatePageTitle() {
+    const titleElements = document.querySelectorAll("[data-st-page-title]");
 
-                node = document.createElement("span");
+    titleElements.forEach((element) => {
+      element.textContent = this.options.title || document.title || "StayEd";
+    });
 
+    if (this.options.title) {
+      document.title = `StayEd | ${this.options.title}`;
+    }
+  }
+
+  static initializeNotifications() {
+    const button = document.querySelector("[data-st-notifications]");
+
+    if (button) {
+      button.addEventListener("click", () => {
+        Router?.go("/notifications") ??
+          (window.location.href = "notifications.html");
+      });
+    }
+
+    const settingsButton = document.querySelector("[data-st-settings]");
+
+    settingsButton?.addEventListener("click", () => {
+      Router?.go("/settings") ?? (window.location.href = "settings.html");
+    });
+  }
+
+  static initializeUserMenu() {
+    const trigger = document.querySelector("[data-st-user-menu]");
+
+    const menu = document.querySelector("[data-st-user-dropdown]");
+
+    if (!trigger || !menu) {
+      return;
+    }
+
+    trigger.addEventListener("click", (event) => {
+      event.stopPropagation();
+
+      menu.classList.toggle("st-hidden");
+    });
+
+    document.addEventListener("click", () => {
+      menu.classList.add("st-hidden");
+    });
+  }
+
+  static highlightCurrentPage() {
+    const current =
+      this.options.page ||
+      window.location.pathname
+
+        .split("/")
+
+        .pop();
+
+    document
+
+      .querySelectorAll(".st-sidebar a")
+
+      .forEach((link) => {
+        link.classList.remove("active");
+
+        const href = link.getAttribute("href");
+
+        if (!href) {
+          return;
+        }
+
+        if (href.endsWith(current)) {
+          link.classList.add("active");
+        }
+      });
+  }
+
+  static updateBreadcrumb() {
+    const container = document.querySelector("[data-st-breadcrumb]");
+
+    if (!container) {
+      return;
+    }
+
+    const filename =
+      this.options.page || window.location.pathname.split("/").pop();
+
+    let items;
+
+    if (this.options.breadcrumb.length) {
+      items = this.options.breadcrumb.map((entry) =>
+        typeof entry === "string" ? { label: entry } : entry,
+      );
+    } else if (window.Router) {
+      items = Router.breadcrumbFor(filename, this.options.title);
+    } else {
+      items = [
+        { label: "Dashboard", href: "dashboard.html" },
+        { label: this.options.title || filename },
+      ];
+    }
+
+    container.innerHTML = "";
+
+    items.forEach((item, index) => {
+      const isLast = index === items.length - 1;
+
+      let node;
+
+      if (!isLast && item.href) {
+        node = document.createElement("a");
+
+        node.href = item.href;
+
+        node.className = "st-breadcrumb-link";
+      } else {
+        node = document.createElement("span");
+      }
+
+      node.textContent = item.label;
+
+      if (isLast) {
+        node.classList.add("active");
+      }
+
+      container.appendChild(node);
+
+      if (!isLast) {
+        const icon = document.createElement("span");
+
+        icon.className = "material-symbols-outlined st-breadcrumb-icon";
+
+        icon.textContent = "chevron_right";
+
+        container.appendChild(icon);
+      }
+    });
+  }
+
+  static initializeFooter() {
+    const year = document.querySelector("[data-st-year]");
+
+    if (year) {
+      year.textContent = new Date().getFullYear();
+    }
+  }
+
+  static initializeLogout() {
+    document
+
+      .querySelectorAll("[data-st-logout]")
+
+      .forEach((button) => {
+        button.addEventListener(
+          "click",
+
+          async (event) => {
+            event.preventDefault();
+
+            try {
+              if (window.API) {
+                await API.post("/auth/logout");
+              }
+            } catch (error) {
+              console.warn(error);
             }
 
-            node.textContent = item.label;
+            Utils.storage.remove("stayed_token");
 
-            if (isLast) {
+            Utils.storage.remove("stayed_user");
 
-                node.classList.add("active");
-
-            }
-
-            container.appendChild(node);
-
-            if (!isLast) {
-
-                const icon = document.createElement("span");
-
-                icon.className =
-                    "material-symbols-outlined st-breadcrumb-icon";
-
-                icon.textContent = "chevron_right";
-
-                container.appendChild(icon);
-
-            }
-
-        });
-
-    }
-
-    static initializeFooter() {
-
-        const year = document.querySelector(
-
-            "[data-st-year]"
-
+            window.location.href = "../auth/login.html";
+          },
         );
+      });
+  }
 
-        if (year) {
+  static initializeResponsiveSidebar() {
+    if (!this.sidebar) {
+      return;
+    }
 
-            year.textContent =
+    document.addEventListener(
+      "click",
 
-                new Date().getFullYear();
-
+      (event) => {
+        if (window.innerWidth > 992) {
+          return;
         }
 
-    }
+        const toggle = document.getElementById("sidebarToggle");
 
-    static initializeLogout() {
+        const clickedSidebar = this.sidebar.contains(event.target);
 
-        document
+        const clickedToggle = toggle ? toggle.contains(event.target) : false;
 
-            .querySelectorAll(
-
-                "[data-st-logout]"
-
-            )
-
-            .forEach(button => {
-
-                button.addEventListener(
-
-                    "click",
-
-                    async event => {
-
-                        event.preventDefault();
-
-                        try {
-
-                            if (
-
-                                window.API
-
-                            ) {
-
-                                await API.post(
-
-                                    "/auth/logout"
-
-                                );
-
-                            }
-
-                        }
-
-                        catch(error){
-
-                            console.warn(error);
-
-                        }
-
-                        Utils.storage.remove(
-
-                            "stayed_token"
-
-                        );
-
-                        Utils.storage.remove(
-
-                            "stayed_user"
-
-                        );
-
-                        window.location.href =
-
-                            "../auth/login.html";
-
-                    }
-
-                );
-
-            });
-
-    }
-
-    static initializeResponsiveSidebar() {
-
-        if (!this.sidebar) {
-
-            return;
-
+        if (!clickedSidebar && !clickedToggle) {
+          this.closeSidebar();
         }
+      },
+    );
 
-        document.addEventListener(
+    document.addEventListener(
+      "keydown",
 
-            "click",
-
-            event => {
-
-                if (
-
-                    window.innerWidth > 992
-
-                ) {
-
-                    return;
-
-                }
-
-                const toggle =
-
-                    document.getElementById(
-
-                        "sidebarToggle"
-
-                    );
-
-                const clickedSidebar =
-
-                    this.sidebar.contains(
-
-                        event.target
-
-                    );
-
-                const clickedToggle =
-
-                    toggle
-
-                        ? toggle.contains(
-
-                            event.target
-
-                        )
-
-                        : false;
-
-                if (
-
-                    !clickedSidebar &&
-
-                    !clickedToggle
-
-                ) {
-
-                    this.closeSidebar();
-
-                }
-
-            }
-
-        );
-
-        document.addEventListener(
-
-            "keydown",
-
-            event => {
-
-                if (
-
-                    event.key === "Escape"
-
-                ) {
-
-                    this.closeSidebar();
-
-                }
-
-            }
-
-        );
-
-        window.addEventListener(
-
-            "resize",
-
-            Utils.debounce(
-
-                () => {
-
-                    if (
-
-                        window.innerWidth >
-
-                        992
-
-                    ) {
-
-                        this.sidebar.classList.remove(
-
-                            "open"
-
-                        );
-
-                    }
-
-                },
-
-                150
-
-            )
-
-        );
-
-    }
-
-    static openSidebar() {
-
-        if (!this.sidebar) {
-
-            return;
-
+      (event) => {
+        if (event.key === "Escape") {
+          this.closeSidebar();
         }
+      },
+    );
 
-        this.sidebar.classList.add(
+    window.addEventListener(
+      "resize",
 
-            "open"
+      Utils.debounce(
+        () => {
+          if (window.innerWidth > 992) {
+            this.sidebar.classList.remove("open");
+          }
+        },
 
-        );
+        150,
+      ),
+    );
+  }
 
+  static openSidebar() {
+    if (!this.sidebar) {
+      return;
     }
 
-    static closeSidebar() {
+    this.sidebar.classList.add("open");
+  }
 
-        if (!this.sidebar) {
-
-            return;
-
-        }
-
-        this.sidebar.classList.remove(
-
-            "open"
-
-        );
-
+  static closeSidebar() {
+    if (!this.sidebar) {
+      return;
     }
 
-    static toggleSidebar() {
+    this.sidebar.classList.remove("open");
+  }
 
-        if (!this.sidebar) {
-
-            return;
-
-        }
-
-        this.sidebar.classList.toggle(
-
-            "open"
-
-        );
-
+  static toggleSidebar() {
+    if (!this.sidebar) {
+      return;
     }
 
-    static showLoader() {
+    this.sidebar.classList.toggle("open");
+  }
 
-        const loader = document.querySelector(
+  static showLoader() {
+    const loader = document.querySelector("[data-st-loader]");
 
-            "[data-st-loader]"
+    if (loader) {
+      loader.classList.remove("st-hidden");
+    }
+  }
 
-        );
+  static hideLoader() {
+    const loader = document.querySelector("[data-st-loader]");
 
-        if (loader) {
+    if (loader) {
+      loader.classList.add("st-hidden");
+    }
+  }
 
-            loader.classList.remove("st-hidden");
+  static success(message = "Success") {
+    if (window.Toast && typeof Toast.success === "function") {
+      Toast.success(message);
 
-        }
-
+      return;
     }
 
-    static hideLoader() {
+    console.log(message);
+  }
 
-        const loader = document.querySelector(
+  static error(message = "Something went wrong.") {
+    if (window.Toast && typeof Toast.error === "function") {
+      Toast.error(message);
 
-            "[data-st-loader]"
-
-        );
-
-        if (loader) {
-
-            loader.classList.add("st-hidden");
-
-        }
-
+      return;
     }
 
-    static success(message = "Success") {
+    console.error(message);
+  }
 
-        if (
+  static warning(message = "Warning") {
+    if (window.Toast && typeof Toast.warning === "function") {
+      Toast.warning(message);
 
-            window.Toast &&
-
-            typeof Toast.success === "function"
-
-        ) {
-
-            Toast.success(message);
-
-            return;
-
-        }
-
-        console.log(message);
-
+      return;
     }
 
-    static error(message = "Something went wrong.") {
+    console.warn(message);
+  }
 
-        if (
+  static info(message = "Information") {
+    if (window.Toast && typeof Toast.info === "function") {
+      Toast.info(message);
 
-            window.Toast &&
-
-            typeof Toast.error === "function"
-
-        ) {
-
-            Toast.error(message);
-
-            return;
-
-        }
-
-        console.error(message);
-
+      return;
     }
 
-    static warning(message = "Warning") {
+    console.info(message);
+  }
 
-        if (
+  static beforePageLoad() {
+    this.showLoader();
+  }
 
-            window.Toast &&
-
-            typeof Toast.warning === "function"
-
-        ) {
-
-            Toast.warning(message);
-
-            return;
-
-        }
-
-        console.warn(message);
-
-    }
-
-    static info(message = "Information") {
-
-        if (
-
-            window.Toast &&
-
-            typeof Toast.info === "function"
-
-        ) {
-
-            Toast.info(message);
-
-            return;
-
-        }
-
-        console.info(message);
-
-    }
-
-    static beforePageLoad() {
-
-        this.showLoader();
-
-    }
-
-    static afterPageLoad() {
-
-        this.hideLoader();
-
-    }
-
+  static afterPageLoad() {
+    this.hideLoader();
+  }
 }
 
 window.addEventListener(
+  "error",
 
-    "error",
+  (event) => {
+    console.error(
+      "[StayEd]",
 
-    event => {
-
-        console.error(
-
-            "[StayEd]",
-
-            event.message
-
-        );
-
-    }
-
+      event.message,
+    );
+  },
 );
 
 window.addEventListener(
+  "unhandledrejection",
 
-    "unhandledrejection",
+  (event) => {
+    console.error(
+      "[StayEd Promise]",
 
-    event => {
-
-        console.error(
-
-            "[StayEd Promise]",
-
-            event.reason
-
-        );
-
-    }
-
+      event.reason,
+    );
+  },
 );
 
 window.Layout = Layout;
 
 function bootStayEdLayout() {
+  Layout.beforePageLoad();
 
-    Layout.beforePageLoad();
+  Layout.init({
+    page: window.location.pathname
 
-    Layout.init({
+      .split("/")
 
-        page:
+      .pop(),
 
-            window.location.pathname
+    title: document.body.dataset.page || document.title,
+  });
 
-                .split("/")
-
-                .pop(),
-
-        title:
-
-            document.body.dataset.page ||
-
-            document.title
-
-    });
-
-    Layout.afterPageLoad();
-
+  Layout.afterPageLoad();
 }
 
 document.addEventListener(
+  "DOMContentLoaded",
 
-    "DOMContentLoaded",
+  () => {
+    bootStayEdLayout();
 
-    () => {
+    console.log(
+      "%cStayEd Layout Ready",
 
-        bootStayEdLayout();
-
-        console.log(
-
-            "%cStayEd Layout Ready",
-
-            "color:#12355B;font-weight:bold;"
-
-        );
-
-    }
-
+      "color:#12355B;font-weight:bold;",
+    );
+  },
 );
 
 document.addEventListener(
+  "components:loaded",
 
-    "components:loaded",
-
-    () => {
-
-        bootStayEdLayout();
-
-    }
-
+  () => {
+    bootStayEdLayout();
+  },
 );

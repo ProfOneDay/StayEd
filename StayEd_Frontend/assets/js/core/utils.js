@@ -1,571 +1,387 @@
-
-
 class Utils {
+  static downloadLearnerImportTemplate() {
+    const headers = [
+      "LRN",
+      "Last Name",
+      "First Name",
+      "Middle Name (optional)",
+      "Sex",
+      "Date of Birth",
+      "Learning Modality",
+    ];
 
-    static downloadLearnerImportTemplate() {
+    const sampleRow = [
+      "123456789012",
+      "Dela Cruz",
+      "Juan",
+      "Reyes",
+      "Male",
+      "2008-05-14",
+      "Face-to-Face",
+    ];
 
-        const headers = [
-            "LRN",
-            "Last Name",
-            "First Name",
-            "Middle Name (optional)",
-            "Sex",
-            "Date of Birth",
-            "Learning Modality"
-        ];
+    const csvContent = [headers, sampleRow]
+      .map((row) =>
+        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
+      )
+      .join("\r\n");
 
-        const sampleRow = [
-            "123456789012",
-            "Dela Cruz",
-            "Juan",
-            "Reyes",
-            "Male",
-            "2008-05-14",
-            "Face-to-Face"
-        ];
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
 
-        const csvContent = [headers, sampleRow]
-            .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(","))
-            .join("\r\n");
+    const url = URL.createObjectURL(blob);
 
-        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
 
-        const url = URL.createObjectURL(blob);
+    link.href = url;
 
-        const link = document.createElement("a");
+    link.download = "StayEd_Learner_Import_Template.csv";
 
-        link.href = url;
+    document.body.appendChild(link);
 
-        link.download = "StayEd_Learner_Import_Template.csv";
+    link.click();
 
-        document.body.appendChild(link);
+    document.body.removeChild(link);
 
-        link.click();
+    URL.revokeObjectURL(url);
+  }
 
-        document.body.removeChild(link);
+  static qs(selector, scope = document) {
+    return scope.querySelector(selector);
+  }
 
-        URL.revokeObjectURL(url);
+  static qsa(selector, scope = document) {
+    return [...scope.querySelectorAll(selector)];
+  }
 
+  static create(tag, className = "") {
+    const element = document.createElement(tag);
+
+    if (className) {
+      element.className = className;
     }
 
-    static qs(selector, scope = document) {
+    return element;
+  }
 
-        return scope.querySelector(selector);
+  static show(element) {
+    if (!element) return;
 
-    }
+    element.classList.remove("st-hidden");
+  }
 
-    static qsa(selector, scope = document) {
+  static hide(element) {
+    if (!element) return;
 
-        return [...scope.querySelectorAll(selector)];
+    element.classList.add("st-hidden");
+  }
 
-    }
+  static toggle(element) {
+    if (!element) return;
 
-    static create(tag, className = "") {
+    element.classList.toggle("st-hidden");
+  }
 
-        const element = document.createElement(tag);
+  static enable(button) {
+    if (!button) return;
 
-        if (className) {
+    button.disabled = false;
+  }
 
-            element.className = className;
+  static disable(button) {
+    if (!button) return;
 
-        }
+    button.disabled = true;
+  }
 
-        return element;
+  static formatFileSize(bytes) {
+    if (bytes < 1024) return `${bytes} B`;
 
-    }
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
 
-    static show(element) {
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
 
-        if (!element) return;
+  static formatDate(date) {
+    return new Intl.DateTimeFormat(
+      "en-PH",
 
-        element.classList.remove("st-hidden");
+      {
+        year: "numeric",
 
-    }
+        month: "long",
 
-    static hide(element) {
+        day: "numeric",
+      },
+    ).format(new Date(date));
+  }
 
-        if (!element) return;
+  static formatDateTime(date) {
+    return new Intl.DateTimeFormat(
+      "en-PH",
 
-        element.classList.add("st-hidden");
+      {
+        dateStyle: "medium",
 
-    }
+        timeStyle: "short",
+      },
+    ).format(new Date(date));
+  }
 
-    static toggle(element) {
+  static capitalize(text = "") {
+    return text
 
-        if (!element) return;
+      .split(" ")
 
-        element.classList.toggle("st-hidden");
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
 
-    }
+      .join(" ");
+  }
 
-    static enable(button) {
+  static initials(name = "") {
+    return name
 
-        if (!button) return;
+      .split(" ")
 
-        button.disabled = false;
+      .map((word) => word[0])
 
-    }
+      .join("")
 
-    static disable(button) {
+      .substring(0, 2)
 
-        if (!button) return;
+      .toUpperCase();
+  }
 
-        button.disabled = true;
+  static randomId(prefix = "st") {
+    return `${prefix}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+  }
 
-    }
+  static debounce(callback, delay = 300) {
+    let timer;
 
-    static formatFileSize(bytes) {
+    return (...args) => {
+      clearTimeout(timer);
 
-        if (bytes < 1024) return `${bytes} B`;
+      timer = setTimeout(() => {
+        callback(...args);
+      }, delay);
+    };
+  }
 
-        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  static sleep(milliseconds) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, milliseconds);
+    });
+  }
 
-        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  static copy(text) {
+    navigator.clipboard.writeText(text);
+  }
 
-    }
+  static scrollTop() {
+    window.scrollTo({
+      top: 0,
 
-    static formatDate(date) {
+      behavior: "smooth",
+    });
+  }
 
-        return new Intl.DateTimeFormat(
+  static isEmpty(value) {
+    return value === null || value === undefined || value === "";
+  }
 
-            "en-PH",
+  static empty(element) {
+    if (!element) return;
 
-            {
+    element.innerHTML = "";
+  }
 
-                year: "numeric",
+  static serialize(form) {
+    const data = {};
 
-                month: "long",
+    new FormData(form).forEach((value, key) => {
+      data[key] = value;
+    });
 
-                day: "numeric"
-
-            }
-
-        ).format(new Date(date));
-
-    }
-
-    static formatDateTime(date) {
-
-        return new Intl.DateTimeFormat(
-
-            "en-PH",
-
-            {
-
-                dateStyle: "medium",
-
-                timeStyle: "short"
-
-            }
-
-        ).format(new Date(date));
-
-    }
-
-    static capitalize(text = "") {
-
-        return text
-
-            .split(" ")
-
-            .map(
-
-                word =>
-
-                    word.charAt(0).toUpperCase() +
-
-                    word.slice(1).toLowerCase()
-
-            )
-
-            .join(" ");
-
-    }
-
-    static initials(name = "") {
-
-        return name
-
-            .split(" ")
-
-            .map(word => word[0])
-
-            .join("")
-
-            .substring(0, 2)
-
-            .toUpperCase();
-
-    }
-
-    static randomId(prefix = "st") {
-
-        return `${prefix}_${Date.now()}_${Math.floor(Math.random()*1000)}`;
-
-    }
-
-    static debounce(callback, delay = 300) {
-
-        let timer;
-
-        return (...args) => {
-
-            clearTimeout(timer);
-
-            timer = setTimeout(() => {
-
-                callback(...args);
-
-            }, delay);
-
-        };
-
-    }
-
-    static sleep(milliseconds) {
-
-        return new Promise(resolve => {
-
-            setTimeout(resolve, milliseconds);
-
-        });
-
-    }
-
-    static copy(text) {
-
-        navigator.clipboard.writeText(text);
-
-    }
-
-    static scrollTop() {
-
-        window.scrollTo({
-
-            top: 0,
-
-            behavior: "smooth"
-
-        });
-
-    }
-
-    static isEmpty(value) {
-
-        return (
-
-            value === null ||
-
-            value === undefined ||
-
-            value === ""
-
-        );
-
-    }
-
-    static empty(element) {
-
-        if (!element) return;
-
-        element.innerHTML = "";
-
-    }
-
-    static serialize(form) {
-
-        const data = {};
-
-        new FormData(form).forEach(
-
-            (value, key) => {
-
-                data[key] = value;
-
-            }
-
-        );
-
-        return data;
-
-    }
-
+    return data;
+  }
 }
 
 Object.assign(Utils, {
+  storage: {
+    set(key, value) {
+      localStorage.setItem(
+        key,
 
-    storage: {
-
-        set(key, value) {
-
-            localStorage.setItem(
-
-                key,
-
-                JSON.stringify(value)
-
-            );
-
-        },
-
-        get(key, fallback = null) {
-
-            try {
-
-                const value = localStorage.getItem(key);
-
-                return value
-
-                    ? JSON.parse(value)
-
-                    : fallback;
-
-            }
-
-            catch {
-
-                return fallback;
-
-            }
-
-        },
-
-        remove(key) {
-
-            localStorage.removeItem(key);
-
-        },
-
-        clear() {
-
-            localStorage.clear();
-
-        }
-
+        JSON.stringify(value),
+      );
     },
 
-    session: {
+    get(key, fallback = null) {
+      try {
+        const value = localStorage.getItem(key);
 
-        set(key, value) {
-
-            sessionStorage.setItem(
-
-                key,
-
-                JSON.stringify(value)
-
-            );
-
-        },
-
-        get(key, fallback = null) {
-
-            try {
-
-                const value = sessionStorage.getItem(key);
-
-                return value
-
-                    ? JSON.parse(value)
-
-                    : fallback;
-
-            }
-
-            catch {
-
-                return fallback;
-
-            }
-
-        },
-
-        remove(key) {
-
-            sessionStorage.removeItem(key);
-
-        },
-
-        clear() {
-
-            sessionStorage.clear();
-
-        }
-
+        return value ? JSON.parse(value) : fallback;
+      } catch {
+        return fallback;
+      }
     },
 
-    formatNumber(number = 0) {
-
-        return new Intl.NumberFormat(
-
-            "en-PH"
-
-        ).format(number);
-
+    remove(key) {
+      localStorage.removeItem(key);
     },
 
-    formatCurrency(amount = 0) {
+    clear() {
+      localStorage.clear();
+    },
+  },
 
-        return new Intl.NumberFormat(
+  session: {
+    set(key, value) {
+      sessionStorage.setItem(
+        key,
 
-            "en-PH",
-
-            {
-
-                style: "currency",
-
-                currency: "PHP"
-
-            }
-
-        ).format(amount);
-
+        JSON.stringify(value),
+      );
     },
 
-    percentage(value, total) {
+    get(key, fallback = null) {
+      try {
+        const value = sessionStorage.getItem(key);
 
-        if (!total) {
-
-            return 0;
-
-        }
-
-        return ((value / total) * 100).toFixed(1);
-
+        return value ? JSON.parse(value) : fallback;
+      } catch {
+        return fallback;
+      }
     },
 
-    email(email) {
-
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
+    remove(key) {
+      sessionStorage.removeItem(key);
     },
 
-    phone(number) {
-
-        return /^(09|\+639)\d{9}$/.test(number);
-
+    clear() {
+      sessionStorage.clear();
     },
+  },
 
-    required(value) {
+  formatNumber(number = 0) {
+    return new Intl.NumberFormat("en-PH").format(number);
+  },
 
-        return !this.isEmpty(value);
+  formatCurrency(amount = 0) {
+    return new Intl.NumberFormat(
+      "en-PH",
 
-    },
+      {
+        style: "currency",
 
-    uuid() {
+        currency: "PHP",
+      },
+    ).format(amount);
+  },
 
-        return crypto.randomUUID();
-
-    },
-
-    query(name) {
-
-        return new URLSearchParams(
-
-            window.location.search
-
-        ).get(name);
-
-    },
-
-    redirect(url) {
-
-        window.location.href = url;
-
-    },
-
-    download(filename, content) {
-
-        const blob = new Blob(
-
-            [content],
-
-            {
-
-                type: "text/plain"
-
-            }
-
-        );
-
-        const link = document.createElement("a");
-
-        link.href = URL.createObjectURL(blob);
-
-        link.download = filename;
-
-        link.click();
-
-        URL.revokeObjectURL(link.href);
-
-    },
-
-    avatarColor(text = "") {
-
-        const colors = [
-
-            "#12355B",
-
-            "#006A68",
-
-            "#0D47A1",
-
-            "#6A1B9A",
-
-            "#EF6C00",
-
-            "#2E7D32",
-
-            "#AD1457"
-
-        ];
-
-        let hash = 0;
-
-        for (const char of text) {
-
-            hash += char.charCodeAt(0);
-
-        }
-
-        return colors[hash % colors.length];
-
+  percentage(value, total) {
+    if (!total) {
+      return 0;
     }
 
+    return ((value / total) * 100).toFixed(1);
+  },
+
+  email(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  },
+
+  phone(number) {
+    return /^(09|\+639)\d{9}$/.test(number);
+  },
+
+  required(value) {
+    return !this.isEmpty(value);
+  },
+
+  uuid() {
+    return crypto.randomUUID();
+  },
+
+  query(name) {
+    return new URLSearchParams(window.location.search).get(name);
+  },
+
+  redirect(url) {
+    window.location.href = url;
+  },
+
+  download(filename, content) {
+    const blob = new Blob(
+      [content],
+
+      {
+        type: "text/plain",
+      },
+    );
+
+    const link = document.createElement("a");
+
+    link.href = URL.createObjectURL(blob);
+
+    link.download = filename;
+
+    link.click();
+
+    URL.revokeObjectURL(link.href);
+  },
+
+  avatarColor(text = "") {
+    const colors = [
+      "#12355B",
+
+      "#006A68",
+
+      "#0D47A1",
+
+      "#6A1B9A",
+
+      "#EF6C00",
+
+      "#2E7D32",
+
+      "#AD1457",
+    ];
+
+    let hash = 0;
+
+    for (const char of text) {
+      hash += char.charCodeAt(0);
+    }
+
+    return colors[hash % colors.length];
+  },
 });
 
 Utils.toast = function (message, type = "info") {
+  if (window.Toast && typeof Toast[type] === "function") {
+    Toast[type](message);
+    return;
+  }
 
-    if (window.Toast && typeof Toast[type] === "function") {
-        Toast[type](message);
-        return;
-    }
+  if (window.Toast && typeof Toast.show === "function") {
+    Toast.show(message, type);
+    return;
+  }
 
-    if (window.Toast && typeof Toast.show === "function") {
-        Toast.show(message, type);
-        return;
-    }
-
-    console.log(`[toast:${type}] ${message}`);
-
+  console.log(`[toast:${type}] ${message}`);
 };
 
 window.Utils = Utils;
 
 document.addEventListener(
+  "DOMContentLoaded",
 
-    "DOMContentLoaded",
+  () => {
+    console.log(
+      "%cStayEd Utilities Loaded",
 
-    () => {
-
-        console.log(
-
-            "%cStayEd Utilities Loaded",
-
-            "color:#12355B;font-weight:bold;"
-
-        );
-
-    }
-
+      "color:#12355B;font-weight:bold;",
+    );
+  },
 );

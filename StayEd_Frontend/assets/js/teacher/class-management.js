@@ -1,64 +1,48 @@
-
 class ClassManagement {
+  static classes = [];
 
-    static classes = [];
+  static async init() {
+    if (window.Guards) Guards.teacher();
 
-    static async init() {
+    this.bindAddClass();
 
-        if (window.Guards) Guards.teacher();
+    await this.load();
+  }
 
-        this.bindAddClass();
+  static async load() {
+    if (window.Layout) Layout.showLoader();
 
-        await this.load();
+    this.showSkeleton();
 
+    try {
+      const res = await API.getTeacherClasses();
+
+      this.classes = res.data || [];
+
+      this.render();
+    } catch (error) {
+      console.error("[ClassManagement]", error);
+      Toast?.error("Unable to load your classes.");
+    } finally {
+      if (window.Layout) Layout.hideLoader();
     }
+  }
 
-    static async load() {
+  static showSkeleton() {
+    const grid = document.querySelector("[data-class-grid]");
 
-        if (window.Layout) Layout.showLoader();
-
-        this.showSkeleton();
-
-        try {
-
-            const res = await API.getTeacherClasses();
-
-            this.classes = res.data || [];
-
-            this.render();
-
-        } catch (error) {
-
-            console.error("[ClassManagement]", error);
-            Toast?.error("Unable to load your classes.");
-
-        } finally {
-
-            if (window.Layout) Layout.hideLoader();
-
-        }
-
+    if (grid && window.Skeletons) {
+      grid.innerHTML = Skeletons.cards(4);
     }
+  }
 
-    static showSkeleton() {
+  static render() {
+    const grid = document.querySelector("[data-class-grid]");
 
-        const grid = document.querySelector("[data-class-grid]");
+    if (!grid) return;
 
-        if (grid && window.Skeletons) {
-            grid.innerHTML = Skeletons.cards(4);
-        }
-
-    }
-
-    static render() {
-
-        const grid = document.querySelector("[data-class-grid]");
-
-        if (!grid) return;
-
-        if (!this.classes.length) {
-
-            grid.innerHTML = `
+    if (!this.classes.length) {
+      grid.innerHTML = `
                 <div class="st-empty" style="grid-column:1/-1;">
                     <span class="material-symbols-outlined">school</span>
                     <p class="st-empty-title">No classes yet</p>
@@ -66,26 +50,21 @@ class ClassManagement {
                 </div>
             `;
 
-            return;
-
-        }
-
-        grid.innerHTML = this.classes.map(c => this.card(c)).join("");
-
-        grid.querySelectorAll("[data-open-class]").forEach(el => {
-            el.addEventListener("click", () => {
-
-                const classId = el.dataset.openClass;
-                window.location.href =
-                    `learner-records.html?class=${encodeURIComponent(classId)}`;
-            });
-        });
-
+      return;
     }
 
-    static card(c) {
+    grid.innerHTML = this.classes.map((c) => this.card(c)).join("");
 
-        return `
+    grid.querySelectorAll("[data-open-class]").forEach((el) => {
+      el.addEventListener("click", () => {
+        const classId = el.dataset.openClass;
+        window.location.href = `learner-records.html?class=${encodeURIComponent(classId)}`;
+      });
+    });
+  }
+
+  static card(c) {
+    return `
             <div class="st-clc-card">
 
                 <div class="st-clc-card-head">
@@ -120,24 +99,22 @@ class ClassManagement {
 
             </div>
         `;
+  }
 
-    }
+  static bindAddClass() {
+    document
+      .querySelector("[data-add-class-btn]")
+      ?.addEventListener("click", () => {
+        if (!window.Modal) return;
 
-    static bindAddClass() {
+        Modal.show({
+          title: "Add Class",
 
-        document.querySelector("[data-add-class-btn]")?.addEventListener("click", () => {
+          size: "sm",
 
-            if (!window.Modal) return;
+          confirmLabel: "Create Class",
 
-            Modal.show({
-
-                title: "Add Class",
-
-                size: "sm",
-
-                confirmLabel: "Create Class",
-
-                message: `
+          message: `
                     <div class="st-schedule-modal-field">
                         <label for="newClassClc">Community Learning Center</label>
                         <select id="newClassClc">
@@ -162,27 +139,26 @@ class ClassManagement {
                     </div>
                 `,
 
-                onConfirm: () => {
+          onConfirm: () => {
+            Toast?.success("Class created.");
 
-                    Toast?.success("Class created.");
-
-                    this.load();
-
-                }
-
-            });
-
+            this.load();
+          },
         });
-
-    }
-
+      });
+  }
 }
 
 (function bootClassManagement() {
-    let started = false;
-    const start = () => { if (!started) { started = true; ClassManagement.init(); } };
-    document.addEventListener("components:loaded", start);
-    document.addEventListener("DOMContentLoaded", () => setTimeout(start, 400));
+  let started = false;
+  const start = () => {
+    if (!started) {
+      started = true;
+      ClassManagement.init();
+    }
+  };
+  document.addEventListener("components:loaded", start);
+  document.addEventListener("DOMContentLoaded", () => setTimeout(start, 400));
 })();
 
 window.ClassManagement = ClassManagement;

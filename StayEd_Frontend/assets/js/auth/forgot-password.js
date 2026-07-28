@@ -1,113 +1,55 @@
-
-
 class ForgotPasswordPage {
+  static initialize() {
+    this.form = document.getElementById("forgotPasswordForm");
 
-    static initialize() {
-
-        this.form =
-
-            document.getElementById(
-
-                "forgotPasswordForm"
-
-            );
-
-        if (!this.form) {
-
-            return;
-
-        }
-
-        this.form.addEventListener(
-
-            "submit",
-
-            this.submit.bind(this)
-
-        );
-
+    if (!this.form) {
+      return;
     }
 
-    static async submit(event) {
+    this.form.addEventListener(
+      "submit",
 
-        event.preventDefault();
+      this.submit.bind(this),
+    );
+  }
 
-        const email =
+  static async submit(event) {
+    event.preventDefault();
 
-            document
+    const email = document
 
-                .getElementById("email")
+      .getElementById("email")
 
-                .value
+      .value.trim();
 
-                .trim();
+    if (!email) {
+      Toast.warning("Please enter your email.");
 
-        if (!email) {
-
-            Toast.warning(
-
-                "Please enter your email."
-
-            );
-
-            return;
-
-        }
-
-        try {
-
-            await Auth.forgotPassword(
-
-                email
-
-            );
-
-            Toast.success(
-
-                "Password reset instructions have been sent."
-
-            );
-
-            setTimeout(
-
-                () => {
-
-                    window.location.href =
-
-                        "login.html";
-
-                },
-
-                1500
-
-            );
-
-        }
-
-        catch (error) {
-
-            Toast.error(
-
-                error.message ||
-
-                "Unable to send reset email."
-
-            );
-
-        }
-
+      return;
     }
 
+    try {
+      await Auth.forgotPassword(email);
+
+      Toast.success("Password reset instructions have been sent.");
+
+      setTimeout(
+        () => {
+          window.location.href = "login.html";
+        },
+
+        1500,
+      );
+    } catch (error) {
+      Toast.error(error.message || "Unable to send reset email.");
+    }
+  }
 }
 
 document.addEventListener(
+  "DOMContentLoaded",
 
-    "DOMContentLoaded",
-
-    () => {
-
-        ForgotPasswordPage.initialize();
-
-    }
-
+  () => {
+    ForgotPasswordPage.initialize();
+  },
 );

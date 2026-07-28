@@ -1,756 +1,484 @@
 class SetupWizard {
-
-    static async completeDemoSession() {
-
-        if (!(window.DemoAuthService && DemoAuthService.isEnabled())) {
-            return;
-        }
-
-        await DemoAuthService.completeOnboarding();
-
-        Auth.seedDemoSession?.(
-            DemoAuthService.getSession().account
-        );
-
+  static async completeDemoSession() {
+    if (!(window.DemoAuthService && DemoAuthService.isEnabled())) {
+      return;
     }
 
-    static init() {
+    await DemoAuthService.completeOnboarding();
 
-        const step = document.body.dataset.wizard;
+    Auth.seedDemoSession?.(DemoAuthService.getSession().account);
+  }
 
-        switch (step) {
+  static init() {
+    const step = document.body.dataset.wizard;
 
-            case "1": this.initWizard1(); break;
-            case "2": this.initWizard2(); break;
-            case "3": this.initWizard3(); break;
-            case "4": this.initWizard4(); break;
-            case "5": this.initWizard5(); break;
+    switch (step) {
+      case "1":
+        this.initWizard1();
+        break;
+      case "2":
+        this.initWizard2();
+        break;
+      case "3":
+        this.initWizard3();
+        break;
+      case "4":
+        this.initWizard4();
+        break;
+      case "5":
+        this.initWizard5();
+        break;
 
-            default:
-                this.initWizard1();
-                this.initWizard2();
-                this.initWizard3();
-                this.initWizard4();
-                this.initWizard5();
+      default:
+        this.initWizard1();
+        this.initWizard2();
+        this.initWizard3();
+        this.initWizard4();
+        this.initWizard5();
+    }
+  }
 
-        }
+  static initWizard1() {
+    const nextBtn = document.getElementById("nextBtn");
 
+    if (nextBtn) {
+      nextBtn.addEventListener(
+        "click",
+
+        () => {
+          Router.go("/setup/wizard-2");
+        },
+      );
     }
 
-    static initWizard1() {
+    const backBtn = document.getElementById("backBtn");
 
-        const nextBtn =
-            document.getElementById("nextBtn");
+    if (backBtn) {
+      backBtn.addEventListener(
+        "click",
 
-        if (nextBtn) {
+        () => {
+          Router.go("/login");
+        },
+      );
+    }
+  }
 
-            nextBtn.addEventListener(
+  static initWizard2() {
+    const form = document.getElementById("classForm");
 
-                "click",
+    if (!form) return;
 
-                () => {
+    const municipality = document.getElementById("municipality");
 
-                    Router.go("/setup/wizard-2");
+    const clc = document.getElementById("clc");
 
-                }
+    const schoolYear = document.getElementById("schoolYear");
 
-            );
+    const learningLevel = document.getElementById("learningLevel");
 
-        }
+    const summaryMunicipality = document.getElementById("summaryMunicipality");
 
-        const backBtn =
-            document.getElementById("backBtn");
+    const summaryCLC = document.getElementById("summaryCLC");
 
-        if (backBtn) {
+    const summaryYear = document.getElementById("summaryYear");
 
-            backBtn.addEventListener(
+    const summaryLevel = document.getElementById("summaryLevel");
 
-                "click",
+    function populateMunicipalities() {
+      if (!municipality || !window.MockDB?.getMunicipalities) return;
 
-                () => {
+      const list = MockDB.getMunicipalities();
 
-                    Router.go("/login");
-
-                }
-
-            );
-
-        }
-
+      municipality.innerHTML =
+        `<option value="">Select Municipality</option>` +
+        list.map((m) => `<option value="${m}">${m}</option>`).join("");
     }
 
-    static initWizard2() {
+    function populateClcsForMunicipality(selected) {
+      if (!clc) return;
 
-        const form =
-            document.getElementById("classForm");
+      if (!selected) {
+        clc.innerHTML = `<option value="">Select Municipality first</option>`;
 
-        if (!form) return;
+        clc.disabled = true;
 
-        const municipality =
-            document.getElementById("municipality");
+        return;
+      }
 
-        const clc =
-            document.getElementById("clc");
+      const clcs = window.MockDB?.getClcsByMunicipality
+        ? MockDB.getClcsByMunicipality(selected)
+        : [];
 
-        const schoolYear =
-            document.getElementById("schoolYear");
+      clc.innerHTML =
+        `<option value="">Select CLC</option>` +
+        clcs
+          .map((c) => `<option value="${c.name}">${c.name}</option>`)
+          .join("");
 
-        const learningLevel =
-            document.getElementById("learningLevel");
-
-        const summaryMunicipality =
-            document.getElementById("summaryMunicipality");
-
-        const summaryCLC =
-            document.getElementById("summaryCLC");
-
-        const summaryYear =
-            document.getElementById("summaryYear");
-
-        const summaryLevel =
-            document.getElementById("summaryLevel");
-
-        function populateMunicipalities() {
-
-            if (!municipality || !window.MockDB?.getMunicipalities) return;
-
-            const list = MockDB.getMunicipalities();
-
-            municipality.innerHTML =
-                `<option value="">Select Municipality</option>` +
-                list.map(m => `<option value="${m}">${m}</option>`).join("");
-
-        }
-
-        function populateClcsForMunicipality(selected) {
-
-            if (!clc) return;
-
-            if (!selected) {
-
-                clc.innerHTML = `<option value="">Select Municipality first</option>`;
-
-                clc.disabled = true;
-
-                return;
-
-            }
-
-            const clcs = window.MockDB?.getClcsByMunicipality
-                ? MockDB.getClcsByMunicipality(selected)
-                : [];
-
-            clc.innerHTML =
-                `<option value="">Select CLC</option>` +
-                clcs.map(c => `<option value="${c.name}">${c.name}</option>`).join("");
-
-            clc.disabled = false;
-
-        }
-
-        populateMunicipalities();
-
-        populateClcsForMunicipality(municipality?.value);
-
-        municipality?.addEventListener("change", () => {
-
-            populateClcsForMunicipality(municipality.value);
-
-            refreshSummary();
-
-        });
-
-        function refreshSummary() {
-
-            if (summaryMunicipality)
-                summaryMunicipality.textContent =
-                    municipality?.value || "—";
-
-            if (summaryCLC)
-                summaryCLC.textContent =
-                    clc.value || "—";
-
-            if (summaryYear)
-                summaryYear.textContent =
-                    schoolYear.value;
-
-            if (summaryLevel)
-                summaryLevel.textContent =
-                    learningLevel.value || "—";
-
-        }
-
-        [
-            clc,
-            schoolYear,
-            learningLevel
-
-        ].forEach(element => {
-
-            if (!element) return;
-
-            element.addEventListener(
-
-                "change",
-
-                refreshSummary
-
-            );
-
-        });
-
-        refreshSummary();
-
-        const submitBtn =
-            document.getElementById("nextBtn");
-
-        if (submitBtn) {
-
-            submitBtn.addEventListener(
-
-                "click",
-
-                event => {
-
-                    event.preventDefault();
-
-                    if (typeof form.requestSubmit === "function") {
-                        form.requestSubmit();
-                    } else {
-                        form.dispatchEvent(
-                            new Event("submit", {
-                                cancelable: true,
-                                bubbles: true
-                            })
-                        );
-                    }
-
-                }
-
-            );
-
-        }
-
-        form.addEventListener(
-
-            "submit",
-
-            async function (event) {
-
-                event.preventDefault();
-
-                const payload = {
-
-                    municipality:
-                        municipality?.value,
-
-                    communityLearningCenter:
-                        clc.value,
-
-                    schoolYear:
-                        schoolYear.value,
-
-                    learningLevel:
-                        learningLevel.value
-
-                };
-
-                try {
-
-                    await API.createClass(payload);
-
-                    Router.go("/setup/wizard-3");
-
-                }
-
-                catch (error) {
-
-                    console.error(error);
-
-                    Utils.toast(
-                        "Unable to create class.",
-                        "error"
-                    );
-
-                }
-
-            }
-
-        );
-
-        const backBtn =
-            document.getElementById("backBtn");
-
-        if (backBtn) {
-
-            backBtn.onclick = () => {
-
-                Router.go("/setup/wizard-1");
-
-            };
-
-        }
-
+      clc.disabled = false;
     }
 
-    static initWizard3() {
+    populateMunicipalities();
 
-        const browseBtn =
-            document.getElementById("browseBtn");
+    populateClcsForMunicipality(municipality?.value);
 
-        if (!browseBtn) return;
+    municipality?.addEventListener("change", () => {
+      populateClcsForMunicipality(municipality.value);
 
-        const fileInput =
-            document.getElementById("fileInput");
+      refreshSummary();
+    });
 
-        const dropZone =
-            document.getElementById("dropZone");
+    function refreshSummary() {
+      if (summaryMunicipality)
+        summaryMunicipality.textContent = municipality?.value || "—";
 
-        const uploadPreview =
-            document.getElementById("uploadPreview");
+      if (summaryCLC) summaryCLC.textContent = clc.value || "—";
 
-        const importBtn =
-            document.getElementById("importBtn");
+      if (summaryYear) summaryYear.textContent = schoolYear.value;
 
-        const skipBtn =
-            document.getElementById("skipBtn");
-
-        const backBtn =
-            document.getElementById("backBtn");
-
-        const downloadTemplateLink =
-            document.getElementById("setupDownloadTemplateLink");
-
-        if (downloadTemplateLink) {
-
-            downloadTemplateLink.addEventListener(
-
-                "click",
-
-                event => {
-
-                    event.preventDefault();
-
-                    Utils.downloadLearnerImportTemplate();
-
-                    if (window.Toast) {
-                        Toast.success("Template downloaded.");
-                    }
-
-                }
-
-            );
-
-        }
-
-        const fileName =
-            document.getElementById("fileName");
-
-        const fileSize =
-            document.getElementById("fileSize");
-
-        const uploadStatus =
-            document.getElementById("uploadStatus");
-
-        const uploadProgress =
-            document.getElementById("uploadProgress");
-
-        let selectedFile = null;
-
-        browseBtn.addEventListener(
-
-            "click",
-
-            () => fileInput.click()
-
-        );
-
-        dropZone.addEventListener(
-
-            "click",
-
-            () => fileInput.click()
-
-        );
-
-        [
-            "dragenter",
-            "dragover"
-
-        ].forEach(event => {
-
-            dropZone.addEventListener(
-
-                event,
-
-                e => {
-
-                    e.preventDefault();
-
-                    e.stopPropagation();
-
-                    dropZone.classList.add(
-
-                        "drop-zone-active"
-
-                    );
-
-                }
-
-            );
-
-        });
-
-        [
-            "dragleave",
-            "drop"
-
-        ].forEach(event => {
-
-            dropZone.addEventListener(
-
-                event,
-
-                e => {
-
-                    e.preventDefault();
-
-                    e.stopPropagation();
-
-                    dropZone.classList.remove(
-
-                        "drop-zone-active"
-
-                    );
-
-                }
-
-            );
-
-        });
-
-        dropZone.addEventListener(
-
-            "drop",
-
-            e => {
-
-                if (
-
-                    e.dataTransfer.files.length === 0
-
-                ) return;
-
-                handleFile(
-
-                    e.dataTransfer.files[0]
-
-                );
-
-            }
-
-        );
-
-        fileInput.addEventListener(
-
-            "change",
-
-            () => {
-
-                if (
-
-                    !fileInput.files.length
-
-                ) return;
-
-                handleFile(
-
-                    fileInput.files[0]
-
-                );
-
-            }
-
-        );
-
-        function handleFile(file) {
-
-            const extension =
-
-                file.name
-
-                    .split(".")
-
-                    .pop()
-
-                    .toLowerCase();
-
-            if (
-
-                extension !== "csv" &&
-
-                extension !== "xlsx"
-
-            ) {
-
-                Utils.toast(
-
-                    "Only CSV or XLSX files are allowed.",
-
-                    "warning"
-
-                );
-
-                return;
-
-            }
-
-            if (
-
-                file.size >
-
-                5 * 1024 * 1024
-
-            ) {
-
-                Utils.toast(
-
-                    "Maximum upload size is 5MB.",
-
-                    "warning"
-
-                );
-
-                return;
-
-            }
-
-            selectedFile = file;
-
-            uploadPreview.classList.remove(
-
-                "hidden"
-
-            );
-
-            fileName.textContent =
-
-                file.name;
-
-            fileSize.textContent =
-
-                Utils.formatFileSize(
-
-                    file.size
-
-                );
-
-            uploadStatus.textContent =
-
-                "Ready to import.";
-
-            uploadProgress.style.width =
-
-                "0%";
-
-            importBtn.disabled = false;
-
-        }
-
-        importBtn.addEventListener(
-
-            "click",
-
-            async () => {
-
-                if (!selectedFile) return;
-
-                importBtn.disabled = true;
-
-                browseBtn.disabled = true;
-
-                uploadStatus.textContent =
-
-                    "Uploading learner records...";
-
-                uploadProgress.style.width =
-
-                    "20%";
-
-                try {
-
-                    await API.importLearners(
-
-                        selectedFile,
-
-                        progress => {
-
-                            uploadProgress.style.width =
-
-                                `${progress}%`;
-
-                        }
-
-                    );
-
-                    uploadProgress.style.width =
-
-                        "100%";
-
-                    uploadStatus.textContent =
-
-                        "Learners imported successfully.";
-
-                    Utils.toast(
-
-                        "Import completed.",
-
-                        "success"
-
-                    );
-
-                    setTimeout(() => {
-
-                        Router.go(
-
-                            "/setup/wizard-4"
-
-                        );
-
-                    }, 700);
-
-                }
-
-                catch (error) {
-
-                    console.error(error);
-
-                    uploadStatus.textContent =
-
-                        "Import failed.";
-
-                    uploadProgress.style.width =
-
-                        "0%";
-
-                    Utils.toast(
-
-                        "Unable to import learners.",
-
-                        "error"
-
-                    );
-
-                    importBtn.disabled = false;
-
-                    browseBtn.disabled = false;
-
-                }
-
-            }
-
-        );
-
-        if (skipBtn) {
-
-            skipBtn.addEventListener(
-
-                "click",
-
-                async () => {
-
-                    await SetupWizard.completeDemoSession();
-
-                    Router.go(
-
-                        "/dashboard"
-
-                    );
-
-                }
-
-            );
-
-        }
-
-        if (backBtn) {
-
-            backBtn.addEventListener(
-
-                "click",
-
-                () => {
-
-                    Router.go(
-
-                        "/setup/wizard-2"
-
-                    );
-
-                }
-
-            );
-
-        }
-
+      if (summaryLevel) summaryLevel.textContent = learningLevel.value || "—";
     }
 
-    static async initWizard4() {
+    [clc, schoolYear, learningLevel].forEach((element) => {
+      if (!element) return;
 
-        const learnerTable =
-            document.getElementById("learnerTable");
+      element.addEventListener(
+        "change",
 
-        if (!learnerTable) return;
+        refreshSummary,
+      );
+    });
 
-        const statTotal =
-            document.getElementById("statTotal");
+    refreshSummary();
 
-        const statImported =
-            document.getElementById("statImported");
+    const submitBtn = document.getElementById("nextBtn");
 
-        const statDuplicates =
-            document.getElementById("statDuplicates");
+    if (submitBtn) {
+      submitBtn.addEventListener(
+        "click",
 
-        const statInvalid =
-            document.getElementById("statInvalid");
+        (event) => {
+          event.preventDefault();
 
-        const finishBtn =
-            document.getElementById("finishBtn");
+          if (typeof form.requestSubmit === "function") {
+            form.requestSubmit();
+          } else {
+            form.dispatchEvent(
+              new Event("submit", {
+                cancelable: true,
+                bubbles: true,
+              }),
+            );
+          }
+        },
+      );
+    }
 
-        const reuploadBtn =
-            document.getElementById("reuploadBtn");
+    form.addEventListener(
+      "submit",
 
-        const backBtn =
-            document.getElementById("backBtn");
+      async function (event) {
+        event.preventDefault();
+
+        const payload = {
+          municipality: municipality?.value,
+
+          communityLearningCenter: clc.value,
+
+          schoolYear: schoolYear.value,
+
+          learningLevel: learningLevel.value,
+        };
 
         try {
+          await API.createClass(payload);
 
-            const result =
-                await API.getImportedLearners();
+          Router.go("/setup/wizard-3");
+        } catch (error) {
+          console.error(error);
 
-            statTotal.textContent =
-                result.total;
+          Utils.toast("Unable to create class.", "error");
+        }
+      },
+    );
 
-            statImported.textContent =
-                result.imported;
+    const backBtn = document.getElementById("backBtn");
 
-            statDuplicates.textContent =
-                result.duplicates;
+    if (backBtn) {
+      backBtn.onclick = () => {
+        Router.go("/setup/wizard-1");
+      };
+    }
+  }
 
-            statInvalid.textContent =
-                result.invalid;
+  static initWizard3() {
+    const browseBtn = document.getElementById("browseBtn");
 
-            learnerTable.innerHTML = "";
+    if (!browseBtn) return;
 
-            (result.learners || []).forEach(
+    const fileInput = document.getElementById("fileInput");
 
-                (learner, index) => {
+    const dropZone = document.getElementById("dropZone");
 
-                    learnerTable.insertAdjacentHTML(
+    const uploadPreview = document.getElementById("uploadPreview");
 
-                        "beforeend",
+    const importBtn = document.getElementById("importBtn");
 
-                        `
+    const skipBtn = document.getElementById("skipBtn");
+
+    const backBtn = document.getElementById("backBtn");
+
+    const downloadTemplateLink = document.getElementById(
+      "setupDownloadTemplateLink",
+    );
+
+    if (downloadTemplateLink) {
+      downloadTemplateLink.addEventListener(
+        "click",
+
+        (event) => {
+          event.preventDefault();
+
+          Utils.downloadLearnerImportTemplate();
+
+          if (window.Toast) {
+            Toast.success("Template downloaded.");
+          }
+        },
+      );
+    }
+
+    const fileName = document.getElementById("fileName");
+
+    const fileSize = document.getElementById("fileSize");
+
+    const uploadStatus = document.getElementById("uploadStatus");
+
+    const uploadProgress = document.getElementById("uploadProgress");
+
+    let selectedFile = null;
+
+    browseBtn.addEventListener(
+      "click",
+
+      () => fileInput.click(),
+    );
+
+    dropZone.addEventListener(
+      "click",
+
+      () => fileInput.click(),
+    );
+
+    ["dragenter", "dragover"].forEach((event) => {
+      dropZone.addEventListener(
+        event,
+
+        (e) => {
+          e.preventDefault();
+
+          e.stopPropagation();
+
+          dropZone.classList.add("drop-zone-active");
+        },
+      );
+    });
+
+    ["dragleave", "drop"].forEach((event) => {
+      dropZone.addEventListener(
+        event,
+
+        (e) => {
+          e.preventDefault();
+
+          e.stopPropagation();
+
+          dropZone.classList.remove("drop-zone-active");
+        },
+      );
+    });
+
+    dropZone.addEventListener(
+      "drop",
+
+      (e) => {
+        if (e.dataTransfer.files.length === 0) return;
+
+        handleFile(e.dataTransfer.files[0]);
+      },
+    );
+
+    fileInput.addEventListener(
+      "change",
+
+      () => {
+        if (!fileInput.files.length) return;
+
+        handleFile(fileInput.files[0]);
+      },
+    );
+
+    function handleFile(file) {
+      const extension = file.name
+
+        .split(".")
+
+        .pop()
+
+        .toLowerCase();
+
+      if (extension !== "csv" && extension !== "xlsx") {
+        Utils.toast(
+          "Only CSV or XLSX files are allowed.",
+
+          "warning",
+        );
+
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        Utils.toast(
+          "Maximum upload size is 5MB.",
+
+          "warning",
+        );
+
+        return;
+      }
+
+      selectedFile = file;
+
+      uploadPreview.classList.remove("hidden");
+
+      fileName.textContent = file.name;
+
+      fileSize.textContent = Utils.formatFileSize(file.size);
+
+      uploadStatus.textContent = "Ready to import.";
+
+      uploadProgress.style.width = "0%";
+
+      importBtn.disabled = false;
+    }
+
+    importBtn.addEventListener(
+      "click",
+
+      async () => {
+        if (!selectedFile) return;
+
+        importBtn.disabled = true;
+
+        browseBtn.disabled = true;
+
+        uploadStatus.textContent = "Uploading learner records...";
+
+        uploadProgress.style.width = "20%";
+
+        try {
+          await API.importLearners(
+            selectedFile,
+
+            (progress) => {
+              uploadProgress.style.width = `${progress}%`;
+            },
+          );
+
+          uploadProgress.style.width = "100%";
+
+          uploadStatus.textContent = "Learners imported successfully.";
+
+          Utils.toast(
+            "Import completed.",
+
+            "success",
+          );
+
+          setTimeout(() => {
+            Router.go("/setup/wizard-4");
+          }, 700);
+        } catch (error) {
+          console.error(error);
+
+          uploadStatus.textContent = "Import failed.";
+
+          uploadProgress.style.width = "0%";
+
+          Utils.toast(
+            "Unable to import learners.",
+
+            "error",
+          );
+
+          importBtn.disabled = false;
+
+          browseBtn.disabled = false;
+        }
+      },
+    );
+
+    if (skipBtn) {
+      skipBtn.addEventListener(
+        "click",
+
+        async () => {
+          await SetupWizard.completeDemoSession();
+
+          Router.go("/dashboard");
+        },
+      );
+    }
+
+    if (backBtn) {
+      backBtn.addEventListener(
+        "click",
+
+        () => {
+          Router.go("/setup/wizard-2");
+        },
+      );
+    }
+  }
+
+  static async initWizard4() {
+    const learnerTable = document.getElementById("learnerTable");
+
+    if (!learnerTable) return;
+
+    const statTotal = document.getElementById("statTotal");
+
+    const statImported = document.getElementById("statImported");
+
+    const statDuplicates = document.getElementById("statDuplicates");
+
+    const statInvalid = document.getElementById("statInvalid");
+
+    const finishBtn = document.getElementById("finishBtn");
+
+    const reuploadBtn = document.getElementById("reuploadBtn");
+
+    const backBtn = document.getElementById("backBtn");
+
+    try {
+      const result = await API.getImportedLearners();
+
+      statTotal.textContent = result.total;
+
+      statImported.textContent = result.imported;
+
+      statDuplicates.textContent = result.duplicates;
+
+      statInvalid.textContent = result.invalid;
+
+      learnerTable.innerHTML = "";
+
+      (result.learners || []).forEach((learner, index) => {
+        learnerTable.insertAdjacentHTML(
+          "beforeend",
+
+          `
 <tr>
 
 <td class="px-4 py-3">
@@ -798,235 +526,131 @@ Imported
 
 </tr>
 
-`
+`,
+        );
+      });
+    } catch (error) {
+      console.error(error);
 
-                    );
+      Utils.toast(
+        "Unable to load imported learners.",
 
-                }
-
-            );
-
-        }
-
-        catch (error) {
-
-            console.error(error);
-
-            Utils.toast(
-
-                "Unable to load imported learners.",
-
-                "error"
-
-            );
-
-        }
-
-        if (backBtn) {
-
-            backBtn.addEventListener(
-
-                "click",
-
-                () => {
-
-                    Router.go(
-
-                        "/setup/wizard-3"
-
-                    );
-
-                }
-
-            );
-
-        }
-
-        if (reuploadBtn) {
-
-            reuploadBtn.addEventListener(
-
-                "click",
-
-                () => {
-
-                    Router.go(
-
-                        "/setup/wizard-3"
-
-                    );
-
-                }
-
-            );
-
-        }
-
-        if (finishBtn) {
-
-            finishBtn.addEventListener(
-
-                "click",
-
-                () => {
-
-                    Router.go(
-
-                        "/setup/wizard-5"
-
-                    );
-
-                }
-
-            );
-
-        }
-
+        "error",
+      );
     }
 
-    static async initWizard5() {
+    if (backBtn) {
+      backBtn.addEventListener(
+        "click",
 
-        const finishBtn =
-            document.getElementById("finishBtn");
+        () => {
+          Router.go("/setup/wizard-3");
+        },
+      );
+    }
 
-        if (!finishBtn) return;
+    if (reuploadBtn) {
+      reuploadBtn.addEventListener(
+        "click",
 
-        try {
+        () => {
+          Router.go("/setup/wizard-3");
+        },
+      );
+    }
 
-            const cls =
-                await API.getCurrentClass();
+    if (finishBtn) {
+      finishBtn.addEventListener(
+        "click",
 
-            if (cls) {
+        () => {
+          Router.go("/setup/wizard-5");
+        },
+      );
+    }
+  }
 
-                document.getElementById(
-                    "summaryMunicipality"
-                ).textContent =
-                    cls.municipality || "—";
+  static async initWizard5() {
+    const finishBtn = document.getElementById("finishBtn");
 
-                document.getElementById(
-                    "summaryCLC"
-                ).textContent =
-                    cls.communityLearningCenter || "—";
+    if (!finishBtn) return;
 
-                document.getElementById(
-                    "summaryYear"
-                ).textContent =
-                    cls.schoolYear || "—";
+    try {
+      const cls = await API.getCurrentClass();
 
-                document.getElementById(
-                    "summaryLevel"
-                ).textContent =
-                    cls.learningLevel || "—";
+      if (cls) {
+        document.getElementById("summaryMunicipality").textContent =
+          cls.municipality || "—";
 
-            }
+        document.getElementById("summaryCLC").textContent =
+          cls.communityLearningCenter || "—";
 
-            const stats =
-                await API.getImportedLearners();
+        document.getElementById("summaryYear").textContent =
+          cls.schoolYear || "—";
 
-            document.getElementById(
-                "statTotal"
-            ).textContent =
-                stats.total;
+        document.getElementById("summaryLevel").textContent =
+          cls.learningLevel || "—";
+      }
 
-            document.getElementById(
-                "statImported"
-            ).textContent =
-                stats.imported;
+      const stats = await API.getImportedLearners();
 
-            document.getElementById(
-                "statDuplicates"
-            ).textContent =
-                stats.duplicates;
+      document.getElementById("statTotal").textContent = stats.total;
 
-            document.getElementById(
-                "statInvalid"
-            ).textContent =
-                stats.invalid;
+      document.getElementById("statImported").textContent = stats.imported;
 
-        }
+      document.getElementById("statDuplicates").textContent = stats.duplicates;
 
-        catch (error) {
+      document.getElementById("statInvalid").textContent = stats.invalid;
+    } catch (error) {
+      console.error(error);
+    }
 
-            console.error(error);
+    const createAnotherBtn = document.getElementById("createAnotherBtn");
 
-        }
+    if (createAnotherBtn) {
+      createAnotherBtn.addEventListener(
+        "click",
 
-                const createAnotherBtn =
-            document.getElementById("createAnotherBtn");
+        () => {
+          Router.go("/setup/wizard-2");
+        },
+      );
+    }
 
-        if (createAnotherBtn) {
+    finishBtn.addEventListener(
+      "click",
 
-            createAnotherBtn.addEventListener(
+      async () => {
+        await SetupWizard.completeDemoSession();
 
-                "click",
+        Utils.toast(
+          "Setup completed successfully.",
 
-                () => {
-
-                    Router.go("/setup/wizard-2");
-
-                }
-
-            );
-
-        }
-
-        finishBtn.addEventListener(
-
-            "click",
-
-            async () => {
-
-                await SetupWizard.completeDemoSession();
-
-                Utils.toast(
-
-                    "Setup completed successfully.",
-
-                    "success"
-
-                );
-
-                setTimeout(
-
-                    () => {
-
-                        Router.go("/dashboard");
-
-                    },
-
-                    500
-
-                );
-
-            }
-
+          "success",
         );
 
-        const successIcon =
-            document.getElementById("successIcon");
+        setTimeout(
+          () => {
+            Router.go("/dashboard");
+          },
 
-        if (successIcon) {
+          500,
+        );
+      },
+    );
 
-            successIcon.classList.add(
+    const successIcon = document.getElementById("successIcon");
 
-                "animate-bounce"
-
-            );
-
-        }
-
+    if (successIcon) {
+      successIcon.classList.add("animate-bounce");
     }
-
+  }
 }
 
 document.addEventListener(
+  "DOMContentLoaded",
 
-    "DOMContentLoaded",
-
-    () => {
-
-        SetupWizard.init();
-
-    }
-
+  () => {
+    SetupWizard.init();
+  },
 );
