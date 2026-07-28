@@ -56,7 +56,7 @@ class LearnerEnrollWizard {
     });
   }
 
-  static checkReenrolleeStatus() {
+  static async checkReenrolleeStatus() {
     const lrnInput = document.getElementById("wLrn");
 
     const statusBox = document.querySelector("[data-reenrollee-status]");
@@ -78,23 +78,36 @@ class LearnerEnrollWizard {
       return;
     }
 
-    const existing = window.MockDB?.findLearnerByLrn
-      ? MockDB.findLearnerByLrn(lrn)
-      : null;
+    statusBox.innerHTML = `
+              <span class="material-symbols-outlined">progress_activity</span>
+              <p>Checking the StayEd database for this LRN…</p>
+          `;
 
-    if (existing) {
-      hidden.value = "Yes";
+    try {
+      const result = await API.lookupLearnerByLrn(lrn);
+      const existing = result?.found ? result.data : null;
 
-      statusBox.innerHTML = `
-                <span class="material-symbols-outlined" style="color:var(--st-secondary);">check_circle</span>
-                <p><strong>Re-enrollee detected.</strong> This LRN matches ${existing.name}, already known to the system. Marked as a re-enrollee automatically.</p>
-            `;
-    } else {
+      if (existing) {
+        hidden.value = "Yes";
+
+        statusBox.innerHTML = `
+                  <span class="material-symbols-outlined" style="color:var(--st-secondary);">check_circle</span>
+                  <p><strong>Re-enrollee detected.</strong> This LRN matches ${existing.name}, already known to the system. Marked as a re-enrollee automatically.</p>
+              `;
+      } else {
+        hidden.value = "No";
+
+        statusBox.innerHTML = `
+                  <span class="material-symbols-outlined">person_add</span>
+                  <p>No existing record found for this LRN. This will be enrolled as a new learner.</p>
+              `;
+      }
+    } catch (error) {
+      console.error("[LearnerEnrollWizard] LRN lookup failed", error);
       hidden.value = "No";
-
       statusBox.innerHTML = `
-                <span class="material-symbols-outlined">person_add</span>
-                <p>No existing record found for this LRN. This will be enrolled as a new learner.</p>
+                <span class="material-symbols-outlined">warning</span>
+                <p>The LRN could not be checked right now. You may continue, and the server will validate it when you enroll.</p>
             `;
     }
   }
@@ -173,7 +186,7 @@ class LearnerEnrollWizard {
 
   static validateStep(step) {
     const requiredByStep = {
-      1: ["wFullName", "wSex", "wBirthdate"],
+      1: ["wFullName", "wLrn", "wSex", "wBirthdate"],
       2: ["wAddress"],
     };
 
@@ -192,6 +205,17 @@ class LearnerEnrollWizard {
 
       if (isEmpty) valid = false;
     });
+
+    if (step === 1) {
+      const lrnInput = document.getElementById("wLrn");
+      const lrn = lrnInput?.value.trim() || "";
+
+      if (!/^\d{12}$/.test(lrn)) {
+        lrnInput?.classList.add("has-error");
+        Toast?.error("LRN must contain exactly 12 digits.");
+        valid = false;
+      }
+    }
 
     if (!valid) {
       Toast?.error("Please complete all required fields before continuing.");
@@ -304,7 +328,7 @@ class LearnerEnrollWizard {
       lrn: document.getElementById("wLrn").value.trim(),
       sex: document.getElementById("wSex").value,
       birthdate: document.getElementById("wBirthdate").value,
-      reenrollee: document.getElementById("wReenrollee")?.value === "Yes",
+      is_re_enrollee: document.getElementById("wReenrollee")?.value === "Yes",
       level: this.getSegmentValue("level"),
       modality: this.getSegmentValue("modality"),
       clc: document.getElementById("wClc").value,
@@ -328,7 +352,7 @@ class LearnerEnrollWizard {
     } catch (error) {
       console.error(error);
 
-      Toast?.error("Unable to enroll learner. Please try again.");
+      Toast?.error(error?.message || error?.data?.message || "Unable to enroll learner. Please try again.");
 
       nextBtn.disabled = false;
 

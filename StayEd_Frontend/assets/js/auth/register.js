@@ -26,32 +26,46 @@ class RegisterPage {
   static async submit() {
     const form = Utils.serialize(this.form);
 
+    if (!this.form.checkValidity()) {
+      this.form.reportValidity();
+      return;
+    }
+
     if (form.password !== form.confirm_password) {
       Toast.error("Passwords do not match.");
-
       return;
     }
 
     try {
-      Layout.showLoader();
+      if (window.Layout) {
+        Layout.showLoader();
+      }
 
-      await Auth.register({
-        full_name: form.full_name,
-
-        email: form.email,
-
+      const response = await Auth.register({
+        full_name: form.full_name.trim(),
+        email: form.email.trim(),
         password: form.password,
       });
 
-      Toast.success("Registration submitted.");
+      Toast.success(
+        response?.message || "Registration submitted successfully."
+      );
 
       setTimeout(() => {
         window.location.href = "pending.html";
       }, 1200);
     } catch (error) {
-      Toast.error(error.data?.message || "Registration failed.");
+      console.error("Registration error:", error);
+
+      Toast.error(
+        error?.data?.message ||
+        error?.message ||
+        "Registration failed."
+      );
     } finally {
-      Layout.hideLoader();
+      if (window.Layout) {
+        Layout.hideLoader();
+      }
     }
   }
 }

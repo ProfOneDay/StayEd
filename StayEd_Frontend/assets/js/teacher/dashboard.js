@@ -21,6 +21,8 @@ class TeacherDashboard {
     try {
       const data = await API.getDashboard();
 
+      this.state.context = data.context || {};
+
       this.renderWelcome(data.context);
 
       this.renderStatistics(data.statistics);
@@ -111,7 +113,7 @@ class TeacherDashboard {
 
     this.setText(
       "[data-stat-total-meta]",
-      MockDB?.dashboard?.context?.selected_class || "Current class",
+      this.state.context?.selected_class || "Current class",
     );
 
     this.setText("[data-stat-high]", stats.high);
@@ -175,7 +177,7 @@ class TeacherDashboard {
   }
 
   static renderInterventionTip(interventions = []) {
-    const pending = interventions.filter((i) => i.status !== "Resolved").length;
+    const pending = interventions.filter((i) => !["Resolved", "Completed", "Cancelled"].includes(i.status)).length;
 
     const el = document.querySelector("[data-quick-intervention-count]");
 

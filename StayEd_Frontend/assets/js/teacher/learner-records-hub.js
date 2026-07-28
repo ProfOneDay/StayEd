@@ -8,6 +8,7 @@ class LearnerRecordsHub {
     risk: "",
     page: { modular: 1, "face-to-face": 1, blended: 1 },
     perPage: 6,
+    classId: "",
     selected: {
       modular: new Set(),
       "face-to-face": new Set(),
@@ -18,7 +19,7 @@ class LearnerRecordsHub {
   static async init() {
     if (window.Guards) Guards.teacher();
 
-    this.loadClassContext();
+    await this.loadClassContext();
 
     this.bindTabs();
 
@@ -29,34 +30,36 @@ class LearnerRecordsHub {
     await this.load();
   }
 
-  static loadClassContext() {
+  static async loadClassContext() {
     const params = new URLSearchParams(window.location.search);
-
     const classId = params.get("class");
-
     const banner = document.querySelector("[data-class-context-banner]");
+
+    this.state.classId = classId || "";
 
     if (!classId || !banner) return;
 
-    const match = (MockDB.classes || []).find(
-      (c) => String(c.id) === String(classId),
-    );
+    try {
+      const response = await API.getTeacherClasses();
+      const match = (response?.data || []).find(
+        (item) => String(item.id) === String(classId),
+      );
 
-    if (!match) return;
+      if (!match) return;
 
-    banner.classList.remove("st-hidden");
-
-    this.set("[data-class-context-name]", `${match.clc} \u2014 ${match.level}`);
-
-    this.set(
-      "[data-class-context-meta]",
-      `${match.modality} \u00b7 School Year ${match.schoolYear} \u00b7 ${match.learnerCount} Enrolled Learners`,
-    );
-
-    this.set(
-      "[data-records-subtitle]",
-      `Viewing records for ${match.clc}, ${match.level} (SY ${match.schoolYear}).`,
-    );
+      banner.classList.remove("st-hidden");
+      this.set("[data-class-context-name]", `${match.clc} — ${match.level}`);
+      this.set(
+        "[data-class-context-meta]",
+        `${match.modality} · School Year ${match.schoolYear} · ${match.learnerCount} Enrolled Learners`,
+      );
+      this.set(
+        "[data-records-subtitle]",
+        `Viewing records for ${match.clc}, ${match.level} (SY ${match.schoolYear}).`,
+      );
+    } catch (error) {
+      console.error("[LearnerRecordsHub] Unable to load class context", error);
+    }
   }
 
   static async load() {
@@ -65,7 +68,9 @@ class LearnerRecordsHub {
     this.showSkeleton();
 
     try {
-      const res = await API.getLearners();
+      const res = await API.getLearners(
+        this.state.classId ? { class: this.state.classId } : {},
+      );
 
       const learners = res.data || [];
 

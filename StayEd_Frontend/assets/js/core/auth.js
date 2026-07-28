@@ -80,10 +80,12 @@ class Auth {
   }
 
   static role() {
-    const user = this.user();
+  const user = this.user();
 
-    return user ? user.role : null;
-  }
+  return String(user?.role || "")
+    .trim()
+    .toLowerCase();
+}
 
   static id() {
     const user = this.user();

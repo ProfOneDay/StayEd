@@ -24,7 +24,7 @@ MockDB.predictionSummary = {
   coverage: "100%",
   model: "v1",
   confidence: "High",
-  algorithm: "Logistic Regression",
+  algorithm: "Random Forest",
   insights: [
     {
       tone: "primary",

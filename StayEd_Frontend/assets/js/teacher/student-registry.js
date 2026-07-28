@@ -256,8 +256,8 @@ class StudentRegistry {
       .join("")
       .toUpperCase();
 
-    const confidence = Math.round(
-      (1 - (l.risk_probability || 0.3)) * 100 + (l.risk === "Low" ? 20 : 0),
+    const riskProbability = Math.round(
+      Math.min(1, Math.max(0, l.risk_probability ?? 0)) * 100,
     );
 
     const isArchived = l.status === "Archived";
@@ -284,8 +284,8 @@ class StudentRegistry {
                 <td>${this.modalityPill(l.modality)}</td>
                 <td>${this.riskBadge(l.risk)}</td>
                 <td class="is-center">
-                    <p class="st-confidence-value">${Math.min(99, Math.max(1, confidence))}%</p>
-                    <p class="st-confidence-label">${l.risk === "Low" ? "High" : l.risk === "High" ? "Low" : "Medium"}</p>
+                    <p class="st-confidence-value">${riskProbability}%</p>
+                    <p class="st-confidence-label">${l.risk || "Low"} Risk</p>
                 </td>
                 <td>${this.statusPill(l.status)}</td>
                 <td>
@@ -428,16 +428,29 @@ class StudentRegistry {
       title: "Archive Learners",
       message: `Archive <strong>${ids.length}</strong> selected learner(s)? They can be restored later.`,
       onConfirm: async () => {
+        let archived = 0;
+
         for (const id of ids) {
-          const l = this.state.all.find((x) => String(x.id) === String(id));
-          if (l) l.status = "Archived";
+          try {
+            await API.updateLearner(id, { status: "Archived" });
+            const learner = this.state.all.find(
+              (item) => String(item.id) === String(id),
+            );
+            if (learner) learner.status = "Archived";
+            archived += 1;
+          } catch (error) {
+            console.error(error);
+          }
         }
 
         this.state.selected.clear();
-
         this.apply();
 
-        Toast?.success(`${ids.length} learner(s) archived.`);
+        if (archived === ids.length) {
+          Toast?.success(`${archived} learner(s) archived.`);
+        } else {
+          Toast?.warning(`${archived} of ${ids.length} learner(s) were archived.`);
+        }
       },
     });
   }

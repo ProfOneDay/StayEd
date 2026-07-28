@@ -119,7 +119,7 @@ class LearnerImportPage {
 
   static async runPreview() {
     try {
-      this.preview = await API.getImportPreview(this.file?.name);
+      this.preview = await API.getImportPreview(this.file);
 
       document
         .getElementById("importUploadSection")

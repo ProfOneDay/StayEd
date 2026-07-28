@@ -287,8 +287,8 @@ class LearnerManagement {
       .join("")
       .toUpperCase();
 
-    const confidence = Math.round(
-      (1 - (l.risk_probability || 0.3)) * 100 + (l.risk === "Low" ? 20 : 0),
+    const riskProbability = Math.round(
+      Math.min(1, Math.max(0, l.risk_probability ?? 0)) * 100,
     );
 
     const isArchived = l.status === "Archived";
@@ -315,8 +315,8 @@ class LearnerManagement {
                 <td>${this.modalityPill(l.modality)}</td>
                 <td>${this.riskBadge(l.risk)}</td>
                 <td class="is-center">
-                    <p class="st-confidence-value">${Math.min(99, Math.max(1, confidence))}%</p>
-                    <p class="st-confidence-label">${l.risk === "Low" ? "High" : l.risk === "High" ? "Low" : "Medium"}</p>
+                    <p class="st-confidence-value">${riskProbability}%</p>
+                    <p class="st-confidence-label">${l.risk || "Low"} Risk</p>
                 </td>
                 <td>${this.statusPill(l.status)}</td>
                 <td>

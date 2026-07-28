@@ -74,19 +74,30 @@ class ProfileSettingsPage {
 
     window.UnsavedChanges?.track(profileForm);
 
-    profileForm?.addEventListener("submit", (event) => {
+    profileForm?.addEventListener("submit", async (event) => {
       event.preventDefault();
 
-      window.UnsavedChanges?.clear(profileForm);
+      try {
+        await Auth.updateProfile({
+          first_name: document.getElementById("settingsFirstName")?.value.trim(),
+          last_name: document.getElementById("settingsLastName")?.value.trim(),
+          email: document.getElementById("settingsEmail")?.value.trim(),
+        });
 
-      Toast?.success("Profile information saved.");
+        window.UnsavedChanges?.clear(profileForm);
+        this.populateFromUser();
+        Toast?.success("Profile information saved.");
+      } catch (error) {
+        console.error(error);
+        Toast?.error(error.message || "Unable to save profile information.");
+      }
     });
 
     const passwordForm = document.getElementById("passwordForm");
 
     window.UnsavedChanges?.track(passwordForm);
 
-    passwordForm?.addEventListener("submit", (event) => {
+    passwordForm?.addEventListener("submit", async (event) => {
       event.preventDefault();
 
       const current = document.getElementById("currentPassword").value;
@@ -111,11 +122,19 @@ class ProfileSettingsPage {
         return;
       }
 
-      Toast?.success("Password updated successfully.");
+      try {
+        await Auth.changePassword({
+          current_password: current,
+          password: next,
+        });
 
-      event.target.reset();
-
-      window.UnsavedChanges?.clear(passwordForm);
+        Toast?.success("Password updated successfully.");
+        event.target.reset();
+        window.UnsavedChanges?.clear(passwordForm);
+      } catch (error) {
+        console.error(error);
+        Toast?.error(error.message || "Unable to update password.");
+      }
     });
 
     document

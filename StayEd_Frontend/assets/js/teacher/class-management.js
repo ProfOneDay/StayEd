@@ -104,50 +104,82 @@ class ClassManagement {
   static bindAddClass() {
     document
       .querySelector("[data-add-class-btn]")
-      ?.addEventListener("click", () => {
+      ?.addEventListener("click", async () => {
         if (!window.Modal) return;
+
+        let clcs = [];
+
+        try {
+          const response = await API.getClcs();
+          clcs = response.data || [];
+        } catch (error) {
+          console.warn("[ClassManagement] Unable to load CLC choices", error);
+        }
+
+        const options = clcs.length
+          ? clcs
+              .map((item) => {
+                const name = item.name || item.clc || item.clc_name || "";
+                return `<option value="${name}">${name}</option>`;
+              })
+              .join("")
+          : `<option value="San Felipe Sur CLC">San Felipe Sur CLC</option>`;
 
         Modal.show({
           title: "Add Class",
-
           size: "sm",
-
           confirmLabel: "Create Class",
-
           message: `
-                    <div class="st-schedule-modal-field">
-                        <label for="newClassClc">Community Learning Center</label>
-                        <select id="newClassClc">
-                            <option>San Felipe Sur CLC</option>
-                            <option>Manila North CLC</option>
-                            <option>Quezon City Central CLC</option>
-                            <option>Davao South Hub</option>
-                        </select>
-                    </div>
-                    <div class="st-schedule-modal-field">
-                        <label for="newClassLevel">Learning Level</label>
-                        <select id="newClassLevel">
-                            <option>Basic Literacy Program</option>
-                            <option>Elementary</option>
-                            <option>Junior High School</option>
-                            <option>Senior High School</option>
-                        </select>
-                    </div>
-                    <div class="st-schedule-modal-field">
-                        <label for="newClassYear">School Year</label>
-                        <input id="newClassYear" type="text" value="2026-2027" readonly>
-                    </div>
-                `,
+            <div class="st-schedule-modal-field">
+              <label for="newClassClc">Community Learning Center</label>
+              <select id="newClassClc">${options}</select>
+            </div>
+            <div class="st-schedule-modal-field">
+              <label for="newClassLevel">Learning Level</label>
+              <select id="newClassLevel">
+                <option>Basic Literacy Program</option>
+                <option>Elementary</option>
+                <option>Junior High School</option>
+                <option>Senior High School</option>
+              </select>
+            </div>
+            <div class="st-schedule-modal-field">
+              <label for="newClassYear">School Year</label>
+              <input id="newClassYear" type="text" value="2026-2027">
+            </div>
+          `,
+          onConfirm: async () => {
+            const communityLearningCenter =
+              document.getElementById("newClassClc")?.value.trim();
+            const learningLevel =
+              document.getElementById("newClassLevel")?.value.trim();
+            const schoolYear =
+              document.getElementById("newClassYear")?.value.trim();
 
-          onConfirm: () => {
-            Toast?.success("Class created.");
+            if (!communityLearningCenter || !learningLevel || !schoolYear) {
+              Toast?.error("Please complete all class details.");
+              return;
+            }
 
-            this.load();
+            try {
+              await API.createClass({
+                communityLearningCenter,
+                learningLevel,
+                schoolYear,
+                semester: "Whole Year",
+                className: `${learningLevel} ${schoolYear}`,
+              });
+
+              Toast?.success("Class created.");
+              await this.load();
+            } catch (error) {
+              console.error(error);
+              Toast?.error(error.message || "Unable to create the class.");
+            }
           },
         });
       });
-  }
-}
+  }}
 
 (function bootClassManagement() {
   let started = false;

@@ -34,7 +34,11 @@ class API {
 
     options = {},
   ) {
-    if (CONFIG.MODE === "development" && window.MockAPI) {
+    if (
+      CONFIG.MODE === "development" &&
+      CONFIG.USE_MOCK_API !== false &&
+      window.MockAPI
+    ) {
       return MockAPI.request(
         endpoint,
 
@@ -159,7 +163,13 @@ class API {
     }
 
     if (error.data) {
-      throw error.data;
+      const apiError = new Error(
+        error.data.message || "The request could not be completed."
+      );
+      apiError.status = error.status;
+      apiError.data = error.data;
+
+      throw apiError;
     }
 
     throw error;
@@ -374,7 +384,11 @@ class API {
   }
 
   static async ping() {
-    if (this.MODE === "development" && window.MockAPI) {
+    if (
+      this.MODE === "development" &&
+      CONFIG.USE_MOCK_API !== false &&
+      window.MockAPI
+    ) {
       return true;
     }
 
@@ -510,6 +524,10 @@ class API {
     return this.get(`/learners${qs}`);
   }
 
+  static lookupLearnerByLrn(lrn) {
+    return this.get(`/learners/lookup?lrn=${encodeURIComponent(lrn)}`);
+  }
+
   static getLearner(id) {
     return this.get(`/learners/${id}`);
   }
@@ -539,11 +557,27 @@ class API {
   }
 
   static importLearners(payload) {
+    if (payload instanceof File) {
+      const form = new FormData();
+      form.append("file", payload);
+      return this.upload("/learners/import", form);
+    }
+
+    if (payload instanceof FormData) {
+      return this.upload("/learners/import", payload);
+    }
+
     return this.post("/learners/import", payload);
   }
 
-  static getImportPreview(filename) {
-    return this.post("/learners/import/preview", { filename });
+  static getImportPreview(fileOrName) {
+    if (fileOrName instanceof File) {
+      const form = new FormData();
+      form.append("file", fileOrName);
+      return this.upload("/learners/import/preview", form);
+    }
+
+    return this.post("/learners/import/preview", { filename: fileOrName });
   }
 
   static getImportedLearners() {

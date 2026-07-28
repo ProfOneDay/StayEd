@@ -34,12 +34,14 @@ class EarlyWarningPage {
         .map((l) => ({
           ...l,
           program: l.level,
-          clc: l.clc || this.clcFor(l.id),
-          dateGenerated: l.date_generated || "July 8, 2026",
-          assignedTeacher: l.assigned_teacher || "Trisha Santos",
+          clc: l.clc || "Unassigned",
+          dateGenerated: l.date_generated || "",
+          assignedTeacher: l.assigned_teacher || "Unassigned",
           status: l.status === "Archived" ? "Archived" : "Active",
         }))
         .sort((a, b) => (b.risk_probability || 0) - (a.risk_probability || 0));
+
+      this.populateClcFilter();
 
       this.renderSummary(learners);
 
@@ -52,12 +54,31 @@ class EarlyWarningPage {
     }
   }
 
-  static clcFor(id) {
-    const clcs = MockDB.clcs || [];
+  static populateClcFilter() {
+    const select = document.querySelector("[data-ewa-filter-clc]");
+    if (!select) return;
 
-    if (!clcs.length) return "San Felipe Sur CLC";
+    const current = this.state.clc;
+    const names = [...new Set(this.state.all.map((item) => item.clc))]
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b));
 
-    return clcs[id % clcs.length].name;
+    select.replaceChildren();
+
+    const allOption = document.createElement("option");
+    allOption.value = "";
+    allOption.textContent = "All CLCs";
+    select.appendChild(allOption);
+
+    names.forEach((name) => {
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name;
+      select.appendChild(option);
+    });
+
+    select.value = names.includes(current) ? current : "";
+    this.state.clc = select.value;
   }
 
   static bindControls() {
@@ -160,6 +181,22 @@ class EarlyWarningPage {
       rows = rows.filter((l) => l.clc === this.state.clc);
     }
 
+    if (this.state.dateFrom) {
+      const from = new Date(`${this.state.dateFrom}T00:00:00`);
+      rows = rows.filter((item) => {
+        const generated = item.dateGenerated ? new Date(item.dateGenerated) : null;
+        return generated && !Number.isNaN(generated.valueOf()) && generated >= from;
+      });
+    }
+
+    if (this.state.dateTo) {
+      const to = new Date(`${this.state.dateTo}T23:59:59`);
+      rows = rows.filter((item) => {
+        const generated = item.dateGenerated ? new Date(item.dateGenerated) : null;
+        return generated && !Number.isNaN(generated.valueOf()) && generated <= to;
+      });
+    }
+
     this.state.filtered = rows;
 
     this.set(
@@ -217,7 +254,7 @@ class EarlyWarningPage {
       .join("")
       .toUpperCase();
 
-    const score = Math.round((l.risk_probability || 0.5) * 100);
+    const score = Math.round((l.risk_probability ?? 0) * 100);
 
     return `
             <tr>
@@ -237,7 +274,7 @@ class EarlyWarningPage {
                 </td>
                 <td>${this.riskBadge(l.risk)}</td>
                 <td><span class="st-pill">${l.status}</span></td>
-                <td style="font-size:12px;">${l.dateGenerated}</td>
+                <td style="font-size:12px;">${l.dateGenerated ? new Date(l.dateGenerated).toLocaleDateString() : "Not generated"}</td>
                 <td style="font-size:12px;">${l.assignedTeacher}</td>
                 <td class="is-center">
                     <button type="button" class="st-btn st-btn-primary st-btn-xs" data-open-profile="${l.id}">

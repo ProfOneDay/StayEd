@@ -64,7 +64,7 @@ class SetupWizard {
     }
   }
 
-  static initWizard2() {
+  static async initWizard2() {
     const form = document.getElementById("classForm");
 
     if (!form) return;
@@ -85,43 +85,99 @@ class SetupWizard {
 
     const summaryLevel = document.getElementById("summaryLevel");
 
+    let availableClcs = [];
+
+    function replaceOptions(select, placeholder, items, valueFor, labelFor) {
+      if (!select) return;
+
+      select.replaceChildren();
+
+      const first = document.createElement("option");
+      first.value = "";
+      first.textContent = placeholder;
+      select.appendChild(first);
+
+      items.forEach((item) => {
+        const option = document.createElement("option");
+        option.value = valueFor(item);
+        option.textContent = labelFor(item);
+        select.appendChild(option);
+      });
+    }
+
     function populateMunicipalities() {
-      if (!municipality || !window.MockDB?.getMunicipalities) return;
+      const list = [...new Set(availableClcs.map((item) => item.municipality))]
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b));
 
-      const list = MockDB.getMunicipalities();
-
-      municipality.innerHTML =
-        `<option value="">Select Municipality</option>` +
-        list.map((m) => `<option value="${m}">${m}</option>`).join("");
+      replaceOptions(
+        municipality,
+        "Select Municipality",
+        list,
+        (item) => item,
+        (item) => item,
+      );
     }
 
     function populateClcsForMunicipality(selected) {
       if (!clc) return;
 
       if (!selected) {
-        clc.innerHTML = `<option value="">Select Municipality first</option>`;
-
+        replaceOptions(
+          clc,
+          "Select Municipality first",
+          [],
+          () => "",
+          () => "",
+        );
         clc.disabled = true;
-
         return;
       }
 
-      const clcs = window.MockDB?.getClcsByMunicipality
-        ? MockDB.getClcsByMunicipality(selected)
-        : [];
+      const matching = availableClcs
+        .filter((item) => item.municipality === selected)
+        .sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 
-      clc.innerHTML =
-        `<option value="">Select CLC</option>` +
-        clcs
-          .map((c) => `<option value="${c.name}">${c.name}</option>`)
-          .join("");
-
-      clc.disabled = false;
+      replaceOptions(
+        clc,
+        matching.length ? "Select CLC" : "No CLC registered",
+        matching,
+        (item) => item.name,
+        (item) => item.name,
+      );
+      clc.disabled = matching.length === 0;
     }
 
-    populateMunicipalities();
+    async function loadAvailableClcs() {
+      try {
+        const response = await API.getClcs();
+        availableClcs = Array.isArray(response)
+          ? response
+          : Array.isArray(response?.data)
+            ? response.data
+            : [];
+      } catch (error) {
+        console.error("[SetupWizard] Unable to load CLCs from the API", error);
+      }
 
-    populateClcsForMunicipality(municipality?.value);
+      if (!availableClcs.length && Array.isArray(window.MockDB?.clcs)) {
+        availableClcs = window.MockDB.clone
+          ? MockDB.clone(MockDB.clcs)
+          : [...MockDB.clcs];
+      }
+
+      populateMunicipalities();
+      populateClcsForMunicipality(municipality?.value);
+
+      if (!availableClcs.length) {
+        Utils.toast(
+          "No Community Learning Centers are registered in the database yet.",
+          "warning",
+        );
+      }
+    }
+
+    await loadAvailableClcs();
 
     municipality?.addEventListener("change", () => {
       populateClcsForMunicipality(municipality.value);
@@ -198,7 +254,7 @@ class SetupWizard {
         } catch (error) {
           console.error(error);
 
-          Utils.toast("Unable to create class.", "error");
+          Utils.toast(error?.message || error?.data?.message || "Unable to create class.", "error");
         }
       },
     );

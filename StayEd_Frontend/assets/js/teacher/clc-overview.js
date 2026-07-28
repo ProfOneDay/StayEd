@@ -24,6 +24,8 @@ class ClcOverview {
 
       this.state.all = response.data || [];
 
+      this.populateMunicipalityFilter();
+
       this.renderStats();
 
       this.apply();
@@ -36,8 +38,6 @@ class ClcOverview {
   }
 
   static bindControls() {
-    this.populateMunicipalityFilter();
-
     document
       .querySelector("[data-clc-search]")
       ?.addEventListener("input", (e) => {
@@ -200,13 +200,29 @@ class ClcOverview {
   static populateMunicipalityFilter() {
     const select = document.querySelector("[data-clc-filter-municipality]");
 
-    if (!select || !window.MockDB?.getMunicipalities) return;
+    if (!select) return;
 
-    const list = MockDB.getMunicipalities();
+    const current = this.state.municipality;
+    const list = [...new Set(this.state.all.map((item) => item.municipality))]
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b));
 
-    select.innerHTML =
-      `<option value="">All Municipalities</option>` +
-      list.map((m) => `<option value="${m}">${m}</option>`).join("");
+    select.replaceChildren();
+
+    const allOption = document.createElement("option");
+    allOption.value = "";
+    allOption.textContent = "All Municipalities";
+    select.appendChild(allOption);
+
+    list.forEach((municipality) => {
+      const option = document.createElement("option");
+      option.value = municipality;
+      option.textContent = municipality;
+      select.appendChild(option);
+    });
+
+    select.value = list.includes(current) ? current : "";
+    this.state.municipality = select.value;
   }
 
   static set(selector, value) {
