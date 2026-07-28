@@ -1,39 +1,47 @@
-/**
- * ============================================
- * StayEd
- * Mock Community Learning Centers (CLC) Dataset
- * ============================================
- */
 
 MockDB.clcs = [
     {
-        id: 1, name: "Manila North CLC", municipality: "Manila",
-        location: "Tondo, Manila", status: "Active", icon: "account_balance",
-        totalLearners: 132, schoolYear: "2023-2024", teachers: 3
+        id: 1, name: "Poblacion CLC", municipality: "Binalonan",
+        location: "Poblacion, Binalonan, Pangasinan", status: "Active", icon: "account_balance",
+        totalLearners: 46, schoolYear: "2026-2027", teachers: 3
     },
     {
-        id: 2, name: "Quezon City Central CLC", municipality: "Quezon City",
-        location: "Diliman, Quezon City", status: "Active", icon: "school",
-        totalLearners: 245, schoolYear: "2023-2024", teachers: 5
+        id: 2, name: "San Felipe Sur CLC", municipality: "Binalonan",
+        location: "San Felipe Sur, Binalonan, Pangasinan", status: "Active", icon: "school",
+        totalLearners: 38, schoolYear: "2026-2027", teachers: 2
     },
     {
-        id: 3, name: "Davao South Hub", municipality: "Davao City",
-        location: "Toril, Davao City", status: "Active", icon: "cottage",
-        totalLearners: 189, schoolYear: "2023-2024", teachers: 4
+        id: 3, name: "San Felipe Norte CLC", municipality: "Binalonan",
+        location: "San Felipe Norte, Binalonan, Pangasinan", status: "Active", icon: "cottage",
+        totalLearners: 29, schoolYear: "2026-2027", teachers: 2
     },
     {
-        id: 4, name: "Cebu East ALS", municipality: "Cebu City",
-        location: "Mandaue, Cebu", status: "Active", icon: "account_balance",
-        totalLearners: 98, schoolYear: "2023-2024", teachers: 2
+        id: 4, name: "Cabalitian CLC", municipality: "Binalonan",
+        location: "Cabalitian, Binalonan, Pangasinan", status: "Active", icon: "account_balance",
+        totalLearners: 22, schoolYear: "2026-2027", teachers: 1
     },
     {
-        id: 5, name: "Pasig Integrated", municipality: "Pasig",
-        location: "Kapitolyo, Pasig", status: "Active", icon: "apartment",
-        totalLearners: 156, schoolYear: "2023-2024", teachers: 3
+        id: 5, name: "Alacan CLC", municipality: "Binalonan",
+        location: "Alacan, Binalonan, Pangasinan", status: "Active", icon: "apartment",
+        totalLearners: 33, schoolYear: "2026-2027", teachers: 2
     },
     {
-        id: 6, name: "Zamboanga West Hub", municipality: "Zamboanga City",
-        location: "Baliwasan, Zamboanga", status: "Active", icon: "meeting_room",
-        totalLearners: 112, schoolYear: "2023-2024", teachers: 2
+        id: 6, name: "Buenlag CLC", municipality: "Binalonan",
+        location: "Buenlag, Binalonan, Pangasinan", status: "Active", icon: "meeting_room",
+        totalLearners: 27, schoolYear: "2026-2027", teachers: 2
     }
 ];
+
+MockDB.getMunicipalities = function () {
+
+    return [...new Set(this.clcs.map(c => c.municipality))];
+
+};
+
+MockDB.getClcsByMunicipality = function (municipality) {
+
+    if (!municipality) return this.clone(this.clcs);
+
+    return this.clone(this.clcs.filter(c => c.municipality === municipality));
+
+};

@@ -1,14 +1,4 @@
-/*
-==================================================
-StayEd — Profile Settings
-Collapsible sections, quick-stats card, toggle
-switches. Reuses form/button/panel patterns.
-==================================================
-*/
 
-/* ==================================================
-   PROFILE SUMMARY (left column)
-================================================== */
 
 .st-profile-summary-card{
     background:#fff;
@@ -132,7 +122,6 @@ switches. Reuses form/button/panel patterns.
     color:var(--st-primary);
 }
 
-/* Quick stats */
 .st-quick-stats-grid{
     display:grid;
     grid-template-columns:1fr 1fr;
@@ -159,10 +148,6 @@ switches. Reuses form/button/panel patterns.
     color:var(--st-on-surface-variant);
     margin-top:2px;
 }
-
-/* ==================================================
-   COLLAPSIBLE SECTIONS (right column)
-================================================== */
 
 .st-settings-section{
     background:#fff;
@@ -233,7 +218,6 @@ switches. Reuses form/button/panel patterns.
     padding:0 24px 24px;
 }
 
-/* Danger variant */
 .st-settings-section--danger{
     border-color:rgba(186,26,26,.30);
 }
@@ -246,10 +230,6 @@ switches. Reuses form/button/panel patterns.
 .st-settings-section--danger .st-settings-section-header-left .material-symbols-outlined{
     color:var(--st-error);
 }
-
-/* ==================================================
-   FORM GRID (within sections)
-================================================== */
 
 .st-settings-form-grid{
     display:grid;
@@ -325,10 +305,6 @@ switches. Reuses form/button/panel patterns.
     color:var(--st-on-surface-variant);
 }
 
-/* ==================================================
-   TOGGLE SWITCHES
-================================================== */
-
 .st-toggle-row{
     display:flex;
     align-items:center;
@@ -403,10 +379,6 @@ switches. Reuses form/button/panel patterns.
     outline-offset:2px;
 }
 
-/* ==================================================
-   SESSION / DEVICE LIST (Privacy section)
-================================================== */
-
 .st-session-item{
     display:flex;
     align-items:center;
@@ -456,10 +428,6 @@ switches. Reuses form/button/panel patterns.
     border-radius:999px;
 }
 
-/* ==================================================
-   APPEARANCE — THEME SWATCHES
-================================================== */
-
 .st-theme-options{
     display:grid;
     grid-template-columns:repeat(3,1fr);
@@ -503,7 +471,6 @@ switches. Reuses form/button/panel patterns.
     color:var(--st-on-surface);
 }
 
-/* Font scale slider */
 .st-range-row{
     display:flex;
     align-items:center;

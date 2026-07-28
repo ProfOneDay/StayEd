@@ -1,19 +1,10 @@
-/**
- * ============================================
- * StayEd
- * Authentication
- * ============================================
- */
+
 
 class Auth {
 
     static TOKEN_KEY = "stayed_token";
 
     static USER_KEY = "stayed_user";
-
-    /* =======================================
-       LOGIN
-    ======================================= */
 
     static async login(credentials) {
 
@@ -47,10 +38,6 @@ class Auth {
 
     }
 
-    /* =======================================
-       SESSION
-    ======================================= */
-
     static saveSession(token, user) {
 
         Utils.storage.set(
@@ -71,15 +58,6 @@ class Auth {
 
     }
 
-    /*
-     * DEMO MODE ONLY
-     * -----------------------------------------
-     * Seeds a normal-looking local session (same
-     * storage keys/shape as a real login) from a
-     * DemoAuthService account, so Guards/Layout
-     * work exactly as they would post-login. Not
-     * called anywhere in the real auth flow.
-     */
     static seedDemoSession(account) {
 
         account = account || {};
@@ -209,11 +187,7 @@ class Auth {
 
     }
 
-    /* =======================================
-       LOGOUT
-    ======================================= */
-
-    static async logout() {
+static async logout() {
 
         try {
 
@@ -237,10 +211,6 @@ class Auth {
 
     }
 
-    /* =======================================
-       RESTORE SESSION
-    ======================================= */
-
     static restore() {
 
         if (!this.authenticated()) {
@@ -252,10 +222,6 @@ class Auth {
         return this.user();
 
     }
-
-    /* =======================================
-       REFRESH USER
-    ======================================= */
 
     static async refresh() {
 
@@ -276,10 +242,6 @@ class Auth {
         return user;
 
     }
-
-    /* =======================================
-       UPDATE LOCAL USER
-    ======================================= */
 
     static updateUser(data = {}) {
 
@@ -306,10 +268,6 @@ class Auth {
         return updated;
 
     }
-
-    /* =======================================
-       REDIRECT AFTER LOGIN
-    ======================================= */
 
     static redirectAfterLogin() {
 
@@ -340,10 +298,6 @@ class Auth {
 
     }
 
-    /* =======================================
-       REQUIRE LOGIN
-    ======================================= */
-
     static requireAuth() {
 
         if (!this.authenticated()) {
@@ -355,10 +309,6 @@ class Auth {
         }
 
     }
-
-    /* =======================================
-       REQUIRE ROLE
-    ======================================= */
 
     static requireRole(...roles) {
 
@@ -379,10 +329,6 @@ class Auth {
         }
 
     }
-
-    /* =======================================
-       TOKEN EXPIRATION
-    ======================================= */
 
     static tokenExpired() {
 
@@ -420,10 +366,6 @@ class Auth {
 
     }
 
-    /* =======================================
-       VALIDATE SESSION
-    ======================================= */
-
     static validateSession() {
 
         if (
@@ -452,10 +394,6 @@ class Auth {
 
     }
 
-    /* =======================================
-       CHANGE PASSWORD
-    ======================================= */
-
     static async changePassword(data) {
 
         return API.post(
@@ -467,10 +405,6 @@ class Auth {
         );
 
     }
-
-    /* =======================================
-       FORGOT PASSWORD
-    ======================================= */
 
     static async forgotPassword(email) {
 
@@ -488,10 +422,6 @@ class Auth {
 
     }
 
-    /* =======================================
-       RESET PASSWORD
-    ======================================= */
-
     static async resetPassword(data) {
 
         return API.post(
@@ -504,10 +434,6 @@ class Auth {
 
     }
 
-    /* =======================================
-       REGISTER
-    ======================================= */
-
     static async register(data){
 
         return API.post(
@@ -519,10 +445,6 @@ class Auth {
         );
 
     }
-
-    /* =======================================
-       VERIFY EMAIL
-    ======================================= */
 
     static async verifyEmail(token) {
 
@@ -540,10 +462,6 @@ class Auth {
 
     }
 
-    /* =======================================
-       UPDATE PROFILE
-    ======================================= */
-
     static async updateProfile(data) {
 
         const user = await API.put(
@@ -559,10 +477,6 @@ class Auth {
         return user;
 
     }
-
-    /* =======================================
-       AUTO RESTORE
-    ======================================= */
 
     static initialize() {
 
@@ -587,10 +501,6 @@ class Auth {
         }
 
     }
-
-    /* =======================================
-       REDIRECT IF LOGGED IN
-    ======================================= */
 
     static redirectIfAuthenticated() {
 
@@ -620,10 +530,6 @@ class Auth {
 
     }
 
-    /* =======================================
-       USER DISPLAY HELPERS
-    ======================================= */
-
     static avatar() {
 
         const user = this.user();
@@ -650,15 +556,7 @@ class Auth {
 
 }
 
-/* ==========================================
-   EXPORT
-========================================== */
-
 window.Auth = Auth;
-
-/* ==========================================
-   AUTO INITIALIZATION
-========================================== */
 
 document.addEventListener(
 

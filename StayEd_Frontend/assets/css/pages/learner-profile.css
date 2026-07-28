@@ -1,15 +1,4 @@
-/*
-==================================================
-StayEd — Learner Profile
-Overview / Monitoring History / Risk Explanation /
-Interventions tabs. Reuses dashboard/records panel,
-badge, and pill styles wherever possible.
-==================================================
-*/
 
-/* ==================================================
-   PROFILE HERO CARD
-================================================== */
 
 .st-profile-hero{
     background:#fff;
@@ -142,10 +131,6 @@ badge, and pill styles wherever possible.
     justify-content:center;
 }
 
-/* ==================================================
-   TABS
-================================================== */
-
 .st-profile-tabs{
     display:flex;
     gap:32px;
@@ -185,10 +170,6 @@ badge, and pill styles wherever possible.
     display:block;
     animation:st-fade-in .25s ease;
 }
-
-/* ==================================================
-   OVERVIEW TAB
-================================================== */
 
 .st-profile-metrics{
     display:grid;
@@ -251,7 +232,6 @@ badge, and pill styles wherever possible.
     transition:width .6s ease;
 }
 
-/* Risk trend chart */
 .st-risk-trend-card{
     background:#fff;
     border:1px solid rgba(195,198,207,.30);
@@ -316,7 +296,6 @@ badge, and pill styles wherever possible.
     color:var(--st-on-surface-variant);
 }
 
-/* Two-column: recommended actions + background info sidebar */
 .st-profile-grid{
     display:grid;
     grid-template-columns:1fr;
@@ -388,7 +367,6 @@ badge, and pill styles wherever possible.
 .st-sidebar-info-row span:first-child{ color:var(--st-on-surface-variant); }
 .st-sidebar-info-row span:last-child{ text-align:right; font-weight:600; color:var(--st-on-surface); }
 
-/* Activity feed */
 .st-activity-feed{
     max-height:420px;
     overflow-y:auto;
@@ -453,10 +431,6 @@ badge, and pill styles wherever possible.
     font-weight:600;
     margin-top:2px;
 }
-
-/* ==================================================
-   MONITORING HISTORY TAB (timeline)
-================================================== */
 
 .st-history-filters{
     display:flex;
@@ -570,10 +544,6 @@ badge, and pill styles wherever possible.
     color:var(--st-on-surface-variant);
 }
 
-/* ==================================================
-   RISK EXPLANATION TAB
-================================================== */
-
 .st-prediction-card{
     background:#fff;
     border:1px solid rgba(195,198,207,.30);
@@ -666,7 +636,6 @@ badge, and pill styles wherever possible.
 
 .st-change-list-label .material-symbols-outlined{ font-size:16px; }
 
-/* Contributors */
 .st-contributor-item{
     display:flex;
     gap:12px;
@@ -706,10 +675,6 @@ badge, and pill styles wherever possible.
     font-size:11px;
     color:var(--st-on-surface-variant);
 }
-
-/* ==================================================
-   INTERVENTIONS TAB
-================================================== */
 
 .st-intervention-card{
     background:#fff;
@@ -767,7 +732,6 @@ badge, and pill styles wherever possible.
     color:var(--st-secondary);
 }
 
-/* Active intervention */
 .st-active-intervention{
     display:flex;
     justify-content:space-between;
@@ -785,7 +749,6 @@ badge, and pill styles wherever possible.
     margin-top:4px;
 }
 
-/* Expandable intervention history cards */
 .st-expand-card{
     border:1px solid rgba(195,198,207,.30);
     border-radius:var(--st-radius-md);
@@ -851,10 +814,6 @@ badge, and pill styles wherever possible.
     margin-top:5px;
     flex-shrink:0;
 }
-
-/* ==================================================
-   LAYOUT UTILITIES (avoid repeated inline styles)
-================================================== */
 
 .st-stack-col-lg{
     display:flex;

@@ -1,10 +1,4 @@
-/*
-==================================================
-StayEd
-Layout
-Based on Approved Prototype
-==================================================
-*/
+
 
 *,
 *::before,
@@ -40,10 +34,6 @@ body{
 
 }
 
-/* ==============================================
-   APP
-============================================== */
-
 .st-app{
 
     display:flex;
@@ -53,10 +43,6 @@ body{
     background:var(--st-background);
 
 }
-
-/* ==============================================
-   SIDEBAR
-============================================== */
 
 .st-sidebar{
 
@@ -83,10 +69,6 @@ body{
     transition:width .25s cubic-bezier(.4,0,.2,1);
 
 }
-
-/* ==============================================
-   SIDEBAR — COLLAPSED (icons only)
-============================================== */
 
 .st-sidebar.is-collapsed{
 
@@ -139,8 +121,6 @@ body{
 
 }
 
-/* Tooltip on hover when collapsed, so icon-only nav
-   still communicates the label. */
 .st-sidebar.is-collapsed .st-sidebar-nav a,
 .st-sidebar.is-collapsed .st-submenu-trigger{
 
@@ -308,10 +288,6 @@ body{
 
 }
 
-/* ==============================================
-   SIDEBAR SUBMENU (e.g. "Learner" parent group)
-============================================== */
-
 .st-submenu-trigger{
 
     display:flex;
@@ -478,7 +454,6 @@ body{
 
 }
 
-/* Collapsed sidebar: submenu becomes a flyout on hover */
 .st-sidebar.is-collapsed .st-submenu-list{
 
     max-height:none;
@@ -617,10 +592,6 @@ body{
 
 }
 
-/* ==============================================
-   MAIN CONTENT
-============================================== */
-
 .st-main{
 
     margin-left:var(--st-sidebar-width);
@@ -646,10 +617,6 @@ body{
     width:calc(100% - var(--st-sidebar-width-collapsed));
 
 }
-
-/* ==============================================
-   NAVBAR
-============================================== */
 
 .st-navbar{
 
@@ -685,8 +652,6 @@ body{
 
 }
 
-/* Hamburger — controls desktop collapse-to-icons and
-   mobile slide-in, so it's visible at every breakpoint. */
 .st-navbar-toggle{
 
     display:flex;
@@ -714,6 +679,8 @@ body{
     font-size:12px;
 
     color:var(--st-text-secondary);
+
+    margin-bottom:20px;
 
 }
 
@@ -851,10 +818,6 @@ body{
 
 }
 
-/* ==============================================
-   PAGE CONTENT
-============================================== */
-
 .st-content{
 
     flex:1;
@@ -881,6 +844,8 @@ body{
 
     flex-wrap:wrap;
 
+    margin-bottom:24px;
+
 }
 
 .st-page-title{
@@ -904,10 +869,6 @@ body{
     font-size:15px;
 
 }
-
-/* ==============================================
-   FOOTER
-============================================== */
 
 .st-footer{
 
@@ -985,10 +946,6 @@ body{
 
 }
 
-/* ==============================================
-   SCROLLBAR
-============================================== */
-
 ::-webkit-scrollbar{
 
     width:var(--st-scrollbar-width);
@@ -1016,10 +973,6 @@ body{
     background:var(--st-outline);
 
 }
-
-/* ==============================================
-   UTILITIES
-============================================== */
 
 .st-hidden{
 
@@ -1080,10 +1033,6 @@ body{
     margin-bottom:var(--st-section-gap);
 
 }
-
-/* ==============================================
-   RESPONSIVE
-============================================== */
 
 @media (max-width:992px){
 

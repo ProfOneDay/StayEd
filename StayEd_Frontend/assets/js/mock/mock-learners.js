@@ -1,14 +1,3 @@
-/**
- * ============================================
- * StayEd
- * Mock Learners Dataset
- * ============================================
- *
- * Prototype-aligned sample data. Mirrors the
- * future Learner + Prediction backend models so
- * page code can be written against the real shape.
- * ============================================
- */
 
 MockDB.learners = [
     {

@@ -1,14 +1,4 @@
-/*
-==================================================
-StayEd
-Teacher Dashboard
-Matches approved prototype (dashboard_4)
-==================================================
-*/
 
-/* ==================================================
-   NOTIFICATION BANNER
-================================================== */
 
 .st-notif-banner{
     display:flex;
@@ -51,10 +41,6 @@ Matches approved prototype (dashboard_4)
     font-size:18px;
 }
 
-/* ==================================================
-   WELCOME SECTION
-================================================== */
-
 .st-welcome{
     display:flex;
     flex-wrap:wrap;
@@ -77,7 +63,6 @@ Matches approved prototype (dashboard_4)
     color:var(--st-on-surface-variant);
 }
 
-/* Term / context info card */
 .st-term-card{
     display:flex;
     gap:24px;
@@ -113,10 +98,6 @@ Matches approved prototype (dashboard_4)
     background:rgba(195,198,207,.50);
 }
 
-/* ==================================================
-   GLOBAL FILTER BAR
-================================================== */
-
 .st-filter-bar{
     background:#fff;
     padding:16px;
@@ -147,7 +128,6 @@ Matches approved prototype (dashboard_4)
     padding-left:4px;
 }
 
-/* Segmented control (learning level) */
 .st-segment{
     display:flex;
     gap:4px;
@@ -211,22 +191,12 @@ Matches approved prototype (dashboard_4)
     align-self:flex-end;
 }
 
-/* ==================================================
-   DASHBOARD GRID
-================================================== */
-
 .st-dash-grid{
     display:grid;
     grid-template-columns:repeat(12,1fr);
     gap:24px;
 }
 
-/*
- * Statistics renders 4 cards and analytics/actions/
- * registry render their own grid-spanning elements.
- * They're wrapped in [data-component] loader divs, so
- * those wrappers must be transparent to the grid.
- */
 .st-dash-grid > [data-component]{
     display:contents;
 }
@@ -235,10 +205,6 @@ Matches approved prototype (dashboard_4)
 .col-4{ grid-column:span 4; }
 .col-8{ grid-column:span 8; }
 .col-12{ grid-column:span 12; }
-
-/* ==================================================
-   STAT CARDS
-================================================== */
 
 .st-stat-card{
     background:#fff;
@@ -285,7 +251,6 @@ Matches approved prototype (dashboard_4)
     color:var(--st-outline);
 }
 
-/* Color variants */
 .st-stat-card--primary .st-stat-card-icon,
 .st-stat-card--primary .st-stat-card-value{ color:var(--st-primary); }
 
@@ -299,10 +264,6 @@ Matches approved prototype (dashboard_4)
 
 .st-stat-card--low .st-stat-card-icon,
 .st-stat-card--low .st-stat-card-value{ color:var(--st-risk-low); }
-
-/* ==================================================
-   PANEL (analytics / actions / registry container)
-================================================== */
 
 .st-panel{
     background:#fff;
@@ -359,10 +320,6 @@ Matches approved prototype (dashboard_4)
 .st-panel-link:hover{ text-decoration:underline; }
 
 .st-panel-link .material-symbols-outlined{ font-size:16px; }
-
-/* ==================================================
-   RISK DISTRIBUTION CHART
-================================================== */
 
 .st-riskchart{
     display:flex;
@@ -458,7 +415,6 @@ Matches approved prototype (dashboard_4)
     color:var(--st-on-surface-variant);
 }
 
-/* Insights side panel */
 .st-riskchart-side{
     width:33%;
     display:flex;
@@ -522,10 +478,6 @@ Matches approved prototype (dashboard_4)
 }
 
 .st-meta-grid-item .is-teal{ color:var(--st-secondary); }
-
-/* ==================================================
-   QUICK ACTIONS
-================================================== */
 
 .st-quick-list{
     flex:1;
@@ -595,10 +547,6 @@ Matches approved prototype (dashboard_4)
     color:var(--st-primary-container);
 }
 
-/* ==================================================
-   REGISTRY / DATA TABLE
-================================================== */
-
 .st-registry-head{
     padding:24px;
     border-bottom:1px solid rgba(195,198,207,.10);
@@ -666,7 +614,6 @@ Matches approved prototype (dashboard_4)
 
 .st-tool-btn .material-symbols-outlined{ font-size:18px; }
 
-/* Data table */
 .st-table-scroll{
     overflow-x:auto;
 }
@@ -748,10 +695,6 @@ Matches approved prototype (dashboard_4)
 
 .st-icon-btn-sm .material-symbols-outlined{ font-size:18px; }
 
-/* ==================================================
-   TABLE PAGINATION
-================================================== */
-
 .st-pagination{
     display:flex;
     align-items:center;
@@ -800,10 +743,6 @@ Matches approved prototype (dashboard_4)
 
 .st-page-btn:disabled{ opacity:.4; cursor:not-allowed; }
 
-/* ==================================================
-   EMPTY STATE
-================================================== */
-
 .st-empty{
     flex:1;
     display:flex;
@@ -836,10 +775,6 @@ Matches approved prototype (dashboard_4)
     color:var(--st-outline);
 }
 
-/* ==================================================
-   RESPONSIVE
-================================================== */
-
 @media (max-width:1200px){
     .col-8{ grid-column:span 12; }
     .col-4{ grid-column:span 12; }
@@ -864,10 +799,6 @@ Matches approved prototype (dashboard_4)
     .st-data-table th,
     .st-data-table td{ padding:12px 16px; }
 }
-
-/* ==================================================
-   EARLY WARNING / INTERVENTIONS
-================================================== */
 
 .st-alert-card{
     background:#fff;
@@ -932,10 +863,6 @@ Matches approved prototype (dashboard_4)
     color:var(--st-outline);
 }
 
-/* ==================================================
-   EARLY WARNING ALERTS — SUMMARY STRIP
-================================================== */
-
 .st-ewa-summary{
     display:grid;
     grid-template-columns:repeat(4,1fr);
@@ -985,10 +912,6 @@ Matches approved prototype (dashboard_4)
     font-size:32px;
     opacity:.18;
 }
-
-/* ==================================================
-   EARLY WARNING ALERTS — FILTER BAR
-================================================== */
 
 .st-ewa-filter-bar{
     background:#fff;
@@ -1043,10 +966,6 @@ Matches approved prototype (dashboard_4)
 .st-ewa-clear-btn:hover{
     background:var(--st-surface-container-low);
 }
-
-/* ==================================================
-   EARLY WARNING ALERTS — TABLE
-================================================== */
 
 .st-ewa-risk-score{
     display:inline-flex;

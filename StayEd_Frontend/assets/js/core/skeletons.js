@@ -1,28 +1,6 @@
-/**
- * ============================================
- * StayEd
- * Skeleton Loader Helpers
- * ============================================
- *
- * Small, reusable generators for the loading
- * states most pages need: table rows and stat
- * cards. Centralised here so every controller
- * (dashboard, learner management, early warning,
- * CLC overview, notifications) uses the same
- * markup instead of hand-rolling "Loading..."
- * strings or duplicating skeleton HTML.
- * ============================================
- */
 
 const Skeletons = {
 
-    /**
-     * A table row skeleton: avatar + two lines,
-     * matching the shape of most data-table rows
-     * in the app. `columns` controls how many
-     * <td> cells to fill (colspan-style single
-     * cell if only rendering into one column).
-     */
     tableRows(count = 5, columns = 1) {
 
         const row = `
@@ -43,11 +21,6 @@ const Skeletons = {
 
     },
 
-    /**
-     * A grid of stat-card skeletons (label + value
-     * placeholder), matching .st-stat-card /
-     * .st-records-stat / .st-ewa-summary-card.
-     */
     statCards(count = 4) {
 
         const card = `
@@ -61,11 +34,6 @@ const Skeletons = {
 
     },
 
-    /**
-     * A generic content card skeleton (title +
-     * body lines), for card-grid layouts like
-     * CLC Overview.
-     */
     cards(count = 3) {
 
         const card = `
@@ -81,11 +49,6 @@ const Skeletons = {
 
     },
 
-    /**
-     * A notification/list-item skeleton (icon +
-     * two lines), for card-list layouts like
-     * Notifications.
-     */
     listItems(count = 4) {
 
         const item = `

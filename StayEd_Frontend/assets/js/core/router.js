@@ -1,25 +1,6 @@
-/**
- * ============================================
- * StayEd
- * Client Router
- * ============================================
- *
- * Maps logical application routes to physical
- * page files. Pages live under /pages/<area>/,
- * so navigation is centralised here — page code
- * never hard-codes relative "../" paths.
- *
- * When the app later moves to a real backend or
- * SPA history API, only this module changes.
- * ============================================
- */
 
 class Router {
 
-    /*
-     * Logical route -> path relative to the /pages
-     * directory. The leading segment is the folder.
-     */
     static ROUTES = {
 
         "/login":            "auth/login.html",
@@ -42,18 +23,6 @@ class Router {
 
     };
 
-    /*
-     * Centralised breadcrumb map, keyed by physical
-     * filename (e.g. "learner-management.html"). Each
-     * entry is the trail of {label, href} crumbs to show,
-     * in order, ending with the current page (the last
-     * entry's href is ignored — it's never clickable).
-     *
-     * Layout.updateBreadcrumb() reads this automatically
-     * so individual pages don't need to declare their own
-     * breadcrumb trail — add a page here once and every
-     * page linking to it gets a correct, clickable trail.
-     */
     static BREADCRUMBS = {
 
         "dashboard.html": [
@@ -76,41 +45,41 @@ class Router {
             { label: "Upload Records" }
         ],
 
+        "class-management.html": [
+            { label: "Dashboard", href: "dashboard.html" },
+            { label: "Learner", href: "class-management.html" },
+            { label: "Class Management" }
+        ],
         "learner-records.html": [
             { label: "Dashboard", href: "dashboard.html" },
-            { label: "Learner", href: "learner-management.html" },
-            { label: "Learner Record Management" }
+            { label: "Learner", href: "class-management.html" },
+            { label: "Class Management", href: "class-management.html" },
+            { label: "Learner Records" }
         ],
-        "learner-management.html": [
+        "student-registry.html": [
             { label: "Dashboard", href: "dashboard.html" },
-            { label: "Learner", href: "learner-management.html" },
-            { label: "Learner Management" }
+            { label: "Learner", href: "class-management.html" },
+            { label: "Student Registry" }
         ],
         "learner-profile.html": [
             { label: "Dashboard", href: "dashboard.html" },
-            { label: "Learner", href: "learner-management.html" },
-            { label: "Learner Management", href: "learner-management.html" },
+            { label: "Learner", href: "class-management.html" },
+            { label: "Student Registry", href: "student-registry.html" },
             { label: "Learner Profile" }
-        ],
-        "add-learner.html": [
-            { label: "Dashboard", href: "dashboard.html" },
-            { label: "Learner", href: "learner-management.html" },
-            { label: "Learner Management", href: "learner-management.html" },
-            { label: "Add New Learner" }
         ],
         "learner-import.html": [
             { label: "Dashboard", href: "dashboard.html" },
-            { label: "Learner", href: "learner-management.html" },
-            { label: "Learner Management", href: "learner-management.html" },
-            { label: "Add New Learner", href: "add-learner.html" },
-            { label: "Import Learners" }
+            { label: "Learner", href: "class-management.html" },
+            { label: "Class Management", href: "class-management.html" },
+            { label: "Learner Records", href: "learner-records.html" },
+            { label: "Import Students" }
         ],
         "learner-enroll.html": [
             { label: "Dashboard", href: "dashboard.html" },
-            { label: "Learner", href: "learner-management.html" },
-            { label: "Learner Management", href: "learner-management.html" },
-            { label: "Add New Learner", href: "add-learner.html" },
-            { label: "Manual Enrollment" }
+            { label: "Learner", href: "class-management.html" },
+            { label: "Class Management", href: "class-management.html" },
+            { label: "Learner Records", href: "learner-records.html" },
+            { label: "Enroll Student" }
         ],
 
         "early-warning.html": [
@@ -143,12 +112,6 @@ class Router {
 
     };
 
-    /**
-     * Look up the breadcrumb trail for a page. Falls back
-     * to a generic two-level trail (Dashboard > title) if
-     * the page isn't in the map, so nothing ever renders
-     * empty.
-     */
     static breadcrumbFor(filename, fallbackTitle) {
 
         if (this.BREADCRUMBS[filename]) {
@@ -164,10 +127,6 @@ class Router {
 
     }
 
-    /**
-     * Resolve a logical route to a URL relative to the
-     * current page's location.
-     */
     static resolve(route) {
 
         const target = this.ROUTES[route];
@@ -184,31 +143,21 @@ class Router {
 
     }
 
-    /**
-     * Build a path from the current page back to /pages,
-     * then into the target. Every page sits at
-     * /pages/<area>/<file>, so "../" reaches /pages.
-     */
     static toPagesRelative(target) {
 
         const path = window.location.pathname;
 
-        // Are we already somewhere under /pages/<area>/ ?
         const match = path.match(/\/pages\/[^/]+\//);
 
         if (match) {
-            // From /pages/<area>/file -> ../<area>/file
+            
             return `../${target}`;
         }
 
-        // Fallback: assume we're at project root.
         return `pages/${target}`;
 
     }
 
-    /**
-     * Navigate to a logical route.
-     */
     static go(route) {
 
         const url = this.resolve(route);
@@ -219,9 +168,6 @@ class Router {
 
     }
 
-    /**
-     * Replace current history entry (no back button trap).
-     */
     static replace(route) {
 
         const url = this.resolve(route);
@@ -232,9 +178,6 @@ class Router {
 
     }
 
-    /**
-     * Current filename (e.g. "dashboard.html").
-     */
     static current() {
 
         return window.location.pathname

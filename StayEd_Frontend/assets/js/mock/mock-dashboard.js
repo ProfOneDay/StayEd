@@ -1,17 +1,6 @@
-/**
- * ============================================
- * StayEd
- * Mock Dashboard + Predictive Analytics Data
- * ============================================
- *
- * Prototype-aligned. Shapes mirror the future
- * Prediction / Intervention backend models.
- * ============================================
- */
 
 MockDB.dashboard = {
 
-    /* Class context shown in the welcome term card */
     context: {
         registered_learners: 42,
         selected_class: "Basic Literacy Program, San Felipe Sur CLC",
@@ -21,7 +10,6 @@ MockDB.dashboard = {
         greeting_name: "Trisha"
     },
 
-    /* Risk stat cards */
     statistics: {
         registered: 42,
         high: 8,
@@ -34,7 +22,6 @@ MockDB.dashboard = {
 
 };
 
-/* Prediction summary (metadata for the latest run) */
 MockDB.predictionSummary = {
     date: "July 8, 2026",
     coverage: "100%",
@@ -47,7 +34,6 @@ MockDB.predictionSummary = {
     ]
 };
 
-/* Risk distribution (drives the bar chart) */
 MockDB.riskDistribution = {
     high: 8,
     moderate: 11,
@@ -55,7 +41,6 @@ MockDB.riskDistribution = {
     scale_max: 25
 };
 
-/* Intervention recommendations */
 MockDB.interventions = [
     {
         id: 1, prediction_id: 1, learner: "Juan Santos",

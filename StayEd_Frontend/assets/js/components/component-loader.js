@@ -1,16 +1,4 @@
-/**
- * ============================================
- * StayEd
- * Component Loader
- * ============================================
- *
- * Supports
- * data-component="layout/sidebar"
- * data-component="dashboard/statistics"
- * data-component="auth/login-form"
- *
- * ============================================
- */
+
 
 class ComponentLoader {
 
@@ -131,13 +119,6 @@ document.addEventListener(
     async () => {
 
         await ComponentLoader.load();
-
-        /*
-         * Components are injected asynchronously, so any
-         * module that needs to read component markup (Layout,
-         * page controllers) must wait for this event rather
-         * than DOMContentLoaded alone.
-         */
 
         document.dispatchEvent(
 

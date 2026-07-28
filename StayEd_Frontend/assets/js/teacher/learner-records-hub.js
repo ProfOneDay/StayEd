@@ -1,25 +1,8 @@
-/**
- * ============================================
- * StayEd
- * Learner Records Hub Controller
- * ============================================
- *
- * Central hub for managing learner records across
- * all ALS modalities. Three subtabs (Modular,
- * Face-to-Face, Blended) switch instantly with no
- * page reload; search/filters are shared state so
- * switching tabs never loses what was typed.
- *
- * Module/attendance detail comes from
- * API.getLearnerRecordsDetail(id) — see
- * mock-records-hub.js for the mock shape.
- * ============================================
- */
 
 class LearnerRecordsHub {
 
     static state = {
-        all: [],           // learners + merged records-hub detail
+        all: [],           
         activeTab: "modular",
         search: "",
         clc: "",
@@ -34,6 +17,8 @@ class LearnerRecordsHub {
 
         if (window.Guards) Guards.teacher();
 
+        this.loadClassContext();
+
         this.bindTabs();
 
         this.bindFilters();
@@ -44,9 +29,37 @@ class LearnerRecordsHub {
 
     }
 
-    /* ---------------------------------------
-       Load
-    --------------------------------------- */
+    static loadClassContext() {
+
+        const params = new URLSearchParams(window.location.search);
+
+        const classId = params.get("class");
+
+        const banner = document.querySelector("[data-class-context-banner]");
+
+        if (!classId || !banner) return;
+
+        const match = (MockDB.classes || []).find(
+            c => String(c.id) === String(classId)
+        );
+
+        if (!match) return;
+
+        banner.classList.remove("st-hidden");
+
+        this.set("[data-class-context-name]", `${match.clc} \u2014 ${match.level}`);
+
+        this.set(
+            "[data-class-context-meta]",
+            `${match.modality} \u00b7 School Year ${match.schoolYear} \u00b7 ${match.learnerCount} Enrolled Learners`
+        );
+
+        this.set(
+            "[data-records-subtitle]",
+            `Viewing records for ${match.clc}, ${match.level} (SY ${match.schoolYear}).`
+        );
+
+    }
 
     static async load() {
 
@@ -60,8 +73,6 @@ class LearnerRecordsHub {
 
             const learners = res.data || [];
 
-            // Merge each learner with its records-hub detail
-            // (module groups, attendance sessions, etc.)
             this.state.all = await Promise.all(
                 learners.map(async l => {
                     const detail = await API.getLearnerRecordsDetail(l.id);
@@ -98,10 +109,6 @@ class LearnerRecordsHub {
 
     }
 
-    /* ---------------------------------------
-       Tabs
-    --------------------------------------- */
-
     static bindTabs() {
 
         document.querySelectorAll("[data-modality-tab]").forEach(tab => {
@@ -120,10 +127,6 @@ class LearnerRecordsHub {
                     panel.classList.toggle("is-active", panel.dataset.modalityPanel === target);
                 });
 
-                // Search/filters are shared state (this.state.search
-                // etc.) so switching tabs never loses what was
-                // typed — just re-render the newly active tab with
-                // the same filter values already applied.
                 this.state.activeTab = target;
 
                 this.renderActiveTab();
@@ -133,10 +136,6 @@ class LearnerRecordsHub {
         });
 
     }
-
-    /* ---------------------------------------
-       Filters (shared across all 3 tabs)
-    --------------------------------------- */
 
     static bindFilters() {
 
@@ -198,10 +197,6 @@ class LearnerRecordsHub {
 
     }
 
-    /* ---------------------------------------
-       Shared filter pipeline
-    --------------------------------------- */
-
     static filteredForModality(modality) {
 
         let rows = this.state.all.filter(l => l.modality === modality);
@@ -232,10 +227,6 @@ class LearnerRecordsHub {
         else if (tab === "blended") this.renderBlended();
 
     }
-
-    /* ---------------------------------------
-       MODULAR TAB
-    --------------------------------------- */
 
     static renderModular() {
 
@@ -286,7 +277,7 @@ class LearnerRecordsHub {
                     </div>
                 </td>
                 <td>
-                    <select class="st-quick-select" data-contact-status="${l.id}">
+                    <select class="st-quick-select" data-contact-status="${l.id}" aria-label="Contact status for ${l.name}">
                         <option ${m.contactStatus === "Contacted" ? "selected" : ""}>Contacted</option>
                         <option ${m.contactStatus === "Follow-up Needed" ? "selected" : ""}>Follow-up Needed</option>
                         <option ${m.contactStatus === "No Response" ? "selected" : ""}>No Response</option>
@@ -306,11 +297,7 @@ class LearnerRecordsHub {
 
     }
 
-    /* ---------------------------------------
-       FACE-TO-FACE TAB
-    --------------------------------------- */
-
-    static renderF2F() {
+static renderF2F() {
 
         const rows = this.filteredForModality("Face-to-Face");
 
@@ -349,7 +336,7 @@ class LearnerRecordsHub {
                     </div>
                 </td>
                 <td>
-                    <select class="st-quick-select" data-attendance-status="${l.id}">
+                    <select class="st-quick-select" data-attendance-status="${l.id}" aria-label="Attendance status for ${l.name}">
                         <option ${a.lastSession?.status === "Attended" ? "selected" : ""}>Attended</option>
                         <option ${a.lastSession?.status === "Absent" ? "selected" : ""}>Absent</option>
                         <option ${a.lastSession?.status === "Excused" ? "selected" : ""}>Excused</option>
@@ -374,11 +361,7 @@ class LearnerRecordsHub {
 
     }
 
-    /* ---------------------------------------
-       BLENDED TAB (unified view)
-    --------------------------------------- */
-
-    static renderBlended() {
+static renderBlended() {
 
         const rows = this.filteredForModality("Blended");
 
@@ -480,11 +463,7 @@ class LearnerRecordsHub {
 
     }
 
-    /* ---------------------------------------
-       Shared table rendering + pagination
-    --------------------------------------- */
-
-    static renderTable({ rows, bodySelector, infoSelector, pagesSelector, pageKey, colspan, rowRenderer }) {
+static renderTable({ rows, bodySelector, infoSelector, pagesSelector, pageKey, colspan, rowRenderer }) {
 
         const body = document.querySelector(bodySelector);
 
@@ -583,10 +562,6 @@ class LearnerRecordsHub {
 
     }
 
-    /* ---------------------------------------
-       Row interactions
-    --------------------------------------- */
-
     static bindRowInteractions(container) {
 
         container.querySelectorAll("[data-open-module-modal]").forEach(el => {
@@ -618,13 +593,6 @@ class LearnerRecordsHub {
         this.bindSelectionCheckboxes(container);
 
     }
-
-    /* ---------------------------------------
-       Row selection + bulk actions
-       (mirrors the pattern used on Learner
-       Management, scoped per-tab since each
-       modality has its own filtered row set)
-    --------------------------------------- */
 
     static SELECTION_CONFIG = {
         modular: { attr: "data-row-select-modular", selectAll: "[data-modular-select-all]", bar: "[data-modular-bulk-bar]", count: "[data-modular-bulk-count]" },
@@ -746,10 +714,6 @@ class LearnerRecordsHub {
 
     }
 
-    /* ---------------------------------------
-       Helpers
-    --------------------------------------- */
-
     static riskBadge(risk) {
         const cls = { High: "high", Moderate: "moderate", Low: "low" }[risk] || "low";
         return `<span class="st-risk-badge st-risk-badge--${cls}"><span class="st-risk-dot"></span>${risk}</span>`;
@@ -764,8 +728,6 @@ class LearnerRecordsHub {
 
 }
 
-/* Row-menu open/close (event delegation, works across
-   all three tables and survives re-renders). */
 document.addEventListener("click", event => {
 
     const trigger = event.target.closest("[data-row-menu-trigger]");

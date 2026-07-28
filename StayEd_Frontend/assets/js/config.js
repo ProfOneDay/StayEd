@@ -1,9 +1,4 @@
-/**
- * ============================================
- * StayEd
- * Configuration
- * ============================================
- */
+
 
 const CONFIG = {
 
@@ -11,7 +6,7 @@ const CONFIG = {
 
     VERSION: "1.0.0",
 
-    MODE: "development",   // development | production
+    MODE: "development",   
 
     API_URL: "http://localhost:3000/api",
 
@@ -19,13 +14,6 @@ const CONFIG = {
 
     DEBUG: true,
 
-    /*
-     * DEMO_MODE lets "Create Account" launch the full
-     * setup wizard without a connected backend, using
-     * DemoAuthService (assets/js/demo/demo-auth-service.js)
-     * instead of the real registration endpoint. Set to
-     * false once self-serve registration is live.
-     */
     DEMO_MODE: true
 
 };

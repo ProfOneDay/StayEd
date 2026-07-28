@@ -1,16 +1,4 @@
-/*
-==================================================
-StayEd — Learner Records Hub
-Modality subtabs (Modular / Face-to-Face / Blended)
-with grouped-header tables, progress bars, and
-quick-edit cells. Reuses dashboard/records panel,
-badge, and pill styles wherever possible.
-==================================================
-*/
 
-/* ==================================================
-   MODALITY SUBTABS
-================================================== */
 
 .st-modality-tabs{
     display:flex;
@@ -61,10 +49,6 @@ badge, and pill styles wherever possible.
     animation:st-fade-in .25s ease;
 }
 
-/* ==================================================
-   GROUPED TABLE HEADERS (Modular tab)
-================================================== */
-
 .st-grouped-table thead tr.st-group-row th{
     padding:10px 24px;
     font-size:10px;
@@ -96,10 +80,6 @@ badge, and pill styles wherever possible.
 .st-grouped-table td:last-child{
     border-right:none;
 }
-
-/* ==================================================
-   PROGRESS CELL (module completion)
-================================================== */
 
 .st-progress-cell{
     display:flex;
@@ -171,10 +151,6 @@ badge, and pill styles wherever possible.
     text-decoration:underline;
 }
 
-/* ==================================================
-   QUICK-EDIT SELECTS (inline table dropdowns)
-================================================== */
-
 .st-quick-select{
     width:100%;
     height:36px;
@@ -198,10 +174,6 @@ badge, and pill styles wherever possible.
 .st-quick-select--present{ background:var(--st-risk-low-soft); border-color:var(--st-risk-low-border); color:var(--st-risk-low); }
 .st-quick-select--late{ background:var(--st-risk-moderate-soft); border-color:var(--st-risk-moderate-border); color:var(--st-risk-moderate); }
 .st-quick-select--absent{ background:var(--st-risk-high-soft); border-color:var(--st-risk-high-border); color:var(--st-risk-high); }
-
-/* ==================================================
-   SCHEDULE CELL (Blended / F2F attendance)
-================================================== */
 
 .st-schedule-cell{
     display:flex;
@@ -249,10 +221,6 @@ badge, and pill styles wherever possible.
 .st-schedule-set-link:hover{
     text-decoration:underline;
 }
-
-/* ==================================================
-   ROW ACTION DROPDOWN MENU
-================================================== */
 
 .st-row-menu{
     position:relative;
@@ -319,10 +287,6 @@ badge, and pill styles wherever possible.
     font-size:18px;
 }
 
-/* ==================================================
-   BLENDED UNIFIED SUMMARY STRIP
-================================================== */
-
 .st-blended-summary{
     display:grid;
     grid-template-columns:repeat(4,1fr);
@@ -371,18 +335,10 @@ badge, and pill styles wherever possible.
     color:var(--st-on-surface-variant);
 }
 
-/* ==================================================
-   RESPONSIVE
-================================================== */
-
 @media (max-width:768px){
     .st-modality-tabs{ width:100%; overflow-x:auto; }
     .st-progress-cell{ min-width:120px; }
 }
-
-/* ==================================================
-   MODULE MANAGEMENT MODAL
-================================================== */
 
 .st-module-modal .st-modal-dialog,
 .st-module-modal .st-modal-card{
@@ -472,7 +428,6 @@ badge, and pill styles wherever possible.
     color:var(--st-primary);
 }
 
-/* Tabs */
 .st-module-modal-tabs{
     display:flex;
     gap:32px;
@@ -497,7 +452,6 @@ badge, and pill styles wherever possible.
     border-bottom-color:var(--st-primary);
 }
 
-/* Body */
 .st-module-modal-body{
     flex:1;
     overflow-y:auto;
@@ -687,7 +641,6 @@ badge, and pill styles wherever possible.
     min-width:140px;
 }
 
-/* Module history table */
 .st-module-history-table th,
 .st-module-history-table td{
     padding:10px 16px;
@@ -703,7 +656,6 @@ badge, and pill styles wherever possible.
     border-top:1px solid rgba(195,198,207,.20);
 }
 
-/* Footer */
 .st-module-modal-footer{
     padding:16px 24px;
     border-top:1px solid rgba(195,198,207,.30);
@@ -712,10 +664,6 @@ badge, and pill styles wherever possible.
     align-items:center;
     gap:16px;
 }
-
-/* ==================================================
-   SCHEDULE & ATTENDANCE MODAL
-================================================== */
 
 .st-schedule-modal-field{
     display:flex;
@@ -771,10 +719,6 @@ badge, and pill styles wherever possible.
     font-weight:700;
     color:var(--st-primary);
 }
-
-/* ==================================================
-   ADD NEW LEARNER — CHOOSE ENROLLMENT METHOD
-================================================== */
 
 .st-add-learner-shell{
     max-width:900px;
@@ -851,4 +795,59 @@ badge, and pill styles wherever possible.
     font-size:13px;
     font-weight:700;
     color:var(--st-secondary);
+}
+
+.st-class-context-banner{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:var(--st-primary-fixed);
+    border:1px solid rgba(18,53,91,.15);
+    border-radius:var(--st-radius-lg);
+    padding:12px 20px;
+    margin-bottom:24px;
+}
+
+.st-class-context-banner .material-symbols-outlined{
+    color:var(--st-primary);
+    font-size:22px;
+    flex-shrink:0;
+}
+
+.st-class-context-banner-text{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+}
+
+.st-class-context-banner-name{
+    font-size:14px;
+    font-weight:700;
+    color:var(--st-primary);
+}
+
+.st-class-context-banner-meta{
+    font-size:12px;
+    color:var(--st-on-surface-variant);
+}
+
+.st-class-context-banner-switch{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    font-size:13px;
+    font-weight:700;
+    color:var(--st-secondary);
+    white-space:nowrap;
+    flex-shrink:0;
+}
+
+.st-class-context-banner-switch:hover{
+    text-decoration:underline;
+}
+
+.st-class-context-banner-switch .material-symbols-outlined{
+    color:var(--st-secondary);
+    font-size:16px;
 }

@@ -29,7 +29,7 @@
                         <p class="st-page-header-subtitle">Register a new learner into the ALS support system.</p>
                     </div>
                     <div class="st-page-header-actions">
-                        <a href="add-learner.html" class="st-btn st-btn-outline">
+                        <a href="learner-records.html" class="st-btn st-btn-outline">
                             <span class="material-symbols-outlined">arrow_back</span>
                             Back
                         </a>
@@ -52,19 +52,19 @@
                     </div>
                     <div class="st-enroll-progress-step" data-progress-step="4">
                         <div class="st-enroll-progress-dot">4</div>
-                        <span class="st-enroll-progress-label">Education</span>
+                        <span class="st-enroll-progress-label">Modality</span>
                     </div>
                     <div class="st-enroll-progress-step" data-progress-step="5">
                         <div class="st-enroll-progress-dot">5</div>
-                        <span class="st-enroll-progress-label">Modality</span>
+                        <span class="st-enroll-progress-label">Class</span>
                     </div>
                     <div class="st-enroll-progress-step" data-progress-step="6">
                         <div class="st-enroll-progress-dot">6</div>
-                        <span class="st-enroll-progress-label">CLC</span>
+                        <span class="st-enroll-progress-label">Program</span>
                     </div>
                     <div class="st-enroll-progress-step" data-progress-step="7">
                         <div class="st-enroll-progress-dot">7</div>
-                        <span class="st-enroll-progress-label">Program</span>
+                        <span class="st-enroll-progress-label">Education</span>
                     </div>
                     <div class="st-enroll-progress-step" data-progress-step="8">
                         <div class="st-enroll-progress-dot">8</div>
@@ -174,38 +174,8 @@
                         </div>
                     </div>
 
-                    <!-- Step 4: Educational Background -->
+                    <!-- Step 4: Learning Modality -->
                     <div class="st-enroll-step" data-enroll-step="4">
-                        <div class="st-enroll-step-card">
-                            <h3 class="st-enroll-step-title">
-                                <span class="material-symbols-outlined">auto_stories</span>
-                                Educational Background
-                            </h3>
-                            <div class="st-enroll-fields">
-                                <div class="st-enroll-field">
-                                    <label for="wReenrollee">Is this a Re-enrollee? <span class="required">*</span></label>
-                                    <div class="st-enroll-radio-row">
-                                        <label><input type="radio" name="wReenrollee" value="No" checked> New</label>
-                                        <label><input type="radio" name="wReenrollee" value="Yes"> Re-enrollee</label>
-                                    </div>
-                                </div>
-                                <div class="st-enroll-field">
-                                    <label for="wEmployment">Employment Status</label>
-                                    <select id="wEmployment">
-                                        <option>Unemployed</option>
-                                        <option>Employed</option>
-                                    </select>
-                                </div>
-                                <div class="st-enroll-field st-enroll-field--full">
-                                    <label for="wLastGrade">Last Grade/Level Completed</label>
-                                    <input id="wLastGrade" type="text" placeholder="e.g. Grade 6, Elementary">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Step 5: Learning Modality -->
-                    <div class="st-enroll-step" data-enroll-step="5">
                         <div class="st-enroll-step-card">
                             <h3 class="st-enroll-step-title">
                                 <span class="material-symbols-outlined">school</span>
@@ -233,23 +203,23 @@
                         </div>
                     </div>
 
-                    <!-- Step 6: Assigned CLC -->
-                    <div class="st-enroll-step" data-enroll-step="6">
+                    <!-- Step 5: Class Context (read-only — the CLC/Class was already
+                         chosen by opening this class's Learner Records page, so we
+                         only confirm it here rather than asking again) -->
+                    <div class="st-enroll-step" data-enroll-step="5">
                         <div class="st-enroll-step-card">
                             <h3 class="st-enroll-step-title">
                                 <span class="material-symbols-outlined">hub</span>
-                                Assigned CLC
+                                Class Context
                             </h3>
+                            <div class="st-settings-info-box" style="margin-bottom:16px;">
+                                <span class="material-symbols-outlined">info</span>
+                                <p>This learner will be enrolled into the class you opened this form from. The Community Learning Center is set automatically.</p>
+                            </div>
                             <div class="st-enroll-fields">
                                 <div class="st-enroll-field st-enroll-field--full">
-                                    <label for="wClc">Community Learning Center <span class="required">*</span></label>
-                                    <select id="wClc" required>
-                                        <option value="" disabled selected>Select CLC</option>
-                                        <option>San Felipe Sur CLC</option>
-                                        <option>Manila North CLC</option>
-                                        <option>Quezon City Central CLC</option>
-                                        <option>Davao South Hub</option>
-                                    </select>
+                                    <label for="wClc">Community Learning Center</label>
+                                    <input id="wClc" type="text" value="San Felipe Sur CLC" readonly>
                                 </div>
                                 <div class="st-enroll-field">
                                     <label for="wDistance">Distance Category</label>
@@ -268,8 +238,8 @@
                         </div>
                     </div>
 
-                    <!-- Step 7: Program Assignment -->
-                    <div class="st-enroll-step" data-enroll-step="7">
+                    <!-- Step 6: Program Assignment -->
+                    <div class="st-enroll-step" data-enroll-step="6">
                         <div class="st-enroll-step-card">
                             <h3 class="st-enroll-step-title">
                                 <span class="material-symbols-outlined">assignment</span>
@@ -300,6 +270,39 @@
                         </div>
                     </div>
 
+                    <!-- Step 7: Educational Background (moved to just before
+                         Review; Re-enrollee is auto-detected from the LRN
+                         entered in step 1 instead of a manual choice) -->
+                    <div class="st-enroll-step" data-enroll-step="7">
+                        <div class="st-enroll-step-card">
+                            <h3 class="st-enroll-step-title">
+                                <span class="material-symbols-outlined">auto_stories</span>
+                                Educational Background
+                            </h3>
+                            <div class="st-enroll-fields">
+                                <div class="st-enroll-field st-enroll-field--full">
+                                    <label>Re-enrollee Status</label>
+                                    <div class="st-settings-info-box" data-reenrollee-status>
+                                        <span class="material-symbols-outlined">person_search</span>
+                                        <p>Enter a Learner Reference Number in Step 1 to automatically check enrollment history.</p>
+                                    </div>
+                                    <input type="hidden" id="wReenrollee" value="No">
+                                </div>
+                                <div class="st-enroll-field">
+                                    <label for="wEmployment">Employment Status</label>
+                                    <select id="wEmployment">
+                                        <option>Unemployed</option>
+                                        <option>Employed</option>
+                                    </select>
+                                </div>
+                                <div class="st-enroll-field st-enroll-field--full">
+                                    <label for="wLastGrade">Last Grade/Level Completed</label>
+                                    <input id="wLastGrade" type="text" placeholder="e.g. Grade 6, Elementary">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Step 8: Review -->
                     <div class="st-enroll-step" data-enroll-step="8">
                         <div class="st-enroll-step-card">
@@ -322,7 +325,7 @@
                                 The learner has been added to the system.
                             </p>
                             <div class="st-clc-success-actions">
-                                <a href="learner-management.html" class="st-btn st-btn-primary">Go to Learner Management</a>
+                                <a href="learner-records.html" class="st-btn st-btn-primary">Go to Learner Records</a>
                                 <button type="button" class="st-btn st-btn-outline" data-enroll-another>Enroll Another Learner</button>
                             </div>
                         </div>

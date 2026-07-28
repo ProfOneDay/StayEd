@@ -1,17 +1,3 @@
-/**
- * ============================================
- * StayEd
- * Manual Enrollment Wizard Controller
- * ============================================
- *
- * 9-step guided enrollment: Personal, Contact,
- * Guardian, Educational Background, Learning
- * Modality, Assigned CLC, Program Assignment,
- * Review, Confirmation. Supports Previous/Next
- * navigation with a progress indicator, and
- * tracks unsaved changes until submission.
- * ============================================
- */
 
 class LearnerEnrollWizard {
 
@@ -31,6 +17,8 @@ class LearnerEnrollWizard {
 
         this.bindSegments();
 
+        this.bindLrnLookup();
+
         this.bindNav();
 
         this.bindConfirmActions();
@@ -38,11 +26,6 @@ class LearnerEnrollWizard {
         this.updateProgress();
 
     }
-
-    /* ---------------------------------------
-       Segmented toggles (reused pattern from
-       the round-2 enrollment form)
-    --------------------------------------- */
 
     static bindSegments() {
 
@@ -69,9 +52,74 @@ class LearnerEnrollWizard {
 
     }
 
-    /* ---------------------------------------
-       Wizard navigation
-    --------------------------------------- */
+    static bindLrnLookup() {
+
+        const lrnInput = document.getElementById("wLrn");
+
+        if (!lrnInput) return;
+
+        lrnInput.addEventListener("blur", () => this.checkReenrolleeStatus());
+
+        lrnInput.addEventListener("input", () => {
+
+            const hidden = document.getElementById("wReenrollee");
+
+            if (hidden) hidden.value = "No";
+
+        });
+
+    }
+
+    static checkReenrolleeStatus() {
+
+        const lrnInput = document.getElementById("wLrn");
+
+        const statusBox = document.querySelector("[data-reenrollee-status]");
+
+        const hidden = document.getElementById("wReenrollee");
+
+        if (!lrnInput || !statusBox || !hidden) return;
+
+        const lrn = lrnInput.value.trim();
+
+        if (!lrn) {
+
+            statusBox.innerHTML = `
+                <span class="material-symbols-outlined">person_search</span>
+                <p>Enter a Learner Reference Number in Step 1 to automatically check enrollment history.</p>
+            `;
+
+            hidden.value = "No";
+
+            return;
+
+        }
+
+        const existing = window.MockDB?.findLearnerByLrn
+            ? MockDB.findLearnerByLrn(lrn)
+            : null;
+
+        if (existing) {
+
+            hidden.value = "Yes";
+
+            statusBox.innerHTML = `
+                <span class="material-symbols-outlined" style="color:var(--st-secondary);">check_circle</span>
+                <p><strong>Re-enrollee detected.</strong> This LRN matches ${existing.name}, already known to the system. Marked as a re-enrollee automatically.</p>
+            `;
+
+        } else {
+
+            hidden.value = "No";
+
+            statusBox.innerHTML = `
+                <span class="material-symbols-outlined">person_add</span>
+                <p>No existing record found for this LRN. This will be enrolled as a new learner.</p>
+            `;
+
+        }
+
+    }
 
     static bindNav() {
 
@@ -90,7 +138,7 @@ class LearnerEnrollWizard {
             }
 
             if (this.currentStep === this.totalSteps - 1) {
-                // Leaving the Review step -> submit.
+                
                 this.submit();
                 return;
             }
@@ -113,6 +161,10 @@ class LearnerEnrollWizard {
 
         this.updateProgress();
 
+        if (step === 7) {
+            this.checkReenrolleeStatus();
+        }
+
         if (step === this.totalSteps - 1) {
             this.renderReview();
         }
@@ -125,8 +177,6 @@ class LearnerEnrollWizard {
 
         if (prevBtn) prevBtn.disabled = step === 1;
 
-        // Hide the Prev/Next footer entirely on the final
-        // confirmation step — it has its own actions.
         if (nav) nav.style.display = step === this.totalSteps ? "none" : "flex";
 
         if (nextBtn) {
@@ -151,17 +201,11 @@ class LearnerEnrollWizard {
 
     }
 
-    /* ---------------------------------------
-       Per-step validation (required fields only
-       on the steps that have them)
-    --------------------------------------- */
-
     static validateStep(step) {
 
         const requiredByStep = {
             1: ["wFullName", "wSex", "wBirthdate"],
-            2: ["wAddress"],
-            6: ["wClc"]
+            2: ["wAddress"]
         };
 
         const ids = requiredByStep[step];
@@ -189,10 +233,6 @@ class LearnerEnrollWizard {
         return valid;
 
     }
-
-    /* ---------------------------------------
-       Review step
-    --------------------------------------- */
 
     static renderReview() {
 
@@ -230,14 +270,6 @@ class LearnerEnrollWizard {
                 ]
             },
             {
-                title: "Educational Background",
-                rows: [
-                    ["Re-enrollee", document.querySelector('input[name="wReenrollee"]:checked')?.value || "No"],
-                    ["Employment Status", val("wEmployment")],
-                    ["Last Grade Completed", val("wLastGrade")]
-                ]
-            },
-            {
                 title: "Learning Modality",
                 rows: [
                     ["Learning Level", this.getSegmentValue("level")],
@@ -245,7 +277,7 @@ class LearnerEnrollWizard {
                 ]
             },
             {
-                title: "Assigned CLC",
+                title: "Class Context",
                 rows: [
                     ["CLC", val("wClc")],
                     ["Distance Category", val("wDistance")],
@@ -258,6 +290,14 @@ class LearnerEnrollWizard {
                     ["Program", val("wProgram")],
                     ["Semester", val("wSemester")],
                     ["Assigned Teacher", val("wAssignedTeacher")]
+                ]
+            },
+            {
+                title: "Educational Background",
+                rows: [
+                    ["Re-enrollee", val("wReenrollee")],
+                    ["Employment Status", val("wEmployment")],
+                    ["Last Grade Completed", val("wLastGrade")]
                 ]
             }
         ];
@@ -278,11 +318,7 @@ class LearnerEnrollWizard {
 
     }
 
-    /* ---------------------------------------
-       Submit
-    --------------------------------------- */
-
-    static async submit() {
+static async submit() {
 
         const nextBtn = document.querySelector("[data-wizard-next]");
 
@@ -297,6 +333,7 @@ class LearnerEnrollWizard {
             lrn: document.getElementById("wLrn").value.trim(),
             sex: document.getElementById("wSex").value,
             birthdate: document.getElementById("wBirthdate").value,
+            reenrollee: document.getElementById("wReenrollee")?.value === "Yes",
             level: this.getSegmentValue("level"),
             modality: this.getSegmentValue("modality"),
             clc: document.getElementById("wClc").value,
@@ -344,6 +381,8 @@ class LearnerEnrollWizard {
                     b.classList.toggle("is-active", i === (group.dataset.segment === "level" ? 2 : 0));
                 });
             });
+
+            this.checkReenrolleeStatus();
 
             const nextBtn = document.querySelector("[data-wizard-next]");
 

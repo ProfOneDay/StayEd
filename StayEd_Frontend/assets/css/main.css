@@ -1,21 +1,11 @@
-/*
-==================================================
-StayEd
-Main Stylesheet
-Loads the entire design system
-==================================================
-*/
 
-/* Design System */
+
 @import url("./variables.css");
 
-/* Shared Components */
 @import url("./components.css");
 
-/* Application Layout */
 @import url("./layout.css");
 
-/* Page Styles */
 @import url("./pages/auth.css");
 @import url("./pages/dashboard.css");
 @import url("./pages/setup.css");

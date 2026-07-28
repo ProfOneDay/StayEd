@@ -1,50 +1,9 @@
-/**
- * ============================================
- * StayEd
- * Demo Auth / Registration Service
- * ============================================
- *
- * ISOLATION NOTICE
- * ----------------
- * This module exists so the "Create Account" ->
- * Setup Wizard flow can be fully demonstrated
- * without a connected backend. It never touches
- * the real API layer (assets/js/core/api.js) or
- * the real session keys used by Auth
- * (assets/js/core/auth.js) — it has its own
- * "stayed_demo_*" localStorage namespace.
- *
- * WHEN TO REMOVE
- * ---------------
- * Once the real backend supports instant/self-serve
- * account creation, delete this file, remove the
- * <script> include, and set CONFIG.DEMO_MODE = false.
- * Every call site already guards on
- * DemoAuthService.isEnabled() so nothing else needs
- * to change.
- *
- * WHAT IT SIMULATES
- * ------------------
- *   - createAccount()       new teacher account
- *   - createOrganization()  CLC / class creation
- *   - completeProfile()     teacher profile details
- *   - completeOnboarding()  marks the demo session done
- *
- * All state is kept in memory + localStorage under
- * the "stayed_demo_" prefix so a demo can be resumed
- * after a refresh, and reset() clears it completely.
- * ============================================
- */
 
 class DemoAuthService {
 
     static STORAGE_KEY = "stayed_demo_session";
 
     static _session = null;
-
-    /* -----------------------------------------
-       Mode switch
-    ----------------------------------------- */
 
     static isEnabled() {
 
@@ -53,10 +12,6 @@ class DemoAuthService {
         );
 
     }
-
-    /* -----------------------------------------
-       Session helpers
-    ----------------------------------------- */
 
     static _load() {
 
@@ -107,11 +62,7 @@ class DemoAuthService {
 
         } catch {
 
-            /* localStorage unavailable (private mode,
-               storage full, etc.) — demo still works
-               in-memory for the current page load. */
-
-        }
+}
 
     }
 
@@ -129,13 +80,6 @@ class DemoAuthService {
 
     }
 
-    /* -----------------------------------------
-       1. Account creation
-       (mirrors Auth.register() shape so this can
-       be swapped for the real call with no other
-       code changes)
-    ----------------------------------------- */
-
     static async createAccount({ full_name, email, password } = {}) {
 
         await this._delay();
@@ -148,7 +92,7 @@ class DemoAuthService {
             full_name: full_name || "Demo Teacher",
             email: email || "demo.teacher@deped.gov.ph",
             role: "teacher",
-            status: "approved",   // demo skips the real approval wait
+            status: "approved",   
             created_at: new Date().toISOString()
 
         };
@@ -165,11 +109,6 @@ class DemoAuthService {
         };
 
     }
-
-    /* -----------------------------------------
-       2. Organization / class creation
-       (mirrors API.createClass())
-    ----------------------------------------- */
 
     static async createOrganization(payload = {}) {
 
@@ -203,10 +142,6 @@ class DemoAuthService {
 
     }
 
-    /* -----------------------------------------
-       3. Profile completion
-    ----------------------------------------- */
-
     static async completeProfile(payload = {}) {
 
         await this._delay(300);
@@ -232,10 +167,6 @@ class DemoAuthService {
 
     }
 
-    /* -----------------------------------------
-       4. Onboarding completion
-    ----------------------------------------- */
-
     static async completeOnboarding() {
 
         await this._delay(300);
@@ -255,12 +186,6 @@ class DemoAuthService {
 
     }
 
-    /* -----------------------------------------
-       Session accessors (read-only helpers used
-       by the wizard's Complete step / dashboard
-       demo banner)
-    ----------------------------------------- */
-
     static getSession() {
 
         return { ...this._load() };
@@ -273,23 +198,6 @@ class DemoAuthService {
 
     }
 
-    /* -----------------------------------------
-       Start / reset
-    ----------------------------------------- */
-
-    /**
-     * Begin a brand-new demo session and enter the
-     * setup wizard, exactly the path a real signup
-     * would take once the account exists.
-     */
-    /**
-     * Enter the setup wizard. If a demo account was
-     * already created (the normal path, via
-     * createAccount()), that session is kept so the
-     * wizard can read it back. Only starts fresh when
-     * called with no existing session (e.g. a stale
-     * demo left over from a previous visit).
-     */
     static startDemo() {
 
         if (!this.hasActiveSession()) {
@@ -312,9 +220,7 @@ class DemoAuthService {
 
         } catch {
 
-            /* ignore */
-
-        }
+}
 
     }
 

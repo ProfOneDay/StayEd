@@ -1,14 +1,20 @@
 class SetupWizard {
 
-    static init() {
+    static async completeDemoSession() {
 
-        /*
-         * All wizard steps share generic button IDs
-         * (nextBtn / backBtn). Running every initWizard on
-         * every page would bind conflicting handlers, so we
-         * only initialise the step named on the body:
-         *   <body data-wizard="2">
-         */
+        if (!(window.DemoAuthService && DemoAuthService.isEnabled())) {
+            return;
+        }
+
+        await DemoAuthService.completeOnboarding();
+
+        Auth.seedDemoSession?.(
+            DemoAuthService.getSession().account
+        );
+
+    }
+
+    static init() {
 
         const step = document.body.dataset.wizard;
 
@@ -30,10 +36,6 @@ class SetupWizard {
         }
 
     }
-
-    /* =====================================================
-       Wizard 1
-    ====================================================== */
 
     static initWizard1() {
 
@@ -77,10 +79,6 @@ class SetupWizard {
 
     }
 
-    /* =====================================================
-       Wizard 2
-    ====================================================== */
-
     static initWizard2() {
 
         const form =
@@ -88,17 +86,20 @@ class SetupWizard {
 
         if (!form) return;
 
+        const municipality =
+            document.getElementById("municipality");
+
         const clc =
             document.getElementById("clc");
 
         const schoolYear =
             document.getElementById("schoolYear");
 
-        const semester =
-            document.getElementById("semester");
-
         const learningLevel =
             document.getElementById("learningLevel");
+
+        const summaryMunicipality =
+            document.getElementById("summaryMunicipality");
 
         const summaryCLC =
             document.getElementById("summaryCLC");
@@ -106,13 +107,64 @@ class SetupWizard {
         const summaryYear =
             document.getElementById("summaryYear");
 
-        const summarySemester =
-            document.getElementById("summarySemester");
-
         const summaryLevel =
             document.getElementById("summaryLevel");
 
+        function populateMunicipalities() {
+
+            if (!municipality || !window.MockDB?.getMunicipalities) return;
+
+            const list = MockDB.getMunicipalities();
+
+            municipality.innerHTML =
+                `<option value="">Select Municipality</option>` +
+                list.map(m => `<option value="${m}">${m}</option>`).join("");
+
+        }
+
+        function populateClcsForMunicipality(selected) {
+
+            if (!clc) return;
+
+            if (!selected) {
+
+                clc.innerHTML = `<option value="">Select Municipality first</option>`;
+
+                clc.disabled = true;
+
+                return;
+
+            }
+
+            const clcs = window.MockDB?.getClcsByMunicipality
+                ? MockDB.getClcsByMunicipality(selected)
+                : [];
+
+            clc.innerHTML =
+                `<option value="">Select CLC</option>` +
+                clcs.map(c => `<option value="${c.name}">${c.name}</option>`).join("");
+
+            clc.disabled = false;
+
+        }
+
+        populateMunicipalities();
+
+        populateClcsForMunicipality(municipality?.value);
+
+        municipality?.addEventListener("change", () => {
+
+            populateClcsForMunicipality(municipality.value);
+
+            refreshSummary();
+
+        });
+
         function refreshSummary() {
+
+            if (summaryMunicipality)
+                summaryMunicipality.textContent =
+                    municipality?.value || "—";
 
             if (summaryCLC)
                 summaryCLC.textContent =
@@ -121,10 +173,6 @@ class SetupWizard {
             if (summaryYear)
                 summaryYear.textContent =
                     schoolYear.value;
-
-            if (summarySemester)
-                summarySemester.textContent =
-                    semester.value;
 
             if (summaryLevel)
                 summaryLevel.textContent =
@@ -135,7 +183,6 @@ class SetupWizard {
         [
             clc,
             schoolYear,
-            semester,
             learningLevel
 
         ].forEach(element => {
@@ -154,11 +201,6 @@ class SetupWizard {
 
         refreshSummary();
 
-        /*
-         * The Continue button lives in the fixed footer,
-         * outside the <form>. Bind it explicitly so it
-         * triggers the form's submit handler reliably.
-         */
         const submitBtn =
             document.getElementById("nextBtn");
 
@@ -199,14 +241,14 @@ class SetupWizard {
 
                 const payload = {
 
+                    municipality:
+                        municipality?.value,
+
                     communityLearningCenter:
                         clc.value,
 
                     schoolYear:
                         schoolYear.value,
-
-                    semester:
-                        semester.value,
 
                     learningLevel:
                         learningLevel.value
@@ -251,10 +293,6 @@ class SetupWizard {
 
     }
 
-    /* =====================================================
-       Wizard 3
-    ====================================================== */
-    
     static initWizard3() {
 
         const browseBtn =
@@ -279,6 +317,31 @@ class SetupWizard {
 
         const backBtn =
             document.getElementById("backBtn");
+
+        const downloadTemplateLink =
+            document.getElementById("setupDownloadTemplateLink");
+
+        if (downloadTemplateLink) {
+
+            downloadTemplateLink.addEventListener(
+
+                "click",
+
+                event => {
+
+                    event.preventDefault();
+
+                    Utils.downloadLearnerImportTemplate();
+
+                    if (window.Toast) {
+                        Toast.success("Template downloaded.");
+                    }
+
+                }
+
+            );
+
+        }
 
         const fileName =
             document.getElementById("fileName");
@@ -594,11 +657,13 @@ class SetupWizard {
 
                 "click",
 
-                () => {
+                async () => {
+
+                    await SetupWizard.completeDemoSession();
 
                     Router.go(
 
-                        "/setup/wizard-4"
+                        "/dashboard"
 
                     );
 
@@ -629,10 +694,6 @@ class SetupWizard {
         }
 
     }
-
-    /* =====================================================
-       Wizard 4
-    ===================================================== */
 
     static async initWizard4() {
 
@@ -823,10 +884,6 @@ Imported
 
     }
 
-    /* =====================================================
-       Wizard 5
-    ===================================================== */
-
     static async initWizard5() {
 
         const finishBtn =
@@ -842,6 +899,11 @@ Imported
             if (cls) {
 
                 document.getElementById(
+                    "summaryMunicipality"
+                ).textContent =
+                    cls.municipality || "—";
+
+                document.getElementById(
                     "summaryCLC"
                 ).textContent =
                     cls.communityLearningCenter || "—";
@@ -850,11 +912,6 @@ Imported
                     "summaryYear"
                 ).textContent =
                     cls.schoolYear || "—";
-
-                document.getElementById(
-                    "summarySemester"
-                ).textContent =
-                    cls.semester || "—";
 
                 document.getElementById(
                     "summaryLevel"
@@ -919,23 +976,7 @@ Imported
 
             async () => {
 
-                /*
-                 * DEMO MODE: mark the demo onboarding
-                 * complete and seed a lightweight local
-                 * session so Guards.teacher() lets the
-                 * dashboard load with no backend.
-                 * (See assets/js/demo/demo-auth-service.js)
-                 */
-
-                if (window.DemoAuthService && DemoAuthService.isEnabled()) {
-
-                    await DemoAuthService.completeOnboarding();
-
-                    Auth.seedDemoSession?.(
-                        DemoAuthService.getSession().account
-                    );
-
-                }
+                await SetupWizard.completeDemoSession();
 
                 Utils.toast(
 
@@ -961,12 +1002,6 @@ Imported
 
         );
 
-        /*
-        ----------------------------------------------------
-        Optional Success Animation
-        ----------------------------------------------------
-        */
-
         const successIcon =
             document.getElementById("successIcon");
 
@@ -983,10 +1018,6 @@ Imported
     }
 
 }
-
-/* ==========================================================
-   Initialize Wizard
-========================================================== */
 
 document.addEventListener(
 

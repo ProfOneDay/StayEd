@@ -1,9 +1,4 @@
-/**
- * ============================================
- * StayEd
- * Login Page
- * ============================================
- */
+
 
 class LoginPage {
 
@@ -60,18 +55,6 @@ class LoginPage {
 
     }
 
-    /* =======================================
-       CREATE ACCOUNT (DEMO MODE)
-       -----------------------------------------
-       When DemoAuthService is enabled, "Create
-       Account" skips the real (backend-dependent)
-       registration page and launches the full
-       setup wizard directly, using demo data so
-       the entire onboarding flow can be shown
-       without a connected database. See
-       assets/js/demo/demo-auth-service.js.
-    ======================================= */
-
     static initializeCreateAccountDemo() {
 
         if (!this.createAccountLink) {
@@ -81,9 +64,6 @@ class LoginPage {
         }
 
         if (!window.DemoAuthService || !DemoAuthService.isEnabled()) {
-
-            /* Real backend path: let the link behave
-               normally and open register.html. */
 
             return;
 
@@ -139,11 +119,7 @@ class LoginPage {
 
     }
 
-    /* =======================================
-       PASSWORD VISIBILITY
-    ======================================= */
-
-    static initializePasswordToggle() {
+static initializePasswordToggle() {
 
         if (!this.toggleButton) {
 
@@ -186,10 +162,6 @@ class LoginPage {
         );
 
     }
-
-    /* =======================================
-       LOGIN
-    ======================================= */
 
     static async submit(event) {
 
@@ -261,12 +233,6 @@ class LoginPage {
 
                 () => {
 
-                    /**
-                     * Next version:
-                     * if (!response.user.setup_completed)
-                     *      redirect to setup wizard
-                     */
-
                     Auth.redirectAfterLogin();
 
                 },
@@ -297,10 +263,6 @@ class LoginPage {
 
     }
 
-    /* =======================================
-       BUTTON LOADING
-    ======================================= */
-
     static loading(state) {
 
         if (!this.submitButton) {
@@ -320,10 +282,6 @@ class LoginPage {
                 : "Log In";
 
     }
-
-    /* =======================================
-       REMEMBER EMAIL
-    ======================================= */
 
     static restoreRememberedEmail() {
 
@@ -352,10 +310,6 @@ class LoginPage {
     }
 
 }
-
-/* ==========================================
-   INITIALIZE
-========================================== */
 
 document.addEventListener(
 

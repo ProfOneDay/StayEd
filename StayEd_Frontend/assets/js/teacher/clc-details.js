@@ -1,16 +1,3 @@
-/**
- * ============================================
- * StayEd
- * CLC Details ("Add New CLC") Controller
- * ============================================
- *
- * Validates the CLC registration form, creates
- * the CLC via API.createClc() (mock-backed), then
- * proceeds to the CLC Upload / learner enrollment
- * step. Required fields mirror the Community
- * Learning Center backend model.
- * ============================================
- */
 
 class ClcDetails {
 
@@ -82,7 +69,6 @@ class ClcDetails {
             municipality: document.getElementById("clcMunicipality").value,
             name: document.getElementById("clcName").value.trim(),
             schoolYear: document.getElementById("clcSchoolYear").value,
-            semester: document.getElementById("clcSemester").value,
             learningLevel: document.getElementById("clcLevel").value,
             phone: document.getElementById("clcPhone").value.trim(),
             email: document.getElementById("clcEmail").value.trim(),

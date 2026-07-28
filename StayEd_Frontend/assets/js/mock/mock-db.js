@@ -1,22 +1,6 @@
-/**
- * ============================================
- * StayEd
- * Mock Database
- * ============================================
- *
- * Single Source of Truth
- * for Frontend Development
- *
- * ============================================
- */
+
 
 const MockDB = {
-
-    /**
-     * ----------------------------------------
-     * System
-     * ----------------------------------------
-     */
 
     system: {
 
@@ -31,12 +15,6 @@ const MockDB = {
         mode: CONFIG.MODE
 
     },
-
-    /**
-     * ----------------------------------------
-     * Users
-     * ----------------------------------------
-     */
 
     users: [
 
@@ -88,12 +66,6 @@ const MockDB = {
 
     ],
 
-    /**
-     * ----------------------------------------
-     * Collections
-     * ----------------------------------------
-     */
-
     learners: [],
 
     attendance: [],
@@ -107,12 +79,6 @@ const MockDB = {
     uploads: [],
 
     settings: {},
-
-    /**
-     * ----------------------------------------
-     * Helpers
-     * ----------------------------------------
-     */
 
     findUser(email) {
 
@@ -147,6 +113,20 @@ const MockDB = {
             learner =>
 
                 Number(learner.id) === Number(id)
+
+        ) || null;
+
+    },
+
+    findLearnerByLrn(lrn) {
+
+        if (!lrn) return null;
+
+        const normalized = String(lrn).trim();
+
+        return this.learners.find(
+
+            learner => learner.lrn === normalized
 
         ) || null;
 
@@ -252,22 +232,6 @@ const MockDB = {
 
     },
 
-    /**
-     * ----------------------------------------
-     * Cross-page persistence for mock "current
-     * record" state (e.g. currentClc,
-     * currentClass). MockDB is otherwise
-     * reinitialised fresh on every page load, so
-     * multi-step flows that create a record on
-     * one page and read it back on the next
-     * (CLC Details -> CLC Upload, Setup Wizard)
-     * need it saved somewhere that survives
-     * navigation. sessionStorage is used rather
-     * than localStorage since this is transient
-     * demo/session state, not a real record.
-     * ----------------------------------------
-     */
-
     rememberCurrent(key, value) {
 
         this[key] = value;
@@ -281,10 +245,7 @@ const MockDB = {
 
         } catch {
 
-            /* sessionStorage unavailable — value still
-               works for the remainder of this page load. */
-
-        }
+}
 
     },
 
@@ -307,12 +268,6 @@ const MockDB = {
         }
 
     },
-
-    /**
-     * ----------------------------------------
-     * Reset Database
-     * ----------------------------------------
-     */
 
     reset() {
 
@@ -340,12 +295,6 @@ const MockDB = {
 
     },
 
-    /**
-     * ----------------------------------------
-     * Seed Database
-     * ----------------------------------------
-     */
-
     seed() {
 
         console.info(
@@ -362,15 +311,7 @@ const MockDB = {
 
 };
 
-/* ==========================================
-   EXPORT
-========================================== */
-
 window.MockDB = MockDB;
-
-/* ==========================================
-   INITIALIZATION
-========================================== */
 
 document.addEventListener(
 

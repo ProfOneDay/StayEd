@@ -1,23 +1,6 @@
-/**
- * ============================================
- * StayEd
- * Mock Learner Profile Data
- * ============================================
- *
- * Richer per-learner detail than the summary
- * records in mock-learners.js: monitoring
- * history, risk explanation, and interventions.
- * Keyed by learner id so any learner in
- * MockDB.learners can be opened.
- * ============================================
- */
 
 MockDB.learnerProfiles = {
 
-    /* Default/fallback profile, used for any learner
-       id that doesn't have bespoke detail below (keeps
-       the profile page functional for every row in the
-       Learner Management table, not just a hand-picked few). */
     _default: {
 
         riskTrend: [
@@ -127,12 +110,6 @@ MockDB.learnerProfiles = {
 
 };
 
-/**
- * Fetch (mock) profile detail for a learner id,
- * merging bespoke data over the shared default so
- * every learner has a fully-populated profile even
- * without hand-authoring all of them.
- */
 MockDB.getLearnerProfile = function (id) {
 
     const learner =

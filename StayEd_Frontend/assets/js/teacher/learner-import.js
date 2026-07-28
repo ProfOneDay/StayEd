@@ -1,16 +1,3 @@
-/**
- * ============================================
- * StayEd
- * Import Learners Controller
- * ============================================
- *
- * Three-state flow: drag-and-drop/browse upload
- * with mocked progress -> row-level validation
- * preview (duplicate + error detection) -> import
- * summary / success screen. Mirrors the CLC
- * Upload flow's structure for consistency.
- * ============================================
- */
 
 class LearnerImportPage {
 
@@ -29,14 +16,18 @@ class LearnerImportPage {
         this.bindSuccessActions();
 
         document.querySelector("[data-download-template]")?.addEventListener("click", () => {
-            Toast?.info("Template download will be available once connected to the server.");
+            this.downloadTemplate();
         });
 
     }
 
-    /* ---------------------------------------
-       State 1: Dropzone
-    --------------------------------------- */
+    static downloadTemplate() {
+
+        Utils.downloadLearnerImportTemplate();
+
+        Toast?.success("Template downloaded.");
+
+    }
 
     static bindDropzone() {
 
@@ -132,10 +123,6 @@ class LearnerImportPage {
         done();
 
     }
-
-    /* ---------------------------------------
-       State 2: Validation preview
-    --------------------------------------- */
 
     static async runPreview() {
 
@@ -293,9 +280,7 @@ class LearnerImportPage {
     }
 
     static formatBytes(bytes) {
-        if (bytes < 1024) return `${bytes} B`;
-        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+        return Utils.formatFileSize(bytes);
     }
 
     static set(selector, value) {

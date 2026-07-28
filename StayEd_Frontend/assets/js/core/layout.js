@@ -1,9 +1,4 @@
-/**
- * ============================================
- * StayEd
- * Global Layout
- * ============================================
- */
+
 
 class Layout {
 
@@ -45,11 +40,7 @@ class Layout {
 
     }
 
-    /* =======================================
-       CACHE DOM
-    ======================================= */
-
-    static cache() {
+static cache() {
 
         this.sidebar = document.querySelector(".st-sidebar");
 
@@ -62,10 +53,6 @@ class Layout {
         this.content = document.querySelector(".st-content");
 
     }
-
-    /* =======================================
-       USER
-    ======================================= */
 
     static restoreUser() {
 
@@ -155,10 +142,6 @@ class Layout {
 
     }
 
-    /* =======================================
-       SIDEBAR
-    ======================================= */
-
     static initializeSidebar() {
 
         if (!this.sidebar) {
@@ -181,9 +164,6 @@ class Layout {
 
         }
 
-        /* Restore the persisted collapse state (desktop
-           icon-only mode) before wiring the click handler,
-           so navigating between pages keeps it consistent. */
         this.restoreSidebarCollapsedState();
 
         toggle.addEventListener(
@@ -212,10 +192,6 @@ class Layout {
 
     }
 
-    /* =======================================
-       SIDEBAR COLLAPSE (desktop icon-only mode)
-    ======================================= */
-
     static SIDEBAR_COLLAPSED_KEY = "stayed_sidebar_collapsed";
 
     static toggleSidebarCollapsed() {
@@ -238,10 +214,7 @@ class Layout {
 
         } catch {
 
-            /* localStorage unavailable — state still
-               applies for the current page view. */
-
-        }
+}
 
     }
 
@@ -274,13 +247,6 @@ class Layout {
 
     }
 
-    /* =======================================
-       SIDEBAR SUBMENUS (e.g. "Learner")
-       Expand/collapse, remembers state across
-       navigation, auto-expands when a child
-       page is active.
-    ======================================= */
-
     static initializeSubmenus() {
 
         document.querySelectorAll("[data-submenu]").forEach(submenu => {
@@ -311,15 +277,6 @@ class Layout {
             }
 
             trigger?.addEventListener("click", () => {
-
-                /*
-                 * If the sidebar is in icon-only (collapsed)
-                 * mode, a click on the Learner icon should
-                 * first expand the sidebar back to its full
-                 * width so the submenu labels are visible,
-                 * then open the submenu — rather than
-                 * silently expanding a submenu nobody can see.
-                 */
 
                 if (this.sidebar.classList.contains("is-collapsed")) {
 
@@ -372,15 +329,9 @@ class Layout {
 
         } catch {
 
-            /* ignore */
-
-        }
+}
 
     }
-
-    /* =======================================
-       NAVBAR
-    ======================================= */
 
     static initializeNavbar() {
 
@@ -490,10 +441,6 @@ class Layout {
 
     }
 
-    /* =======================================
-       SIDEBAR ACTIVE LINK
-    ======================================= */
-
     static highlightCurrentPage() {
 
         const current =
@@ -550,10 +497,6 @@ class Layout {
 
     }
 
-    /* =======================================
-       BREADCRUMB
-    ======================================= */
-
     static updateBreadcrumb() {
 
         const container = document.querySelector(
@@ -567,16 +510,6 @@ class Layout {
             return;
 
         }
-
-        /*
-         * Two supported inputs, in priority order:
-         *   1. this.options.breadcrumb — explicit override,
-         *      an array of strings or {label, href} objects,
-         *      for pages that need a custom trail (e.g. a
-         *      learner's name as the final crumb).
-         *   2. Router.BREADCRUMBS — automatic, centralised
-         *      trail looked up by the current filename.
-         */
 
         const filename =
             this.options.page ||
@@ -654,10 +587,6 @@ class Layout {
 
     }
 
-    /* =======================================
-       FOOTER
-    ======================================= */
-
     static initializeFooter() {
 
         const year = document.querySelector(
@@ -675,10 +604,6 @@ class Layout {
         }
 
     }
-
-    /* =======================================
-       LOGOUT
-    ======================================= */
 
     static initializeLogout() {
 
@@ -747,10 +672,6 @@ class Layout {
             });
 
     }
-
-    /* =======================================
-       RESPONSIVE SIDEBAR
-    ======================================= */
 
     static initializeResponsiveSidebar() {
 
@@ -874,10 +795,6 @@ class Layout {
 
     }
 
-    /* =======================================
-       SIDEBAR METHODS
-    ======================================= */
-
     static openSidebar() {
 
         if (!this.sidebar) {
@@ -926,10 +843,6 @@ class Layout {
 
     }
 
-    /* =======================================
-       PAGE LOADER
-    ======================================= */
-
     static showLoader() {
 
         const loader = document.querySelector(
@@ -961,10 +874,6 @@ class Layout {
         }
 
     }
-
-    /* =======================================
-       TOAST HELPERS
-    ======================================= */
 
     static success(message = "Success") {
 
@@ -1046,10 +955,6 @@ class Layout {
 
     }
 
-    /* =======================================
-       PAGE HOOKS
-    ======================================= */
-
     static beforePageLoad() {
 
         this.showLoader();
@@ -1063,10 +968,6 @@ class Layout {
     }
 
 }
-
-/* ==========================================
-   GLOBAL ERROR HANDLER
-========================================== */
 
 window.addEventListener(
 
@@ -1104,15 +1005,7 @@ window.addEventListener(
 
 );
 
-/* ==========================================
-   EXPORT
-========================================== */
-
 window.Layout = Layout;
-
-/* ==========================================
-   AUTO INITIALIZATION
-========================================== */
 
 function bootStayEdLayout() {
 
@@ -1159,12 +1052,6 @@ document.addEventListener(
     }
 
 );
-
-/*
- * Re-run once async partials (sidebar, navbar, footer)
- * are in the DOM so user info, active nav, breadcrumb and
- * logout binding attach to the injected markup.
- */
 
 document.addEventListener(
 

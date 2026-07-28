@@ -1,18 +1,3 @@
-/**
- * ============================================
- * StayEd
- * Teacher Dashboard Controller
- * ============================================
- *
- * Loads dashboard data through the API domain
- * layer (mock now, Flask later) and renders:
- *   - welcome greeting + term context
- *   - risk statistic cards
- *   - risk distribution chart + insights
- *   - quick action tip
- *   - student registry table (search + paginate)
- * ============================================
- */
 
 class TeacherDashboard {
 
@@ -22,7 +7,8 @@ class TeacherDashboard {
         page: 1,
         perPage: 5,
         search: "",
-        sortByRisk: true
+        sortByRisk: true,
+        filtersApplied: false
     };
 
     static async init() {
@@ -52,7 +38,7 @@ class TeacherDashboard {
 
             this.state.learners = data.learners || [];
 
-            this.applyRegistry();
+            this.applyRegistry({ recomputeStats: false });
 
         }
 
@@ -76,13 +62,8 @@ class TeacherDashboard {
 
     }
 
-    /* ---------------------------------------
-       Static UI (banner, filters, search)
-    --------------------------------------- */
-
     static bindStaticUI() {
 
-        /* Dismissible notification banner */
         const dismiss =
             document.querySelector("[data-notif-dismiss]");
 
@@ -92,7 +73,6 @@ class TeacherDashboard {
                 ?.remove();
         });
 
-        /* Learning-level segmented control */
         const seg =
             document.querySelector("[data-filter-level]");
 
@@ -109,39 +89,34 @@ class TeacherDashboard {
 
         });
 
-        /* Apply filters */
         document
             .querySelector("[data-filter-apply]")
             ?.addEventListener("click", () => {
                 if (window.Toast) {
                     Toast.success("Filters applied.");
                 }
-                this.applyRegistry();
+                this.state.filtersApplied = true;
+                this.state.page = 1;
+                this.applyRegistry({ recomputeStats: true });
             });
 
-        /* Registry search */
         document
             .querySelector("[data-registry-search]")
             ?.addEventListener("input", event => {
                 this.state.search =
                     event.target.value.toLowerCase();
                 this.state.page = 1;
-                this.applyRegistry();
+                this.applyRegistry({ recomputeStats: false });
             });
 
-        /* Registry sort */
         document
             .querySelector("[data-registry-sort]")
             ?.addEventListener("click", () => {
                 this.state.sortByRisk = !this.state.sortByRisk;
-                this.applyRegistry();
+                this.applyRegistry({ recomputeStats: false });
             });
 
     }
-
-    /* ---------------------------------------
-       Welcome + term context
-    --------------------------------------- */
 
     static renderWelcome(context = {}) {
 
@@ -168,10 +143,6 @@ class TeacherDashboard {
         );
 
     }
-
-    /* ---------------------------------------
-       Statistic cards
-    --------------------------------------- */
 
     static renderStatistics(stats = {}) {
 
@@ -206,10 +177,6 @@ class TeacherDashboard {
 
     }
 
-    /* ---------------------------------------
-       Risk distribution chart
-    --------------------------------------- */
-
     static renderRiskChart(dist = {}, summary = {}) {
 
         const max = dist.scale_max || 25;
@@ -224,7 +191,6 @@ class TeacherDashboard {
             const pct =
                 Math.min(100, Math.round((value / max) * 100));
 
-            // Animate from 0 on next frame
             requestAnimationFrame(() => {
                 bar.style.height = `${pct}%`;
             });
@@ -240,13 +206,11 @@ class TeacherDashboard {
         setBar("moderate", dist.moderate || 0);
         setBar("low", dist.low || 0);
 
-        /* Prediction meta */
         this.setText("[data-risk-date]", summary.date);
         this.setText("[data-risk-coverage]", summary.coverage);
         this.setText("[data-risk-model]", summary.model);
         this.setText("[data-risk-confidence]", summary.confidence);
 
-        /* Insights */
         const list =
             document.querySelector("[data-risk-insights]");
 
@@ -267,11 +231,7 @@ class TeacherDashboard {
 
     }
 
-    /* ---------------------------------------
-       Intervention tip
-    --------------------------------------- */
-
-    static renderInterventionTip(interventions = []) {
+static renderInterventionTip(interventions = []) {
 
         const pending =
             interventions.filter(
@@ -290,15 +250,44 @@ class TeacherDashboard {
 
     }
 
-    /* ---------------------------------------
-       Registry table
-    --------------------------------------- */
-
-    static applyRegistry() {
+    static applyRegistry({ recomputeStats = false } = {}) {
 
         let rows = [...this.state.learners];
 
-        /* Search */
+        if (this.state.filtersApplied) {
+
+            const activeLevel =
+                document.querySelector("[data-filter-level] button.is-active");
+
+            if (activeLevel && activeLevel.dataset.level) {
+                rows = rows.filter(l => l.level === activeLevel.dataset.level);
+            }
+
+            const modality =
+                document.querySelector("[data-filter-modality]")?.value;
+
+            if (modality && modality !== "All Modalities") {
+                rows = rows.filter(l => l.modality === modality);
+            }
+
+            const sectionLabel =
+                document.querySelector("[data-filter-section]")?.value;
+
+            if (sectionLabel && sectionLabel !== "All Sections") {
+                
+                const sectionCode = sectionLabel.replace("Section ", "").split(" ")[0];
+                rows = rows.filter(l => l.section === sectionCode);
+            }
+
+            const clc =
+                document.querySelector("[data-filter-clc]")?.value;
+
+            if (clc && clc !== "All CLCs" && rows.some(l => l.clc)) {
+                rows = rows.filter(l => l.clc === clc);
+            }
+
+        }
+
         if (this.state.search) {
             rows = rows.filter(l =>
                 (l.name || "").toLowerCase()
@@ -308,7 +297,6 @@ class TeacherDashboard {
             );
         }
 
-        /* Sort by risk severity */
         if (this.state.sortByRisk) {
             const order = { High: 0, Moderate: 1, Low: 2 };
             rows.sort((a, b) =>
@@ -319,6 +307,64 @@ class TeacherDashboard {
         this.state.filtered = rows;
 
         this.renderRegistryPage();
+
+        if (recomputeStats) {
+
+            this.renderStatisticsFromRows(rows);
+
+            this.renderRiskChartFromRows(rows);
+
+        }
+
+    }
+
+    static renderStatisticsFromRows(rows) {
+
+        const count = risk => rows.filter(l => l.risk === risk).length;
+
+        this.renderStatistics({
+            registered: rows.length,
+            high: count("High"),
+            moderate: count("Moderate"),
+            low: count("Low")
+        });
+
+    }
+
+    static renderRiskChartFromRows(rows) {
+
+        const count = risk => rows.filter(l => l.risk === risk).length;
+
+        const high = count("High");
+        const moderate = count("Moderate");
+        const low = count("Low");
+
+        const scaleMax = Math.max(25, high, moderate, low) + 5;
+
+        const insights = [];
+
+        if (!rows.length) {
+
+            insights.push({ text: "No learners match the current filters.", tone: "neutral" });
+
+        } else if (low >= rows.length / 2) {
+
+            insights.push({ text: "Most learners in this view are currently classified as Low Risk.", tone: "neutral" });
+
+        } else {
+
+            insights.push({ text: "A significant share of learners in this view are at Moderate or High Risk.", tone: "error" });
+
+        }
+
+        this.renderRiskChart(
+            { scale_max: scaleMax, high, moderate, low },
+            {
+                date: new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
+                coverage: `${rows.length} learner${rows.length === 1 ? "" : "s"} in current view`,
+                insights
+            }
+        );
 
     }
 
@@ -479,10 +525,6 @@ class TeacherDashboard {
 
     }
 
-    /* ---------------------------------------
-       Render helpers
-    --------------------------------------- */
-
     static riskBadge(risk) {
 
         const map = {
@@ -542,12 +584,6 @@ class TeacherDashboard {
 
 }
 
-/*
- * Components load asynchronously via ComponentLoader.
- * Prefer the components:loaded event; fall back to a
- * timed init if the event has already fired.
- */
-
 (function bootDashboard() {
 
     let started = false;
@@ -560,7 +596,6 @@ class TeacherDashboard {
 
     document.addEventListener("components:loaded", start);
 
-    // Safety net in case the event fired before this listener.
     document.addEventListener("DOMContentLoaded", () => {
         setTimeout(start, 600);
     });

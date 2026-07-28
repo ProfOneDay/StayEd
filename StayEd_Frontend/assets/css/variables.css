@@ -1,16 +1,6 @@
-/*
-==================================================
-StayEd
-Design System Variables
-Based on Approved Prototype
-==================================================
-*/
+
 
 :root{
-
-    /* ==================================================
-       PRIMARY PALETTE
-    ================================================== */
 
     --st-primary:#12355B;
     --st-primary-container:#12355B;
@@ -24,10 +14,6 @@ Based on Approved Prototype
     --st-on-primary-fixed:#001C39;
     --st-on-primary-fixed-variant:#28486F;
 
-    /* ==================================================
-       SECONDARY
-    ================================================== */
-
     --st-secondary:#006A68;
     --st-secondary-container:#8DF0EE;
     --st-secondary-fixed:#90F3F1;
@@ -37,10 +23,6 @@ Based on Approved Prototype
     --st-on-secondary-container:#006E6D;
     --st-on-secondary-fixed:#00201F;
     --st-on-secondary-fixed-variant:#00504F;
-
-    /* ==================================================
-       TERTIARY
-    ================================================== */
 
     --st-tertiary:#002230;
     --st-tertiary-container:#00384E;
@@ -52,20 +34,11 @@ Based on Approved Prototype
     --st-on-tertiary-fixed:#001E2C;
     --st-on-tertiary-fixed-variant:#004C69;
 
-    /* ==================================================
-       ERROR
-    ================================================== */
-
     --st-error:#BA1A1A;
     --st-error-container:#FFDAD6;
 
     --st-on-error:#FFFFFF;
     --st-on-error-container:#93000A;
-
-    /* ==================================================
-       RISK LEVELS (Predictive Analytics)
-       Exact values from approved prototype
-    ================================================== */
 
     --st-risk-high:#BA1A1A;
     --st-risk-high-soft:rgba(186,26,26,.10);
@@ -79,21 +52,12 @@ Based on Approved Prototype
     --st-risk-low-soft:rgba(107,191,89,.12);
     --st-risk-low-border:rgba(107,191,89,.22);
 
-    /* Deep navy used on auth screens (prototype auth palette) */
     --st-primary-deep:#001F3F;
-
-    /* ==================================================
-       GLASSMORPHISM (Auth screens)
-    ================================================== */
 
     --st-glass-bg:rgba(255,255,255,.85);
     --st-glass-border:1px solid rgba(255,255,255,.30);
     --st-glass-blur:blur(12px);
     --st-glass-shadow:0 24px 48px -12px rgba(0,31,63,.35);
-
-    /* ==================================================
-       SURFACE
-    ================================================== */
 
     --st-background:#F4F6F8;
 
@@ -116,16 +80,8 @@ Based on Approved Prototype
     --st-inverse-on-surface:#EFF0FF;
     --st-inverse-primary:#AAC8F6;
 
-    /* ==================================================
-       OUTLINES
-    ================================================== */
-
     --st-outline:#73777F;
     --st-outline-variant:#C3C6CF;
-
-    /* ==================================================
-       TYPOGRAPHY
-    ================================================== */
 
     --st-font-heading:
         "Libre Franklin",
@@ -153,10 +109,6 @@ Based on Approved Prototype
     --st-line-height-heading:1.3;
     --st-line-height-body:1.5;
 
-    /* ==================================================
-       SPACING
-    ================================================== */
-
     --st-space-2:2px;
     --st-space-4:4px;
     --st-space-8:8px;
@@ -175,18 +127,9 @@ Based on Approved Prototype
     --st-margin-tablet:24px;
     --st-margin-desktop:40px;
 
-    /*
-     * Semantic "stack" spacing (content-block gaps),
-     * aliased to the 8px scale above per the design
-     * reference: stack-sm=8, stack-md=16, stack-lg=24.
-     */
     --st-stack-sm:var(--st-space-8);
     --st-stack-md:var(--st-space-16);
     --st-stack-lg:var(--st-space-24);
-
-    /* ==================================================
-       BORDER RADIUS
-    ================================================== */
 
     --st-radius-xs:2px;
     --st-radius-sm:4px;
@@ -198,10 +141,6 @@ Based on Approved Prototype
 
     --st-card-radius:5px;
     --st-button-radius:4px;
-
-    /* ==================================================
-       SIDEBAR
-    ================================================== */
 
     --st-sidebar-width:280px;
     --st-sidebar-width-collapsed:80px;
@@ -217,20 +156,12 @@ Based on Approved Prototype
     --st-sidebar-border:4px solid
         var(--st-secondary-container);
 
-    /* ==================================================
-       NAVBAR
-    ================================================== */
-
     --st-navbar-height:80px;
 
     --st-navbar-background:#FFFFFF;
 
     --st-navbar-border:1px solid
         var(--st-outline-variant);
-
-    /* ==================================================
-       FOOTER
-    ================================================== */
 
     --st-footer-height:64px;
 
@@ -239,10 +170,6 @@ Based on Approved Prototype
 
     --st-footer-border:
         1px solid var(--st-outline-variant);
-
-    /* ==================================================
-       BUTTONS
-    ================================================== */
 
     --st-button-height:44px;
 
@@ -254,10 +181,6 @@ Based on Approved Prototype
 
     --st-button-weight:
         var(--st-font-weight-semibold);
-
-    /* ==================================================
-       INPUTS
-    ================================================== */
 
     --st-input-height:44px;
 
@@ -272,20 +195,12 @@ Based on Approved Prototype
     --st-input-focus:
         var(--st-secondary);
 
-    /* ==================================================
-       TABLES
-    ================================================== */
-
     --st-table-header:#F8F9FB;
 
     --st-table-hover:#F6F9FF;
 
     --st-table-border:
         1px solid var(--st-outline-variant);
-
-    /* ==================================================
-       SHADOWS
-    ================================================== */
 
     --st-shadow-xs:
         0 1px 2px rgba(18,53,91,.05);
@@ -299,10 +214,6 @@ Based on Approved Prototype
     --st-shadow-lg:
         0 12px 32px rgba(18,53,91,.16);
 
-    /* ==================================================
-       Z-INDEX
-    ================================================== */
-
     --st-z-sidebar:100;
 
     --st-z-navbar:200;
@@ -313,10 +224,6 @@ Based on Approved Prototype
 
     --st-z-toast:1000;
 
-    /* ==================================================
-       TRANSITIONS
-    ================================================== */
-
     --st-transition-fast:
         .15s ease;
 
@@ -325,10 +232,6 @@ Based on Approved Prototype
 
     --st-transition-slow:
         .35s ease;
-
-    /* ==================================================
-       COMPONENT SIZES
-    ================================================== */
 
     --st-avatar-sm:36px;
 
@@ -352,19 +255,11 @@ Based on Approved Prototype
 
     --st-content-padding:40px;
 
-    /* ==================================================
-       BREAKPOINTS
-    ================================================== */
-
     --st-breakpoint-sm:576px;
     --st-breakpoint-md:768px;
     --st-breakpoint-lg:992px;
     --st-breakpoint-xl:1200px;
     --st-breakpoint-2xl:1440px;
-
-    /* ==================================================
-       LAYOUT
-    ================================================== */
 
     --st-content-width:calc(
         100% - var(--st-sidebar-width)
@@ -376,10 +271,6 @@ Based on Approved Prototype
 
     --st-card-border:
         1px solid rgba(195,198,207,.35);
-
-    /* ==================================================
-       STATUS COLORS
-    ================================================== */
 
     --st-success:#2E7D32;
     --st-success-light:#E8F5E9;
@@ -393,20 +284,12 @@ Based on Approved Prototype
     --st-info:#0288D1;
     --st-info-light:#E1F5FE;
 
-    /* ==================================================
-       CHART COLORS
-    ================================================== */
-
     --st-chart-primary:#12355B;
     --st-chart-secondary:#006A68;
     --st-chart-tertiary:#4F83CC;
     --st-chart-warning:#ED6C02;
     --st-chart-danger:#D32F2F;
     --st-chart-success:#2E7D32;
-
-    /* ==================================================
-       ANIMATIONS
-    ================================================== */
 
     --st-hover-scale:1.02;
 
@@ -423,19 +306,11 @@ Based on Approved Prototype
         background-color .2s ease,
         border-color .2s ease;
 
-    /* ==================================================
-       SCROLLBAR
-    ================================================== */
-
     --st-scrollbar-width:8px;
 
     --st-scrollbar-thumb:#C3C6CF;
 
     --st-scrollbar-track:#F4F6F8;
-
-    /* ==================================================
-       ELEVATION
-    ================================================== */
 
     --st-elevation-0:none;
 
@@ -447,10 +322,6 @@ Based on Approved Prototype
 
     --st-elevation-3:
         0 10px 24px rgba(0,0,0,.14);
-
-    /* ==================================================
-       APP
-    ================================================== */
 
     --st-app-background:
         var(--st-background);

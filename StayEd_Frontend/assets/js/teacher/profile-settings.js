@@ -1,19 +1,3 @@
-/**
- * ============================================
- * StayEd
- * Profile Settings Controller
- * ============================================
- *
- * Collapsible sections (Profile Information,
- * Account Settings, Appearance, System
- * Preferences, Privacy, Danger Zone), each
- * independently expandable. Preferences are
- * mocked via localStorage for the demo and
- * structured so a real API-backed preferences
- * endpoint can replace them later with minimal
- * change (see savePreference()).
- * ============================================
- */
 
 class ProfileSettingsPage {
 
@@ -40,10 +24,6 @@ class ProfileSettingsPage {
         this.restorePreferences();
 
     }
-
-    /* ---------------------------------------
-       Populate summary card from the logged-in user
-    --------------------------------------- */
 
     static populateFromUser() {
 
@@ -76,10 +56,6 @@ class ProfileSettingsPage {
 
     }
 
-    /* ---------------------------------------
-       Collapsible sections
-    --------------------------------------- */
-
     static bindSections() {
 
         document.querySelectorAll("[data-settings-toggle]").forEach(header => {
@@ -95,10 +71,6 @@ class ProfileSettingsPage {
         });
 
     }
-
-    /* ---------------------------------------
-       Forms (Profile Information + Password)
-    --------------------------------------- */
 
     static bindForms() {
 
@@ -168,10 +140,6 @@ class ProfileSettingsPage {
 
     }
 
-    /* ---------------------------------------
-       Toggle switches (notification/appearance prefs)
-    --------------------------------------- */
-
     static bindToggles() {
 
         document.querySelectorAll("[data-settings-toggle-pref]").forEach(toggle => {
@@ -190,10 +158,6 @@ class ProfileSettingsPage {
         });
 
     }
-
-    /* ---------------------------------------
-       Appearance: theme swatches
-    --------------------------------------- */
 
     static bindTheme() {
 
@@ -214,10 +178,6 @@ class ProfileSettingsPage {
         });
 
     }
-
-    /* ---------------------------------------
-       Appearance: font scale slider
-    --------------------------------------- */
 
     static bindFontScale() {
 
@@ -245,10 +205,6 @@ class ProfileSettingsPage {
 
     }
 
-    /* ---------------------------------------
-       Danger zone
-    --------------------------------------- */
-
     static bindDangerZone() {
 
         document.querySelector("[data-deactivate-account]")?.addEventListener("click", () => {
@@ -273,11 +229,6 @@ class ProfileSettingsPage {
 
     }
 
-    /* ---------------------------------------
-       Preference persistence (demo-only, see
-       PREFS_KEY doc comment above)
-    --------------------------------------- */
-
     static savePreference(key, value) {
 
         let prefs = {};
@@ -300,9 +251,7 @@ class ProfileSettingsPage {
 
         } catch {
 
-            /* ignore */
-
-        }
+}
 
     }
 

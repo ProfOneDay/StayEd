@@ -1,16 +1,3 @@
-/**
- * ============================================
- * StayEd
- * Notifications Controller
- * ============================================
- *
- * Filterable list (all/unread/by category) with
- * mark-as-read, mark-all-read, and delete. The
- * navbar's notification badge is kept in sync via
- * Layout.refreshNotificationBadge() so unread
- * count stays consistent across pages.
- * ============================================
- */
 
 class NotificationsPage {
 

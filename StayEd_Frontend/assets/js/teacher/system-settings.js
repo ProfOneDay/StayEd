@@ -1,16 +1,3 @@
-/**
- * ============================================
- * StayEd
- * System Settings Controller
- * ============================================
- *
- * Bento-grid layout: editable configuration
- * cards on the left, read-only system info and
- * data-management actions on the right. Data
- * Management actions (Backup/Restore/Audit Logs)
- * are UI-only placeholders per the current scope.
- * ============================================
- */
 
 class SystemSettingsPage {
 
@@ -32,9 +19,6 @@ class SystemSettingsPage {
 
     static trackForms() {
 
-        // Track every settings card as one big "form" for
-        // unsaved-changes purposes, since these fields save
-        // together via the single "Save All Changes" button.
         const container = document.querySelector(".st-settings-bento-left");
 
         if (container) {

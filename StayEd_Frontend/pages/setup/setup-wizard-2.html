@@ -54,32 +54,25 @@
             <form class="setup-form" id="classForm">
 
                 <div class="setup-field">
-                    <label for="clc">Community Learning Center (CLC)</label>
-                    <select id="clc">
-                        <option value="">Select CLC</option>
-                        <option value="San Felipe Sur CLC">San Felipe Sur CLC</option>
-                        <option value="Davao City Central CLC">Davao City Central CLC</option>
-                        <option value="Talomo District CLC">Talomo District CLC</option>
-                        <option value="Agdao Community Hub">Agdao Community Hub</option>
+                    <label for="municipality">Municipality</label>
+                    <select id="municipality">
+                        <option value="">Select Municipality</option>
                     </select>
                 </div>
 
-                <div class="setup-field-row">
-                    <div class="setup-field">
-                        <label for="schoolYear">School Year</label>
-                        <select id="schoolYear">
-                            <option value="2025-2026">2025-2026</option>
-                            <option value="2026-2027" selected>2026-2027</option>
-                        </select>
-                    </div>
-                    <div class="setup-field">
-                        <label for="semester">Semester</label>
-                        <select id="semester">
-                            <option value="First Trimester">First Trimester</option>
-                            <option value="Second Trimester">Second Trimester</option>
-                            <option value="Third Trimester">Third Trimester</option>
-                        </select>
-                    </div>
+                <div class="setup-field">
+                    <label for="clc">Community Learning Center (CLC)</label>
+                    <select id="clc" disabled>
+                        <option value="">Select Municipality first</option>
+                    </select>
+                </div>
+
+                <div class="setup-field">
+                    <label for="schoolYear">School Year</label>
+                    <select id="schoolYear">
+                        <option value="2025-2026">2025-2026</option>
+                        <option value="2026-2027" selected>2026-2027</option>
+                    </select>
                 </div>
 
                 <div class="setup-field">
@@ -98,7 +91,11 @@
                     <h3>Class Summary</h3>
                     <div class="setup-summary-grid">
                         <div class="setup-summary-item">
-                            <p>Community Learning Center</p>
+                            <p>Municipality</p>
+                            <p id="summaryMunicipality">—</p>
+                        </div>
+                        <div class="setup-summary-item">
+                            <p id="summaryCLCLabel">Community Learning Center</p>
                             <p id="summaryCLC">—</p>
                         </div>
                         <div class="setup-summary-item">
@@ -108,10 +105,6 @@
                         <div class="setup-summary-item">
                             <p>School Year</p>
                             <p id="summaryYear">2026-2027</p>
-                        </div>
-                        <div class="setup-summary-item">
-                            <p>Semester</p>
-                            <p id="summarySemester">First Trimester</p>
                         </div>
                     </div>
                     <div class="setup-summary-status">
@@ -146,6 +139,8 @@
 
     <script src="../../assets/js/config.js"></script>
     <script src="../../assets/js/mock/mock-db.js"></script>
+
+    <script src="../../assets/js/mock/mock-clcs.js"></script>
     <script src="../../assets/js/mock/mock-api.js"></script>
     <script src="../../assets/js/core/utils.js"></script>
     <script src="../../assets/js/core/router.js"></script>

@@ -1,20 +1,3 @@
-/**
- * ============================================
- * StayEd
- * Shared Authentication Page Behaviour
- * ============================================
- *
- * Wires up interactions common to every auth
- * screen without any page-specific coupling:
- *
- *   - password visibility toggles
- *   - live password-requirement feedback
- *   - dynamic footer year
- *
- * Page-specific logic (login/register/etc.)
- * lives in its own script.
- * ============================================
- */
 
 const AuthPage = {
 
@@ -28,10 +11,6 @@ const AuthPage = {
 
     },
 
-    /* -----------------------------------------
-       Password visibility
-    ----------------------------------------- */
-
     bindPasswordToggles() {
 
         const toggles =
@@ -40,12 +19,6 @@ const AuthPage = {
         toggles.forEach(toggle => {
 
             toggle.addEventListener("click", () => {
-
-                /*
-                 * A toggle either references a field by
-                 * data-toggle, or sits inside a wrapper
-                 * next to the input it controls.
-                 */
 
                 let input = null;
 
@@ -100,10 +73,6 @@ const AuthPage = {
         });
 
     },
-
-    /* -----------------------------------------
-       Live password requirement feedback
-    ----------------------------------------- */
 
     bindPasswordRules() {
 
@@ -164,10 +133,6 @@ const AuthPage = {
 
     },
 
-    /* -----------------------------------------
-       Footer year
-    ----------------------------------------- */
-
     stampYear() {
 
         const year = new Date().getFullYear();
@@ -182,20 +147,10 @@ const AuthPage = {
 
 };
 
-/*
- * Auth partials load asynchronously via the
- * ComponentLoader, so we initialise slightly after
- * DOMContentLoaded to ensure injected markup
- * (toggles, footer) is present.
- */
-
 document.addEventListener("DOMContentLoaded", () => {
 
-    // Initialise immediately for inline markup...
     AuthPage.init();
 
-    // ...and again shortly after, to catch
-    // component-injected elements.
     setTimeout(() => AuthPage.init(), 250);
 
 });

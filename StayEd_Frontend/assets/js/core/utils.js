@@ -1,11 +1,52 @@
-/**
- * ============================================
- * StayEd
- * Utilities
- * ============================================
- */
+
 
 class Utils {
+
+    static downloadLearnerImportTemplate() {
+
+        const headers = [
+            "LRN",
+            "Last Name",
+            "First Name",
+            "Middle Name (optional)",
+            "Sex",
+            "Date of Birth",
+            "Learning Modality"
+        ];
+
+        const sampleRow = [
+            "123456789012",
+            "Dela Cruz",
+            "Juan",
+            "Reyes",
+            "Male",
+            "2008-05-14",
+            "Face-to-Face"
+        ];
+
+        const csvContent = [headers, sampleRow]
+            .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+            .join("\r\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+
+        link.href = url;
+
+        link.download = "StayEd_Learner_Import_Template.csv";
+
+        document.body.appendChild(link);
+
+        link.click();
+
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(url);
+
+    }
 
     static qs(selector, scope = document) {
 
@@ -70,6 +111,16 @@ class Utils {
         if (!button) return;
 
         button.disabled = true;
+
+    }
+
+    static formatFileSize(bytes) {
+
+        if (bytes < 1024) return `${bytes} B`;
+
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 
     }
 
@@ -240,13 +291,6 @@ class Utils {
     }
 
 }
-
-/**
- * ============================================
- * StayEd
- * Utilities
- * ============================================
- */
 
 Object.assign(Utils, {
 
@@ -490,11 +534,6 @@ Object.assign(Utils, {
 
 });
 
-/*
- * Toast convenience shim. Older modules call
- * Utils.toast(message, type); delegate to the Toast
- * manager when it's available, else fall back to console.
- */
 Utils.toast = function (message, type = "info") {
 
     if (window.Toast && typeof Toast[type] === "function") {

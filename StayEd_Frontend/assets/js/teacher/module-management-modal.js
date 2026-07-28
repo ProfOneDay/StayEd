@@ -1,17 +1,3 @@
-/**
- * ============================================
- * StayEd
- * Module Management Modal
- * ============================================
- *
- * Opened from the Learner Records hub (any
- * modality tab) via the "history" icon or
- * "Active Modules" link. Shows the learner's full
- * module list grouped by learning strand, with
- * inline status/return-date/remarks editing, plus
- * a Module History tab for completed modules.
- * ============================================
- */
 
 class ModuleManagementModal {
 

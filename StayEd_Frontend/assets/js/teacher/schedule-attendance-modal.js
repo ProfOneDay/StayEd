@@ -1,19 +1,3 @@
-/**
- * ============================================
- * StayEd
- * Session Schedule & Attendance Modal
- * ============================================
- *
- * Opened from the Learner Records hub (Face-to-
- * Face and Blended tabs) via the session-
- * attendance cell. Lets a teacher set the next
- * session date/time, mark attendance status, and
- * add an optional note — using the standard
- * Modal.show() confirm/cancel footer since this
- * is a straightforward form, unlike the larger
- * Module Management workflow.
- * ============================================
- */
 
 class ScheduleAttendanceModal {
 
@@ -91,11 +75,7 @@ class ScheduleAttendanceModal {
 
         Toast?.success(`Session schedule saved for ${this.learner?.name}.`);
 
-        // In a real implementation this would call
-        // API.updateLearner()/a dedicated schedule
-        // endpoint with { date, status, note }.
-
-    }
+}
 
     static toDateInputValue(displayDate) {
 

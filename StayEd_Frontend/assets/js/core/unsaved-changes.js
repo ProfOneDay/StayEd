@@ -1,20 +1,3 @@
-/**
- * ============================================
- * StayEd
- * Unsaved Changes Guard
- * ============================================
- *
- * Watches a form (or any container) for user
- * edits and warns before the browser tab closes
- * or reloads, and before in-app links navigate
- * away, so nobody silently loses form input.
- *
- * Usage:
- *   UnsavedChanges.track(formElement);
- *   // ...on successful save:
- *   UnsavedChanges.clear(formElement);
- * ============================================
- */
 
 const UnsavedChanges = {
 
@@ -22,12 +5,6 @@ const UnsavedChanges = {
 
     _installed: false,
 
-    /**
-     * Start tracking a form/container for changes.
-     * Any input/change event inside it marks it dirty;
-     * calling clear() (e.g. after a successful save)
-     * marks it clean again.
-     */
     track(container) {
 
         if (!container || container.dataset.unsavedTracked) {
@@ -48,30 +25,17 @@ const UnsavedChanges = {
 
     },
 
-    /**
-     * Mark a tracked form/container as saved (clean).
-     * Call this right after a successful submit/save.
-     */
     clear(container) {
 
         this._dirtyForms.delete(container);
 
     },
 
-    /**
-     * Whether anything currently tracked has unsaved
-     * edits.
-     */
     hasUnsavedChanges() {
 
         return this._dirtyForms.size > 0;
 
     },
-
-    /* -----------------------------------------
-       Global guards (installed once): browser
-       close/reload, and in-app link clicks.
-    ----------------------------------------- */
 
     _installGlobalGuards() {
 
@@ -85,19 +49,10 @@ const UnsavedChanges = {
 
             event.preventDefault();
 
-            // Chrome requires returnValue to be set to
-            // show its native confirmation dialog.
             event.returnValue = "";
 
         });
 
-        /*
-         * Intercept clicks on in-app links (not the
-         * current page, not new-tab/modifier clicks) so
-         * the person gets our own confirm dialog rather
-         * than the generic browser prompt, matching the
-         * rest of the app's modal styling.
-         */
         document.addEventListener("click", event => {
 
             if (!this.hasUnsavedChanges()) return;

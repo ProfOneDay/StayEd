@@ -1,20 +1,6 @@
-/**
- * ============================================
- * StayEd
- * Mock API
- * ============================================
- *
- * Simulates the Laravel backend during
- * frontend development.
- *
- * ============================================
- */
+
 
 class MockAPI {
-
-    /* =======================================
-       REQUEST ROUTER
-    ======================================= */
 
     static async request(endpoint, options = {}) {
 
@@ -25,8 +11,6 @@ class MockAPI {
         const body = this.parseBody(options.body);
 
         switch (`${method} ${endpoint}`) {
-
-            /* Authentication */
 
             case "POST /auth/login":
                 return this.login(body);
@@ -49,12 +33,8 @@ class MockAPI {
             case "POST /auth/register":
                 return this.register(body);
 
-            /* Dashboard */
-
             case "GET /teacher/dashboard":
                 return this.teacherDashboard();
-
-            /* Predictive Analytics */
 
             case "GET /predictions/summary":
                 return this.predictionSummary();
@@ -64,8 +44,6 @@ class MockAPI {
 
             case "GET /interventions":
                 return this.interventions();
-
-            /* Classes */
 
             case "GET /classes":
                 return this.classes();
@@ -85,12 +63,11 @@ class MockAPI {
             case "GET /learners/import/summary":
                 return this.importSummary();
 
-            /* Community Learning Centers */
+            case "GET /teacher-classes":
+                return this.teacherClasses();
 
             case "GET /clcs":
                 return this.clcs();
-
-            /* Notifications */
 
             case "GET /notifications":
                 return this.notifications();
@@ -104,8 +81,6 @@ class MockAPI {
             case "POST /clcs":
                 return this.createClc(body);
 
-            /* Learners */
-
             case "GET /learners":
                 return this.learners();
 
@@ -114,21 +89,13 @@ class MockAPI {
 
             default:
 
-                /* Parameterised routes (e.g. /learners/:id) */
-
                 return this.dynamicRoute(method, endpoint, body);
 
         }
 
     }
 
-    /* =======================================
-       DYNAMIC (PARAMETERISED) ROUTES
-    ======================================= */
-
     static dynamicRoute(method, endpoint, body) {
-
-        /* /notifications/:id/read -> POST (mark one read) */
 
         const notifReadMatch =
             endpoint.match(/^\/notifications\/([^/]+)\/read$/);
@@ -139,8 +106,6 @@ class MockAPI {
 
         }
 
-        /* /notifications/:id -> DELETE */
-
         const notifMatch =
             endpoint.match(/^\/notifications\/([^/]+)$/);
 
@@ -149,8 +114,6 @@ class MockAPI {
             return this.deleteNotification(notifMatch[1]);
 
         }
-
-        /* /learners/:id/profile -> GET (full profile detail) */
 
         const profileMatch =
             endpoint.match(/^\/learners\/([^/]+)\/profile$/);
@@ -161,8 +124,6 @@ class MockAPI {
 
         }
 
-        /* /learners/:id/records-detail -> GET (modality hub detail) */
-
         const recordsDetailMatch =
             endpoint.match(/^\/learners\/([^/]+)\/records-detail$/);
 
@@ -171,8 +132,6 @@ class MockAPI {
             return MockDB.getRecordsHubDetail(recordsDetailMatch[1]);
 
         }
-
-        /* /learners/:id  ->  GET / PUT / DELETE */
 
         const learnerMatch =
             endpoint.match(/^\/learners\/([^/]+)$/);
@@ -208,10 +167,6 @@ class MockAPI {
         };
 
     }
-
-    /* =======================================
-       HELPERS
-    ======================================= */
 
     static parseBody(body) {
 
@@ -294,10 +249,6 @@ class MockAPI {
         }
 
     }
-
-    /* =======================================
-       AUTHENTICATION
-    ======================================= */
 
     static login(credentials = {}) {
 
@@ -571,10 +522,6 @@ class MockAPI {
 
     }
 
-    /* =======================================
-       DASHBOARD
-    ======================================= */
-
     static teacherDashboard() {
 
         const learners = MockDB.learners;
@@ -625,10 +572,6 @@ class MockAPI {
 
     }
 
-    /* =======================================
-       PREDICTIVE ANALYTICS
-    ======================================= */
-
     static predictionSummary() {
 
         return MockDB.clone(MockDB.predictionSummary);
@@ -652,10 +595,6 @@ class MockAPI {
         };
 
     }
-
-    /* =======================================
-       CLASSES
-    ======================================= */
 
     static classes() {
 
@@ -695,7 +634,6 @@ class MockAPI {
 
         MockDB.classes.push(record);
 
-        /* Remember as the active class for the setup wizard */
         MockDB.currentClass = record;
         MockDB.rememberCurrent("currentClass", record);
 
@@ -708,14 +646,6 @@ class MockAPI {
         };
 
     }
-
-    /* =======================================
-       COMMUNITY LEARNING CENTERS (CLC)
-    ======================================= */
-
-    /* =======================================
-       NOTIFICATIONS
-    ======================================= */
 
     static notifications() {
 
@@ -771,6 +701,20 @@ class MockAPI {
 
     }
 
+    static teacherClasses() {
+
+        const list = MockDB.classes || [];
+
+        return {
+
+            total: list.length,
+
+            data: MockDB.clone(list)
+
+        };
+
+    }
+
     static clcs() {
 
         const list = MockDB.clcs || [];
@@ -816,10 +760,6 @@ class MockAPI {
 
         MockDB.clcs.push(record);
 
-        /* Remembered so the Upload confirmation step can
-           read back what was just entered on CLC Details.
-           Persisted across the page navigation between
-           CLC Details and CLC Upload (see MockDB.rememberCurrent). */
         MockDB.rememberCurrent("currentClc", record);
 
         return {
@@ -847,12 +787,10 @@ class MockAPI {
 
     static currentClass() {
 
-        /* Fall back to a sensible default so the wizard summary
-           still renders if the class step was skipped. */
         const fallback = {
+            municipality: "Binalonan",
             communityLearningCenter: "San Felipe Sur CLC",
             schoolYear: "2026-2027",
-            semester: "First Trimester",
             learningLevel: "Basic Literacy Program"
         };
 
@@ -860,12 +798,6 @@ class MockAPI {
 
     }
 
-    /**
-     * Simulated row-level validation preview shown before
-     * a batch import is committed — mixes valid, duplicate,
-     * and error rows so the preview table (and duplicate-
-     * detection UI) has something realistic to render.
-     */
     static importPreview(filename) {
 
         const sample = MockDB.learners.slice(0, 6);
@@ -923,9 +855,6 @@ class MockAPI {
                     level: l.level
                 }));
 
-        /* Persist a summary the next page can read back
-           (see MockDB.rememberCurrent for why this is
-           needed across a real page navigation). */
         MockDB.rememberCurrent("importSummary", {
             total: imported + 2,
             imported: imported,
@@ -963,10 +892,6 @@ class MockAPI {
         return MockDB.clone(MockDB.recallCurrent("importSummary") || fallback);
 
     }
-
-    /* =======================================
-       LEARNERS
-    ======================================= */
 
     static learners() {
 
@@ -1144,15 +1069,7 @@ class MockAPI {
 
 }
 
-/* ==========================================
-   EXPORT
-========================================== */
-
 window.MockAPI = MockAPI;
-
-/* ==========================================
-   INITIALIZATION
-========================================== */
 
 document.addEventListener(
 

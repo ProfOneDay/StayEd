@@ -1,15 +1,3 @@
-/**
- * ============================================
- * StayEd
- * Early Warning Alerts Controller
- * ============================================
- *
- * Table-based alert view: summary strip, search,
- * date range, risk level, and CLC filters, with
- * pagination. Clicking a row (or its action
- * button) opens that learner's profile directly.
- * ============================================
- */
 
 class EarlyWarningPage {
 
@@ -47,7 +35,6 @@ class EarlyWarningPage {
 
             const learners = res.data || [];
 
-            // Alerts = learners with a Moderate or High risk level.
             this.state.all = learners
                 .filter(l => l.risk === "High" || l.risk === "Moderate")
                 .map(l => ({
@@ -77,9 +64,6 @@ class EarlyWarningPage {
 
     }
 
-    /* Demo-only helper: give each learner a plausible
-       CLC name so the table/filter has real variety
-       without needing a CLC field on every mock learner. */
     static clcFor(id) {
 
         const clcs = MockDB.clcs || [];

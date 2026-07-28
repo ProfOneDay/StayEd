@@ -1,25 +1,6 @@
-/**
- * ============================================
- * StayEd
- * API Client
- * ============================================
- *
- * Supports:
- * - Mock Database
- * - Future Laravel API
- * - JWT Authentication
- * - Automatic Timeout
- * - Unified Error Handling
- * ============================================
- */
+
 
 class API {
-
-    /**
-     * ----------------------------------------
-     * Configuration
-     * ----------------------------------------
-     */
 
     static BASE_URL = CONFIG.API_URL;
 
@@ -30,12 +11,6 @@ class API {
         return CONFIG.MODE || "development";
 
     }
-
-    /**
-     * ----------------------------------------
-     * Default Headers
-     * ----------------------------------------
-     */
 
     static headers(extra = {}) {
 
@@ -69,12 +44,6 @@ class API {
 
     }
 
-    /**
-     * ----------------------------------------
-     * Request Entry
-     * ----------------------------------------
-     */
-
     static async request(
 
         endpoint,
@@ -82,12 +51,6 @@ class API {
         options = {}
 
     ) {
-
-        /*
-        ---------------------------------------
-        Development Mode
-        ---------------------------------------
-        */
 
         if (
 
@@ -106,12 +69,6 @@ class API {
             );
 
         }
-
-        /*
-        ---------------------------------------
-        Production
-        ---------------------------------------
-        */
 
         const controller =
 
@@ -166,12 +123,6 @@ class API {
         }
 
     }
-
-    /**
-     * ----------------------------------------
-     * HTTP Fetch Request
-     * ----------------------------------------
-     */
 
     static async fetchRequest(
 
@@ -239,12 +190,6 @@ class API {
 
     }
 
-    /**
-     * ----------------------------------------
-     * Response Handler
-     * ----------------------------------------
-     */
-
     static async handleResponse(
 
         response
@@ -306,12 +251,6 @@ class API {
         return data;
 
     }
-
-    /**
-     * ----------------------------------------
-     * Error Handler
-     * ----------------------------------------
-     */
 
     static handleError(error) {
 
@@ -417,12 +356,6 @@ class API {
 
     }
 
-    /**
-     * ----------------------------------------
-     * GET
-     * ----------------------------------------
-     */
-
     static get(
 
         endpoint
@@ -446,12 +379,6 @@ class API {
         );
 
     }
-
-    /**
-     * ----------------------------------------
-     * POST
-     * ----------------------------------------
-     */
 
     static post(
 
@@ -483,12 +410,6 @@ class API {
 
     }
 
-    /**
-     * ----------------------------------------
-     * PUT
-     * ----------------------------------------
-     */
-
     static put(
 
         endpoint,
@@ -518,12 +439,6 @@ class API {
         );
 
     }
-
-    /**
-     * ----------------------------------------
-     * PATCH
-     * ----------------------------------------
-     */
 
     static patch(
 
@@ -555,12 +470,6 @@ class API {
 
     }
 
-    /**
-     * ----------------------------------------
-     * DELETE
-     * ----------------------------------------
-     */
-
     static delete(
 
         endpoint
@@ -584,12 +493,6 @@ class API {
         );
 
     }
-
-    /**
-     * ----------------------------------------
-     * HEAD
-     * ----------------------------------------
-     */
 
     static head(
 
@@ -615,12 +518,6 @@ class API {
 
     }
 
-    /**
-     * ----------------------------------------
-     * OPTIONS
-     * ----------------------------------------
-     */
-
     static options(
 
         endpoint
@@ -644,12 +541,6 @@ class API {
         );
 
     }
-
-    /**
-     * ----------------------------------------
-     * File Upload
-     * ----------------------------------------
-     */
 
     static upload(
 
@@ -691,12 +582,6 @@ class API {
         );
 
     }
-
-    /**
-     * ----------------------------------------
-     * Build Query String
-     * ----------------------------------------
-     */
 
     static query(
 
@@ -746,13 +631,7 @@ class API {
 
     }
 
-    /**
-     * ----------------------------------------
-     * Download File
-     * ----------------------------------------
-     */
-
-    static async download(
+static async download(
 
         endpoint,
 
@@ -818,12 +697,6 @@ class API {
 
     }
 
-    /**
-     * ----------------------------------------
-     * Retry Helper
-     * ----------------------------------------
-     */
-
     static async retry(
 
         callback,
@@ -862,12 +735,6 @@ class API {
 
     }
 
-    /**
-     * ----------------------------------------
-     * Health Check
-     * ----------------------------------------
-     */
-
     static health() {
 
         return this.get(
@@ -877,12 +744,6 @@ class API {
         );
 
     }
-
-    /**
-     * ----------------------------------------
-     * Connectivity Test
-     * ----------------------------------------
-     */
 
     static async ping() {
 
@@ -924,12 +785,6 @@ class API {
 
     }
 
-    /**
-     * ----------------------------------------
-     * Endpoint Builder
-     * ----------------------------------------
-     */
-
     static endpoint(
 
         resource,
@@ -946,12 +801,6 @@ class API {
 
     }
 
-    /**
-     * ----------------------------------------
-     * Version
-     * ----------------------------------------
-     */
-
     static version() {
 
         return {
@@ -967,18 +816,6 @@ class API {
         };
 
     }
-
-    /* ==========================================
-       DOMAIN METHODS
-       ------------------------------------------
-       Named, intention-revealing wrappers around
-       the transport verbs above. Page code calls
-       these — never raw endpoints — so the switch
-       from MockAPI to the real Flask backend needs
-       no page changes.
-    ========================================== */
-
-    /* --- Authentication --- */
 
     static login(credentials) {
         return this.post("/auth/login", credentials);
@@ -1008,8 +845,6 @@ class API {
         return this.post("/auth/change-password", payload);
     }
 
-    /* --- Notifications --- */
-
     static getNotifications() {
         return this.get("/notifications");
     }
@@ -1026,7 +861,9 @@ class API {
         return this.delete(`/notifications/${id}`);
     }
 
-    /* --- Community Learning Centers --- */
+    static getTeacherClasses() {
+        return this.get("/teacher-classes");
+    }
 
     static getClcs() {
         return this.get("/clcs");
@@ -1040,22 +877,10 @@ class API {
         return this.post("/clcs", payload);
     }
 
-    /* --- Classes --- */
-
     static getClasses() {
         return this.get("/classes");
     }
 
-    /*
-     * DEMO MODE BRANCH POINT
-     * When CONFIG.DEMO_MODE is on (see config.js) and a
-     * demo onboarding session is active, class creation
-     * is simulated by DemoAuthService so the setup wizard
-     * works with no backend at all. Remove this branch
-     * once self-serve registration is live — the
-     * post("/classes", payload) call below already
-     * matches the real endpoint contract.
-     */
     static createClass(payload) {
 
         if (window.DemoAuthService && DemoAuthService.isEnabled()
@@ -1066,7 +891,6 @@ class API {
         return this.post("/classes", payload);
     }
 
-    /* Most recently created class (used by the setup wizard) */
     static getCurrentClass() {
 
         if (window.DemoAuthService && DemoAuthService.isEnabled()
@@ -1077,8 +901,6 @@ class API {
 
         return this.get("/classes/current");
     }
-
-    /* --- Learners --- */
 
     static getLearners(params = {}) {
         const qs =
@@ -1112,33 +934,25 @@ class API {
         return this.delete(`/learners/${id}`);
     }
 
-    /* Bulk import from a parsed CSV/Excel dataset */
     static uploadLearners(payload) {
         return this.post("/learners/import", payload);
     }
 
-    /* Alias used by the setup wizard */
     static importLearners(payload) {
         return this.post("/learners/import", payload);
     }
 
-    /* Row-level validation preview before committing an import */
     static getImportPreview(filename) {
         return this.post("/learners/import/preview", { filename });
     }
 
-    /* Import summary for the just-uploaded dataset */
     static getImportedLearners() {
         return this.get("/learners/import/summary");
     }
 
-    /* --- Dashboard --- */
-
     static getDashboard() {
         return this.get("/teacher/dashboard");
     }
-
-    /* --- Predictive Analytics --- */
 
     static getPredictionSummary() {
         return this.get("/predictions/summary");
@@ -1154,15 +968,7 @@ class API {
 
 }
 
-/* ==========================================
-   Export
-========================================== */
-
 window.API = API;
-
-/* ==========================================
-   Initialization
-========================================== */
 
 document.addEventListener(
 

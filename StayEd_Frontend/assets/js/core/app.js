@@ -1,9 +1,4 @@
-/**
- * ============================================
- * StayEd
- * Global Application
- * ============================================
- */
+
 
 class App {
 
@@ -24,10 +19,6 @@ class App {
         this.initializeLogout();
 
     }
-
-    /* =======================================
-       USER
-    ======================================= */
 
     static restoreUser() {
 
@@ -135,11 +126,7 @@ class App {
 
     }
 
-    /* =======================================
-       PAGE
-    ======================================= */
-
-    static initializePage() {
+static initializePage() {
 
         const body = document.body;
 
@@ -159,11 +146,7 @@ class App {
 
     }
 
-    /* =======================================
-       LOGOUT
-    ======================================= */
-
-    static initializeLogout() {
+static initializeLogout() {
 
         document
 
@@ -192,10 +175,6 @@ class App {
             });
 
     }
-
-    /* =======================================
-       READY
-    ======================================= */
 
     static ready(callback) {
 

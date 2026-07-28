@@ -1,18 +1,3 @@
-/**
- * ============================================
- * StayEd
- * Learner Profile Controller
- * ============================================
- *
- * Reads a learner id from the URL (?id=) and
- * renders the hero card plus all four tabs:
- * Overview, Monitoring History, Risk Explanation,
- * Interventions. Every render function reads only
- * from the payload returned by
- * API.getLearnerProfile(id), so swapping the mock
- * for a real endpoint requires no page changes.
- * ============================================
- */
 
 class LearnerProfilePage {
 
@@ -76,27 +61,20 @@ class LearnerProfilePage {
 
     }
 
-    /* Reflect the learner's actual name as the final
-       breadcrumb crumb once it's loaded, per the brief's
-       example: Dashboard > Learner > Juan Dela Cruz. */
     static updatePageBreadcrumb() {
 
         if (!window.Layout || !this.profile) return;
 
         Layout.options.breadcrumb = [
             { label: "Dashboard", href: "dashboard.html" },
-            { label: "Learner", href: "learner-management.html" },
-            { label: "Learner Management", href: "learner-management.html" },
+            { label: "Learner", href: "student-registry.html" },
+            { label: "Student Registry", href: "student-registry.html" },
             { label: this.profile.name }
         ];
 
         Layout.updateBreadcrumb();
 
     }
-
-    /* ---------------------------------------
-       Tabs
-    --------------------------------------- */
 
     static bindTabs() {
 
@@ -121,10 +99,6 @@ class LearnerProfilePage {
         });
 
     }
-
-    /* ---------------------------------------
-       Hero card
-    --------------------------------------- */
 
     static renderHero() {
 
@@ -158,10 +132,6 @@ class LearnerProfilePage {
         });
 
     }
-
-    /* ---------------------------------------
-       Overview
-    --------------------------------------- */
 
     static renderOverview() {
 
@@ -337,11 +307,7 @@ class LearnerProfilePage {
 
     }
 
-    /* ---------------------------------------
-       Monitoring History (timeline)
-    --------------------------------------- */
-
-    static renderMonitoringHistory() {
+static renderMonitoringHistory() {
 
         const timeline = this.profile.monitoringHistory?.timeline || [];
 
@@ -402,9 +368,6 @@ class LearnerProfilePage {
 
                 chip.classList.add("is-active");
 
-                // Demo-level filtering: "This Month"/"This Semester" narrow
-                // to a recent slice; real filtering will use actual dates
-                // once backed by the API.
                 const filter = chip.dataset.historyFilter;
 
                 const all = this.allTimelineItems || [];
@@ -436,11 +399,7 @@ class LearnerProfilePage {
 
     }
 
-    /* ---------------------------------------
-       Risk Explanation
-    --------------------------------------- */
-
-    static renderRiskExplanation() {
+static renderRiskExplanation() {
 
         const r = this.profile.riskExplanation || {};
 
@@ -506,11 +465,7 @@ class LearnerProfilePage {
 
     }
 
-    /* ---------------------------------------
-       Interventions
-    --------------------------------------- */
-
-    static renderInterventions() {
+static renderInterventions() {
 
         const iv = this.profile.interventions || {};
 
@@ -644,11 +599,7 @@ class LearnerProfilePage {
 
     }
 
-    /* ---------------------------------------
-       Shared helpers
-    --------------------------------------- */
-
-    static showSkeleton() {
+static showSkeleton() {
 
         const monitoringBody = document.querySelector("[data-monitoring-summary-body]");
 

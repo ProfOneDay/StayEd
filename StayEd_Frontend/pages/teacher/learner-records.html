@@ -23,13 +23,21 @@
 
             <div class="st-page-header">
                 <div>
-                    <h1 class="st-page-header-title">Learner Record Management</h1>
-                    <p class="st-page-header-subtitle">
+                    <h1 class="st-page-header-title">Learner Records</h1>
+                    <p class="st-page-header-subtitle" data-records-subtitle>
                         Record learner attendance, module monitoring, consultations, and teacher
                         remarks across all ALS learning modalities.
                     </p>
                 </div>
                 <div class="st-page-header-actions">
+                    <a href="learner-import.html" class="st-btn st-btn-outline">
+                        <span class="material-symbols-outlined">upload_file</span>
+                        Import Students
+                    </a>
+                    <a href="learner-enroll.html" class="st-btn st-btn-outline">
+                        <span class="material-symbols-outlined">person_add</span>
+                        Enroll Student
+                    </a>
                     <button type="button" class="st-btn st-btn-outline" data-records-export>
                         <span class="material-symbols-outlined">ios_share</span>
                         Export
@@ -39,6 +47,23 @@
                         Save Changes
                     </button>
                 </div>
+            </div>
+
+            <!-- Class context banner: shows which class this Learner
+                 Records page belongs to when reached via Class
+                 Management -> Open Class (see learner-records-hub.js
+                 loadClassContext()). Hidden when there's no ?class=
+                 in the URL, e.g. when linked to directly. -->
+            <div class="st-class-context-banner st-hidden" data-class-context-banner>
+                <span class="material-symbols-outlined">school</span>
+                <div class="st-class-context-banner-text">
+                    <span class="st-class-context-banner-name" data-class-context-name>—</span>
+                    <span class="st-class-context-banner-meta" data-class-context-meta>—</span>
+                </div>
+                <a href="class-management.html" class="st-class-context-banner-switch">
+                    Switch Class
+                    <span class="material-symbols-outlined">swap_horiz</span>
+                </a>
             </div>
 
             <!-- Shared filter bar (persists across subtab switches) -->
@@ -291,6 +316,7 @@
     <script src="../../assets/js/config.js"></script>
     <script src="../../assets/js/mock/mock-db.js"></script>
     <script src="../../assets/js/mock/mock-clcs.js"></script>
+    <script src="../../assets/js/mock/mock-classes.js"></script>
     <script src="../../assets/js/mock/mock-learners.js"></script>
     <script src="../../assets/js/mock/mock-records-hub.js"></script>
     <script src="../../assets/js/mock/mock-api.js"></script>

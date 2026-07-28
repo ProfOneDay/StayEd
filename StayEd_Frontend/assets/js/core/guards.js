@@ -1,15 +1,7 @@
-/**
- * ============================================
- * StayEd
- * Route Guards
- * ============================================
- */
+
 
 class Guards {
 
-    /**
-     * Any authenticated user
-     */
     static auth() {
 
         if (!Auth.validateSession()) {
@@ -20,10 +12,6 @@ class Guards {
 
     }
 
-    /**
-     * Guest only
-     * (Login, Forgot Password, etc.)
-     */
     static guest() {
 
         if (Auth.validateSession()) {
@@ -34,9 +22,6 @@ class Guards {
 
     }
 
-    /**
-     * Teacher pages only
-     */
     static teacher() {
 
         this.auth();
@@ -49,9 +34,6 @@ class Guards {
 
     }
 
-    /**
-     * Admin pages only
-     */
     static admin() {
 
         this.auth();
@@ -64,9 +46,6 @@ class Guards {
 
     }
 
-    /**
-     * Teacher or Admin
-     */
     static roles(...roles) {
 
         this.auth();
@@ -79,18 +58,12 @@ class Guards {
 
     }
 
-    /**
-     * Unauthorized page
-     */
     static unauthorized() {
 
         window.location.href = "../errors/403.html";
 
     }
 
-    /**
-     * Not Found
-     */
     static notFound() {
 
         window.location.href = "../errors/404.html";

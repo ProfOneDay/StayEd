@@ -1,25 +1,3 @@
-/**
- * ============================================
- * StayEd
- * Modal Manager
- * ============================================
- *
- * Standardized modal behaviour app-wide:
- *   - consistent width system (sm/md/lg/xl via
- *     the `size` option, defaulting to md)
- *   - consistent header with a close (X) button
- *   - consistent footer buttons (Cancel/Confirm,
- *     with confirmLabel/cancelLabel overrides)
- *   - Escape key closes the modal
- *   - clicking the backdrop closes the modal
- *   - smooth open/close animation
- *
- * Fully backward compatible with the original
- * Modal.show({title, message, onConfirm}) call
- * shape used throughout the app; new options are
- * additive.
- * ============================================
- */
 
 class Modal {
 
@@ -55,7 +33,6 @@ class Modal {
 
         if (!modal) return;
 
-        // Reset any previous size modifier, apply the new one.
         modal.className = modal.className
             .split(" ")
             .filter(c => !c.startsWith("st-modal--"))
@@ -128,13 +105,6 @@ class Modal {
 
     }
 
-    /**
-     * Show a modal with fully custom body HTML and no
-     * default Confirm/Cancel wiring (e.g. embedding a
-     * larger workflow like Module Management). Still
-     * gets the standardized header/close/Escape/
-     * backdrop/animation behaviour.
-     */
     static showCustom({
 
         title = "",
@@ -225,8 +195,6 @@ class Modal {
 
         modal.classList.add("hidden");
 
-        // Restore the footer for the next standard show()
-        // call, in case showCustom() hid it.
         const footer = modal.querySelector(".st-modal-footer");
 
         if (footer) footer.style.display = "";

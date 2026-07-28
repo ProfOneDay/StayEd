@@ -1,17 +1,3 @@
-/**
- * ============================================
- * StayEd
- * Mock Learner Records Hub Data
- * ============================================
- *
- * Modality-specific detail (module progress,
- * attendance sessions, contact status) layered
- * on top of MockDB.learners, keyed by learner id.
- * A sensible default covers any learner without
- * bespoke detail, so every row in the hub renders
- * correctly regardless of dataset size.
- * ============================================
- */
 
 MockDB.recordsHub = {
 

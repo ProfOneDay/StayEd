@@ -1,16 +1,4 @@
-/*
-==================================================
-StayEd
-Authentication Pages
-Glassmorphism card over full-bleed hero
-Matches approved prototype (login / register /
-forgot / reset / pending)
-==================================================
-*/
 
-/* ==================================================
-   PAGE SHELL + HERO BACKGROUND
-================================================== */
 
 .auth-page{
     position:relative;
@@ -22,7 +10,6 @@ forgot / reset / pending)
     overflow-x:hidden;
 }
 
-/* Full-bleed classroom hero with navy wash */
 .auth-page::before{
     content:"";
     position:fixed;
@@ -40,7 +27,6 @@ forgot / reset / pending)
     background-position:center;
 }
 
-/* Soft ambient glow layer for depth */
 .auth-page::after{
     content:"";
     position:fixed;
@@ -54,10 +40,6 @@ forgot / reset / pending)
         );
     pointer-events:none;
 }
-
-/* ==================================================
-   MAIN (centers the card)
-================================================== */
 
 .auth-main{
     flex:1 0 auto;
@@ -74,14 +56,6 @@ forgot / reset / pending)
         padding:var(--st-margin-desktop);
     }
 }
-
-/* ==================================================
-   LOGIN SPLIT-SCREEN LAYOUT
-   Two-column layout used only by the login page.
-   Left: form panel (vertically centered). Right:
-   full-bleed hero image. Other auth pages continue
-   to use .auth-page/.auth-card above, unchanged.
-================================================== */
 
 .login-split{
     position:relative;
@@ -105,7 +79,6 @@ forgot / reset / pending)
     }
 }
 
-/* Left: form panel, vertically centered */
 .login-split-form{
     width:100%;
     display:flex;
@@ -141,7 +114,6 @@ forgot / reset / pending)
     animation:auth-card-in .5s cubic-bezier(.16,1,.3,1) both;
 }
 
-/* Right: hero image panel */
 .login-split-hero{
     display:none;
     position:relative;
@@ -217,7 +189,6 @@ forgot / reset / pending)
     opacity:.92;
 }
 
-/* Branding block inside the login card */
 .login-split-brand{
     margin-bottom:var(--st-stack-lg);
 }
@@ -276,7 +247,6 @@ forgot / reset / pending)
     }
 }
 
-/* Wider variant for the registration form */
 .auth-card--wide{
     max-width:560px;
 }
@@ -297,10 +267,6 @@ forgot / reset / pending)
         transform:translateY(0) scale(1);
     }
 }
-
-/* ==================================================
-   IN-CARD BRAND
-================================================== */
 
 .auth-brand{
     margin-bottom:24px;
@@ -363,10 +329,6 @@ img.auth-brand-icon{
     color:var(--st-on-surface-variant);
 }
 
-/* ==================================================
-   HEADER
-================================================== */
-
 .auth-header{
     margin-bottom:24px;
 }
@@ -389,17 +351,12 @@ img.auth-brand-icon{
     color:var(--st-on-surface-variant);
 }
 
-/* ==================================================
-   FORM
-================================================== */
-
 .auth-form{
     display:flex;
     flex-direction:column;
     gap:16px;
 }
 
-/* Two-column row inside auth forms (e.g. password + confirm) */
 .auth-grid-2{
     display:grid;
     grid-template-columns:1fr 1fr;
@@ -444,7 +401,6 @@ img.auth-brand-icon{
     box-shadow:var(--st-focus-ring);
 }
 
-/* Input with leading icon */
 .auth-input-icon{
     position:relative;
 }
@@ -463,7 +419,6 @@ img.auth-brand-icon{
     padding-left:44px !important;
 }
 
-/* Password field */
 .password-wrapper{
     position:relative;
 }
@@ -491,7 +446,6 @@ img.auth-brand-icon{
     color:var(--st-primary);
 }
 
-/* Options row (remember me / forgot) */
 .auth-options{
     display:flex;
     justify-content:space-between;
@@ -530,16 +484,11 @@ img.auth-brand-icon{
     text-decoration:underline;
 }
 
-/* Primary submit button */
 .auth-form .st-btn-block{
     height:52px;
     margin-top:4px;
     box-shadow:0 12px 24px -8px rgba(0,31,63,.45);
 }
-
-/* ==================================================
-   REGISTER / SWITCH LINK
-================================================== */
 
 .auth-register,
 .auth-switch{
@@ -562,10 +511,6 @@ img.auth-brand-icon{
 .auth-switch a:hover{
     text-decoration:underline;
 }
-
-/* ==================================================
-   SECURITY / INFO NOTICE
-================================================== */
 
 .auth-notice{
     margin-top:16px;
@@ -591,7 +536,6 @@ img.auth-brand-icon{
     color:var(--st-on-surface-variant);
 }
 
-/* Teal verification variant (registration) */
 .auth-notice--teal{
     background:rgba(141,240,238,.18);
     border-color:var(--st-secondary-container);
@@ -607,10 +551,6 @@ img.auth-brand-icon{
     color:var(--st-on-secondary-container);
     margin-bottom:2px;
 }
-
-/* ==================================================
-   SYSTEM STATUS
-================================================== */
 
 .auth-status{
     margin-top:24px;
@@ -657,10 +597,6 @@ img.auth-brand-icon{
     }
 }
 
-/* ==================================================
-   PASSWORD REQUIREMENTS (register)
-================================================== */
-
 .auth-password-rules{
     background:var(--st-surface-container-low);
     padding:12px;
@@ -703,10 +639,6 @@ img.auth-brand-icon{
     color:var(--st-secondary);
 }
 
-/* ==================================================
-   TERMS CHECKBOX (register)
-================================================== */
-
 .auth-terms{
     display:flex;
     align-items:flex-start;
@@ -739,10 +671,6 @@ img.auth-brand-icon{
 .auth-terms a:hover{
     text-decoration:underline;
 }
-
-/* ==================================================
-   FULL-WIDTH GLASS FOOTER
-================================================== */
 
 .auth-footer{
     position:relative;
@@ -808,10 +736,6 @@ img.auth-brand-icon{
     opacity:.7;
 }
 
-/* ==================================================
-   PENDING APPROVAL STATE
-================================================== */
-
 .auth-pending-icon{
     width:72px;
     height:72px;
@@ -873,10 +797,6 @@ img.auth-brand-icon{
     line-height:1.5;
     color:var(--st-on-surface-variant);
 }
-
-/* ==================================================
-   RESPONSIVE
-================================================== */
 
 @media (max-width:520px){
     .auth-card{

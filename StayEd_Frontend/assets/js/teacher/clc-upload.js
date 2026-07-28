@@ -1,22 +1,3 @@
-/**
- * ============================================
- * StayEd
- * CLC Upload Controller
- * ============================================
- *
- * Three-state flow:
- *   1. Drag-and-drop / browse file selection
- *      with mocked upload progress
- *   2. Enrollment confirmation (batch summary,
- *      validation donut, next-steps tip) —
- *      matches the CLC Upload design reference
- *   3. Success screen
- *
- * Reads back the CLC just created in CLC Details
- * via API.getCurrentClc() so the confirmation
- * screen reflects real (mocked) data.
- * ============================================
- */
 
 class ClcUpload {
 
@@ -31,10 +12,6 @@ class ClcUpload {
         this.bindConfirmActions();
 
     }
-
-    /* ---------------------------------------
-       State 1: Dropzone
-    --------------------------------------- */
 
     static bindDropzone() {
 
@@ -126,10 +103,6 @@ class ClcUpload {
 
     }
 
-    /* ---------------------------------------
-       State 2: Confirmation
-    --------------------------------------- */
-
     static async showConfirmation() {
 
         document.getElementById("clcUploadZoneSection")?.classList.add("st-hidden");
@@ -198,10 +171,6 @@ class ClcUpload {
 
     }
 
-    /* ---------------------------------------
-       State 3: Create records / Success
-    --------------------------------------- */
-
     static async createRecords() {
 
         const btn = document.getElementById("clcCreateRecordsBtn");
@@ -237,10 +206,6 @@ class ClcUpload {
         }
 
     }
-
-    /* ---------------------------------------
-       Helpers
-    --------------------------------------- */
 
     static formatBytes(bytes) {
         if (bytes < 1024) return `${bytes} B`;

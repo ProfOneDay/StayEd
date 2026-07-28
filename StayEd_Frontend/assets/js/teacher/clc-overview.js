@@ -1,15 +1,3 @@
-/**
- * ============================================
- * StayEd
- * CLC Overview Controller
- * ============================================
- *
- * Lists Community Learning Centers with search,
- * municipality filter, and summary statistics.
- * "Add New CLC" (in the page header) links into
- * the CLC Details -> CLC Upload workflow.
- * ============================================
- */
 
 class ClcOverview {
 
@@ -60,6 +48,8 @@ class ClcOverview {
     }
 
     static bindControls() {
+
+        this.populateMunicipalityFilter();
 
         document.querySelector("[data-clc-search]")?.addEventListener("input", e => {
             this.state.search = e.target.value.toLowerCase();
@@ -228,6 +218,20 @@ class ClcOverview {
             grid.innerHTML = Skeletons.cards(6);
 
         }
+
+    }
+
+    static populateMunicipalityFilter() {
+
+        const select = document.querySelector("[data-clc-filter-municipality]");
+
+        if (!select || !window.MockDB?.getMunicipalities) return;
+
+        const list = MockDB.getMunicipalities();
+
+        select.innerHTML =
+            `<option value="">All Municipalities</option>` +
+            list.map(m => `<option value="${m}">${m}</option>`).join("");
 
     }
 

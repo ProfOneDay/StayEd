@@ -1,20 +1,4 @@
-/*
-==================================================
-StayEd — Learner Records
-Full records management page. Reuses dashboard
-table, badge, pagination and panel components.
-==================================================
-*/
 
-/* Page header */
-.st-page-header{
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:space-between;
-    align-items:flex-start;
-    gap:16px;
-    margin-bottom:8px;
-}
 
 .st-page-header-title{
     font-family:var(--st-font-heading);
@@ -36,7 +20,6 @@ table, badge, pagination and panel components.
     gap:12px;
 }
 
-/* Compact stat strip */
 .st-records-stats{
     display:grid;
     grid-template-columns:repeat(4,1fr);
@@ -83,7 +66,6 @@ table, badge, pagination and panel components.
     color:var(--st-on-surface-variant);
 }
 
-/* Toolbar */
 .st-records-toolbar{
     display:flex;
     flex-wrap:wrap;
@@ -119,7 +101,6 @@ table, badge, pagination and panel components.
     box-shadow:var(--st-focus-ring);
 }
 
-/* Sortable header cells */
 .st-data-table th.is-sortable{
     cursor:pointer;
     user-select:none;
@@ -136,10 +117,6 @@ table, badge, pagination and panel components.
 }
 
 .st-data-table th.is-sorted .st-sort-icon{ opacity:1; color:var(--st-primary); }
-
-/* ==================================================
-   LEARNER DETAIL MODAL
-================================================== */
 
 .st-learner-modal-header{
     display:flex;
@@ -196,7 +173,6 @@ table, badge, pagination and panel components.
     color:var(--st-on-surface);
 }
 
-/* Risk probability meter */
 .st-risk-meter{
     margin-top:8px;
     height:8px;
@@ -224,10 +200,6 @@ table, badge, pagination and panel components.
     border-bottom:1px solid rgba(195,198,207,.20);
 }
 
-/* ==================================================
-   STICKY TABLE HEADER (Learner Management)
-================================================== */
-
 .st-table-scroll--sticky{
     max-height:640px;
     overflow-y:auto;
@@ -254,14 +226,9 @@ table, badge, pagination and panel components.
     cursor:pointer;
 }
 
-/* Row selected state */
 .st-data-table tbody tr.is-selected{
     background:rgba(18,53,91,.04);
 }
-
-/* ==================================================
-   BULK ACTIONS BAR
-================================================== */
 
 .st-bulk-bar{
     display:flex;
@@ -321,7 +288,6 @@ table, badge, pagination and panel components.
     font-size:16px;
 }
 
-/* Confidence meter cell */
 .st-confidence-value{
     font-size:14px;
     font-weight:700;
@@ -334,10 +300,6 @@ table, badge, pagination and panel components.
     color:var(--st-outline);
     text-align:center;
 }
-
-/* ==================================================
-   RESPONSIVE
-================================================== */
 
 @media (max-width:992px){
     .st-records-stats{ grid-template-columns:1fr 1fr; }
@@ -352,10 +314,6 @@ table, badge, pagination and panel components.
 @media (max-width:520px){
     .st-records-stats{ grid-template-columns:1fr; }
 }
-
-/* ==================================================
-   IMPORT / ENROLL SEGMENTED TABS
-================================================== */
 
 .st-entry-tabs{
     display:inline-flex;
@@ -408,10 +366,6 @@ table, badge, pagination and panel components.
     from{ opacity:0; transform:translateY(4px); }
     to{ opacity:1; transform:translateY(0); }
 }
-
-/* ==================================================
-   MANUAL ENROLLMENT FORM
-================================================== */
 
 .st-enroll-grid{
     display:grid;
@@ -531,7 +485,6 @@ table, badge, pagination and panel components.
     accent-color:var(--st-primary);
 }
 
-/* Segmented toggle (Learning Level / Modality) */
 .st-enroll-segment{
     display:flex;
     border:1px solid var(--st-outline-variant);
@@ -567,10 +520,6 @@ table, badge, pagination and panel components.
     padding-top:8px;
 }
 
-/* ==================================================
-   IMPORT PANEL INTRO BLOCK (utility, avoids inline)
-================================================== */
-
 .st-import-intro{
     text-align:center;
     padding:48px 24px;
@@ -600,7 +549,6 @@ table, badge, pagination and panel components.
     text-align:left;
 }
 
-/* Full-width field span inside a 2-col enrollment grid */
 .st-enroll-field--full{
     grid-column:1/-1;
 }
@@ -614,13 +562,6 @@ table, badge, pagination and panel components.
     background:var(--st-surface-container-low);
     cursor:not-allowed;
 }
-
-/* ==================================================
-   CLICKABLE AVATAR / NAME (View Profile triggers)
-   Reset button chrome so the avatar and learner name
-   look identical to before, but are real, keyboard
-   accessible buttons that open the Learner Profile.
-================================================== */
 
 .st-avatar-btn{
     border:none;
