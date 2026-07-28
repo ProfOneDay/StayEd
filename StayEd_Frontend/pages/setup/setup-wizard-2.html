@@ -62,43 +62,47 @@
         </div>
 
         <form class="setup-form" id="classForm">
-          <div class="setup-field">
-            <label for="municipality">Municipality</label>
-            <select id="municipality">
-              <option value="">Select Municipality</option>
-            </select>
+          <div class="setup-field-row">
+            <div class="setup-field">
+              <label for="municipality">Municipality</label>
+              <select id="municipality">
+                <option value="">Select Municipality</option>
+              </select>
+            </div>
+
+            <div class="setup-field">
+              <label for="clc">Community Learning Center (CLC)</label>
+              <select id="clc" disabled>
+                <option value="">Select Municipality first</option>
+              </select>
+            </div>
           </div>
 
-          <div class="setup-field">
-            <label for="clc">Community Learning Center (CLC)</label>
-            <select id="clc" disabled>
-              <option value="">Select Municipality first</option>
-            </select>
-          </div>
+          <div class="setup-field-row">
+            <div class="setup-field">
+              <label for="learningLevel">Learning Level</label>
+              <select id="learningLevel">
+                <option value="">Select Level</option>
+                <option value="Basic Literacy Program">
+                  Basic Literacy Program (BLP)
+                </option>
+                <option value="Elementary A&amp;E">Elementary A&amp;E</option>
+                <option value="Junior High School A&amp;E">
+                  Junior High School A&amp;E
+                </option>
+                <option value="Senior High School A&amp;E">
+                  Senior High School A&amp;E
+                </option>
+              </select>
+            </div>
 
-          <div class="setup-field">
-            <label for="schoolYear">School Year</label>
-            <select id="schoolYear">
-              <option value="2025-2026">2025-2026</option>
-              <option value="2026-2027" selected>2026-2027</option>
-            </select>
-          </div>
-
-          <div class="setup-field">
-            <label for="learningLevel">Learning Level</label>
-            <select id="learningLevel">
-              <option value="">Select Level</option>
-              <option value="Basic Literacy Program">
-                Basic Literacy Program (BLP)
-              </option>
-              <option value="Elementary A&amp;E">Elementary A&amp;E</option>
-              <option value="Junior High School A&amp;E">
-                Junior High School A&amp;E
-              </option>
-              <option value="Senior High School A&amp;E">
-                Senior High School A&amp;E
-              </option>
-            </select>
+            <div class="setup-field">
+              <label for="schoolYear">School Year</label>
+              <select id="schoolYear">
+                <option value="2025-2026">2025-2026</option>
+                <option value="2026-2027" selected>2026-2027</option>
+              </select>
+            </div>
           </div>
 
           <!-- Class summary -->
