@@ -1,0 +1,25 @@
+docker run --name stayed-postgres `
+  -e POSTGRES_USER=postgres `
+  -e POSTGRES_PASSWORD=StayEd2026DB `
+  -e POSTGRES_DB=stayed_db `
+  -p 5433:5432 `
+  -d postgres:16
+
+Name: StayEd PostgreSQL
+Host: localhost
+Port: 5433
+Database: stayed_db
+Username: postgres
+Password: StayEd2026DB
+
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+Copy-Item .env.example .env
+
+StayEd2026DB
+
+python seed_demo.py
+
+python run.py
+
