@@ -1,5 +1,5 @@
 -- StayEd Flask API support tables.
--- Run this AFTER the existing 02_stayed_schema.sql inside stayed_db.
+-- Run this AFTER 00_core_schema.sql inside stayed_db.
 
 BEGIN;
 

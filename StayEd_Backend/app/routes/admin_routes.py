@@ -1,12 +1,97 @@
 from __future__ import annotations
 
+import secrets
+
 from flask import Blueprint, request
+from werkzeug.security import generate_password_hash
 
 from ..authz import role_required
-from ..db import fetch_all, fetch_one, get_db
+from ..db import execute, fetch_all, fetch_one, get_db
 from ..helpers import error
 
 bp = Blueprint("admin", __name__)
+
+_ACCOUNT_STATUS_TO_UI = {"ACTIVE": "active", "INACTIVE": "pending", "SUSPENDED": "deactivated"}
+
+_USER_ROW_QUERY = """
+    SELECT
+        u.user_id AS id, u.email, u.account_status, u.created_at,
+        t.teacher_id, t.employee_id, t.first_name, t.middle_name, t.last_name,
+        t.contact_number, t.municipality,
+        COALESCE(
+            json_agg(c.clc_name) FILTER (WHERE c.clc_name IS NOT NULL), '[]'
+        ) AS clcs
+    FROM users u
+    JOIN teacher t ON t.user_id = u.user_id
+    LEFT JOIN teacher_clc tc ON tc.teacher_id = t.teacher_id AND tc.assignment_status = 'ACTIVE'
+    LEFT JOIN clc c ON c.clc_id = tc.clc_id
+    WHERE u.role = 'TEACHER' AND u.user_id = %s
+    GROUP BY u.user_id, t.teacher_id, t.employee_id, t.first_name, t.middle_name,
+             t.last_name, t.contact_number, t.municipality
+"""
+
+
+def _admin_teacher_row(row):
+    full_name = " ".join(
+        str(part) for part in (row.get("first_name"), row.get("middle_name"), row.get("last_name")) if part
+    )
+    clcs = row.get("clcs") or []
+    return {
+        "id": row["id"],
+        "firstName": row.get("first_name") or "",
+        "middleName": row.get("middle_name") or "",
+        "lastName": row.get("last_name") or "",
+        "name": full_name,
+        "email": row.get("email") or "",
+        "phone": row.get("contact_number") or "",
+        "employeeId": row.get("employee_id") or "",
+        "clc": clcs[0] if clcs else "",
+        "clcs": clcs,
+        "municipality": row.get("municipality") or "",
+        "status": _ACCOUNT_STATUS_TO_UI.get(row["account_status"], "pending"),
+        "date": row["created_at"].strftime("%b %d, %Y") if row.get("created_at") else "",
+    }
+
+
+def _load_admin_user(user_id: int):
+    row = fetch_one(_USER_ROW_QUERY, (user_id,))
+    return _admin_teacher_row(row) if row else None
+
+
+def _merge_field(data: dict, key: str, current):
+    if key in data and data[key] is not None:
+        return str(data[key]).strip() or None
+    return current
+
+
+def _generate_temp_password() -> str:
+    alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789"
+    return "StayEd-" + "".join(secrets.choice(alphabet) for _ in range(8))
+
+
+@bp.get("/admin/users")
+@role_required("admin")
+def list_users():
+    rows = fetch_all(
+        """
+        SELECT
+            u.user_id AS id, u.email, u.account_status, u.created_at,
+            t.employee_id, t.first_name, t.middle_name, t.last_name,
+            t.contact_number, t.municipality,
+            COALESCE(
+                json_agg(c.clc_name) FILTER (WHERE c.clc_name IS NOT NULL), '[]'
+            ) AS clcs
+        FROM users u
+        JOIN teacher t ON t.user_id = u.user_id
+        LEFT JOIN teacher_clc tc ON tc.teacher_id = t.teacher_id AND tc.assignment_status = 'ACTIVE'
+        LEFT JOIN clc c ON c.clc_id = tc.clc_id
+        WHERE u.role = 'TEACHER'
+        GROUP BY u.user_id, t.teacher_id, t.employee_id, t.first_name, t.middle_name,
+                 t.last_name, t.contact_number, t.municipality
+        ORDER BY u.created_at DESC
+        """
+    )
+    return {"total": len(rows), "data": [_admin_teacher_row(r) for r in rows]}
 
 
 @bp.get("/admin/users/pending")
@@ -118,6 +203,219 @@ def suspend_user(user_id: int):
         db.rollback()
         raise
     return {"success": True, "message": "Teacher account suspended."}
+
+
+@bp.post("/admin/users/<int:user_id>/reject")
+@role_required("admin")
+def reject_user(user_id: int):
+    row = fetch_one(
+        "SELECT user_id FROM users WHERE user_id=%s AND role='TEACHER' AND account_status='INACTIVE'",
+        (user_id,),
+    )
+    if not row:
+        return error("Pending teacher registration not found.", 404)
+
+    db = get_db()
+    try:
+        with db.cursor() as cur:
+            cur.execute("DELETE FROM teacher WHERE user_id=%s", (user_id,))
+            cur.execute("DELETE FROM users WHERE user_id=%s", (user_id,))
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    return {"success": True, "message": "Registration rejected."}
+
+
+@bp.put("/admin/users/<int:user_id>")
+@role_required("admin")
+def update_user(user_id: int):
+    existing = fetch_one(
+        """
+        SELECT u.user_id, u.email, t.teacher_id, t.first_name, t.middle_name, t.last_name,
+               t.employee_id, t.contact_number, t.municipality
+        FROM users u
+        JOIN teacher t ON t.user_id = u.user_id
+        WHERE u.user_id = %s AND u.role = 'TEACHER'
+        """,
+        (user_id,),
+    )
+    if not existing:
+        return error("Teacher account not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    first_name = _merge_field(data, "firstName", existing["first_name"])
+    middle_name = _merge_field(data, "middleName", existing.get("middle_name"))
+    last_name = _merge_field(data, "lastName", existing["last_name"])
+    employee_id = _merge_field(data, "employeeId", existing["employee_id"])
+    contact_number = _merge_field(data, "phone", existing.get("contact_number"))
+    email = _merge_field(data, "email", existing["email"])
+    municipality = _merge_field(data, "municipality", existing.get("municipality")) or "Unassigned"
+
+    if not first_name or not last_name or not email or not employee_id:
+        return error("First name, last name, employee ID, and email are required.", 422)
+    email = email.lower()
+
+    db = get_db()
+    try:
+        with db.cursor() as cur:
+            cur.execute("UPDATE users SET email = %s WHERE user_id = %s", (email, user_id))
+            cur.execute(
+                """
+                UPDATE teacher
+                SET first_name=%s, middle_name=%s, last_name=%s, employee_id=%s,
+                    contact_number=%s, municipality=%s
+                WHERE user_id=%s
+                """,
+                (first_name, middle_name, last_name, employee_id, contact_number, municipality, user_id),
+            )
+
+            if isinstance(data.get("clcs"), list):
+                teacher_id = existing["teacher_id"]
+                school_year = str(data.get("schoolYear") or "2026-2027").strip()
+                clc_names = [str(c).strip() for c in data["clcs"] if str(c).strip()]
+
+                clc_ids = []
+                for name in clc_names:
+                    cur.execute(
+                        "SELECT clc_id FROM clc WHERE LOWER(clc_name) = LOWER(%s) LIMIT 1",
+                        (name,),
+                    )
+                    found = cur.fetchone()
+                    if found:
+                        clc_ids.append(found["clc_id"])
+
+                cur.execute(
+                    "SELECT clc_id FROM teacher_clc WHERE teacher_id=%s AND assignment_status='ACTIVE'",
+                    (teacher_id,),
+                )
+                currently_active = {r["clc_id"] for r in cur.fetchall()}
+                wanted = set(clc_ids)
+
+                for clc_id in currently_active - wanted:
+                    cur.execute(
+                        """
+                        UPDATE teacher_clc SET assignment_status='INACTIVE'
+                        WHERE teacher_id=%s AND clc_id=%s AND assignment_status='ACTIVE'
+                        """,
+                        (teacher_id, clc_id),
+                    )
+                for clc_id in wanted - currently_active:
+                    cur.execute(
+                        """
+                        INSERT INTO teacher_clc (teacher_id, clc_id, school_year, assignment_status)
+                        VALUES (%s, %s, %s, 'ACTIVE')
+                        ON CONFLICT (teacher_id, clc_id, school_year)
+                        DO UPDATE SET assignment_status='ACTIVE', assigned_at=CURRENT_DATE
+                        """,
+                        (teacher_id, clc_id, school_year),
+                    )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    return {"message": "Teacher account updated.", "data": _load_admin_user(user_id)}
+
+
+@bp.post("/admin/users/<int:user_id>/reset-password")
+@role_required("admin")
+def reset_user_password(user_id: int):
+    row = fetch_one(
+        "SELECT user_id FROM users WHERE user_id=%s AND role='TEACHER'",
+        (user_id,),
+    )
+    if not row:
+        return error("Teacher account not found.", 404)
+
+    temp_password = _generate_temp_password()
+    execute(
+        "UPDATE users SET password_hash=%s WHERE user_id=%s",
+        (generate_password_hash(temp_password), user_id),
+    )
+    return {"success": True, "message": "Password reset.", "temp_password": temp_password}
+
+
+@bp.post("/admin/users")
+@role_required("admin")
+def create_user():
+    data = request.get_json(silent=True) or {}
+    first_name = str(data.get("firstName") or "").strip()
+    last_name = str(data.get("lastName") or "").strip()
+    email = str(data.get("email") or "").strip().lower()
+    if not first_name or not last_name or not email:
+        return error("First name, last name, and email are required.", 422)
+
+    if fetch_one("SELECT user_id FROM users WHERE LOWER(email) = LOWER(%s)", (email,)):
+        return error("Email already exists.", 409)
+
+    middle_name = str(data.get("middleName") or "").strip() or None
+    contact_number = str(data.get("phone") or "").strip() or None
+    municipality = str(data.get("municipality") or "Unassigned").strip()
+    employee_id = str(data.get("employeeId") or "").strip()
+    clc_name = str(data.get("clc") or "").strip()
+
+    username_base = email.split("@", 1)[0][:80] or "teacher"
+    username = username_base
+    suffix = 1
+    while fetch_one("SELECT user_id FROM users WHERE username = %s", (username,)):
+        suffix += 1
+        username = f"{username_base}{suffix}"
+
+    temp_password = _generate_temp_password()
+
+    db = get_db()
+    try:
+        with db.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO users (username, password_hash, email, role, account_status)
+                VALUES (%s, %s, %s, 'TEACHER', 'ACTIVE')
+                RETURNING user_id
+                """,
+                (username, generate_password_hash(temp_password), email),
+            )
+            user_id = cur.fetchone()["user_id"]
+
+            final_employee_id = employee_id or f"ALS-TEACHER-{user_id}"
+            cur.execute(
+                """
+                INSERT INTO teacher (
+                    user_id, employee_id, first_name, middle_name, last_name,
+                    contact_number, municipality, status
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, 'ACTIVE')
+                RETURNING teacher_id
+                """,
+                (user_id, final_employee_id, first_name, middle_name, last_name, contact_number, municipality),
+            )
+            teacher_id = cur.fetchone()["teacher_id"]
+
+            if clc_name:
+                cur.execute(
+                    "SELECT clc_id FROM clc WHERE LOWER(clc_name) = LOWER(%s) LIMIT 1",
+                    (clc_name,),
+                )
+                clc_row = cur.fetchone()
+                if clc_row:
+                    cur.execute(
+                        """
+                        INSERT INTO teacher_clc (teacher_id, clc_id, school_year, assignment_status)
+                        VALUES (%s, %s, %s, 'ACTIVE')
+                        ON CONFLICT (teacher_id, clc_id, school_year) DO NOTHING
+                        """,
+                        (teacher_id, clc_row["clc_id"], str(data.get("schoolYear") or "2026-2027").strip()),
+                    )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    return {
+        "message": "Teacher account created.",
+        "data": _load_admin_user(user_id),
+        "temp_password": temp_password,
+    }, 201
 
 
 @bp.get("/admin/model")

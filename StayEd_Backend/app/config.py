@@ -8,7 +8,7 @@ class Config:
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=12)
     DATABASE_URL = os.getenv(
         "DATABASE_URL",
-        "postgresql://postgres@127.0.0.1:5432/stayed_db",
+        "postgresql://postgres@127.0.0.1:5433/stayed_db",
     )
     FRONTEND_ORIGINS = [
         item.strip()

@@ -1,3 +1,5 @@
+// Must run first, before anything else on this page executes.
+Guards.admin();
 document.querySelectorAll('#settingsTabs button').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('#settingsTabs button').forEach(x=>x.classList.remove('active'));
   b.classList.add('active');
@@ -57,7 +59,7 @@ function confirmLogout(){
   document.getElementById('confirm-sub').textContent="You'll need to sign in again to access the admin dashboard.";
   const btn=document.getElementById('confirm-btn');
   btn.className='btn primary'; btn.textContent='Log Out';
-  btn.onclick=()=>{closeModal('modal-confirm');showToast('Signed out — redirecting to login…')};
+  btn.onclick=()=>{closeModal('modal-confirm');Auth.logout()};
   openModal('modal-confirm');
 }
 document.getElementById('logoutBtn').addEventListener('click',confirmLogout);

@@ -1,23 +1,37 @@
-const clcOptions=["Alcala I Central School CLC","Buenlag Barangay Hall CLC","San Jose Elementary School CLC","Asingan Central School CLC","Macalong Barangay Hall CLC","San Vicente Multipurpose Hall CLC","Coldit National High School CLC","Binalonan I Central School CLC","Balangobong Covered Court CLC","Linmansangan Elementary School CLC","Bonuan Gede Elementary School CLC","Lucao Barangay Hall CLC","Pantal Multipurpose Hall CLC","Bonuan Boquig National High School CLC","Mangaldan Central School CLC","Guiguilonen Basketball Court CLC","Embarcadero Chapel CLC","Pozorrubio I Central School CLC","Cabaruan Barangay Hall CLC","Nancamaliran East Elementary School CLC","San Nicolas Multipurpose Hall CLC","Rosales Central School CLC","Carmen East Barangay Hall CLC","San Bartolome Basketball Court CLC","San Fabian I Central School CLC","Alacan Elementary School CLC","Longos Covered Court CLC","Santa Maria Central School CLC","Bantog Barangay Hall CLC","Turac Multipurpose Hall CLC","Sison I Central School CLC","Cariay Basketball Court CLC","Immalog Elementary School CLC","Tayug Central School CLC","Bantog Barangay Hall CLC","Carriedo Multipurpose Hall CLC","Umingan I Central School CLC","Cablong Barangay Hall CLC","Cayanga Elementary School CLC","Urdaneta City Central School CLC","Nancayasan National High School CLC","Bactad East Barangay Hall CLC","Villasis I Central School CLC","Basketball Court Sitio Dos CLC","Tocok Multipurpose Hall CLC"];
-const clcMunicipality={"Alcala I Central School CLC":"Alcala","Buenlag Barangay Hall CLC":"Alcala","San Jose Elementary School CLC":"Alcala","Asingan Central School CLC":"Asingan","Macalong Barangay Hall CLC":"Asingan","San Vicente Multipurpose Hall CLC":"Asingan","Coldit National High School CLC":"Asingan","Binalonan I Central School CLC":"Binalonan","Balangobong Covered Court CLC":"Binalonan","Linmansangan Elementary School CLC":"Binalonan","Bonuan Gede Elementary School CLC":"Dagupan City","Lucao Barangay Hall CLC":"Dagupan City","Pantal Multipurpose Hall CLC":"Dagupan City","Bonuan Boquig National High School CLC":"Dagupan City","Mangaldan Central School CLC":"Mangaldan","Guiguilonen Basketball Court CLC":"Mangaldan","Embarcadero Chapel CLC":"Mangaldan","Pozorrubio I Central School CLC":"Pozorrubio","Cabaruan Barangay Hall CLC":"Pozorrubio","Nancamaliran East Elementary School CLC":"Pozorrubio","San Nicolas Multipurpose Hall CLC":"Pozorrubio","Rosales Central School CLC":"Rosales","Carmen East Barangay Hall CLC":"Rosales","San Bartolome Basketball Court CLC":"Rosales","San Fabian I Central School CLC":"San Fabian","Alacan Elementary School CLC":"San Fabian","Longos Covered Court CLC":"San Fabian","Santa Maria Central School CLC":"Santa Maria","Bantog Barangay Hall CLC":"Tayug","Turac Multipurpose Hall CLC":"Santa Maria","Sison I Central School CLC":"Sison","Cariay Basketball Court CLC":"Sison","Immalog Elementary School CLC":"Sison","Tayug Central School CLC":"Tayug","Carriedo Multipurpose Hall CLC":"Tayug","Umingan I Central School CLC":"Umingan","Cablong Barangay Hall CLC":"Umingan","Cayanga Elementary School CLC":"Umingan","Urdaneta City Central School CLC":"Urdaneta City","Nancayasan National High School CLC":"Urdaneta City","Bactad East Barangay Hall CLC":"Urdaneta City","Villasis I Central School CLC":"Villasis","Basketball Court Sitio Dos CLC":"Villasis","Tocok Multipurpose Hall CLC":"Villasis"};
-const clcsByMuni={"Alcala":["Alcala I Central School CLC","Buenlag Barangay Hall CLC","San Jose Elementary School CLC"],"Asingan":["Asingan Central School CLC","Macalong Barangay Hall CLC","San Vicente Multipurpose Hall CLC","Coldit National High School CLC"],"Binalonan":["Binalonan I Central School CLC","Balangobong Covered Court CLC","Linmansangan Elementary School CLC"],"Dagupan City":["Bonuan Gede Elementary School CLC","Lucao Barangay Hall CLC","Pantal Multipurpose Hall CLC","Bonuan Boquig National High School CLC"],"Mangaldan":["Mangaldan Central School CLC","Guiguilonen Basketball Court CLC","Embarcadero Chapel CLC"],"Pozorrubio":["Pozorrubio I Central School CLC","Cabaruan Barangay Hall CLC","Nancamaliran East Elementary School CLC","San Nicolas Multipurpose Hall CLC"],"Rosales":["Rosales Central School CLC","Carmen East Barangay Hall CLC","San Bartolome Basketball Court CLC"],"San Fabian":["San Fabian I Central School CLC","Alacan Elementary School CLC","Longos Covered Court CLC"],"Santa Maria":["Santa Maria Central School CLC","Bantog Barangay Hall CLC","Turac Multipurpose Hall CLC"],"Sison":["Sison I Central School CLC","Cariay Basketball Court CLC","Immalog Elementary School CLC"],"Tayug":["Tayug Central School CLC","Bantog Barangay Hall CLC","Carriedo Multipurpose Hall CLC"],"Umingan":["Umingan I Central School CLC","Cablong Barangay Hall CLC","Cayanga Elementary School CLC"],"Urdaneta City":["Urdaneta City Central School CLC","Nancayasan National High School CLC","Bactad East Barangay Hall CLC"],"Villasis":["Villasis I Central School CLC","Basketball Court Sitio Dos CLC","Tocok Multipurpose Hall CLC"]};
+// Must run first, before anything else on this page executes.
+Guards.admin();
+let clcsByMuni={};
+async function loadClcOptions(){
+  try{
+    const response=await API.get('/clcs');
+    const list=response.data||[];
+    const grouped={};
+    list.forEach(c=>{
+      if(!grouped[c.municipality]) grouped[c.municipality]=[];
+      grouped[c.municipality].push(c.name);
+    });
+    clcsByMuni=grouped;
+  }catch(error){
+    console.error('[UserManagement] Failed to load CLC list',error);
+    clcsByMuni={};
+  }
+  populateCreateMuniOptions();
+}
 
-let teachers=[
-{id:1,firstName:"Maria",middleName:"",lastName:"Santos",name:"Maria Santos",email:"maria.santos@deped.gov.ph",phone:"0917 200 1121",employeeId:"T-2025-1001",clc:"Alcala I Central School CLC",clcs:["Alcala I Central School CLC","Asingan Central School CLC"],municipality:"Alcala",status:"active",date:"Jan 12, 2026"},
-{id:2,firstName:"Juan",middleName:"",lastName:"Dela Cruz",name:"Juan Dela Cruz",email:"juan.delacruz@deped.gov.ph",phone:"0918 334 5566",employeeId:"T-2025-1002",clc:"Asingan Central School CLC",clcs:["Asingan Central School CLC"],municipality:"Asingan",status:"pending",date:"Jul 20, 2026"},
-{id:3,firstName:"Angelica",middleName:"",lastName:"Reyes",name:"Angelica Reyes",email:"angelica.reyes@deped.gov.ph",phone:"0920 112 8890",employeeId:"T-2025-1003",clc:"Binalonan I Central School CLC",clcs:["Binalonan I Central School CLC"],municipality:"Binalonan",status:"active",date:"Feb 3, 2026"},
-{id:4,firstName:"Mark",middleName:"Anthony",lastName:"Garcia",name:"Mark Anthony Garcia",email:"mark.garcia@deped.gov.ph",phone:"0917 456 7812",employeeId:"T-2025-1004",clc:"Bonuan Gede Elementary School CLC",clcs:["Bonuan Gede Elementary School CLC"],municipality:"Dagupan City",status:"pending",date:"Jul 24, 2026"},
-{id:5,firstName:"Rosemarie",middleName:"",lastName:"Bautista",name:"Rosemarie Bautista",email:"rosemarie.bautista@deped.gov.ph",phone:"0919 887 4432",employeeId:"T-2025-1005",clc:"Mangaldan Central School CLC",clcs:["Mangaldan Central School CLC"],municipality:"Mangaldan",status:"deactivated",date:"Nov 8, 2025"},
-{id:6,firstName:"Ferdinand",middleName:"",lastName:"Lopez",name:"Ferdinand Lopez",email:"ferdinand.lopez@deped.gov.ph",phone:"0921 300 9981",employeeId:"T-2025-1006",clc:"Pozorrubio I Central School CLC",clcs:["Pozorrubio I Central School CLC"],municipality:"Pozorrubio",status:"active",date:"Mar 19, 2026"},
-{id:7,firstName:"Jasmine",middleName:"",lastName:"Torres",name:"Jasmine Torres",email:"jasmine.torres@deped.gov.ph",phone:"0917 654 3210",employeeId:"T-2025-1007",clc:"Rosales Central School CLC",clcs:["Rosales Central School CLC"],municipality:"Rosales",status:"pending",date:"Jul 22, 2026"},
-{id:8,firstName:"Ronaldo",middleName:"",lastName:"Mendoza",name:"Ronaldo Mendoza",email:"ronaldo.mendoza@deped.gov.ph",phone:"0918 220 6674",employeeId:"T-2025-1008",clc:"San Fabian I Central School CLC",clcs:["San Fabian I Central School CLC"],municipality:"San Fabian",status:"active",date:"Jan 29, 2026"},
-{id:9,firstName:"Cristina",middleName:"",lastName:"Ramos",name:"Cristina Ramos",email:"cristina.ramos@deped.gov.ph",phone:"0920 774 1183",employeeId:"T-2025-1009",clc:"Santa Maria Central School CLC",clcs:["Santa Maria Central School CLC"],municipality:"Santa Maria",status:"active",date:"Apr 2, 2026"},
-{id:10,firstName:"Bryan",middleName:"",lastName:"Cruz",name:"Bryan Cruz",email:"bryan.cruz@deped.gov.ph",phone:"0917 990 2245",employeeId:"T-2025-1010",clc:"Sison I Central School CLC",clcs:["Sison I Central School CLC"],municipality:"Sison",status:"pending",date:"Jul 25, 2026"},
-{id:11,firstName:"Kimberly",middleName:"",lastName:"Aquino",name:"Kimberly Aquino",email:"kimberly.aquino@deped.gov.ph",phone:"0919 112 6630",employeeId:"T-2025-1011",clc:"Tayug Central School CLC",clcs:["Tayug Central School CLC"],municipality:"Tayug",status:"deactivated",date:"Sep 14, 2025"},
-{id:12,firstName:"Paolo",middleName:"",lastName:"Fernandez",name:"Paolo Fernandez",email:"paolo.fernandez@deped.gov.ph",phone:"0921 556 8809",employeeId:"T-2025-1012",clc:"Umingan I Central School CLC",clcs:["Umingan I Central School CLC"],municipality:"Umingan",status:"active",date:"May 11, 2026"},
-{id:13,firstName:"Grace",middleName:"",lastName:"Villanueva",name:"Grace Villanueva",email:"grace.villanueva@deped.gov.ph",phone:"0918 774 3321",employeeId:"T-2025-1013",clc:"Urdaneta City Central School CLC",clcs:["Urdaneta City Central School CLC"],municipality:"Urdaneta City",status:"pending",date:"Jul 26, 2026"},
-{id:14,firstName:"Noel",middleName:"",lastName:"Ramirez",name:"Noel Ramirez",email:"noel.ramirez@deped.gov.ph",phone:"0917 330 1198",employeeId:"T-2025-1014",clc:"Villasis I Central School CLC",clcs:["Villasis I Central School CLC"],municipality:"Villasis",status:"active",date:"Feb 27, 2026"}
-];
+let teachers=[];
+
+async function loadTeachers(){
+  try{
+    const response=await API.get('/admin/users');
+    teachers=response.data||[];
+  }catch(error){
+    console.error('[UserManagement] Failed to load teachers',error);
+    showToast('Unable to load teacher accounts.');
+    teachers=[];
+  }
+  renderKPIs();
+  renderTable();
+}
 
 let activeFilter="all",searchTerm="",currentPage=1;
 const PAGE_SIZE=10;
@@ -156,9 +170,18 @@ function openApprove(id){
   document.getElementById('ap-clc').value=t.clc||'Unassigned';
   openModal('modal-approve');
 }
-document.getElementById('ap-confirm-btn').addEventListener('click',()=>{
-  const t=teachers.find(x=>x.id===activeTeacherId); t.status='active'; t.date='Today';
-  closeModal('modal-approve'); renderKPIs(); renderTable(); showToast(`${t.name} approved`);
+document.getElementById('ap-confirm-btn').addEventListener('click',async()=>{
+  const t=teachers.find(x=>x.id===activeTeacherId);
+  const name=t.name;
+  try{
+    await API.post(`/admin/users/${activeTeacherId}/approve`,{});
+    closeModal('modal-approve');
+    await loadTeachers();
+    showToast(`${name} approved`);
+  }catch(error){
+    console.error('[UserManagement] Approve failed',error);
+    showToast('Unable to approve this account.');
+  }
 });
 
 function openReject(id){
@@ -169,10 +192,18 @@ function openReject(id){
   document.getElementById('reject-remarks').value='';
   openModal('modal-reject');
 }
-document.getElementById('rj-confirm-btn').addEventListener('click',()=>{
-  const t=teachers.find(x=>x.id===activeTeacherId); const name=t.name;
-  teachers=teachers.filter(x=>x.id!==activeTeacherId);
-  closeModal('modal-reject'); renderKPIs(); renderTable(); showToast(`${name}'s registration rejected`);
+document.getElementById('rj-confirm-btn').addEventListener('click',async()=>{
+  const t=teachers.find(x=>x.id===activeTeacherId);
+  const name=t.name;
+  try{
+    await API.post(`/admin/users/${activeTeacherId}/reject`,{});
+    closeModal('modal-reject');
+    await loadTeachers();
+    showToast(`${name}'s registration rejected`);
+  }catch(error){
+    console.error('[UserManagement] Reject failed',error);
+    showToast('Unable to reject this registration.');
+  }
 });
 
 let editClcDraft=[];
@@ -228,19 +259,26 @@ function openEdit(id){
   }
   openModal('modal-edit');
 }
-document.getElementById('edit-save-btn').addEventListener('click',()=>{
-  const t=teachers.find(x=>x.id===activeTeacherId);
-  t.firstName=document.getElementById('edit-first').value.trim()||t.firstName;
-  t.middleName=document.getElementById('edit-middle').value.trim();
-  t.lastName=document.getElementById('edit-last').value.trim()||t.lastName;
-  t.name=[t.firstName,t.middleName,t.lastName].filter(Boolean).join(' ');
-  t.employeeId=document.getElementById('edit-empid').value.trim()||t.employeeId;
-  t.phone=document.getElementById('edit-phone').value.trim()||t.phone;
-  t.email=document.getElementById('edit-email').value.trim()||t.email;
-  t.clcs=[...editClcDraft];
-  t.clc=t.clcs[0]||'';
-  t.municipality=document.getElementById('edit-muni').value||t.municipality;
-  closeModal('modal-edit'); renderKPIs(); renderTable(); showToast('Teacher account updated');
+document.getElementById('edit-save-btn').addEventListener('click',async()=>{
+  const payload={
+    firstName:document.getElementById('edit-first').value.trim(),
+    middleName:document.getElementById('edit-middle').value.trim(),
+    lastName:document.getElementById('edit-last').value.trim(),
+    employeeId:document.getElementById('edit-empid').value.trim(),
+    phone:document.getElementById('edit-phone').value.trim(),
+    email:document.getElementById('edit-email').value.trim(),
+    municipality:document.getElementById('edit-muni').value,
+    clcs:[...editClcDraft],
+  };
+  try{
+    await API.put(`/admin/users/${activeTeacherId}`,payload);
+    closeModal('modal-edit');
+    await loadTeachers();
+    showToast('Teacher account updated');
+  }catch(error){
+    console.error('[UserManagement] Update failed',error);
+    showToast(error?.data?.message||'Unable to update this account.');
+  }
 });
 document.getElementById('edit-quick-btn').addEventListener('click',()=>{
   const t=teachers.find(x=>x.id===activeTeacherId);
@@ -258,15 +296,19 @@ function openReset(id){
   document.getElementById('rs-email').textContent=t.email;
   openModal('modal-reset');
 }
-document.getElementById('rs-confirm-btn').addEventListener('click',()=>{
-  closeModal('modal-reset');
+document.getElementById('rs-confirm-btn').addEventListener('click',async()=>{
   const t=teachers.find(x=>x.id===activeTeacherId);
-  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let suffix=''; for(let i=0;i<4;i++)suffix+=chars[Math.floor(Math.random()*chars.length)];
-  realPassword=`STAY-ED-2026-${suffix}`; passwordVisible=false;
-  document.getElementById('ps-name').textContent=t.name;
-  document.getElementById('temp-pass-val').textContent='••••••••••••';
-  openModal('modal-reset-success');
+  try{
+    const response=await API.post(`/admin/users/${activeTeacherId}/reset-password`,{});
+    closeModal('modal-reset');
+    realPassword=response.temp_password; passwordVisible=false;
+    document.getElementById('ps-name').textContent=t.name;
+    document.getElementById('temp-pass-val').textContent='••••••••••••';
+    openModal('modal-reset-success');
+  }catch(error){
+    console.error('[UserManagement] Reset password failed',error);
+    showToast('Unable to reset this password.');
+  }
 });
 document.getElementById('toggle-pass-btn').addEventListener('click',()=>{
   passwordVisible=!passwordVisible;
@@ -285,19 +327,38 @@ function openDeactivate(id){
   document.getElementById('dc-warning').style.display=(t.clcs&&t.clcs.length)?'block':'none';
   openModal('modal-deactivate');
 }
-document.getElementById('dc-confirm-btn').addEventListener('click',()=>{
-  const t=teachers.find(x=>x.id===activeTeacherId); t.status='deactivated';
-  closeModal('modal-deactivate'); renderKPIs(); renderTable(); showToast(`${t.name} deactivated`);
+document.getElementById('dc-confirm-btn').addEventListener('click',async()=>{
+  const t=teachers.find(x=>x.id===activeTeacherId);
+  const name=t.name;
+  try{
+    await API.post(`/admin/users/${activeTeacherId}/suspend`,{});
+    closeModal('modal-deactivate');
+    await loadTeachers();
+    showToast(`${name} deactivated`);
+  }catch(error){
+    console.error('[UserManagement] Deactivate failed',error);
+    showToast('Unable to deactivate this account.');
+  }
 });
-function reactivate(id){
-  const t=teachers.find(x=>x.id===id); t.status='active';
-  renderKPIs(); renderTable(); showToast(`${t.name} reactivated`);
+async function reactivate(id){
+  const t=teachers.find(x=>x.id===id);
+  const name=t.name;
+  try{
+    await API.post(`/admin/users/${id}/approve`,{});
+    await loadTeachers();
+    showToast(`${name} reactivated`);
+  }catch(error){
+    console.error('[UserManagement] Reactivate failed',error);
+    showToast('Unable to reactivate this account.');
+  }
 }
 
 // Create Teacher Account
 const createClcSelect=document.getElementById('cr-clc');
 const createMuniSelect=document.getElementById('cr-muni');
-createMuniSelect.innerHTML='<option value="" disabled selected hidden>Select Municipality…</option>'+Object.keys(clcsByMuni).sort().map(m=>`<option>${m}</option>`).join('');
+function populateCreateMuniOptions(){
+  createMuniSelect.innerHTML='<option value="" disabled selected hidden>Select Municipality…</option>'+Object.keys(clcsByMuni).sort().map(m=>`<option>${m}</option>`).join('');
+}
 function populateCreateClc(muni){
   const list=clcsByMuni[muni]||[];
   createClcSelect.innerHTML='<option value="" disabled selected hidden>Select CLC…</option>'+list.map(c=>`<option>${c}</option>`).join('');
@@ -309,25 +370,33 @@ document.getElementById('createTeacherBtn').addEventListener('click',()=>{
   createClcSelect.innerHTML='<option value="" disabled selected hidden>Select CLC…</option>';
   openModal('modal-create');
 });
-document.getElementById('cr-save-btn').addEventListener('click',()=>{
+document.getElementById('cr-save-btn').addEventListener('click',async()=>{
   const first=document.getElementById('cr-first').value.trim();
   const last=document.getElementById('cr-last').value.trim();
   const email=document.getElementById('cr-email').value.trim();
   if(!first||!last||!email){ showToast('Please fill in first name, last name, and email'); return; }
-  const middle=document.getElementById('cr-middle').value.trim();
-  const phone=document.getElementById('cr-phone').value.trim()||'—';
-  const muni=createMuniSelect.value;
-  const clc=createClcSelect.value;
-  const newId=Math.max(...teachers.map(t=>t.id))+1;
-  const employeeId=document.getElementById('cr-empid').value.trim()||`T-2026-${String(1000+newId)}`;
-  teachers.push({
-    id:newId, firstName:first, middleName:middle, lastName:last,
-    name:[first,middle,last].filter(Boolean).join(' '),
-    email, phone, employeeId, clc, clcs:clc?[clc]:[], municipality:muni||'—',
-    status:'active', date:'Today'
-  });
-  closeModal('modal-create'); renderKPIs(); renderTable();
-  showToast('Teacher account created');
+  const payload={
+    firstName:first,
+    middleName:document.getElementById('cr-middle').value.trim(),
+    lastName:last,
+    email,
+    phone:document.getElementById('cr-phone').value.trim(),
+    employeeId:document.getElementById('cr-empid').value.trim(),
+    municipality:createMuniSelect.value,
+    clc:createClcSelect.value,
+  };
+  try{
+    const response=await API.post('/admin/users',payload);
+    closeModal('modal-create');
+    await loadTeachers();
+    realPassword=response.temp_password; passwordVisible=false;
+    document.getElementById('ps-name').textContent=response.data.name;
+    document.getElementById('temp-pass-val').textContent='••••••••••••';
+    openModal('modal-reset-success');
+  }catch(error){
+    console.error('[UserManagement] Create failed',error);
+    showToast(error?.data?.message||'Unable to create this account.');
+  }
 });
 
 const menuBtn=document.getElementById('menuBtn');
@@ -335,9 +404,10 @@ const asideEl=document.querySelector('aside');
 menuBtn.addEventListener('click',()=>{const open=asideEl.classList.toggle('open');menuBtn.setAttribute('aria-expanded',open?'true':'false')});
 document.addEventListener('click',e=>{if(asideEl.classList.contains('open')&&!asideEl.contains(e.target)&&e.target!==menuBtn){asideEl.classList.remove('open');menuBtn.setAttribute('aria-expanded','false')}});
 
-renderKPIs(); renderTable();
+loadTeachers();
+loadClcOptions();
 
 document.getElementById('sidebarLogoutBtn').addEventListener('click',e=>{e.preventDefault();openModal('modal-logout')});
-document.getElementById('logout-confirm-btn').addEventListener('click',()=>{closeModal('modal-logout');showToast('Signed out — redirecting to login…')});
+document.getElementById('logout-confirm-btn').addEventListener('click',()=>{closeModal('modal-logout');Auth.logout()});
 
 document.querySelectorAll('.select-wrap select').forEach(sel=>{sel.addEventListener('focus',()=>sel.closest('.select-wrap').classList.add('open'));sel.addEventListener('blur',()=>sel.closest('.select-wrap').classList.remove('open'));});

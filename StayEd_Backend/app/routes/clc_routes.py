@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from flask import Blueprint, request
 
-from ..authz import current_user_id, role_required, teacher_for_user
-from ..db import fetch_all, fetch_one, get_db
-from ..helpers import error
+from ..authz import role_required, teacher_for_user
+from ..db import execute, fetch_all, fetch_one, get_db
+from ..helpers import enum_level, error, title_enum
 
 bp = Blueprint("clcs", __name__)
 
@@ -21,6 +21,72 @@ def _clc_card(row):
         "teachers": int(row.get("teachers") or 0),
         "schoolYear": row.get("school_year") or "—",
     }
+
+
+_PROFILE_QUERY = """
+    SELECT
+        c.*,
+        COUNT(DISTINCT tc.teacher_id) FILTER (WHERE tc.assignment_status = 'ACTIVE') AS teachers,
+        COUNT(DISTINCT ce.learner_id) FILTER (WHERE ce.enrollment_status = 'ENROLLED') AS total_learners,
+        COUNT(DISTINCT lc.class_id) FILTER (WHERE lc.status = 'ACTIVE') AS active_classes,
+        MAX(tc.school_year) AS school_year
+    FROM clc c
+    LEFT JOIN teacher_clc tc ON tc.clc_id = c.clc_id
+    LEFT JOIN learning_class lc ON lc.clc_id = c.clc_id
+    LEFT JOIN class_enrollment ce ON ce.class_id = lc.class_id
+    WHERE c.clc_id = %s
+    GROUP BY c.clc_id
+"""
+
+_PROFILE_TEACHERS_QUERY = """
+    SELECT t.teacher_id, t.employee_id, t.first_name, t.last_name, t.status
+    FROM teacher_clc tc
+    JOIN teacher t ON t.teacher_id = tc.teacher_id
+    WHERE tc.clc_id = %s AND tc.assignment_status = 'ACTIVE'
+    ORDER BY t.last_name, t.first_name
+"""
+
+
+def _clc_profile(row, teachers):
+    return {
+        "id": row["clc_id"],
+        "name": row["clc_name"],
+        "municipality": row["municipality"],
+        "barangay": row.get("barangay") or "",
+        "address": row.get("address") or "",
+        "province": row.get("province") or "",
+        "zip": row.get("zip_code") or "",
+        "phone": row.get("contact_number") or "",
+        "email": row.get("email") or "",
+        "coordinatorName": row.get("coordinator_name") or "",
+        "coordinatorEmail": row.get("coordinator_email") or "",
+        "learningLevel": title_enum(row.get("learning_level")),
+        "schoolYear": row.get("school_year") or "",
+        "status": "Active" if row["status"] == "ACTIVE" else "Inactive",
+        "stats": {
+            "totalLearners": int(row.get("total_learners") or 0),
+            "teachers": int(row.get("teachers") or 0),
+            "activeClasses": int(row.get("active_classes") or 0),
+        },
+        "teachers": [
+            {
+                "id": t["teacher_id"],
+                "employeeId": t["employee_id"],
+                "name": " ".join(p for p in [t.get("first_name"), t.get("last_name")] if p),
+                "status": t["status"],
+            }
+            for t in teachers
+        ],
+        "createdAt": row["created_at"].isoformat() if row.get("created_at") else None,
+    }
+
+
+def _load_profile(clc_id: int):
+    row = fetch_one(_PROFILE_QUERY, (clc_id,))
+    if not row:
+        return None
+    teachers = fetch_all(_PROFILE_TEACHERS_QUERY, (clc_id,))
+    return _clc_profile(row, teachers)
 
 
 @bp.get("/clcs")
@@ -87,6 +153,15 @@ def current_clc():
     }
 
 
+@bp.get("/clcs/<int:clc_id>")
+@role_required("teacher", "admin", "coordinator")
+def get_clc(clc_id: int):
+    profile = _load_profile(clc_id)
+    if not profile:
+        return error("Community Learning Center not found.", 404)
+    return {"data": profile}
+
+
 @bp.post("/clcs")
 @role_required("teacher")
 def create_clc():
@@ -103,18 +178,32 @@ def create_clc():
     school_year = str(data.get("schoolYear") or "2026-2027").strip()
     address = str(data.get("address") or "").strip() or None
     barangay = str(data.get("barangay") or "").strip() or None
+    province = str(data.get("province") or "").strip() or None
+    zip_code = str(data.get("zip") or data.get("zipCode") or "").strip() or None
+    phone = str(data.get("phone") or data.get("contact_number") or "").strip() or None
+    email = str(data.get("email") or "").strip() or None
+    coordinator_name = str(data.get("coordinatorName") or "").strip() or None
+    coordinator_email = str(data.get("coordinatorEmail") or "").strip() or None
+    learning_level = enum_level(data.get("learningLevel")) if data.get("learningLevel") else None
 
     db = get_db()
     try:
         with db.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO clc (clc_name, municipality, barangay, address, status)
-                VALUES (%s, %s, %s, %s, 'ACTIVE')
+                INSERT INTO clc (
+                    clc_name, municipality, barangay, address, province, zip_code,
+                    contact_number, email, coordinator_name, coordinator_email,
+                    learning_level, status
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'ACTIVE')
                 ON CONFLICT DO NOTHING
                 RETURNING clc_id
                 """,
-                (name, municipality, barangay, address),
+                (
+                    name, municipality, barangay, address, province, zip_code,
+                    phone, email, coordinator_name, coordinator_email, learning_level,
+                ),
             )
             created = cur.fetchone()
             if created:
@@ -153,15 +242,56 @@ def create_clc():
         db.rollback()
         raise
 
-    return {
-        "message": "CLC registered successfully.",
-        "data": {
-            "id": clc_id,
-            "name": name,
-            "municipality": municipality,
-            "schoolYear": school_year,
-            "learningLevel": data.get("learningLevel") or "Basic Literacy Program",
-            "status": "Active",
-            "location": data.get("location") or ", ".join(x for x in [address, municipality] if x),
-        },
-    }, 201
+    return {"message": "CLC registered successfully.", "data": _load_profile(clc_id)}, 201
+
+
+def _merge_field(data: dict, key: str, current, *aliases: str):
+    """Use a submitted value if the key is present, otherwise keep the current
+    value. Lets PUT /clcs/<id> accept partial payloads without blanking out
+    fields the caller didn't touch."""
+    for k in (key, *aliases):
+        if k in data and data[k] is not None:
+            return str(data[k]).strip() or None
+    return current
+
+
+@bp.put("/clcs/<int:clc_id>")
+@role_required("teacher")
+def update_clc(clc_id: int):
+    existing = fetch_one("SELECT * FROM clc WHERE clc_id = %s", (clc_id,))
+    if not existing:
+        return error("Community Learning Center not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    name = _merge_field(data, "name", existing["clc_name"], "clc_name")
+    municipality = _merge_field(data, "municipality", existing["municipality"])
+    if not name or not municipality:
+        return error("CLC name and municipality are required.", 422)
+
+    barangay = _merge_field(data, "barangay", existing.get("barangay"))
+    address = _merge_field(data, "address", existing.get("address"))
+    province = _merge_field(data, "province", existing.get("province"))
+    zip_code = _merge_field(data, "zip", existing.get("zip_code"), "zipCode")
+    phone = _merge_field(data, "phone", existing.get("contact_number"), "contact_number")
+    email = _merge_field(data, "email", existing.get("email"))
+    coordinator_name = _merge_field(data, "coordinatorName", existing.get("coordinator_name"))
+    coordinator_email = _merge_field(data, "coordinatorEmail", existing.get("coordinator_email"))
+    learning_level = (
+        enum_level(data["learningLevel"]) if data.get("learningLevel") else existing.get("learning_level")
+    )
+
+    execute(
+        """
+        UPDATE clc SET
+            clc_name = %s, municipality = %s, barangay = %s, address = %s,
+            province = %s, zip_code = %s, contact_number = %s, email = %s,
+            coordinator_name = %s, coordinator_email = %s, learning_level = %s
+        WHERE clc_id = %s
+        """,
+        (
+            name, municipality, barangay, address, province, zip_code,
+            phone, email, coordinator_name, coordinator_email, learning_level,
+            clc_id,
+        ),
+    )
+    return {"message": "CLC profile updated.", "data": _load_profile(clc_id)}

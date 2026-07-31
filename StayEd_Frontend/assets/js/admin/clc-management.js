@@ -1,3 +1,5 @@
+// Must run first, before anything else on this page executes.
+Guards.admin();
 const allTeachers=[
 {name:"Maria Santos",clc:"Alcala CLC 1"},{name:"Juan Dela Cruz",clc:"Asingan CLC A"},
 {name:"Angelica Reyes",clc:"Binalonan CLC 2"},{name:"Ferdinand Lopez",clc:"Pozorrubio CLC 1"},
@@ -324,6 +326,6 @@ document.addEventListener('click',e=>{if(asideEl.classList.contains('open')&&!as
 renderKPIs(); renderTable();
 
 document.getElementById('sidebarLogoutBtn').addEventListener('click',e=>{e.preventDefault();openModal('modal-logout')});
-document.getElementById('logout-confirm-btn').addEventListener('click',()=>{closeModal('modal-logout');showToast('Signed out — redirecting to login…')});
+document.getElementById('logout-confirm-btn').addEventListener('click',()=>{closeModal('modal-logout');Auth.logout()});
 
 document.querySelectorAll('.select-wrap select').forEach(sel=>{sel.addEventListener('focus',()=>sel.closest('.select-wrap').classList.add('open'));sel.addEventListener('blur',()=>sel.closest('.select-wrap').classList.remove('open'));});

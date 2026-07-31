@@ -3,6 +3,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from app.db_bootstrap import ensure_database_ready
+
+ensure_database_ready()
+
 from app import create_app
 
 app = create_app()
