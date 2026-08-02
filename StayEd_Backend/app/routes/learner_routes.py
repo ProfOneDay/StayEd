@@ -8,7 +8,7 @@ import pandas as pd
 from flask import Blueprint, request
 
 from ..authz import current_user_id, role_required, teacher_for_user
-from ..db import fetch_all, fetch_one, get_db
+from ..db import execute, fetch_all, fetch_one, get_db
 from ..helpers import (
     LRN_RE,
     enum_level,
@@ -104,7 +104,7 @@ def _learner_query(where: str = "", order: str = "l.last_name, l.first_name"):
             CONCAT_WS(' ', t.first_name, t.last_name) AS assigned_teacher,
             risk.risk_assessment_id, risk.risk_probability, risk.risk_level, risk.assessment_date,
             COALESCE(att.session_attendance_rate_percent, 0) AS attendance_rate,
-            COALESCE(assess.assessment_avg, 0) AS assessment_avg,
+            0 AS assessment_avg,
             COALESCE(activity.latest_activity, 'No recent activity') AS latest_activity
         FROM learner l
         JOIN class_enrollment ce ON ce.learner_id = l.learner_id
@@ -114,19 +114,12 @@ def _learner_query(where: str = "", order: str = "l.last_name, l.first_name"):
         {_latest_risk_join_sql()}
         LEFT JOIN vw_session_attendance_summary att ON att.enrollment_id = ce.enrollment_id
         LEFT JOIN LATERAL (
-            SELECT ROUND(AVG(100.0 * ar.score / NULLIF(ar.maximum_score, 0)), 2) AS assessment_avg
-            FROM assessment a
-            JOIN assessment_result ar ON ar.assessment_id = a.assessment_id
-            WHERE a.enrollment_id = ce.enrollment_id
-              AND ar.score IS NOT NULL AND ar.maximum_score IS NOT NULL
-        ) assess ON TRUE
-        LEFT JOIN LATERAL (
             SELECT latest_activity FROM (
                 SELECT
-                    ('Module ' || mr.module_number || ' submitted ' || TO_CHAR(mr.date_submitted, 'Mon DD')) AS latest_activity,
-                    mr.date_submitted::timestamp AS happened_at
+                    ('"' || mr.module_name || '" returned ' || TO_CHAR(mr.date_returned, 'Mon DD')) AS latest_activity,
+                    mr.date_returned::timestamp AS happened_at
                 FROM module_record mr
-                WHERE mr.enrollment_id = ce.enrollment_id AND mr.date_submitted IS NOT NULL
+                WHERE mr.enrollment_id = ce.enrollment_id AND mr.date_returned IS NOT NULL
                 UNION ALL
                 SELECT
                     ('Attendance recorded ' || TO_CHAR(cs.session_date, 'Mon DD')),
@@ -498,22 +491,20 @@ def records_detail(learner_id: int):
     history = []
     for m in modules:
         strand = f"{m.get('strand_code') or 'General'} – {m.get('strand_name') or 'Modules'}"
-        status_map = {"COMPLETED": "returned", "SUBMITTED": "returned", "OVERDUE": "not_returned", "RELEASED": "in_progress"}
-        due = m.get("due_date")
-        overdue = max((date.today() - due).days, 0) if due and not m.get("date_submitted") else 0
+        status = "returned" if m["module_status"] == "RETURNED" else "in_progress"
         groups.setdefault(strand, []).append({
-            "title": f"Module {m['module_number']}: {m['module_title']}",
+            "title": m["module_name"],
             "released": m["date_released"].strftime("%B %d, %Y"),
-            "due": due.strftime("%B %d, %Y") if due else "—",
-            "status": status_map.get(m["module_status"], "in_progress"),
-            "overdueDays": overdue,
-            "remarks": "",
+            "due": m["date_returned"].strftime("%B %d, %Y") if m.get("date_returned") else "—",
+            "status": status,
+            "overdueDays": 0,
+            "remarks": m.get("remarks") or "",
         })
-        if m.get("date_submitted"):
+        if m.get("date_returned"):
             history.append({
-                "module": f"Module {m['module_number']}: {m['module_title']}",
+                "module": m["module_name"],
                 "strand": m.get("strand_code") or "—",
-                "completedDate": m["date_submitted"].strftime("%B %d, %Y"),
+                "completedDate": m["date_returned"].strftime("%B %d, %Y"),
                 "score": "—",
             })
 
@@ -534,7 +525,7 @@ def records_detail(learner_id: int):
         (base["class_id"],),
     )
     total = int(progress.get("total_modules_released") or 0)
-    completed = int(progress.get("total_completed_or_submitted") or 0)
+    completed = int(progress.get("total_modules_returned") or 0)
     return {
         "modules": {
             "total": total,
@@ -621,7 +612,7 @@ def learner_profile(learner_id: int):
 
     attendance_rate = round(float(att.get("session_attendance_rate_percent") or 0))
     total_modules = int(mod.get("total_modules_released") or 0)
-    completed_modules = int(mod.get("total_completed_or_submitted") or 0)
+    completed_modules = int(mod.get("total_modules_returned") or 0)
     risk_pct = round(shaped["risk_probability"] * 100)
     current_risk = shaped["risk"]
     prev_risk = title_enum(risk_history[-2]["risk_level"]) if len(risk_history) >= 2 else current_risk
@@ -667,7 +658,7 @@ def learner_profile(learner_id: int):
     )
     module_history = fetch_all(
         """
-        SELECT module_number, date_released, date_submitted
+        SELECT module_name, date_released, date_returned
         FROM module_record WHERE enrollment_id=%s ORDER BY date_released DESC LIMIT 8
         """,
         (enrollment_id,),
@@ -693,7 +684,7 @@ def learner_profile(learner_id: int):
             "attendanceDelta": 0,
             "modulesCompleted": completed_modules,
             "modulesTotal": total_modules,
-            "submissionTimeliness": max(0, 100 - int(mod.get("overdue_modules") or 0) * 10),
+            "submissionTimeliness": int(mod.get("module_completion_progress_percent") or 0),
             "consultationsAttended": sum(1 for c in contacts if c["contact_result"] == "SUCCESSFUL"),
             "consultationsTotal": len(contacts),
         },
@@ -713,7 +704,7 @@ def learner_profile(learner_id: int):
                 for a in att_history
             ],
             "modules": [
-                {"module": f"Module {m['module_number']}", "released": m["date_released"].strftime("%b %d"), "submitted": m["date_submitted"].strftime("%b %d") if m.get("date_submitted") else "—"}
+                {"module": m["module_name"], "released": m["date_released"].strftime("%b %d"), "submitted": m["date_returned"].strftime("%b %d") if m.get("date_returned") else "—"}
                 for m in module_history
             ],
             "timeline": timeline,
@@ -762,6 +753,158 @@ def learner_profile(learner_id: int):
         },
     }
     return response
+
+
+@bp.get("/learning-strands")
+@role_required("teacher")
+def list_learning_strands():
+    rows = fetch_all(
+        "SELECT learning_strand_id, strand_code, strand_name FROM learning_strand WHERE status='ACTIVE' ORDER BY strand_code"
+    )
+    return {"data": [{"id": r["learning_strand_id"], "code": r["strand_code"], "name": r["strand_name"]} for r in rows]}
+
+
+def _shape_module(row):
+    return {
+        "id": row["module_record_id"],
+        "strandCode": row.get("strand_code") or "",
+        "strandName": row.get("strand_name") or "",
+        "title": row["module_name"],
+        "released": row["date_released"].strftime("%B %d, %Y"),
+        "returned": row["date_returned"].strftime("%B %d, %Y") if row.get("date_returned") else None,
+        "status": "returned" if row["module_status"] == "RETURNED" else "released",
+        "remarks": row.get("remarks") or "",
+    }
+
+
+def _module_summary(enrollment_id: int):
+    rows = fetch_all(
+        """
+        SELECT mr.*, ls.strand_code, ls.strand_name
+        FROM module_record mr
+        LEFT JOIN learning_strand ls ON ls.learning_strand_id = mr.learning_strand_id
+        WHERE mr.enrollment_id = %s
+        ORDER BY ls.strand_code NULLS LAST, mr.date_released DESC
+        """,
+        (enrollment_id,),
+    )
+    modules = [_shape_module(r) for r in rows]
+    total = len(modules)
+    returned = sum(1 for m in modules if m["status"] == "returned")
+    return {
+        "summary": {
+            "total": total,
+            "returned": returned,
+            "inProgress": total - returned,
+            "completionPercent": round(100 * returned / total) if total else 0,
+        },
+        "modules": modules,
+    }
+
+
+@bp.get("/learners/<int:learner_id>/modules")
+@role_required("teacher")
+def list_learner_modules(learner_id: int):
+    base = _profile_base(learner_id)
+    if not base:
+        return error("Learner not found.", 404)
+    return _module_summary(base["enrollment_id"])
+
+
+@bp.post("/learners/<int:learner_id>/modules")
+@role_required("teacher")
+def release_module(learner_id: int):
+    base = _profile_base(learner_id)
+    if not base:
+        return error("Learner not found.", 404)
+    teacher = _teacher_scope()
+
+    data = request.get_json(silent=True) or {}
+    title = str(data.get("title") or "").strip()
+    strand_code = str(data.get("strandCode") or "").strip().upper()
+    if not title or not strand_code:
+        return error("Module title and learning strand are required.", 422)
+
+    strand = fetch_one("SELECT learning_strand_id FROM learning_strand WHERE strand_code = %s", (strand_code,))
+    if not strand:
+        return error("Unknown learning strand.", 422)
+
+    try:
+        date_released = date.fromisoformat(str(data.get("dateReleased"))) if data.get("dateReleased") else date.today()
+    except ValueError:
+        return error("Release date must use YYYY-MM-DD.", 422)
+
+    db = get_db()
+    try:
+        with db.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO module_record (
+                    enrollment_id, learning_strand_id, module_name, date_released, recorded_by_teacher_id
+                ) VALUES (%s, %s, %s, %s, %s)
+                """,
+                (base["enrollment_id"], strand["learning_strand_id"], title, date_released, teacher["teacher_id"]),
+            )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    return {"message": "Module released.", **_module_summary(base["enrollment_id"])}, 201
+
+
+@bp.put("/learners/<int:learner_id>/modules/<int:module_record_id>")
+@role_required("teacher")
+def update_module(learner_id: int, module_record_id: int):
+    base = _profile_base(learner_id)
+    if not base:
+        return error("Learner not found.", 404)
+
+    existing = fetch_one(
+        "SELECT * FROM module_record WHERE module_record_id=%s AND enrollment_id=%s",
+        (module_record_id, base["enrollment_id"]),
+    )
+    if not existing:
+        return error("Module record not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    title = str(data.get("title") or existing["module_name"]).strip()
+
+    date_released = existing["date_released"]
+    if data.get("dateReleased"):
+        try:
+            date_released = date.fromisoformat(str(data["dateReleased"]))
+        except ValueError:
+            return error("Release date must use YYYY-MM-DD.", 422)
+
+    date_returned = existing["date_returned"]
+    if "returned" in data:
+        if data["returned"]:
+            if data.get("dateReturned"):
+                try:
+                    date_returned = date.fromisoformat(str(data["dateReturned"]))
+                except ValueError:
+                    return error("Return date must use YYYY-MM-DD.", 422)
+            else:
+                date_returned = date.today()
+        else:
+            date_returned = None
+
+    if date_returned and date_returned < date_released:
+        return error("Return date cannot be before the release date.", 422)
+
+    remarks = data.get("remarks", existing.get("remarks"))
+
+    execute(
+        """
+        UPDATE module_record
+        SET module_name=%s, date_released=%s, date_returned=%s, remarks=%s
+        WHERE module_record_id=%s
+        """,
+        (title, date_released, date_returned, remarks, module_record_id),
+    )
+
+    return {"message": "Module updated.", **_module_summary(base["enrollment_id"])}
 
 
 def _read_upload(file_storage):

@@ -3,34 +3,57 @@ class ModuleManagementModal {
 
   static activeTab = "active";
 
-  static open(learner) {
-    this.learner = learner;
+  static summary = { total: 0, returned: 0, inProgress: 0, completionPercent: 0 };
 
+  static modules = [];
+
+  static strands = [];
+
+  static showReleaseForm = false;
+
+  static async open(learner) {
+    this.learner = learner;
     this.activeTab = "active";
+    this.showReleaseForm = false;
 
     const body = Modal.showCustom({
       title: "",
-
       size: "xl",
-
       hideFooter: true,
     });
 
     if (!body) return;
 
+    this.bodyEl = body;
     body.parentElement.classList.add("st-module-modal");
+    body.innerHTML = `<div class="st-empty" style="border:none;background:transparent;">
+      <span class="material-symbols-outlined">progress_activity</span>
+      <p class="st-empty-title">Loading modules…</p>
+    </div>`;
+
+    try {
+      const [modulesResponse, strandsResponse] = await Promise.all([
+        API.get(`/learners/${learner.id}/modules`),
+        API.get("/learning-strands"),
+      ]);
+      this.summary = modulesResponse.summary || this.summary;
+      this.modules = modulesResponse.modules || [];
+      this.strands = strandsResponse.data || [];
+    } catch (error) {
+      console.error("[ModuleManagementModal] Failed to load modules", error);
+      Toast?.error("Unable to load modules for this learner.");
+      this.summary = { total: 0, returned: 0, inProgress: 0, completionPercent: 0 };
+      this.modules = [];
+      this.strands = [];
+    }
 
     body.innerHTML = this.render();
-
     this.bind(body.parentElement);
   }
 
   static render() {
     const l = this.learner;
-
-    const m = l.modules || {};
-
-    const pct = Math.round((m.completed / m.total) * 100) || 0;
+    const s = this.summary;
 
     return `
             <div class="st-module-modal-header">
@@ -56,29 +79,31 @@ class ModuleManagementModal {
                         <div>
                             <p class="st-module-summary-label">Module Status</p>
                             <div class="st-module-summary-stats">
-                                <span style="color:var(--st-primary);">${m.total} <span>Modules</span></span>
-                                <span style="color:var(--st-secondary);">${m.completed} <span>Completed</span></span>
-                                <span style="color:var(--st-primary-container);">${m.active} <span>Active</span></span>
+                                <span style="color:var(--st-primary);">${s.total} <span>Modules</span></span>
+                                <span style="color:var(--st-secondary);">${s.returned} <span>Returned</span></span>
+                                <span style="color:var(--st-primary-container);">${s.inProgress} <span>In Progress</span></span>
                             </div>
                         </div>
                         <div style="text-align:right;">
-                            <span class="st-module-summary-pct">${pct}%</span>
+                            <span class="st-module-summary-pct">${s.completionPercent}%</span>
                             <p class="st-module-summary-label">Overall</p>
                         </div>
                     </div>
                     <div class="st-progress-track st-progress-track--lg">
-                        <div class="st-progress-fill st-progress-fill--secondary" style="width:${pct}%;"></div>
+                        <div class="st-progress-fill st-progress-fill--secondary" style="width:${s.completionPercent}%;"></div>
                     </div>
                 </div>
             </div>
 
+            ${this.showReleaseForm ? this.renderReleaseForm() : ""}
+
             <nav class="st-module-modal-tabs">
-                <button type="button" class="st-module-modal-tab is-active" data-module-tab="active">Active Modules</button>
-                <button type="button" class="st-module-modal-tab" data-module-tab="history">Module History</button>
+                <button type="button" class="st-module-modal-tab ${this.activeTab === "active" ? "is-active" : ""}" data-module-tab="active">Active Modules</button>
+                <button type="button" class="st-module-modal-tab ${this.activeTab === "history" ? "is-active" : ""}" data-module-tab="history">Module History</button>
             </nav>
 
             <div class="st-module-modal-body" data-module-modal-content>
-                ${this.renderActiveTab()}
+                ${this.activeTab === "active" ? this.renderActiveTab() : this.renderHistoryTab()}
             </div>
 
             <div class="st-module-modal-footer">
@@ -88,10 +113,44 @@ class ModuleManagementModal {
         `;
   }
 
-  static renderActiveTab() {
-    const groups = this.learner.moduleGroups || [];
+  static renderReleaseForm() {
+    const options = this.strands
+      .map((s) => `<option value="${s.code}">${s.code} – ${s.name}</option>`)
+      .join("");
 
-    if (!groups.length) {
+    return `
+            <form class="st-module-release-form" data-release-form style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;padding:12px;margin:0 0 12px;border:1px solid var(--st-outline-variant);border-radius:8px;">
+                <div style="flex:2;min-width:200px;">
+                    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Module Title</label>
+                    <input type="text" data-release-title required placeholder="e.g. Module 1: Basic Reading Comprehension" style="width:100%;">
+                </div>
+                <div style="flex:1;min-width:160px;">
+                    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Learning Strand</label>
+                    <select data-release-strand required style="width:100%;">
+                        <option value="" disabled selected>Select strand…</option>
+                        ${options}
+                    </select>
+                </div>
+                <div style="flex:1;min-width:140px;">
+                    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Release Date</label>
+                    <input type="date" data-release-date value="${new Date().toISOString().slice(0, 10)}" style="width:100%;">
+                </div>
+                <button type="submit" class="st-btn st-btn-primary st-btn-xs">Release</button>
+                <button type="button" class="st-btn st-btn-xs" data-release-cancel>Cancel</button>
+            </form>
+        `;
+  }
+
+  static renderActiveTab() {
+    const active = this.modules.filter((m) => m.status === "released");
+    const groups = {};
+    active.forEach((m) => {
+      const key = `${m.strandCode || "General"} – ${m.strandName || "Modules"}`;
+      (groups[key] = groups[key] || []).push(m);
+    });
+
+    const strandKeys = Object.keys(groups);
+    if (!strandKeys.length) {
       return `
                 <div class="st-empty" style="border:none;background:transparent;">
                     <span class="material-symbols-outlined">menu_book</span>
@@ -101,20 +160,20 @@ class ModuleManagementModal {
             `;
     }
 
-    return groups
+    return strandKeys
       .map(
-        (group, gi) => `
+        (strand) => `
             <div class="st-module-group" data-module-group>
                 <button type="button" class="st-module-group-header" data-module-group-toggle>
                     <div class="st-module-group-header-left">
-                        <span class="material-symbols-outlined" style="color:var(--st-primary);">${group.icon || "forum"}</span>
-                        <h2 class="st-module-group-title">${group.strand}</h2>
-                        <span class="st-module-group-count">(${group.modules.length} Active)</span>
+                        <span class="material-symbols-outlined" style="color:var(--st-primary);">forum</span>
+                        <h2 class="st-module-group-title">${strand}</h2>
+                        <span class="st-module-group-count">(${groups[strand].length} Active)</span>
                     </div>
                     <span class="material-symbols-outlined st-module-group-caret">expand_less</span>
                 </button>
                 <div class="st-module-group-body">
-                    ${group.modules.map((mod, mi) => this.renderModuleItem(mod, gi, mi)).join("")}
+                    ${groups[strand].map((mod) => this.renderModuleItem(mod)).join("")}
                 </div>
             </div>
         `,
@@ -122,11 +181,9 @@ class ModuleManagementModal {
       .join("");
   }
 
-  static renderModuleItem(mod, gi, mi) {
-    const overdue = mod.overdueDays > 0;
-
+  static renderModuleItem(mod) {
     return `
-            <div class="st-module-item ${overdue ? "st-module-item--overdue" : ""}">
+            <div class="st-module-item" data-module-id="${mod.id}">
                 <div class="st-module-item-main">
                     <div class="st-module-item-icon">
                         <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">description</span>
@@ -138,45 +195,33 @@ class ModuleManagementModal {
                                 <span class="st-module-item-date-label">Released</span>
                                 <span>${mod.released}</span>
                             </div>
-                            <div class="st-module-item-date-row">
-                                <span class="st-module-item-date-label">Due</span>
-                                <span>${mod.due}</span>
-                            </div>
-                            ${overdue ? `<span class="st-module-item-overdue-chip">${mod.overdueDays} Days Overdue</span>` : ""}
+                            ${mod.returned ? `<div class="st-module-item-date-row"><span class="st-module-item-date-label">Returned</span><span>${mod.returned}</span></div>` : ""}
                         </div>
                         <input type="text" class="st-module-item-remarks" placeholder="Add remarks (optional)..."
-                            value="${mod.remarks || ""}" data-module-remarks="${gi}-${mi}">
+                            value="${mod.remarks || ""}" data-module-remarks="${mod.id}">
                     </div>
                 </div>
                 <div class="st-module-item-controls">
                     <div class="st-module-item-field">
                         <label>Status</label>
-                        <select data-module-status="${gi}-${mi}">
-                            <option value="in_progress" ${mod.status === "in_progress" ? "selected" : ""}>In Progress</option>
+                        <select data-module-status="${mod.id}">
+                            <option value="released" ${mod.status === "released" ? "selected" : ""}>In Progress</option>
                             <option value="returned" ${mod.status === "returned" ? "selected" : ""}>Returned</option>
-                            <option value="not_returned" ${mod.status === "not_returned" ? "selected" : ""}>Not Returned</option>
                         </select>
                     </div>
-                    <div class="st-module-item-field">
-                        <label>Return Date</label>
-                        <input type="date" data-module-return-date="${gi}-${mi}">
-                    </div>
-                    <button type="button" class="st-icon-btn-sm" style="margin-top:18px;" aria-label="More options">
-                        <span class="material-symbols-outlined">more_vert</span>
-                    </button>
                 </div>
             </div>
         `;
   }
 
   static renderHistoryTab() {
-    const history = this.learner.moduleHistory || [];
+    const history = this.modules.filter((m) => m.status === "returned");
 
     if (!history.length) {
       return `
                 <div class="st-empty" style="border:none;background:transparent;">
                     <span class="material-symbols-outlined">history</span>
-                    <p class="st-empty-title">No completed modules yet</p>
+                    <p class="st-empty-title">No returned modules yet</p>
                 </div>
             `;
     }
@@ -187,8 +232,8 @@ class ModuleManagementModal {
                     <tr>
                         <th>Module</th>
                         <th>Strand</th>
-                        <th>Completed</th>
-                        <th>Score</th>
+                        <th>Returned</th>
+                        <th>Remarks</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -196,10 +241,10 @@ class ModuleManagementModal {
                       .map(
                         (h) => `
                         <tr>
-                            <td style="font-weight:600;">${h.module}</td>
-                            <td>${h.strand}</td>
-                            <td>${h.completedDate}</td>
-                            <td style="color:var(--st-secondary);font-weight:700;">${h.score}</td>
+                            <td style="font-weight:600;">${h.title}</td>
+                            <td>${h.strandCode || "—"}</td>
+                            <td>${h.returned || "—"}</td>
+                            <td>${h.remarks || "—"}</td>
                         </tr>
                     `,
                       )
@@ -212,23 +257,9 @@ class ModuleManagementModal {
   static bind(container) {
     container.querySelectorAll("[data-module-tab]").forEach((tab) => {
       tab.addEventListener("click", () => {
-        container
-          .querySelectorAll("[data-module-tab]")
-          .forEach((t) => t.classList.remove("is-active"));
-
-        tab.classList.add("is-active");
-
         this.activeTab = tab.dataset.moduleTab;
-
-        const content = container.querySelector("[data-module-modal-content]");
-
-        if (content) {
-          content.innerHTML =
-            this.activeTab === "active"
-              ? this.renderActiveTab()
-              : this.renderHistoryTab();
-          this.bindGroupToggles(content);
-        }
+        this.showReleaseForm = false;
+        this.refreshBody(container);
       });
     });
 
@@ -237,23 +268,99 @@ class ModuleManagementModal {
     container
       .querySelector("[data-module-modal-done]")
       ?.addEventListener("click", () => {
-        Toast?.success("Module updates saved.");
         Modal.hide();
       });
 
     container
       .querySelector("[data-release-module]")
       ?.addEventListener("click", () => {
-        Toast?.info("Release New Module form will open here.");
+        this.showReleaseForm = !this.showReleaseForm;
+        this.rerender(container);
       });
 
     container
-      .querySelectorAll("[data-module-status], [data-module-return-date]")
-      .forEach((el) => {
-        el.addEventListener("change", () => {
-          Toast?.success("Module status updated.");
-        });
+      .querySelector("[data-release-cancel]")
+      ?.addEventListener("click", () => {
+        this.showReleaseForm = false;
+        this.rerender(container);
       });
+
+    container
+      .querySelector("[data-release-form]")
+      ?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const title = container.querySelector("[data-release-title]").value.trim();
+        const strandCode = container.querySelector("[data-release-strand]").value;
+        const dateReleased = container.querySelector("[data-release-date]").value;
+        if (!title || !strandCode) {
+          Toast?.error("Module title and learning strand are required.");
+          return;
+        }
+        try {
+          const response = await API.post(`/learners/${this.learner.id}/modules`, {
+            title,
+            strandCode,
+            dateReleased,
+          });
+          this.summary = response.summary;
+          this.modules = response.modules;
+          this.showReleaseForm = false;
+          this.activeTab = "active";
+          Toast?.success("Module released.");
+          this.rerender(container);
+        } catch (error) {
+          console.error("[ModuleManagementModal] Release failed", error);
+          Toast?.error(error?.data?.message || "Unable to release this module.");
+        }
+      });
+
+    this.bindItemControls(container);
+  }
+
+  static async updateModule(container, moduleId, payload, { silent = false } = {}) {
+    try {
+      const response = await API.put(`/learners/${this.learner.id}/modules/${moduleId}`, payload);
+      this.summary = response.summary;
+      this.modules = response.modules;
+      if (!silent) Toast?.success("Module updated.");
+      this.rerender(container);
+    } catch (error) {
+      console.error("[ModuleManagementModal] Update failed", error);
+      Toast?.error(error?.data?.message || "Unable to update this module.");
+    }
+  }
+
+  static rerender(container) {
+    this.bodyEl.innerHTML = this.render();
+    this.bind(container);
+  }
+
+  static refreshBody(container) {
+    const content = container.querySelector("[data-module-modal-content]");
+    const tabs = container.querySelectorAll("[data-module-tab]");
+    tabs.forEach((t) => t.classList.toggle("is-active", t.dataset.moduleTab === this.activeTab));
+    if (content) {
+      content.innerHTML = this.activeTab === "active" ? this.renderActiveTab() : this.renderHistoryTab();
+      this.bindGroupToggles(content);
+      this.bindItemControls(container);
+    }
+  }
+
+  static bindItemControls(container) {
+    container.querySelectorAll("[data-module-status]").forEach((el) => {
+      el.addEventListener("change", async () => {
+        const moduleId = el.dataset.moduleStatus;
+        await this.updateModule(container, moduleId, { returned: el.value === "returned" });
+      });
+    });
+    container.querySelectorAll("[data-module-remarks]").forEach((el) => {
+      el.addEventListener("blur", async () => {
+        const moduleId = el.dataset.moduleRemarks;
+        const original = this.modules.find((m) => String(m.id) === String(moduleId));
+        if (original && (original.remarks || "") === el.value.trim()) return;
+        await this.updateModule(container, moduleId, { remarks: el.value.trim() }, { silent: true });
+      });
+    });
   }
 
   static bindGroupToggles(container) {

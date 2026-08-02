@@ -5,9 +5,9 @@ import secrets
 from flask import Blueprint, request
 from werkzeug.security import generate_password_hash
 
-from ..authz import role_required
+from ..authz import current_user_id, role_required
 from ..db import execute, fetch_all, fetch_one, get_db
-from ..helpers import error
+from ..helpers import error, split_name
 
 bp = Blueprint("admin", __name__)
 
@@ -416,6 +416,67 @@ def create_user():
         "data": _load_admin_user(user_id),
         "temp_password": temp_password,
     }, 201
+
+
+@bp.put("/admin/profile")
+@role_required("admin")
+def update_own_admin_profile():
+    """Self-service profile edit for the logged-in admin. Separate from
+    PUT /users/profile, which only works for teacher accounts (it requires a
+    `teacher` row) - admin/coordinator accounts have no such row, so their
+    name/phone live directly on `users` instead."""
+    user_id = current_user_id()
+    existing = fetch_one(
+        "SELECT user_id, email, first_name, last_name, contact_number FROM users WHERE user_id=%s",
+        (user_id,),
+    )
+    if not existing:
+        return error("Account not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    full_name = str(data.get("fullName") or "").strip()
+    if full_name:
+        first_name, last_name = split_name(full_name)
+    else:
+        first_name = existing.get("first_name") or ""
+        last_name = existing.get("last_name") or ""
+
+    contact_number = _merge_field(data, "phone", existing.get("contact_number"))
+    email = _merge_field(data, "email", existing.get("email"))
+    if not first_name or not last_name or not email:
+        return error("Full name and email are required.", 422)
+    email = email.lower()
+
+    execute(
+        "UPDATE users SET first_name=%s, last_name=%s, contact_number=%s, email=%s WHERE user_id=%s",
+        (first_name, last_name, contact_number, email, user_id),
+    )
+    return {
+        "message": "Profile updated.",
+        "data": {
+            "id": user_id,
+            "fullName": f"{first_name} {last_name}".strip(),
+            "email": email,
+            "phone": contact_number or "",
+        },
+    }
+
+
+@bp.post("/admin/self/deactivate")
+@role_required("admin")
+def deactivate_self():
+    user_id = current_user_id()
+    active_admins = fetch_one(
+        "SELECT COUNT(*) AS n FROM users WHERE role='ADMIN' AND account_status='ACTIVE'"
+    )["n"]
+    if active_admins <= 1:
+        return error(
+            "You are the only active administrator. Create another admin account before deactivating this one.",
+            409,
+        )
+
+    execute("UPDATE users SET account_status='SUSPENDED' WHERE user_id=%s", (user_id,))
+    return {"success": True, "message": "Your account has been deactivated."}
 
 
 @bp.get("/admin/model")

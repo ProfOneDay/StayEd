@@ -13,6 +13,16 @@ document.querySelectorAll('.overlay').forEach(ov=>ov.addEventListener('click',e=
 
 function initialsOf(name){return name.split(' ').filter(Boolean).map(w=>w[0]).slice(0,2).join('').toUpperCase()}
 
+function loadOwnProfile(){
+  const user=Auth.user()||{};
+  const fullName=user.full_name||user.first_name||'Admin';
+  document.getElementById('profileDisplayName').textContent=fullName;
+  document.getElementById('profileAvatarInitials').textContent=initialsOf(fullName);
+  document.getElementById('profileEmailDisplay').textContent=user.email||'';
+  document.getElementById('profilePhoneDisplay').textContent=user.phone||'—';
+}
+loadOwnProfile();
+
 // Change Password modal
 function setReq(id,met){
   const el=document.getElementById(id);
@@ -49,7 +59,12 @@ document.getElementById('forgotPasswordLink').addEventListener('click',e=>{
   showPasswordView('forgot');
 });
 document.getElementById('forgotBackBtn').addEventListener('click',()=>showPasswordView('main'));
-document.getElementById('sendResetLinkBtn').addEventListener('click',()=>{
+document.getElementById('sendResetLinkBtn').addEventListener('click',async()=>{
+  try{
+    await Auth.forgotPassword(document.getElementById('forgot-email-display').textContent);
+  }catch(error){
+    console.error('[AdminSettings] Forgot password request failed',error);
+  }
   showPasswordView('sent');
 });
 function confirmLogout(){
@@ -65,18 +80,33 @@ function confirmLogout(){
 document.getElementById('logoutBtn').addEventListener('click',confirmLogout);
 document.getElementById('sidebarLogoutBtn').addEventListener('click',e=>{e.preventDefault();confirmLogout()});
 document.getElementById('deactivateSelfBtn').addEventListener('click',()=>{
-  confirmDangerous('Deactivate your account?',"You'll immediately lose access to administrative tools. Contact another division admin to reactivate.",'Deactivate');
+  confirmDangerous('Deactivate your account?',"You'll immediately lose access to administrative tools. Contact another division admin to reactivate.",'Deactivate',async()=>{
+    try{
+      await API.post('/admin/self/deactivate',{});
+      showToast('Account deactivated. Signing you out…');
+      setTimeout(()=>Auth.logout(),1200);
+    }catch(error){
+      console.error('[AdminSettings] Deactivate self failed',error);
+      showToast(error?.data?.message||'Unable to deactivate your account.');
+    }
+  });
 });
 document.getElementById('openChangePasswordBtn2').addEventListener('click',openChangePasswordModal);
-document.getElementById('cp-update-btn').addEventListener('click',()=>{
+document.getElementById('cp-update-btn').addEventListener('click',async()=>{
   const cur=document.getElementById('cp-current').value;
   const nw=document.getElementById('cp-new').value;
   const cf=document.getElementById('cp-confirm').value;
   if(!cur||!nw||!cf){ showToast('Please fill in all password fields'); return; }
   if(nw!==cf){ showToast("New passwords don't match"); return; }
   if(nw.length<8||!/[A-Z]/.test(nw)||!/[a-z]/.test(nw)||!/[0-9]/.test(nw)){ showToast('Password does not meet all requirements'); return; }
-  closeModal('modal-password');
-  showToast('Password updated');
+  try{
+    await Auth.changePassword({current_password:cur, password:nw});
+    closeModal('modal-password');
+    showToast('Password updated');
+  }catch(error){
+    console.error('[AdminSettings] Change password failed',error);
+    showToast(error?.data?.message||error?.message||'Unable to update password.');
+  }
 });
 
 // Two-factor toggle
@@ -110,29 +140,31 @@ document.getElementById('avatar-file-input').addEventListener('change',e=>{
   reader.readAsDataURL(file);
   showToast('Photo selected — save changes to apply');
 });
-document.getElementById('ep-save-btn').addEventListener('click',()=>{
+document.getElementById('ep-save-btn').addEventListener('click',async()=>{
   const name=document.getElementById('ep-name').value.trim();
-  const empid=document.getElementById('ep-empid').value.trim();
   const phone=document.getElementById('ep-phone').value.trim();
   const email=document.getElementById('ep-email').value.trim();
   if(!name){ showToast('Please enter your full name'); return; }
-  document.getElementById('profileDisplayName').textContent=name;
-  document.getElementById('profileAvatarInitials').textContent=initialsOf(name);
-  if(empid) document.getElementById('profileEmpIdDisplay').textContent=empid;
-  if(phone) document.getElementById('profilePhoneDisplay').textContent=phone;
-  if(email) document.getElementById('profileEmailDisplay').textContent=email;
-  closeModal('modal-edit-profile');
-  showToast('Profile updated');
+  try{
+    const response=await API.put('/admin/profile',{fullName:name, phone, email});
+    Auth.updateUser({full_name:response.data.fullName, email:response.data.email, phone:response.data.phone});
+    loadOwnProfile();
+    closeModal('modal-edit-profile');
+    showToast('Profile updated');
+  }catch(error){
+    console.error('[AdminSettings] Update profile failed',error);
+    showToast(error?.data?.message||'Unable to update profile.');
+  }
 });
 
-function confirmDangerous(title,sub,label){
+function confirmDangerous(title,sub,label,onConfirm){
   document.getElementById('confirm-icon').className='icon-circle warn';
   document.getElementById('confirm-icon').innerHTML='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M10.29 3.86l-8.18 14A2 2 0 0 0 3.82 21h16.36a2 2 0 0 0 1.71-3.14l-8.18-14a2 2 0 0 0-3.42 0Z"/></svg>';
   document.getElementById('confirm-title').textContent=title;
   document.getElementById('confirm-sub').textContent=sub;
   const btn=document.getElementById('confirm-btn');
   btn.className='btn danger'; btn.textContent=label;
-  btn.onclick=()=>{closeModal('modal-confirm');showToast(label+' complete')};
+  btn.onclick=()=>{closeModal('modal-confirm'); if(onConfirm){ onConfirm(); } else { showToast(label+' complete'); }};
   openModal('modal-confirm');
 }
 

@@ -1,12 +1,4 @@
 # StayEd dev launcher.
-#
-# Starts the Flask backend and the static frontend, each in its own window.
-# The backend auto-creates/starts the Docker Postgres container and applies
-# the SQL schema the first time it detects an empty database
-# (see StayEd_Backend/app/db_bootstrap.py). Re-running this script is safe —
-# it will not touch an already-provisioned database.
-#
-# Usage:  .\start.ps1
 
 $ErrorActionPreference = "Stop"
 

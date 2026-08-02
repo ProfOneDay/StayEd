@@ -26,6 +26,7 @@ def _safe_user(row):
         "first_name": row.get("first_name") or row.get("username"),
         "last_name": row.get("last_name") or "",
         "full_name": full_name or row.get("username"),
+        "phone": row.get("contact_number") or "",
         "school": row.get("clc_name") or "",
         "municipality": row.get("municipality") or "",
     }
@@ -36,7 +37,10 @@ def _user_by_email(email: str):
         """
         SELECT
             u.user_id, u.username, u.password_hash, u.email, u.role, u.account_status,
-            t.teacher_id, t.first_name, t.middle_name, t.last_name, t.municipality,
+            t.teacher_id, t.middle_name, t.municipality,
+            COALESCE(t.first_name, u.first_name) AS first_name,
+            COALESCE(t.last_name, u.last_name) AS last_name,
+            COALESCE(t.contact_number, u.contact_number) AS contact_number,
             c.clc_name
         FROM users u
         LEFT JOIN teacher t ON t.user_id = u.user_id
@@ -91,7 +95,10 @@ def me():
         """
         SELECT
             u.user_id, u.username, u.email, u.role, u.account_status,
-            t.first_name, t.middle_name, t.last_name, t.municipality,
+            t.middle_name, t.municipality,
+            COALESCE(t.first_name, u.first_name) AS first_name,
+            COALESCE(t.last_name, u.last_name) AS last_name,
+            COALESCE(t.contact_number, u.contact_number) AS contact_number,
             c.clc_name
         FROM users u
         LEFT JOIN teacher t ON t.user_id = u.user_id
