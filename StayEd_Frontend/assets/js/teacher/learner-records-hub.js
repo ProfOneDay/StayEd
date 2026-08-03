@@ -33,9 +33,11 @@ class LearnerRecordsHub {
   static async loadClassContext() {
     const params = new URLSearchParams(window.location.search);
     const classId = params.get("class");
+    const clcName = params.get("clc");
     const banner = document.querySelector("[data-class-context-banner]");
 
     this.state.classId = classId || "";
+    if (clcName) this.state.clc = clcName;
 
     if (!classId || !banner) return;
 
@@ -81,6 +83,7 @@ class LearnerRecordsHub {
         }),
       );
 
+      this.populateClcFilter();
       this.renderActiveTab();
     } catch (error) {
       console.error("[LearnerRecordsHub]", error);
@@ -159,6 +162,33 @@ class LearnerRecordsHub {
       });
   }
 
+  static populateClcFilter() {
+    const select = document.querySelector("[data-records-filter-clc]");
+    if (!select) return;
+
+    const current = this.state.clc;
+    const clcs = [...new Set(this.state.all.map((l) => l.clc).filter(Boolean))].sort(
+      (a, b) => a.localeCompare(b),
+    );
+
+    select.replaceChildren();
+
+    const allOption = document.createElement("option");
+    allOption.value = "";
+    allOption.textContent = "All CLCs";
+    select.appendChild(allOption);
+
+    clcs.forEach((clc) => {
+      const option = document.createElement("option");
+      option.value = clc;
+      option.textContent = clc;
+      select.appendChild(option);
+    });
+
+    select.value = clcs.includes(current) ? current : "";
+    this.state.clc = select.value;
+  }
+
   static resetPages() {
     this.state.page = { modular: 1, "face-to-face": 1, blended: 1 };
   }
@@ -222,7 +252,7 @@ class LearnerRecordsHub {
       );
     }
 
-    if (clc) rows = rows.filter((l) => (l.clc || "San Felipe Sur CLC") === clc);
+    if (clc) rows = rows.filter((l) => l.clc === clc);
     if (level) rows = rows.filter((l) => l.level === level);
     if (risk) rows = rows.filter((l) => l.risk === risk);
 

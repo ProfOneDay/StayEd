@@ -9,12 +9,27 @@ from ..helpers import enum_level, error, title_enum
 bp = Blueprint("clcs", __name__)
 
 
+def _location_string(address, barangay, municipality):
+    """Join address/barangay/municipality without repeating parts that are
+    already present in the address (the seeded reference CLCs store a full
+    "Barangay, Municipality, Province" string as their address, so naively
+    appending barangay and municipality again produced duplicated text like
+    "Alacan, Binalonan, Pangasinan, Alacan, Binalonan")."""
+    address = (address or "").strip()
+    parts = [address] if address else []
+    for part in (barangay, municipality):
+        part = (part or "").strip()
+        if part and (not address or part.lower() not in address.lower()):
+            parts.append(part)
+    return ", ".join(parts)
+
+
 def _clc_card(row):
     return {
         "id": row["clc_id"],
         "name": row["clc_name"],
         "municipality": row["municipality"],
-        "location": ", ".join(x for x in [row.get("address"), row.get("barangay"), row.get("municipality")] if x),
+        "location": _location_string(row.get("address"), row.get("barangay"), row.get("municipality")),
         "status": "Active" if row["status"] == "ACTIVE" else "Inactive",
         "icon": "account_balance",
         "totalLearners": int(row.get("total_learners") or 0),

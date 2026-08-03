@@ -120,7 +120,7 @@ class ClcOverview {
 
     grid.querySelectorAll("[data-clc-view]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        window.location.href = `learner-records.html?clc=${encodeURIComponent(btn.dataset.clcView)}`;
+        window.location.href = `learner-records.html?clc=${encodeURIComponent(btn.dataset.clcName)}`;
       });
     });
   }
@@ -179,7 +179,7 @@ class ClcOverview {
                 </div>
 
                 <div class="st-clc-card-footer">
-                    <button type="button" class="st-btn st-btn-primary" data-clc-view="${clc.id}">
+                    <button type="button" class="st-btn st-btn-primary" data-clc-view="${clc.id}" data-clc-name="${clc.name}">
                         View Records
                         <span class="material-symbols-outlined">arrow_forward</span>
                     </button>
