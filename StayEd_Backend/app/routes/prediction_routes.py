@@ -12,6 +12,38 @@ from ..services.prediction_service import run_external_model
 bp = Blueprint("predictions", __name__)
 
 
+def _compute_features(enrollment_id):
+    """Build the model's feature payload from real StayEd data -- no values
+    are ever trusted from the caller. Every field here has a direct source:
+    age/sex from learner, learning_level from learning_class, modality/
+    is_re_enrollee/distance_km from class_enrollment.
+    """
+    row = fetch_one(
+        """
+        SELECT
+            EXTRACT(YEAR FROM AGE(CURRENT_DATE, l.date_of_birth))::int AS age,
+            l.sex,
+            lc.learning_level,
+            ce.learning_modality AS modality,
+            ce.is_re_enrollee,
+            ce.distance_from_clc_km AS distance_km
+        FROM class_enrollment ce
+        JOIN learner l ON l.learner_id = ce.learner_id
+        JOIN learning_class lc ON lc.class_id = ce.class_id
+        WHERE ce.enrollment_id = %s
+        """,
+        (enrollment_id,),
+    )
+    return {
+        "age": row["age"],
+        "sex": row["sex"],
+        "learning_level": row["learning_level"],
+        "modality": row["modality"],
+        "is_re_enrollee": int(row["is_re_enrollee"]) if row["is_re_enrollee"] is not None else None,
+        "distance_km": float(row["distance_km"]) if row["distance_km"] is not None else None,
+    }
+
+
 def _risk_rows(teacher_id):
     return fetch_all(
         """
@@ -98,7 +130,7 @@ def run_prediction():
             503,
         )
 
-    model_payload = data.get("features") if isinstance(data.get("features"), dict) else data
+    model_payload = _compute_features(enrollment["enrollment_id"])
     try:
         result = run_external_model(command, model_payload)
         probability = float(result["risk_probability"])

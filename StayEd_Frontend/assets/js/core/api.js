@@ -540,6 +540,10 @@ class API {
     return this.get(`/learners/${id}/records-detail`);
   }
 
+  static runPrediction(learnerId) {
+    return this.post("/predictions/run", { learner_id: learnerId });
+  }
+
   static createLearner(payload) {
     return this.post("/learners", payload);
   }

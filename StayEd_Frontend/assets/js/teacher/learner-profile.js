@@ -8,6 +8,8 @@ class LearnerProfilePage {
 
     this.bindHistoryFilters();
 
+    this.bindRunPrediction();
+
     await this.load();
   }
 
@@ -58,6 +60,34 @@ class LearnerProfilePage {
     ];
 
     Layout.updateBreadcrumb();
+  }
+
+  static bindRunPrediction() {
+    const btn = document.querySelector("[data-profile-run-prediction-btn]");
+
+    if (!btn) return;
+
+    btn.addEventListener("click", async () => {
+      btn.disabled = true;
+      btn.innerHTML = `<span class="material-symbols-outlined">progress_activity</span> Running…`;
+
+      try {
+        const result = await API.runPrediction(this.getLearnerId());
+
+        Toast?.success(
+          `Prediction generated: ${result.risk_level} risk (${Math.round(result.risk_probability * 100)}%)`,
+        );
+
+        await this.load();
+      } catch (error) {
+        console.error("[LearnerProfile] runPrediction", error);
+
+        Toast?.error(error.message || "Unable to generate a prediction.");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<span class="material-symbols-outlined">insights</span> Run Prediction`;
+      }
+    });
   }
 
   static bindTabs() {
