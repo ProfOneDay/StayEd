@@ -83,7 +83,6 @@ class LearnerRecordsHub {
         }),
       );
 
-      this.populateClcFilter();
       this.renderActiveTab();
     } catch (error) {
       console.error("[LearnerRecordsHub]", error);
@@ -138,55 +137,12 @@ class LearnerRecordsHub {
       });
 
     document
-      .querySelector("[data-records-filter-clc]")
-      ?.addEventListener("change", (e) => {
-        this.state.clc = e.target.value;
-        this.resetPages();
-        this.renderActiveTab();
-      });
-
-    document
-      .querySelector("[data-records-filter-level]")
-      ?.addEventListener("change", (e) => {
-        this.state.level = e.target.value;
-        this.resetPages();
-        this.renderActiveTab();
-      });
-
-    document
       .querySelector("[data-records-filter-risk]")
       ?.addEventListener("change", (e) => {
         this.state.risk = e.target.value;
         this.resetPages();
         this.renderActiveTab();
       });
-  }
-
-  static populateClcFilter() {
-    const select = document.querySelector("[data-records-filter-clc]");
-    if (!select) return;
-
-    const current = this.state.clc;
-    const clcs = [...new Set(this.state.all.map((l) => l.clc).filter(Boolean))].sort(
-      (a, b) => a.localeCompare(b),
-    );
-
-    select.replaceChildren();
-
-    const allOption = document.createElement("option");
-    allOption.value = "";
-    allOption.textContent = "All CLCs";
-    select.appendChild(allOption);
-
-    clcs.forEach((clc) => {
-      const option = document.createElement("option");
-      option.value = clc;
-      option.textContent = clc;
-      select.appendChild(option);
-    });
-
-    select.value = clcs.includes(current) ? current : "";
-    this.state.clc = select.value;
   }
 
   static resetPages() {
@@ -198,12 +154,6 @@ class LearnerRecordsHub {
       .querySelector("[data-records-save]")
       ?.addEventListener("click", () => {
         Toast?.success("Changes saved.");
-      });
-
-    document
-      .querySelector("[data-records-export]")
-      ?.addEventListener("click", () => {
-        Toast?.info("Export will be available once connected to the server.");
       });
 
     document
@@ -219,14 +169,6 @@ class LearnerRecordsHub {
       ?.addEventListener("click", () => {
         Toast?.success(
           `Marked ${this.state.selected.modular.size} learner(s) as Contacted.`,
-        );
-      });
-
-    document
-      .querySelector("[data-f2f-bulk-export]")
-      ?.addEventListener("click", () => {
-        Toast?.info(
-          `Exporting ${this.state.selected["face-to-face"].size} learner record(s)…`,
         );
       });
 
@@ -309,7 +251,7 @@ class LearnerRecordsHub {
                 <td>
                     <div class="st-progress-cell">
                         <div class="st-progress-cell-head">
-                            <span class="st-progress-cell-label ${labelClass}">${m.active} Active Modules</span>
+                            <button type="button" class="st-progress-cell-label ${labelClass}" data-open-module-modal="${l.id}" style="background:none;border:none;padding:0;cursor:pointer;text-align:left;">${m.active} Active Modules</button>
                             <span class="st-progress-cell-count">${m.completed} of ${m.total}</span>
                         </div>
                         <div class="st-progress-track">
@@ -346,61 +288,52 @@ class LearnerRecordsHub {
       infoSelector: "[data-f2f-info]",
       pagesSelector: "[data-f2f-pages]",
       pageKey: "face-to-face",
-      colspan: 6,
+      colspan: 5,
       rowRenderer: (l) => this.f2fRow(l),
     });
   }
 
   static f2fRow(l) {
-    const a = l.attendance || {};
-
     const m = l.modules || {};
 
     const pct = Math.round((m.completed / m.total) * 100) || 0;
 
+    const consultDot =
+      l.risk === "High"
+        ? "st-consult-dot--danger"
+        : l.risk === "Moderate"
+          ? "st-consult-dot--warning"
+          : "st-consult-dot--ok";
+
     return `
             <tr>
-                <td class="checkbox-col">
-                    <input type="checkbox" data-row-select-f2f="${l.id}"
-                        ${this.state.selected["face-to-face"].has(l.id) ? "checked" : ""}
-                        aria-label="Select ${l.name}">
-                </td>
-                <td>
-                    <div style="display:flex;flex-direction:column;">
-                        <span style="font-weight:700;color:var(--st-primary);">${l.name}</span>
-                        <span class="st-learner-id">LRN: ${l.lrn}</span>
-                        <div style="margin-top:4px;">${this.riskBadge(l.risk)}</div>
-                    </div>
-                </td>
-                <td>
-                    <select class="st-quick-select" data-attendance-status="${l.id}" aria-label="Attendance status for ${l.name}">
-                        <option ${a.lastSession?.status === "Attended" ? "selected" : ""}>Attended</option>
-                        <option ${a.lastSession?.status === "Absent" ? "selected" : ""}>Absent</option>
-                        <option ${a.lastSession?.status === "Excused" ? "selected" : ""}>Excused</option>
-                    </select>
-                </td>
+                <td style="font-family:monospace;font-size:12px;color:var(--st-on-surface-variant);">${l.lrn}</td>
+                <td style="font-weight:600;color:var(--st-on-surface);">${l.name}</td>
                 <td>
                     <div class="st-progress-cell">
-                        <span class="st-progress-cell-count">${m.completed} of ${m.total} Completed</span>
-                        <button type="button" class="st-progress-link" data-open-module-modal="${l.id}">
-                            <span class="material-symbols-outlined" style="font-size:16px;">menu_book</span>
-                            ${m.active} Active Modules
-                        </button>
-                        <div class="st-progress-track st-progress-track--lg">
-                            <div class="st-progress-fill st-progress-fill--secondary" style="width:${pct}%;"></div>
+                        <span class="st-progress-cell-count">${m.completed} of ${m.total} Returned</span>
+                        <div class="st-progress-track">
+                            <div class="st-progress-fill st-progress-fill--primary" style="width:${pct}%;"></div>
                         </div>
+                        <button type="button" class="st-progress-link" data-open-module-modal="${l.id}">
+                            View Logbook
+                            <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span>
+                        </button>
                     </div>
                 </td>
-                <td style="font-size:13px;color:var(--st-on-surface-variant);">${l.lastInteraction || "\u2014"}</td>
-                <td class="is-center">${this.rowActionsMenu(l.id)}</td>
+                <td>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span class="st-consult-dot ${consultDot}"></span>
+                        <span style="font-size:13px;">${l.lastInteraction || "\u2014"}</span>
+                    </div>
+                </td>
+                <td>${this.riskBadge(l.risk)}</td>
             </tr>
         `;
   }
 
   static renderBlended() {
     const rows = this.filteredForModality("Blended");
-
-    this.renderBlendedSummary(rows);
 
     this.renderTable({
       rows,
@@ -411,43 +344,6 @@ class LearnerRecordsHub {
       colspan: 7,
       rowRenderer: (l) => this.blendedRow(l),
     });
-  }
-
-  static renderBlendedSummary(rows) {
-    if (!rows.length) {
-      this.set("[data-blended-modules]", "\u2014");
-      this.set("[data-blended-attendance]", "\u2014");
-      this.set("[data-blended-completion]", "\u2014");
-      this.set("[data-blended-risk]", "0");
-      return;
-    }
-
-    const avgModules = Math.round(
-      (rows.reduce(
-        (sum, l) => sum + (l.modules?.completed / l.modules?.total || 0),
-        0,
-      ) /
-        rows.length) *
-        100,
-    );
-
-    const avgAttendance = Math.round(
-      (rows.reduce((sum, l) => sum + (l.attendance_rate || 0), 0) /
-        rows.length) *
-        100,
-    );
-
-    const atRisk = rows.filter(
-      (l) => l.risk === "High" || l.risk === "Moderate",
-    ).length;
-
-    this.set("[data-blended-modules]", `${avgModules}%`);
-    this.set("[data-blended-attendance]", `${avgAttendance}%`);
-    this.set(
-      "[data-blended-completion]",
-      `${Math.round((avgModules + avgAttendance) / 2)}%`,
-    );
-    this.set("[data-blended-risk]", atRisk);
   }
 
   static blendedRow(l) {
@@ -629,7 +525,7 @@ class LearnerRecordsHub {
     });
 
     container
-      .querySelectorAll("[data-contact-status], [data-attendance-status]")
+      .querySelectorAll("[data-contact-status]")
       .forEach((select) => {
         select.addEventListener("change", () => {
           Toast?.success("Status updated.");
@@ -645,12 +541,6 @@ class LearnerRecordsHub {
       selectAll: "[data-modular-select-all]",
       bar: "[data-modular-bulk-bar]",
       count: "[data-modular-bulk-count]",
-    },
-    "face-to-face": {
-      attr: "data-row-select-f2f",
-      selectAll: "[data-f2f-select-all]",
-      bar: "[data-f2f-bulk-bar]",
-      count: "[data-f2f-bulk-count]",
     },
     blended: {
       attr: "data-row-select-blended",

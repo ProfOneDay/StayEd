@@ -51,14 +51,6 @@
             </a>
             <button
               type="button"
-              class="st-btn st-btn-outline"
-              data-records-export
-            >
-              <span class="material-symbols-outlined">ios_share</span>
-              Export
-            </button>
-            <button
-              type="button"
               class="st-btn st-btn-primary"
               data-records-save
             >
@@ -107,21 +99,6 @@
                 aria-label="Search learner records"
               />
             </div>
-
-            <select data-records-filter-clc aria-label="Filter by CLC">
-              <option value="">All CLCs</option>
-            </select>
-
-            <select
-              data-records-filter-level
-              aria-label="Filter by learning level"
-            >
-              <option value="">All Levels</option>
-              <option value="Basic Literacy">Basic Literacy</option>
-              <option value="Elementary">Elementary</option>
-              <option value="Junior High">Junior High</option>
-              <option value="Senior High">Senior High</option>
-            </select>
 
             <select data-records-filter-risk aria-label="Filter by risk level">
               <option value="">All Risk Levels</option>
@@ -251,43 +228,30 @@
         <!-- FACE-TO-FACE PANEL -->
         <div class="st-modality-panel" data-modality-panel="face-to-face">
           <div class="st-panel col-12">
-            <div class="st-bulk-bar st-hidden" data-f2f-bulk-bar>
-              <span class="st-bulk-bar-count" data-f2f-bulk-count
-                >0 selected</span
-              >
-              <div class="st-bulk-bar-actions">
-                <button type="button" class="st-bulk-btn" data-f2f-bulk-export>
-                  <span class="material-symbols-outlined">download</span>
-                  Export Selected
-                </button>
-              </div>
-            </div>
             <div class="st-table-scroll st-table-scroll--sticky">
               <table class="st-data-table">
                 <thead>
                   <tr>
-                    <th class="checkbox-col">
-                      <input
-                        type="checkbox"
-                        data-f2f-select-all
-                        aria-label="Select all learners"
-                      />
-                    </th>
+                    <th>LRN</th>
                     <th class="is-sortable" data-sort="name">
-                      Learner Information
+                      Learner
                       <span class="material-symbols-outlined st-sort-icon"
                         >unfold_more</span
                       >
                     </th>
-                    <th>Session Attendance</th>
-                    <th>Module Progress</th>
-                    <th>Last Interaction</th>
-                    <th class="is-center">Actions</th>
+                    <th>Modules</th>
+                    <th>Latest Consultation</th>
+                    <th class="is-sortable" data-sort="risk">
+                      Risk Level
+                      <span class="material-symbols-outlined st-sort-icon"
+                        >unfold_more</span
+                      >
+                    </th>
                   </tr>
                 </thead>
                 <tbody data-f2f-body>
                   <tr>
-                    <td colspan="6" class="st-table-empty-cell">Loading…</td>
+                    <td colspan="5" class="st-table-empty-cell">Loading…</td>
                   </tr>
                 </tbody>
               </table>
@@ -303,61 +267,6 @@
 
         <!-- BLENDED PANEL -->
         <div class="st-modality-panel" data-modality-panel="blended">
-          <!-- Unified summary strip -->
-          <div class="st-blended-summary">
-            <div class="st-blended-summary-card">
-              <div
-                class="st-blended-summary-icon st-blended-summary-icon--modular"
-              >
-                <span class="material-symbols-outlined">menu_book</span>
-              </div>
-              <div>
-                <p class="st-blended-summary-value" data-blended-modules>--</p>
-                <p class="st-blended-summary-label">Avg. Module Progress</p>
-              </div>
-            </div>
-
-            <div class="st-blended-summary-card">
-              <div
-                class="st-blended-summary-icon st-blended-summary-icon--attendance"
-              >
-                <span class="material-symbols-outlined">event_available</span>
-              </div>
-              <div>
-                <p class="st-blended-summary-value" data-blended-attendance>
-                  --
-                </p>
-                <p class="st-blended-summary-label">Avg. Attendance Rate</p>
-              </div>
-            </div>
-
-            <div class="st-blended-summary-card">
-              <div
-                class="st-blended-summary-icon st-blended-summary-icon--completion"
-              >
-                <span class="material-symbols-outlined">task_alt</span>
-              </div>
-              <div>
-                <p class="st-blended-summary-value" data-blended-completion>
-                  --
-                </p>
-                <p class="st-blended-summary-label">Overall Completion Rate</p>
-              </div>
-            </div>
-
-            <div class="st-blended-summary-card">
-              <div
-                class="st-blended-summary-icon st-blended-summary-icon--risk"
-              >
-                <span class="material-symbols-outlined">warning</span>
-              </div>
-              <div>
-                <p class="st-blended-summary-value" data-blended-risk>--</p>
-                <p class="st-blended-summary-label">Learners At Risk</p>
-              </div>
-            </div>
-          </div>
-
           <div class="st-panel col-12">
             <div class="st-bulk-bar st-hidden" data-blended-bulk-bar>
               <span class="st-bulk-bar-count" data-blended-bulk-count

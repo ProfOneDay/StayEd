@@ -204,15 +204,6 @@ class TeacherDashboard {
         rows = rows.filter((l) => l.modality === modality);
       }
 
-      const sectionLabel = document.querySelector(
-        "[data-filter-section]",
-      )?.value;
-
-      if (sectionLabel && sectionLabel !== "All Sections") {
-        const sectionCode = sectionLabel.replace("Section ", "").split(" ")[0];
-        rows = rows.filter((l) => l.section === sectionCode);
-      }
-
       const clc = document.querySelector("[data-filter-clc]")?.value;
 
       if (clc && clc !== "All CLCs" && rows.some((l) => l.clc)) {

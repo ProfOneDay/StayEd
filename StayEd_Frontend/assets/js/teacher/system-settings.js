@@ -6,10 +6,6 @@ class SystemSettingsPage {
 
     this.bindToggles();
 
-    this.bindDataActions();
-
-    this.bindInviteUser();
-
     this.bindSaveAll();
   }
 
@@ -28,32 +24,6 @@ class SystemSettingsPage {
         toggle.addEventListener("change", () => {
           Toast?.success("Preference updated.");
         });
-      });
-  }
-
-  static bindDataActions() {
-    const labels = {
-      backup: "Backup started. This may take a few minutes.",
-      restore: "Restore from backup will open a file picker here.",
-      "audit-logs": "Audit log viewer will open here.",
-    };
-
-    document.querySelectorAll("[data-action]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        Toast?.info(
-          labels[btn.dataset.action] || "This feature is coming soon.",
-        );
-      });
-    });
-  }
-
-  static bindInviteUser() {
-    document
-      .querySelector("[data-invite-user]")
-      ?.addEventListener("click", () => {
-        Toast?.info(
-          "User invitations will be available once connected to the server.",
-        );
       });
   }
 

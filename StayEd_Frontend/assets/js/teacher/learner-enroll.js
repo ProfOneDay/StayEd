@@ -277,7 +277,6 @@ class LearnerEnrollWizard {
         title: "Program Assignment",
         rows: [
           ["Program", val("wProgram")],
-          ["Semester", val("wSemester")],
           ["Assigned Teacher", val("wAssignedTeacher")],
         ],
       },
