@@ -91,12 +91,10 @@ def run_prediction():
     except ValueError:
         return error("Monitoring dates must use YYYY-MM-DD.", 422)
 
-    features = data.get("features") if isinstance(data.get("features"), dict) else data
-
     try:
         outcome = trigger_prediction(
             enrollment["enrollment_id"], current_user_id(),
-            monitoring_start=monitoring_start, monitoring_end=monitoring_end, features=features,
+            monitoring_start=monitoring_start, monitoring_end=monitoring_end,
         )
     except RuntimeError as exc:
         return error(str(exc), 503)

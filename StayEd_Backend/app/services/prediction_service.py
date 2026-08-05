@@ -10,6 +10,38 @@ from flask import current_app
 from ..db import fetch_one, get_db
 
 
+def _compute_features(enrollment_id: int) -> dict:
+    """Build the model's feature payload from real StayEd data -- no values
+    are ever trusted from the caller. Every field here has a direct source:
+    age/sex from learner, learning_level from learning_class, modality/
+    is_re_enrollee/distance_km from class_enrollment.
+    """
+    row = fetch_one(
+        """
+        SELECT
+            EXTRACT(YEAR FROM AGE(CURRENT_DATE, l.date_of_birth))::int AS age,
+            l.sex,
+            lc.learning_level,
+            ce.learning_modality AS modality,
+            ce.is_re_enrollee,
+            ce.distance_from_clc_km AS distance_km
+        FROM class_enrollment ce
+        JOIN learner l ON l.learner_id = ce.learner_id
+        JOIN learning_class lc ON lc.class_id = ce.class_id
+        WHERE ce.enrollment_id = %s
+        """,
+        (enrollment_id,),
+    )
+    return {
+        "age": row["age"],
+        "sex": row["sex"],
+        "learning_level": row["learning_level"],
+        "modality": row["modality"],
+        "is_re_enrollee": int(row["is_re_enrollee"]) if row["is_re_enrollee"] is not None else None,
+        "distance_km": float(row["distance_km"]) if row["distance_km"] is not None else None,
+    }
+
+
 def run_external_model(command: str, payload: dict) -> dict:
     """Run a configured model bridge (for example Rscript) over JSON stdin.
 
@@ -44,14 +76,16 @@ def trigger_prediction(
     *,
     monitoring_start: date | None = None,
     monitoring_end: date | None = None,
-    features: dict | None = None,
 ) -> dict:
     """Compute and persist a fresh risk assessment for one enrollment.
 
-    Shared by the manual `/predictions/run` endpoint and best-effort background
-    callers (e.g. after a module return or intervention change). Raises on any
-    failure -- background callers should catch and ignore, since there is no
-    trained model wired up (MODEL_COMMAND) in most environments yet.
+    Shared by the `/predictions/run` endpoint and best-effort background
+    callers (e.g. after a module return or intervention change). Features are
+    always computed server-side from real StayEd data via `_compute_features`
+    -- never accepted from the caller, so nothing here can be used to
+    fabricate a risk score. Raises on any failure -- background callers
+    should catch and ignore, since MODEL_COMMAND may not be configured in
+    every environment.
     """
     model = fetch_one(
         "SELECT model_id, model_version, algorithm FROM model_info WHERE model_status='ACTIVE' ORDER BY training_date DESC LIMIT 1"
@@ -68,7 +102,8 @@ def trigger_prediction(
     monitoring_end = monitoring_end or date.today()
     monitoring_start = monitoring_start or (monitoring_end - timedelta(days=30))
 
-    result = run_external_model(command, features if features is not None else {"enrollment_id": enrollment_id})
+    features = _compute_features(enrollment_id)
+    result = run_external_model(command, features)
     probability = float(result["risk_probability"])
 
     db = get_db()

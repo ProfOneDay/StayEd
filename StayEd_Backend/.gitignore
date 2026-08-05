@@ -6,3 +6,5 @@ __pycache__/
 models/*.rds
 models/*.pkl
 models/*.joblib
+backend_run.log
+backend_run.err.log
