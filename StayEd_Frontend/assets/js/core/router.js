@@ -40,7 +40,7 @@ class Router {
 
     "class-management.html": [
       { label: "Dashboard", href: "dashboard.html" },
-      { label: "Learner", href: "class-management.html" },
+      { label: "CLC Overview", href: "clc-overview.html" },
       { label: "Class Management" },
     ],
     "learner-records.html": [

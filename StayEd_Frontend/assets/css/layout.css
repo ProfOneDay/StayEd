@@ -716,24 +716,6 @@ body {
   margin-bottom: 24px;
 }
 
-.st-page-title {
-  font-family: var(--st-font-heading);
-
-  font-size: 32px;
-
-  font-weight: 700;
-
-  color: var(--st-primary);
-}
-
-.st-page-subtitle {
-  margin-top: 6px;
-
-  color: var(--st-text-secondary);
-
-  font-size: 15px;
-}
-
 .st-footer {
   background: var(--st-footer-background);
 
@@ -915,10 +897,6 @@ body {
     flex-wrap: wrap;
 
     gap: 16px;
-  }
-
-  .st-page-title {
-    font-size: 24px;
   }
 
   .st-content {

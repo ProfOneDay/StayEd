@@ -1,12 +1,42 @@
 class ClassManagement {
   static classes = [];
 
+  static clcName = "";
+
+  static municipality = "";
+
   static async init() {
     if (window.Guards) Guards.teacher();
+
+    await this.resolveClcContext();
 
     this.bindAddClass();
 
     await this.load();
+  }
+
+  // A teacher may belong to several CLCs within their municipality, so
+  // Class Management always operates on exactly one CLC at a time: either
+  // the one passed in via ?clc= (arriving from CLC Overview's "View
+  // Classes" button) or, when reached directly (e.g. the sidebar link),
+  // the teacher's current CLC assignment.
+  static async resolveClcContext() {
+    const params = new URLSearchParams(window.location.search);
+    const clcParam = params.get("clc");
+
+    this.municipality = window.Auth ? Auth.municipality() : "";
+
+    if (clcParam) {
+      this.clcName = clcParam;
+      return;
+    }
+
+    try {
+      const current = await API.getCurrentClc();
+      this.clcName = current?.name || "";
+    } catch (error) {
+      this.clcName = "";
+    }
   }
 
   static async load() {
@@ -15,9 +45,18 @@ class ClassManagement {
     this.showSkeleton();
 
     try {
+      if (!this.clcName) {
+        this.classes = [];
+        this.renderClcBanner();
+        this.renderNoClcSelected();
+        return;
+      }
+
       const res = await API.getTeacherClasses();
 
-      this.classes = res.data || [];
+      this.classes = (res.data || []).filter((c) => c.clc === this.clcName);
+
+      this.renderClcBanner();
 
       this.render();
     } catch (error) {
@@ -28,12 +67,43 @@ class ClassManagement {
     }
   }
 
+  static renderClcBanner() {
+    this.set(
+      "[data-clc-context-name]",
+      this.clcName || "No CLC selected",
+    );
+
+    this.set(
+      "[data-clc-context-meta]",
+      this.clcName
+        ? `${this.classes.length} class${this.classes.length === 1 ? "" : "es"} under this CLC`
+        : "Choose a CLC from CLC Overview to get started",
+    );
+  }
+
   static showSkeleton() {
     const grid = document.querySelector("[data-class-grid]");
 
     if (grid && window.Skeletons) {
       grid.innerHTML = Skeletons.cards(4);
     }
+  }
+
+  static renderNoClcSelected() {
+    const grid = document.querySelector("[data-class-grid]");
+
+    if (!grid) return;
+
+    grid.innerHTML = `
+            <div class="st-empty" style="grid-column:1/-1;">
+                <span class="material-symbols-outlined">hub</span>
+                <p class="st-empty-title">No Community Learning Center selected</p>
+                <p class="st-empty-text">Choose a CLC from CLC Overview to view and manage its classes.</p>
+                <a href="clc-overview.html" class="st-btn st-btn-primary" style="margin-top:16px;">
+                    Go to CLC Overview
+                </a>
+            </div>
+        `;
   }
 
   static render() {
@@ -45,8 +115,8 @@ class ClassManagement {
       grid.innerHTML = `
                 <div class="st-empty" style="grid-column:1/-1;">
                     <span class="material-symbols-outlined">school</span>
-                    <p class="st-empty-title">No classes yet</p>
-                    <p class="st-empty-text">Add your first class to start enrolling learners.</p>
+                    <p class="st-empty-title">No registered classes yet.</p>
+                    <p class="st-empty-text">Create a class for this CLC to begin enrolling learners and managing records.</p>
                 </div>
             `;
 
@@ -59,6 +129,14 @@ class ClassManagement {
       el.addEventListener("click", () => {
         const classId = el.dataset.openClass;
         window.location.href = `learner-records.html?class=${encodeURIComponent(classId)}`;
+      });
+    });
+
+    grid.querySelectorAll("[data-delete-class]").forEach((el) => {
+      el.addEventListener("click", () => {
+        const classId = el.dataset.deleteClass;
+        const cls = this.classes.find((x) => String(x.id) === String(classId));
+        this.confirmDelete(classId, cls?.level);
       });
     });
   }
@@ -80,7 +158,6 @@ class ClassManagement {
                         <span class="material-symbols-outlined">location_on</span>
                         ${c.clc}
                     </p>
-                    <span class="st-class-card-modality-chip">${c.modality}</span>
                 </div>
 
                 <div class="st-clc-card-stats">
@@ -90,10 +167,13 @@ class ClassManagement {
                     </div>
                 </div>
 
-                <div class="st-clc-card-footer">
+                <div class="st-clc-card-footer st-clc-card-footer--split">
                     <button type="button" class="st-btn st-btn-primary" data-open-class="${c.id}">
                         Open Class
                         <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
+                    <button type="button" class="st-icon-btn-sm st-icon-btn-sm--danger" data-delete-class="${c.id}" aria-label="Delete class" title="Delete class">
+                        <span class="material-symbols-outlined">delete</span>
                     </button>
                 </div>
 
@@ -101,29 +181,40 @@ class ClassManagement {
         `;
   }
 
+  static confirmDelete(id, level) {
+    if (!window.Modal) return;
+
+    Modal.show({
+      title: "Delete Class",
+      message: `Are you sure you want to delete <strong>${level || "this class"}</strong>? This cannot be undone.`,
+      confirmLabel: "Delete Class",
+      onConfirm: async () => {
+        try {
+          await API.deleteClass(id);
+
+          Toast?.success("Class deleted.");
+
+          await this.load();
+        } catch (error) {
+          console.error(error);
+          Toast?.error(error.message || "Unable to delete the class.");
+        }
+      },
+    });
+  }
+
   static bindAddClass() {
     document
       .querySelector("[data-add-class-btn]")
-      ?.addEventListener("click", async () => {
+      ?.addEventListener("click", () => {
         if (!window.Modal) return;
 
-        let clcs = [];
-
-        try {
-          const response = await API.getClcs();
-          clcs = response.data || [];
-        } catch (error) {
-          console.warn("[ClassManagement] Unable to load CLC choices", error);
+        if (!this.clcName) {
+          Toast?.warning(
+            "Choose a Community Learning Center from CLC Overview first.",
+          );
+          return;
         }
-
-        const options = clcs.length
-          ? clcs
-              .map((item) => {
-                const name = item.name || item.clc || item.clc_name || "";
-                return `<option value="${name}">${name}</option>`;
-              })
-              .join("")
-          : `<option value="San Felipe Sur CLC">San Felipe Sur CLC</option>`;
 
         Modal.show({
           title: "Add Class",
@@ -131,8 +222,8 @@ class ClassManagement {
           confirmLabel: "Create Class",
           message: `
             <div class="st-schedule-modal-field">
-              <label for="newClassClc">Community Learning Center</label>
-              <select id="newClassClc">${options}</select>
+              <label>Community Learning Center</label>
+              <p class="st-schedule-modal-learner">${this.clcName}</p>
             </div>
             <div class="st-schedule-modal-field">
               <label for="newClassLevel">Learning Level</label>
@@ -149,21 +240,20 @@ class ClassManagement {
             </div>
           `,
           onConfirm: async () => {
-            const communityLearningCenter =
-              document.getElementById("newClassClc")?.value.trim();
             const learningLevel =
               document.getElementById("newClassLevel")?.value.trim();
             const schoolYear =
               document.getElementById("newClassYear")?.value.trim();
 
-            if (!communityLearningCenter || !learningLevel || !schoolYear) {
+            if (!learningLevel || !schoolYear) {
               Toast?.error("Please complete all class details.");
               return;
             }
 
             try {
               await API.createClass({
-                communityLearningCenter,
+                communityLearningCenter: this.clcName,
+                municipality: this.municipality,
                 learningLevel,
                 schoolYear,
                 semester: "Whole Year",
@@ -179,7 +269,15 @@ class ClassManagement {
           },
         });
       });
-  }}
+  }
+
+  static set(selector, value) {
+    const el = document.querySelector(selector);
+    if (el && value !== undefined && value !== null) {
+      el.textContent = value;
+    }
+  }
+}
 
 (function bootClassManagement() {
   let started = false;

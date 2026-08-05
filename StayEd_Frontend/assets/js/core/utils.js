@@ -8,6 +8,12 @@ class Utils {
       "Sex",
       "Date of Birth",
       "Learning Modality",
+      "Re-enrollee (Yes/No)",
+      "Employment Status",
+      "Distance from CLC (km)",
+      "Civil Status (if applicable)",
+      "Contact Number",
+      "Guardian Contact Number (if applicable)",
     ];
 
     const sampleRow = [
@@ -18,6 +24,12 @@ class Utils {
       "Male",
       "2008-05-14",
       "Face-to-Face",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
     ];
 
     const csvContent = [headers, sampleRow]

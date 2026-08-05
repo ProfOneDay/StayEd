@@ -1,11 +1,17 @@
 from __future__ import annotations
 
-from flask import Blueprint
+from datetime import date
 
-from ..authz import role_required, teacher_for_user
-from ..db import fetch_all
+from flask import Blueprint, request
+
+from ..authz import current_user_id, role_required, teacher_for_user
+from ..db import execute, fetch_all, fetch_one
+from ..helpers import error
+from ..services.prediction_service import trigger_prediction
 
 bp = Blueprint("interventions", __name__)
+
+INTERVENTION_STATUSES = {"PLANNED", "ONGOING", "COMPLETED", "CANCELLED"}
 
 
 @bp.get("/interventions")
@@ -35,3 +41,68 @@ def interventions():
     status_map = {"PLANNED": "Pending", "ONGOING": "In Progress", "COMPLETED": "Completed", "CANCELLED": "Cancelled"}
     data = [{**dict(r), "status": status_map.get(r["status"], r["status"])} for r in rows]
     return {"total": len(data), "data": data}
+
+
+@bp.patch("/interventions/<int:intervention_id>")
+@role_required("teacher")
+def update_intervention_status(intervention_id: int):
+    teacher = teacher_for_user()
+    row = fetch_one(
+        "SELECT intervention_id, risk_assessment_id FROM intervention WHERE intervention_id=%s AND assigned_to_teacher_id=%s",
+        (intervention_id, teacher["teacher_id"]),
+    )
+    if not row:
+        return error("Intervention not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    status = str(data.get("status") or "").strip().upper()
+    if status not in INTERVENTION_STATUSES:
+        return error(f"Status must be one of {', '.join(sorted(INTERVENTION_STATUSES))}.", 422)
+
+    if status == "COMPLETED":
+        execute(
+            "UPDATE intervention SET status=%s, date_completed=CURRENT_DATE WHERE intervention_id=%s",
+            (status, intervention_id),
+        )
+    else:
+        execute(
+            "UPDATE intervention SET status=%s, date_completed=NULL WHERE intervention_id=%s",
+            (status, intervention_id),
+        )
+
+    ra = fetch_one("SELECT enrollment_id FROM risk_assessment WHERE risk_assessment_id=%s", (row["risk_assessment_id"],))
+    if ra:
+        try:
+            trigger_prediction(ra["enrollment_id"], current_user_id())
+        except Exception:
+            pass
+
+    return {"message": "Intervention status updated."}
+
+
+@bp.post("/interventions/<int:intervention_id>/follow-up")
+@role_required("teacher")
+def add_intervention_follow_up(intervention_id: int):
+    teacher = teacher_for_user()
+    row = fetch_one(
+        "SELECT intervention_id FROM intervention WHERE intervention_id=%s AND assigned_to_teacher_id=%s",
+        (intervention_id, teacher["teacher_id"]),
+    )
+    if not row:
+        return error("Intervention not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    notes = str(data.get("notes") or "").strip()
+    outcome = str(data.get("outcome") or "").strip() or None
+    if not notes:
+        return error("Follow-up notes are required.", 422)
+
+    execute(
+        """
+        INSERT INTO follow_up (intervention_id, follow_up_date, notes, outcome, created_by_user_id)
+        VALUES (%s, %s, %s, %s, %s)
+        """,
+        (intervention_id, date.today(), notes, outcome, current_user_id()),
+    )
+
+    return {"message": "Follow-up recorded."}, 201

@@ -150,68 +150,20 @@
         <!-- MODULAR PANEL -->
         <div class="st-modality-panel is-active" data-modality-panel="modular">
           <div class="st-panel col-12">
-            <div class="st-bulk-bar st-hidden" data-modular-bulk-bar>
-              <span class="st-bulk-bar-count" data-modular-bulk-count
-                >0 selected</span
-              >
-              <div class="st-bulk-bar-actions">
-                <button
-                  type="button"
-                  class="st-bulk-btn"
-                  data-modular-bulk-export
-                >
-                  <span class="material-symbols-outlined">download</span>
-                  Export Selected
-                </button>
-                <button
-                  type="button"
-                  class="st-bulk-btn"
-                  data-modular-bulk-contact
-                >
-                  <span class="material-symbols-outlined">call</span>
-                  Mark Contacted
-                </button>
-              </div>
-            </div>
             <div class="st-table-scroll st-table-scroll--sticky">
-              <table class="st-data-table st-grouped-table">
+              <table class="st-data-table">
                 <thead>
-                  <tr class="st-group-row">
-                    <th></th>
-                    <th colspan="3">Learner Information</th>
-                    <th>Module Progress</th>
-                    <th>Contact Status</th>
-                    <th>History</th>
-                  </tr>
-                  <tr class="st-label-row">
-                    <th class="checkbox-col">
-                      <input
-                        type="checkbox"
-                        data-modular-select-all
-                        aria-label="Select all learners"
-                      />
-                    </th>
+                  <tr>
                     <th>LRN</th>
-                    <th class="is-sortable" data-sort="name">
-                      Learner Name
-                      <span class="material-symbols-outlined st-sort-icon"
-                        >unfold_more</span
-                      >
-                    </th>
-                    <th class="is-sortable" data-sort="risk">
-                      Risk Level
-                      <span class="material-symbols-outlined st-sort-icon"
-                        >unfold_more</span
-                      >
-                    </th>
-                    <th>Progress Summary</th>
-                    <th>Contact Status</th>
-                    <th>Last Interaction</th>
+                    <th>Learner</th>
+                    <th>Modules</th>
+                    <th>Latest Learner Activity</th>
+                    <th>Risk Level</th>
                   </tr>
                 </thead>
                 <tbody data-modular-body>
                   <tr>
-                    <td colspan="7" class="st-table-empty-cell">Loading…</td>
+                    <td colspan="5" class="st-table-empty-cell">Loading…</td>
                   </tr>
                 </tbody>
               </table>
@@ -233,20 +185,10 @@
                 <thead>
                   <tr>
                     <th>LRN</th>
-                    <th class="is-sortable" data-sort="name">
-                      Learner
-                      <span class="material-symbols-outlined st-sort-icon"
-                        >unfold_more</span
-                      >
-                    </th>
+                    <th>Learner</th>
                     <th>Modules</th>
                     <th>Latest Consultation</th>
-                    <th class="is-sortable" data-sort="risk">
-                      Risk Level
-                      <span class="material-symbols-outlined st-sort-icon"
-                        >unfold_more</span
-                      >
-                    </th>
+                    <th>Risk Level</th>
                   </tr>
                 </thead>
                 <tbody data-f2f-body>
@@ -268,48 +210,21 @@
         <!-- BLENDED PANEL -->
         <div class="st-modality-panel" data-modality-panel="blended">
           <div class="st-panel col-12">
-            <div class="st-bulk-bar st-hidden" data-blended-bulk-bar>
-              <span class="st-bulk-bar-count" data-blended-bulk-count
-                >0 selected</span
-              >
-              <div class="st-bulk-bar-actions">
-                <button
-                  type="button"
-                  class="st-bulk-btn"
-                  data-blended-bulk-export
-                >
-                  <span class="material-symbols-outlined">download</span>
-                  Export Selected
-                </button>
-              </div>
-            </div>
             <div class="st-table-scroll st-table-scroll--sticky">
               <table class="st-data-table">
                 <thead>
                   <tr>
-                    <th class="checkbox-col">
-                      <input
-                        type="checkbox"
-                        data-blended-select-all
-                        aria-label="Select all learners"
-                      />
-                    </th>
-                    <th class="is-sortable" data-sort="name">
-                      Learner Information
-                      <span class="material-symbols-outlined st-sort-icon"
-                        >unfold_more</span
-                      >
-                    </th>
-                    <th>Session Attendance</th>
-                    <th>Module Progress</th>
-                    <th>Completion Rate</th>
-                    <th>Last Interaction</th>
+                    <th>LRN</th>
+                    <th>Learner</th>
+                    <th>Modules</th>
+                    <th>Latest Learning Activity</th>
+                    <th>Risk Level</th>
                     <th class="is-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody data-blended-body>
                   <tr>
-                    <td colspan="7" class="st-table-empty-cell">Loading…</td>
+                    <td colspan="6" class="st-table-empty-cell">Loading…</td>
                   </tr>
                 </tbody>
               </table>

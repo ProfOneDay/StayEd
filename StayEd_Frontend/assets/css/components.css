@@ -15,7 +15,7 @@
 
   border-radius: var(--st-button-radius);
 
-  font-size: 14px;
+  font-size: var(--st-font-size-small);
 
   font-weight: 600;
 
@@ -107,7 +107,7 @@
 .st-card-title {
   font-family: var(--st-font-heading);
 
-  font-size: 20px;
+  font-size: 22px;
 
   font-weight: 600;
 
@@ -145,7 +145,7 @@
 }
 
 .st-metric-label {
-  font-size: 13px;
+  font-size: 14px;
 
   color: var(--st-text-secondary);
 }
@@ -159,7 +159,7 @@
 .st-metric-value {
   margin-top: auto;
 
-  font-size: 36px;
+  font-size: 38px;
 
   font-weight: 700;
 
@@ -673,7 +673,7 @@
 
   padding: 16px;
 
-  font-size: 13px;
+  font-size: 15px;
 
   font-weight: 700;
 
@@ -689,7 +689,7 @@
 
   border-bottom: 1px solid rgba(195, 198, 207, 0.35);
 
-  font-size: 14px;
+  font-size: 16px;
 
   color: var(--st-text-primary);
 

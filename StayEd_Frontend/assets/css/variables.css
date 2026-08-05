@@ -84,14 +84,14 @@
 
   --st-font-body: "Inter", sans-serif;
 
-  --st-font-size-display: 32px;
-  --st-font-size-title: 24px;
-  --st-font-size-heading: 20px;
+  --st-font-size-display: 34px;
+  --st-font-size-title: 26px;
+  --st-font-size-heading: 22px;
 
-  --st-font-size-body-lg: 18px;
-  --st-font-size-body: 16px;
-  --st-font-size-small: 14px;
-  --st-font-size-caption: 12px;
+  --st-font-size-body-lg: 20px;
+  --st-font-size-body: 18px;
+  --st-font-size-small: 16px;
+  --st-font-size-caption: 13px;
 
   --st-font-weight-regular: 400;
   --st-font-weight-medium: 500;

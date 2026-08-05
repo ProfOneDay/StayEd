@@ -121,6 +121,11 @@
     gap:8px;
 }
 
+.st-filter-group--level{
+    flex:0 0 auto;
+    min-width:0;
+}
+
 .st-filter-label{
     font-size:12px;
     font-weight:600;
@@ -925,8 +930,7 @@
     margin-bottom:24px;
 }
 
-.st-ewa-filter-bar select,
-.st-ewa-filter-bar input[type="date"]{
+.st-ewa-filter-bar select{
     height:40px;
     padding:0 12px;
     border:1px solid var(--st-outline-variant);
@@ -937,8 +941,7 @@
     color:var(--st-on-surface);
 }
 
-.st-ewa-filter-bar select:focus,
-.st-ewa-filter-bar input[type="date"]:focus{
+.st-ewa-filter-bar select:focus{
     outline:none;
     box-shadow:var(--st-focus-ring);
 }

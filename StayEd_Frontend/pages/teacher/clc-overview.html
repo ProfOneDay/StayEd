@@ -92,7 +92,15 @@
           </div>
         </div>
 
-        <!-- Search & Filter bar -->
+        <!-- Assigned municipality (read-only — teachers are scoped to one
+             municipality at account setup; the Municipality filter itself
+             lives only in the Admin/ALS Division Supervisor module) -->
+        <p class="st-clc-municipality-label">
+          <span class="material-symbols-outlined">location_on</span>
+          Municipality: <strong data-clc-municipality-name>—</strong>
+        </p>
+
+        <!-- Search bar -->
         <div class="st-filter-bar">
           <div class="st-filter-row st-clc-filter-row">
             <div class="st-search st-clc-search-wide">
@@ -104,14 +112,6 @@
                 aria-label="Search CLC name"
               />
             </div>
-
-            <select
-              data-clc-filter-municipality
-              class="st-clc-municipality-select"
-              aria-label="Filter by municipality"
-            >
-              <option value="">All Municipalities</option>
-            </select>
 
             <div class="st-clc-showing-indicator">
               <span class="material-symbols-outlined">analytics</span>

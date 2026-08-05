@@ -219,3 +219,39 @@ def create_class():
         (class_id,),
     )
     return {"message": "Class created successfully.", "data": _shape(row)}, 201
+
+
+@bp.delete("/classes/<int:class_id>")
+@role_required("teacher")
+def delete_class(class_id: int):
+    teacher = teacher_for_user()
+    if not teacher:
+        return error("Teacher profile not found.", 404)
+
+    owned = fetch_one(
+        "SELECT class_id FROM learning_class WHERE class_id = %s AND teacher_id = %s",
+        (class_id, teacher["teacher_id"]),
+    )
+    if not owned:
+        return error("Class not found.", 404)
+
+    enrolled = fetch_one(
+        "SELECT COUNT(*)::INT AS n FROM class_enrollment WHERE class_id = %s",
+        (class_id,),
+    )
+    if enrolled and enrolled["n"] > 0:
+        return error(
+            "This class still has enrolled learners. Move or remove them before deleting the class.",
+            409,
+        )
+
+    db = get_db()
+    try:
+        with db.cursor() as cur:
+            cur.execute("DELETE FROM learning_class WHERE class_id = %s", (class_id,))
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    return {"message": "Class deleted."}

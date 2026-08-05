@@ -52,6 +52,25 @@
           </div>
         </div>
 
+        <!-- CLC context banner: shows which CLC these classes belong to.
+             Populated from ?clc= in the URL (arriving from CLC Overview),
+             falling back to the teacher's current CLC assignment. -->
+        <div class="st-class-context-banner" data-clc-context-banner>
+          <span class="material-symbols-outlined">hub</span>
+          <div class="st-class-context-banner-text">
+            <span class="st-class-context-banner-name" data-clc-context-name
+              >—</span
+            >
+            <span class="st-class-context-banner-meta" data-clc-context-meta
+              >Community Learning Center</span
+            >
+          </div>
+          <a href="clc-overview.html" class="st-class-context-banner-switch">
+            Switch CLC
+            <span class="material-symbols-outlined">swap_horiz</span>
+          </a>
+        </div>
+
         <div class="st-clc-grid" data-class-grid>
           <div class="st-empty col-12" style="grid-column: 1/-1">
             <span class="material-symbols-outlined">hourglass_empty</span>

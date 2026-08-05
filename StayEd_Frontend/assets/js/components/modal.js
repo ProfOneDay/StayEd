@@ -37,6 +37,9 @@ class Modal {
 
     modal.classList.remove("hidden");
 
+    const card = modal.querySelector(".st-modal-card");
+    if (card) card.className = "st-modal-card";
+
     document.getElementById("st-modal-title").textContent = title;
 
     document.getElementById("st-modal-body").innerHTML = message;
@@ -115,6 +118,9 @@ class Modal {
     modal.classList.add(`st-modal--${size}`);
 
     modal.classList.remove("hidden");
+
+    const card = modal.querySelector(".st-modal-card");
+    if (card) card.className = "st-modal-card";
 
     document.getElementById("st-modal-title").textContent = title;
 

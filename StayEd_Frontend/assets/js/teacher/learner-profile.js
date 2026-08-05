@@ -83,6 +83,7 @@ class LearnerProfilePage {
 
   static renderHero() {
     const p = this.profile;
+    const h = p.header || {};
 
     const initials = (p.name || "?")
       .split(" ")
@@ -94,17 +95,13 @@ class LearnerProfilePage {
     this.set("[data-profile-avatar]", initials);
     this.set("[data-profile-name]", p.name);
     this.set("[data-profile-lrn]", p.lrn);
-    this.set("[data-profile-clc]", p.clc || "San Felipe Sur CLC");
+    this.set("[data-profile-clc]", p.clc || "—");
     this.set("[data-profile-level]", p.level);
     this.set("[data-profile-modality]", p.modality);
-    this.set(
-      "[data-profile-probability]",
-      `${Math.round((p.risk_probability || 0.5) * 100)}%`,
-    );
-    this.set(
-      "[data-profile-confidence]",
-      p.riskExplanation?.confidence || "High",
-    );
+    this.set("[data-profile-school-year]", h.schoolYear);
+    this.set("[data-profile-date-enrolled]", h.dateEnrolled);
+    this.set("[data-profile-assigned-teacher]", h.assignedTeacher);
+    this.set("[data-profile-current-class]", h.currentClass);
 
     const badge = document.querySelector("[data-profile-risk-badge]");
 
@@ -114,123 +111,121 @@ class LearnerProfilePage {
       .querySelector("[data-profile-assign-btn]")
       ?.addEventListener("click", () => {
         document.querySelector('[data-profile-tab="interventions"]')?.click();
+        this.openAddInterventionModal();
       });
 
     document
       .querySelector("[data-profile-edit-btn]")
-      ?.addEventListener("click", () => {
-        Toast?.info(
-          "Learner editing will open the enrollment form once connected.",
-        );
-      });
+      ?.addEventListener("click", () => this.openEditLearnerModal());
+  }
+
+  static openEditLearnerModal() {
+    if (!window.Modal) return;
+    const bg = this.profile.background || {};
+
+    Modal.show({
+      title: "Edit Learner",
+      size: "sm",
+      confirmLabel: "Save Changes",
+      message: `
+        <div class="st-schedule-modal-field">
+          <label for="elCivil">Civil Status</label>
+          <input id="elCivil" type="text" value="${bg.civilStatusRaw || ""}" placeholder="e.g. Single">
+        </div>
+        <div class="st-schedule-modal-field">
+          <label for="elEmployment">Employment Status</label>
+          <input id="elEmployment" type="text" value="${bg.employmentRaw || ""}" placeholder="e.g. Unemployed">
+        </div>
+        <div class="st-schedule-modal-field">
+          <label for="elDistance">Distance from CLC (km)</label>
+          <input id="elDistance" type="number" step="0.1" min="0" value="${bg.distanceKm || 0}">
+        </div>
+        <div class="st-schedule-modal-field st-schedule-modal-field--row">
+          <input id="elReenrollee" type="checkbox" ${bg.isReenrollee ? "checked" : ""}>
+          <label for="elReenrollee">Re-enrollee</label>
+        </div>
+        <div class="st-schedule-modal-field st-schedule-modal-field--row">
+          <input id="el4Ps" type="checkbox" ${bg.is4Ps ? "checked" : ""}>
+          <label for="el4Ps">4Ps Beneficiary</label>
+        </div>
+      `,
+      onConfirm: async () => {
+        const payload = {
+          civil_status: document.getElementById("elCivil")?.value.trim(),
+          employment_status: document.getElementById("elEmployment")?.value.trim(),
+          distance_from_clc_km: parseFloat(document.getElementById("elDistance")?.value) || 0,
+          is_re_enrollee: document.getElementById("elReenrollee")?.checked,
+          is4Ps: document.getElementById("el4Ps")?.checked,
+        };
+        try {
+          await API.updateLearner(this.getLearnerId(), payload);
+          Toast?.success("Learner updated.");
+          await this.load();
+        } catch (error) {
+          console.error("[LearnerProfile] Edit failed", error);
+          Toast?.error(error?.data?.message || "Unable to update learner.");
+        }
+      },
+    });
   }
 
   static renderOverview() {
     const p = this.profile;
     const m = p.metrics || {};
 
-    this.set("[data-metric-attendance]", `${m.attendanceRate}%`);
-
-    const deltaEl = document.querySelector("[data-metric-attendance-delta]");
-
-    if (deltaEl && m.attendanceDelta != null) {
-      const isDown = m.attendanceDelta < 0;
-
-      deltaEl.classList.toggle("is-down", isDown);
-      deltaEl.classList.toggle("is-up", !isDown);
-      deltaEl.innerHTML = `<span class="material-symbols-outlined" style="font-size:12px;">${isDown ? "trending_down" : "trending_up"}</span>${m.attendanceDelta}%`;
-    }
-
+    this.set("[data-metric-engagement]", `${m.engagementScore} of ${m.engagementScoreMax}`);
+    this.set("[data-metric-released]", m.modulesReleased);
+    this.set("[data-metric-returned]", m.modulesReturned);
+    this.set("[data-metric-active]", m.activeModules);
+    this.set("[data-metric-last-activity]", m.lastActivity);
     this.set(
-      "[data-metric-modules]",
-      `${m.modulesCompleted} of ${m.modulesTotal} Modules`,
-    );
-
-    const modulesPct =
-      Math.round((m.modulesCompleted / m.modulesTotal) * 100) || 0;
-
-    this.set("[data-metric-modules-pct]", `${modulesPct}%`);
-
-    const bar = document.querySelector("[data-metric-modules-bar]");
-
-    if (bar)
-      requestAnimationFrame(() => {
-        bar.style.width = `${modulesPct}%`;
-      });
-
-    this.set("[data-metric-timeliness]", `${m.submissionTimeliness}%`);
-    this.set(
-      "[data-metric-consultations]",
-      `${m.consultationsAttended} of ${m.consultationsTotal}`,
+      "[data-metric-days-since]",
+      m.daysSinceLastReturn == null ? "—" : m.daysSinceLastReturn,
     );
 
     this.renderRiskTrendChart(p.riskTrend || []);
 
-    this.renderRecommendedActions(p.recommendedActions || []);
-
     this.renderMonitoringSummaryTable();
 
-    this.renderBackgroundInfo(p.background || {});
-
-    this.renderActivityFeed(p.recentActivity || []);
+    this.renderTimeline(
+      document.querySelector("[data-activity-feed]"),
+      p.recentActivity || [],
+      "No recent activity yet.",
+    );
   }
 
   static renderRiskTrendChart(trend) {
-    const svg = document.querySelector("[data-risk-trend-svg]");
-    const xaxis = document.querySelector("[data-risk-trend-xaxis]");
+    const points = document.querySelector("[data-risk-trend-points]");
+    const list = document.querySelector("[data-risk-trend-list]");
 
-    if (!svg || !trend.length) return;
+    if (!points || !list) return;
 
-    const w = 600,
-      h = 220;
-
-    const max = 100;
-
-    const points = trend.map((pt, i) => {
-      const x = (i / (trend.length - 1)) * w;
-      const y = h - (pt.value / max) * h;
-      return `${x},${y}`;
-    });
-
-    const path = `M ${points.join(" L ")}`;
-
-    svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
-
-    svg.innerHTML = `
-            <path d="${path}" fill="none" stroke="#12355B" stroke-linecap="round" stroke-width="3"/>
-            <circle cx="${points[points.length - 1].split(",")[0]}" cy="${points[points.length - 1].split(",")[1]}" r="5" fill="#12355B"/>
-        `;
-
-    if (xaxis) {
-      xaxis.innerHTML = trend.map((pt) => `<span>${pt.month}</span>`).join("");
+    if (!trend.length) {
+      points.innerHTML = "";
+      list.innerHTML = `<p class="st-risk-trend-empty">No risk assessments recorded yet.</p>`;
+      return;
     }
-  }
 
-  static renderRecommendedActions(actions) {
-    const container = document.querySelector("[data-recommended-actions]");
+    const yFor = { High: 15, Moderate: 50, Low: 85 };
 
-    if (!container) return;
+    points.innerHTML = trend
+      .map((pt, i) => {
+        const x = trend.length === 1 ? 50 : (i / (trend.length - 1)) * 100;
+        const y = yFor[pt.level] ?? 50;
+        return `<span class="st-risk-trend-point st-risk-trend-point--${pt.level.toLowerCase()}" style="left:${x}%;top:${y}%;" title="${pt.date}: ${pt.level} Risk"></span>`;
+      })
+      .join("");
 
-    container.innerHTML = actions
+    list.innerHTML = trend
       .map(
-        (a) => `
-            <div class="st-recommend-card">
-                <div class="st-recommend-card-head">
-                    <span class="st-priority-chip st-priority-chip--${a.priority}">${a.priority} priority</span>
-                    <button type="button" class="st-panel-link" style="font-size:11px;" data-assign-action>Assign</button>
-                </div>
-                <p style="font-weight:700;font-size:13px;">${a.title}</p>
-                <p style="font-size:11px;color:var(--st-on-surface-variant);">${a.text}</p>
-            </div>
+        (pt) => `
+          <div class="st-risk-trend-list-row">
+            <span>${pt.date}</span>
+            <span class="st-risk-badge st-risk-badge--${pt.level.toLowerCase()}"><span class="st-risk-dot"></span>${pt.level}</span>
+          </div>
         `,
       )
       .join("");
-
-    container.querySelectorAll("[data-assign-action]").forEach((btn) => {
-      btn.addEventListener("click", () =>
-        Toast?.success("Action assigned to your task list."),
-      );
-    });
   }
 
   static renderMonitoringSummaryTable() {
@@ -238,10 +233,17 @@ class LearnerProfilePage {
 
     if (!body) return;
 
-    const timeline = (this.profile.monitoringHistory?.timeline || []).slice(
-      0,
-      4,
-    );
+    const timeline = (this.profile.monitoringHistory?.timeline || []).slice(0, 4);
+
+    if (!timeline.length) {
+      body.innerHTML = `<tr><td colspan="3" class="st-table-empty-cell">No monitoring activity yet.</td></tr>`;
+      document
+        .querySelector("[data-view-all-monitoring]")
+        ?.addEventListener("click", () => {
+          document.querySelector('[data-profile-tab="monitoring"]')?.click();
+        });
+      return;
+    }
 
     body.innerHTML = timeline
       .map(
@@ -249,8 +251,7 @@ class LearnerProfilePage {
             <tr>
                 <td style="font-weight:600;color:var(--st-primary);">${this.capitalize(item.type)}</td>
                 <td>${item.date}</td>
-                <td>${this.statusBadge(item.type)}</td>
-                <td>${item.text}</td>
+                <td>${item.title}${item.text ? ` — ${item.text}` : ""}</td>
             </tr>
         `,
       )
@@ -263,81 +264,26 @@ class LearnerProfilePage {
       });
   }
 
-  static renderBackgroundInfo(bg) {
-    const container = document.querySelector("[data-background-info]");
-
-    if (!container) return;
-
-    const rows = {
-      "Age / Sex": `${this.profile.age || "—"} / ${this.profile.sex || "—"}`,
-      "Civil Status": bg.civilStatus,
-      Employment: bg.employment,
-      "Distance Category": bg.distanceCategory,
-      Modality: this.profile.modality,
-      "Learning Level": this.profile.level,
-      "Re-enrollee": bg.reenrollee,
-      "Years Enrolled": bg.yearsEnrolled,
-      "4Ps Beneficiary": bg.beneficiary4Ps,
-    };
-
-    container.innerHTML = Object.entries(rows)
-      .map(
-        ([label, value]) => `
-            <div class="st-sidebar-info-row">
-                <span>${label}</span>
-                <span>${value ?? "—"}</span>
-            </div>
-        `,
-      )
-      .join("");
-  }
-
-  static renderActivityFeed(activity) {
-    const container = document.querySelector("[data-activity-feed]");
-
-    if (!container) return;
-
-    const iconMap = {
-      trending_up: "trending_up",
-      "file-check": "task_alt",
-      users: "groups",
-      mail: "mail",
-    };
-
-    container.innerHTML = activity
-      .map(
-        (item) => `
-            <div class="st-activity-item">
-                <div class="st-activity-dot st-activity-dot--${item.tone}">
-                    <span class="material-symbols-outlined">${iconMap[item.icon] || "circle"}</span>
-                </div>
-                <p class="st-activity-title">${item.title}</p>
-                <p class="st-activity-sub">${item.sub}</p>
-                ${item.date ? `<p class="st-activity-date">${item.date}</p>` : ""}
-            </div>
-        `,
-      )
-      .join("");
-  }
-
   static renderMonitoringHistory() {
     const timeline = this.profile.monitoringHistory?.timeline || [];
 
     this.allTimelineItems = timeline;
 
-    this.renderTimeline(timeline);
+    this.renderTimeline(
+      document.querySelector("[data-monitoring-timeline]"),
+      timeline,
+      "No monitoring records yet.",
+    );
   }
 
-  static renderTimeline(items) {
-    const container = document.querySelector("[data-monitoring-timeline]");
-
+  static renderTimeline(container, items, emptyText = "Nothing to show yet.") {
     if (!container) return;
 
     if (!items.length) {
       container.innerHTML = `
                 <div class="st-empty">
                     <span class="material-symbols-outlined">history</span>
-                    <p class="st-empty-title">No monitoring records yet</p>
+                    <p class="st-empty-title">${emptyText}</p>
                 </div>
             `;
 
@@ -345,10 +291,9 @@ class LearnerProfilePage {
     }
 
     const iconMap = {
-      attendance: "event_busy",
-      module: "assignment_late",
+      module: "menu_book",
       intervention: "support_agent",
-      note: "sticky_note_2",
+      risk: "trending_up",
     };
 
     container.innerHTML = items
@@ -386,7 +331,11 @@ class LearnerProfilePage {
 
         const filtered = filter === "all" ? all : all.slice(-3);
 
-        this.renderTimeline(filtered);
+        this.renderTimeline(
+          document.querySelector("[data-monitoring-timeline]"),
+          filtered,
+          "No monitoring records yet.",
+        );
       });
     });
 
@@ -405,7 +354,11 @@ class LearnerProfilePage {
             )
           : all;
 
-        this.renderTimeline(filtered);
+        this.renderTimeline(
+          document.querySelector("[data-monitoring-timeline]"),
+          filtered,
+          "No monitoring records yet.",
+        );
       });
   }
 
@@ -416,31 +369,31 @@ class LearnerProfilePage {
 
     if (badge) badge.innerHTML = this.riskPill(this.profile.risk);
 
-    this.set("[data-risk-probability]", `${r.probability}%`);
-    this.set("[data-risk-confidence]", r.confidence);
-    this.set("[data-risk-last]", r.lastPrediction);
-    this.set("[data-risk-model]", r.model);
     this.set("[data-risk-summary]", r.summary);
-    this.set("[data-risk-previous]", r.previousRisk);
-    this.set("[data-risk-current]", r.currentRisk);
 
     const changesList = document.querySelector("[data-risk-changes]");
+    const changesCard = document.querySelector("[data-risk-changes-card]");
 
     if (changesList) {
-      changesList.innerHTML = (r.changes || [])
-        .map(
-          (c) => `
+      if (!r.changes || !r.changes.length) {
+        changesList.innerHTML = `<li class="st-change-list-empty">No risk level changes recorded yet.</li>`;
+      } else {
+        changesList.innerHTML = r.changes
+          .map(
+            (c) => `
                 <li>
                     <span class="st-change-list-label">
-                        <span class="material-symbols-outlined" style="color:var(--st-risk-${c.tone === "error" ? "high" : c.tone === "moderate" ? "moderate" : "low"});">${c.icon}</span>
+                        <span class="material-symbols-outlined" style="color:var(--st-risk-${c.severity});">${c.icon}</span>
                         ${c.text}
                     </span>
-                    <span style="font-weight:700;color:var(--st-risk-${c.tone === "error" ? "high" : c.tone === "moderate" ? "moderate" : "low"});">${c.severity}</span>
+                    <span style="font-weight:700;color:var(--st-risk-${c.severity});">${c.date}</span>
                 </li>
             `,
-        )
-        .join("");
+          )
+          .join("");
+      }
     }
+    if (changesCard) changesCard.style.display = "";
 
     const contributors = document.querySelector("[data-risk-contributors]");
 
@@ -463,13 +416,29 @@ class LearnerProfilePage {
         .join("");
     }
 
+    const recommendedAction = document.querySelector("[data-risk-recommended-action]");
+
+    if (recommendedAction) {
+      recommendedAction.innerHTML = (r.recommendedAction || [])
+        .map(
+          (a) => `
+              <div class="st-action-item">
+                  <span class="material-symbols-outlined" style="color:var(--st-primary);font-size:18px;">arrow_right</span>
+                  <div>
+                      <p class="st-action-item-title">${a.title}</p>
+                      <p class="st-action-item-text">${a.text}</p>
+                  </div>
+              </div>
+          `,
+        )
+        .join("");
+    }
+
     const details = document.querySelector("[data-risk-details]");
 
     if (details) {
       details.innerHTML = `
-                <div class="st-sidebar-info-row"><span>Model</span><span>${r.model || "—"}</span></div>
-                <div class="st-sidebar-info-row"><span>Confidence</span><span style="color:var(--st-secondary);">${r.confidence || "—"}</span></div>
-                <div class="st-sidebar-info-row"><span>Last Updated</span><span>${r.lastPrediction || "—"}</span></div>
+                <div class="st-sidebar-info-row"><span>Current Risk</span><span>${r.currentRisk || "—"}</span></div>
                 <div class="st-sidebar-info-row"><span>Records Used</span><span style="text-align:right;">${r.recordsUsed || "—"}</span></div>
             `;
     }
@@ -481,9 +450,12 @@ class LearnerProfilePage {
     const recs = document.querySelector("[data-intervention-recommendations]");
 
     if (recs) {
-      recs.innerHTML = (iv.recommended || [])
-        .map(
-          (r) => `
+      if (!iv.recommended || !iv.recommended.length) {
+        recs.innerHTML = `<div class="st-empty" style="border:none;background:transparent;"><p class="st-empty-title">No recommendations available.</p></div>`;
+      } else {
+        recs.innerHTML = iv.recommended
+          .map(
+            (r) => `
                 <div class="st-intervention-card">
                     <div class="st-intervention-card-head">
                         <div class="st-intervention-card-title-row">
@@ -492,30 +464,40 @@ class LearnerProfilePage {
                         </div>
                         <span class="st-intervention-rank">Rank #${r.rank}</span>
                     </div>
-                    <p class="st-intervention-card-factor"><strong>Factor:</strong> ${r.factor}</p>
+                    <p class="st-intervention-card-factor"><strong>Factor:</strong> ${r.factor || "—"}</p>
                     <p class="st-intervention-card-text">${r.text}</p>
                     <div class="st-intervention-card-footer">
                         <span class="st-intervention-action-hint">Action: ${r.action}</span>
-                        <button type="button" class="st-btn st-btn-primary st-btn-xs" data-select-intervention="${r.rank}">Select Intervention</button>
+                        <button type="button" class="st-btn st-btn-primary st-btn-xs" data-assign-recommendation="${r.rank}">Assign</button>
                     </div>
                 </div>
             `,
-        )
-        .join("");
+          )
+          .join("");
 
-      recs.querySelectorAll("[data-select-intervention]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          Toast?.success(
-            "Intervention selected and added to Active Interventions.",
-          );
+        recs.querySelectorAll("[data-assign-recommendation]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const rank = Number(btn.dataset.assignRecommendation);
+            const rec = iv.recommended.find((r) => r.rank === rank);
+            this.openAddInterventionModal(rec?.text || "");
+          });
         });
-      });
+      }
     }
 
     const active = document.querySelector("[data-active-intervention]");
 
-    if (active && iv.active) {
-      active.innerHTML = `
+    if (active) {
+      if (!iv.active) {
+        active.innerHTML = `
+          <div class="st-empty" style="border:none;background:transparent;">
+            <span class="material-symbols-outlined">assignment_turned_in</span>
+            <p class="st-empty-title">No interventions have been assigned.</p>
+            <p class="st-empty-text">Assign an intervention once a learner requires additional support.</p>
+          </div>
+        `;
+      } else {
+        active.innerHTML = `
                 <div class="st-active-intervention">
                     <div>
                         <div style="display:flex;align-items:center;gap:8px;">
@@ -525,6 +507,7 @@ class LearnerProfilePage {
                         <div class="st-active-intervention-meta">
                             <span>Assigned: ${iv.active.assigned}</span>
                             <span>Follow-up: ${iv.active.followUp}</span>
+                            <span>Assigned by: ${iv.active.assignedBy}</span>
                         </div>
                         <div style="margin-top:10px;">
                             <span class="st-pill st-pill--teal">${iv.active.status}</span>
@@ -537,63 +520,35 @@ class LearnerProfilePage {
                 </div>
             `;
 
-      active
-        .querySelector("[data-update-status]")
-        ?.addEventListener("click", () => {
-          Toast?.info("Status update form will open here.");
-        });
+        active
+          .querySelector("[data-update-status]")
+          ?.addEventListener("click", () => this.openUpdateStatusModal(iv.active.id));
 
-      active
-        .querySelector("[data-add-outcome]")
-        ?.addEventListener("click", () => {
-          Toast?.info("Outcome logging will open here.");
-        });
+        active
+          .querySelector("[data-add-outcome]")
+          ?.addEventListener("click", () => this.openAddOutcomeModal(iv.active.id));
+      }
     }
 
     const history = document.querySelector("[data-intervention-history]");
 
     if (history) {
-      history.innerHTML = (iv.history || [])
-        .map(
-          (h, i) => `
-                <div class="st-expand-card" data-history-card>
-                    <div class="st-expand-card-header" data-history-toggle>
-                        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-                            <span style="font-size:12px;color:var(--st-on-surface-variant);min-width:110px;">${h.date}</span>
-                            <span style="font-weight:600;font-size:13px;">${h.intervention}</span>
-                            <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:${h.priority === "High" ? "var(--st-risk-high)" : "var(--st-risk-moderate)"};">${h.priority}</span>
-                        </div>
-                        <span class="material-symbols-outlined">expand_more</span>
-                    </div>
-                    <div class="st-expand-card-body">
-                        <div class="st-expand-card-body-inner">
-                            <p><strong>Reason:</strong> ${h.reason}</p>
-                            <p><strong>Status:</strong> ${h.status}</p>
-                            <p><strong>Outcome:</strong> ${h.outcome}</p>
-                            <div style="display:flex;gap:8px;margin-top:8px;">
-                                <button type="button" class="st-btn st-btn-outline st-btn-xs" data-history-view>View</button>
-                                <button type="button" class="st-btn st-btn-outline st-btn-xs" data-history-edit>Edit</button>
-                                <button type="button" class="st-btn st-btn-outline st-btn-xs" data-history-archive>Archive</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+      if (!iv.history || !iv.history.length) {
+        history.innerHTML = `<tr><td colspan="4" class="st-table-empty-cell">No interventions have been assigned yet.</td></tr>`;
+      } else {
+        history.innerHTML = iv.history
+          .map(
+            (h) => `
+                <tr>
+                    <td>${h.date}</td>
+                    <td style="font-weight:600;">${h.intervention}</td>
+                    <td>${h.status}</td>
+                    <td>${h.remarks}</td>
+                </tr>
             `,
-        )
-        .join("");
-
-      history.querySelectorAll("[data-history-toggle]").forEach((header) => {
-        header.addEventListener("click", () => {
-          header.closest(".st-expand-card")?.classList.toggle("is-open");
-        });
-      });
-
-      history.querySelectorAll("[data-history-archive]").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          Toast?.success("Intervention archived.");
-        });
-      });
+          )
+          .join("");
+      }
     }
 
     const factors = document.querySelector("[data-current-risk-factors]");
@@ -605,10 +560,13 @@ class LearnerProfilePage {
         neutral: "#60a5fa",
       };
 
-      factors.innerHTML = (this.profile.riskExplanation?.contributors || [])
-        .slice(0, 3)
-        .map(
-          (c) => `
+      const contributors = this.profile.riskExplanation?.contributors || [];
+
+      factors.innerHTML = contributors.length
+        ? contributors
+            .slice(0, 3)
+            .map(
+              (c) => `
                 <div class="st-risk-factor-item">
                     <span class="st-risk-factor-dot" style="background:${toneMap[c.tone] || "var(--st-outline)"};"></span>
                     <div>
@@ -617,9 +575,132 @@ class LearnerProfilePage {
                     </div>
                 </div>
             `,
-        )
-        .join("");
+            )
+            .join("")
+        : `<p class="st-empty-text" style="padding:8px 0;">No risk factors on record.</p>`;
     }
+
+    document
+      .querySelector("[data-add-intervention-btn]")
+      ?.addEventListener("click", () => this.openAddInterventionModal());
+  }
+
+  static openAddInterventionModal(prefillDescription = "") {
+    if (!window.Modal) return;
+    const types = [
+      "Home Visit", "Consultation", "Referral",
+      "Learner Follow-up", "Parent/Guardian Conference", "Other",
+    ];
+
+    Modal.show({
+      title: "Assign Intervention",
+      size: "sm",
+      confirmLabel: "Assign Intervention",
+      message: `
+        <div class="st-schedule-modal-field">
+          <label for="ivType">Intervention Type</label>
+          <select id="ivType">${types.map((t) => `<option value="${t}">${t}</option>`).join("")}</select>
+        </div>
+        <div class="st-schedule-modal-field">
+          <label for="ivDescription">Description</label>
+          <textarea id="ivDescription" rows="3" placeholder="What will this intervention involve?">${prefillDescription}</textarea>
+        </div>
+        <div class="st-schedule-modal-field">
+          <label for="ivTargetDate">Target Follow-up Date (optional)</label>
+          <input type="date" id="ivTargetDate">
+        </div>
+      `,
+      onConfirm: async () => {
+        const type = document.getElementById("ivType")?.value;
+        const description = document.getElementById("ivDescription")?.value.trim();
+        const targetDate = document.getElementById("ivTargetDate")?.value;
+
+        if (!description) {
+          Toast?.error("Please describe the intervention.");
+          return;
+        }
+
+        try {
+          await API.createIntervention(this.getLearnerId(), {
+            type, description, targetDate: targetDate || undefined,
+          });
+          Toast?.success("Intervention assigned.");
+          await this.load();
+          document.querySelector('[data-profile-tab="interventions"]')?.click();
+        } catch (error) {
+          console.error("[LearnerProfile] Assign intervention failed", error);
+          Toast?.error(error?.data?.message || "Unable to assign intervention.");
+        }
+      },
+    });
+  }
+
+  static openUpdateStatusModal(interventionId) {
+    if (!window.Modal || !interventionId) return;
+    const statuses = ["PLANNED", "ONGOING", "COMPLETED", "CANCELLED"];
+
+    Modal.show({
+      title: "Update Intervention Status",
+      size: "sm",
+      confirmLabel: "Update Status",
+      message: `
+        <div class="st-schedule-modal-field">
+          <label for="ivStatus">Status</label>
+          <select id="ivStatus">${statuses.map((s) => `<option value="${s}">${this.capitalize(s.toLowerCase())}</option>`).join("")}</select>
+        </div>
+      `,
+      onConfirm: async () => {
+        const status = document.getElementById("ivStatus")?.value;
+        try {
+          await API.updateInterventionStatus(interventionId, { status });
+          Toast?.success("Status updated.");
+          await this.load();
+          document.querySelector('[data-profile-tab="interventions"]')?.click();
+        } catch (error) {
+          console.error("[LearnerProfile] Status update failed", error);
+          Toast?.error(error?.data?.message || "Unable to update status.");
+        }
+      },
+    });
+  }
+
+  static openAddOutcomeModal(interventionId) {
+    if (!window.Modal || !interventionId) return;
+
+    Modal.show({
+      title: "Add Outcome",
+      size: "sm",
+      confirmLabel: "Save Outcome",
+      message: `
+        <div class="st-schedule-modal-field">
+          <label for="ivOutcome">Outcome</label>
+          <input id="ivOutcome" type="text" placeholder="e.g. Learner responded positively">
+        </div>
+        <div class="st-schedule-modal-field">
+          <label for="ivNotes">Notes</label>
+          <textarea id="ivNotes" rows="3" placeholder="Details from the follow-up..."></textarea>
+        </div>
+      `,
+      onConfirm: async () => {
+        const outcome = document.getElementById("ivOutcome")?.value.trim();
+        const notes = document.getElementById("ivNotes")?.value.trim();
+
+        if (!notes) {
+          Toast?.error("Notes are required.");
+          return;
+        }
+
+        try {
+          await API.addInterventionFollowUp(interventionId, { outcome, notes });
+          Toast?.success("Outcome recorded.");
+          await this.load();
+          document.querySelector('[data-profile-tab="interventions"]')?.click();
+        } catch (error) {
+          console.error("[LearnerProfile] Add outcome failed", error);
+          Toast?.error(error?.data?.message || "Unable to save outcome.");
+        }
+      },
+    });
   }
 
   static showSkeleton() {
@@ -628,7 +709,7 @@ class LearnerProfilePage {
     );
 
     if (monitoringBody && window.Skeletons) {
-      monitoringBody.innerHTML = Skeletons.tableRows(3, 4);
+      monitoringBody.innerHTML = Skeletons.tableRows(3, 3);
     }
 
     const timeline = document.querySelector("[data-monitoring-timeline]");
@@ -642,19 +723,6 @@ class LearnerProfilePage {
     const cls =
       { High: "high", Moderate: "moderate", Low: "low" }[risk] || "low";
     return `<span class="st-risk-badge st-risk-badge--${cls}" style="padding:4px 16px;font-size:12px;"><span class="st-risk-dot"></span>${risk} Risk</span>`;
-  }
-
-  static statusBadge(type) {
-    const map = {
-      attendance:
-        '<span class="st-risk-badge st-risk-badge--high"><span class="st-risk-dot"></span>Flagged</span>',
-      module:
-        '<span class="st-risk-badge st-risk-badge--moderate"><span class="st-risk-dot"></span>Late</span>',
-      intervention:
-        '<span class="st-risk-badge st-risk-badge--low"><span class="st-risk-dot"></span>Resolved</span>',
-      note: '<span class="st-pill">Note</span>',
-    };
-    return map[type] || '<span class="st-pill">—</span>';
   }
 
   static capitalize(s) {

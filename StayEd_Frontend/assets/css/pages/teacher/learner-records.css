@@ -2,7 +2,7 @@
 
 .st-page-header-title{
     font-family:var(--st-font-heading);
-    font-size:28px;
+    font-size:30px;
     font-weight:700;
     color:var(--st-primary);
     line-height:1.2;
@@ -10,7 +10,7 @@
 
 .st-page-header-subtitle{
     margin-top:4px;
-    font-size:15px;
+    font-size:17px;
     color:var(--st-on-surface-variant);
 }
 
@@ -306,7 +306,7 @@
 }
 
 @media (max-width:768px){
-    .st-page-header-title{ font-size:24px; }
+    .st-page-header-title{ font-size:26px; }
     .st-records-toolbar{ padding:16px; }
     .st-learner-modal-grid{ grid-template-columns:1fr; }
 }

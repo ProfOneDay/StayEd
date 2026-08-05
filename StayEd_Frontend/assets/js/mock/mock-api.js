@@ -114,6 +114,12 @@ class MockAPI {
       return MockDB.getRecordsHubDetail(recordsDetailMatch[1]);
     }
 
+    const classMatch = endpoint.match(/^\/classes\/([^/]+)$/);
+
+    if (classMatch && method === "DELETE") {
+      return this.deleteClass(classMatch[1]);
+    }
+
     const learnerMatch = endpoint.match(/^\/learners\/([^/]+)$/);
 
     if (learnerMatch) {
@@ -425,6 +431,37 @@ class MockAPI {
 
       data: MockDB.clone(record),
     };
+  }
+
+  static deleteClass(id) {
+    const enrolledCount = (MockDB.learners || []).filter(
+      (l) => String(l.classId) === String(id),
+    ).length;
+
+    if (enrolledCount > 0) {
+      throw {
+        status: 409,
+
+        data: {
+          message:
+            "This class still has enrolled learners. Move or remove them before deleting the class.",
+        },
+      };
+    }
+
+    const success = MockDB.remove(MockDB.classes || [], id);
+
+    if (!success) {
+      throw {
+        status: 404,
+
+        data: {
+          message: "Class not found.",
+        },
+      };
+    }
+
+    return { message: "Class deleted." };
   }
 
   static notifications() {

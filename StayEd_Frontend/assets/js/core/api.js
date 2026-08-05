@@ -503,6 +503,22 @@ class API {
     return this.post("/classes", payload);
   }
 
+  static deleteClass(id) {
+    return this.delete(`/classes/${id}`);
+  }
+
+  static getModuleLogbook(learnerId) {
+    return this.get(`/learners/${learnerId}/modules`);
+  }
+
+  static releaseModuleBatch(learnerId, payload) {
+    return this.post(`/learners/${learnerId}/module-batches`, payload);
+  }
+
+  static returnModuleBatch(learnerId, batchId, payload) {
+    return this.post(`/learners/${learnerId}/module-batches/${batchId}/return`, payload);
+  }
+
   static getCurrentClass() {
     if (
       window.DemoAuthService &&
@@ -598,6 +614,18 @@ class API {
 
   static getInterventions() {
     return this.get("/interventions");
+  }
+
+  static createIntervention(learnerId, payload) {
+    return this.post(`/learners/${learnerId}/interventions`, payload);
+  }
+
+  static updateInterventionStatus(id, payload) {
+    return this.patch(`/interventions/${id}`, payload);
+  }
+
+  static addInterventionFollowUp(id, payload) {
+    return this.post(`/interventions/${id}/follow-up`, payload);
   }
 }
 

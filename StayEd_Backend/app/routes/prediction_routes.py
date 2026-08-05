@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import date
 
-from flask import Blueprint, current_app, request
+from flask import Blueprint, request
 
 from ..authz import current_user_id, role_required, teacher_for_user
-from ..db import fetch_all, fetch_one, get_db
+from ..db import fetch_all, fetch_one
 from ..helpers import error
-from ..services.prediction_service import run_external_model
+from ..services.prediction_service import trigger_prediction
 
 bp = Blueprint("predictions", __name__)
 
@@ -85,88 +85,25 @@ def run_prediction():
     if not enrollment:
         return error("Learner enrollment not found for this teacher.", 404)
 
-    model = fetch_one(
-        "SELECT model_id, model_version, algorithm FROM model_info WHERE model_status='ACTIVE' ORDER BY training_date DESC LIMIT 1"
-    )
-    if not model:
-        return error("No ACTIVE model is registered in model_info.", 503)
-
-    command = current_app.config.get("MODEL_COMMAND")
-    if not command:
-        return error(
-            "The prediction API is ready, but MODEL_COMMAND is not configured with the trained Random Forest bridge yet.",
-            503,
-        )
-
-    model_payload = data.get("features") if isinstance(data.get("features"), dict) else data
     try:
-        result = run_external_model(command, model_payload)
-        probability = float(result["risk_probability"])
-    except (RuntimeError, ValueError, KeyError) as exc:
-        return error(f"Prediction bridge failed: {exc}", 502)
-
-    try:
-        monitoring_end = date.fromisoformat(str(data.get("monitoring_end_date"))) if data.get("monitoring_end_date") else date.today()
-        monitoring_start = date.fromisoformat(str(data.get("monitoring_start_date"))) if data.get("monitoring_start_date") else monitoring_end - timedelta(days=30)
+        monitoring_end = date.fromisoformat(str(data.get("monitoring_end_date"))) if data.get("monitoring_end_date") else None
+        monitoring_start = date.fromisoformat(str(data.get("monitoring_start_date"))) if data.get("monitoring_start_date") else None
     except ValueError:
         return error("Monitoring dates must use YYYY-MM-DD.", 422)
 
-    db = get_db()
+    features = data.get("features") if isinstance(data.get("features"), dict) else data
+
     try:
-        with db.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO risk_assessment (
-                    model_id, enrollment_id, monitoring_start_date, monitoring_end_date,
-                    data_sufficiency_status, risk_probability, generated_by_user_id
-                ) VALUES (%s,%s,%s,%s,'PREDICTION_GENERATED',%s,%s)
-                ON CONFLICT (model_id, enrollment_id, monitoring_start_date, monitoring_end_date)
-                DO UPDATE SET data_sufficiency_status='PREDICTION_GENERATED',
-                              risk_probability=EXCLUDED.risk_probability,
-                              generated_by_user_id=EXCLUDED.generated_by_user_id,
-                              assessment_date=CURRENT_TIMESTAMP
-                RETURNING risk_assessment_id, risk_probability, risk_level, assessment_date
-                """,
-                (
-                    model["model_id"], enrollment["enrollment_id"], monitoring_start,
-                    monitoring_end, probability, current_user_id(),
-                ),
-            )
-            saved = cur.fetchone()
+        outcome = trigger_prediction(
+            enrollment["enrollment_id"], current_user_id(),
+            monitoring_start=monitoring_start, monitoring_end=monitoring_end, features=features,
+        )
+    except RuntimeError as exc:
+        return error(str(exc), 503)
+    except (ValueError, KeyError) as exc:
+        return error(f"Prediction bridge failed: {exc}", 502)
 
-            for factor in result.get("factors", []) if isinstance(result.get("factors"), list) else []:
-                name = str(factor.get("name") or factor.get("factor_name") or "").strip()
-                if not name:
-                    continue
-                cur.execute(
-                    """
-                    INSERT INTO risk_factors (risk_assessment_id, factor_name, factor_value, importance_score)
-                    VALUES (%s,%s,%s,%s)
-                    ON CONFLICT (risk_assessment_id, factor_name)
-                    DO UPDATE SET factor_value=EXCLUDED.factor_value, importance_score=EXCLUDED.importance_score
-                    """,
-                    (
-                        saved["risk_assessment_id"], name,
-                        factor.get("value") if factor.get("value") is not None else factor.get("factor_value"),
-                        factor.get("importance") if factor.get("importance") is not None else factor.get("importance_score"),
-                    ),
-                )
-
-            if saved["risk_level"] == "HIGH":
-                cur.execute(
-                    """
-                    INSERT INTO notification (user_id, notification_type, title, message, link)
-                    VALUES (%s,'RISK','High Risk prediction generated',
-                            'A learner was classified as High Risk and should be reviewed.',
-                            '../teacher/early-warning.html')
-                    """,
-                    (current_user_id(),),
-                )
-        db.commit()
-    except Exception:
-        db.rollback()
-        raise
-
+    saved, model = outcome["saved"], outcome["model"]
     return {
         "risk_assessment_id": saved["risk_assessment_id"],
         "learner_id": int(learner_id),

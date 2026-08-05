@@ -12,10 +12,6 @@ class ProfileSettingsPage {
 
     this.bindToggles();
 
-    this.bindTheme();
-
-    this.bindFontScale();
-
     this.bindDangerZone();
 
     this.restorePreferences();
@@ -136,12 +132,6 @@ class ProfileSettingsPage {
         Toast?.error(error.message || "Unable to update password.");
       }
     });
-
-    document
-      .querySelector("[data-save-preferences]")
-      ?.addEventListener("click", () => {
-        Toast?.success("System preferences saved.");
-      });
   }
 
   static bindToggles() {
@@ -157,44 +147,6 @@ class ProfileSettingsPage {
           Toast?.success("Preference updated.");
         });
       });
-  }
-
-  static bindTheme() {
-    document.querySelectorAll("[data-theme-option]").forEach((option) => {
-      option.addEventListener("click", () => {
-        document
-          .querySelectorAll("[data-theme-option]")
-          .forEach((o) => o.classList.remove("is-selected"));
-
-        option.classList.add("is-selected");
-
-        this.savePreference("theme", option.dataset.themeOption);
-
-        Toast?.info(
-          `Theme set to ${option.dataset.themeOption}. Full theming support is coming soon.`,
-        );
-      });
-    });
-  }
-
-  static bindFontScale() {
-    const slider = document.querySelector("[data-font-scale]");
-    const display = document.querySelector("[data-font-scale-value]");
-
-    if (!slider) return;
-
-    slider.addEventListener("input", () => {
-      if (display) display.textContent = `${slider.value}%`;
-
-      document.documentElement.style.setProperty(
-        "--st-font-scale",
-        slider.value / 100,
-      );
-    });
-
-    slider.addEventListener("change", () => {
-      this.savePreference("font-scale", slider.value);
-    });
   }
 
   static bindDangerZone() {
@@ -248,21 +200,6 @@ class ProfileSettingsPage {
 
       if (toggle) {
         toggle.checked = Boolean(value);
-        return;
-      }
-
-      if (key === "theme") {
-        document.querySelectorAll("[data-theme-option]").forEach((o) => {
-          o.classList.toggle("is-selected", o.dataset.themeOption === value);
-        });
-      }
-
-      if (key === "font-scale") {
-        const slider = document.querySelector("[data-font-scale]");
-        const display = document.querySelector("[data-font-scale-value]");
-
-        if (slider) slider.value = value;
-        if (display) display.textContent = `${value}%`;
       }
     });
   }

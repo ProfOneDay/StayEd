@@ -17,6 +17,7 @@ from ..helpers import (
     split_name,
     title_enum,
 )
+from ..services.prediction_service import trigger_prediction
 
 bp = Blueprint("learners", __name__)
 
@@ -96,7 +97,7 @@ def _learner_query(where: str = "", order: str = "l.last_name, l.first_name"):
             l.learner_id, l.lrn, l.first_name, l.last_name, l.sex,
             DATE_PART('year', AGE(CURRENT_DATE, l.date_of_birth))::INT AS age,
             l.date_of_birth, l.employment_status, l.civil_status,
-            l.contact_number, l.guardian_contact_number,
+            l.contact_number, l.guardian_contact_number, l.is_4ps_beneficiary,
             ce.enrollment_id, ce.learning_modality, ce.distance_from_clc_km,
             ce.enrollment_status, ce.is_re_enrollee, ce.enrollment_date,
             lc.class_id, lc.learning_level, lc.class_name, lc.school_year, lc.semester,
@@ -254,6 +255,10 @@ def _validate_learner_payload(data, *, partial=False):
     ):
         if src in data:
             result[dest] = data.get(src) or None
+
+    if "is_4ps_beneficiary" in data or "is4Ps" in data:
+        result["is_4ps_beneficiary"] = bool(data.get("is_4ps_beneficiary", data.get("is4Ps")))
+
     return result
 
 
@@ -364,7 +369,7 @@ def update_learner(learner_id: int):
     teacher = _teacher_scope()
     row = fetch_one(
         """
-        SELECT l.*, ce.enrollment_id
+        SELECT l.*, ce.enrollment_id, ce.is_re_enrollee, ce.distance_from_clc_km
         FROM learner l
         JOIN class_enrollment ce ON ce.learner_id=l.learner_id
         JOIN learning_class lc ON lc.class_id=ce.class_id
@@ -392,7 +397,8 @@ def update_learner(learner_id: int):
 
     editable = {k: v for k, v in data.items() if k in {
         "lrn", "name", "full_name", "first_name", "last_name", "sex", "birthdate", "date_of_birth",
-        "employment_status", "civil_status", "contact_number", "guardian_contact_number"
+        "employment_status", "civil_status", "contact_number", "guardian_contact_number",
+        "is_4ps_beneficiary", "is4Ps",
     }}
     if editable:
         try:
@@ -411,6 +417,25 @@ def update_learner(learner_id: int):
             except Exception:
                 db.rollback()
                 raise
+
+    if "distance_from_clc_km" in data or "is_re_enrollee" in data:
+        distance = data.get("distance_from_clc_km", row.get("distance_from_clc_km"))
+        try:
+            distance = float(distance) if distance not in (None, "") else None
+        except (TypeError, ValueError):
+            return error("Distance from CLC must be a number.", 422)
+        is_re_enrollee = bool(data.get("is_re_enrollee", row.get("is_re_enrollee")))
+        db = get_db()
+        try:
+            with db.cursor() as cur:
+                cur.execute(
+                    "UPDATE class_enrollment SET distance_from_clc_km=%s, is_re_enrollee=%s WHERE enrollment_id=%s",
+                    (distance, is_re_enrollee, row["enrollment_id"]),
+                )
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
 
     refreshed = fetch_one(
         _learner_query("WHERE l.learner_id = %s AND lc.teacher_id = %s", "ce.enrollment_date DESC") + " LIMIT 1",
@@ -556,6 +581,40 @@ def records_detail(learner_id: int):
     }
 
 
+def _engagement_score(enrollment_id: int) -> int:
+    row = fetch_one(
+        """
+        SELECT
+            EXISTS (
+                SELECT 1 FROM module_record
+                WHERE enrollment_id=%s AND date_returned >= CURRENT_DATE - INTERVAL '30 days'
+            ) AS returned_recently,
+            EXISTS (
+                SELECT 1 FROM module_record
+                WHERE enrollment_id=%s AND date_released >= CURRENT_DATE - INTERVAL '30 days'
+            ) AS released_recently,
+            EXISTS (
+                SELECT 1 FROM contact_log
+                WHERE enrollment_id=%s AND contact_result='SUCCESSFUL'
+                  AND contact_date >= CURRENT_DATE - INTERVAL '30 days'
+            ) AS contacted_recently,
+            NOT EXISTS (
+                SELECT 1 FROM module_release_batch mrb
+                WHERE mrb.enrollment_id=%s
+                  AND mrb.release_date <= CURRENT_DATE - INTERVAL '30 days'
+                  AND EXISTS (
+                      SELECT 1 FROM module_record mr
+                      WHERE mr.release_batch_id = mrb.release_batch_id AND mr.date_returned IS NULL
+                  )
+            ) AS no_overdue_batch
+        """,
+        (enrollment_id, enrollment_id, enrollment_id, enrollment_id),
+    )
+    if not row:
+        return 0
+    return sum(1 for v in row.values() if v)
+
+
 @bp.get("/learners/<int:learner_id>/profile")
 @role_required("teacher")
 def learner_profile(learner_id: int):
@@ -575,23 +634,67 @@ def learner_profile(learner_id: int):
         (enrollment_id,),
     )
     risk_trend = [
-        {"month": r["assessment_date"].strftime("%b"), "value": round(float(r["risk_probability"] or 0) * 100)}
+        {"date": r["assessment_date"].strftime("%b %d, %Y"), "level": title_enum(r["risk_level"])}
         for r in risk_history[-6:]
     ]
-    if not risk_trend:
-        risk_trend = [{"month": datetime.now().strftime("%b"), "value": round(shaped["risk_probability"] * 100)}]
 
-    mod = fetch_one("SELECT * FROM vw_module_progress WHERE enrollment_id=%s", (enrollment_id,)) or {}
-    att = fetch_one("SELECT * FROM vw_session_attendance_summary WHERE enrollment_id=%s", (enrollment_id,)) or {}
-    contacts = fetch_all(
-        "SELECT * FROM contact_log WHERE enrollment_id=%s ORDER BY contact_date DESC LIMIT 10",
+    module_stats = fetch_one(
+        """
+        SELECT
+            COUNT(*) AS released,
+            COUNT(*) FILTER (WHERE date_returned IS NOT NULL) AS returned,
+            COUNT(*) FILTER (WHERE date_returned IS NULL) AS active,
+            MAX(date_returned) AS last_returned
+        FROM module_record WHERE enrollment_id=%s
+        """,
+        (enrollment_id,),
+    ) or {}
+    modules_released = int(module_stats.get("released") or 0)
+    modules_returned = int(module_stats.get("returned") or 0)
+    active_modules = int(module_stats.get("active") or 0)
+    last_returned = module_stats.get("last_returned")
+    days_since_last_return = (date.today() - last_returned).days if last_returned else None
+
+    last_module_event = fetch_one(
+        """
+        SELECT module_name, date_returned FROM module_record
+        WHERE enrollment_id=%s AND date_returned IS NOT NULL
+        ORDER BY date_returned DESC LIMIT 1
+        """,
         (enrollment_id,),
     )
+    last_contact_event = fetch_one(
+        """
+        SELECT contact_method, contact_date FROM contact_log
+        WHERE enrollment_id=%s AND contact_result='SUCCESSFUL'
+        ORDER BY contact_date DESC LIMIT 1
+        """,
+        (enrollment_id,),
+    )
+    activity_candidates = []
+    if last_module_event:
+        activity_candidates.append((
+            last_module_event["date_returned"],
+            f"\"{last_module_event['module_name']}\" returned {last_module_event['date_returned'].strftime('%b %d')}",
+        ))
+    if last_contact_event:
+        activity_candidates.append((
+            last_contact_event["contact_date"],
+            f"{title_enum(last_contact_event['contact_method'])} contact on {last_contact_event['contact_date'].strftime('%b %d')}",
+        ))
+    activity_candidates.sort(key=lambda c: c[0], reverse=True)
+    last_activity = activity_candidates[0][1] if activity_candidates else "No recent activity"
+    days_since_contact = (date.today() - last_contact_event["contact_date"]).days if last_contact_event else None
+
     interventions = fetch_all(
         """
-        SELECT i.*, ra.risk_level
+        SELECT i.*, ra.risk_level, fu.notes AS follow_up_notes, fu.outcome AS follow_up_outcome
         FROM intervention i
         JOIN risk_assessment ra ON ra.risk_assessment_id=i.risk_assessment_id
+        LEFT JOIN LATERAL (
+            SELECT notes, outcome FROM follow_up WHERE intervention_id=i.intervention_id
+            ORDER BY follow_up_date DESC LIMIT 1
+        ) fu ON TRUE
         WHERE ra.enrollment_id=%s
         ORDER BY i.date_assigned DESC
         """,
@@ -610,12 +713,11 @@ def learner_profile(learner_id: int):
             (base["risk_assessment_id"],),
         )
 
-    attendance_rate = round(float(att.get("session_attendance_rate_percent") or 0))
-    total_modules = int(mod.get("total_modules_released") or 0)
-    completed_modules = int(mod.get("total_modules_returned") or 0)
     risk_pct = round(shaped["risk_probability"] * 100)
     current_risk = shaped["risk"]
     prev_risk = title_enum(risk_history[-2]["risk_level"]) if len(risk_history) >= 2 else current_risk
+    engagement_score = _engagement_score(enrollment_id)
+    years_enrolled = (date.today() - base["enrollment_date"]).days // 365 if base.get("enrollment_date") else None
 
     contributor_rows = []
     for f in factors[:4]:
@@ -628,31 +730,72 @@ def learner_profile(learner_id: int):
             "text": f"Current value: {f.get('factor_value') if f.get('factor_value') is not None else 'n/a'}.",
         })
     if not contributor_rows:
-        contributor_rows = [
-            {"icon": "event_busy", "tone": "error" if attendance_rate < 70 else "neutral", "title": "Attendance Consistency", "level": "High" if attendance_rate < 70 else "Low", "text": f"Attendance rate is {attendance_rate}%."},
-            {"icon": "history_edu", "tone": "moderate", "title": "Module Completion", "level": "Moderate", "text": f"{completed_modules} of {total_modules} released modules are submitted/completed."},
-        ]
+        if days_since_last_return is None:
+            contributor_rows.append({
+                "icon": "menu_book", "tone": "error", "title": "No Modules Returned Yet", "level": "High",
+                "text": f"{modules_released} module(s) released, none returned so far." if modules_released else "No modules have been released yet.",
+            })
+        elif days_since_last_return >= 21:
+            high = days_since_last_return >= 28
+            contributor_rows.append({
+                "icon": "event_busy", "tone": "error" if high else "moderate",
+                "title": "Module Return Inactivity", "level": "High" if high else "Moderate",
+                "text": f"No module returned for {days_since_last_return} days.",
+            })
+        eng_level = "High" if engagement_score <= 1 else "Moderate" if engagement_score <= 2 else "Low"
+        contributor_rows.append({
+            "icon": "bolt", "tone": "error" if eng_level == "High" else "moderate" if eng_level == "Moderate" else "neutral",
+            "title": "Engagement Score", "level": eng_level,
+            "text": f"Engagement Score = {engagement_score} (out of 4).",
+        })
+        if base.get("is_re_enrollee"):
+            contributor_rows.append({
+                "icon": "restart_alt", "tone": "moderate", "title": "Re-enrollee", "level": "Moderate",
+                "text": "This learner previously dropped out and re-enrolled.",
+            })
+        if days_since_contact is None or days_since_contact >= 30:
+            contributor_rows.append({
+                "icon": "phone_missed", "tone": "moderate", "title": "Consultation Contact", "level": "Moderate",
+                "text": "No consultation contact on record." if days_since_contact is None else f"No consultation contact in {days_since_contact} days.",
+            })
+        if years_enrolled is not None:
+            contributor_rows.append({
+                "icon": "history", "tone": "neutral", "title": "Years Enrolled", "level": "Low",
+                "text": f"{years_enrolled} year(s) enrolled in the ALS program.",
+            })
 
     recommendation = []
     if current_risk == "High":
         recommendation = [
             {"priority": "high", "title": "Contact learner", "text": "Immediate follow-up regarding identified risk indicators."},
-            {"priority": "high", "title": "Schedule consultation", "text": "Review attendance and module barriers with the learner."},
-            {"priority": "medium", "title": "Monitor next activity", "text": "Track the next session and module submission closely."},
+            {"priority": "high", "title": "Schedule consultation", "text": "Review module return barriers with the learner."},
+            {"priority": "medium", "title": "Assign intervention", "text": "Assign a support intervention and track its outcome."},
+            {"priority": "medium", "title": "Monitor for 2 weeks", "text": "Track the next module return and engagement signals closely."},
         ]
     elif current_risk == "Moderate":
         recommendation = [
-            {"priority": "medium", "title": "Check in with learner", "text": "Discuss emerging attendance or learning barriers."},
-            {"priority": "medium", "title": "Monitor next module", "text": "Watch for repeated delays before risk increases."},
+            {"priority": "medium", "title": "Contact learner", "text": "Check in about emerging module-return or engagement barriers."},
+            {"priority": "medium", "title": "Monitor for 2 weeks", "text": "Watch for repeated delays before risk increases."},
         ]
     else:
-        recommendation = [{"priority": "low", "title": "Continue monitoring", "text": "Maintain regular attendance and module tracking."}]
+        recommendation = [{"priority": "low", "title": "Continue monitoring", "text": "Maintain regular module tracking and consultation contact."}]
 
-    att_history = fetch_all(
+    release_batches = fetch_all(
         """
-        SELECT cs.session_date, cs.session_topic, sa.attendance_status
-        FROM session_attendance sa JOIN class_session cs ON cs.session_id=sa.session_id
-        WHERE sa.enrollment_id=%s ORDER BY cs.session_date DESC LIMIT 8
+        SELECT mrb.release_date, COUNT(mr.module_record_id) AS n
+        FROM module_release_batch mrb
+        JOIN module_record mr ON mr.release_batch_id = mrb.release_batch_id
+        WHERE mrb.enrollment_id=%s
+        GROUP BY mrb.release_batch_id, mrb.release_date
+        ORDER BY mrb.release_date DESC LIMIT 10
+        """,
+        (enrollment_id,),
+    )
+    return_events = fetch_all(
+        """
+        SELECT date_returned, COUNT(*) AS n
+        FROM module_record WHERE enrollment_id=%s AND date_returned IS NOT NULL
+        GROUP BY date_returned ORDER BY date_returned DESC LIMIT 10
         """,
         (enrollment_id,),
     )
@@ -665,44 +808,84 @@ def learner_profile(learner_id: int):
     )
 
     timeline = []
-    for a in att_history[:5]:
+    for b in release_batches:
         timeline.append({
-            "type": "attendance", "title": f"Attendance: {title_enum(a['attendance_status'])}",
-            "text": a.get("session_topic") or "Class session", "date": a["session_date"].strftime("%b %d, %Y")
+            "type": "module", "title": f"Released {b['n']} Module{'s' if b['n'] != 1 else ''}",
+            "text": "Module batch released to learner.",
+            "date": b["release_date"].strftime("%b %d, %Y"), "_sort": b["release_date"],
         })
-    for i in interventions[:5]:
+    for r in return_events:
         timeline.append({
-            "type": "intervention", "title": i["intervention_type"], "text": i["description"],
-            "date": i["date_assigned"].strftime("%b %d, %Y")
+            "type": "module", "title": f"Returned {r['n']} Module{'s' if r['n'] != 1 else ''}",
+            "text": "Learner returned module(s) for review.",
+            "date": r["date_returned"].strftime("%b %d, %Y"), "_sort": r["date_returned"],
         })
+    for i in interventions[:10]:
+        timeline.append({
+            "type": "intervention", "title": f"Assigned Intervention: {i['intervention_type']}",
+            "text": i["description"], "date": i["date_assigned"].strftime("%b %d, %Y"),
+            "_sort": i["date_assigned"],
+        })
+        if i["status"] == "COMPLETED" and i.get("date_completed"):
+            timeline.append({
+                "type": "intervention", "title": "Intervention Completed", "text": i["intervention_type"],
+                "date": i["date_completed"].strftime("%b %d, %Y"), "_sort": i["date_completed"],
+            })
+    risk_changes = []
+    for idx in range(1, len(risk_history)):
+        prev_level = title_enum(risk_history[idx - 1]["risk_level"])
+        curr_level = title_enum(risk_history[idx]["risk_level"])
+        if prev_level == curr_level:
+            continue
+        assessed_at = risk_history[idx]["assessment_date"]
+        risk_changes.append({
+            "icon": "trending_up" if curr_level == "High" else "trending_down" if curr_level == "Low" else "trending_flat",
+            "text": f"{prev_level} → {curr_level}",
+            "severity": curr_level.lower(),
+            "date": assessed_at.strftime("%b %d, %Y"),
+        })
+        timeline.append({
+            "type": "risk", "title": "Risk Updated", "text": f"{prev_level} → {curr_level}",
+            "date": assessed_at.strftime("%b %d, %Y"), "_sort": assessed_at.date(),
+        })
+
+    timeline.sort(key=lambda t: t["_sort"], reverse=True)
+    for item in timeline:
+        item.pop("_sort", None)
 
     response = {
         **shaped,
+        "header": {
+            "schoolYear": base.get("school_year") or "—",
+            "dateEnrolled": base["enrollment_date"].strftime("%B %d, %Y") if base.get("enrollment_date") else "—",
+            "assignedTeacher": base.get("assigned_teacher") or "—",
+            "currentClass": base.get("class_name") or "—",
+        },
         "riskTrend": risk_trend,
         "metrics": {
-            "attendanceRate": attendance_rate,
-            "attendanceDelta": 0,
-            "modulesCompleted": completed_modules,
-            "modulesTotal": total_modules,
-            "submissionTimeliness": int(mod.get("module_completion_progress_percent") or 0),
-            "consultationsAttended": sum(1 for c in contacts if c["contact_result"] == "SUCCESSFUL"),
-            "consultationsTotal": len(contacts),
+            "engagementScore": engagement_score,
+            "engagementScoreMax": 4,
+            "modulesReleased": modules_released,
+            "modulesReturned": modules_returned,
+            "activeModules": active_modules,
+            "lastActivity": last_activity,
+            "daysSinceLastReturn": days_since_last_return,
         },
         "background": {
             "civilStatus": title_enum(base.get("civil_status")) or "—",
             "employment": base.get("employment_status") or "—",
             "distanceCategory": "Far (>5km)" if float(base.get("distance_from_clc_km") or 0) > 5 else "Near (≤5km)",
+            "distanceKm": float(base.get("distance_from_clc_km") or 0),
             "reenrollee": "Yes" if base.get("is_re_enrollee") else "No",
-            "yearsEnrolled": "—",
-            "beneficiary4Ps": "—",
+            "isReenrollee": bool(base.get("is_re_enrollee")),
+            "yearsEnrolled": years_enrolled if years_enrolled is not None else "—",
+            "is4Ps": bool(base.get("is_4ps_beneficiary")),
+            "civilStatusRaw": base.get("civil_status") or "",
+            "employmentRaw": base.get("employment_status") or "",
         },
-        "recentActivity": timeline[:4],
+        "recentActivity": timeline[:5],
         "recommendedActions": recommendation,
         "monitoringHistory": {
-            "attendance": [
-                {"date": a["session_date"].strftime("%b %d"), "session": a.get("session_topic") or "Session", "status": "Attended" if a["attendance_status"] == "PRESENT" else title_enum(a["attendance_status"])}
-                for a in att_history
-            ],
             "modules": [
                 {"module": m["module_name"], "released": m["date_released"].strftime("%b %d"), "submitted": m["date_returned"].strftime("%b %d") if m.get("date_returned") else "—"}
                 for m in module_history
@@ -710,24 +893,24 @@ def learner_profile(learner_id: int):
             "timeline": timeline,
         },
         "riskExplanation": {
-            "probability": risk_pct,
-            "confidence": "Available" if risk_history else "Pending",
-            "model": "Random Forest",
-            "lastPrediction": base["assessment_date"].strftime("%b %d, %Y %I:%M %p") if base.get("assessment_date") else "No prediction yet",
+            "currentRiskLevel": current_risk,
             "summary": f"StayEd currently classifies this learner as {current_risk} Risk based on the latest available monitoring data.",
             "previousRisk": f"{prev_risk} Risk",
             "currentRisk": f"{current_risk} Risk",
-            "changes": [],
+            "changes": risk_changes,
             "contributors": contributor_rows,
-            "recordsUsed": "Attendance, Modules, Assessments, Contacts, and Enrollment Context",
+            "recommendedAction": recommendation,
+            "recordsUsed": "Modules, Interventions, Consultation Contacts, and Enrollment Context",
         },
         "interventions": {
             "active": {
+                "id": active["intervention_id"],
                 "title": active["intervention_type"],
                 "priority": "High Priority" if current_risk == "High" else "Medium Priority",
                 "assigned": active["date_assigned"].strftime("%B %d, %Y"),
                 "followUp": active["target_date"].strftime("%B %d, %Y") if active.get("target_date") else "—",
                 "status": title_enum(active["status"]),
+                "assignedBy": base.get("assigned_teacher") or "—",
             } if active else None,
             "history": [
                 {
@@ -737,6 +920,7 @@ def learner_profile(learner_id: int):
                     "priority": "High" if i.get("risk_level") == "HIGH" else "Medium",
                     "status": title_enum(i["status"]),
                     "outcome": "Completed" if i["status"] == "COMPLETED" else "Pending",
+                    "remarks": i.get("follow_up_notes") or i.get("follow_up_outcome") or "—",
                 } for i in interventions
             ],
             "recommended": [
@@ -744,7 +928,7 @@ def learner_profile(learner_id: int):
                     "priority": "High Priority" if r["priority"] == "high" else "Medium Priority",
                     "rank": idx + 1,
                     "title": r["title"].title(),
-                    "factor": contributor_rows[min(idx, len(contributor_rows)-1)]["title"],
+                    "factor": contributor_rows[min(idx, len(contributor_rows) - 1)]["title"] if contributor_rows else "",
                     "text": r["text"],
                     "action": r["title"].title(),
                 }
@@ -753,6 +937,87 @@ def learner_profile(learner_id: int):
         },
     }
     return response
+
+
+INTERVENTION_TYPES = {
+    "Home Visit", "Consultation", "Referral", "Learner Follow-up",
+    "Parent/Guardian Conference", "Other",
+}
+
+
+def _ensure_risk_assessment_id(enrollment_id: int) -> int:
+    """Return the enrollment's most recent risk_assessment_id, creating a
+    placeholder (INSUFFICIENT_DATA, no probability/level) if none exists yet --
+    interventions require one via a NOT NULL FK, but most learners have no
+    prediction on record while the scoring engine remains unconfigured."""
+    existing = fetch_one(
+        "SELECT risk_assessment_id FROM risk_assessment WHERE enrollment_id=%s ORDER BY assessment_date DESC LIMIT 1",
+        (enrollment_id,),
+    )
+    if existing:
+        return existing["risk_assessment_id"]
+
+    model = fetch_one(
+        "SELECT model_id FROM model_info WHERE model_status='ACTIVE' ORDER BY training_date DESC LIMIT 1"
+    )
+    if not model:
+        raise ValueError("No ACTIVE model is registered in model_info.")
+
+    today = date.today()
+    created = execute(
+        """
+        INSERT INTO risk_assessment (model_id, enrollment_id, monitoring_start_date, monitoring_end_date)
+        VALUES (%s, %s, %s, %s)
+        RETURNING risk_assessment_id
+        """,
+        (model["model_id"], enrollment_id, today, today),
+        returning=True,
+    )
+    return created["risk_assessment_id"]
+
+
+@bp.post("/learners/<int:learner_id>/interventions")
+@role_required("teacher")
+def create_intervention(learner_id: int):
+    base = _profile_base(learner_id)
+    if not base:
+        return error("Learner not found.", 404)
+    teacher = _teacher_scope()
+
+    data = request.get_json(silent=True) or {}
+    intervention_type = str(data.get("type") or "").strip()
+    description = str(data.get("description") or "").strip()
+    if not intervention_type:
+        return error("Intervention type is required.", 422)
+    if not description:
+        return error("A short description is required.", 422)
+
+    target_date = None
+    if data.get("targetDate"):
+        try:
+            target_date = date.fromisoformat(str(data["targetDate"]))
+        except ValueError:
+            return error("Target date must use YYYY-MM-DD.", 422)
+
+    try:
+        risk_assessment_id = _ensure_risk_assessment_id(base["enrollment_id"])
+    except ValueError as exc:
+        return error(str(exc), 503)
+
+    execute(
+        """
+        INSERT INTO intervention (risk_assessment_id, assigned_to_teacher_id, intervention_type, description, target_date)
+        VALUES (%s, %s, %s, %s, %s)
+        """,
+        (risk_assessment_id, teacher["teacher_id"], intervention_type, description, target_date),
+    )
+
+    try:
+        trigger_prediction(base["enrollment_id"], current_user_id())
+    except Exception:
+        pass
+
+    return {"message": "Intervention assigned."}, 201
 
 
 @bp.get("/learning-strands")
@@ -764,42 +1029,99 @@ def list_learning_strands():
     return {"data": [{"id": r["learning_strand_id"], "code": r["strand_code"], "name": r["strand_name"]} for r in rows]}
 
 
-def _shape_module(row):
-    return {
-        "id": row["module_record_id"],
-        "strandCode": row.get("strand_code") or "",
-        "strandName": row.get("strand_name") or "",
-        "title": row["module_name"],
-        "released": row["date_released"].strftime("%B %d, %Y"),
-        "returned": row["date_returned"].strftime("%B %d, %Y") if row.get("date_returned") else None,
-        "status": "returned" if row["module_status"] == "RETURNED" else "released",
-        "remarks": row.get("remarks") or "",
-    }
+def _batch_status(modules: list[dict], release_date: date) -> dict:
+    total = len(modules)
+    returned = sum(1 for m in modules if m["status"] == "returned")
+
+    if total and returned == total:
+        return_dates = [m["returnedRaw"] for m in modules if m["returnedRaw"]]
+        return_date = max(return_dates) if return_dates else release_date
+        return {
+            "status": "returned",
+            "returnDate": return_date.strftime("%B %d, %Y"),
+            "daysToReturn": (return_date - release_date).days,
+            "daysInactive": None,
+        }
+
+    if returned > 0:
+        return {"status": "partial", "returnDate": None, "daysToReturn": None, "daysInactive": None}
+
+    days_inactive = (date.today() - release_date).days
+    if days_inactive >= 30:
+        tier = "high"
+    elif days_inactive >= 21:
+        tier = "moderate"
+    else:
+        tier = "active"
+    return {"status": tier, "returnDate": None, "daysToReturn": None, "daysInactive": days_inactive}
 
 
-def _module_summary(enrollment_id: int):
+def _logbook(enrollment_id: int) -> dict:
     rows = fetch_all(
         """
-        SELECT mr.*, ls.strand_code, ls.strand_name
+        SELECT mr.module_record_id, mr.module_name, mr.date_released, mr.date_returned,
+               mr.module_status, mr.remarks, mr.release_batch_id,
+               ls.strand_code, ls.strand_name,
+               mrb.release_date AS batch_release_date
         FROM module_record mr
+        JOIN module_release_batch mrb ON mrb.release_batch_id = mr.release_batch_id
         LEFT JOIN learning_strand ls ON ls.learning_strand_id = mr.learning_strand_id
         WHERE mr.enrollment_id = %s
-        ORDER BY ls.strand_code NULLS LAST, mr.date_released DESC
+        ORDER BY mrb.release_date DESC, ls.strand_code NULLS LAST, mr.module_record_id
         """,
         (enrollment_id,),
     )
-    modules = [_shape_module(r) for r in rows]
-    total = len(modules)
-    returned = sum(1 for m in modules if m["status"] == "returned")
-    return {
-        "summary": {
-            "total": total,
-            "returned": returned,
-            "inProgress": total - returned,
-            "completionPercent": round(100 * returned / total) if total else 0,
-        },
-        "modules": modules,
-    }
+
+    batches: dict[int, dict] = {}
+    order: list[int] = []
+    for r in rows:
+        batch_id = r["release_batch_id"]
+        if batch_id not in batches:
+            batches[batch_id] = {
+                "id": batch_id,
+                "releaseDate": r["batch_release_date"].strftime("%B %d, %Y"),
+                "releaseDateRaw": r["batch_release_date"],
+                "strandsByCode": {},
+            }
+            order.append(batch_id)
+
+        batch = batches[batch_id]
+        strand_code = r["strand_code"] or "General"
+        strand = batch["strandsByCode"].setdefault(
+            strand_code, {"code": strand_code, "name": r["strand_name"] or "Modules", "modules": []}
+        )
+        strand["modules"].append(
+            {
+                "id": r["module_record_id"],
+                "title": r["module_name"],
+                "status": "returned" if r["module_status"] == "RETURNED" else "active",
+                "returned": r["date_returned"].strftime("%B %d, %Y") if r["date_returned"] else None,
+                "returnedRaw": r["date_returned"],
+                "remarks": r.get("remarks") or "",
+            }
+        )
+
+    shaped = []
+    for batch_id in order:
+        batch = batches[batch_id]
+        strands = list(batch["strandsByCode"].values())
+        all_modules = [m for s in strands for m in s["modules"]]
+        status_info = _batch_status(all_modules, batch["releaseDateRaw"])
+        for s in strands:
+            for m in s["modules"]:
+                m.pop("returnedRaw", None)
+        shaped.append(
+            {
+                "id": batch["id"],
+                "releaseDate": batch["releaseDate"],
+                "moduleCount": len(all_modules),
+                "strandCount": len(strands),
+                "strands": strands,
+                **status_info,
+            }
+        )
+
+    return {"batches": shaped}
 
 
 @bp.get("/learners/<int:learner_id>/modules")
@@ -808,103 +1130,124 @@ def list_learner_modules(learner_id: int):
     base = _profile_base(learner_id)
     if not base:
         return error("Learner not found.", 404)
-    return _module_summary(base["enrollment_id"])
+    return {
+        "learner": {
+            "name": f"{base['first_name']} {base['last_name']}",
+            "lrn": base["lrn"],
+            "clc": base["clc_name"],
+            "level": base["learning_level"],
+        },
+        **_logbook(base["enrollment_id"]),
+    }
 
 
-@bp.post("/learners/<int:learner_id>/modules")
+@bp.post("/learners/<int:learner_id>/module-batches")
 @role_required("teacher")
-def release_module(learner_id: int):
+def release_module_batch(learner_id: int):
     base = _profile_base(learner_id)
     if not base:
         return error("Learner not found.", 404)
     teacher = _teacher_scope()
 
     data = request.get_json(silent=True) or {}
-    title = str(data.get("title") or "").strip()
-    strand_code = str(data.get("strandCode") or "").strip().upper()
-    if not title or not strand_code:
-        return error("Module title and learning strand are required.", 422)
-
-    strand = fetch_one("SELECT learning_strand_id FROM learning_strand WHERE strand_code = %s", (strand_code,))
-    if not strand:
-        return error("Unknown learning strand.", 422)
-
     try:
-        date_released = date.fromisoformat(str(data.get("dateReleased"))) if data.get("dateReleased") else date.today()
+        release_date = date.fromisoformat(str(data.get("releaseDate"))) if data.get("releaseDate") else date.today()
     except ValueError:
         return error("Release date must use YYYY-MM-DD.", 422)
+
+    strands_in = data.get("strands") or []
+    inserts = []
+    for strand in strands_in:
+        strand_code = str(strand.get("strandCode") or "").strip().upper()
+        titles = [str(t).strip() for t in (strand.get("modules") or []) if str(t).strip()]
+        if not strand_code or not titles:
+            continue
+        row = fetch_one("SELECT learning_strand_id FROM learning_strand WHERE strand_code = %s", (strand_code,))
+        if not row:
+            return error(f"Unknown learning strand: {strand_code}.", 422)
+        for title in titles:
+            inserts.append((row["learning_strand_id"], title))
+
+    if not inserts:
+        return error("At least one learning strand with at least one module is required.", 422)
 
     db = get_db()
     try:
         with db.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO module_record (
-                    enrollment_id, learning_strand_id, module_name, date_released, recorded_by_teacher_id
-                ) VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO module_release_batch (enrollment_id, release_date, recorded_by_teacher_id)
+                VALUES (%s, %s, %s) RETURNING release_batch_id
                 """,
-                (base["enrollment_id"], strand["learning_strand_id"], title, date_released, teacher["teacher_id"]),
+                (base["enrollment_id"], release_date, teacher["teacher_id"]),
             )
+            batch_id = cur.fetchone()["release_batch_id"]
+            for learning_strand_id, title in inserts:
+                cur.execute(
+                    """
+                    INSERT INTO module_record (
+                        enrollment_id, learning_strand_id, module_name, date_released,
+                        recorded_by_teacher_id, release_batch_id
+                    ) VALUES (%s, %s, %s, %s, %s, %s)
+                    """,
+                    (base["enrollment_id"], learning_strand_id, title, release_date, teacher["teacher_id"], batch_id),
+                )
         db.commit()
     except Exception:
         db.rollback()
         raise
 
-    return {"message": "Module released.", **_module_summary(base["enrollment_id"])}, 201
+    return {"message": "Module batch released.", **_logbook(base["enrollment_id"])}, 201
 
 
-@bp.put("/learners/<int:learner_id>/modules/<int:module_record_id>")
+@bp.post("/learners/<int:learner_id>/module-batches/<int:batch_id>/return")
 @role_required("teacher")
-def update_module(learner_id: int, module_record_id: int):
+def return_module_batch(learner_id: int, batch_id: int):
     base = _profile_base(learner_id)
     if not base:
         return error("Learner not found.", 404)
 
-    existing = fetch_one(
-        "SELECT * FROM module_record WHERE module_record_id=%s AND enrollment_id=%s",
-        (module_record_id, base["enrollment_id"]),
+    batch = fetch_one(
+        "SELECT release_batch_id FROM module_release_batch WHERE release_batch_id=%s AND enrollment_id=%s",
+        (batch_id, base["enrollment_id"]),
     )
-    if not existing:
-        return error("Module record not found.", 404)
+    if not batch:
+        return error("Release batch not found.", 404)
 
     data = request.get_json(silent=True) or {}
-    title = str(data.get("title") or existing["module_name"]).strip()
+    module_ids = [int(m) for m in (data.get("moduleIds") or []) if str(m).strip().lstrip("-").isdigit()]
+    if not module_ids:
+        return error("Select at least one module to return.", 422)
 
-    date_released = existing["date_released"]
-    if data.get("dateReleased"):
-        try:
-            date_released = date.fromisoformat(str(data["dateReleased"]))
-        except ValueError:
-            return error("Release date must use YYYY-MM-DD.", 422)
+    try:
+        return_date = date.fromisoformat(str(data.get("returnDate"))) if data.get("returnDate") else date.today()
+    except ValueError:
+        return error("Return date must use YYYY-MM-DD.", 422)
 
-    date_returned = existing["date_returned"]
-    if "returned" in data:
-        if data["returned"]:
-            if data.get("dateReturned"):
-                try:
-                    date_returned = date.fromisoformat(str(data["dateReturned"]))
-                except ValueError:
-                    return error("Return date must use YYYY-MM-DD.", 422)
-            else:
-                date_returned = date.today()
-        else:
-            date_returned = None
+    remarks = data.get("remarks") or None
 
-    if date_returned and date_returned < date_released:
-        return error("Return date cannot be before the release date.", 422)
-
-    remarks = data.get("remarks", existing.get("remarks"))
+    owned = fetch_all(
+        "SELECT module_record_id FROM module_record WHERE release_batch_id=%s AND module_record_id = ANY(%s)",
+        (batch_id, module_ids),
+    )
+    if len(owned) != len(set(module_ids)):
+        return error("One or more selected modules do not belong to this batch.", 422)
 
     execute(
         """
         UPDATE module_record
-        SET module_name=%s, date_released=%s, date_returned=%s, remarks=%s
-        WHERE module_record_id=%s
+        SET date_returned=%s, module_status='RETURNED', remarks=%s
+        WHERE release_batch_id=%s AND module_record_id = ANY(%s)
         """,
-        (title, date_released, date_returned, remarks, module_record_id),
+        (return_date, remarks, batch_id, module_ids),
     )
 
-    return {"message": "Module updated.", **_module_summary(base["enrollment_id"])}
+    try:
+        trigger_prediction(base["enrollment_id"], current_user_id())
+    except Exception:
+        pass
+
+    return {"message": "Module return recorded.", **_logbook(base["enrollment_id"])}
 
 
 def _read_upload(file_storage):
@@ -936,6 +1279,10 @@ def _canonical_rows(frame: pd.DataFrame):
         "learner_reference_number": "lrn", "full_name": "name", "learner_name": "name",
         "date_of_birth": "birthdate", "dob": "birthdate", "learning_level": "level",
         "learning_modality": "modality",
+        "re-enrollee_(yes/no)": "re_enrollee", "re-enrollee": "re_enrollee",
+        "distance_from_clc_(km)": "distance_from_clc_km",
+        "civil_status_(if_applicable)": "civil_status",
+        "guardian_contact_number_(if_applicable)": "guardian_contact_number",
     }
     frame = frame.rename(columns={k: v for k, v in aliases.items() if k in frame.columns})
     records = frame.where(pd.notna(frame), None).to_dict(orient="records")
@@ -958,6 +1305,17 @@ def _parse_import_birthdate(value):
         if pd.isna(parsed):
             return None
         return parsed.date()
+
+
+def _parse_import_bool(value):
+    return str(value or "").strip().lower() in {"yes", "y", "true", "1"}
+
+
+def _parse_import_distance(value):
+    try:
+        return float(value) if value not in (None, "") else None
+    except (TypeError, ValueError):
+        return None
 
 
 def _preview_rows(rows):
@@ -1044,18 +1402,34 @@ def _insert_import_rows(rows, teacher):
                     continue
                 cur.execute(
                     """
-                    INSERT INTO learner (lrn, first_name, last_name, sex, date_of_birth)
-                    VALUES (%s,%s,%s,%s,%s) RETURNING learner_id
+                    INSERT INTO learner (
+                        lrn, first_name, last_name, sex, date_of_birth,
+                        employment_status, civil_status, contact_number, guardian_contact_number
+                    )
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING learner_id
                     """,
-                    (row["lrn"], first, last, sex, dob),
+                    (
+                        row["lrn"], first, last, sex, dob,
+                        row.get("employment_status") or None,
+                        row.get("civil_status") or None,
+                        row.get("contact_number") or None,
+                        row.get("guardian_contact_number") or None,
+                    ),
                 )
                 learner_id = cur.fetchone()["learner_id"]
                 cur.execute(
                     """
-                    INSERT INTO class_enrollment (class_id, learner_id, learning_modality, enrollment_status)
-                    VALUES (%s,%s,%s,'ENROLLED')
+                    INSERT INTO class_enrollment (
+                        class_id, learner_id, learning_modality, is_re_enrollee,
+                        distance_from_clc_km, enrollment_status
+                    )
+                    VALUES (%s,%s,%s,%s,%s,'ENROLLED')
                     """,
-                    (class_row["class_id"], learner_id, enum_modality(row.get("modality"))),
+                    (
+                        class_row["class_id"], learner_id, enum_modality(row.get("modality")),
+                        _parse_import_bool(row.get("re_enrollee")),
+                        _parse_import_distance(row.get("distance_from_clc_km")),
+                    ),
                 )
                 imported.append({"lrn": row["lrn"], "name": name, "level": row.get("level") or "Basic Literacy"})
 

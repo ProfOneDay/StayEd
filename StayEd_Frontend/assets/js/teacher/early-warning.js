@@ -7,8 +7,6 @@ class EarlyWarningPage {
     search: "",
     riskLevel: "",
     clc: "",
-    dateFrom: "",
-    dateTo: "",
   };
 
   static async init() {
@@ -107,34 +105,16 @@ class EarlyWarningPage {
       });
 
     document
-      .querySelector("[data-ewa-date-from]")
-      ?.addEventListener("change", (e) => {
-        this.state.dateFrom = e.target.value;
-        this.apply();
-      });
-
-    document
-      .querySelector("[data-ewa-date-to]")
-      ?.addEventListener("change", (e) => {
-        this.state.dateTo = e.target.value;
-        this.apply();
-      });
-
-    document
       .querySelector("[data-ewa-clear]")
       ?.addEventListener("click", () => {
         this.state.search = "";
         this.state.riskLevel = "";
         this.state.clc = "";
-        this.state.dateFrom = "";
-        this.state.dateTo = "";
         this.state.page = 1;
 
         document.querySelector("[data-ewa-search]").value = "";
         document.querySelector("[data-ewa-filter-risk]").value = "";
         document.querySelector("[data-ewa-filter-clc]").value = "";
-        document.querySelector("[data-ewa-date-from]").value = "";
-        document.querySelector("[data-ewa-date-to]").value = "";
 
         this.apply();
       });
@@ -179,22 +159,6 @@ class EarlyWarningPage {
 
     if (this.state.clc) {
       rows = rows.filter((l) => l.clc === this.state.clc);
-    }
-
-    if (this.state.dateFrom) {
-      const from = new Date(`${this.state.dateFrom}T00:00:00`);
-      rows = rows.filter((item) => {
-        const generated = item.dateGenerated ? new Date(item.dateGenerated) : null;
-        return generated && !Number.isNaN(generated.valueOf()) && generated >= from;
-      });
-    }
-
-    if (this.state.dateTo) {
-      const to = new Date(`${this.state.dateTo}T23:59:59`);
-      rows = rows.filter((item) => {
-        const generated = item.dateGenerated ? new Date(item.dateGenerated) : null;
-        return generated && !Number.isNaN(generated.valueOf()) && generated <= to;
-      });
     }
 
     this.state.filtered = rows;

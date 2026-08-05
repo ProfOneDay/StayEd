@@ -9,6 +9,8 @@ class ClcOverview {
   static async init() {
     if (window.Guards) Guards.teacher();
 
+    this.state.municipality = window.Auth ? Auth.municipality() : "";
+
     this.bindControls();
 
     await this.load();
@@ -22,9 +24,16 @@ class ClcOverview {
     try {
       const response = await API.getClcs();
 
-      this.state.all = response.data || [];
+      const all = response.data || [];
 
-      this.populateMunicipalityFilter();
+      // Teachers are assigned to a single municipality at account setup —
+      // this page only ever shows CLCs within that municipality. Picking a
+      // different municipality is an Admin/ALS Division Supervisor action.
+      this.state.all = this.state.municipality
+        ? all.filter((c) => c.municipality === this.state.municipality)
+        : all;
+
+      this.renderMunicipalityLabel();
 
       this.renderStats();
 
@@ -37,18 +46,15 @@ class ClcOverview {
     }
   }
 
+  static renderMunicipalityLabel() {
+    this.set("[data-clc-municipality-name]", this.state.municipality || "—");
+  }
+
   static bindControls() {
     document
       .querySelector("[data-clc-search]")
       ?.addEventListener("input", (e) => {
         this.state.search = e.target.value.toLowerCase();
-        this.apply();
-      });
-
-    document
-      .querySelector("[data-clc-filter-municipality]")
-      ?.addEventListener("change", (e) => {
-        this.state.municipality = e.target.value;
         this.apply();
       });
   }
@@ -81,10 +87,6 @@ class ClcOverview {
       rows = rows.filter((c) =>
         (c.name || "").toLowerCase().includes(this.state.search),
       );
-    }
-
-    if (this.state.municipality) {
-      rows = rows.filter((c) => c.municipality === this.state.municipality);
     }
 
     this.state.filtered = rows;
@@ -120,7 +122,7 @@ class ClcOverview {
 
     grid.querySelectorAll("[data-clc-view]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        window.location.href = `learner-records.html?clc=${encodeURIComponent(btn.dataset.clcName)}`;
+        window.location.href = `class-management.html?clc=${encodeURIComponent(btn.dataset.clcName)}`;
       });
     });
   }
@@ -180,7 +182,7 @@ class ClcOverview {
 
                 <div class="st-clc-card-footer">
                     <button type="button" class="st-btn st-btn-primary" data-clc-view="${clc.id}" data-clc-name="${clc.name}">
-                        View Records
+                        View Classes
                         <span class="material-symbols-outlined">arrow_forward</span>
                     </button>
                 </div>
@@ -195,34 +197,6 @@ class ClcOverview {
     if (grid && window.Skeletons) {
       grid.innerHTML = Skeletons.cards(6);
     }
-  }
-
-  static populateMunicipalityFilter() {
-    const select = document.querySelector("[data-clc-filter-municipality]");
-
-    if (!select) return;
-
-    const current = this.state.municipality;
-    const list = [...new Set(this.state.all.map((item) => item.municipality))]
-      .filter(Boolean)
-      .sort((a, b) => a.localeCompare(b));
-
-    select.replaceChildren();
-
-    const allOption = document.createElement("option");
-    allOption.value = "";
-    allOption.textContent = "All Municipalities";
-    select.appendChild(allOption);
-
-    list.forEach((municipality) => {
-      const option = document.createElement("option");
-      option.value = municipality;
-      option.textContent = municipality;
-      select.appendChild(option);
-    });
-
-    select.value = list.includes(current) ? current : "";
-    this.state.municipality = select.value;
   }
 
   static set(selector, value) {

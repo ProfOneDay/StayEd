@@ -9,11 +9,6 @@ class LearnerRecordsHub {
     page: { modular: 1, "face-to-face": 1, blended: 1 },
     perPage: 6,
     classId: "",
-    selected: {
-      modular: new Set(),
-      "face-to-face": new Set(),
-      blended: new Set(),
-    },
   };
 
   static async init() {
@@ -155,30 +150,6 @@ class LearnerRecordsHub {
       ?.addEventListener("click", () => {
         Toast?.success("Changes saved.");
       });
-
-    document
-      .querySelector("[data-modular-bulk-export]")
-      ?.addEventListener("click", () => {
-        Toast?.info(
-          `Exporting ${this.state.selected.modular.size} learner record(s)…`,
-        );
-      });
-
-    document
-      .querySelector("[data-modular-bulk-contact]")
-      ?.addEventListener("click", () => {
-        Toast?.success(
-          `Marked ${this.state.selected.modular.size} learner(s) as Contacted.`,
-        );
-      });
-
-    document
-      .querySelector("[data-blended-bulk-export]")
-      ?.addEventListener("click", () => {
-        Toast?.info(
-          `Exporting ${this.state.selected.blended.size} learner record(s)…`,
-        );
-      });
   }
 
   static filteredForModality(modality) {
@@ -218,65 +189,13 @@ class LearnerRecordsHub {
       infoSelector: "[data-modular-info]",
       pagesSelector: "[data-modular-pages]",
       pageKey: "modular",
-      colspan: 7,
+      colspan: 5,
       rowRenderer: (l) => this.modularRow(l),
     });
   }
 
   static modularRow(l) {
-    const m = l.modules || {};
-
-    const pct = Math.round((m.completed / m.total) * 100) || 0;
-
-    const barClass =
-      l.risk === "High"
-        ? "st-progress-fill--high"
-        : l.risk === "Moderate"
-          ? "st-progress-fill--moderate"
-          : "st-progress-fill--low";
-
-    const labelClass =
-      l.risk === "High" ? "st-progress-cell-label--danger" : "";
-
-    return `
-            <tr>
-                <td class="checkbox-col">
-                    <input type="checkbox" data-row-select-modular="${l.id}"
-                        ${this.state.selected.modular.has(l.id) ? "checked" : ""}
-                        aria-label="Select ${l.name}">
-                </td>
-                <td style="font-family:monospace;font-size:12px;color:var(--st-on-surface-variant);">${l.lrn}</td>
-                <td style="font-weight:600;color:var(--st-on-surface);">${l.name}</td>
-                <td>${this.riskBadge(l.risk)}</td>
-                <td>
-                    <div class="st-progress-cell">
-                        <div class="st-progress-cell-head">
-                            <button type="button" class="st-progress-cell-label ${labelClass}" data-open-module-modal="${l.id}" style="background:none;border:none;padding:0;cursor:pointer;text-align:left;">${m.active} Active Modules</button>
-                            <span class="st-progress-cell-count">${m.completed} of ${m.total}</span>
-                        </div>
-                        <div class="st-progress-track">
-                            <div class="st-progress-fill ${barClass}" style="width:${pct}%;"></div>
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <select class="st-quick-select" data-contact-status="${l.id}" aria-label="Contact status for ${l.name}">
-                        <option ${m.contactStatus === "Contacted" ? "selected" : ""}>Contacted</option>
-                        <option ${m.contactStatus === "Follow-up Needed" ? "selected" : ""}>Follow-up Needed</option>
-                        <option ${m.contactStatus === "No Response" ? "selected" : ""}>No Response</option>
-                        <option ${m.contactStatus === "Guardian Contacted" ? "selected" : ""}>Guardian Contacted</option>
-                    </select>
-                </td>
-                <td>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <span style="font-size:13px;">${l.lastInteraction || "\u2014"}</span>
-                        <button type="button" class="st-icon-btn-sm" data-open-module-modal="${l.id}" aria-label="View module history" title="View module history">
-                            <span class="material-symbols-outlined" style="font-size:16px;">history</span>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `;
+    return `<tr>${this.recordCells(l)}</tr>`;
   }
 
   static renderF2F() {
@@ -294,42 +213,7 @@ class LearnerRecordsHub {
   }
 
   static f2fRow(l) {
-    const m = l.modules || {};
-
-    const pct = Math.round((m.completed / m.total) * 100) || 0;
-
-    const consultDot =
-      l.risk === "High"
-        ? "st-consult-dot--danger"
-        : l.risk === "Moderate"
-          ? "st-consult-dot--warning"
-          : "st-consult-dot--ok";
-
-    return `
-            <tr>
-                <td style="font-family:monospace;font-size:12px;color:var(--st-on-surface-variant);">${l.lrn}</td>
-                <td style="font-weight:600;color:var(--st-on-surface);">${l.name}</td>
-                <td>
-                    <div class="st-progress-cell">
-                        <span class="st-progress-cell-count">${m.completed} of ${m.total} Returned</span>
-                        <div class="st-progress-track">
-                            <div class="st-progress-fill st-progress-fill--primary" style="width:${pct}%;"></div>
-                        </div>
-                        <button type="button" class="st-progress-link" data-open-module-modal="${l.id}">
-                            View Logbook
-                            <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span>
-                        </button>
-                    </div>
-                </td>
-                <td>
-                    <div style="display:flex;align-items:center;gap:6px;">
-                        <span class="st-consult-dot ${consultDot}"></span>
-                        <span style="font-size:13px;">${l.lastInteraction || "\u2014"}</span>
-                    </div>
-                </td>
-                <td>${this.riskBadge(l.risk)}</td>
-            </tr>
-        `;
+    return `<tr>${this.recordCells(l)}</tr>`;
   }
 
   static renderBlended() {
@@ -341,63 +225,60 @@ class LearnerRecordsHub {
       infoSelector: "[data-blended-info]",
       pagesSelector: "[data-blended-pages]",
       pageKey: "blended",
-      colspan: 7,
+      colspan: 6,
       rowRenderer: (l) => this.blendedRow(l),
     });
   }
 
   static blendedRow(l) {
-    const a = l.attendance || {};
+    return `<tr>${this.recordCells(l)}<td class="is-center">${this.rowActionsMenu(l.id)}</td></tr>`;
+  }
 
+  // Shared cell markup for LRN / Learner / Modules / Latest Activity / Risk
+  // Level \u2014 kept identical across all three modality tables so only the
+  // underlying data (and each tab's "Latest ..." column header) differs.
+  static recordCells(l) {
+    return `
+            <td style="font-family:monospace;font-size:12px;color:var(--st-on-surface-variant);">${l.lrn}</td>
+            <td style="font-weight:600;color:var(--st-on-surface);">${l.name}</td>
+            <td>${this.modulesCell(l)}</td>
+            <td>${this.activityCell(l)}</td>
+            <td>${this.riskBadge(l.risk)}</td>
+        `;
+  }
+
+  static modulesCell(l) {
     const m = l.modules || {};
 
     const pct = Math.round((m.completed / m.total) * 100) || 0;
 
-    const scheduleCell = a.nextSession
-      ? `
-                <div class="st-schedule-cell" data-open-schedule-modal="${l.id}">
-                    <span class="st-schedule-date">${a.nextSession.date}</span>
-                    <span class="st-schedule-status ${a.nextSession.status === "Scheduled" ? "st-schedule-status--scheduled" : "st-schedule-status--pending"}">${a.nextSession.status}</span>
+    return `
+            <div class="st-progress-cell">
+                <span class="st-progress-cell-count">${m.completed} of ${m.total} Returned</span>
+                <div class="st-progress-track">
+                    <div class="st-progress-fill st-progress-fill--primary" style="width:${pct}%;"></div>
                 </div>
-            `
-      : `
-                <div class="st-schedule-cell" data-open-schedule-modal="${l.id}">
-                    <span style="font-size:12px;color:var(--st-on-surface-variant);">No session scheduled</span>
-                    <button type="button" class="st-schedule-set-link">Set Schedule</button>
-                </div>
-            `;
+                <button type="button" class="st-progress-link" data-open-module-modal="${l.id}">
+                    View Logbook
+                    <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span>
+                </button>
+            </div>
+        `;
+  }
+
+  static activityCell(l) {
+    const dotClass =
+      l.risk === "High"
+        ? "st-consult-dot--danger"
+        : l.risk === "Moderate"
+          ? "st-consult-dot--warning"
+          : "st-consult-dot--ok";
 
     return `
-            <tr>
-                <td class="checkbox-col">
-                    <input type="checkbox" data-row-select-blended="${l.id}"
-                        ${this.state.selected.blended.has(l.id) ? "checked" : ""}
-                        aria-label="Select ${l.name}">
-                </td>
-                <td>
-                    <div style="display:flex;flex-direction:column;">
-                        <span class="st-learner-id" style="font-family:monospace;">${l.lrn}</span>
-                        <span style="font-weight:600;">${l.name}</span>
-                        <div style="margin-top:4px;">${this.riskBadge(l.risk)}</div>
-                    </div>
-                </td>
-                <td>${scheduleCell}</td>
-                <td>
-                    <div class="st-progress-cell">
-                        <span class="st-progress-cell-count">${m.completed} of ${m.total} Completed</span>
-                        <div class="st-progress-track st-progress-track--lg">
-                            <div class="st-progress-fill st-progress-fill--primary" style="width:${pct}%;"></div>
-                        </div>
-                        <button type="button" class="st-progress-link" data-open-module-modal="${l.id}">
-                            <span class="material-symbols-outlined" style="font-size:16px;">menu_book</span>
-                            ${m.active} Active Modules
-                        </button>
-                    </div>
-                </td>
-                <td style="font-weight:700;color:var(--st-primary);">${pct}%</td>
-                <td style="font-size:13px;font-style:italic;color:var(--st-on-surface-variant);">${l.lastInteraction || "\u2014"}</td>
-                <td class="is-center">${this.rowActionsMenu(l.id)}</td>
-            </tr>
+            <div style="display:flex;align-items:center;gap:6px;">
+                <span class="st-consult-dot ${dotClass}"></span>
+                <span style="font-size:13px;">${l.lastInteraction || "\u2014"}</span>
+            </div>
         `;
   }
 
@@ -524,106 +405,6 @@ class LearnerRecordsHub {
       });
     });
 
-    container
-      .querySelectorAll("[data-contact-status]")
-      .forEach((select) => {
-        select.addEventListener("change", () => {
-          Toast?.success("Status updated.");
-        });
-      });
-
-    this.bindSelectionCheckboxes(container);
-  }
-
-  static SELECTION_CONFIG = {
-    modular: {
-      attr: "data-row-select-modular",
-      selectAll: "[data-modular-select-all]",
-      bar: "[data-modular-bulk-bar]",
-      count: "[data-modular-bulk-count]",
-    },
-    blended: {
-      attr: "data-row-select-blended",
-      selectAll: "[data-blended-select-all]",
-      bar: "[data-blended-bulk-bar]",
-      count: "[data-blended-bulk-count]",
-    },
-  };
-
-  static bindSelectionCheckboxes(container) {
-    const tab = this.state.activeTab;
-
-    const config = this.SELECTION_CONFIG[tab];
-
-    if (!config) return;
-
-    const attrCamel = config.attr
-      .replace(/-([a-z])/g, (_, c) => c.toUpperCase())
-      .replace("data", "");
-
-    container.querySelectorAll(`[${config.attr}]`).forEach((cb) => {
-      cb.addEventListener("change", () => {
-        const id = cb.getAttribute(config.attr);
-
-        if (cb.checked) this.state.selected[tab].add(id);
-        else this.state.selected[tab].delete(id);
-
-        cb.closest("tr")?.classList.toggle("is-selected", cb.checked);
-
-        this.updateBulkBar(tab);
-      });
-    });
-
-    this.syncSelectAll(tab);
-
-    this.updateBulkBar(tab);
-  }
-
-  static syncSelectAll(tab) {
-    const config = this.SELECTION_CONFIG[tab];
-
-    const selectAll = document.querySelector(config.selectAll);
-
-    if (!selectAll) return;
-
-    selectAll.onchange = () => {
-      const checked = selectAll.checked;
-
-      const config2 = this.SELECTION_CONFIG[tab];
-
-      document.querySelectorAll(`[${config2.attr}]`).forEach((cb) => {
-        cb.checked = checked;
-
-        const id = cb.getAttribute(config2.attr);
-
-        if (checked) this.state.selected[tab].add(id);
-        else this.state.selected[tab].delete(id);
-
-        cb.closest("tr")?.classList.toggle("is-selected", checked);
-      });
-
-      this.updateBulkBar(tab);
-    };
-  }
-
-  static updateBulkBar(tab) {
-    const config = this.SELECTION_CONFIG[tab];
-
-    if (!config) return;
-
-    const bar = document.querySelector(config.bar);
-
-    const count = document.querySelector(config.count);
-
-    if (!bar) return;
-
-    const n = this.state.selected[tab].size;
-
-    bar.classList.toggle("st-hidden", n === 0);
-
-    if (count) {
-      count.textContent = `${n} learner${n === 1 ? "" : "s"} selected`;
-    }
   }
 
   static rowActionsMenu(id) {
@@ -640,6 +421,10 @@ class LearnerRecordsHub {
                     <button type="button" data-open-module-modal="${id}">
                         <span class="material-symbols-outlined">menu_book</span>
                         Open Module Progress
+                    </button>
+                    <button type="button" data-open-schedule-modal="${id}">
+                        <span class="material-symbols-outlined">event</span>
+                        Set Schedule
                     </button>
                     <button type="button" data-assign-intervention="${id}">
                         <span class="material-symbols-outlined">support_agent</span>
@@ -664,6 +449,12 @@ class LearnerRecordsHub {
   }
 }
 
+function closeOpenRowMenus() {
+  document.querySelectorAll(".st-row-menu.is-open").forEach((menu) => {
+    menu.classList.remove("is-open");
+  });
+}
+
 document.addEventListener("click", (event) => {
   const trigger = event.target.closest("[data-row-menu-trigger]");
 
@@ -674,7 +465,20 @@ document.addEventListener("click", (event) => {
   });
 
   if (trigger) {
-    trigger.closest(".st-row-menu")?.classList.toggle("is-open");
+    const menu = trigger.closest(".st-row-menu");
+    const opening = !menu?.classList.contains("is-open");
+
+    menu?.classList.toggle("is-open");
+
+    if (opening && menu) {
+      const list = menu.querySelector(".st-row-menu-list");
+      const rect = trigger.getBoundingClientRect();
+
+      if (list) {
+        list.style.top = `${rect.bottom + 4}px`;
+        list.style.right = `${window.innerWidth - rect.right}px`;
+      }
+    }
   }
 
   const viewBtn = event.target.closest("[data-view-learner]");
@@ -687,6 +491,8 @@ document.addEventListener("click", (event) => {
     window.location.href = `learner-profile.html?id=${encodeURIComponent(assignBtn.dataset.assignIntervention)}#interventions`;
   }
 });
+
+window.addEventListener("scroll", closeOpenRowMenus, true);
 
 (function bootRecordsHub() {
   let started = false;

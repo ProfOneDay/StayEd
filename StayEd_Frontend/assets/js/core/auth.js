@@ -328,6 +328,12 @@ class Auth {
 
     return user?.school || "";
   }
+
+  static municipality() {
+    const user = this.user();
+
+    return user?.municipality || "";
+  }
 }
 
 window.Auth = Auth;
