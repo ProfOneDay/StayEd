@@ -12,6 +12,9 @@ from ..services.prediction_service import trigger_prediction
 bp = Blueprint("interventions", __name__)
 
 INTERVENTION_STATUSES = {"PLANNED", "ONGOING", "COMPLETED", "CANCELLED"}
+INTERVENTION_STATUS_LABELS = {
+    "PLANNED": "Pending", "ONGOING": "In Progress", "COMPLETED": "Completed", "CANCELLED": "Cancelled",
+}
 
 
 @bp.get("/interventions")
@@ -38,8 +41,7 @@ def interventions():
         """,
         (teacher["teacher_id"],),
     )
-    status_map = {"PLANNED": "Pending", "ONGOING": "In Progress", "COMPLETED": "Completed", "CANCELLED": "Cancelled"}
-    data = [{**dict(r), "status": status_map.get(r["status"], r["status"])} for r in rows]
+    data = [{**dict(r), "status": INTERVENTION_STATUS_LABELS.get(r["status"], r["status"])} for r in rows]
     return {"total": len(data), "data": data}
 
 
@@ -76,6 +78,34 @@ def update_intervention_status(intervention_id: int):
             trigger_prediction(ra["enrollment_id"], current_user_id())
         except Exception:
             pass
+
+    learner = fetch_one(
+        """
+        SELECT ce.learner_id, CONCAT_WS(' ', l.first_name, l.last_name) AS learner_name
+        FROM risk_assessment ra
+        JOIN class_enrollment ce ON ce.enrollment_id = ra.enrollment_id
+        JOIN learner l ON l.learner_id = ce.learner_id
+        WHERE ra.risk_assessment_id = %s
+        """,
+        (row["risk_assessment_id"],),
+    )
+    if learner:
+        status_label = INTERVENTION_STATUS_LABELS.get(status, status)
+        execute(
+            """
+            INSERT INTO notification (user_id, notification_type, title, message, link, meta_label, dedup_key)
+            VALUES (%s, 'INTERVENTION', %s, %s, %s, %s, %s)
+            ON CONFLICT (user_id, dedup_key) WHERE dedup_key IS NOT NULL DO NOTHING
+            """,
+            (
+                current_user_id(),
+                f"Intervention Marked {status_label}",
+                f"The intervention for {learner['learner_name']} is now {status_label}.",
+                f"learner-profile.html?id={learner['learner_id']}&tab=interventions",
+                status_label,
+                f"intervention_status:{intervention_id}:{status}",
+            ),
+        )
 
     return {"message": "Intervention status updated."}
 

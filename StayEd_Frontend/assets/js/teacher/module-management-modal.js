@@ -126,16 +126,16 @@ class ModuleManagementModal {
     if (batch.status === "returned") {
       return { label: "Returned", icon: "check", cssClass: "returned" };
     }
-    if (batch.status === "partial") {
-      return { label: "Partially Returned", icon: "incomplete_circle", cssClass: "partial" };
-    }
     if (batch.status === "high") {
       return { label: "High Risk", sub: `${batch.daysInactive} days inactive`, icon: "warning", cssClass: "high" };
     }
     if (batch.status === "moderate") {
       return { label: "Moderate Risk", sub: `${batch.daysInactive} days inactive`, icon: "circle", cssClass: "moderate" };
     }
-    return { label: "Active", sub: `${batch.daysInactive} days inactive`, icon: "check_circle", cssClass: "active" };
+    if (batch.status === "low") {
+      return { label: "Low Risk", sub: `${batch.daysInactive} days inactive`, icon: "check_circle", cssClass: "low" };
+    }
+    return { label: "Not Yet Assessed", icon: "help", cssClass: "neutral" };
   }
 
   static renderBatchRow(batch) {
@@ -176,9 +176,14 @@ class ModuleManagementModal {
             <span class="st-mrb-label">Released</span>
             <span class="st-mrb-date">${batch.releaseDate}${batch.daysInactive != null ? ` <span class="st-mrb-days-ago">(${batch.daysInactive} days ago)</span>` : ""}</span>
           </div>
-          <div class="st-mrb-stat">
-            <span class="st-mrb-label">Modules</span>
-            <span class="st-mrb-stat-value">${batch.moduleCount} Modules</span>
+          <div class="st-mrb-stat st-mrb-stat--progress">
+            <span class="st-mrb-label">Release Progress</span>
+            <div class="st-progress-cell">
+              <span class="st-progress-cell-count">${batch.returnedCount} of ${batch.moduleCount} Returned (${Math.round((batch.returnedCount / batch.moduleCount) * 100) || 0}%)</span>
+              <div class="st-progress-track">
+                <div class="st-progress-fill st-progress-fill--primary" style="width:${Math.round((batch.returnedCount / batch.moduleCount) * 100) || 0}%;"></div>
+              </div>
+            </div>
           </div>
           <div class="st-mrb-stat">
             <span class="st-mrb-label">Strands</span>
@@ -208,18 +213,50 @@ class ModuleManagementModal {
           <span class="material-symbols-outlined">info</span>
           Recommended Follow-up Period: Within 1 Month
         </p>
+        ${this.renderLastContactBlock(batch)}
         <div class="st-mrb-strand-grid">
           ${batch.strands
             .map(
               (s) => `
               <div class="st-mrb-strand-col">
                 <h4>${s.code} ${s.name}</h4>
-                <ul>${s.modules.map((m) => `<li>${m.title}</li>`).join("")}</ul>
+                <ul class="st-mrb-module-status-list">${s.modules
+                  .map(
+                    (m) => `
+                    <li class="st-mrb-module-status-item ${m.status === "returned" ? "is-returned" : "is-pending"}">
+                      <span class="material-symbols-outlined">${m.status === "returned" ? "check_box" : "check_box_outline_blank"}</span>
+                      <span>${m.title} <em>(${m.status === "returned" ? "Returned" : "Pending"})</em></span>
+                    </li>
+                  `,
+                  )
+                  .join("")}</ul>
               </div>
             `,
             )
             .join("")}
         </div>
+      </div>
+    `;
+  }
+
+  static riskBadgeCssClass(risk) {
+    return { High: "high", Moderate: "moderate", Low: "low" }[risk] || "neutral";
+  }
+
+  static renderLastContactBlock(batch) {
+    const dateLine =
+      batch.status === "returned"
+        ? `Returned: ${batch.returnDate}`
+        : `Released: ${batch.releaseDate}`;
+
+    return `
+      <div class="st-mrb-last-contact">
+        <span class="st-return-eyebrow">Last Contact</span>
+        <p class="st-mrb-last-contact-date">${dateLine}</p>
+        <p class="st-mrb-last-contact-activity">${batch.activityText || this.meta.activityText || "—"}</p>
+        <span class="st-risk-badge st-risk-badge--${this.riskBadgeCssClass(batch.risk || this.meta.risk)}">
+          <span class="st-risk-dot"></span>${batch.risk || this.meta.risk || "Not Yet Assessed"}
+        </span>
       </div>
     `;
   }
@@ -425,8 +462,12 @@ class ModuleManagementModal {
       this.renderAll();
     });
 
-    root.querySelector("[data-record-release]")?.addEventListener("click", async () => {
+    root.querySelector("[data-record-release]")?.addEventListener("click", async (e) => {
       if (!this.isReleaseFormValid()) return;
+
+      const btn = e.currentTarget;
+      if (btn.disabled) return;
+      btn.disabled = true;
 
       const payload = {
         releaseDate: this.releaseForm.releaseDate,
@@ -447,6 +488,7 @@ class ModuleManagementModal {
       } catch (error) {
         console.error("[ModuleManagementModal] Release failed", error);
         Toast?.error(error?.data?.message || "Unable to release this module batch.");
+        btn.disabled = false;
       }
     });
   }
@@ -462,11 +504,10 @@ class ModuleManagementModal {
       return this.renderLogbook();
     }
 
-    const returnableStrands = batch.strands
-      .map((s) => ({ ...s, modules: s.modules.filter((m) => m.status !== "returned") }))
-      .filter((s) => s.modules.length);
-    const returnableCount = returnableStrands.reduce((sum, s) => sum + s.modules.length, 0);
-    const showRisk = batch.status === "moderate" || batch.status === "high";
+    const returnableCount = batch.strands.reduce(
+      (sum, s) => sum + s.modules.filter((m) => m.status !== "returned").length,
+      0,
+    );
     const strandSummary = batch.strands.map((s) => `${s.code} – ${s.name}`).join(", ");
 
     return `
@@ -481,7 +522,6 @@ class ModuleManagementModal {
         <div class="st-return-summary-card">
           <span class="st-return-eyebrow">Returning for Student</span>
           <p class="st-return-student-name">${this.meta.name || ""}</p>
-          ${showRisk ? `<span class="st-return-inactivity-chip">No Learner Activity for ${batch.daysInactive} Days</span>` : ""}
 
           <hr>
 
@@ -491,11 +531,7 @@ class ModuleManagementModal {
               <p class="st-return-summary-bold">${batch.moduleCount} Modules • ${batch.strandCount} Learning Strand${batch.strandCount === 1 ? "" : "s"}</p>
               <p class="st-return-summary-strands">${strandSummary}</p>
             </div>
-            <div class="st-return-summary-right">
-              <span class="st-return-eyebrow">Last Contact</span>
-              <p>Released: ${batch.releaseDate}</p>
-              ${batch.daysInactive != null ? `<p class="st-return-nocontact">No contact for ${batch.daysInactive} days</p>` : ""}
-            </div>
+            ${this.renderLastContactBlock(batch)}
           </div>
 
           <div class="st-return-info-note">
@@ -510,14 +546,21 @@ class ModuleManagementModal {
             <span>Return All</span>
           </label>
 
-          ${returnableStrands
+          ${batch.strands
             .map(
               (s) => `
               <div class="st-return-strand-group">
                 <span class="st-return-strand-label">${s.code} – ${s.name}</span>
                 ${s.modules
-                  .map(
-                    (m) => `
+                  .map((m) =>
+                    m.status === "returned"
+                      ? `
+                    <label class="st-return-module-row st-return-module-row--returned">
+                      <input type="checkbox" checked disabled>
+                      <span>${m.title} <em>(Returned ${m.returned})</em></span>
+                    </label>
+                  `
+                      : `
                     <label class="st-return-module-row">
                       <input type="checkbox" data-return-module="${m.id}" ${this.returnState.checked.has(m.id) ? "checked" : ""}>
                       <span>${m.title}</span>
@@ -594,11 +637,15 @@ class ModuleManagementModal {
       this.renderAll();
     });
 
-    root.querySelector("[data-record-return-submit]")?.addEventListener("click", async () => {
+    root.querySelector("[data-record-return-submit]")?.addEventListener("click", async (e) => {
       if (!this.returnState.checked.size) {
         Toast?.error("Select at least one module to return.");
         return;
       }
+
+      const btn = e.currentTarget;
+      if (btn.disabled) return;
+      btn.disabled = true;
 
       const payload = {
         returnDate: this.returnState.returnDate,
@@ -617,6 +664,7 @@ class ModuleManagementModal {
       } catch (error) {
         console.error("[ModuleManagementModal] Return failed", error);
         Toast?.error(error?.data?.message || "Unable to record this return.");
+        btn.disabled = false;
       }
     });
   }

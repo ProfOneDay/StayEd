@@ -10,6 +10,14 @@ from flask import current_app
 from ..db import fetch_one, get_db
 
 
+class InsufficientDataError(Exception):
+    """Raised when an enrollment has no released module batches yet.
+
+    Monitoring -- and therefore risk prediction -- only begins once a learner
+    has been assigned their first module batch, per the risk gate requirement.
+    """
+
+
 def _compute_features(enrollment_id: int) -> dict:
     """Build the model's feature payload from real StayEd data -- no values
     are ever trusted from the caller. Every field here has a direct source:
@@ -87,6 +95,15 @@ def trigger_prediction(
     should catch and ignore, since MODEL_COMMAND may not be configured in
     every environment.
     """
+    batch_count = fetch_one(
+        "SELECT COUNT(*) AS n FROM module_release_batch WHERE enrollment_id=%s",
+        (enrollment_id,),
+    )
+    if not batch_count or not batch_count["n"]:
+        raise InsufficientDataError(
+            "This learner has no released modules yet -- prediction requires at least one module batch."
+        )
+
     model = fetch_one(
         "SELECT model_id, model_version, algorithm FROM model_info WHERE model_status='ACTIVE' ORDER BY training_date DESC LIMIT 1"
     )
@@ -143,16 +160,6 @@ def trigger_prediction(
                 ),
             )
 
-        if saved["risk_level"] == "HIGH":
-            cur.execute(
-                """
-                INSERT INTO notification (user_id, notification_type, title, message, link)
-                VALUES (%s,'RISK','High Risk prediction generated',
-                        'A learner was classified as High Risk and should be reviewed.',
-                        '../teacher/early-warning.html')
-                """,
-                (user_id,),
-            )
     db.commit()
 
     return {"saved": saved, "model": model}

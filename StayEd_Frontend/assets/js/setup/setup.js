@@ -160,12 +160,6 @@ class SetupWizard {
         console.error("[SetupWizard] Unable to load CLCs from the API", error);
       }
 
-      if (!availableClcs.length && Array.isArray(window.MockDB?.clcs)) {
-        availableClcs = window.MockDB.clone
-          ? MockDB.clone(MockDB.clcs)
-          : [...MockDB.clcs];
-      }
-
       populateMunicipalities();
       populateClcsForMunicipality(municipality?.value);
 

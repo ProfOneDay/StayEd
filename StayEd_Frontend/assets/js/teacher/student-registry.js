@@ -57,9 +57,7 @@ class StudentRegistry {
     };
 
     on("[data-mgmt-export-all]", "click", () => {
-      Toast?.info(
-        `Exporting all ${this.state.filtered.length} filtered learner record(s)…`,
-      );
+      this.exportLearners(this.state.filtered);
     });
 
     on("[data-mgmt-search]", "input", (e) => {
@@ -112,8 +110,24 @@ class StudentRegistry {
     on("[data-mgmt-bulk-archive]", "click", () => this.bulkArchive());
     on("[data-mgmt-bulk-delete]", "click", () => this.bulkDelete());
     on("[data-mgmt-bulk-export]", "click", () => {
-      Toast?.info(`Exporting ${this.state.selected.size} learner record(s)…`);
+      const selected = this.state.all.filter((l) => this.state.selected.has(l.id));
+      this.exportLearners(selected);
     });
+  }
+
+  static exportLearners(learners) {
+    if (!learners.length) {
+      Toast?.error("There are no learners to export.");
+      return;
+    }
+
+    Utils.downloadCsv(
+      `StayEd_Student_Registry_${new Date().toISOString().slice(0, 10)}.csv`,
+      ["LRN", "Name", "Learning Level", "Modality", "CLC", "Risk Level", "Status"],
+      learners.map((l) => [l.lrn, l.name, l.level, l.modality, l.clc, l.risk, l.status]),
+    );
+
+    Toast?.success(`Exported ${learners.length} learner(s).`);
   }
 
   static renderStats() {
@@ -284,8 +298,8 @@ class StudentRegistry {
                 <td>${this.modalityPill(l.modality)}</td>
                 <td>${this.riskBadge(l.risk)}</td>
                 <td class="is-center">
-                    <p class="st-confidence-value">${riskProbability}%</p>
-                    <p class="st-confidence-label">${l.risk || "Low"} Risk</p>
+                    <p class="st-confidence-value">${l.risk && l.risk !== "Not Yet Assessed" ? `${riskProbability}%` : "—"}</p>
+                    <p class="st-confidence-label">${l.risk && l.risk !== "Not Yet Assessed" ? `${l.risk} Risk` : "Not Yet Assessed"}</p>
                 </td>
                 <td>${this.statusPill(l.status)}</td>
                 <td>
@@ -487,8 +501,8 @@ class StudentRegistry {
 
   static riskBadge(risk) {
     const cls =
-      { High: "high", Moderate: "moderate", Low: "low" }[risk] || "low";
-    return `<span class="st-risk-badge st-risk-badge--${cls}"><span class="st-risk-dot"></span>${risk}</span>`;
+      { High: "high", Moderate: "moderate", Low: "low" }[risk] || "neutral";
+    return `<span class="st-risk-badge st-risk-badge--${cls}"><span class="st-risk-dot"></span>${risk || "Not Yet Assessed"}</span>`;
   }
 
   static levelPill(level) {

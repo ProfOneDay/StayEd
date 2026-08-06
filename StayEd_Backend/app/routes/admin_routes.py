@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import secrets
 
 from flask import Blueprint, request
@@ -8,6 +9,7 @@ from werkzeug.security import generate_password_hash
 from ..authz import current_user_id, role_required
 from ..db import execute, fetch_all, fetch_one, get_db
 from ..helpers import error, split_name
+from ..services.settings_service import get_active_school_year, set_active_school_year
 
 bp = Blueprint("admin", __name__)
 
@@ -272,7 +274,7 @@ def update_user(user_id: int):
 
             if isinstance(data.get("clcs"), list):
                 teacher_id = existing["teacher_id"]
-                school_year = str(data.get("schoolYear") or "2026-2027").strip()
+                school_year = str(data.get("schoolYear") or "").strip() or get_active_school_year()
                 clc_names = [str(c).strip() for c in data["clcs"] if str(c).strip()]
 
                 clc_ids = []
@@ -404,7 +406,7 @@ def create_user():
                         VALUES (%s, %s, %s, 'ACTIVE')
                         ON CONFLICT (teacher_id, clc_id, school_year) DO NOTHING
                         """,
-                        (teacher_id, clc_row["clc_id"], str(data.get("schoolYear") or "2026-2027").strip()),
+                        (teacher_id, clc_row["clc_id"], str(data.get("schoolYear") or "").strip() or get_active_school_year()),
                     )
         db.commit()
     except Exception:
@@ -497,3 +499,94 @@ def active_model():
     data = dict(row)
     data["training_date"] = row["training_date"].isoformat()
     return {"data": data}
+
+
+def _slugify(name: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+
+
+_ADMIN_DASHBOARD_LEVEL_MAP = {
+    "BLP": "BLP",
+    "ELEMENTARY": "Elementary",
+    "JUNIOR_HIGH_SCHOOL": "JHS",
+    "SENIOR_HIGH_SCHOOL": "SHS",
+}
+
+
+@bp.get("/admin/dashboard")
+@role_required("admin")
+def admin_dashboard():
+    """Municipality-aggregated risk overview for the admin map dashboard.
+    Kept independent of the per-teacher dashboard (dashboard_routes.py) since
+    this spans every teacher's learners division-wide, not just one."""
+    clc_counts = fetch_all(
+        "SELECT municipality, COUNT(*) AS clc_count FROM clc WHERE status='ACTIVE' GROUP BY municipality"
+    )
+    learner_rows = fetch_all(
+        """
+        WITH latest AS (
+            SELECT DISTINCT ON (ce.enrollment_id)
+                ce.enrollment_id, lc.clc_id, lc.learning_level, ra.risk_level
+            FROM class_enrollment ce
+            JOIN learning_class lc ON lc.class_id = ce.class_id
+            LEFT JOIN risk_assessment ra
+                ON ra.enrollment_id = ce.enrollment_id
+               AND ra.data_sufficiency_status = 'PREDICTION_GENERATED'
+            WHERE ce.enrollment_status = 'ENROLLED'
+            ORDER BY ce.enrollment_id, ra.assessment_date DESC NULLS LAST
+        )
+        SELECT c.municipality, latest.learning_level, latest.risk_level
+        FROM latest
+        JOIN clc c ON c.clc_id = latest.clc_id
+        """
+    )
+
+    def _empty_bucket(name):
+        return {
+            "name": name,
+            "total": 0,
+            "high": 0,
+            "moderate": 0,
+            "low": 0,
+            "levels": {"BLP": 0, "Elementary": 0, "JHS": 0, "SHS": 0},
+            "clcs": 0,
+        }
+
+    result = {}
+    for row in clc_counts:
+        slug = _slugify(row["municipality"])
+        bucket = result.setdefault(slug, _empty_bucket(row["municipality"]))
+        bucket["clcs"] = row["clc_count"]
+
+    for row in learner_rows:
+        slug = _slugify(row["municipality"])
+        bucket = result.setdefault(slug, _empty_bucket(row["municipality"]))
+        bucket["total"] += 1
+        level_key = _ADMIN_DASHBOARD_LEVEL_MAP.get(row["learning_level"])
+        if level_key:
+            bucket["levels"][level_key] += 1
+        if row["risk_level"] == "HIGH":
+            bucket["high"] += 1
+        elif row["risk_level"] == "MODERATE":
+            bucket["moderate"] += 1
+        elif row["risk_level"] == "LOW":
+            bucket["low"] += 1
+
+    return result
+
+
+@bp.get("/settings/school-year")
+@role_required("teacher", "admin", "coordinator")
+def get_school_year():
+    return {"schoolYear": get_active_school_year()}
+
+
+@bp.put("/admin/settings/school-year")
+@role_required("admin")
+def update_school_year():
+    data = request.get_json(silent=True) or {}
+    value = str(data.get("schoolYear") or "").strip()
+    if not re.match(r"^\d{4}-\d{4}$", value):
+        return error("School year must be in the format YYYY-YYYY.", 422)
+    set_active_school_year(value, current_user_id())
+    return {"schoolYear": value}

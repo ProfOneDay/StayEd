@@ -86,7 +86,7 @@ class NotificationsPage {
 
     if (this.filter === "unread") return this.all.filter((n) => !n.read);
 
-    return this.all.filter((n) => n.category === this.filter);
+    return this.all.filter((n) => n.type === this.filter);
   }
 
   static render() {
@@ -109,26 +109,34 @@ class NotificationsPage {
     }
 
     const iconMap = {
-      alert: "warning",
+      risk: "warning",
       intervention: "support_agent",
-      registration: "person_add",
-      system: "settings_suggest",
+    };
+
+    const metaBadgeClass = (n) => {
+      const label = (n.metaLabel || "").toLowerCase();
+      if (label.includes("high") || label.includes("overdue")) return "high";
+      if (label.includes("moderate")) return "moderate";
+      if (label.includes("low")) return "low";
+      return n.type;
     };
 
     container.innerHTML = rows
       .map(
         (n) => `
             <div class="st-notif-item ${n.read ? "" : "is-unread"}" data-notif-id="${n.id}">
-                <div class="st-notif-icon st-notif-icon--${n.category}">
-                    <span class="material-symbols-outlined">${iconMap[n.category] || "notifications"}</span>
+                <div class="st-notif-icon st-notif-icon--${n.type}">
+                    <span class="material-symbols-outlined">${iconMap[n.type] || "notifications"}</span>
                 </div>
-                <div class="st-notif-body" ${n.learnerId ? `data-notif-open="${n.learnerId}" style="cursor:pointer;"` : ""}>
+                <div class="st-notif-body">
                     <div class="st-notif-title-row">
                         <p class="st-notif-title">${n.title}</p>
+                        ${n.metaLabel ? `<span class="st-notif-meta-badge st-notif-meta-badge--${metaBadgeClass(n)}">${n.metaLabel}</span>` : ""}
                         ${n.read ? "" : '<span class="st-notif-unread-dot"></span>'}
                     </div>
-                    <p class="st-notif-text">${n.text}</p>
+                    <p class="st-notif-text">${n.message}</p>
                     <p class="st-notif-time">${n.time}</p>
+                    ${n.link ? `<button type="button" class="st-btn st-btn-primary st-btn-xs" data-notif-action="${n.link}">${n.type === "intervention" ? "View Intervention" : "View Learner"}</button>` : ""}
                 </div>
                 <div class="st-notif-item-actions">
                     ${n.read ? "" : `<button type="button" class="st-icon-btn-sm" data-notif-mark-read="${n.id}" aria-label="Mark as read" title="Mark as read"><span class="material-symbols-outlined">done</span></button>`}
@@ -145,9 +153,10 @@ class NotificationsPage {
   }
 
   static bindItemActions(container) {
-    container.querySelectorAll("[data-notif-open]").forEach((el) => {
-      el.addEventListener("click", () => {
-        window.location.href = `learner-profile.html?id=${encodeURIComponent(el.dataset.notifOpen)}`;
+    container.querySelectorAll("[data-notif-action]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        window.location.href = btn.dataset.notifAction;
       });
     });
 

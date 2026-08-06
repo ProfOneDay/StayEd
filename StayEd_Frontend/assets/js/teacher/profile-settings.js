@@ -1,5 +1,5 @@
 class ProfileSettingsPage {
-  static PREFS_KEY = "stayed_user_prefs";
+  static preferences = {};
 
   static async init() {
     if (window.Guards) Guards.teacher();
@@ -14,7 +14,7 @@ class ProfileSettingsPage {
 
     this.bindDangerZone();
 
-    this.restorePreferences();
+    await this.restorePreferences();
   }
 
   static populateFromUser() {
@@ -138,13 +138,18 @@ class ProfileSettingsPage {
     document
       .querySelectorAll("[data-settings-toggle-pref]")
       .forEach((toggle) => {
-        toggle.addEventListener("change", () => {
-          this.savePreference(
-            toggle.dataset.settingsTogglePref,
-            toggle.checked,
-          );
+        toggle.addEventListener("change", async () => {
+          const key = toggle.dataset.settingsTogglePref;
 
-          Toast?.success("Preference updated.");
+          try {
+            const result = await API.updateSettings({ [key]: toggle.checked });
+            this.preferences = result.preferences || this.preferences;
+            Toast?.success("Preference updated.");
+          } catch (error) {
+            console.error("[ProfileSettings] Unable to save preference", error);
+            Toast?.error("Unable to save this preference.");
+            toggle.checked = !toggle.checked;
+          }
         });
       });
   }
@@ -168,39 +173,18 @@ class ProfileSettingsPage {
       });
   }
 
-  static savePreference(key, value) {
-    let prefs = {};
-
+  static async restorePreferences() {
     try {
-      prefs = JSON.parse(localStorage.getItem(this.PREFS_KEY) || "{}");
-    } catch {
-      prefs = {};
+      const settings = await API.getSettings();
+      this.preferences = settings.preferences || {};
+    } catch (error) {
+      console.error("[ProfileSettings] Unable to load settings", error);
+      return;
     }
 
-    prefs[key] = value;
-
-    try {
-      localStorage.setItem(this.PREFS_KEY, JSON.stringify(prefs));
-    } catch {}
-  }
-
-  static restorePreferences() {
-    let prefs = {};
-
-    try {
-      prefs = JSON.parse(localStorage.getItem(this.PREFS_KEY) || "{}");
-    } catch {
-      prefs = {};
-    }
-
-    Object.entries(prefs).forEach(([key, value]) => {
-      const toggle = document.querySelector(
-        `[data-settings-toggle-pref="${key}"]`,
-      );
-
-      if (toggle) {
-        toggle.checked = Boolean(value);
-      }
+    document.querySelectorAll("[data-settings-toggle-pref]").forEach((toggle) => {
+      const key = toggle.dataset.settingsTogglePref;
+      toggle.checked = Boolean(this.preferences[key]);
     });
   }
 

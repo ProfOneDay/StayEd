@@ -408,6 +408,15 @@
     min-width:90px;
 }
 
+.st-mrb-stat--progress{
+    min-width:170px;
+    max-width:220px;
+}
+
+.st-mrb-stat--progress .st-progress-cell-count{
+    font-size:12px;
+}
+
 .st-mrb-stat-value{
     font-size:14px;
     font-weight:700;
@@ -437,12 +446,7 @@
     color:#00504E;
 }
 
-.st-mrb-status-pill--partial{
-    background:var(--st-surface-container-high, #E3E7FF);
-    color:var(--st-primary);
-}
-
-.st-mrb-status-pill--active{
+.st-mrb-status-pill--low{
     background:var(--st-risk-low-soft);
     color:var(--st-risk-low);
     border-color:var(--st-risk-low-border);
@@ -458,6 +462,12 @@
     background:var(--st-risk-high-soft);
     color:var(--st-risk-high);
     border-color:var(--st-risk-high-border);
+}
+
+.st-mrb-status-pill--neutral{
+    background:var(--st-risk-neutral-soft);
+    color:var(--st-risk-neutral);
+    border-color:var(--st-risk-neutral-border);
 }
 
 .st-mrb-actions{
@@ -525,6 +535,59 @@
 .st-mrb-strand-col li{
     font-size:13px;
     color:var(--st-on-surface-variant);
+}
+
+.st-mrb-module-status-list{
+    list-style:none;
+    padding-left:0;
+}
+
+.st-mrb-module-status-item{
+    display:flex;
+    align-items:flex-start;
+    gap:6px;
+    font-size:13px;
+    color:var(--st-on-surface-variant);
+}
+
+.st-mrb-module-status-item .material-symbols-outlined{
+    font-size:18px;
+    flex-shrink:0;
+}
+
+.st-mrb-module-status-item.is-returned{
+    color:var(--st-on-surface);
+}
+
+.st-mrb-module-status-item.is-returned .material-symbols-outlined{
+    color:var(--st-risk-low);
+}
+
+.st-mrb-module-status-item em{
+    font-style:normal;
+    font-size:11px;
+    color:var(--st-outline);
+    margin-left:2px;
+}
+
+.st-mrb-last-contact{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    padding:12px 0;
+    margin-bottom:12px;
+    border-bottom:1px solid rgba(195,198,207,.30);
+}
+
+.st-mrb-last-contact-date,
+.st-mrb-last-contact-activity{
+    font-size:13px;
+    color:var(--st-on-surface-variant);
+}
+
+.st-mrb-last-contact .st-risk-badge{
+    margin-top:4px;
+    align-self:flex-start;
 }
 
 /* Release form */
@@ -734,17 +797,6 @@
     color:var(--st-primary);
 }
 
-.st-return-inactivity-chip{
-    width:fit-content;
-    background:var(--st-risk-high-soft);
-    color:var(--st-risk-high);
-    font-size:11px;
-    font-weight:700;
-    text-transform:uppercase;
-    padding:4px 10px;
-    border-radius:999px;
-}
-
 .st-return-summary-card hr{
     border:none;
     border-top:1px solid rgba(195,198,207,.30);
@@ -769,15 +821,31 @@
     color:var(--st-on-surface-variant);
 }
 
-.st-return-summary-right{
+.st-return-summary-row .st-mrb-last-contact{
+    border-bottom:none;
+    padding:0;
+    margin-bottom:0;
     text-align:right;
-    font-size:13px;
-    color:var(--st-on-surface-variant);
+    align-items:flex-end;
 }
 
-.st-return-nocontact{
-    color:var(--st-error);
-    font-weight:600;
+.st-return-summary-row .st-mrb-last-contact .st-risk-badge{
+    align-self:flex-end;
+}
+
+.st-return-module-row--returned{
+    color:var(--st-outline);
+    cursor:default;
+}
+
+.st-return-module-row--returned input{
+    cursor:default;
+}
+
+.st-return-module-row--returned em{
+    font-style:normal;
+    font-size:11px;
+    color:var(--st-outline);
 }
 
 .st-return-info-note{

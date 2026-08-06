@@ -17,6 +17,15 @@ from ..helpers import (
     split_name,
     title_enum,
 )
+from ..services.learner_service import (
+    ACTIVITY_DANGER_DAYS,
+    ACTIVITY_WARNING_DAYS,
+    _latest_risk_join_sql,
+    _learner_query,
+    _relative_day_phrase,
+    _shape_activity,
+    _shape_learner,
+)
 from ..services.prediction_service import trigger_prediction
 
 bp = Blueprint("learners", __name__)
@@ -47,94 +56,6 @@ def _active_class(teacher_id: int, clc_name: str | None = None):
         """,
         tuple(params),
     )
-
-
-def _latest_risk_join_sql():
-    return """
-        LEFT JOIN LATERAL (
-            SELECT ra.risk_assessment_id, ra.risk_probability, ra.risk_level, ra.assessment_date
-            FROM risk_assessment ra
-            WHERE ra.enrollment_id = ce.enrollment_id
-              AND ra.data_sufficiency_status = 'PREDICTION_GENERATED'
-            ORDER BY ra.assessment_date DESC
-            LIMIT 1
-        ) risk ON TRUE
-    """
-
-
-def _shape_learner(row):
-    first = row.get("first_name") or ""
-    last = row.get("last_name") or ""
-    risk = title_enum(row.get("risk_level")) or "Low"
-    probability = float(row.get("risk_probability") or 0)
-    return {
-        "id": row["learner_id"],
-        "lrn": row["lrn"],
-        "first_name": first,
-        "last_name": last,
-        "name": f"{first} {last}".strip(),
-        "sex": str(row.get("sex") or "").title(),
-        "age": int(row.get("age") or 0),
-        "level": title_enum(row.get("learning_level")),
-        "section": row.get("class_name") or "A",
-        "modality": title_enum(row.get("learning_modality")),
-        "clc": row.get("clc_name") or "",
-        "status": title_enum(row.get("enrollment_status")),
-        "risk": risk,
-        "risk_probability": probability,
-        "latest_activity": row.get("latest_activity") or "No recent activity",
-        "attendance_rate": float(row.get("attendance_rate") or 0) / 100.0,
-        "assessment_avg": round(float(row.get("assessment_avg") or 0), 1),
-        "distance_km": float(row.get("distance_from_clc_km") or 0),
-        "date_generated": row["assessment_date"].isoformat() if row.get("assessment_date") else None,
-        "assigned_teacher": row.get("assigned_teacher") or "",
-    }
-
-
-def _learner_query(where: str = "", order: str = "l.last_name, l.first_name"):
-    return f"""
-        SELECT
-            l.learner_id, l.lrn, l.first_name, l.last_name, l.sex,
-            DATE_PART('year', AGE(CURRENT_DATE, l.date_of_birth))::INT AS age,
-            l.date_of_birth, l.employment_status, l.civil_status,
-            l.contact_number, l.guardian_contact_number, l.is_4ps_beneficiary,
-            ce.enrollment_id, ce.learning_modality, ce.distance_from_clc_km,
-            ce.enrollment_status, ce.is_re_enrollee, ce.enrollment_date,
-            lc.class_id, lc.learning_level, lc.class_name, lc.school_year, lc.semester,
-            lc.teacher_id, c.clc_id, c.clc_name,
-            CONCAT_WS(' ', t.first_name, t.last_name) AS assigned_teacher,
-            risk.risk_assessment_id, risk.risk_probability, risk.risk_level, risk.assessment_date,
-            COALESCE(att.session_attendance_rate_percent, 0) AS attendance_rate,
-            0 AS assessment_avg,
-            COALESCE(activity.latest_activity, 'No recent activity') AS latest_activity
-        FROM learner l
-        JOIN class_enrollment ce ON ce.learner_id = l.learner_id
-        JOIN learning_class lc ON lc.class_id = ce.class_id
-        JOIN clc c ON c.clc_id = lc.clc_id
-        JOIN teacher t ON t.teacher_id = lc.teacher_id
-        {_latest_risk_join_sql()}
-        LEFT JOIN vw_session_attendance_summary att ON att.enrollment_id = ce.enrollment_id
-        LEFT JOIN LATERAL (
-            SELECT latest_activity FROM (
-                SELECT
-                    ('"' || mr.module_name || '" returned ' || TO_CHAR(mr.date_returned, 'Mon DD')) AS latest_activity,
-                    mr.date_returned::timestamp AS happened_at
-                FROM module_record mr
-                WHERE mr.enrollment_id = ce.enrollment_id AND mr.date_returned IS NOT NULL
-                UNION ALL
-                SELECT
-                    ('Attendance recorded ' || TO_CHAR(cs.session_date, 'Mon DD')),
-                    cs.session_date::timestamp
-                FROM session_attendance sa
-                JOIN class_session cs ON cs.session_id = sa.session_id
-                WHERE sa.enrollment_id = ce.enrollment_id
-            ) a
-            ORDER BY happened_at DESC
-            LIMIT 1
-        ) activity ON TRUE
-        {where}
-        ORDER BY {order}
-    """
 
 
 @bp.get("/learners")
@@ -252,6 +173,11 @@ def _validate_learner_payload(data, *, partial=False):
         ("civil_status", "civil_status"),
         ("contact_number", "contact_number"),
         ("guardian_contact_number", "guardian_contact_number"),
+        ("email", "email"),
+        ("address", "address"),
+        ("guardian_name", "guardian_name"),
+        ("guardian_relationship", "guardian_relationship"),
+        ("last_grade_completed", "last_grade_completed"),
     ):
         if src in data:
             result[dest] = data.get(src) or None
@@ -294,14 +220,17 @@ def create_learner():
                     """
                     INSERT INTO learner (
                         lrn, first_name, last_name, sex, date_of_birth,
-                        employment_status, civil_status, contact_number, guardian_contact_number
-                    ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                        employment_status, civil_status, contact_number, guardian_contact_number,
+                        email, address, guardian_name, guardian_relationship, last_grade_completed
+                    ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                     RETURNING learner_id
                     """,
                     (
                         clean["lrn"], clean["first_name"], clean["last_name"], clean["sex"],
                         clean["date_of_birth"], clean.get("employment_status"), clean.get("civil_status"),
                         clean.get("contact_number"), clean.get("guardian_contact_number"),
+                        clean.get("email"), clean.get("address"), clean.get("guardian_name"),
+                        clean.get("guardian_relationship"), clean.get("last_grade_completed"),
                     ),
                 )
                 learner_id = cur.fetchone()["learner_id"]
@@ -399,6 +328,7 @@ def update_learner(learner_id: int):
         "lrn", "name", "full_name", "first_name", "last_name", "sex", "birthdate", "date_of_birth",
         "employment_status", "civil_status", "contact_number", "guardian_contact_number",
         "is_4ps_beneficiary", "is4Ps",
+        "email", "address", "guardian_name", "guardian_relationship", "last_grade_completed",
     }}
     if editable:
         try:
@@ -478,6 +408,17 @@ def _profile_base(learner_id: int):
         _learner_query("WHERE l.learner_id = %s AND lc.teacher_id = %s", "ce.enrollment_date DESC") + " LIMIT 1",
         (learner_id, teacher["teacher_id"]),
     )
+
+
+def _learner_activity_info(base) -> dict:
+    shaped = _shape_learner(base)
+    return {
+        "activityText": shaped["activity_text"],
+        "activityStatus": shaped["activity_status"],
+        "daysInactive": shaped["days_inactive"],
+        "risk": shaped["risk"],
+        "riskProbability": shaped["risk_probability"],
+    }
 
 
 @bp.get("/learners/<int:learner_id>/records-detail")
@@ -572,7 +513,6 @@ def records_detail(learner_id: int):
                 "status": "Scheduled" if next_session else "—",
             },
         },
-        "lastInteraction": contact["contact_date"].strftime("%b %d, %Y") if contact else "—",
         "moduleGroups": [
             {"strand": strand, "icon": "menu_book", "modules": rows}
             for strand, rows in groups.items()
@@ -1029,7 +969,15 @@ def list_learning_strands():
     return {"data": [{"id": r["learning_strand_id"], "code": r["strand_code"], "name": r["strand_name"]} for r in rows]}
 
 
-def _batch_status(modules: list[dict], release_date: date) -> dict:
+RISK_TO_BATCH_STATUS = {
+    "High": "high",
+    "Moderate": "moderate",
+    "Low": "low",
+    "Not Yet Assessed": "neutral",
+}
+
+
+def _batch_status(modules: list[dict], release_date: date, learner_activity: dict) -> dict:
     total = len(modules)
     returned = sum(1 for m in modules if m["status"] == "returned")
 
@@ -1040,23 +988,20 @@ def _batch_status(modules: list[dict], release_date: date) -> dict:
             "status": "returned",
             "returnDate": return_date.strftime("%B %d, %Y"),
             "daysToReturn": (return_date - release_date).days,
-            "daysInactive": None,
+            "returnedCount": returned,
         }
 
-    if returned > 0:
-        return {"status": "partial", "returnDate": None, "daysToReturn": None, "daysInactive": None}
-
-    days_inactive = (date.today() - release_date).days
-    if days_inactive >= 30:
-        tier = "high"
-    elif days_inactive >= 21:
-        tier = "moderate"
-    else:
-        tier = "active"
-    return {"status": tier, "returnDate": None, "daysToReturn": None, "daysInactive": days_inactive}
+    status = RISK_TO_BATCH_STATUS.get(learner_activity["risk"], "neutral")
+    return {
+        "status": status,
+        "returnDate": None,
+        "daysToReturn": None,
+        "returnedCount": returned,
+        **learner_activity,
+    }
 
 
-def _logbook(enrollment_id: int) -> dict:
+def _logbook(enrollment_id: int, learner_activity: dict) -> dict:
     rows = fetch_all(
         """
         SELECT mr.module_record_id, mr.module_name, mr.date_released, mr.date_returned,
@@ -1106,7 +1051,7 @@ def _logbook(enrollment_id: int) -> dict:
         batch = batches[batch_id]
         strands = list(batch["strandsByCode"].values())
         all_modules = [m for s in strands for m in s["modules"]]
-        status_info = _batch_status(all_modules, batch["releaseDateRaw"])
+        status_info = _batch_status(all_modules, batch["releaseDateRaw"], learner_activity)
         for s in strands:
             for m in s["modules"]:
                 m.pop("returnedRaw", None)
@@ -1130,14 +1075,16 @@ def list_learner_modules(learner_id: int):
     base = _profile_base(learner_id)
     if not base:
         return error("Learner not found.", 404)
+    learner_activity = _learner_activity_info(base)
     return {
         "learner": {
             "name": f"{base['first_name']} {base['last_name']}",
             "lrn": base["lrn"],
             "clc": base["clc_name"],
             "level": base["learning_level"],
+            **learner_activity,
         },
-        **_logbook(base["enrollment_id"]),
+        **_logbook(base["enrollment_id"], learner_activity),
     }
 
 
@@ -1197,7 +1144,24 @@ def release_module_batch(learner_id: int):
         db.rollback()
         raise
 
-    return {"message": "Module batch released.", **_logbook(base["enrollment_id"])}, 201
+    try:
+        trigger_prediction(base["enrollment_id"], current_user_id())
+    except Exception:
+        pass
+
+    base = _profile_base(learner_id)
+    learner_activity = _learner_activity_info(base)
+    return {
+        "message": "Module batch released.",
+        "learner": {
+            "name": f"{base['first_name']} {base['last_name']}",
+            "lrn": base["lrn"],
+            "clc": base["clc_name"],
+            "level": base["learning_level"],
+            **learner_activity,
+        },
+        **_logbook(base["enrollment_id"], learner_activity),
+    }, 201
 
 
 @bp.post("/learners/<int:learner_id>/module-batches/<int:batch_id>/return")
@@ -1227,11 +1191,13 @@ def return_module_batch(learner_id: int, batch_id: int):
     remarks = data.get("remarks") or None
 
     owned = fetch_all(
-        "SELECT module_record_id FROM module_record WHERE release_batch_id=%s AND module_record_id = ANY(%s)",
+        "SELECT module_record_id, module_status FROM module_record WHERE release_batch_id=%s AND module_record_id = ANY(%s)",
         (batch_id, module_ids),
     )
     if len(owned) != len(set(module_ids)):
         return error("One or more selected modules do not belong to this batch.", 422)
+    if any(r["module_status"] == "RETURNED" for r in owned):
+        return error("One or more selected modules have already been returned.", 422)
 
     execute(
         """
@@ -1247,7 +1213,63 @@ def return_module_batch(learner_id: int, batch_id: int):
     except Exception:
         pass
 
-    return {"message": "Module return recorded.", **_logbook(base["enrollment_id"])}
+    base = _profile_base(learner_id)
+    learner_activity = _learner_activity_info(base)
+    return {
+        "message": "Module return recorded.",
+        "learner": {
+            "name": f"{base['first_name']} {base['last_name']}",
+            "lrn": base["lrn"],
+            "clc": base["clc_name"],
+            "level": base["learning_level"],
+            **learner_activity,
+        },
+        **_logbook(base["enrollment_id"], learner_activity),
+    }
+
+
+CONTACT_METHODS = {"CALL", "SMS", "CHAT", "HOME_VISIT", "OTHER"}
+CONTACT_RESULTS = {"SUCCESSFUL", "UNSUCCESSFUL"}
+
+
+@bp.post("/learners/<int:learner_id>/consultations")
+@role_required("teacher")
+def record_consultation(learner_id: int):
+    base = _profile_base(learner_id)
+    if not base:
+        return error("Learner not found.", 404)
+    teacher = _teacher_scope()
+
+    data = request.get_json(silent=True) or {}
+
+    try:
+        contact_date = date.fromisoformat(str(data.get("date"))) if data.get("date") else date.today()
+    except ValueError:
+        return error("Consultation date must use YYYY-MM-DD.", 422)
+
+    method = str(data.get("method") or "").strip().upper()
+    result = str(data.get("result") or "").strip().upper()
+    if method not in CONTACT_METHODS:
+        return error(f"Method must be one of: {', '.join(sorted(CONTACT_METHODS))}.", 422)
+    if result not in CONTACT_RESULTS:
+        return error(f"Result must be one of: {', '.join(sorted(CONTACT_RESULTS))}.", 422)
+
+    notes = (data.get("notes") or "").strip() or None
+
+    execute(
+        """
+        INSERT INTO contact_log (enrollment_id, contact_date, contact_method, contact_result, notes, recorded_by_teacher_id)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        """,
+        (base["enrollment_id"], contact_date, method, result, notes, teacher["teacher_id"]),
+    )
+
+    try:
+        trigger_prediction(base["enrollment_id"], current_user_id())
+    except Exception:
+        pass
+
+    return {"message": "Consultation recorded."}, 201
 
 
 def _read_upload(file_storage):

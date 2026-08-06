@@ -13,15 +13,71 @@ document.querySelectorAll('.overlay').forEach(ov=>ov.addEventListener('click',e=
 
 function initialsOf(name){return name.split(' ').filter(Boolean).map(w=>w[0]).slice(0,2).join('').toUpperCase()}
 
+let currentAvatar=null;
+let pendingAvatar=undefined;
+
+function applyAvatar(el,initials,dataUrl){
+  if(dataUrl){
+    el.textContent='';
+    el.style.backgroundImage=`url(${dataUrl})`;
+    el.style.backgroundSize='cover';
+    el.style.backgroundPosition='center';
+  }else{
+    el.textContent=initials;
+    el.style.backgroundImage='';
+  }
+}
+
 function loadOwnProfile(){
   const user=Auth.user()||{};
   const fullName=user.full_name||user.first_name||'Admin';
   document.getElementById('profileDisplayName').textContent=fullName;
-  document.getElementById('profileAvatarInitials').textContent=initialsOf(fullName);
+  applyAvatar(document.getElementById('profileAvatarInitials'),initialsOf(fullName),currentAvatar);
   document.getElementById('profileEmailDisplay').textContent=user.email||'';
   document.getElementById('profilePhoneDisplay').textContent=user.phone||'—';
 }
 loadOwnProfile();
+
+async function loadOwnSettings(){
+  try{
+    const settings=await API.getSettings();
+    currentAvatar=settings.avatar||null;
+    loadOwnProfile();
+    const twoFactor=document.getElementById('twoFactorToggle');
+    if(twoFactor) twoFactor.checked=Boolean(settings.preferences?.twoFactorEnabled);
+  }catch(error){
+    console.error('[AdminSettings] Unable to load settings',error);
+  }
+}
+loadOwnSettings();
+
+async function loadActiveSchoolYear(){
+  try{
+    const result=await API.getActiveSchoolYear();
+    document.getElementById('activeSchoolYearDisplay').textContent=result.schoolYear||'—';
+  }catch(error){
+    console.error('[AdminSettings] Unable to load active school year',error);
+  }
+}
+loadActiveSchoolYear();
+
+document.getElementById('openEditSchoolYearBtn').addEventListener('click',()=>{
+  document.getElementById('ay-school-year').value=document.getElementById('activeSchoolYearDisplay').textContent;
+  openModal('modal-academic-year');
+});
+document.getElementById('ay-save-btn').addEventListener('click',async()=>{
+  const value=document.getElementById('ay-school-year').value.trim();
+  if(!/^\d{4}-\d{4}$/.test(value)){ showToast('School year must be in the format YYYY-YYYY'); return; }
+  try{
+    await API.updateActiveSchoolYear(value);
+    document.getElementById('activeSchoolYearDisplay').textContent=value;
+    closeModal('modal-academic-year');
+    showToast('Active school year updated');
+  }catch(error){
+    console.error('[AdminSettings] Unable to update active school year',error);
+    showToast(error?.data?.message||'Unable to update the active school year.');
+  }
+});
 
 // Change Password modal
 function setReq(id,met){
@@ -110,8 +166,16 @@ document.getElementById('cp-update-btn').addEventListener('click',async()=>{
 });
 
 // Two-factor toggle
-document.getElementById('twoFactorToggle').addEventListener('change',e=>{
-  showToast(e.target.checked?'Two-factor authentication enabled':'Two-factor authentication disabled');
+document.getElementById('twoFactorToggle').addEventListener('change',async e=>{
+  const checked=e.target.checked;
+  try{
+    await API.updateSettings({twoFactorEnabled:checked});
+    showToast(checked?'Two-factor authentication preference saved':'Two-factor authentication preference disabled');
+  }catch(error){
+    console.error('[AdminSettings] Unable to save 2FA preference',error);
+    showToast('Unable to save this preference.');
+    e.target.checked=!checked;
+  }
 });
 
 // Edit Profile modal
@@ -120,7 +184,8 @@ document.getElementById('openEditProfileBtn').addEventListener('click',()=>{
   document.getElementById('ep-empid').value=document.getElementById('profileEmpIdDisplay').textContent;
   document.getElementById('ep-phone').value=document.getElementById('profilePhoneDisplay').textContent;
   document.getElementById('ep-email').value=document.getElementById('profileEmailDisplay').textContent;
-  document.getElementById('editAvatarInitials').textContent=document.getElementById('profileAvatarInitials').textContent;
+  pendingAvatar=undefined;
+  applyAvatar(document.getElementById('editAvatarInitials'),document.getElementById('profileDisplayName').textContent?initialsOf(document.getElementById('profileDisplayName').textContent):'',currentAvatar);
   openModal('modal-edit-profile');
 });
 document.getElementById('cam-upload-btn').addEventListener('click',()=>{
@@ -129,13 +194,12 @@ document.getElementById('cam-upload-btn').addEventListener('click',()=>{
 document.getElementById('avatar-file-input').addEventListener('change',e=>{
   const file=e.target.files[0];
   if(!file) return;
+  if(file.size>2*1024*1024){ showToast('Photo must be 2MB or smaller.'); return; }
   const reader=new FileReader();
   reader.onload=ev=>{
+    pendingAvatar=ev.target.result;
     const preview=document.getElementById('editAvatarInitials');
-    preview.textContent='';
-    preview.parentElement.style.backgroundImage=`url(${ev.target.result})`;
-    preview.parentElement.style.backgroundSize='cover';
-    preview.parentElement.style.backgroundPosition='center';
+    applyAvatar(preview,'',pendingAvatar);
   };
   reader.readAsDataURL(file);
   showToast('Photo selected — save changes to apply');
@@ -148,6 +212,11 @@ document.getElementById('ep-save-btn').addEventListener('click',async()=>{
   try{
     const response=await API.put('/admin/profile',{fullName:name, phone, email});
     Auth.updateUser({full_name:response.data.fullName, email:response.data.email, phone:response.data.phone});
+    if(pendingAvatar!==undefined){
+      const avatarResponse=await API.updateAvatar(pendingAvatar);
+      currentAvatar=avatarResponse.avatar||null;
+      pendingAvatar=undefined;
+    }
     loadOwnProfile();
     closeModal('modal-edit-profile');
     showToast('Profile updated');

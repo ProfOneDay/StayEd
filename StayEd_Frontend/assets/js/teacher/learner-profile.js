@@ -9,6 +9,15 @@ class LearnerProfilePage {
     this.bindHistoryFilters();
 
     await this.load();
+
+    this.openRequestedTab();
+  }
+
+  static openRequestedTab() {
+    const tab = new URLSearchParams(window.location.search).get("tab");
+    if (!tab) return;
+
+    document.querySelector(`[data-profile-tab="${tab}"]`)?.click();
   }
 
   static getLearnerId() {

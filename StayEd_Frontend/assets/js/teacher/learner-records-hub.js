@@ -189,13 +189,13 @@ class LearnerRecordsHub {
       infoSelector: "[data-modular-info]",
       pagesSelector: "[data-modular-pages]",
       pageKey: "modular",
-      colspan: 5,
+      colspan: 6,
       rowRenderer: (l) => this.modularRow(l),
     });
   }
 
   static modularRow(l) {
-    return `<tr>${this.recordCells(l)}</tr>`;
+    return `<tr>${this.recordCells(l)}<td class="is-center">${this.rowActionsMenu(l)}</td></tr>`;
   }
 
   static renderF2F() {
@@ -207,13 +207,13 @@ class LearnerRecordsHub {
       infoSelector: "[data-f2f-info]",
       pagesSelector: "[data-f2f-pages]",
       pageKey: "face-to-face",
-      colspan: 5,
+      colspan: 6,
       rowRenderer: (l) => this.f2fRow(l),
     });
   }
 
   static f2fRow(l) {
-    return `<tr>${this.recordCells(l)}</tr>`;
+    return `<tr>${this.recordCells(l)}<td class="is-center">${this.rowActionsMenu(l)}</td></tr>`;
   }
 
   static renderBlended() {
@@ -231,7 +231,7 @@ class LearnerRecordsHub {
   }
 
   static blendedRow(l) {
-    return `<tr>${this.recordCells(l)}<td class="is-center">${this.rowActionsMenu(l.id)}</td></tr>`;
+    return `<tr>${this.recordCells(l)}<td class="is-center">${this.rowActionsMenu(l)}</td></tr>`;
   }
 
   // Shared cell markup for LRN / Learner / Modules / Latest Activity / Risk
@@ -268,16 +268,16 @@ class LearnerRecordsHub {
 
   static activityCell(l) {
     const dotClass =
-      l.risk === "High"
+      l.activity_status === "danger"
         ? "st-consult-dot--danger"
-        : l.risk === "Moderate"
+        : l.activity_status === "warning"
           ? "st-consult-dot--warning"
           : "st-consult-dot--ok";
 
     return `
             <div style="display:flex;align-items:center;gap:6px;">
                 <span class="st-consult-dot ${dotClass}"></span>
-                <span style="font-size:13px;">${l.lastInteraction || "\u2014"}</span>
+                <span style="font-size:13px;">${l.activity_text || "\u2014"}</span>
             </div>
         `;
   }
@@ -405,9 +405,21 @@ class LearnerRecordsHub {
       });
     });
 
+    container.querySelectorAll("[data-open-consultation-modal]").forEach((el) => {
+      el.addEventListener("click", () => {
+        const id = el.dataset.openConsultationModal;
+        const learner = this.state.all.find((x) => String(x.id) === String(id));
+        if (learner && window.ConsultationModal) {
+          ConsultationModal.open(learner);
+        }
+      });
+    });
+
   }
 
-  static rowActionsMenu(id) {
+  static rowActionsMenu(l) {
+    const id = l.id;
+    const showConsultation = l.modality !== "Modular";
     return `
             <div class="st-row-menu" data-row-menu>
                 <button type="button" class="st-row-menu-trigger" data-row-menu-trigger aria-label="More actions">
@@ -426,6 +438,12 @@ class LearnerRecordsHub {
                         <span class="material-symbols-outlined">event</span>
                         Set Schedule
                     </button>
+                    ${showConsultation ? `
+                    <button type="button" data-open-consultation-modal="${id}">
+                        <span class="material-symbols-outlined">support</span>
+                        Record Consultation
+                    </button>
+                    ` : ""}
                     <button type="button" data-assign-intervention="${id}">
                         <span class="material-symbols-outlined">support_agent</span>
                         Assign Intervention
@@ -437,8 +455,8 @@ class LearnerRecordsHub {
 
   static riskBadge(risk) {
     const cls =
-      { High: "high", Moderate: "moderate", Low: "low" }[risk] || "low";
-    return `<span class="st-risk-badge st-risk-badge--${cls}"><span class="st-risk-dot"></span>${risk}</span>`;
+      { High: "high", Moderate: "moderate", Low: "low" }[risk] || "neutral";
+    return `<span class="st-risk-badge st-risk-badge--${cls}"><span class="st-risk-dot"></span>${risk || "Not Yet Assessed"}</span>`;
   }
 
   static set(selector, value) {
@@ -488,7 +506,7 @@ document.addEventListener("click", (event) => {
 
   const assignBtn = event.target.closest("[data-assign-intervention]");
   if (assignBtn) {
-    window.location.href = `learner-profile.html?id=${encodeURIComponent(assignBtn.dataset.assignIntervention)}#interventions`;
+    window.location.href = `learner-profile.html?id=${encodeURIComponent(assignBtn.dataset.assignIntervention)}&tab=interventions`;
   }
 });
 

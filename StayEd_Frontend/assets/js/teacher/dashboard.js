@@ -104,8 +104,6 @@ class TeacherDashboard {
     this.setText("[data-dash-school-year]", context.school_year);
 
     this.setText("[data-dash-trimester]", context.trimester);
-
-    this.setText("[data-dash-updated]", context.last_updated);
   }
 
   static renderStatistics(stats = {}) {
@@ -345,7 +343,7 @@ class TeacherDashboard {
                 <td>${l.level}</td>
                 <td>${this.modalityPill(l.modality)}</td>
                 <td>${this.riskBadge(l.risk)}</td>
-                <td style="font-size:12px;">${l.latest_activity || "\u2014"}</td>
+                <td style="font-size:12px;">${l.activity_text || "\u2014"}</td>
                 <td>
                     <div class="st-row-actions">
                         <button class="st-btn st-btn-primary st-btn-xs"
@@ -433,11 +431,11 @@ class TeacherDashboard {
       Low: "low",
     };
 
-    const cls = map[risk] || "low";
+    const cls = map[risk] || "neutral";
 
     return `
             <span class="st-risk-badge st-risk-badge--${cls}">
-                <span class="st-risk-dot"></span>${risk}
+                <span class="st-risk-dot"></span>${risk || "Not Yet Assessed"}
             </span>
         `;
   }

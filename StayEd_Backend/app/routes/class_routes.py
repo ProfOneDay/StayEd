@@ -5,6 +5,7 @@ from flask import Blueprint, request
 from ..authz import role_required, teacher_for_user
 from ..db import fetch_all, fetch_one, get_db
 from ..helpers import enum_level, enum_semester, error, title_enum
+from ..services.settings_service import get_active_school_year
 
 bp = Blueprint("classes", __name__)
 
@@ -137,11 +138,11 @@ def create_class():
 
     clc_name = str(data.get("communityLearningCenter") or data.get("clc") or "").strip()
     municipality = str(data.get("municipality") or "").strip()
-    school_year = str(data.get("schoolYear") or "").strip()
+    school_year = get_active_school_year()
     learning_level = enum_level(data.get("learningLevel"))
     semester = enum_semester(data.get("semester"))
-    if not clc_name or not school_year:
-        return error("Community Learning Center and school year are required.", 422)
+    if not clc_name:
+        return error("Community Learning Center is required.", 422)
 
     if municipality:
         clc = fetch_one(

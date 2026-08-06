@@ -3,6 +3,8 @@ class LearnerEnrollWizard {
 
   static totalSteps = 9;
 
+  static currentClc = null;
+
   static async init() {
     if (window.Guards) Guards.teacher();
 
@@ -21,6 +23,31 @@ class LearnerEnrollWizard {
     this.bindConfirmActions();
 
     this.updateProgress();
+
+    await this.loadClassContext();
+  }
+
+  static async loadClassContext() {
+    const teacherName = (window.Auth && Auth.user && Auth.user()) || {};
+    const name =
+      teacherName.full_name ||
+      [teacherName.first_name, teacherName.last_name].filter(Boolean).join(" ") ||
+      "";
+
+    const teacherField = document.getElementById("wAssignedTeacher");
+    if (teacherField && name) teacherField.value = name;
+
+    try {
+      this.currentClc = await API.getCurrentClc();
+
+      const clcField = document.getElementById("wClc");
+      if (clcField) clcField.value = this.currentClc?.name || "";
+
+      const schoolYearField = document.getElementById("wSchoolYear");
+      if (schoolYearField) schoolYearField.value = this.currentClc?.schoolYear || "";
+    } catch (error) {
+      console.error("[LearnerEnrollWizard] Unable to load current CLC", error);
+    }
   }
 
   static bindSegments() {
@@ -322,6 +349,9 @@ class LearnerEnrollWizard {
 
     nextBtn.innerHTML = `<span class="material-symbols-outlined">progress_activity</span> Enrolling…`;
 
+    const distanceKmByCategory = { Near: 2, Moderate: 4, Far: 7, Unknown: null };
+    const distanceCategory = document.getElementById("wDistance")?.value;
+
     const payload = {
       name: document.getElementById("wFullName").value.trim(),
       lrn: document.getElementById("wLrn").value.trim(),
@@ -333,6 +363,16 @@ class LearnerEnrollWizard {
       clc: document.getElementById("wClc").value,
       status: "Active",
       risk: "Low",
+      civil_status: document.getElementById("wCivilStatus")?.value || null,
+      contact_number: document.getElementById("wPhone")?.value.trim() || null,
+      email: document.getElementById("wEmail")?.value.trim() || null,
+      address: document.getElementById("wAddress")?.value.trim() || null,
+      guardian_name: document.getElementById("wGuardianName")?.value.trim() || null,
+      guardian_relationship: document.getElementById("wGuardianRelation")?.value || null,
+      guardian_contact_number: document.getElementById("wGuardianContact")?.value.trim() || null,
+      employment_status: document.getElementById("wEmployment")?.value || null,
+      last_grade_completed: document.getElementById("wLastGrade")?.value.trim() || null,
+      distance_km: distanceKmByCategory[distanceCategory] ?? null,
     };
 
     try {

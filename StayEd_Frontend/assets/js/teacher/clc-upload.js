@@ -1,6 +1,8 @@
 class ClcUpload {
   static file = null;
 
+  static preview = null;
+
   static async init() {
     if (window.Guards) Guards.teacher();
 
@@ -89,7 +91,7 @@ class ClcUpload {
 
     await Utils.sleep(300);
 
-    status.textContent = "42 rows detected. Ready to import.";
+    status.textContent = "Upload complete.";
 
     done();
   }
@@ -108,7 +110,6 @@ class ClcUpload {
       this.set("[data-confirm-name]", clc.name);
       this.set("[data-confirm-year]", clc.schoolYear);
       this.set("[data-confirm-level]", clc.learningLevel);
-      this.set("[data-confirm-total]", "42 Students");
     } catch (error) {
       console.error(error);
     }
@@ -120,7 +121,87 @@ class ClcUpload {
         "[data-confirm-filemeta]",
         `${this.formatBytes(this.file.size)} • Uploaded just now`,
       );
+
+      try {
+        this.preview = await API.getImportPreview(this.file);
+        this.renderPreviewSummary();
+      } catch (error) {
+        console.error(error);
+        Toast?.error("Unable to validate the file. Please try again.");
+      }
     }
+  }
+
+  static renderPreviewSummary() {
+    const p = this.preview;
+
+    if (!p) return;
+
+    const validRows = p.rows.filter((r) => r.status === "valid");
+
+    this.set("[data-confirm-total]", `${p.valid} Students`);
+
+    this.set(
+      "[data-confirm-validation]",
+      `${p.total} row${p.total === 1 ? "" : "s"} detected. ${p.valid} passed validation` +
+        (p.duplicates || p.errors
+          ? ` (${p.duplicates} duplicate${p.duplicates === 1 ? "" : "s"}, ${p.errors} error${p.errors === 1 ? "" : "s"}).`
+          : "."),
+    );
+
+    const male = validRows.filter(
+      (r) => String(r.sex || "").toUpperCase() === "MALE",
+    ).length;
+    const female = validRows.filter(
+      (r) => String(r.sex || "").toUpperCase() === "FEMALE",
+    ).length;
+    const returning = validRows.filter((r) =>
+      ["yes", "y", "true", "1"].includes(
+        String(r.re_enrollee || "").toLowerCase(),
+      ),
+    ).length;
+
+    const ages = validRows
+      .map((r) => this.computeAge(r.birthdate))
+      .filter((age) => age != null);
+
+    this.set("[data-summary-male]", male);
+    this.set("[data-summary-female]", female);
+    this.set("[data-summary-returning]", returning);
+    this.set(
+      "[data-summary-age]",
+      ages.length ? `${Math.min(...ages)} - ${Math.max(...ages)}` : "—",
+    );
+
+    const validatedPct = p.total ? Math.round((p.valid / p.total) * 100) : 0;
+
+    this.set("[data-donut-value]", `${validatedPct}%`);
+
+    const donutPath = document.querySelector("[data-donut-path]");
+
+    if (donutPath) {
+      donutPath.setAttribute("stroke-dasharray", `${validatedPct}, 100`);
+    }
+  }
+
+  static computeAge(isoDate) {
+    if (!isoDate) return null;
+
+    const dob = new Date(isoDate);
+
+    if (Number.isNaN(dob.getTime())) return null;
+
+    const today = new Date();
+
+    let age = today.getFullYear() - dob.getFullYear();
+
+    const hasHadBirthdayThisYear =
+      today.getMonth() > dob.getMonth() ||
+      (today.getMonth() === dob.getMonth() && today.getDate() >= dob.getDate());
+
+    if (!hasHadBirthdayThisYear) age -= 1;
+
+    return age;
   }
 
   static bindConfirmActions() {
@@ -135,6 +216,7 @@ class ClcUpload {
           ?.classList.remove("st-hidden");
 
         this.file = null;
+        this.preview = null;
 
         document.getElementById("clcFileCard")?.classList.add("st-hidden");
 
@@ -161,6 +243,18 @@ class ClcUpload {
   }
 
   static async createRecords() {
+    if (!this.preview?.rows?.length) {
+      Toast?.error("No validated rows to import. Please select a file first.");
+      return;
+    }
+
+    const validRows = this.preview.rows.filter((r) => r.status === "valid");
+
+    if (!validRows.length) {
+      Toast?.error("None of the rows in this file passed validation.");
+      return;
+    }
+
     const btn = document.getElementById("clcCreateRecordsBtn");
 
     const originalHtml = btn.innerHTML;
@@ -170,9 +264,16 @@ class ClcUpload {
     btn.innerHTML = `<span class="material-symbols-outlined">progress_activity</span> Creating…`;
 
     try {
-      await API.importLearners({ learners: [] });
+      const result = await API.importLearners({ learners: validRows });
 
       document.getElementById("clcConfirmSection")?.classList.add("st-hidden");
+
+      const imported = result?.imported ?? validRows.length;
+
+      this.set(
+        "[data-success-summary]",
+        `${imported} learner profile${imported === 1 ? "" : "s"} have been generated for this CLC.`,
+      );
 
       const success = document.getElementById("clcSuccessSection");
 

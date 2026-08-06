@@ -7,7 +7,7 @@ from flask import Blueprint, request
 from ..authz import current_user_id, role_required, teacher_for_user
 from ..db import fetch_all, fetch_one
 from ..helpers import error
-from ..services.prediction_service import trigger_prediction
+from ..services.prediction_service import InsufficientDataError, trigger_prediction
 
 bp = Blueprint("predictions", __name__)
 
@@ -35,7 +35,10 @@ def summary():
     rows = _risk_rows(teacher["teacher_id"])
     assessed = [r for r in rows if r.get("risk_level")]
     model = fetch_one(
-        "SELECT model_version, algorithm FROM model_info WHERE model_status='ACTIVE' ORDER BY training_date DESC LIMIT 1"
+        """
+        SELECT model_version, algorithm, training_date, model_status, description
+        FROM model_info WHERE model_status='ACTIVE' ORDER BY training_date DESC LIMIT 1
+        """
     )
     latest = max((r["assessment_date"] for r in assessed), default=None)
     high = sum(r["risk_level"] == "HIGH" for r in assessed)
@@ -45,6 +48,9 @@ def summary():
         "model": model["model_version"] if model else "Not registered",
         "confidence": "Available" if assessed else "Pending",
         "algorithm": model["algorithm"] if model else "Random Forest",
+        "trainingDate": model["training_date"].strftime("%B %Y") if model and model.get("training_date") else "Not trained yet",
+        "modelStatus": (model["model_status"] or "INACTIVE").title() if model else "Not Registered",
+        "dataset": (model.get("description") if model else None) or "No dataset registered",
         "insights": [
             {"tone": "error" if high else "primary", "text": f"{high} learner(s) are currently High Risk"},
             {"tone": "primary", "text": "Risk levels use the latest generated probability for each learner"},
@@ -96,6 +102,8 @@ def run_prediction():
             enrollment["enrollment_id"], current_user_id(),
             monitoring_start=monitoring_start, monitoring_end=monitoring_end,
         )
+    except InsufficientDataError as exc:
+        return error(str(exc), 422)
     except RuntimeError as exc:
         return error(str(exc), 503)
     except (ValueError, KeyError) as exc:

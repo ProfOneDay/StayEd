@@ -34,18 +34,6 @@ class API {
 
     options = {},
   ) {
-    if (
-      CONFIG.MODE === "development" &&
-      CONFIG.USE_MOCK_API !== false &&
-      window.MockAPI
-    ) {
-      return MockAPI.request(
-        endpoint,
-
-        options,
-      );
-    }
-
     const controller = new AbortController();
 
     const timeout = setTimeout(
@@ -384,14 +372,6 @@ class API {
   }
 
   static async ping() {
-    if (
-      this.MODE === "development" &&
-      CONFIG.USE_MOCK_API !== false &&
-      window.MockAPI
-    ) {
-      return true;
-    }
-
     try {
       await fetch(
         this.BASE_URL,
@@ -483,6 +463,14 @@ class API {
     return this.get("/clcs/current");
   }
 
+  static getActiveSchoolYear() {
+    return this.get("/settings/school-year");
+  }
+
+  static updateActiveSchoolYear(schoolYear) {
+    return this.put("/admin/settings/school-year", { schoolYear });
+  }
+
   static createClc(payload) {
     return this.post("/clcs", payload);
   }
@@ -517,6 +505,10 @@ class API {
 
   static returnModuleBatch(learnerId, batchId, payload) {
     return this.post(`/learners/${learnerId}/module-batches/${batchId}/return`, payload);
+  }
+
+  static recordConsultation(learnerId, payload) {
+    return this.post(`/learners/${learnerId}/consultations`, payload);
   }
 
   static getCurrentClass() {
@@ -606,6 +598,46 @@ class API {
 
   static getPredictionSummary() {
     return this.get("/predictions/summary");
+  }
+
+  static getSettings() {
+    return this.get("/users/settings");
+  }
+
+  static updateSettings(preferences) {
+    return this.put("/users/settings", { preferences });
+  }
+
+  static updateAvatar(avatar) {
+    return this.put("/users/settings/avatar", { avatar });
+  }
+
+  static getAdminClcs() {
+    return this.get("/admin/clcs");
+  }
+
+  static createAdminClc(payload) {
+    return this.post("/admin/clcs", payload);
+  }
+
+  static updateAdminClc(id, payload) {
+    return this.put(`/admin/clcs/${id}`, payload);
+  }
+
+  static archiveAdminClc(id) {
+    return this.post(`/admin/clcs/${id}/archive`, {});
+  }
+
+  static restoreAdminClc(id) {
+    return this.post(`/admin/clcs/${id}/restore`, {});
+  }
+
+  static assignClcTeachers(id, teacherIds, schoolYear) {
+    return this.put(`/admin/clcs/${id}/teachers`, { teacherIds, schoolYear });
+  }
+
+  static getAdminDashboard() {
+    return this.get("/admin/dashboard");
   }
 
   static getRiskDistribution() {

@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from flask import Blueprint, request
 
-from ..authz import role_required, teacher_for_user
+from ..authz import current_user_id, role_required, teacher_for_user
 from ..db import execute, fetch_all, fetch_one, get_db
 from ..helpers import enum_level, error, title_enum
+from ..services.settings_service import get_active_school_year
 
 bp = Blueprint("clcs", __name__)
 
@@ -163,7 +164,7 @@ def current_clc():
         "name": row["clc_name"],
         "municipality": row["municipality"],
         "address": row.get("address") or "",
-        "schoolYear": row.get("school_year") or "",
+        "schoolYear": get_active_school_year(),
         "learningLevel": level_map.get(row.get("learning_level"), "Basic Literacy Program"),
     }
 
@@ -190,7 +191,7 @@ def create_clc():
     if not teacher:
         return error("Teacher profile not found.", 404)
 
-    school_year = str(data.get("schoolYear") or "2026-2027").strip()
+    school_year = str(data.get("schoolYear") or "").strip() or get_active_school_year()
     address = str(data.get("address") or "").strip() or None
     barangay = str(data.get("barangay") or "").strip() or None
     province = str(data.get("province") or "").strip() or None
@@ -310,3 +311,181 @@ def update_clc(clc_id: int):
         ),
     )
     return {"message": "CLC profile updated.", "data": _load_profile(clc_id)}
+
+
+# ----------------------------------------------------------------------------
+# Admin-scoped CLC management. Kept separate from the teacher-facing routes
+# above (rather than widening their role_required list) because POST /clcs is
+# hard-coupled to the calling teacher -- it 404s without a teacher row and
+# auto-assigns the creator to the new CLC, which is correct for the teacher
+# "add my own CLC" onboarding flow but wrong for division-wide admin CRUD.
+# ----------------------------------------------------------------------------
+
+def _admin_clc_row(row):
+    return {
+        "id": row["clc_id"],
+        "name": row["clc_name"],
+        "municipality": row["municipality"],
+        "barangay": row.get("barangay") or "",
+        "address": row.get("address") or "",
+        "status": "active" if row["status"] == "ACTIVE" else "archived",
+        "teachers": row.get("teacher_names") or [],
+        "learners": int(row.get("total_learners") or 0),
+        "schoolYear": row.get("school_year") or "—",
+        "archivedAt": row["archived_at"].strftime("%b %d, %Y") if row.get("archived_at") else None,
+        "archivedBy": row.get("archived_by_name") or None,
+    }
+
+
+@bp.get("/admin/clcs")
+@role_required("admin")
+def admin_list_clcs():
+    rows = fetch_all(
+        """
+        SELECT
+            c.clc_id, c.clc_name, c.municipality, c.barangay, c.address, c.status,
+            c.archived_at,
+            NULLIF(CONCAT_WS(' ', ab.first_name, ab.last_name), '') AS archived_by_name,
+            COUNT(DISTINCT ce.learner_id) FILTER (WHERE ce.enrollment_status = 'ENROLLED') AS total_learners,
+            MAX(tc.school_year) AS school_year,
+            ARRAY_REMOVE(
+                ARRAY_AGG(DISTINCT NULLIF(CONCAT_WS(' ', t.first_name, t.last_name), ''))
+                    FILTER (WHERE tc.assignment_status = 'ACTIVE'),
+                NULL
+            ) AS teacher_names
+        FROM clc c
+        LEFT JOIN teacher_clc tc ON tc.clc_id = c.clc_id
+        LEFT JOIN teacher t ON t.teacher_id = tc.teacher_id
+        LEFT JOIN learning_class lc ON lc.clc_id = c.clc_id
+        LEFT JOIN class_enrollment ce ON ce.class_id = lc.class_id
+        LEFT JOIN users ab ON ab.user_id = c.archived_by_user_id
+        GROUP BY c.clc_id, ab.first_name, ab.last_name
+        ORDER BY c.clc_name
+        """
+    )
+    return {"total": len(rows), "data": [_admin_clc_row(r) for r in rows]}
+
+
+@bp.post("/admin/clcs")
+@role_required("admin")
+def admin_create_clc():
+    data = request.get_json(silent=True) or {}
+    name = str(data.get("name") or "").strip()
+    municipality = str(data.get("municipality") or "").strip()
+    if not name or not municipality:
+        return error("CLC name and municipality are required.", 422)
+
+    barangay = str(data.get("barangay") or "").strip() or None
+    address = str(data.get("address") or "").strip() or None
+
+    row = execute(
+        """
+        INSERT INTO clc (clc_name, municipality, barangay, address, status)
+        VALUES (%s, %s, %s, %s, 'ACTIVE')
+        RETURNING clc_id
+        """,
+        (name, municipality, barangay, address),
+        returning=True,
+    )
+    return {"message": "CLC created.", "data": {"id": row["clc_id"]}}, 201
+
+
+@bp.put("/admin/clcs/<int:clc_id>")
+@role_required("admin")
+def admin_update_clc(clc_id: int):
+    existing = fetch_one("SELECT * FROM clc WHERE clc_id = %s", (clc_id,))
+    if not existing:
+        return error("Community Learning Center not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    name = _merge_field(data, "name", existing["clc_name"], "clc_name")
+    municipality = _merge_field(data, "municipality", existing["municipality"])
+    if not name or not municipality:
+        return error("CLC name and municipality are required.", 422)
+
+    barangay = _merge_field(data, "barangay", existing.get("barangay"))
+    address = _merge_field(data, "address", existing.get("address"))
+
+    execute(
+        "UPDATE clc SET clc_name=%s, municipality=%s, barangay=%s, address=%s WHERE clc_id=%s",
+        (name, municipality, barangay, address, clc_id),
+    )
+    return {"message": "CLC updated."}
+
+
+@bp.post("/admin/clcs/<int:clc_id>/archive")
+@role_required("admin")
+def admin_archive_clc(clc_id: int):
+    existing = fetch_one("SELECT clc_id FROM clc WHERE clc_id = %s", (clc_id,))
+    if not existing:
+        return error("Community Learning Center not found.", 404)
+
+    execute(
+        """
+        UPDATE clc SET status='INACTIVE', archived_at=CURRENT_TIMESTAMP, archived_by_user_id=%s
+        WHERE clc_id=%s
+        """,
+        (current_user_id(), clc_id),
+    )
+    return {"message": "CLC archived."}
+
+
+@bp.post("/admin/clcs/<int:clc_id>/restore")
+@role_required("admin")
+def admin_restore_clc(clc_id: int):
+    existing = fetch_one("SELECT clc_id FROM clc WHERE clc_id = %s", (clc_id,))
+    if not existing:
+        return error("Community Learning Center not found.", 404)
+
+    execute(
+        "UPDATE clc SET status='ACTIVE', archived_at=NULL, archived_by_user_id=NULL WHERE clc_id=%s",
+        (clc_id,),
+    )
+    return {"message": "CLC restored."}
+
+
+@bp.put("/admin/clcs/<int:clc_id>/teachers")
+@role_required("admin")
+def admin_assign_clc_teachers(clc_id: int):
+    existing = fetch_one("SELECT clc_id FROM clc WHERE clc_id = %s", (clc_id,))
+    if not existing:
+        return error("Community Learning Center not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    teacher_ids = [int(t) for t in (data.get("teacherIds") or []) if str(t).strip().isdigit()]
+    school_year = str(data.get("schoolYear") or "2026-2027").strip()
+
+    db = get_db()
+    try:
+        with db.cursor() as cur:
+            cur.execute(
+                "SELECT teacher_id FROM teacher_clc WHERE clc_id=%s AND assignment_status='ACTIVE'",
+                (clc_id,),
+            )
+            currently_active = {r["teacher_id"] for r in cur.fetchall()}
+            wanted = set(teacher_ids)
+
+            for teacher_id in currently_active - wanted:
+                cur.execute(
+                    """
+                    UPDATE teacher_clc SET assignment_status='INACTIVE'
+                    WHERE teacher_id=%s AND clc_id=%s AND assignment_status='ACTIVE'
+                    """,
+                    (teacher_id, clc_id),
+                )
+            for teacher_id in wanted - currently_active:
+                cur.execute(
+                    """
+                    INSERT INTO teacher_clc (teacher_id, clc_id, school_year, assignment_status)
+                    VALUES (%s, %s, %s, 'ACTIVE')
+                    ON CONFLICT (teacher_id, clc_id, school_year)
+                    DO UPDATE SET assignment_status='ACTIVE', assigned_at=CURRENT_DATE
+                    """,
+                    (teacher_id, clc_id, school_year),
+                )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    return {"message": "Teacher assignments updated."}

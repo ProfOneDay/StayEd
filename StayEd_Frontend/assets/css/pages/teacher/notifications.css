@@ -82,10 +82,8 @@
     flex-shrink:0;
 }
 
-.st-notif-icon--alert{ background:var(--st-risk-high-soft); color:var(--st-risk-high); }
+.st-notif-icon--risk{ background:var(--st-risk-high-soft); color:var(--st-risk-high); }
 .st-notif-icon--intervention{ background:rgba(0,106,104,.10); color:var(--st-secondary); }
-.st-notif-icon--registration{ background:var(--st-primary-fixed); color:var(--st-primary); }
-.st-notif-icon--system{ background:var(--st-surface-container); color:var(--st-on-surface-variant); }
 
 .st-notif-body{
     flex:1;
@@ -101,6 +99,27 @@
     font-size:14px;
     font-weight:700;
     color:var(--st-on-surface);
+}
+
+.st-notif-meta-badge{
+    display:inline-flex;
+    align-items:center;
+    padding:2px 10px;
+    border-radius:999px;
+    font-size:10px;
+    font-weight:700;
+    text-transform:uppercase;
+    flex-shrink:0;
+}
+
+.st-notif-meta-badge--risk,
+.st-notif-meta-badge--high{ background:var(--st-risk-high-soft); color:var(--st-risk-high); }
+.st-notif-meta-badge--moderate{ background:var(--st-risk-moderate-soft); color:var(--st-risk-moderate); }
+.st-notif-meta-badge--low{ background:var(--st-risk-low-soft); color:var(--st-risk-low); }
+.st-notif-meta-badge--intervention{ background:rgba(0,106,104,.10); color:var(--st-secondary); }
+
+.st-notif-body .st-btn{
+    margin-top:10px;
 }
 
 .st-notif-unread-dot{

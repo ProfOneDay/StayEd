@@ -25,6 +25,7 @@
   <div class="settings-tabs" id="settingsTabs">
     <button class="active" data-section="profile">Profile</button>
     <button data-section="security">Security</button>
+    <button data-section="academic">Academic Year</button>
   </div>
 
   <!-- Profile -->
@@ -76,8 +77,20 @@
         <button class="btn" id="openChangePasswordBtn2">Change Password</button>
       </div>
       <div class="settings-row">
-        <div><b>Two-Factor Authentication</b><small>Secure your account with an extra verification step at sign-in</small></div>
-        <label class="switch"><input type="checkbox" id="twoFactorToggle" checked/><span class="slider"></span></label>
+        <div><b>Two-Factor Authentication</b><small>Preference saved — verification at sign-in is not yet enforced</small></div>
+        <label class="switch"><input type="checkbox" id="twoFactorToggle"/><span class="slider"></span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Academic Year -->
+  <div class="section" id="section-academic">
+    <div class="card">
+      <h2><span class="section-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>Academic Year</h2>
+      <div class="card-sub">This is the school year every teacher, class, learner enrollment, and report across StayEd currently follows.</div>
+      <div class="settings-row">
+        <div><b>Active School Year</b><small id="activeSchoolYearDisplay">—</small></div>
+        <button class="btn" id="openEditSchoolYearBtn">Change</button>
       </div>
     </div>
   </div>
@@ -198,6 +211,18 @@
     <div class="modal-actions">
       <button class="btn ghost" onclick="closeModal('modal-edit-profile')">Cancel</button>
       <button class="btn primary" id="ep-save-btn">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-academic-year">
+  <div class="modal">
+    <h2>Change Active School Year</h2>
+    <div class="modal-sub">This immediately becomes the school year every teacher's classes, learner enrollments, and reports follow.</div>
+    <div class="field"><label for="ay-school-year">School Year</label><input id="ay-school-year" type="text" placeholder="e.g. 2027-2028"/></div>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal('modal-academic-year')">Cancel</button>
+      <button class="btn primary" id="ay-save-btn">Save Changes</button>
     </div>
   </div>
 </div>

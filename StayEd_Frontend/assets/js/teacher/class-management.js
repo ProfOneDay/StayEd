@@ -206,7 +206,7 @@ class ClassManagement {
   static bindAddClass() {
     document
       .querySelector("[data-add-class-btn]")
-      ?.addEventListener("click", () => {
+      ?.addEventListener("click", async () => {
         if (!window.Modal) return;
 
         if (!this.clcName) {
@@ -214,6 +214,14 @@ class ClassManagement {
             "Choose a Community Learning Center from CLC Overview first.",
           );
           return;
+        }
+
+        let activeSchoolYear = "—";
+        try {
+          const res = await API.getActiveSchoolYear();
+          activeSchoolYear = res?.schoolYear || activeSchoolYear;
+        } catch (error) {
+          console.error("[ClassManagement] Unable to load active school year", error);
         }
 
         Modal.show({
@@ -235,17 +243,15 @@ class ClassManagement {
               </select>
             </div>
             <div class="st-schedule-modal-field">
-              <label for="newClassYear">School Year</label>
-              <input id="newClassYear" type="text" value="2026-2027">
+              <label>School Year</label>
+              <p class="st-schedule-modal-learner">${activeSchoolYear} <span style="font-weight:400;font-size:12px;color:var(--st-outline);">(set by your administrator)</span></p>
             </div>
           `,
           onConfirm: async () => {
             const learningLevel =
               document.getElementById("newClassLevel")?.value.trim();
-            const schoolYear =
-              document.getElementById("newClassYear")?.value.trim();
 
-            if (!learningLevel || !schoolYear) {
+            if (!learningLevel) {
               Toast?.error("Please complete all class details.");
               return;
             }
@@ -255,9 +261,8 @@ class ClassManagement {
                 communityLearningCenter: this.clcName,
                 municipality: this.municipality,
                 learningLevel,
-                schoolYear,
                 semester: "Whole Year",
-                className: `${learningLevel} ${schoolYear}`,
+                className: `${learningLevel} ${activeSchoolYear}`,
               });
 
               Toast?.success("Class created.");

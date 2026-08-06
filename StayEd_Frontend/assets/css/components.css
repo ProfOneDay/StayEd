@@ -366,6 +366,18 @@
   background: var(--st-risk-low);
 }
 
+.st-risk-badge--neutral {
+  background: var(--st-risk-neutral-soft);
+
+  color: var(--st-risk-neutral);
+
+  border-color: var(--st-risk-neutral-border);
+}
+
+.st-risk-badge--neutral .st-risk-dot {
+  background: var(--st-risk-neutral);
+}
+
 .st-pill {
   display: inline-flex;
 

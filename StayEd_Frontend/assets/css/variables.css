@@ -49,6 +49,10 @@
   --st-risk-low-soft: rgba(107, 191, 89, 0.12);
   --st-risk-low-border: rgba(107, 191, 89, 0.22);
 
+  --st-risk-neutral: #73777f;
+  --st-risk-neutral-soft: rgba(115, 119, 127, 0.1);
+  --st-risk-neutral-border: rgba(115, 119, 127, 0.2);
+
   --st-primary-deep: #001f3f;
 
   --st-glass-bg: rgba(255, 255, 255, 0.85);

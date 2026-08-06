@@ -1,6 +1,7 @@
 // Must run first, before anything else on this page executes.
 Guards.admin();
-const municipalityData={"alcala": {"name": "Alcala", "total": 172, "high": 5, "moderate": 9, "low": 158, "levels": {"BLP": 14, "Elementary": 44, "JHS": 65, "SHS": 21}, "clcs": 2}, "asingan": {"name": "Asingan", "total": 89, "high": 4, "moderate": 14, "low": 71, "levels": {"BLP": 11, "Elementary": 67, "JHS": 51, "SHS": 14}, "clcs": 7}, "balungao": {"name": "Balungao", "total": 186, "high": 40, "moderate": 52, "low": 94, "levels": {"BLP": 25, "Elementary": 41, "JHS": 21, "SHS": 17}, "clcs": 7}, "bautista": {"name": "Bautista", "total": 182, "high": 30, "moderate": 32, "low": 120, "levels": {"BLP": 21, "Elementary": 20, "JHS": 63, "SHS": 15}, "clcs": 4}, "binalonan": {"name": "Binalonan", "total": 89, "high": 14, "moderate": 24, "low": 51, "levels": {"BLP": 18, "Elementary": 53, "JHS": 95, "SHS": 19}, "clcs": 4}, "dagupan-city": {"name": "Dagupan City", "total": 159, "high": 23, "moderate": 19, "low": 117, "levels": {"BLP": 30, "Elementary": 62, "JHS": 85, "SHS": 16}, "clcs": 1}, "laoac": {"name": "Laoac", "total": 129, "high": 4, "moderate": 40, "low": 85, "levels": {"BLP": 25, "Elementary": 59, "JHS": 91, "SHS": 24}, "clcs": 4}, "manaoag": {"name": "Manaoag", "total": 138, "high": 10, "moderate": 20, "low": 108, "levels": {"BLP": 5, "Elementary": 67, "JHS": 42, "SHS": 10}, "clcs": 4}, "mangaldan": {"name": "Mangaldan", "total": 203, "high": 15, "moderate": 63, "low": 125, "levels": {"BLP": 12, "Elementary": 48, "JHS": 22, "SHS": 13}, "clcs": 5}, "natividad": {"name": "Natividad", "total": 97, "high": 16, "moderate": 21, "low": 60, "levels": {"BLP": 27, "Elementary": 69, "JHS": 46, "SHS": 13}, "clcs": 7}, "pozorrubio": {"name": "Pozorrubio", "total": 173, "high": 17, "moderate": 11, "low": 145, "levels": {"BLP": 6, "Elementary": 52, "JHS": 92, "SHS": 2}, "clcs": 7}, "rosales": {"name": "Rosales", "total": 102, "high": 13, "moderate": 30, "low": 59, "levels": {"BLP": 29, "Elementary": 45, "JHS": 54, "SHS": 16}, "clcs": 7}, "san-fabian": {"name": "San Fabian", "total": 211, "high": 32, "moderate": 56, "low": 123, "levels": {"BLP": 25, "Elementary": 41, "JHS": 79, "SHS": 1}, "clcs": 5}, "san-jacinto": {"name": "San Jacinto", "total": 198, "high": 34, "moderate": 30, "low": 134, "levels": {"BLP": 6, "Elementary": 67, "JHS": 31, "SHS": 14}, "clcs": 5}, "san-manuel": {"name": "San Manuel", "total": 232, "high": 4, "moderate": 55, "low": 173, "levels": {"BLP": 21, "Elementary": 64, "JHS": 75, "SHS": 9}, "clcs": 8}, "san-nicolas": {"name": "San Nicolas", "total": 160, "high": 10, "moderate": 19, "low": 131, "levels": {"BLP": 21, "Elementary": 16, "JHS": 66, "SHS": 0}, "clcs": 5}, "san-quintin": {"name": "San Quintin", "total": 85, "high": 5, "moderate": 25, "low": 55, "levels": {"BLP": 17, "Elementary": 34, "JHS": 79, "SHS": 11}, "clcs": 4}, "santa-maria": {"name": "Santa Maria", "total": 206, "high": 45, "moderate": 8, "low": 153, "levels": {"BLP": 24, "Elementary": 53, "JHS": 87, "SHS": 18}, "clcs": 3}, "santo-tomas": {"name": "Santo Tomas", "total": 156, "high": 9, "moderate": 51, "low": 96, "levels": {"BLP": 7, "Elementary": 28, "JHS": 81, "SHS": 18}, "clcs": 2}, "sison": {"name": "Sison", "total": 225, "high": 23, "moderate": 73, "low": 129, "levels": {"BLP": 4, "Elementary": 43, "JHS": 26, "SHS": 5}, "clcs": 7}, "tayug": {"name": "Tayug", "total": 225, "high": 18, "moderate": 10, "low": 197, "levels": {"BLP": 16, "Elementary": 46, "JHS": 98, "SHS": 7}, "clcs": 8}, "umingan": {"name": "Umingan", "total": 167, "high": 5, "moderate": 21, "low": 141, "levels": {"BLP": 14, "Elementary": 40, "JHS": 68, "SHS": 0}, "clcs": 8}, "urdaneta-city": {"name": "Urdaneta City", "total": 105, "high": 5, "moderate": 30, "low": 70, "levels": {"BLP": 21, "Elementary": 20, "JHS": 59, "SHS": 20}, "clcs": 3}, "villasis": {"name": "Villasis", "total": 114, "high": 7, "moderate": 12, "low": 95, "levels": {"BLP": 24, "Elementary": 70, "JHS": 20, "SHS": 6}, "clcs": 4}};
+let municipalityData={};
+let levelAverages={BLP:0,Elementary:0,JHS:0,SHS:0};
 const map=document.querySelector('.mapwrap svg');
 const zoomGroup=document.getElementById('zoomGroup');
 const wrap=document.querySelector('.mapwrap');
@@ -62,16 +63,21 @@ wrap.addEventListener('touchend',panEnd);
 // Swallow the click-to-select that would otherwise fire right after a drag
 map.addEventListener('click',e=>{if(justPanned){e.stopPropagation();justPanned=false}},true);
 
-function riskLevel(d){const rate=d.high/d.total; return rate>=.20?'high':rate>=.10?'moderate':'low'}
+function riskLevel(d){if(!d.total)return 'low';const rate=d.high/d.total; return rate>=.20?'high':rate>=.10?'moderate':'low'}
 function riskColor(d){return {high:'#D64545',moderate:'#F39422',low:'#6BBF59'}[riskLevel(d)]}
-Object.entries(municipalityData).forEach(([id,d])=>{const el=map.querySelector('#'+CSS.escape(id));if(el)el.style.fill=riskColor(d)});
-const riskCounts={low:0,moderate:0,high:0};
-Object.values(municipalityData).forEach(d=>{riskCounts[riskLevel(d)]++});
-document.getElementById('countLow').textContent=riskCounts.low;
-document.getElementById('countModerate').textContent=riskCounts.moderate;
-document.getElementById('countHigh').textContent=riskCounts.high;
 const levelKeys=['BLP','Elementary','JHS','SHS'];
-const levelAverages=Object.fromEntries(levelKeys.map(k=>[k,Object.values(municipalityData).reduce((s,d)=>s+d.levels[k],0)/Object.keys(municipalityData).length]));
+function recolorMap(){
+  Object.entries(municipalityData).forEach(([id,d])=>{const el=map.querySelector('#'+CSS.escape(id));if(el)el.style.fill=riskColor(d)});
+  const riskCounts={low:0,moderate:0,high:0};
+  Object.values(municipalityData).forEach(d=>{riskCounts[riskLevel(d)]++});
+  document.getElementById('countLow').textContent=riskCounts.low;
+  document.getElementById('countModerate').textContent=riskCounts.moderate;
+  document.getElementById('countHigh').textContent=riskCounts.high;
+  levelAverages=Object.fromEntries(levelKeys.map(k=>{
+    const municipalities=Object.values(municipalityData);
+    return [k,municipalities.length?municipalities.reduce((s,d)=>s+d.levels[k],0)/municipalities.length:0];
+  }));
+}
 const tooltip=document.getElementById('mapTooltip');
 function positionTooltip(event){
   const wrap=document.querySelector('.mapwrap');
@@ -127,11 +133,27 @@ map.querySelectorAll('.division-ii').forEach(el=>{
 
 // Search / jump-to-municipality dropdown
 const select=document.getElementById('municipalitySelect');
-Object.entries(municipalityData).sort((a,b)=>a[1].name.localeCompare(b[1].name)).forEach(([id,d])=>{
-  const opt=document.createElement('option');opt.value=id;opt.textContent=d.name;select.appendChild(opt);
-});
+function populateMunicipalitySelect(){
+  select.querySelectorAll('option:not([value="all"])').forEach(opt=>opt.remove());
+  Object.entries(municipalityData).sort((a,b)=>a[1].name.localeCompare(b[1].name)).forEach(([id,d])=>{
+    const opt=document.createElement('option');opt.value=id;opt.textContent=d.name;select.appendChild(opt);
+  });
+}
 select.addEventListener('change',()=>{if(select.value==='all')selectAllMunicipalities();else if(select.value)selectMunicipality(select.value)});
-selectAllMunicipalities();
+
+async function loadDashboard(){
+  try{
+    municipalityData=await API.getAdminDashboard();
+  }catch(error){
+    console.error('[AdminDashboard] Unable to load dashboard data',error);
+    showToast('Unable to load division risk data.');
+    municipalityData={};
+  }
+  recolorMap();
+  populateMunicipalitySelect();
+  selectAllMunicipalities();
+}
+loadDashboard();
 
 // Legend click-to-filter
 let activeFilter=null;

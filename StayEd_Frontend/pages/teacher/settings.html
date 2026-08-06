@@ -36,7 +36,7 @@
           <div>
             <h1 class="st-page-header-title">System Settings</h1>
             <p class="st-page-header-subtitle">
-              Configure organization-wide defaults, users, and system behavior.
+              Manage your personal preferences for StayEd.
             </p>
           </div>
         </div>
@@ -52,13 +52,20 @@
               </div>
               <div class="st-bento-form-grid">
                 <div class="st-bento-field">
-                  <label for="sysSchoolYear">School Year</label>
-                  <select id="sysSchoolYear">
-                    <option selected>2026-2027</option>
-                    <option>2025-2026</option>
-                  </select>
+                  <label for="sysSchoolYear">Active School Year</label>
+                  <input
+                    id="sysSchoolYear"
+                    type="text"
+                    value="—"
+                    readonly
+                    disabled
+                  />
                 </div>
               </div>
+              <p class="st-bento-field-hint">
+                Set by your administrator. All classes, enrollments, and
+                reports automatically follow this school year.
+              </p>
             </div>
 
             <!-- Notification Settings -->
@@ -71,15 +78,15 @@
               </div>
               <div class="st-toggle-row">
                 <div>
-                  <p class="st-toggle-row-title">Enable Early Warning Alerts</p>
+                  <p class="st-toggle-row-title">Enable Risk Alert Notifications</p>
                   <p class="st-toggle-row-sub">
-                    Notify administrators of high-risk learner activities.
+                    Notify me when a learner becomes Moderate/High Risk or
+                    reaches an inactivity threshold.
                   </p>
                 </div>
                 <label class="st-toggle">
                   <input
                     type="checkbox"
-                    checked
                     data-settings-toggle-pref="ewa-alerts"
                   />
                   <span class="st-toggle-track"
@@ -87,84 +94,13 @@
                   ></span>
                 </label>
               </div>
-              <div class="st-toggle-row">
-                <div>
-                  <p class="st-toggle-row-title">Enable Attendance Reminders</p>
-                  <p class="st-toggle-row-sub">
-                    Automated alerts for learners with consecutive absences.
-                  </p>
-                </div>
-                <label class="st-toggle">
-                  <input
-                    type="checkbox"
-                    checked
-                    data-settings-toggle-pref="attendance-reminders"
-                  />
-                  <span class="st-toggle-track"
-                    ><span class="st-toggle-thumb"></span
-                  ></span>
-                </label>
-              </div>
-              <div class="st-toggle-row">
-                <div>
-                  <p class="st-toggle-row-title">Enable Email Notifications</p>
-                  <p class="st-toggle-row-sub">
-                    Send system reports and critical updates via email.
-                  </p>
-                </div>
-                <label class="st-toggle">
-                  <input
-                    type="checkbox"
-                    data-settings-toggle-pref="email-notifications"
-                  />
-                  <span class="st-toggle-track"
-                    ><span class="st-toggle-thumb"></span
-                  ></span>
-                </label>
-              </div>
             </div>
 
-            <div style="display: flex; justify-content: flex-end">
-              <button
-                type="button"
-                class="st-btn st-btn-primary"
-                data-save-all-settings
-              >
-                <span class="material-symbols-outlined">save</span>
-                Save All Changes
-              </button>
-            </div>
-          </div>
-
-          <!-- RIGHT COLUMN (4-col): system info + management actions -->
-          <div class="st-settings-bento-right">
-            <!-- Prediction Information -->
-            <div class="st-prediction-info-card">
-              <div class="st-prediction-info-head">
-                <h3>Prediction Information</h3>
-                <span class="st-prediction-status-chip">
-                  <span class="st-prediction-status-dot"></span>
-                  Active
-                </span>
-              </div>
-              <div class="st-prediction-info-row">
-                <span class="label">Algorithm</span>
-                <span>Random Forest</span>
-              </div>
-              <div class="st-prediction-info-row">
-                <span class="label">Training Dataset</span>
-                <span>SY 2023–2026</span>
-              </div>
-              <div class="st-prediction-info-row">
-                <span class="label">Last Model Training</span>
-                <span>July 2026</span>
-              </div>
-              <div class="st-prediction-info-row">
-                <span class="label">Prediction Status</span>
-                <span>Active</span>
-              </div>
-            </div>
-
+            <p class="st-settings-profile-hint">
+              Need to change your password or update your profile
+              information? Visit
+              <a href="profile.html">Profile Settings</a>.
+            </p>
           </div>
         </div>
       </main>
@@ -176,15 +112,12 @@
     <div data-component="layout/modal"></div>
 
     <script src="../../assets/js/config.js"></script>
-    <script src="../../assets/js/mock/mock-db.js"></script>
-    <script src="../../assets/js/mock/mock-api.js"></script>
     <script src="../../assets/js/core/utils.js"></script>
     <script src="../../assets/js/core/router.js"></script>
     <script src="../../assets/js/core/api.js"></script>
     <script src="../../assets/js/core/auth.js"></script>
     <script src="../../assets/js/core/guards.js"></script>
     <script src="../../assets/js/core/layout.js"></script>
-    <script src="../../assets/js/core/unsaved-changes.js"></script>
     <script src="../../assets/js/core/app.js"></script>
     <script src="../../assets/js/components/component-loader.js"></script>
     <script src="../../assets/js/components/toast.js"></script>

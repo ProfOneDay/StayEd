@@ -239,16 +239,17 @@
                       stroke-width="3"
                     ></path>
                     <path
+                      data-donut-path
                       d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                       fill="none"
                       stroke="var(--st-secondary)"
-                      stroke-dasharray="80, 100"
+                      stroke-dasharray="0, 100"
                       stroke-linecap="round"
                       stroke-width="3"
                     ></path>
                   </svg>
                   <div class="st-clc-donut-label">
-                    <span class="st-clc-donut-value">80%</span>
+                    <span class="st-clc-donut-value" data-donut-value>—</span>
                     <span class="st-clc-donut-caption">Validated</span>
                   </div>
                 </div>
@@ -290,9 +291,6 @@
     <div data-component="layout/modal"></div>
 
     <script src="../../assets/js/config.js"></script>
-    <script src="../../assets/js/mock/mock-db.js"></script>
-    <script src="../../assets/js/mock/mock-clcs.js"></script>
-    <script src="../../assets/js/mock/mock-api.js"></script>
     <script src="../../assets/js/core/utils.js"></script>
     <script src="../../assets/js/core/router.js"></script>
     <script src="../../assets/js/core/api.js"></script>
