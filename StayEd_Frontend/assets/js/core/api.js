@@ -588,6 +588,10 @@ class API {
     return this.post("/learners/import/preview", { filename: fileOrName });
   }
 
+  static revalidateImportRows(rows) {
+    return this.post("/learners/import/preview", { rows });
+  }
+
   static getImportedLearners() {
     return this.get("/learners/import/summary");
   }

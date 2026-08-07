@@ -5,6 +5,7 @@ from flask import Blueprint, request
 from ..authz import current_user_id, role_required, teacher_for_user
 from ..db import execute, fetch_all, fetch_one, get_db
 from ..helpers import enum_level, error, title_enum
+from ..services.learner_service import _latest_risk_join_sql
 from ..services.settings_service import get_active_school_year
 
 bp = Blueprint("clcs", __name__)
@@ -35,6 +36,7 @@ def _clc_card(row):
         "icon": "account_balance",
         "totalLearners": int(row.get("total_learners") or 0),
         "teachers": int(row.get("teachers") or 0),
+        "highRiskLearners": int(row.get("high_risk_learners") or 0),
         "schoolYear": row.get("school_year") or "—",
     }
 
@@ -109,16 +111,20 @@ def _load_profile(clc_id: int):
 @role_required("teacher", "admin", "coordinator")
 def list_clcs():
     rows = fetch_all(
-        """
+        f"""
         SELECT
             c.clc_id, c.clc_name, c.municipality, c.barangay, c.address, c.status,
             COUNT(DISTINCT tc.teacher_id) FILTER (WHERE tc.assignment_status = 'ACTIVE') AS teachers,
             COUNT(DISTINCT ce.learner_id) FILTER (WHERE ce.enrollment_status = 'ENROLLED') AS total_learners,
+            COUNT(DISTINCT ce.learner_id) FILTER (
+                WHERE ce.enrollment_status = 'ENROLLED' AND risk.risk_level = 'HIGH'
+            ) AS high_risk_learners,
             MAX(tc.school_year) AS school_year
         FROM clc c
         LEFT JOIN teacher_clc tc ON tc.clc_id = c.clc_id
         LEFT JOIN learning_class lc ON lc.clc_id = c.clc_id
         LEFT JOIN class_enrollment ce ON ce.class_id = lc.class_id
+        {_latest_risk_join_sql()}
         GROUP BY c.clc_id
         ORDER BY c.clc_name
         """

@@ -127,11 +127,15 @@ class TeacherDashboard {
     this.setText("[data-stat-moderate-meta]", stats.moderate_trend || "Stable");
 
     this.setText("[data-stat-low]", stats.low);
-    this.setText("[data-stat-low-meta]", stats.low_trend || "Stable");
+    this.setText(
+      "[data-stat-low-meta]",
+      stats.low_trend || "Includes learners awaiting prediction",
+    );
   }
 
   static renderRiskChart(dist = {}, summary = {}) {
-    const max = dist.scale_max || 25;
+    const rawMax = dist.scale_max || 25;
+    const max = Math.max(5, Math.ceil(rawMax / 5) * 5);
 
     const setBar = (level, value) => {
       const bar = document.querySelector(`[data-bar="${level}"]`);
@@ -151,7 +155,16 @@ class TeacherDashboard {
     setBar("moderate", dist.moderate || 0);
     setBar("low", dist.low || 0);
 
-    this.setText("[data-risk-date]", summary.date);
+    const yaxis = document.querySelector("[data-riskchart-yaxis]");
+
+    if (yaxis) {
+      const steps = 5;
+      yaxis.innerHTML = Array.from(
+        { length: steps + 1 },
+        (_, i) => `<span>${Math.round((max / steps) * (steps - i))}</span>`,
+      ).join("");
+    }
+
     this.setText("[data-risk-coverage]", summary.coverage);
     this.setText("[data-risk-model]", summary.model);
     this.setText("[data-risk-confidence]", summary.confidence);
@@ -240,7 +253,7 @@ class TeacherDashboard {
       registered: rows.length,
       high: count("High"),
       moderate: count("Moderate"),
-      low: count("Low"),
+      low: count("Low") + count("Not Yet Assessed"),
     });
   }
 
@@ -249,7 +262,7 @@ class TeacherDashboard {
 
     const high = count("High");
     const moderate = count("Moderate");
-    const low = count("Low");
+    const low = count("Low") + count("Not Yet Assessed");
 
     const scaleMax = Math.max(25, high, moderate, low) + 5;
 
@@ -275,11 +288,6 @@ class TeacherDashboard {
     this.renderRiskChart(
       { scale_max: scaleMax, high, moderate, low },
       {
-        date: new Date().toLocaleDateString("en-US", {
-          month: "long",
-          day: "numeric",
-          year: "numeric",
-        }),
         coverage: `${rows.length} learner${rows.length === 1 ? "" : "s"} in current view`,
         insights,
       },

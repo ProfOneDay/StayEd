@@ -70,8 +70,8 @@ class ClcOverview {
     );
 
     this.set(
-      "[data-clc-teachers]",
-      all.reduce((sum, c) => sum + (c.teachers || 0), 0),
+      "[data-clc-high-risk]",
+      all.reduce((sum, c) => sum + (c.highRiskLearners || 0), 0),
     );
 
     this.set(

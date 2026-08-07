@@ -87,6 +87,31 @@ class LearnerRecordsHub {
     }
   }
 
+  static async refreshLearnerRow(learnerId) {
+    try {
+      const [learner, detail] = await Promise.all([
+        API.getLearner(learnerId),
+        API.getLearnerRecordsDetail(learnerId),
+      ]);
+
+      const merged = { ...learner, ...detail };
+
+      const index = this.state.all.findIndex(
+        (x) => String(x.id) === String(learnerId),
+      );
+
+      if (index === -1) {
+        this.state.all.push(merged);
+      } else {
+        this.state.all[index] = merged;
+      }
+
+      this.renderActiveTab();
+    } catch (error) {
+      console.error("[LearnerRecordsHub] Unable to refresh learner row", error);
+    }
+  }
+
   static showSkeleton() {
     ["modular", "f2f", "blended"].forEach((key) => {
       const body = document.querySelector(`[data-${key}-body]`);
@@ -272,7 +297,9 @@ class LearnerRecordsHub {
         ? "st-consult-dot--danger"
         : l.activity_status === "warning"
           ? "st-consult-dot--warning"
-          : "st-consult-dot--ok";
+          : l.activity_status === "none"
+            ? "st-consult-dot--none"
+            : "st-consult-dot--ok";
 
     return `
             <div style="display:flex;align-items:center;gap:6px;">
@@ -390,7 +417,7 @@ class LearnerRecordsHub {
         const id = el.dataset.openModuleModal;
         const learner = this.state.all.find((x) => String(x.id) === String(id));
         if (learner && window.ModuleManagementModal) {
-          ModuleManagementModal.open(learner);
+          ModuleManagementModal.open(learner, () => this.refreshLearnerRow(id));
         }
       });
     });

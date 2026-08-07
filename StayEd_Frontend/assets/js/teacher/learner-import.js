@@ -136,6 +136,19 @@ class LearnerImportPage {
     }
   }
 
+  static cell(value) {
+    return value === undefined || value === null || value === ""
+      ? "\u2014"
+      : String(value);
+  }
+
+  static titleCase(value) {
+    if (!value) return "\u2014";
+    return String(value)
+      .toLowerCase()
+      .replace(/(^|[\s/-])\S/g, (m) => m.toUpperCase());
+  }
+
   static renderPreview() {
     const p = this.preview;
 
@@ -150,19 +163,151 @@ class LearnerImportPage {
     if (body) {
       body.innerHTML = p.rows
         .map(
-          (row) => `
+          (row, index) => `
                 <tr class="${row.status !== "valid" ? `st-import-row--${row.status}` : ""}">
-                    <td style="font-family:monospace;font-size:12px;">${row.lrn}</td>
-                    <td style="font-weight:600;">${row.name}</td>
-                    <td>${row.level}</td>
-                    <td>${row.modality}</td>
+                    <td style="font-family:monospace;font-size:12px;">${this.cell(row.lrn)}</td>
+                    <td style="font-weight:600;">${this.cell(row.last_name)}</td>
+                    <td style="font-weight:600;">${this.cell(row.first_name)}</td>
+                    <td>${this.cell(row.middle_name)}</td>
+                    <td>${this.titleCase(row.sex)}</td>
+                    <td>${this.cell(row.birthdate)}</td>
+                    <td>${this.titleCase(row.modality)}</td>
+                    <td>${this.cell(row.level)}</td>
+                    <td>${this.titleCase(row.re_enrollee) === "\u2014" ? "No" : this.titleCase(row.re_enrollee)}</td>
+                    <td>${this.cell(row.employment_status)}</td>
+                    <td>${row.distance_from_clc_km != null && row.distance_from_clc_km !== "" ? `${row.distance_from_clc_km} km` : "\u2014"}</td>
+                    <td>${this.cell(row.civil_status)}</td>
+                    <td>${this.cell(row.contact_number)}</td>
+                    <td>${this.cell(row.guardian_contact_number)}</td>
                     <td>${this.statusBadge(row.status)}</td>
-                    <td style="font-size:12px;color:var(--st-on-surface-variant);">${row.issue || "\u2014"}</td>
+                    <td style="font-size:12px;color:var(--st-on-surface-variant);">${this.cell(row.issue)}</td>
+                    <td>
+                        <div class="st-row-actions">
+                            <button type="button" class="st-icon-btn-sm" data-edit-row="${index}" aria-label="Edit row" title="Edit">
+                                <span class="material-symbols-outlined">edit</span>
+                            </button>
+                            <button type="button" class="st-icon-btn-sm" data-remove-row="${index}" aria-label="Remove row" title="Remove">
+                                <span class="material-symbols-outlined">delete</span>
+                            </button>
+                        </div>
+                    </td>
                 </tr>
             `,
         )
         .join("");
+
+      this.bindRowActions(body);
     }
+  }
+
+  static bindRowActions(body) {
+    body.querySelectorAll("[data-edit-row]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        this.openEditRowModal(Number(btn.dataset.editRow));
+      });
+    });
+
+    body.querySelectorAll("[data-remove-row]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        this.removeRow(Number(btn.dataset.removeRow));
+      });
+    });
+  }
+
+  static async revalidateAndRerender() {
+    try {
+      this.preview = await API.revalidateImportRows(this.preview.rows);
+      this.renderPreview();
+    } catch (error) {
+      console.error("[LearnerImport] Unable to revalidate rows", error);
+      Toast?.error("Unable to revalidate the updated rows.");
+    }
+  }
+
+  static async removeRow(index) {
+    this.preview.rows.splice(index, 1);
+    await this.revalidateAndRerender();
+    Toast?.success("Row removed.");
+  }
+
+  static openEditRowModal(index) {
+    if (!window.Modal) return;
+
+    const row = this.preview.rows[index];
+
+    const field = (id, label, value, type = "text") => `
+      <div class="st-schedule-modal-field">
+        <label for="${id}">${label}</label>
+        <input id="${id}" type="${type}" value="${value ?? ""}">
+      </div>
+    `;
+
+    Modal.show({
+      title: "Edit Learner Row",
+      size: "lg",
+      confirmLabel: "Save Row",
+      message: `
+        <div class="st-schedule-modal-row">
+          ${field("editLrn", "LRN", row.lrn)}
+          ${field("editLastName", "Last Name", row.last_name)}
+          ${field("editFirstName", "First Name", row.first_name)}
+          ${field("editMiddleName", "Middle Name", row.middle_name)}
+          <div class="st-schedule-modal-field">
+            <label for="editSex">Sex</label>
+            <select id="editSex">
+              <option value="Male" ${row.sex?.toUpperCase() === "MALE" ? "selected" : ""}>Male</option>
+              <option value="Female" ${row.sex?.toUpperCase() === "FEMALE" ? "selected" : ""}>Female</option>
+            </select>
+          </div>
+          ${field("editBirthdate", "Date of Birth", row.birthdate, "date")}
+          <div class="st-schedule-modal-field">
+            <label for="editModality">Learning Modality</label>
+            <select id="editModality">
+              <option ${row.modality === "Face-to-Face" ? "selected" : ""}>Face-to-Face</option>
+              <option ${row.modality === "Modular" ? "selected" : ""}>Modular</option>
+              <option ${row.modality === "Blended" ? "selected" : ""}>Blended</option>
+            </select>
+          </div>
+          <div class="st-schedule-modal-field">
+            <label for="editReenrollee">Re-enrollee</label>
+            <select id="editReenrollee">
+              <option value="No" ${String(row.re_enrollee).toLowerCase() !== "yes" ? "selected" : ""}>No</option>
+              <option value="Yes" ${String(row.re_enrollee).toLowerCase() === "yes" ? "selected" : ""}>Yes</option>
+            </select>
+          </div>
+          ${field("editEmployment", "Employment Status", row.employment_status)}
+          ${field("editDistance", "Distance from CLC (km)", row.distance_from_clc_km, "number")}
+          ${field("editCivilStatus", "Civil Status", row.civil_status)}
+          ${field("editContact", "Contact Number", row.contact_number)}
+          ${field("editGuardianContact", "Guardian Contact Number", row.guardian_contact_number)}
+        </div>
+      `,
+      onConfirm: async () => {
+        const val = (id) => document.getElementById(id)?.value.trim() || "";
+
+        this.preview.rows[index] = {
+          ...row,
+          lrn: val("editLrn"),
+          last_name: val("editLastName"),
+          first_name: val("editFirstName"),
+          middle_name: val("editMiddleName"),
+          name: `${val("editFirstName")} ${val("editLastName")}`.trim(),
+          sex: val("editSex"),
+          birthdate: val("editBirthdate"),
+          modality: val("editModality"),
+          re_enrollee: val("editReenrollee"),
+          employment_status: val("editEmployment"),
+          distance_from_clc_km: val("editDistance"),
+          civil_status: val("editCivilStatus"),
+          contact_number: val("editContact"),
+          guardian_contact_number: val("editGuardianContact"),
+        };
+
+        await this.revalidateAndRerender();
+
+        Toast?.success("Row updated.");
+      },
+    });
   }
 
   static statusBadge(status) {

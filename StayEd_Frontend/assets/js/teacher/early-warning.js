@@ -118,32 +118,6 @@ class EarlyWarningPage {
 
         this.apply();
       });
-
-    document
-      .querySelector("[data-ewa-export]")
-      ?.addEventListener("click", () => {
-        if (!this.state.filtered.length) {
-          Toast?.error("There are no learners to export.");
-          return;
-        }
-
-        Utils.downloadCsv(
-          `StayEd_Early_Warning_${new Date().toISOString().slice(0, 10)}.csv`,
-          ["LRN", "Name", "Learning Level", "CLC", "Assigned Teacher", "Risk Level", "Risk Probability", "Status"],
-          this.state.filtered.map((l) => [
-            l.lrn,
-            l.name,
-            l.program,
-            l.clc,
-            l.assignedTeacher,
-            l.risk,
-            l.risk_probability != null ? `${Math.round(l.risk_probability * 100)}%` : "",
-            l.status,
-          ]),
-        );
-
-        Toast?.success(`Exported ${this.state.filtered.length} learner(s).`);
-      });
   }
 
   static renderSummary(allLearners) {

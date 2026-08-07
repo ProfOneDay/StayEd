@@ -182,20 +182,5 @@ function showToast(msg){
   clearTimeout(window._toastTimer);
   window._toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
 }
-document.getElementById('sidebarLogoutBtn').addEventListener('click',e=>{e.preventDefault();openModal('modal-logout')});
-document.getElementById('logout-confirm-btn').addEventListener('click',()=>{closeModal('modal-logout');Auth.logout()});
-
-// Mobile hamburger menu
-const menuBtn=document.getElementById('menuBtn');
-const asideEl=document.querySelector('aside');
-menuBtn.addEventListener('click',()=>{
-  const open=asideEl.classList.toggle('open');
-  menuBtn.setAttribute('aria-expanded',open?'true':'false');
-});
-document.addEventListener('click',e=>{
-  if(asideEl.classList.contains('open')&&!asideEl.contains(e.target)&&e.target!==menuBtn){
-    asideEl.classList.remove('open');menuBtn.setAttribute('aria-expanded','false');
-  }
-});
 
 document.querySelectorAll('.search-box select').forEach(sel=>{sel.addEventListener('focus',()=>sel.closest('.search-box').classList.add('open'));sel.addEventListener('blur',()=>sel.closest('.search-box').classList.remove('open'));});

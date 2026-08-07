@@ -22,6 +22,7 @@ from ..services.learner_service import (
     ACTIVITY_WARNING_DAYS,
     _latest_risk_join_sql,
     _learner_query,
+    _module_totals,
     _relative_day_phrase,
     _shape_activity,
     _shape_learner,
@@ -429,9 +430,7 @@ def records_detail(learner_id: int):
         return error("Learner not found.", 404)
     enrollment_id = base["enrollment_id"]
 
-    progress = fetch_one(
-        "SELECT * FROM vw_module_progress WHERE enrollment_id=%s", (enrollment_id,)
-    ) or {}
+    totals = _module_totals(enrollment_id)
     att = fetch_one(
         "SELECT * FROM vw_session_attendance_summary WHERE enrollment_id=%s", (enrollment_id,)
     ) or {}
@@ -490,13 +489,11 @@ def records_detail(learner_id: int):
         """,
         (base["class_id"],),
     )
-    total = int(progress.get("total_modules_released") or 0)
-    completed = int(progress.get("total_modules_returned") or 0)
     return {
         "modules": {
-            "total": total,
-            "completed": completed,
-            "active": max(total - completed, 0),
+            "total": totals["released"],
+            "completed": totals["returned"],
+            "active": totals["active"],
             "contactStatus": "Contacted" if contact and contact["contact_result"] == "SUCCESSFUL" else "Follow-up Needed",
         },
         "attendance": {
@@ -578,31 +575,14 @@ def learner_profile(learner_id: int):
         for r in risk_history[-6:]
     ]
 
-    module_stats = fetch_one(
-        """
-        SELECT
-            COUNT(*) AS released,
-            COUNT(*) FILTER (WHERE date_returned IS NOT NULL) AS returned,
-            COUNT(*) FILTER (WHERE date_returned IS NULL) AS active,
-            MAX(date_returned) AS last_returned
-        FROM module_record WHERE enrollment_id=%s
-        """,
-        (enrollment_id,),
-    ) or {}
-    modules_released = int(module_stats.get("released") or 0)
-    modules_returned = int(module_stats.get("returned") or 0)
-    active_modules = int(module_stats.get("active") or 0)
-    last_returned = module_stats.get("last_returned")
+    totals = _module_totals(enrollment_id)
+    modules_released = totals["released"]
+    modules_returned = totals["returned"]
+    active_modules = totals["active"]
+    last_returned = totals["last_returned"]
     days_since_last_return = (date.today() - last_returned).days if last_returned else None
+    last_activity = shaped["activity_text"]
 
-    last_module_event = fetch_one(
-        """
-        SELECT module_name, date_returned FROM module_record
-        WHERE enrollment_id=%s AND date_returned IS NOT NULL
-        ORDER BY date_returned DESC LIMIT 1
-        """,
-        (enrollment_id,),
-    )
     last_contact_event = fetch_one(
         """
         SELECT contact_method, contact_date FROM contact_log
@@ -611,19 +591,6 @@ def learner_profile(learner_id: int):
         """,
         (enrollment_id,),
     )
-    activity_candidates = []
-    if last_module_event:
-        activity_candidates.append((
-            last_module_event["date_returned"],
-            f"\"{last_module_event['module_name']}\" returned {last_module_event['date_returned'].strftime('%b %d')}",
-        ))
-    if last_contact_event:
-        activity_candidates.append((
-            last_contact_event["contact_date"],
-            f"{title_enum(last_contact_event['contact_method'])} contact on {last_contact_event['contact_date'].strftime('%b %d')}",
-        ))
-    activity_candidates.sort(key=lambda c: c[0], reverse=True)
-    last_activity = activity_candidates[0][1] if activity_candidates else "No recent activity"
     days_since_contact = (date.today() - last_contact_event["contact_date"]).days if last_contact_event else None
 
     interventions = fetch_all(
@@ -969,14 +936,6 @@ def list_learning_strands():
     return {"data": [{"id": r["learning_strand_id"], "code": r["strand_code"], "name": r["strand_name"]} for r in rows]}
 
 
-RISK_TO_BATCH_STATUS = {
-    "High": "high",
-    "Moderate": "moderate",
-    "Low": "low",
-    "Not Yet Assessed": "neutral",
-}
-
-
 def _batch_status(modules: list[dict], release_date: date, learner_activity: dict) -> dict:
     total = len(modules)
     returned = sum(1 for m in modules if m["status"] == "returned")
@@ -991,7 +950,21 @@ def _batch_status(modules: list[dict], release_date: date, learner_activity: dic
             "returnedCount": returned,
         }
 
-    status = RISK_TO_BATCH_STATUS.get(learner_activity["risk"], "neutral")
+    # Batch status is purely operational -- module completion plus whether
+    # the recommended follow-up window has been exceeded -- and must never be
+    # derived from the ML risk tier. A batch with modules pending isn't
+    # "Moderate Risk"; that's a coincidence of two unrelated concepts. Risk
+    # is still reported via **learner_activity below so the frontend can show
+    # it as its own separate badge.
+    if learner_activity["activityStatus"] == "danger":
+        status = "overdue"
+    elif learner_activity["activityStatus"] == "warning":
+        status = "due"
+    elif returned > 0:
+        status = "partial"
+    else:
+        status = "pending"
+
     return {
         "status": status,
         "returnDate": None,
@@ -1273,12 +1246,15 @@ def record_consultation(learner_id: int):
 
 
 def _read_upload(file_storage):
+    # dtype=str keeps numeric-looking columns (LRN, contact numbers) as the
+    # exact text in the file -- otherwise pandas infers them as integers and
+    # silently drops leading zeros (e.g. "09171112222" -> "9171112222").
     name = (file_storage.filename or "").lower()
     raw = file_storage.read()
     if name.endswith(".csv"):
-        return pd.read_csv(BytesIO(raw))
+        return pd.read_csv(BytesIO(raw), dtype=str)
     if name.endswith(".xlsx") or name.endswith(".xls"):
-        return pd.read_excel(BytesIO(raw))
+        return pd.read_excel(BytesIO(raw), dtype=str)
     raise ValueError("Only CSV, XLSX, or XLS files are supported.")
 
 
@@ -1305,6 +1281,7 @@ def _canonical_rows(frame: pd.DataFrame):
         "distance_from_clc_(km)": "distance_from_clc_km",
         "civil_status_(if_applicable)": "civil_status",
         "guardian_contact_number_(if_applicable)": "guardian_contact_number",
+        "middle_name_(optional)": "middle_name",
     }
     frame = frame.rename(columns={k: v for k, v in aliases.items() if k in frame.columns})
     records = frame.where(pd.notna(frame), None).to_dict(orient="records")
@@ -1425,13 +1402,13 @@ def _insert_import_rows(rows, teacher):
                 cur.execute(
                     """
                     INSERT INTO learner (
-                        lrn, first_name, last_name, sex, date_of_birth,
+                        lrn, first_name, middle_name, last_name, sex, date_of_birth,
                         employment_status, civil_status, contact_number, guardian_contact_number
                     )
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING learner_id
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING learner_id
                     """,
                     (
-                        row["lrn"], first, last, sex, dob,
+                        row["lrn"], first, row.get("middle_name") or None, last, sex, dob,
                         row.get("employment_status") or None,
                         row.get("civil_status") or None,
                         row.get("contact_number") or None,

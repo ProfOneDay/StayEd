@@ -307,6 +307,9 @@ class Layout {
     const filename =
       this.options.page || window.location.pathname.split("/").pop();
 
+    const sectionMatch = window.location.pathname.match(/\/pages\/([^/]+)\//);
+    const sectionKey = sectionMatch ? `${sectionMatch[1]}/${filename}` : null;
+
     let items;
 
     if (this.options.breadcrumb.length) {
@@ -314,7 +317,7 @@ class Layout {
         typeof entry === "string" ? { label: entry } : entry,
       );
     } else if (window.Router) {
-      items = Router.breadcrumbFor(filename, this.options.title);
+      items = Router.breadcrumbFor(filename, this.options.title, sectionKey);
     } else {
       items = [
         { label: "Dashboard", href: "dashboard.html" },

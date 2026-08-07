@@ -188,6 +188,20 @@
 .st-import-status-badge--duplicate{ background:var(--st-risk-moderate-soft); color:var(--st-risk-moderate); }
 .st-import-status-badge--error{ background:var(--st-risk-high-soft); color:var(--st-risk-high); }
 
+.st-import-preview-table{
+    min-width:1700px;
+}
+
+.st-import-preview-table th,
+.st-import-preview-table td{
+    white-space:nowrap;
+    padding:12px 16px;
+}
+
+.st-import-preview-table td:last-child{
+    white-space:normal;
+}
+
 .st-import-success-stats{
     display:grid;
     grid-template-columns:repeat(4,1fr);

@@ -102,9 +102,27 @@ class Router {
       { label: "Dashboard", href: "dashboard.html" },
       { label: "About StayEd" },
     ],
+
+    "admin/dashboard.html": [{ label: "Dashboard" }],
+    "admin/user-management.html": [
+      { label: "Dashboard", href: "dashboard.html" },
+      { label: "User Management" },
+    ],
+    "admin/clc-management.html": [
+      { label: "Dashboard", href: "dashboard.html" },
+      { label: "CLC Management" },
+    ],
+    "admin/settings.html": [
+      { label: "Dashboard", href: "dashboard.html" },
+      { label: "Settings" },
+    ],
   };
 
-  static breadcrumbFor(filename, fallbackTitle) {
+  static breadcrumbFor(filename, fallbackTitle, sectionKey) {
+    if (sectionKey && this.BREADCRUMBS[sectionKey]) {
+      return this.BREADCRUMBS[sectionKey].map((c) => ({ ...c }));
+    }
+
     if (this.BREADCRUMBS[filename]) {
       return this.BREADCRUMBS[filename].map((c) => ({ ...c }));
     }

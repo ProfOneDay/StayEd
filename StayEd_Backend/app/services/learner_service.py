@@ -2,10 +2,37 @@ from __future__ import annotations
 
 from datetime import date
 
+from ..db import fetch_one
 from ..helpers import title_enum
 
 ACTIVITY_WARNING_DAYS = 21
 ACTIVITY_DANGER_DAYS = 30
+
+
+def _module_totals(enrollment_id: int) -> dict:
+    """Single source of truth for module counts -- the Module Release Logbook,
+    Learner Records table, and Learner Profile must never each compute their
+    own answer to "how many modules has this learner been released/returned."
+    """
+    row = fetch_one(
+        """
+        SELECT
+            COUNT(*) AS released,
+            COUNT(*) FILTER (WHERE date_returned IS NOT NULL) AS returned,
+            MAX(date_returned) AS last_returned
+        FROM module_record
+        WHERE enrollment_id = %s
+        """,
+        (enrollment_id,),
+    ) or {}
+    released = int(row.get("released") or 0)
+    returned = int(row.get("returned") or 0)
+    return {
+        "released": released,
+        "returned": returned,
+        "active": max(released - returned, 0),
+        "last_returned": row.get("last_returned"),
+    }
 
 
 def _latest_risk_join_sql():
@@ -30,21 +57,40 @@ def _relative_day_phrase(days: int) -> str:
 
 
 def _shape_activity(row):
+    # Monitoring hasn't started at all until a module batch has been released
+    # -- the same signal _shape_learner uses to gate the risk badge to "Not
+    # Yet Assessed". Without this, a learner with zero released modules falls
+    # back to days-since-enrollment and gets told a module return is overdue,
+    # even though there was never a module to return in the first place.
+    if not row.get("batch_count"):
+        return "No modules released yet", "none", 0
+
+    # Inactivity is always measured from the single most recent valid activity
+    # of any kind (release, return, or consultation -- whichever is newest),
+    # falling back to the enrollment date only when nothing has ever happened.
+    # A prior version measured the fallback text's day-count from a
+    # "primary event" (return-only) instead of this same reference, which let
+    # a fresh module release with zero returns fall back to days-since-
+    # enrollment for its inactivity count -- showing a batch released weeks
+    # ago as "1 day ago" whenever the learner happened to enroll recently.
     modality_raw = row.get("learning_modality") or ""
     event_label = row.get("event_label")
     event_date = row.get("event_date")
-    primary_event_date = row.get("primary_event_date")
-    reference_date = primary_event_date or row.get("enrollment_date")
+    reference_date = event_date or row.get("enrollment_date")
 
-    days_inactive = (date.today() - reference_date).days if reference_date else 0
-    days_since_event = (date.today() - event_date).days if event_date else None
+    # Inactivity can never be negative -- a saved activity date shouldn't ever
+    # land in the future, but clamp defensively rather than ever surface a
+    # value like "-26 days inactive" if one somehow does (bad data entry,
+    # clock skew, etc).
+    days_inactive = max(0, (date.today() - reference_date).days) if reference_date else 0
 
-    if event_date is not None and days_since_event < ACTIVITY_WARNING_DAYS:
-        activity_text = f"{event_label} {_relative_day_phrase(days_since_event)}"
+    if event_date is not None and days_inactive < ACTIVITY_WARNING_DAYS:
+        activity_text = f"{event_label} {_relative_day_phrase(days_inactive)}"
     else:
         primary_noun = "consultation" if modality_raw == "FACE_TO_FACE" else "module return"
+        day_word = "day" if days_inactive == 1 else "days"
         activity_text = (
-            f"No {primary_noun} for {days_inactive} days" if days_inactive > 0 else "No activity recorded"
+            f"No {primary_noun} for {days_inactive} {day_word}" if days_inactive > 0 else "No activity recorded"
         )
 
     if days_inactive >= ACTIVITY_DANGER_DAYS:
@@ -104,7 +150,6 @@ def _learner_query(where: str = "", order: str = "l.last_name, l.first_name"):
             risk.risk_assessment_id, risk.risk_probability, risk.risk_level, risk.assessment_date,
             0 AS assessment_avg,
             latest_event.event_label, latest_event.event_date,
-            primary_event.primary_event_date,
             (SELECT COUNT(*) FROM module_release_batch mrb WHERE mrb.enrollment_id = ce.enrollment_id) AS batch_count
         FROM learner l
         JOIN class_enrollment ce ON ce.learner_id = l.learner_id
@@ -137,19 +182,6 @@ def _learner_query(where: str = "", order: str = "l.last_name, l.first_name"):
             ORDER BY event_date DESC, priority ASC
             LIMIT 1
         ) latest_event ON TRUE
-        LEFT JOIN LATERAL (
-            SELECT
-                CASE
-                    WHEN ce.learning_modality = 'FACE_TO_FACE' THEN (
-                        SELECT MAX(cl.contact_date) FROM contact_log cl
-                        WHERE cl.enrollment_id = ce.enrollment_id AND cl.contact_result = 'SUCCESSFUL'
-                    )
-                    ELSE (
-                        SELECT MAX(mr.date_returned) FROM module_record mr
-                        WHERE mr.enrollment_id = ce.enrollment_id AND mr.date_returned IS NOT NULL
-                    )
-                END AS primary_event_date
-        ) primary_event ON TRUE
         {where}
         ORDER BY {order}
     """

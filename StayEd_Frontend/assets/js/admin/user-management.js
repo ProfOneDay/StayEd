@@ -399,15 +399,7 @@ document.getElementById('cr-save-btn').addEventListener('click',async()=>{
   }
 });
 
-const menuBtn=document.getElementById('menuBtn');
-const asideEl=document.querySelector('aside');
-menuBtn.addEventListener('click',()=>{const open=asideEl.classList.toggle('open');menuBtn.setAttribute('aria-expanded',open?'true':'false')});
-document.addEventListener('click',e=>{if(asideEl.classList.contains('open')&&!asideEl.contains(e.target)&&e.target!==menuBtn){asideEl.classList.remove('open');menuBtn.setAttribute('aria-expanded','false')}});
-
 loadTeachers();
 loadClcOptions();
-
-document.getElementById('sidebarLogoutBtn').addEventListener('click',e=>{e.preventDefault();openModal('modal-logout')});
-document.getElementById('logout-confirm-btn').addEventListener('click',()=>{closeModal('modal-logout');Auth.logout()});
 
 document.querySelectorAll('.select-wrap select').forEach(sel=>{sel.addEventListener('focus',()=>sel.closest('.select-wrap').classList.add('open'));sel.addEventListener('blur',()=>sel.closest('.select-wrap').classList.remove('open'));});

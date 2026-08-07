@@ -116,6 +116,7 @@
 .st-consult-dot--ok{ background:var(--st-risk-low); }
 .st-consult-dot--warning{ background:var(--st-risk-moderate); }
 .st-consult-dot--danger{ background:var(--st-risk-high); }
+.st-consult-dot--none{ background:var(--st-risk-neutral); }
 
 .st-row-menu{
     position:relative;
@@ -446,28 +447,28 @@
     color:#00504E;
 }
 
-.st-mrb-status-pill--low{
-    background:var(--st-risk-low-soft);
-    color:var(--st-risk-low);
-    border-color:var(--st-risk-low-border);
+.st-mrb-status-pill--pending{
+    background:var(--st-risk-neutral-soft);
+    color:var(--st-risk-neutral);
+    border-color:var(--st-risk-neutral-border);
 }
 
-.st-mrb-status-pill--moderate{
+.st-mrb-status-pill--partial{
+    background:var(--st-primary-fixed);
+    color:var(--st-primary);
+    border-color:transparent;
+}
+
+.st-mrb-status-pill--due{
     background:var(--st-risk-moderate-soft);
     color:var(--st-risk-moderate);
     border-color:var(--st-risk-moderate-border);
 }
 
-.st-mrb-status-pill--high{
+.st-mrb-status-pill--overdue{
     background:var(--st-risk-high-soft);
     color:var(--st-risk-high);
     border-color:var(--st-risk-high-border);
-}
-
-.st-mrb-status-pill--neutral{
-    background:var(--st-risk-neutral-soft);
-    color:var(--st-risk-neutral);
-    border-color:var(--st-risk-neutral-border);
 }
 
 .st-mrb-actions{
@@ -486,8 +487,8 @@
     max-width:160px;
 }
 
-.st-mrb-risk-bar--moderate{ background:var(--st-risk-moderate); }
-.st-mrb-risk-bar--high{ background:var(--st-risk-high); }
+.st-mrb-risk-bar--due{ background:var(--st-risk-moderate); }
+.st-mrb-risk-bar--overdue{ background:var(--st-risk-high); }
 
 .st-mrb-expanded{
     padding:0 16px 16px;
@@ -506,6 +507,16 @@
 }
 
 .st-mrb-followup .material-symbols-outlined{ font-size:18px; color:var(--st-primary); }
+
+.st-mrb-followup--overdue{
+    color:var(--st-risk-high);
+    font-weight:600;
+    background:var(--st-risk-high-soft);
+    padding:8px 12px;
+    border-radius:var(--st-radius-md);
+}
+
+.st-mrb-followup--overdue .material-symbols-outlined{ color:var(--st-risk-high); }
 
 .st-mrb-strand-grid{
     display:grid;

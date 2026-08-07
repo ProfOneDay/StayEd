@@ -15,8 +15,11 @@ class ModuleManagementModal {
 
   static returnState = null;
 
-  static async open(learner) {
+  static onUpdate = null;
+
+  static async open(learner, onUpdate) {
     this.learner = learner;
+    this.onUpdate = onUpdate || null;
     this.view = "logbook";
     this.expandedBatchId = null;
 
@@ -123,19 +126,22 @@ class ModuleManagementModal {
   }
 
   static statusMeta(batch) {
+    // Batch status is purely operational (module completion + follow-up
+    // timing) -- never the ML risk tier. Risk is rendered as its own badge
+    // in renderBatchRow(), separate from this pill.
     if (batch.status === "returned") {
-      return { label: "Returned", icon: "check", cssClass: "returned" };
+      return { label: "Fully Returned", icon: "check", cssClass: "returned" };
     }
-    if (batch.status === "high") {
-      return { label: "High Risk", sub: `${batch.daysInactive} days inactive`, icon: "warning", cssClass: "high" };
+    if (batch.status === "overdue") {
+      return { label: "Follow-up Overdue", sub: `${batch.daysInactive} days inactive`, icon: "warning", cssClass: "overdue" };
     }
-    if (batch.status === "moderate") {
-      return { label: "Moderate Risk", sub: `${batch.daysInactive} days inactive`, icon: "circle", cssClass: "moderate" };
+    if (batch.status === "due") {
+      return { label: "Follow-up Due", sub: `${batch.daysInactive} days inactive`, icon: "schedule", cssClass: "due" };
     }
-    if (batch.status === "low") {
-      return { label: "Low Risk", sub: `${batch.daysInactive} days inactive`, icon: "check_circle", cssClass: "low" };
+    if (batch.status === "partial") {
+      return { label: "Partially Returned", icon: "incomplete_circle", cssClass: "partial" };
     }
-    return { label: "Not Yet Assessed", icon: "help", cssClass: "neutral" };
+    return { label: "Pending", icon: "hourglass_empty", cssClass: "pending" };
   }
 
   static renderBatchRow(batch) {
@@ -191,7 +197,10 @@ class ModuleManagementModal {
           </div>
         </button>
         <div class="st-mrb-actions">
-          ${batch.status === "high" || batch.status === "moderate" ? `<div class="st-mrb-risk-bar st-mrb-risk-bar--${status.cssClass}" style="width:${Math.min(100, Math.round((batch.daysInactive / 30) * 100))}%;"></div>` : ""}
+          ${batch.status === "due" || batch.status === "overdue" ? `<div class="st-mrb-risk-bar st-mrb-risk-bar--${status.cssClass}" style="width:${Math.min(100, Math.round((batch.daysInactive / 30) * 100))}%;"></div>` : ""}
+          <span class="st-risk-badge st-risk-badge--${this.riskBadgeCssClass(batch.risk)}">
+            <span class="st-risk-dot"></span>${batch.risk || "Not Yet Assessed"}
+          </span>
           <span class="st-mrb-status-pill st-mrb-status-pill--${status.cssClass}">
             <span class="material-symbols-outlined">${status.icon}</span>
             <span>
@@ -207,13 +216,19 @@ class ModuleManagementModal {
   }
 
   static renderBatchExpanded(batch) {
+    const overdue = batch.activityStatus === "danger";
+
     return `
       <div class="st-mrb-expanded">
-        <p class="st-mrb-followup">
-          <span class="material-symbols-outlined">info</span>
-          Recommended Follow-up Period: Within 1 Month
+        <p class="st-mrb-followup ${overdue ? "st-mrb-followup--overdue" : ""}">
+          <span class="material-symbols-outlined">${overdue ? "warning" : "info"}</span>
+          ${
+            overdue
+              ? `Follow-up Overdue — No recorded learner activity for ${batch.daysInactive} days`
+              : "Recommended Follow-up Period: Within 1 Month"
+          }
         </p>
-        ${this.renderLastContactBlock(batch)}
+        ${this.renderLastContactBlock(batch, { showRiskBadge: batch.status === "returned" })}
         <div class="st-mrb-strand-grid">
           ${batch.strands
             .map(
@@ -243,20 +258,26 @@ class ModuleManagementModal {
     return { High: "high", Moderate: "moderate", Low: "low" }[risk] || "neutral";
   }
 
-  static renderLastContactBlock(batch) {
+  static renderLastContactBlock(batch, { showRiskBadge = true } = {}) {
     const dateLine =
       batch.status === "returned"
         ? `Returned: ${batch.returnDate}`
         : `Released: ${batch.releaseDate}`;
+
+    const risk = batch.risk || this.meta.risk;
 
     return `
       <div class="st-mrb-last-contact">
         <span class="st-return-eyebrow">Last Contact</span>
         <p class="st-mrb-last-contact-date">${dateLine}</p>
         <p class="st-mrb-last-contact-activity">${batch.activityText || this.meta.activityText || "—"}</p>
-        <span class="st-risk-badge st-risk-badge--${this.riskBadgeCssClass(batch.risk || this.meta.risk)}">
-          <span class="st-risk-dot"></span>${batch.risk || this.meta.risk || "Not Yet Assessed"}
-        </span>
+        ${
+          showRiskBadge
+            ? `<span class="st-risk-badge st-risk-badge--${this.riskBadgeCssClass(risk)}">
+                <span class="st-risk-dot"></span>${risk || "Not Yet Assessed"}
+              </span>`
+            : ""
+        }
       </div>
     `;
   }
@@ -485,6 +506,7 @@ class ModuleManagementModal {
         Toast?.success("Module batch released.");
         this.view = "logbook";
         this.renderAll();
+        this.onUpdate?.();
       } catch (error) {
         console.error("[ModuleManagementModal] Release failed", error);
         Toast?.error(error?.data?.message || "Unable to release this module batch.");
@@ -661,6 +683,7 @@ class ModuleManagementModal {
         Toast?.success("Module return recorded.");
         this.view = "logbook";
         this.renderAll();
+        this.onUpdate?.();
       } catch (error) {
         console.error("[ModuleManagementModal] Return failed", error);
         Toast?.error(error?.data?.message || "Unable to record this return.");

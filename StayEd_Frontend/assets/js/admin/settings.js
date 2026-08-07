@@ -134,7 +134,6 @@ function confirmLogout(){
   openModal('modal-confirm');
 }
 document.getElementById('logoutBtn').addEventListener('click',confirmLogout);
-document.getElementById('sidebarLogoutBtn').addEventListener('click',e=>{e.preventDefault();confirmLogout()});
 document.getElementById('deactivateSelfBtn').addEventListener('click',()=>{
   confirmDangerous('Deactivate your account?',"You'll immediately lose access to administrative tools. Contact another division admin to reactivate.",'Deactivate',async()=>{
     try{
@@ -244,10 +243,5 @@ function showToast(msg){
   clearTimeout(window._toastTimer);
   window._toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
 }
-
-const menuBtn=document.getElementById('menuBtn');
-const asideEl=document.querySelector('aside');
-menuBtn.addEventListener('click',()=>{const open=asideEl.classList.toggle('open');menuBtn.setAttribute('aria-expanded',open?'true':'false')});
-document.addEventListener('click',e=>{if(asideEl.classList.contains('open')&&!asideEl.contains(e.target)&&e.target!==menuBtn){asideEl.classList.remove('open');menuBtn.setAttribute('aria-expanded','false')}});
 
 document.querySelectorAll('.select-wrap select').forEach(sel=>{sel.addEventListener('focus',()=>sel.closest('.select-wrap').classList.add('open'));sel.addEventListener('blur',()=>sel.closest('.select-wrap').classList.remove('open'));});

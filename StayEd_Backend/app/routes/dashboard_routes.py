@@ -12,26 +12,6 @@ from .learner_routes import _learner_query, _shape_learner
 bp = Blueprint("dashboard", __name__)
 
 
-def _latest_risk_rows(teacher_id: int):
-    return fetch_all(
-        """
-        SELECT DISTINCT ON (ce.enrollment_id)
-            ce.enrollment_id, l.learner_id,
-            CONCAT_WS(' ', l.first_name, l.last_name) AS learner,
-            ra.risk_level, ra.risk_probability, ra.assessment_date
-        FROM class_enrollment ce
-        JOIN learning_class lc ON lc.class_id=ce.class_id
-        JOIN learner l ON l.learner_id=ce.learner_id
-        LEFT JOIN risk_assessment ra
-            ON ra.enrollment_id=ce.enrollment_id
-           AND ra.data_sufficiency_status='PREDICTION_GENERATED'
-        WHERE lc.teacher_id=%s AND ce.enrollment_status='ENROLLED'
-        ORDER BY ce.enrollment_id, ra.assessment_date DESC NULLS LAST
-        """,
-        (teacher_id,),
-    )
-
-
 def _model_info():
     return fetch_one(
         """
@@ -63,19 +43,6 @@ def dashboard():
         """,
         (teacher["teacher_id"],),
     )
-    risks = _latest_risk_rows(teacher["teacher_id"])
-    registered = len(risks)
-    high = sum(r.get("risk_level") == "HIGH" for r in risks)
-    moderate = sum(r.get("risk_level") == "MODERATE" for r in risks)
-    low = sum(r.get("risk_level") == "LOW" for r in risks)
-    assessed = sum(r.get("risk_level") is not None for r in risks)
-
-    model = _model_info()
-    latest_date = max((r["assessment_date"] for r in risks if r.get("assessment_date")), default=None)
-    algorithm = model["algorithm"] if model else "Random Forest"
-    model_version = model["model_version"] if model else "Not registered"
-    coverage = round((assessed / registered) * 100) if registered else 0
-
     if current_class:
         selected_class = f"{title_enum(current_class['learning_level'])}, {current_class['clc_name']}"
         school_year = current_class["school_year"]
@@ -94,6 +61,24 @@ def dashboard():
     for row in learner_rows:
         latest_by_learner.setdefault(row["learner_id"], row)
     learners = [_shape_learner(row) for row in latest_by_learner.values()]
+
+    # Every learner falls into exactly one of these buckets, so high+moderate+low
+    # always equals registered -- learners with no completed prediction yet
+    # default into Low rather than vanishing from the KPI cards/chart, while
+    # `_shape_learner`'s "Not Yet Assessed" risk value (kept as-is on each
+    # learner) still lets tables/profiles show the distinction.
+    registered = len(learners)
+    high = sum(l["risk"] == "High" for l in learners)
+    moderate = sum(l["risk"] == "Moderate" for l in learners)
+    low_pending = sum(l["risk"] == "Not Yet Assessed" for l in learners)
+    low = sum(l["risk"] == "Low" for l in learners) + low_pending
+    predicted = registered - low_pending
+
+    model = _model_info()
+    latest_date = max((r["assessment_date"] for r in learner_rows if r.get("assessment_date")), default=None)
+    algorithm = model["algorithm"] if model else "Random Forest"
+    model_version = model["model_version"] if model else "Not registered"
+    coverage = round((predicted / registered) * 100) if registered else 0
 
     interventions = fetch_all(
         """
@@ -134,14 +119,14 @@ def dashboard():
             "low": low,
             "high_delta": 0,
             "moderate_trend": "Stable",
-            "low_trend": "Stable",
+            "low_trend": "Includes learners awaiting prediction",
         },
         "riskDistribution": dist,
         "predictionSummary": {
             "date": latest_date.strftime("%B %d, %Y") if latest_date else "No prediction yet",
             "coverage": f"{coverage}%",
             "model": model_version,
-            "confidence": "Available" if assessed else "Pending",
+            "confidence": "Available" if predicted else "Pending",
             "algorithm": algorithm,
             "insights": [
                 {"tone": "error" if high else "primary", "text": f"{high} learner(s) are currently classified as High Risk"},

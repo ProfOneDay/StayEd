@@ -730,8 +730,9 @@ class LearnerProfilePage {
 
   static riskPill(risk) {
     const cls =
-      { High: "high", Moderate: "moderate", Low: "low" }[risk] || "low";
-    return `<span class="st-risk-badge st-risk-badge--${cls}" style="padding:4px 16px;font-size:12px;"><span class="st-risk-dot"></span>${risk} Risk</span>`;
+      { High: "high", Moderate: "moderate", Low: "low" }[risk] || "neutral";
+    const label = cls === "neutral" ? "Not Yet Assessed" : `${risk} Risk`;
+    return `<span class="st-risk-badge st-risk-badge--${cls}" style="padding:4px 16px;font-size:12px;"><span class="st-risk-dot"></span>${label}</span>`;
   }
 
   static capitalize(s) {
