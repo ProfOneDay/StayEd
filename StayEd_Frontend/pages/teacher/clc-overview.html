@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StayEd | CLC Overview</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/css/main.css" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="../../assets/img/brand/favicon.ico"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="../../assets/img/brand/apple-touch-icon.png"
+    />
+  </head>
+  <body class="st-app" data-page="CLC Overview">
+    <div data-component="layout/sidebar"></div>
+
+    <div class="st-main">
+      <div data-component="layout/navbar"></div>
+
+      <main class="st-content">
+        <div class="st-page-header">
+          <div>
+            <h1 class="st-page-header-title">
+              Community Learning Center Overview
+            </h1>
+            <p class="st-page-header-subtitle">
+              Manage and monitor your assigned Community Learning Centers.
+            </p>
+          </div>
+        </div>
+
+        <!-- Compact statistics strip -->
+        <div class="st-records-stats st-records-stats--clc">
+          <div class="st-records-stat st-records-stat--total">
+            <div class="st-records-stat-icon">
+              <span class="material-symbols-outlined">hub</span>
+            </div>
+            <div>
+              <p class="st-records-stat-value" data-clc-count>--</p>
+              <p class="st-records-stat-label">Total CLCs</p>
+            </div>
+          </div>
+
+          <div class="st-records-stat st-records-stat--total">
+            <div class="st-records-stat-icon">
+              <span class="material-symbols-outlined">groups</span>
+            </div>
+            <div>
+              <p class="st-records-stat-value" data-clc-learners>--</p>
+              <p class="st-records-stat-label">Total Learners</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Assigned municipality (read-only — teachers are scoped to one
+             municipality at account setup; the Municipality filter itself
+             lives only in the Admin/ALS Division Supervisor module) -->
+        <p class="st-clc-municipality-label">
+          <span class="material-symbols-outlined">location_on</span>
+          Municipality: <strong data-clc-municipality-name>—</strong>
+        </p>
+
+        <!-- Search bar -->
+        <div class="st-filter-bar">
+          <div class="st-filter-row st-clc-filter-row">
+            <div class="st-search st-clc-search-wide">
+              <span class="material-symbols-outlined">search</span>
+              <input
+                type="text"
+                placeholder="Search CLC Name..."
+                data-clc-search
+                aria-label="Search CLC name"
+              />
+            </div>
+
+            <div class="st-clc-showing-indicator">
+              <span class="material-symbols-outlined">analytics</span>
+              <span data-clc-showing>Showing 0 Community Learning Centers</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CLC Grid -->
+        <div class="st-clc-grid" data-clc-grid>
+          <div class="st-empty col-12">
+            <span class="material-symbols-outlined">hourglass_empty</span>
+            <p class="st-empty-title">Loading Community Learning Centers…</p>
+          </div>
+        </div>
+      </main>
+
+      <div data-component="layout/footer"></div>
+    </div>
+
+    <div data-component="layout/toast"></div>
+    <div data-component="layout/modal"></div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/core/utils.js"></script>
+    <script src="../../assets/js/core/router.js"></script>
+    <script src="../../assets/js/core/api.js"></script>
+    <script src="../../assets/js/core/auth.js"></script>
+    <script src="../../assets/js/core/guards.js"></script>
+    <script src="../../assets/js/core/layout.js"></script>
+    <script src="../../assets/js/core/skeletons.js"></script>
+    <script src="../../assets/js/core/app.js"></script>
+    <script src="../../assets/js/components/component-loader.js"></script>
+    <script src="../../assets/js/components/toast.js"></script>
+    <script src="../../assets/js/components/modal.js"></script>
+    <script src="../../assets/js/teacher/clc-overview.js"></script>
+  </body>
+</html>

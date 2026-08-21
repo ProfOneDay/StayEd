@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StayEd | Profile Settings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/css/main.css" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="../../assets/img/brand/favicon.ico"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="../../assets/img/brand/apple-touch-icon.png"
+    />
+  </head>
+  <body class="st-app" data-page="Profile Settings">
+    <div data-component="layout/sidebar"></div>
+
+    <div class="st-main">
+      <div data-component="layout/navbar"></div>
+
+      <main class="st-content">
+        <div class="st-page-header">
+          <div>
+            <h1 class="st-page-header-title">Profile Settings</h1>
+            <p class="st-page-header-subtitle">
+              Manage your account, preferences, and security.
+            </p>
+          </div>
+        </div>
+
+        <div class="st-dash-grid">
+          <!-- LEFT COLUMN -->
+          <div
+            class="col-4"
+            style="display: flex; flex-direction: column; gap: 16px"
+          >
+            <div class="st-profile-summary-card">
+              <div class="st-profile-photo-wrap">
+                <div class="st-profile-photo" data-profile-photo>T</div>
+                <button
+                  type="button"
+                  class="st-profile-photo-edit"
+                  data-change-photo
+                  aria-label="Change profile photo"
+                >
+                  <span
+                    class="material-symbols-outlined"
+                    style="font-size: 16px"
+                    >photo_camera</span
+                  >
+                </button>
+              </div>
+
+              <h2 class="st-profile-summary-name" data-settings-name>
+                Teacher
+              </h2>
+              <p class="st-profile-summary-role">ALS Teacher</p>
+
+              <div class="st-profile-status-chip">
+                <span class="dot"></span>
+                Active
+              </div>
+
+              <div class="st-profile-summary-details">
+                <div>
+                  <label>Employee ID</label>
+                  <p data-settings-employee-id>ED-ALS-2026-0001</p>
+                </div>
+                <div>
+                  <label>Assigned CLC</label>
+                  <p data-settings-clc>San Felipe Sur CLC</p>
+                </div>
+                <div>
+                  <label>Join Date</label>
+                  <p data-settings-join-date>September 12, 2024</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="st-profile-summary-card" style="align-items: stretch">
+              <h3
+                class="st-panel-title"
+                style="margin-bottom: 16px; text-align: left"
+              >
+                Quick Stats
+              </h3>
+              <div class="st-quick-stats-grid">
+                <div class="st-quick-stat">
+                  <p class="st-quick-stat-value" data-settings-stat-learners>
+                    124
+                  </p>
+                  <p class="st-quick-stat-label">Active Learners</p>
+                </div>
+                <div class="st-quick-stat">
+                  <p
+                    class="st-quick-stat-value st-quick-stat-value--teal"
+                    data-settings-stat-success
+                  >
+                    92%
+                  </p>
+                  <p class="st-quick-stat-label">Intervention Success</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN: Collapsible sections -->
+          <div class="col-8">
+            <!-- Profile Information -->
+            <div
+              class="st-settings-section is-open"
+              data-settings-section="profile-info"
+            >
+              <button
+                type="button"
+                class="st-settings-section-header"
+                data-settings-toggle
+              >
+                <div class="st-settings-section-header-left">
+                  <span class="material-symbols-outlined">person</span>
+                  <h3 class="st-settings-section-title">Profile Information</h3>
+                </div>
+                <span
+                  class="material-symbols-outlined st-settings-section-caret"
+                  >expand_more</span
+                >
+              </button>
+              <div class="st-settings-section-body">
+                <div class="st-settings-section-body-inner">
+                  <form class="st-settings-form-grid" id="profileInfoForm">
+                    <div class="st-settings-field">
+                      <label for="settingsFirstName">First Name</label>
+                      <input
+                        id="settingsFirstName"
+                        type="text"
+                        value="Trisha"
+                      />
+                    </div>
+                    <div class="st-settings-field">
+                      <label for="settingsLastName">Last Name</label>
+                      <input id="settingsLastName" type="text" value="Santos" />
+                    </div>
+                    <div class="st-settings-field st-settings-field--full">
+                      <label for="settingsEmail">Email Address</label>
+                      <input
+                        id="settingsEmail"
+                        type="email"
+                        value="trisha.santos@deped.gov.ph"
+                      />
+                    </div>
+                    <div class="st-settings-field">
+                      <label for="settingsMobile">Mobile Number</label>
+                      <input
+                        id="settingsMobile"
+                        type="tel"
+                        value="+63 917 123 4567"
+                      />
+                    </div>
+                    <div class="st-settings-field">
+                      <label for="settingsPosition">Position</label>
+                      <input
+                        id="settingsPosition"
+                        type="text"
+                        value="ALS Teacher"
+                      />
+                    </div>
+                    <div class="st-settings-field">
+                      <label for="settingsOrg">Organization</label>
+                      <input
+                        id="settingsOrg"
+                        type="text"
+                        value="Department of Education"
+                        readonly
+                        style="
+                          background: var(--st-surface-container-low);
+                          cursor: not-allowed;
+                        "
+                      />
+                    </div>
+                    <div class="st-settings-field">
+                      <label for="settingsClcAssign">CLC Assignment</label>
+                      <select id="settingsClcAssign">
+                        <option selected>San Felipe Sur CLC</option>
+                        <option>Manila North CLC</option>
+                        <option>Quezon City Central CLC</option>
+                      </select>
+                    </div>
+                    <div class="st-settings-form-footer">
+                      <button type="submit" class="st-btn st-btn-primary">
+                        Save Changes
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <!-- Account Settings -->
+            <div class="st-settings-section" data-settings-section="account">
+              <button
+                type="button"
+                class="st-settings-section-header"
+                data-settings-toggle
+              >
+                <div class="st-settings-section-header-left">
+                  <span class="material-symbols-outlined">security</span>
+                  <h3 class="st-settings-section-title">Account Settings</h3>
+                </div>
+                <span
+                  class="material-symbols-outlined st-settings-section-caret"
+                  >expand_more</span
+                >
+              </button>
+              <div class="st-settings-section-body">
+                <div class="st-settings-section-body-inner">
+                  <form
+                    class="st-settings-form-grid"
+                    id="passwordForm"
+                    style="margin-bottom: 24px"
+                  >
+                    <div class="st-settings-field st-settings-field--full">
+                      <label for="currentPassword">Current Password</label>
+                      <input
+                        id="currentPassword"
+                        type="password"
+                        placeholder="••••••••"
+                      />
+                    </div>
+                    <div class="st-settings-field">
+                      <label for="newPassword">New Password</label>
+                      <input
+                        id="newPassword"
+                        type="password"
+                        placeholder="••••••••"
+                      />
+                    </div>
+                    <div class="st-settings-field">
+                      <label for="confirmNewPassword"
+                        >Confirm New Password</label
+                      >
+                      <input
+                        id="confirmNewPassword"
+                        type="password"
+                        placeholder="••••••••"
+                      />
+                    </div>
+                    <div class="st-settings-info-box">
+                      <span class="material-symbols-outlined">info</span>
+                      <p>
+                        Password must be at least 12 characters and include a
+                        mix of letters, numbers, and symbols.
+                      </p>
+                    </div>
+                    <div class="st-settings-form-footer">
+                      <button type="submit" class="st-btn st-btn-primary">
+                        Update Password
+                      </button>
+                    </div>
+                  </form>
+
+                  <div
+                    style="
+                      padding-top: 8px;
+                      border-top: 1px solid rgba(195, 198, 207, 0.2);
+                    "
+                  >
+                    <div class="st-toggle-row">
+                      <div>
+                        <p class="st-toggle-row-title">Email Alerts</p>
+                        <p class="st-toggle-row-sub">
+                          Receive weekly learner progress summaries
+                        </p>
+                      </div>
+                      <label class="st-toggle">
+                        <input
+                          type="checkbox"
+                          data-settings-toggle-pref="email-alerts"
+                        />
+                        <span class="st-toggle-track"
+                          ><span class="st-toggle-thumb"></span
+                        ></span>
+                      </label>
+                    </div>
+
+                    <div class="st-toggle-row">
+                      <div>
+                        <p class="st-toggle-row-title">System Reports</p>
+                        <p class="st-toggle-row-sub">
+                          Notify me when new predictive analytics are ready
+                        </p>
+                      </div>
+                      <label class="st-toggle">
+                        <input
+                          type="checkbox"
+                          data-settings-toggle-pref="system-reports"
+                        />
+                        <span class="st-toggle-track"
+                          ><span class="st-toggle-thumb"></span
+                        ></span>
+                      </label>
+                    </div>
+
+                    <div class="st-toggle-row">
+                      <div>
+                        <p class="st-toggle-row-title">Learner Activity</p>
+                        <p class="st-toggle-row-sub">
+                          Instant alerts when a learner goes inactive
+                        </p>
+                      </div>
+                      <label class="st-toggle">
+                        <input
+                          type="checkbox"
+                          data-settings-toggle-pref="learner-activity"
+                        />
+                        <span class="st-toggle-track"
+                          ><span class="st-toggle-thumb"></span
+                        ></span>
+                      </label>
+                    </div>
+
+                    <div class="st-toggle-row">
+                      <div>
+                        <p class="st-toggle-row-title">
+                          Two-Factor Authentication
+                        </p>
+                        <p class="st-toggle-row-sub">
+                          Require a verification code at login (UI only for now)
+                        </p>
+                      </div>
+                      <label class="st-toggle">
+                        <input
+                          type="checkbox"
+                          data-settings-toggle-pref="2fa"
+                        />
+                        <span class="st-toggle-track"
+                          ><span class="st-toggle-thumb"></span
+                        ></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div
+              class="st-settings-section is-open st-settings-section--danger"
+              data-settings-section="danger"
+            >
+              <div class="st-settings-section-header" style="cursor: default">
+                <div class="st-settings-section-header-left">
+                  <span class="material-symbols-outlined">report_problem</span>
+                  <h3 class="st-settings-section-title">Danger Zone</h3>
+                </div>
+              </div>
+              <div class="st-settings-section-body" style="max-height: 400px">
+                <div class="st-settings-section-body-inner">
+                  <div
+                    style="
+                      display: flex;
+                      flex-wrap: wrap;
+                      justify-content: space-between;
+                      align-items: center;
+                      gap: 16px;
+                      padding: 12px 0;
+                      border-bottom: 1px solid rgba(195, 198, 207, 0.2);
+                    "
+                  >
+                    <div>
+                      <p class="st-toggle-row-title">Sign Out from System</p>
+                      <p class="st-toggle-row-sub">
+                        End your current session across all devices.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      class="st-btn st-btn-outline"
+                      data-st-logout
+                    >
+                      Log Out
+                    </button>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      flex-wrap: wrap;
+                      justify-content: space-between;
+                      align-items: center;
+                      gap: 16px;
+                      padding: 16px 0 4px;
+                    "
+                  >
+                    <div>
+                      <p
+                        class="st-toggle-row-title"
+                        style="color: var(--st-error)"
+                      >
+                        Deactivate Account
+                      </p>
+                      <p class="st-toggle-row-sub">
+                        Once deactivated, you will lose access to administrative
+                        tools.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      class="st-btn"
+                      style="background: var(--st-error); color: #fff"
+                      data-deactivate-account
+                    >
+                      Deactivate
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <div data-component="layout/footer"></div>
+    </div>
+
+    <div data-component="layout/toast"></div>
+    <div data-component="layout/modal"></div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/core/utils.js"></script>
+    <script src="../../assets/js/core/router.js"></script>
+    <script src="../../assets/js/core/api.js"></script>
+    <script src="../../assets/js/core/auth.js"></script>
+    <script src="../../assets/js/core/guards.js"></script>
+    <script src="../../assets/js/core/layout.js"></script>
+    <script src="../../assets/js/core/unsaved-changes.js"></script>
+    <script src="../../assets/js/core/app.js"></script>
+    <script src="../../assets/js/components/component-loader.js"></script>
+    <script src="../../assets/js/components/toast.js"></script>
+    <script src="../../assets/js/components/modal.js"></script>
+    <script src="../../assets/js/teacher/profile-settings.js"></script>
+  </body>
+</html>

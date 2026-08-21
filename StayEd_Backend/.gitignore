@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.py[cod]
+.env
+.pytest_cache/
+models/*.rds
+models/*.pkl
+models/*.joblib
+backend_run.log
+backend_run.err.log

@@ -1,0 +1,212 @@
+====================================================================
+ StayEd - First-Time Setup Guide
+====================================================================
+
+This guide walks you through setting up StayEd on your computer for
+the very first time. After you've done this once, running the system
+again later is just one command (see "EVERY TIME AFTER THIS" at the
+bottom).
+
+
+--------------------------------------------------------------------
+STEP 0: WHAT YOU NEED INSTALLED FIRST
+--------------------------------------------------------------------
+
+Before doing anything, make sure these are installed on your Windows
+computer:
+
+  1. Python 3.10 or newer
+     Check by opening PowerShell and running:  python --version
+     If that fails, download it from https://www.python.org/downloads/
+     During install, tick "Add Python to PATH".
+
+  2. Docker Desktop
+     Download from https://www.docker.com/products/docker-desktop/
+     Install it, then open it at least once so it finishes setting up.
+     Docker Desktop must be OPEN AND RUNNING every time you use StayEd
+     (look for the whale icon in your system tray).
+
+  3. VS Code (optional, but recommended)
+     https://code.visualstudio.com/
+
+
+--------------------------------------------------------------------
+STEP 1: OPEN THE PROJECT
+--------------------------------------------------------------------
+
+  1. Open VS Code.
+  2. File > Open Folder > select the StayEd-1 folder.
+  3. Open a terminal inside VS Code: Terminal > New Terminal.
+     Make sure it says "PowerShell" (it usually does by default on
+     Windows).
+
+
+--------------------------------------------------------------------
+STEP 2: SET UP THE BACKEND (ONE TIME ONLY)
+--------------------------------------------------------------------
+
+In the PowerShell terminal, run these commands one at a time:
+
+  cd StayEd_Backend
+  py -m venv .venv
+  .\.venv\Scripts\Activate.ps1
+  pip install -r requirements.txt
+
+What this does:
+  - Creates a private Python environment just for this project
+    (the ".venv" folder)
+  - Turns it on (you'll see "(.venv)" appear at the start of your
+    terminal prompt)
+  - Installs everything the backend needs to run (Flask, the
+    database driver, etc.)
+
+This step only needs to be done once. You do NOT need to repeat it
+every time you run the app later.
+
+
+--------------------------------------------------------------------
+STEP 3: CREATE YOUR .env FILE (ONE TIME ONLY)
+--------------------------------------------------------------------
+
+Still inside the StayEd_Backend folder, run:
+
+  Copy-Item .env.example .env
+
+This creates a file called ".env" with the settings the backend needs
+(database connection info, secret keys, etc.). The default values
+already match what this guide sets up, so you don't need to edit
+anything right now.
+
+(".env" is intentionally left out of Git / version control, so this
+step has to be done on every machine you set the project up on.)
+
+
+--------------------------------------------------------------------
+STEP 4: MAKE SURE DOCKER DESKTOP IS RUNNING
+--------------------------------------------------------------------
+
+Open Docker Desktop and wait for it to say it's running (the whale
+icon in your system tray should be steady, not animating/loading).
+
+You do NOT need to manually create a database container yourself -
+the backend does this automatically the first time it starts (see
+Step 5). Just make sure Docker Desktop itself is open.
+
+
+--------------------------------------------------------------------
+STEP 5: RUN THE SYSTEM FOR THE FIRST TIME
+--------------------------------------------------------------------
+
+Go back to the main project folder (StayEd-1, the one with
+"start.ps1" in it) and run:
+
+  cd ..
+  .\start.ps1
+
+This single command:
+  1. Opens a new window and starts the backend server. The backend
+     will automatically:
+       - Create a Docker container called "stayed-postgres" running
+         PostgreSQL (this may take a minute or two the very first
+         time, while Docker downloads the PostgreSQL image)
+       - Create the "stayed_db" database
+       - Build all the tables the app needs
+     You'll see lines starting with "[db-bootstrap]" in that window
+     showing this happening. Wait until you see a line that says
+     "Running on http://127.0.0.1:5000"
+  2. Opens a second window and starts the frontend (the website
+     itself) on http://localhost:5500
+
+Leave BOTH windows open and running in the background. Don't close
+them, and you don't need to type anything into them.
+
+
+--------------------------------------------------------------------
+STEP 6: ADD SOME DEMO DATA (RECOMMENDED FOR FIRST-TIME SETUP)
+--------------------------------------------------------------------
+
+The database starts empty (no CLCs, learners, or demo accounts) the
+very first time. To load some sample data to explore the app with,
+open a NEW PowerShell terminal (leave the other two running) and run:
+
+  cd StayEd_Backend
+  .\.venv\Scripts\Activate.ps1
+  python seed_demo.py
+
+This creates:
+  - A demo teacher account: teacher@stayed.com / 12345678
+  - A demo admin account:   admin@stayed.com / 12345678
+  - Some sample learners and CLC records to look at
+
+You only need to run this once. If you run it again later, it's
+safe - it won't create duplicates.
+
+
+--------------------------------------------------------------------
+STEP 7: OPEN THE APP
+--------------------------------------------------------------------
+
+Open your web browser (Chrome, Edge, etc.) and go to:
+
+  http://localhost:5500
+
+Log in with one of the demo accounts from Step 6:
+  Teacher:  teacher@stayed.com   / 12345678
+  Admin:    admin@stayed.com     / 12345678
+
+If the login page loads and you can sign in, everything is working.
+
+
+--------------------------------------------------------------------
+HOW TO STOP THE SYSTEM
+--------------------------------------------------------------------
+
+Close the two black PowerShell windows that start.ps1 opened (or
+click into each one and press Ctrl+C). Docker Desktop can stay open;
+the database container will just sit idle until you start the app
+again.
+
+
+====================================================================
+ EVERY TIME AFTER THIS (you already did Steps 1-4 once)
+====================================================================
+
+  1. Make sure Docker Desktop is open.
+  2. In the StayEd-1 folder, run:
+       .\start.ps1
+  3. Open your browser to http://localhost:5500
+
+
+====================================================================
+ TROUBLESHOOTING
+====================================================================
+
+"docker: command not found" or the backend window says "Docker
+isn't available or the Docker daemon isn't running"
+  -> Docker Desktop isn't open. Open it and wait for it to fully
+     start, then run .\start.ps1 again.
+
+Nothing happens when you paste a URL like http://127.0.0.1:5000 into
+PowerShell
+  -> URLs go in your web BROWSER's address bar, not the PowerShell
+     terminal. The terminal windows just need to stay open quietly
+     in the background.
+
+".\start.ps1 cannot be loaded because running scripts is disabled"
+  -> Open PowerShell as Administrator and run this once:
+       Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+     Then try .\start.ps1 again in a normal (non-admin) window.
+
+"Backend virtual environment not found at StayEd_Backend\.venv"
+  -> You skipped Step 2. Go back and run the venv setup commands.
+
+The site loads but nothing works / login fails with a server error
+  -> Check the backend PowerShell window for red error text. Most
+     often this means Docker Desktop wasn't running when the backend
+     started - close the window, make sure Docker Desktop is open,
+     and run .\start.ps1 again.
+
+Port 5433 or 5000 or 5500 already in use
+  -> Something else on your computer is already using that port.
+     Close other running copies of StayEd (extra PowerShell windows
+     from a previous session), or restart your computer.

@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StayEd | Import Learners</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/css/main.css" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="../../assets/img/brand/favicon.ico"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="../../assets/img/brand/apple-touch-icon.png"
+    />
+  </head>
+  <body class="st-app" data-page="Import Learners">
+    <div data-component="layout/sidebar"></div>
+
+    <div class="st-main">
+      <div data-component="layout/navbar"></div>
+
+      <main class="st-content">
+        <div class="st-page-header">
+          <div>
+            <h1 class="st-page-header-title">Import Learners</h1>
+            <p class="st-page-header-subtitle">
+              Upload a CSV or Excel masterlist to enroll many learners at once.
+            </p>
+          </div>
+          <div class="st-page-header-actions">
+            <a href="learner-records.html" class="st-btn st-btn-outline">
+              <span class="material-symbols-outlined">arrow_back</span>
+              Back
+            </a>
+            <button
+              type="button"
+              class="st-btn st-btn-outline"
+              data-download-template
+            >
+              <span class="material-symbols-outlined">download</span>
+              Download Template
+            </button>
+          </div>
+        </div>
+
+        <!-- STATE 1: Upload zone -->
+        <section id="importUploadSection" class="st-panel st-panel-pad">
+          <div class="st-upload-zone" id="importDropZone">
+            <div class="st-upload-zone-icon">
+              <span class="material-symbols-outlined">cloud_upload</span>
+            </div>
+            <h3>Drag &amp; drop your learner masterlist here</h3>
+            <p>or click browse to select a CSV or Excel file</p>
+            <span class="st-upload-zone-hint"
+              >Supported formats: .csv, .xlsx (max 5MB)</span
+            >
+            <button
+              type="button"
+              id="importBrowseBtn"
+              class="st-btn st-btn-outline st-mt-sm"
+            >
+              <span class="material-symbols-outlined">folder_open</span>
+              Browse Files
+            </button>
+            <input
+              type="file"
+              id="importFileInput"
+              accept=".csv,.xlsx,.xls"
+              hidden
+              aria-label="Choose learner masterlist file"
+            />
+          </div>
+
+          <div class="st-upload-file st-hidden st-mt-md" id="importFileCard">
+            <div class="st-upload-file-icon">
+              <span class="material-symbols-outlined">description</span>
+            </div>
+            <div class="st-upload-file-meta">
+              <h4 id="importFileName">filename.csv</h4>
+              <p id="importFileSize">0 KB</p>
+              <div class="st-upload-progress-track">
+                <div
+                  class="st-upload-progress-fill"
+                  id="importProgressFill"
+                ></div>
+              </div>
+              <p class="st-upload-status-text" id="importStatusText">
+                Ready to validate
+              </p>
+            </div>
+            <button
+              type="button"
+              id="importPreviewBtn"
+              class="st-btn st-btn-primary"
+              disabled
+            >
+              Preview Import
+            </button>
+          </div>
+        </section>
+
+        <!-- STATE 2: Validation preview -->
+        <div id="importPreviewSection" class="st-hidden">
+          <div class="st-import-preview-summary">
+            <span class="st-import-preview-chip st-import-preview-chip--valid">
+              <span class="material-symbols-outlined" style="font-size: 16px"
+                >check_circle</span
+              >
+              <span data-preview-valid-count>0</span> Valid
+            </span>
+            <span
+              class="st-import-preview-chip st-import-preview-chip--duplicate"
+            >
+              <span class="material-symbols-outlined" style="font-size: 16px"
+                >content_copy</span
+              >
+              <span data-preview-duplicate-count>0</span> Duplicates
+            </span>
+            <span class="st-import-preview-chip st-import-preview-chip--error">
+              <span class="material-symbols-outlined" style="font-size: 16px"
+                >error</span
+              >
+              <span data-preview-error-count>0</span> Errors
+            </span>
+          </div>
+
+          <div class="st-panel">
+            <div class="st-table-scroll">
+              <table class="st-data-table st-import-preview-table">
+                <thead>
+                  <tr>
+                    <th>LRN</th>
+                    <th>Last Name</th>
+                    <th>First Name</th>
+                    <th>Middle Name</th>
+                    <th>Sex</th>
+                    <th>Date of Birth</th>
+                    <th>Learning Modality</th>
+                    <th>Learning Level</th>
+                    <th>Re-enrollee</th>
+                    <th>Employment Status</th>
+                    <th>Distance from CLC</th>
+                    <th>Civil Status</th>
+                    <th>Contact Number</th>
+                    <th>Guardian Contact Number</th>
+                    <th>Status</th>
+                    <th>Issue</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody data-preview-body></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="st-clc-form-footer st-mt-md">
+            <span
+              class="st-clc-form-footer-left"
+              style="font-size: 13px; color: var(--st-on-surface-variant)"
+            >
+              Duplicate and error rows will be skipped automatically.
+            </span>
+            <button
+              type="button"
+              class="st-btn st-btn-outline"
+              data-preview-cancel
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="st-btn st-btn-primary"
+              data-preview-confirm
+            >
+              <span class="material-symbols-outlined">upload</span>
+              Import Valid Records
+            </button>
+          </div>
+        </div>
+
+        <!-- STATE 3: Success -->
+        <div
+          id="importSuccessSection"
+          class="st-panel st-panel-pad st-hidden st-clc-success-panel"
+        >
+          <div class="setup-complete-icon st-clc-success-icon">
+            <span class="material-symbols-outlined">check_circle</span>
+          </div>
+          <h2 class="st-clc-success-title">Import Complete!</h2>
+          <p class="st-clc-success-text">
+            Learner records have been successfully added to the system.
+          </p>
+
+          <div class="st-import-success-stats">
+            <div class="st-import-success-stat">
+              <p class="st-import-success-stat-value" data-success-total>--</p>
+              <p class="st-import-success-stat-label">Total Rows</p>
+            </div>
+            <div class="st-import-success-stat">
+              <p
+                class="st-import-success-stat-value"
+                style="color: var(--st-risk-low)"
+                data-success-imported
+              >
+                --
+              </p>
+              <p class="st-import-success-stat-label">Imported</p>
+            </div>
+            <div class="st-import-success-stat">
+              <p
+                class="st-import-success-stat-value"
+                style="color: var(--st-risk-moderate)"
+                data-success-duplicates
+              >
+                --
+              </p>
+              <p class="st-import-success-stat-label">Duplicates Skipped</p>
+            </div>
+            <div class="st-import-success-stat">
+              <p
+                class="st-import-success-stat-value"
+                style="color: var(--st-risk-high)"
+                data-success-errors
+              >
+                --
+              </p>
+              <p class="st-import-success-stat-label">Errors Skipped</p>
+            </div>
+          </div>
+
+          <div class="st-clc-success-actions">
+            <a href="learner-records.html" class="st-btn st-btn-primary"
+              >Go to Learner Records</a
+            >
+            <button
+              type="button"
+              class="st-btn st-btn-outline"
+              data-import-another
+            >
+              Import Another File
+            </button>
+          </div>
+        </div>
+      </main>
+
+      <div data-component="layout/footer"></div>
+    </div>
+
+    <div data-component="layout/toast"></div>
+    <div data-component="layout/modal"></div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/core/utils.js"></script>
+    <script src="../../assets/js/core/router.js"></script>
+    <script src="../../assets/js/core/api.js"></script>
+    <script src="../../assets/js/core/auth.js"></script>
+    <script src="../../assets/js/core/guards.js"></script>
+    <script src="../../assets/js/core/layout.js"></script>
+    <script src="../../assets/js/core/app.js"></script>
+    <script src="../../assets/js/components/component-loader.js"></script>
+    <script src="../../assets/js/components/toast.js"></script>
+    <script src="../../assets/js/components/modal.js"></script>
+    <script src="../../assets/js/teacher/learner-import.js"></script>
+  </body>
+</html>

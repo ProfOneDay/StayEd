@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StayEd | Add New CLC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/css/main.css" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="../../assets/img/brand/favicon.ico"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="../../assets/img/brand/apple-touch-icon.png"
+    />
+  </head>
+  <body class="st-app" data-page="Add New CLC">
+    <div data-component="layout/sidebar"></div>
+
+    <div class="st-main">
+      <div data-component="layout/navbar"></div>
+
+      <main class="st-content">
+        <div class="st-clc-form-shell">
+          <form id="clcDetailsForm" class="st-clc-form-card" novalidate>
+            <div class="st-clc-form-head">
+              <h1>Add New CLC</h1>
+              <p>Register a new Community Learning Center to the system.</p>
+            </div>
+
+            <div class="st-clc-form-body">
+              <!-- CLC Information -->
+              <div>
+                <div class="st-clc-form-section-title">
+                  <span class="material-symbols-outlined">school</span>
+                  CLC Information
+                </div>
+
+                <div class="st-clc-form-grid">
+                  <div class="st-clc-field">
+                    <label for="clcMunicipality"
+                      >Municipality <span class="required">*</span></label
+                    >
+                    <select id="clcMunicipality" required>
+                      <option value="" disabled selected>
+                        Select Municipality
+                      </option>
+                      <option>Quezon City</option>
+                      <option>Manila</option>
+                      <option>Davao City</option>
+                      <option>Cebu City</option>
+                      <option>Pasig</option>
+                      <option>Zamboanga City</option>
+                    </select>
+                    <span class="st-clc-field-error"
+                      >Please select a municipality.</span
+                    >
+                  </div>
+
+                  <div class="st-clc-field">
+                    <label for="clcName"
+                      >CLC Name <span class="required">*</span></label
+                    >
+                    <input
+                      id="clcName"
+                      type="text"
+                      placeholder="Enter CLC Name"
+                      required
+                    />
+                    <span class="st-clc-field-error"
+                      >CLC name is required.</span
+                    >
+                  </div>
+
+                  <div class="st-clc-field">
+                    <label for="clcSchoolYear">School Year</label>
+                    <select id="clcSchoolYear">
+                      <option>2023-2024</option>
+                      <option selected>2024-2025</option>
+                      <option>2025-2026</option>
+                    </select>
+                  </div>
+
+                  <div class="st-clc-field st-clc-field--full">
+                    <label for="clcLevel"
+                      >Learning Level <span class="required">*</span></label
+                    >
+                    <select id="clcLevel" required>
+                      <option value="" disabled selected>
+                        Select Learning Level
+                      </option>
+                      <option>BLP (Basic Literacy Program)</option>
+                      <option>Elementary</option>
+                      <option>Junior High School</option>
+                      <option>Senior High School</option>
+                    </select>
+                    <span class="st-clc-field-error"
+                      >Please select a learning level.</span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <!-- Contact Information -->
+              <div>
+                <div class="st-clc-form-section-title">
+                  <span class="material-symbols-outlined">call</span>
+                  Contact Information
+                </div>
+
+                <div class="st-clc-form-grid">
+                  <div class="st-clc-field">
+                    <label for="clcPhone"
+                      >Contact Number <span class="required">*</span></label
+                    >
+                    <input
+                      id="clcPhone"
+                      type="tel"
+                      placeholder="09XX XXX XXXX"
+                      required
+                    />
+                    <span class="st-clc-field-error"
+                      >Contact number is required.</span
+                    >
+                  </div>
+
+                  <div class="st-clc-field">
+                    <label for="clcEmail">Email Address</label>
+                    <input
+                      id="clcEmail"
+                      type="email"
+                      placeholder="clc.name@deped.gov.ph"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Address -->
+              <div>
+                <div class="st-clc-form-section-title">
+                  <span class="material-symbols-outlined">location_on</span>
+                  Address
+                </div>
+
+                <div class="st-clc-form-grid">
+                  <div class="st-clc-field st-clc-field--full">
+                    <label for="clcAddress"
+                      >Street / Barangay <span class="required">*</span></label
+                    >
+                    <textarea
+                      id="clcAddress"
+                      rows="2"
+                      placeholder="Unit/Street, Barangay"
+                      required
+                    ></textarea>
+                    <span class="st-clc-field-error">Address is required.</span>
+                  </div>
+
+                  <div class="st-clc-field">
+                    <label for="clcProvince">Province</label>
+                    <input
+                      id="clcProvince"
+                      type="text"
+                      placeholder="Enter Province"
+                    />
+                  </div>
+
+                  <div class="st-clc-field">
+                    <label for="clcZip">ZIP Code</label>
+                    <input id="clcZip" type="text" placeholder="e.g. 1100" />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Coordinator -->
+              <div>
+                <div class="st-clc-form-section-title">
+                  <span class="material-symbols-outlined">badge</span>
+                  Coordinator
+                </div>
+
+                <div class="st-clc-form-grid">
+                  <div class="st-clc-field">
+                    <label for="clcCoordinatorName"
+                      >Coordinator Name <span class="required">*</span></label
+                    >
+                    <input
+                      id="clcCoordinatorName"
+                      type="text"
+                      placeholder="Full name"
+                      required
+                    />
+                    <span class="st-clc-field-error"
+                      >Coordinator name is required.</span
+                    >
+                  </div>
+
+                  <div class="st-clc-field">
+                    <label for="clcCoordinatorEmail">Coordinator Email</label>
+                    <input
+                      id="clcCoordinatorEmail"
+                      type="email"
+                      placeholder="coordinator@deped.gov.ph"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="st-clc-note">
+                <span class="material-symbols-outlined">info</span>
+                <div>
+                  <p class="st-clc-note-title">Administrative Note</p>
+                  <p class="st-clc-note-text">
+                    Once a CLC is registered, it will be visible in the regional
+                    overview. Learners can be enrolled immediately after
+                    creation.
+                  </p>
+                </div>
+              </div>
+
+              <div class="st-clc-form-footer">
+                <span class="st-clc-form-footer-left"
+                  >Step 1 of 2 — CLC Details</span
+                >
+                <a
+                  href="clc-overview.html"
+                  class="st-btn st-btn-outline"
+                  id="clcCancelBtn"
+                  >Cancel</a
+                >
+                <button
+                  type="submit"
+                  class="st-btn st-btn-primary"
+                  id="clcNextBtn"
+                >
+                  Next
+                  <span class="material-symbols-outlined">arrow_forward</span>
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </main>
+
+      <div data-component="layout/footer"></div>
+    </div>
+
+    <div data-component="layout/toast"></div>
+    <div data-component="layout/modal"></div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/core/utils.js"></script>
+    <script src="../../assets/js/core/router.js"></script>
+    <script src="../../assets/js/core/api.js"></script>
+    <script src="../../assets/js/core/auth.js"></script>
+    <script src="../../assets/js/core/guards.js"></script>
+    <script src="../../assets/js/core/layout.js"></script>
+    <script src="../../assets/js/core/unsaved-changes.js"></script>
+    <script src="../../assets/js/core/app.js"></script>
+    <script src="../../assets/js/components/component-loader.js"></script>
+    <script src="../../assets/js/components/toast.js"></script>
+    <script src="../../assets/js/components/modal.js"></script>
+    <script src="../../assets/js/teacher/clc-details.js"></script>
+  </body>
+</html>

@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StayEd | Learner Records</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/css/main.css" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="../../assets/img/brand/favicon.ico"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="../../assets/img/brand/apple-touch-icon.png"
+    />
+  </head>
+  <body class="st-app" data-page="Learner Records">
+    <div data-component="layout/sidebar"></div>
+
+    <div class="st-main">
+      <div data-component="layout/navbar"></div>
+
+      <main class="st-content">
+        <div class="st-page-header">
+          <div>
+            <h1 class="st-page-header-title">Learner Records</h1>
+            <p class="st-page-header-subtitle" data-records-subtitle>
+              Record learner attendance, module monitoring, consultations, and
+              teacher remarks across all ALS learning modalities.
+            </p>
+          </div>
+          <div class="st-page-header-actions">
+            <a href="learner-import.html" class="st-btn st-btn-outline">
+              <span class="material-symbols-outlined">upload_file</span>
+              Import Students
+            </a>
+            <a href="learner-enroll.html" class="st-btn st-btn-outline">
+              <span class="material-symbols-outlined">person_add</span>
+              Enroll Student
+            </a>
+            <button
+              type="button"
+              class="st-btn st-btn-primary"
+              data-records-save
+            >
+              <span class="material-symbols-outlined">save</span>
+              Save Changes
+            </button>
+          </div>
+        </div>
+
+        <!-- Class context banner: shows which class this Learner
+                 Records page belongs to when reached via Class
+                 Management -> Open Class (see learner-records-hub.js
+                 loadClassContext()). Hidden when there's no ?class=
+                 in the URL, e.g. when linked to directly. -->
+        <div
+          class="st-class-context-banner st-hidden"
+          data-class-context-banner
+        >
+          <span class="material-symbols-outlined">school</span>
+          <div class="st-class-context-banner-text">
+            <span class="st-class-context-banner-name" data-class-context-name
+              >—</span
+            >
+            <span class="st-class-context-banner-meta" data-class-context-meta
+              >—</span
+            >
+          </div>
+          <a
+            href="class-management.html"
+            class="st-class-context-banner-switch"
+          >
+            Switch Class
+            <span class="material-symbols-outlined">swap_horiz</span>
+          </a>
+        </div>
+
+        <!-- Shared filter bar (persists across subtab switches) -->
+        <div class="st-filter-bar">
+          <div class="st-filter-row" style="align-items: center">
+            <div class="st-search" style="flex: 2; min-width: 240px">
+              <span class="material-symbols-outlined">search</span>
+              <input
+                type="text"
+                placeholder="Search learner, LRN, or learning strand..."
+                data-records-search
+                aria-label="Search learner records"
+              />
+            </div>
+
+            <select data-records-filter-risk aria-label="Filter by risk level">
+              <option value="">All Risk Levels</option>
+              <option value="High">High Risk</option>
+              <option value="Moderate">Moderate Risk</option>
+              <option value="Low">Low Risk</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Modality subtabs -->
+        <div
+          class="st-modality-tabs"
+          role="tablist"
+          aria-label="Learning modality"
+        >
+          <button
+            type="button"
+            class="st-modality-tab is-active"
+            data-modality-tab="modular"
+            role="tab"
+            aria-selected="true"
+          >
+            <span class="material-symbols-outlined">grid_view</span>
+            Modular
+          </button>
+          <button
+            type="button"
+            class="st-modality-tab"
+            data-modality-tab="face-to-face"
+            role="tab"
+            aria-selected="false"
+          >
+            <span class="material-symbols-outlined">groups</span>
+            Face-to-Face
+          </button>
+          <button
+            type="button"
+            class="st-modality-tab"
+            data-modality-tab="blended"
+            role="tab"
+            aria-selected="false"
+          >
+            <span class="material-symbols-outlined">dashboard</span>
+            Blended
+          </button>
+        </div>
+
+        <!-- MODULAR PANEL -->
+        <div class="st-modality-panel is-active" data-modality-panel="modular">
+          <div class="st-panel col-12">
+            <div class="st-table-scroll st-table-scroll--sticky">
+              <table class="st-data-table">
+                <thead>
+                  <tr>
+                    <th>LRN</th>
+                    <th>Learner</th>
+                    <th>Modules</th>
+                    <th>Latest Learner Activity</th>
+                    <th>Risk Level</th>
+                    <th class="is-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody data-modular-body>
+                  <tr>
+                    <td colspan="6" class="st-table-empty-cell">Loading…</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="st-pagination">
+              <span class="st-pagination-info" data-modular-info
+                >Showing 0 learners</span
+              >
+              <div class="st-pagination-controls" data-modular-pages></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FACE-TO-FACE PANEL -->
+        <div class="st-modality-panel" data-modality-panel="face-to-face">
+          <div class="st-panel col-12">
+            <div class="st-table-scroll st-table-scroll--sticky">
+              <table class="st-data-table">
+                <thead>
+                  <tr>
+                    <th>LRN</th>
+                    <th>Learner</th>
+                    <th>Modules</th>
+                    <th>Latest Consultation</th>
+                    <th>Risk Level</th>
+                    <th class="is-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody data-f2f-body>
+                  <tr>
+                    <td colspan="6" class="st-table-empty-cell">Loading…</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="st-pagination">
+              <span class="st-pagination-info" data-f2f-info
+                >Showing 0 learners</span
+              >
+              <div class="st-pagination-controls" data-f2f-pages></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BLENDED PANEL -->
+        <div class="st-modality-panel" data-modality-panel="blended">
+          <div class="st-panel col-12">
+            <div class="st-table-scroll st-table-scroll--sticky">
+              <table class="st-data-table">
+                <thead>
+                  <tr>
+                    <th>LRN</th>
+                    <th>Learner</th>
+                    <th>Modules</th>
+                    <th>Latest Learning Activity</th>
+                    <th>Risk Level</th>
+                    <th class="is-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody data-blended-body>
+                  <tr>
+                    <td colspan="6" class="st-table-empty-cell">Loading…</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="st-pagination">
+              <span class="st-pagination-info" data-blended-info
+                >Showing 0 learners</span
+              >
+              <div class="st-pagination-controls" data-blended-pages></div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <div data-component="layout/footer"></div>
+    </div>
+
+    <div data-component="layout/toast"></div>
+    <div data-component="layout/modal"></div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/core/utils.js"></script>
+    <script src="../../assets/js/core/router.js"></script>
+    <script src="../../assets/js/core/api.js"></script>
+    <script src="../../assets/js/core/auth.js"></script>
+    <script src="../../assets/js/core/guards.js"></script>
+    <script src="../../assets/js/core/layout.js"></script>
+    <script src="../../assets/js/core/skeletons.js"></script>
+    <script src="../../assets/js/core/app.js"></script>
+    <script src="../../assets/js/components/component-loader.js"></script>
+    <script src="../../assets/js/components/toast.js"></script>
+    <script src="../../assets/js/components/modal.js"></script>
+    <script src="../../assets/js/teacher/learner-records-hub.js"></script>
+    <script src="../../assets/js/teacher/module-management-modal.js"></script>
+    <script src="../../assets/js/teacher/schedule-attendance-modal.js"></script>
+    <script src="../../assets/js/teacher/consultation-modal.js"></script>
+  </body>
+</html>

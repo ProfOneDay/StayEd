@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d2846"/>
+      <stop offset="0.55" stop-color="#12355b"/>
+      <stop offset="1" stop-color="#0a4f52"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="38%" r="60%">
+      <stop offset="0" stop-color="#8df0ee" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#8df0ee" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="56" height="56" patternUnits="userSpaceOnUse">
+      <path d="M56 0H0V56" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#sky)"/>
+  <rect width="1600" height="1000" fill="url(#grid)"/>
+  <rect width="1600" height="1000" fill="url(#glow)"/>
+  <!-- Abstract knowledge nodes -->
+  <g stroke="#8df0ee" stroke-opacity="0.18" stroke-width="1.5" fill="none">
+    <path d="M180 720 L360 560 L520 660 L700 470 L900 600 L1120 420 L1320 560"/>
+    <path d="M120 300 L300 380 L480 260 L680 360 L860 220 L1080 340 L1280 240 L1460 360"/>
+  </g>
+  <g fill="#73d6d4" fill-opacity="0.35">
+    <circle cx="360" cy="560" r="5"/><circle cx="700" cy="470" r="5"/>
+    <circle cx="1120" cy="420" r="5"/><circle cx="480" cy="260" r="5"/>
+    <circle cx="860" cy="220" r="5"/><circle cx="1280" cy="240" r="5"/>
+  </g>
+  <!-- Soft floating cards suggesting data/learners -->
+  <g opacity="0.10" fill="#ffffff">
+    <rect x="200" y="430" width="150" height="96" rx="10"/>
+    <rect x="1180" y="640" width="150" height="96" rx="10"/>
+    <rect x="760" y="720" width="180" height="110" rx="10"/>
+  </g>
+  <!-- Large translucent graduation cap motif -->
+  <g transform="translate(1180 250)" fill="#aac8f6" fill-opacity="0.10">
+    <path d="M0 40 L120 0 L240 40 L120 80 Z"/>
+    <path d="M40 66 L40 120 Q120 150 200 120 L200 66 L120 96 Z"/>
+  </g>
+</svg>

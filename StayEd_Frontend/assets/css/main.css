@@ -1,0 +1,21 @@
+@import url("./variables.css");
+
+@import url("./components.css");
+
+@import url("./layout.css");
+
+@import url("./pages/teacher/auth.css");
+@import url("./pages/teacher/dashboard.css");
+@import url("./pages/teacher/setup.css");
+@import url("./pages/teacher/learner-records.css");
+@import url("./pages/teacher/data-upload.css");
+@import url("./pages/teacher/clc.css");
+@import url("./pages/teacher/learner-profile.css");
+@import url("./pages/teacher/profile-settings.css");
+@import url("./pages/teacher/notifications.css");
+@import url("./pages/teacher/learner-records-hub.css");
+@import url("./pages/teacher/system-settings.css");
+@import url("./pages/admin/admin-dashboard.css");
+@import url("./pages/admin/admin-clc-management.css");
+@import url("./pages/admin/admin-settings.css");
+@import url("./pages/admin/admin-user-management.css");

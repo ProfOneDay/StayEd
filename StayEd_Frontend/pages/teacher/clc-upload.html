@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StayEd | Upload Learner Records</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/css/main.css" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="../../assets/img/brand/favicon.ico"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="../../assets/img/brand/apple-touch-icon.png"
+    />
+  </head>
+  <body class="st-app" data-page="Upload Records">
+    <div data-component="layout/sidebar"></div>
+
+    <div class="st-main">
+      <div data-component="layout/navbar"></div>
+
+      <main class="st-content">
+        <div class="st-page-header">
+          <div>
+            <h1 class="st-page-header-title">Upload Learner Records</h1>
+            <p class="st-page-header-subtitle">
+              Import the initial learner masterlist for this Community Learning
+              Center.
+            </p>
+          </div>
+        </div>
+
+        <!-- STATE 1: Drag-and-drop upload zone -->
+        <section id="clcUploadZoneSection" class="st-panel st-panel-pad">
+          <div class="st-upload-zone" id="clcDropZone">
+            <div class="st-upload-zone-icon">
+              <span class="material-symbols-outlined">cloud_upload</span>
+            </div>
+            <h3>Drag &amp; drop your learner masterlist here</h3>
+            <p>or click browse to select a file from your computer</p>
+            <span class="st-upload-zone-hint"
+              >Supported formats: .csv, .xlsx (max 5MB)</span
+            >
+            <button
+              type="button"
+              id="clcBrowseBtn"
+              class="st-btn st-btn-outline st-mt-sm"
+            >
+              <span class="material-symbols-outlined">folder_open</span>
+              Browse Files
+            </button>
+            <input
+              type="file"
+              id="clcFileInput"
+              accept=".csv,.xlsx,.xls"
+              hidden
+              aria-label="Choose learner masterlist file"
+            />
+          </div>
+
+          <div class="st-upload-file st-hidden st-mt-md" id="clcFileCard">
+            <div class="st-upload-file-icon">
+              <span class="material-symbols-outlined">description</span>
+            </div>
+            <div class="st-upload-file-meta">
+              <h4 id="clcFileName">filename.csv</h4>
+              <p id="clcFileSize">0 KB</p>
+              <div class="st-upload-progress-track">
+                <div class="st-upload-progress-fill" id="clcProgressFill"></div>
+              </div>
+              <p class="st-upload-status-text" id="clcUploadStatus">
+                Ready to import
+              </p>
+            </div>
+            <button
+              type="button"
+              id="clcContinueBtn"
+              class="st-btn st-btn-primary"
+              disabled
+            >
+              Continue
+            </button>
+          </div>
+        </section>
+
+        <!-- STATE 2: CLC Enrollment / confirmation (matches design reference) -->
+        <div id="clcConfirmSection" class="st-clc-upload-grid st-hidden">
+          <!-- Main form card -->
+          <div class="st-panel st-panel-pad">
+            <div class="st-panel-head st-items-center">
+              <div>
+                <h3 class="st-panel-title">CLC Enrollment Details</h3>
+                <p class="st-panel-subtitle">
+                  Verify information and finalize batch upload.
+                </p>
+              </div>
+              <span class="st-clc-status-chip">
+                <span class="dot"></span>
+                Ready for Review
+              </span>
+            </div>
+
+            <div class="st-clc-readonly-grid">
+              <div class="st-clc-readonly-field">
+                <label>Municipality / City</label>
+                <div class="value" data-confirm-municipality>—</div>
+              </div>
+              <div class="st-clc-readonly-field">
+                <label>Community Learning Center (CLC)</label>
+                <div class="value" data-confirm-name>—</div>
+              </div>
+            </div>
+
+            <div class="st-clc-readonly-grid st-clc-readonly-grid--3 st-mt-lg">
+              <div class="st-clc-readonly-field">
+                <label>School Year</label>
+                <div class="value" data-confirm-year>—</div>
+              </div>
+              <div class="st-clc-readonly-field">
+                <label>Learner Level</label>
+                <div class="value" data-confirm-level>—</div>
+              </div>
+              <div class="st-clc-readonly-field">
+                <label>Total Learners</label>
+                <div class="value" data-confirm-total>—</div>
+              </div>
+            </div>
+
+            <div class="st-clc-file-section">
+              <p class="st-clc-file-section-label">Uploaded Batch Data</p>
+
+              <div class="st-clc-file-card">
+                <div class="st-clc-file-icon">
+                  <span class="material-symbols-outlined">description</span>
+                </div>
+                <div class="st-clc-file-meta">
+                  <p class="st-clc-file-name">
+                    <span data-confirm-filename>CLC_Learner_Records.csv</span>
+                    <span class="material-symbols-outlined">check_circle</span>
+                  </p>
+                  <p class="st-clc-file-sub" data-confirm-filemeta>
+                    1.2 MB • Uploaded just now
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  class="st-icon-btn-sm"
+                  id="clcRemoveFileBtn"
+                  aria-label="Remove file"
+                >
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              </div>
+
+              <div class="st-clc-info-banner st-mt-sm">
+                <span class="material-symbols-outlined">info</span>
+                <p data-confirm-validation>
+                  42 rows detected. All data points passed initial validation
+                  checks.
+                </p>
+              </div>
+            </div>
+
+            <div class="st-clc-form-footer">
+              <button
+                type="button"
+                class="st-btn st-btn-outline"
+                id="clcCancelClearBtn"
+              >
+                Cancel &amp; Clear
+              </button>
+              <button
+                type="button"
+                class="st-btn st-btn-primary"
+                id="clcCreateRecordsBtn"
+              >
+                <span class="material-symbols-outlined">save</span>
+                Create Learner Records
+              </button>
+            </div>
+          </div>
+
+          <!-- Guidance & summary sidebar -->
+          <div class="st-clc-upload-sidebar">
+            <div class="st-panel st-panel-pad">
+              <h4 class="st-panel-title st-clc-batch-title">Batch Summary</h4>
+              <div class="st-clc-summary-row">
+                <span>Identified Male</span>
+                <span data-summary-male>18</span>
+              </div>
+              <div class="st-clc-summary-row">
+                <span>Identified Female</span>
+                <span data-summary-female>24</span>
+              </div>
+              <div class="st-clc-summary-row">
+                <span>Age Range</span>
+                <span data-summary-age>16 - 45</span>
+              </div>
+              <div class="st-clc-summary-row">
+                <span>Returning Learners</span>
+                <span data-summary-returning>8</span>
+              </div>
+            </div>
+
+            <div class="st-clc-tip-card">
+              <p class="st-clc-tip-title">
+                <span class="material-symbols-outlined">lightbulb</span>
+                Next Steps
+              </p>
+              <p class="st-clc-tip-text">
+                Upon clicking <strong>Create Learner Records</strong>, the
+                system will generate individual profiles for each student in
+                this batch. <br /><br />
+                You will be redirected to Learner Records to assign modules and
+                assessment schedules.
+              </p>
+            </div>
+
+            <div class="st-panel st-panel-pad">
+              <div class="st-clc-donut-wrap">
+                <div class="st-clc-donut">
+                  <svg viewBox="0 0 36 36">
+                    <path
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="var(--st-surface-container-highest)"
+                      stroke-width="3"
+                    ></path>
+                    <path
+                      data-donut-path
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="var(--st-secondary)"
+                      stroke-dasharray="0, 100"
+                      stroke-linecap="round"
+                      stroke-width="3"
+                    ></path>
+                  </svg>
+                  <div class="st-clc-donut-label">
+                    <span class="st-clc-donut-value" data-donut-value>—</span>
+                    <span class="st-clc-donut-caption">Validated</span>
+                  </div>
+                </div>
+                <p class="st-clc-donut-text">
+                  Data integrity score based on regional ALS standards.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STATE 3: Success -->
+        <div
+          id="clcSuccessSection"
+          class="st-panel st-panel-pad st-hidden st-clc-success-panel"
+        >
+          <div class="setup-complete-icon st-clc-success-icon">
+            <span class="material-symbols-outlined">check_circle</span>
+          </div>
+          <h2 class="st-clc-success-title">Learner Records Created!</h2>
+          <p class="st-clc-success-text" data-success-summary>
+            42 learner profiles have been generated for this CLC.
+          </p>
+          <div class="st-clc-success-actions">
+            <a href="clc-overview.html" class="st-btn st-btn-outline"
+              >Back to CLC Overview</a
+            >
+            <a href="learner-records.html" class="st-btn st-btn-primary"
+              >Go to Learner Records</a
+            >
+          </div>
+        </div>
+      </main>
+
+      <div data-component="layout/footer"></div>
+    </div>
+
+    <div data-component="layout/toast"></div>
+    <div data-component="layout/modal"></div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/core/utils.js"></script>
+    <script src="../../assets/js/core/router.js"></script>
+    <script src="../../assets/js/core/api.js"></script>
+    <script src="../../assets/js/core/auth.js"></script>
+    <script src="../../assets/js/core/guards.js"></script>
+    <script src="../../assets/js/core/layout.js"></script>
+    <script src="../../assets/js/core/app.js"></script>
+    <script src="../../assets/js/components/component-loader.js"></script>
+    <script src="../../assets/js/components/toast.js"></script>
+    <script src="../../assets/js/components/modal.js"></script>
+    <script src="../../assets/js/teacher/clc-upload.js"></script>
+  </body>
+</html>
