@@ -150,6 +150,11 @@ const muniSelect=document.getElementById('new-clc-muni');
 const brgyInput=document.getElementById('new-clc-brgy');
 let editingClcId=null;
 
+// Every Division II municipality is offered up front, not just the ones
+// that already have a CLC on record -- otherwise the first CLC in a
+// municipality could only ever be added via a manual "new municipality" entry.
+const DIVISION_II_MUNI_NAMES=DIVISION_II_MUNICIPALITIES.map(m=>m.name).sort();
+
 function openAddClcModal(){
   editingClcId=null;
   document.getElementById('clc-modal-title').textContent='Add New CLC';
@@ -157,8 +162,7 @@ function openAddClcModal(){
   document.getElementById('addClcSaveBtn').textContent='Add CLC';
   document.getElementById('new-clc-name').value='';
   document.getElementById('new-clc-street').value='';
-  const munis=[...new Set(clcs.map(c=>c.muni))].sort();
-  muniSelect.innerHTML='<option value="">Select Municipality</option>'+munis.map(m=>`<option>${m}</option>`).join('')+'<option value="__new__">+ New municipality…</option>';
+  muniSelect.innerHTML='<option value="">Select Municipality</option>'+DIVISION_II_MUNI_NAMES.map(m=>`<option>${m}</option>`).join('');
   brgyInput.value='';
   document.getElementById('clc-quick-actions').style.display='none';
   openModal('modal-add-clc');
@@ -171,8 +175,10 @@ function openEditClc(id){
   document.getElementById('addClcSaveBtn').textContent='Save changes';
   document.getElementById('new-clc-name').value=c.name;
   document.getElementById('new-clc-street').value='';
-  const munis=[...new Set(clcs.map(x=>x.muni))].sort();
-  muniSelect.innerHTML=munis.map(m=>`<option ${m===c.muni?'selected':''}>${m}</option>`).join('')+'<option value="__new__">+ New municipality…</option>';
+  // Union with the CLC's current municipality in case it's a legacy record
+  // registered outside Division II, so editing it doesn't silently drop it.
+  const munis=[...new Set([...DIVISION_II_MUNI_NAMES,c.muni])].sort();
+  muniSelect.innerHTML=munis.map(m=>`<option ${m===c.muni?'selected':''}>${m}</option>`).join('');
   brgyInput.value=c.barangay||'';
   const qaBtn=document.getElementById('qa-assign-btn');
   const qaCount=document.getElementById('qa-teacher-count');
@@ -187,18 +193,6 @@ function openEditClc(id){
   openModal('modal-add-clc');
 }
 document.getElementById('addClcBtn').addEventListener('click',openAddClcModal);
-muniSelect.addEventListener('change',()=>{
-  if(muniSelect.value==='__new__'){
-    const name=prompt('Enter the new municipality name:');
-    if(name&&name.trim()){
-      const opt=document.createElement('option');
-      opt.value=name.trim(); opt.textContent=name.trim(); opt.selected=true;
-      muniSelect.insertBefore(opt,muniSelect.lastElementChild);
-    }else{
-      muniSelect.value='';
-    }
-  }
-});
 document.getElementById('qa-assign-btn').addEventListener('click',()=>{
   if(!editingClcId) return;
   closeModal('modal-add-clc');
@@ -209,7 +203,7 @@ document.getElementById('addClcSaveBtn').addEventListener('click',async()=>{
   const muni=muniSelect.value;
   const barangay=brgyInput.value.trim();
   const street=document.getElementById('new-clc-street').value.trim();
-  if(!name||!muni||muni==='__new__'||!barangay){ showToast('Please fill in CLC name, municipality, and barangay'); return; }
+  if(!name||!muni||!barangay){ showToast('Please fill in CLC name, municipality, and barangay'); return; }
   const address=`${street?street+', ':''}Brgy. ${barangay}, ${muni}`;
   const btn=document.getElementById('addClcSaveBtn');
   const originalText=btn.textContent;

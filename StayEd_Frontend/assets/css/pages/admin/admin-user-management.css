@@ -132,3 +132,11 @@ tbody tr:last-child td{border-bottom:none}
   tbody tr{border-bottom:1px solid var(--line);padding:10px 0}
   tbody td{border-bottom:none;padding:6px 0}
 }
+
+/* Create Account: Teacher / Admin role toggle */
+.role-toggle{display:flex;border:1px solid var(--line);border-radius:var(--st-button-radius);overflow:hidden;width:fit-content}
+.role-toggle-btn{border:none;background:#fff;color:var(--muted);padding:8px 22px;font:inherit;font-size:15.5px;font-weight:700;cursor:pointer;transition:background .15s ease,color .15s ease}
+.role-toggle-btn:not(:last-child){border-right:1px solid var(--line)}
+.role-toggle-btn:hover{background:#f2f5fa}
+.role-toggle-btn.active{background:var(--navy);color:#fff}
+.role-toggle-btn.active:hover{background:var(--navy)}

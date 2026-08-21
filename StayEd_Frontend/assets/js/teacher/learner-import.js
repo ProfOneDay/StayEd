@@ -6,6 +6,8 @@ class LearnerImportPage {
   static async init() {
     if (window.Guards) Guards.teacher();
 
+    this.bindBackLinks();
+
     this.bindDropzone();
 
     this.bindPreviewActions();
@@ -17,6 +19,16 @@ class LearnerImportPage {
       ?.addEventListener("click", () => {
         this.downloadTemplate();
       });
+  }
+
+  // Carries this page's own ?class=&clc= (set by learner-records-hub.js
+  // when it links here) back onto every "return to records" link, so Back
+  // lands on the same class instead of the unfiltered records view.
+  static bindBackLinks() {
+    const search = window.location.search || "";
+    document.querySelectorAll("[data-back-to-records]").forEach((el) => {
+      el.href = `learner-records.html${search}`;
+    });
   }
 
   static downloadTemplate() {
@@ -350,8 +362,12 @@ class LearnerImportPage {
         btn.innerHTML = `<span class="material-symbols-outlined">progress_activity</span> Importing…`;
 
         try {
+          // Duplicates are bypassed, not skipped: the row keeps its
+          // "Duplicate" status in the preview, but the matching existing
+          // learner is still attached to this class. Only error rows are
+          // left out of the submission.
           const result = await API.importLearners({
-            learners: this.preview.rows.filter((r) => r.status === "valid"),
+            learners: this.preview.rows.filter((r) => r.status !== "error"),
           });
 
           document
@@ -362,14 +378,14 @@ class LearnerImportPage {
 
           success?.classList.remove("st-hidden");
 
+          const addedCount = this.preview.valid + this.preview.duplicates;
+
           this.set("[data-success-total]", this.preview.total);
-          this.set("[data-success-imported]", this.preview.valid);
+          this.set("[data-success-imported]", addedCount);
           this.set("[data-success-duplicates]", this.preview.duplicates);
           this.set("[data-success-errors]", this.preview.errors);
 
-          Toast?.success(
-            `${this.preview.valid} learner(s) imported successfully.`,
-          );
+          Toast?.success(`${addedCount} learner(s) added to this class.`);
         } catch (error) {
           console.error(error);
 

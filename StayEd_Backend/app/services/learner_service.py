@@ -132,6 +132,20 @@ def _shape_learner(row):
         "distance_km": float(row.get("distance_from_clc_km") or 0),
         "date_generated": row["assessment_date"].isoformat() if row.get("assessment_date") else None,
         "assigned_teacher": row.get("assigned_teacher") or "",
+        # Raw personal-info fields -- not used by the records table, but the
+        # "Existing Student" picker in the enrollment wizard prefills its form
+        # from this same shape and needs more than name/lrn/sex to do that.
+        "birthdate": row["date_of_birth"].isoformat() if row.get("date_of_birth") else None,
+        "civil_status": row.get("civil_status") or "",
+        "contact_number": row.get("contact_number") or "",
+        "email": row.get("email") or "",
+        "address": row.get("address") or "",
+        "guardian_name": row.get("guardian_name") or "",
+        "guardian_relationship": row.get("guardian_relationship") or "",
+        "guardian_contact_number": row.get("guardian_contact_number") or "",
+        "employment_status": row.get("employment_status") or "",
+        "last_grade_completed": row.get("last_grade_completed") or "",
+        "is_4ps_beneficiary": bool(row.get("is_4ps_beneficiary")),
     }
 
 
@@ -142,6 +156,7 @@ def _learner_query(where: str = "", order: str = "l.last_name, l.first_name"):
             DATE_PART('year', AGE(CURRENT_DATE, l.date_of_birth))::INT AS age,
             l.date_of_birth, l.employment_status, l.civil_status,
             l.contact_number, l.guardian_contact_number, l.is_4ps_beneficiary,
+            l.email, l.address, l.guardian_name, l.guardian_relationship, l.last_grade_completed,
             ce.enrollment_id, ce.learning_modality, ce.distance_from_clc_km,
             ce.enrollment_status, ce.is_re_enrollee, ce.enrollment_date,
             lc.class_id, lc.learning_level, lc.class_name, lc.school_year, lc.semester,

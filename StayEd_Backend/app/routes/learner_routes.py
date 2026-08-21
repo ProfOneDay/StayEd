@@ -1385,51 +1385,90 @@ def _insert_import_rows(rows, teacher):
     if not class_row:
         raise ValueError("Create an active class before importing learners.")
     preview = _preview_rows(rows)
-    valid = [r for r in preview if r["status"] == "valid"]
+    # Duplicate rows (LRN already known to StayEd) are no longer skipped --
+    # the existing learner is looked up and attached to this class instead of
+    # being re-inserted into `learner`. Only genuine errors (bad LRN/missing
+    # required fields) are left out of the class roster.
+    importable = [r for r in preview if r["status"] in ("valid", "duplicate")]
     db = get_db()
     imported = []
     try:
         with db.cursor() as cur:
-            for row in valid:
+            for row in importable:
                 name = row.get("name") or f"{row.get('first_name','')} {row.get('last_name','')}"
                 first, last = split_name(name)
-                sex = str(row.get("sex") or "MALE").strip().upper()
-                if sex not in {"MALE", "FEMALE"}:
-                    sex = "MALE"
-                dob = _parse_import_birthdate(row.get("birthdate"))
-                if not dob:
-                    continue
+
+                if row["status"] == "duplicate":
+                    cur.execute("SELECT learner_id FROM learner WHERE lrn = %s", (row["lrn"],))
+                    existing = cur.fetchone()
+                    if not existing:
+                        continue
+                    learner_id = existing["learner_id"]
+                else:
+                    sex = str(row.get("sex") or "MALE").strip().upper()
+                    if sex not in {"MALE", "FEMALE"}:
+                        sex = "MALE"
+                    dob = _parse_import_birthdate(row.get("birthdate"))
+                    if not dob:
+                        continue
+                    cur.execute(
+                        """
+                        INSERT INTO learner (
+                            lrn, first_name, middle_name, last_name, sex, date_of_birth,
+                            employment_status, civil_status, contact_number, guardian_contact_number
+                        )
+                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING learner_id
+                        """,
+                        (
+                            row["lrn"], first, row.get("middle_name") or None, last, sex, dob,
+                            row.get("employment_status") or None,
+                            row.get("civil_status") or None,
+                            row.get("contact_number") or None,
+                            row.get("guardian_contact_number") or None,
+                        ),
+                    )
+                    learner_id = cur.fetchone()["learner_id"]
+
                 cur.execute(
                     """
-                    INSERT INTO learner (
-                        lrn, first_name, middle_name, last_name, sex, date_of_birth,
-                        employment_status, civil_status, contact_number, guardian_contact_number
-                    )
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING learner_id
+                    SELECT enrollment_id
+                    FROM class_enrollment
+                    WHERE class_id = %s AND learner_id = %s
+                    LIMIT 1
                     """,
-                    (
-                        row["lrn"], first, row.get("middle_name") or None, last, sex, dob,
-                        row.get("employment_status") or None,
-                        row.get("civil_status") or None,
-                        row.get("contact_number") or None,
-                        row.get("guardian_contact_number") or None,
-                    ),
+                    (class_row["class_id"], learner_id),
                 )
-                learner_id = cur.fetchone()["learner_id"]
-                cur.execute(
-                    """
-                    INSERT INTO class_enrollment (
-                        class_id, learner_id, learning_modality, is_re_enrollee,
-                        distance_from_clc_km, enrollment_status
+                prior_enrollment = cur.fetchone()
+                modality = enum_modality(row.get("modality"))
+                distance = _parse_import_distance(row.get("distance_from_clc_km"))
+                # A duplicate LRN means the learner was already known to
+                # StayEd before this import, so treat it as a re-enrollment
+                # by default even if the file didn't say so explicitly.
+                is_re_enrollee = _parse_import_bool(row.get("re_enrollee")) or row["status"] == "duplicate"
+
+                if prior_enrollment:
+                    cur.execute(
+                        """
+                        UPDATE class_enrollment
+                        SET learning_modality = %s,
+                            is_re_enrollee = %s,
+                            distance_from_clc_km = %s,
+                            enrollment_status = 'ENROLLED'
+                        WHERE enrollment_id = %s
+                        """,
+                        (modality, is_re_enrollee, distance, prior_enrollment["enrollment_id"]),
                     )
-                    VALUES (%s,%s,%s,%s,%s,'ENROLLED')
-                    """,
-                    (
-                        class_row["class_id"], learner_id, enum_modality(row.get("modality")),
-                        _parse_import_bool(row.get("re_enrollee")),
-                        _parse_import_distance(row.get("distance_from_clc_km")),
-                    ),
-                )
+                else:
+                    cur.execute(
+                        """
+                        INSERT INTO class_enrollment (
+                            class_id, learner_id, learning_modality, is_re_enrollee,
+                            distance_from_clc_km, enrollment_status
+                        )
+                        VALUES (%s,%s,%s,%s,%s,'ENROLLED')
+                        """,
+                        (class_row["class_id"], learner_id, modality, is_re_enrollee, distance),
+                    )
                 imported.append({"lrn": row["lrn"], "name": name, "level": row.get("level") or "Basic Literacy"})
 
             summary = {
@@ -1471,7 +1510,8 @@ def import_learners():
     return {
         "message": "Learners imported successfully.",
         "imported": summary["imported"],
-        "skipped": summary["duplicates"] + summary["invalid"],
+        "duplicatesMerged": summary["duplicates"],
+        "skipped": summary["invalid"],
     }
 
 

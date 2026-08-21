@@ -1,6 +1,15 @@
 // Must run first, before anything else on this page executes.
 Guards.admin();
+
+// DIVISION_II_MUNICIPALITIES / DIVISION_II_IDS / slugifyMunicipality come from
+// division-ii-municipalities.js (loaded before this file). This dashboard is
+// scoped to Division II only -- the rest of the province is shown on the map
+// for geographic context but stays non-interactive (see .outside-division in
+// admin-dashboard.css).
+function emptyBucket(name){return {name,total:0,high:0,moderate:0,low:0,levels:{BLP:0,Elementary:0,JHS:0,SHS:0},clcs:0}}
+
 let municipalityData={};
+let clcsByMunicipality={};
 let levelAverages={BLP:0,Elementary:0,JHS:0,SHS:0};
 const map=document.querySelector('.mapwrap svg');
 const zoomGroup=document.getElementById('zoomGroup');
@@ -67,7 +76,16 @@ function riskLevel(d){if(!d.total)return 'low';const rate=d.high/d.total; return
 function riskColor(d){return {high:'#D64545',moderate:'#F39422',low:'#6BBF59'}[riskLevel(d)]}
 const levelKeys=['BLP','Elementary','JHS','SHS'];
 function recolorMap(){
-  Object.entries(municipalityData).forEach(([id,d])=>{const el=map.querySelector('#'+CSS.escape(id));if(el)el.style.fill=riskColor(d)});
+  // Every Division II municipality gets a risk color, whether or not it has
+  // a CLC registered yet -- riskLevel() defaults an empty bucket to "low"
+  // (green), so an as-yet-unregistered Division II municipality still reads
+  // as in-scope rather than "no data" gray. Only municipalities outside the
+  // division (forced gray via .outside-division in CSS) stay ungraded.
+  Object.entries(municipalityData).forEach(([id,d])=>{
+    const el=map.querySelector('#'+CSS.escape(id));
+    if(!el)return;
+    el.style.fill=riskColor(d);
+  });
   const riskCounts={low:0,moderate:0,high:0};
   Object.values(municipalityData).forEach(d=>{riskCounts[riskLevel(d)]++});
   document.getElementById('countLow').textContent=riskCounts.low;
@@ -93,20 +111,66 @@ function showTooltip(el,event){
   tooltip.classList.add('show');
 }
 function hideTooltip(){tooltip.classList.remove('show')}
-function selectMunicipality(id){const d=municipalityData[id];if(!d)return;map.querySelectorAll('.municipality').forEach(x=>x.classList.remove('selected'));const el=map.querySelector('#'+CSS.escape(id));el.classList.add('selected');el.parentNode.appendChild(el);
+const CLC_LIST_PAGE_SIZE=3;
+let clcListPage=1;
+function renderClcList(id){
+  const container=document.getElementById('clcList');
+  if(!container)return;
+  const list=clcsByMunicipality[id]||[];
+  if(!list.length){
+    container.innerHTML='<div class="clc-list-empty">No CLCs registered in this municipality yet.</div>';
+    return;
+  }
+  const totalPages=Math.max(1,Math.ceil(list.length/CLC_LIST_PAGE_SIZE));
+  if(clcListPage>totalPages) clcListPage=totalPages;
+  if(clcListPage<1) clcListPage=1;
+  const start=(clcListPage-1)*CLC_LIST_PAGE_SIZE;
+  const pageItems=list.slice(start,start+CLC_LIST_PAGE_SIZE);
+  const rows=pageItems.map(c=>{
+    const teacherCount=(c.teachers||[]).length;
+    const meta=[
+      c.barangay||null,
+      `${c.learners} learner${c.learners===1?'':'s'}`,
+      teacherCount?`${teacherCount} teacher${teacherCount===1?'':'s'}`:'No teacher assigned',
+    ].filter(Boolean).join(' · ');
+    return `<div class="clc-row">
+      <div class="clc-row-main">
+        <span class="clc-row-name">${c.name}</span>
+        <span class="clc-row-meta">${meta}</span>
+      </div>
+      <span class="clc-row-status ${c.status==='active'?'':'archived'}">${c.status==='active'?'Active':'Archived'}</span>
+    </div>`;
+  }).join('');
+  const pager=list.length>CLC_LIST_PAGE_SIZE?`
+    <div class="clc-list-pager">
+      <button type="button" class="clc-pager-btn" id="clcListPrev" ${clcListPage<=1?'disabled':''} aria-label="Previous CLCs">&lt;</button>
+      <span class="clc-pager-info">${start+1}–${Math.min(start+CLC_LIST_PAGE_SIZE,list.length)} of ${list.length}</span>
+      <button type="button" class="clc-pager-btn" id="clcListNext" ${clcListPage>=totalPages?'disabled':''} aria-label="Next CLCs">&gt;</button>
+    </div>`:'';
+  container.innerHTML=rows+pager;
+  document.getElementById('clcListPrev')?.addEventListener('click',()=>{clcListPage--;renderClcList(id)});
+  document.getElementById('clcListNext')?.addEventListener('click',()=>{clcListPage++;renderClcList(id)});
+}
+function selectMunicipality(id){const d=municipalityData[id]||emptyBucket(id);map.querySelectorAll('.municipality').forEach(x=>x.classList.remove('selected'));const el=map.querySelector('#'+CSS.escape(id));if(el){el.classList.add('selected');el.parentNode.appendChild(el)}
   document.getElementById('name').innerHTML=`<span class="risk-dot" style="background:${riskColor(d)}"></span>${d.name}`;
   document.getElementById('empty').hidden=true;document.getElementById('panel').hidden=false;
+  document.getElementById('clcListSection').hidden=false;
   document.getElementById('municipalitySelect').value=id;
   ['total','clcs','high','moderate'].forEach(k=>document.getElementById(k).textContent=d[k]);
-  const pct=k=>Math.round(d[k]/d.total*100);
+  const pct=k=>d.total?Math.round(d[k]/d.total*100):0;
   [['high','highBar','highPct'],['moderate','modBar','modPct'],['low','lowBar','lowPct']].forEach(([k,b,p])=>{document.getElementById(b).style.width=pct(k)+'%';document.getElementById(p).textContent=pct(k)+'%'});
-  const max=Math.max(...Object.values(d.levels),...Object.values(levelAverages));
-  document.getElementById('levels').innerHTML=levelKeys.map(label=>{const val=d.levels[label];const avgPct=Math.min(100,levelAverages[label]/max*100);return `<div class="levelbar"><span>${label}</span><div class="track level-track"><div class="fill" style="width:${val/max*100}%"></div><div class="avg-mark" style="left:${avgPct}%" title="Division average: ${levelAverages[label].toFixed(1)}"></div></div><b>${val}</b></div>`}).join('')
+  const max=Math.max(1,...Object.values(d.levels),...Object.values(levelAverages));
+  document.getElementById('levels').innerHTML=levelKeys.map(label=>{const val=d.levels[label];const avgPct=Math.min(100,levelAverages[label]/max*100);return `<div class="levelbar"><span>${label}</span><div class="track level-track"><div class="fill" style="width:${val/max*100}%"></div><div class="avg-mark" style="left:${avgPct}%" title="Division average: ${levelAverages[label].toFixed(1)}"></div></div><b>${val}</b></div>`}).join('');
+  clcListPage=1;
+  renderClcList(id);
 }
 function selectAllMunicipalities(){
   map.querySelectorAll('.municipality').forEach(x=>x.classList.remove('selected'));
   document.getElementById('name').innerHTML='Pangasinan II — All Municipalities';
   document.getElementById('empty').hidden=true;document.getElementById('panel').hidden=false;
+  // Listing every CLC across the whole province here would swamp the panel --
+  // that view is per-municipality only.
+  document.getElementById('clcListSection').hidden=true;
   document.getElementById('municipalitySelect').value='all';
   const t={total:0,clcs:0,high:0,moderate:0,low:0};
   const lv={BLP:0,Elementary:0,JHS:0,SHS:0};
@@ -118,11 +182,13 @@ function selectAllMunicipalities(){
   document.getElementById('clcs').textContent=t.clcs;
   document.getElementById('high').textContent=t.high;
   document.getElementById('moderate').textContent=t.moderate;
-  const pct=k=>Math.round(t[k]/t.total*100);
+  const pct=k=>t.total?Math.round(t[k]/t.total*100):0;
   [['high','highBar','highPct'],['moderate','modBar','modPct'],['low','lowBar','lowPct']].forEach(([k,b,p])=>{document.getElementById(b).style.width=pct(k)+'%';document.getElementById(p).textContent=pct(k)+'%'});
-  const max=Math.max(...Object.values(lv));
+  const max=Math.max(1,...Object.values(lv));
   document.getElementById('levels').innerHTML=levelKeys.map(label=>{const val=lv[label];return `<div class="levelbar"><span>${label}</span><div class="track level-track"><div class="fill" style="width:${val/max*100}%"></div></div><b>${val}</b></div>`}).join('');
 }
+// Only Division II municipalities are interactive -- the rest of the
+// province renders for geographic context but is not part of this scope.
 map.querySelectorAll('.division-ii').forEach(el=>{
   el.addEventListener('mouseenter',e=>showTooltip(el,e));
   el.addEventListener('mousemove',positionTooltip);
@@ -143,12 +209,35 @@ select.addEventListener('change',()=>{if(select.value==='all')selectAllMunicipal
 
 async function loadDashboard(){
   try{
-    municipalityData=await API.getAdminDashboard();
+    const [dashboardData,clcResponse]=await Promise.all([
+      API.getAdminDashboard(),
+      API.getAdminClcs(),
+    ]);
+    // The API aggregates by whatever municipality string is on each CLC,
+    // with no division filter -- restrict to Division II here so a CLC
+    // mistakenly registered outside the division can't leak onto this map.
+    municipalityData={};
+    Object.entries(dashboardData||{}).forEach(([id,d])=>{
+      if(DIVISION_II_IDS.has(id)) municipalityData[id]=d;
+    });
+    clcsByMunicipality={};
+    (clcResponse?.data||[]).forEach(clc=>{
+      const slug=slugifyMunicipality(clc.municipality);
+      if(!DIVISION_II_IDS.has(slug)) return;
+      (clcsByMunicipality[slug]=clcsByMunicipality[slug]||[]).push(clc);
+    });
   }catch(error){
     console.error('[AdminDashboard] Unable to load dashboard data',error);
     showToast('Unable to load division risk data.');
     municipalityData={};
+    clcsByMunicipality={};
   }
+  // Guarantee every Division II municipality has a bucket -- the API only
+  // returns entries for municipalities that already have CLCs/learners, but
+  // the whole division should still be clickable on the map.
+  DIVISION_II_MUNICIPALITIES.forEach(({id,name})=>{
+    if(!municipalityData[id]) municipalityData[id]=emptyBucket(name);
+  });
   recolorMap();
   populateMunicipalitySelect();
   selectAllMunicipalities();

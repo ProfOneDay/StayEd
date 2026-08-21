@@ -5,6 +5,24 @@ class LearnerEnrollWizard {
 
   static currentClc = null;
 
+  static existingLearnerId = null;
+
+  static PREFILLED_FIELD_IDS = [
+    "wFullName",
+    "wLrn",
+    "wSex",
+    "wBirthdate",
+    "wCivilStatus",
+    "wPhone",
+    "wEmail",
+    "wAddress",
+    "wGuardianName",
+    "wGuardianRelation",
+    "wGuardianContact",
+  ];
+
+  static LOCKED_SELECT_IDS = ["wSex", "wCivilStatus", "wGuardianRelation"];
+
   static async init() {
     if (window.Guards) Guards.teacher();
 
@@ -13,6 +31,10 @@ class LearnerEnrollWizard {
     if (!this.form) return;
 
     window.UnsavedChanges?.track(this.form);
+
+    this.bindBackLinks();
+
+    this.bindGate();
 
     this.bindSegments();
 
@@ -25,6 +47,193 @@ class LearnerEnrollWizard {
     this.updateProgress();
 
     await this.loadClassContext();
+  }
+
+  // Carries this page's own ?class=&clc= (set by learner-records-hub.js
+  // when it links here) back onto every "return to records" link, so Back
+  // lands on the same class instead of the unfiltered records view.
+  static bindBackLinks() {
+    const search = window.location.search || "";
+    document.querySelectorAll("[data-back-to-records]").forEach((el) => {
+      el.href = `learner-records.html${search}`;
+    });
+  }
+
+  static bindGate() {
+    const gate = document.querySelector("[data-enroll-gate]");
+    const wizard = document.querySelector("[data-enroll-wizard]");
+
+    if (!gate || !wizard) return;
+
+    document
+      .querySelector('[data-gate-choice="new"]')
+      ?.addEventListener("click", () => this.enterWizard());
+
+    document
+      .querySelector('[data-gate-choice="existing"]')
+      ?.addEventListener("click", () => {
+        document.querySelector("[data-gate-options]")?.classList.add("st-hidden");
+        document
+          .querySelector("[data-gate-existing-panel]")
+          ?.classList.remove("st-hidden");
+        this.searchExistingLearners("");
+      });
+
+    document.querySelector("[data-gate-back]")?.addEventListener("click", () => {
+      document
+        .querySelector("[data-gate-existing-panel]")
+        ?.classList.add("st-hidden");
+      document.querySelector("[data-gate-options]")?.classList.remove("st-hidden");
+    });
+
+    let searchTimer;
+    document
+      .querySelector("[data-gate-search-input]")
+      ?.addEventListener("input", (e) => {
+        clearTimeout(searchTimer);
+        const value = e.target.value;
+        searchTimer = setTimeout(() => this.searchExistingLearners(value), 250);
+      });
+  }
+
+  static async searchExistingLearners(search) {
+    const results = document.querySelector("[data-gate-search-results]");
+
+    if (!results) return;
+
+    results.innerHTML = `<p class="st-enroll-gate-hint">Searching…</p>`;
+
+    try {
+      const res = await API.getLearners(search ? { search } : {});
+      const learners = res?.data || [];
+
+      if (!learners.length) {
+        results.innerHTML = `<p class="st-enroll-gate-hint">No matching learners found.</p>`;
+        return;
+      }
+
+      results.innerHTML = learners
+        .map(
+          (l) => `
+            <button type="button" class="st-enroll-gate-result" data-gate-select="${l.id}">
+              <span class="material-symbols-outlined">person</span>
+              <span class="st-enroll-gate-result-info">
+                <strong>${l.name}</strong>
+                <small>LRN ${l.lrn || "—"} · ${l.clc || "—"} · ${l.level || "—"}</small>
+              </span>
+            </button>
+          `,
+        )
+        .join("");
+
+      results.querySelectorAll("[data-gate-select]").forEach((btn) => {
+        btn.addEventListener("click", () =>
+          this.selectExistingLearner(btn.dataset.gateSelect),
+        );
+      });
+    } catch (error) {
+      console.error("[LearnerEnrollWizard] Unable to search learners", error);
+      results.innerHTML = `<p class="st-enroll-gate-hint">Unable to load learners right now.</p>`;
+    }
+  }
+
+  static async selectExistingLearner(id) {
+    try {
+      const learner = await API.getLearner(id);
+
+      this.existingLearnerId = id;
+
+      this.prefillFromExistingLearner(learner);
+
+      this.enterWizard();
+
+      Toast?.success(`Using the existing record for ${learner.name}.`);
+    } catch (error) {
+      console.error("[LearnerEnrollWizard] Unable to load learner", error);
+      Toast?.error("Unable to load that learner's record. Please try again.");
+    }
+  }
+
+  static prefillFromExistingLearner(learner) {
+    const set = (id, value) => {
+      const el = document.getElementById(id);
+      if (el && value !== undefined && value !== null && value !== "") {
+        el.value = value;
+      }
+    };
+
+    set("wFullName", learner.name);
+    set("wLrn", learner.lrn);
+    set("wSex", learner.sex);
+    set("wBirthdate", learner.birthdate);
+    set("wCivilStatus", learner.civil_status);
+    set("wPhone", learner.contact_number);
+    set("wEmail", learner.email);
+    set("wAddress", learner.address);
+    set("wGuardianName", learner.guardian_name);
+    set("wGuardianRelation", learner.guardian_relationship);
+    set("wGuardianContact", learner.guardian_contact_number);
+    set("wEmployment", learner.employment_status);
+    set("wLastGrade", learner.last_grade_completed);
+
+    this.PREFILLED_FIELD_IDS.forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (this.LOCKED_SELECT_IDS.includes(id)) {
+        el.disabled = true;
+      } else {
+        el.setAttribute("readonly", "readonly");
+      }
+    });
+
+    const hidden = document.getElementById("wReenrollee");
+    if (hidden) hidden.value = "Yes";
+
+    const statusBox = document.querySelector("[data-reenrollee-status]");
+    if (statusBox) {
+      statusBox.innerHTML = `
+                <span class="material-symbols-outlined" style="color:var(--st-secondary);">check_circle</span>
+                <p><strong>Existing learner selected.</strong> ${learner.name} is already known to StayEd and will be enrolled into this class.</p>
+            `;
+    }
+
+    const banner = document.querySelector("[data-existing-learner-banner]");
+    if (banner) {
+      banner.classList.remove("st-hidden");
+      const nameEl = banner.querySelector("[data-existing-learner-name]");
+      if (nameEl) nameEl.textContent = learner.name;
+    }
+  }
+
+  static clearExistingLearnerPrefill() {
+    this.existingLearnerId = null;
+
+    this.PREFILLED_FIELD_IDS.forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.removeAttribute("readonly");
+      el.disabled = false;
+    });
+
+    document
+      .querySelector("[data-existing-learner-banner]")
+      ?.classList.add("st-hidden");
+  }
+
+  static enterWizard() {
+    document.querySelector("[data-enroll-gate]")?.classList.add("st-hidden");
+    document.querySelector("[data-enroll-wizard]")?.classList.remove("st-hidden");
+  }
+
+  static returnToGate() {
+    this.clearExistingLearnerPrefill();
+
+    document
+      .querySelector("[data-gate-existing-panel]")
+      ?.classList.add("st-hidden");
+    document.querySelector("[data-gate-options]")?.classList.remove("st-hidden");
+    document.querySelector("[data-enroll-wizard]")?.classList.add("st-hidden");
+    document.querySelector("[data-enroll-gate]")?.classList.remove("st-hidden");
   }
 
   static async loadClassContext() {
@@ -145,6 +354,10 @@ class LearnerEnrollWizard {
       ?.addEventListener("click", () => {
         if (this.currentStep > 1) {
           this.goToStep(this.currentStep - 1);
+        } else {
+          // Step 1 has nowhere earlier to go inside the wizard itself --
+          // send them back to the New/Existing Student gate instead.
+          this.returnToGate();
         }
       });
 
@@ -185,12 +398,10 @@ class LearnerEnrollWizard {
 
     const nav = document.querySelector("[data-wizard-nav]");
 
-    const prevBtn = document.querySelector("[data-wizard-prev]");
-
     const nextBtn = document.querySelector("[data-wizard-next]");
 
-    if (prevBtn) prevBtn.disabled = step === 1;
-
+    // The Back button is always enabled -- on step 1 it returns to the
+    // New/Existing Student gate instead of going to a nonexistent step 0.
     if (nav) nav.style.display = step === this.totalSteps ? "none" : "flex";
 
     if (nextBtn) {
@@ -405,6 +616,8 @@ class LearnerEnrollWizard {
       ?.addEventListener("click", () => {
         this.form.reset();
 
+        this.clearExistingLearnerPrefill();
+
         document.querySelectorAll("[data-segment]").forEach((group) => {
           group.querySelectorAll("button").forEach((b, i) => {
             b.classList.toggle(
@@ -424,6 +637,8 @@ class LearnerEnrollWizard {
         }
 
         this.goToStep(1);
+
+        this.returnToGate();
       });
   }
 

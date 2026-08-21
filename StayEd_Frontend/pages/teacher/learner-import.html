@@ -40,7 +40,11 @@
             </p>
           </div>
           <div class="st-page-header-actions">
-            <a href="learner-records.html" class="st-btn st-btn-outline">
+            <a
+              href="learner-records.html"
+              class="st-btn st-btn-outline"
+              data-back-to-records
+            >
               <span class="material-symbols-outlined">arrow_back</span>
               Back
             </a>
@@ -170,7 +174,8 @@
               class="st-clc-form-footer-left"
               style="font-size: 13px; color: var(--st-on-surface-variant)"
             >
-              Duplicate and error rows will be skipped automatically.
+              Duplicate rows use the learner's existing record and are still
+              added to this class. Error rows will be skipped.
             </span>
             <button
               type="button"
@@ -226,7 +231,7 @@
               >
                 --
               </p>
-              <p class="st-import-success-stat-label">Duplicates Skipped</p>
+              <p class="st-import-success-stat-label">Duplicates Merged into Class</p>
             </div>
             <div class="st-import-success-stat">
               <p
@@ -241,7 +246,10 @@
           </div>
 
           <div class="st-clc-success-actions">
-            <a href="learner-records.html" class="st-btn st-btn-primary"
+            <a
+              href="learner-records.html"
+              class="st-btn st-btn-primary"
+              data-back-to-records
               >Go to Learner Records</a
             >
             <button

@@ -558,9 +558,13 @@
     font-weight:600;
 }
 
-.st-enroll-field input[readonly]{
+.st-enroll-field input[readonly],
+.st-enroll-field textarea[readonly],
+.st-enroll-field select[disabled]{
     background:var(--st-surface-container-low);
     cursor:not-allowed;
+    opacity:1;
+    -webkit-text-fill-color:currentColor;
 }
 
 .st-avatar-btn{
