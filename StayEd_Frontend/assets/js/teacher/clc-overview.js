@@ -22,9 +22,16 @@ class ClcOverview {
     this.showSkeleton();
 
     try {
-      const all = await API.getAssignedClcs();
+      const response = await API.getClcs();
 
-      this.state.all = all;
+      const all = response.data || [];
+
+      // Teachers are assigned to a single municipality at account setup —
+      // this page only ever shows CLCs within that municipality. Picking a
+      // different municipality is an Admin/ALS Division Supervisor action.
+      this.state.all = this.state.municipality
+        ? all.filter((c) => c.municipality === this.state.municipality)
+        : all;
 
       this.renderMunicipalityLabel();
 
@@ -60,6 +67,16 @@ class ClcOverview {
     this.set(
       "[data-clc-learners]",
       all.reduce((sum, c) => sum + (c.totalLearners || 0), 0).toLocaleString(),
+    );
+
+    this.set(
+      "[data-clc-high-risk]",
+      all.reduce((sum, c) => sum + (c.highRiskLearners || 0), 0),
+    );
+
+    this.set(
+      "[data-clc-active]",
+      all.filter((c) => c.status === "Active").length,
     );
   }
 

@@ -459,18 +459,6 @@ class API {
     return this.get("/clcs");
   }
 
-  static async getAssignedClcs() {
-    // Single source of truth for "which CLCs does this teacher work with" --
-    // CLC Overview, the Dashboard filter bar, and Early Warning Alerts all
-    // call this instead of each keeping their own (hardcoded or otherwise
-    // incomplete) CLC list. Teachers are scoped to one municipality at
-    // account setup, so "assigned CLCs" = every CLC in that municipality.
-    const response = await this.getClcs();
-    const all = response.data || [];
-    const municipality = window.Auth ? Auth.municipality() : "";
-    return municipality ? all.filter((c) => c.municipality === municipality) : all;
-  }
-
   static getCurrentClc() {
     return this.get("/clcs/current");
   }
@@ -517,10 +505,6 @@ class API {
 
   static returnModuleBatch(learnerId, batchId, payload) {
     return this.post(`/learners/${learnerId}/module-batches/${batchId}/return`, payload);
-  }
-
-  static updateModuleBatch(learnerId, batchId, payload) {
-    return this.put(`/learners/${learnerId}/module-batches/${batchId}`, payload);
   }
 
   static recordConsultation(learnerId, payload) {

@@ -39,7 +39,7 @@ class EarlyWarningPage {
         }))
         .sort((a, b) => (b.risk_probability || 0) - (a.risk_probability || 0));
 
-      await this.populateClcFilter();
+      this.populateClcFilter();
 
       this.renderSummary(learners);
 
@@ -52,25 +52,14 @@ class EarlyWarningPage {
     }
   }
 
-  static async populateClcFilter() {
+  static populateClcFilter() {
     const select = document.querySelector("[data-ewa-filter-clc]");
     if (!select) return;
 
     const current = this.state.clc;
-
-    // The dropdown must represent every CLC the teacher is assigned to --
-    // where they *can* filter -- not just the CLCs that happen to have an
-    // alert right now. Same assigned-CLC source as CLC Overview and the
-    // Dashboard filter bar.
-    let names = [];
-    try {
-      const clcs = await API.getAssignedClcs();
-      names = clcs.map((c) => c.name).filter(Boolean);
-    } catch (error) {
-      console.error("[EarlyWarning] Unable to load assigned CLCs", error);
-      names = [...new Set(this.state.all.map((item) => item.clc))].filter(Boolean);
-    }
-    names = [...new Set(names)].sort((a, b) => a.localeCompare(b));
+    const names = [...new Set(this.state.all.map((item) => item.clc))]
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b));
 
     select.replaceChildren();
 
@@ -188,15 +177,13 @@ class EarlyWarningPage {
     const pageRows = filtered.slice(start, start + perPage);
 
     if (!pageRows.length) {
-      const clcSpecific = this.state.clc && !this.state.search && !this.state.riskLevel;
-
       body.innerHTML = `
                 <tr>
                     <td colspan="9">
                         <div class="st-empty" style="border:none;background:transparent;">
                             <span class="material-symbols-outlined">verified_user</span>
-                            <p class="st-empty-title">${clcSpecific ? "No learners requiring attention in this CLC." : "No active alerts"}</p>
-                            <p class="st-empty-text">${clcSpecific ? "Try selecting a different CLC or clearing filters." : "Try adjusting your search or filters."}</p>
+                            <p class="st-empty-title">No active alerts</p>
+                            <p class="st-empty-text">Try adjusting your search or filters.</p>
                         </div>
                     </td>
                 </tr>

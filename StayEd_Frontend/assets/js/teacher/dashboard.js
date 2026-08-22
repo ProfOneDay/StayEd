@@ -268,15 +268,9 @@ class TeacherDashboard {
         "[data-filter-level] button.is-active",
       );
 
-      if (
-  activeLevel &&
-  activeLevel.dataset.level &&
-  activeLevel.dataset.level !== "All"
-) {
-  rows = rows.filter(
-    (l) => l.level === activeLevel.dataset.level,
-  );
-}
+      if (activeLevel && activeLevel.dataset.level && activeLevel.dataset.level !== "All") {
+        rows = rows.filter((l) => l.level === activeLevel.dataset.level);
+      }
 
       const modality = document.querySelector("[data-filter-modality]")?.value;
 
@@ -324,139 +318,62 @@ class TeacherDashboard {
   }
 
   static renderStatisticsFromRows(rows) {
-  const count = (risk) =>
-    rows.filter(
-      (l) => l.risk === risk,
-    ).length;
+    const count = (risk) => rows.filter((l) => l.risk === risk).length;
 
-  this.renderStatistics({
-    registered: rows.length,
-
-    high: count("High"),
-
-    moderate:
-      count("Moderate"),
-
-    low:
-      count("Low") +
-      count("Not Yet Assessed"),
-  });
-}
-  static renderRiskChartFromRows(rows) {
-  const count = (risk) =>
-    rows.filter(
-      (l) => l.risk === risk,
-    ).length;
-
-  const high = count("High");
-
-  const moderate = count(
-    "Moderate",
-  );
-
-  const notYetAssessed = count(
-    "Not Yet Assessed",
-  );
-
-  // StayEd currently includes learners
-  // who are "Not Yet Assessed" under Low
-  // for the dashboard KPI/chart.
-  const low =
-    count("Low") +
-    notYetAssessed;
-
-  const registered = rows.length;
-
-  const predicted =
-    registered -
-    notYetAssessed;
-
-  const coverage =
-    registered > 0
-      ? Math.round(
-          (predicted / registered) *
-            100,
-        )
-      : 0;
-
-  /*
-   * Use the actual largest displayed
-   * category to determine the Y-axis.
-   *
-   * Example:
-   *
-   * High = 0
-   * Moderate = 3
-   * Low = 9
-   *
-   * Largest = 9
-   * Chart max = 10
-   *
-   * This prevents the bars from appearing
-   * like tiny decorative lines.
-   */
-  const largestCategory =
-    Math.max(
-      high,
-      moderate,
-      low,
-      1,
-    );
-
-  const scaleMax =
-    Math.max(
-      5,
-      Math.ceil(
-        largestCategory / 5,
-      ) * 5,
-    );
-
-  const insights = [
-    {
-      tone: high
-        ? "error"
-        : "primary",
-
-      text:
-        `${high} learner(s) are currently classified as High Risk`,
-    },
-
-    {
-      tone: "primary",
-
-      text:
-        `Prediction coverage is ${coverage}% of active learners`,
-    },
-  ];
-
-  if (!registered) {
-    insights.push({
-      text:
-        "No learners match the current filters.",
-      tone: "neutral",
+    this.renderStatistics({
+      registered: rows.length,
+      high: count("High"),
+      moderate: count("Moderate"),
+      low: count("Low") + count("Not Yet Assessed"),
     });
   }
 
-  this.renderRiskChart(
-    {
-      scale_max: scaleMax,
-      high,
-      moderate,
-      low,
-    },
+  static renderRiskChartFromRows(rows) {
+    const count = (risk) => rows.filter((l) => l.risk === risk).length;
 
-    {
-      coverage: `${coverage}%`,
+    const high = count("High");
+    const moderate = count("Moderate");
+    const notYetAssessed = count("Not Yet Assessed");
 
-      confidence:
-        predicted > 0
-          ? "Available"
-          : "Pending",
+    // "Not Yet Assessed" learners are counted under Low for this KPI/chart.
+    const low = count("Low") + notYetAssessed;
 
-      insights,
-    },
-  );
-}
+    const registered = rows.length;
+    const predicted = registered - notYetAssessed;
+    const coverage = registered > 0 ? Math.round((predicted / registered) * 100) : 0;
+
+    // Scale the Y-axis to the largest visible category so bars don't
+    // render as tiny slivers (e.g. High=0, Moderate=3, Low=9 -> max 10).
+    const largestCategory = Math.max(high, moderate, low, 1);
+    const scaleMax = Math.max(5, Math.ceil(largestCategory / 5) * 5);
+
+    const insights = [
+      {
+        tone: high ? "error" : "primary",
+        text: `${high} learner(s) are currently classified as High Risk`,
+      },
+      {
+        tone: "primary",
+        text: `Prediction coverage is ${coverage}% of active learners`,
+      },
+    ];
+
+    if (!registered) {
+      insights.push({
+        text: "No learners match the current filters.",
+        tone: "neutral",
+      });
+    }
+
+    this.renderRiskChart(
+      { scale_max: scaleMax, high, moderate, low },
+      {
+        coverage: `${coverage}%`,
+        confidence: predicted > 0 ? "Available" : "Pending",
+        insights,
+      },
+    );
+  }
 
   static renderRegistryPage() {
     const body = document.querySelector("[data-registry-body]");

@@ -41,15 +41,101 @@
               </p>
             </div>
             <div class="st-page-header-actions">
-              <a href="learner-records.html" class="st-btn st-btn-outline">
+              <a
+                href="learner-records.html"
+                class="st-btn st-btn-outline"
+                data-back-to-records
+              >
                 <span class="material-symbols-outlined">arrow_back</span>
-                Back
+                Return to Learner Records
               </a>
             </div>
           </div>
 
-          <!-- Progress indicator -->
-          <div class="st-enroll-progress" data-enroll-progress>
+          <!-- Gate: ask whether this is a brand-new learner or one already
+                       known to StayEd before showing the enrollment wizard. -->
+          <div class="st-enroll-step-card st-enroll-gate" data-enroll-gate>
+            <h3 class="st-enroll-step-title">
+              <span class="material-symbols-outlined">how_to_reg</span>
+              Enroll a Learner
+            </h3>
+
+            <div data-gate-options>
+              <p class="st-enroll-gate-intro">
+                Is this student new to StayEd, or already enrolled in another
+                class?
+              </p>
+              <div class="st-enroll-gate-options">
+                <button
+                  type="button"
+                  class="st-enroll-gate-option"
+                  data-gate-choice="new"
+                >
+                  <span class="material-symbols-outlined">person_add</span>
+                  <span class="st-enroll-gate-option-text">
+                    <strong>New Student</strong>
+                    <span
+                      >Register a learner who has never been added to
+                      StayEd.</span
+                    >
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  class="st-enroll-gate-option"
+                  data-gate-choice="existing"
+                >
+                  <span class="material-symbols-outlined">manage_search</span>
+                  <span class="st-enroll-gate-option-text">
+                    <strong>Existing Student</strong>
+                    <span
+                      >Add a learner already in the system to this
+                      class.</span
+                    >
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <div class="st-enroll-gate-search st-hidden" data-gate-existing-panel>
+              <div class="st-search st-enroll-gate-search-input">
+                <span class="material-symbols-outlined">search</span>
+                <input
+                  type="text"
+                  placeholder="Search by name or LRN..."
+                  data-gate-search-input
+                  aria-label="Search existing learners"
+                />
+              </div>
+              <div class="st-enroll-gate-results" data-gate-search-results></div>
+              <button
+                type="button"
+                class="st-btn st-btn-outline st-mt-sm"
+                data-gate-back
+              >
+                <span class="material-symbols-outlined">arrow_back</span>
+                Back
+              </button>
+            </div>
+          </div>
+
+          <div class="st-hidden" data-enroll-wizard>
+            <div
+              class="st-settings-info-box st-hidden"
+              data-existing-learner-banner
+              style="margin-bottom: 16px"
+            >
+              <span class="material-symbols-outlined">verified</span>
+              <p>
+                Using the existing record for
+                <strong data-existing-learner-name>—</strong>. Personal
+                details below are locked; continue through the remaining
+                steps to enroll them in this class.
+              </p>
+            </div>
+
+            <!-- Progress indicator -->
+            <div class="st-enroll-progress" data-enroll-progress>
             <div
               class="st-enroll-progress-step is-active"
               data-progress-step="1"
@@ -422,7 +508,10 @@
                   The learner has been added to the system.
                 </p>
                 <div class="st-clc-success-actions">
-                  <a href="learner-records.html" class="st-btn st-btn-primary"
+                  <a
+                    href="learner-records.html"
+                    class="st-btn st-btn-primary"
+                    data-back-to-records
                     >Go to Learner Records</a
                   >
                   <button
@@ -442,10 +531,9 @@
                 type="button"
                 class="st-btn st-btn-outline"
                 data-wizard-prev
-                disabled
               >
                 <span class="material-symbols-outlined">arrow_back</span>
-                Previous
+                Back
               </button>
               <button
                 type="button"
@@ -457,6 +545,8 @@
               </button>
             </div>
           </form>
+          </div>
+          <!-- /data-enroll-wizard -->
         </div>
       </main>
 

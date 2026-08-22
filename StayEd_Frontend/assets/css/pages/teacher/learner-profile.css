@@ -205,16 +205,6 @@
     display:block;
 }
 
-.st-metric-card-progress{
-    margin-top:8px;
-}
-
-.st-metric-card-sub{
-    margin-top:6px;
-    font-size:11px;
-    color:var(--st-on-surface-variant);
-}
-
 .st-risk-trend-card{
     background:#fff;
     border:1px solid rgba(195,198,207,.30);
@@ -272,29 +262,6 @@
     inset:0;
 }
 
-.st-risk-trend-line{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    overflow:visible;
-}
-
-.st-risk-trend-line polyline{
-    fill:none;
-    stroke:var(--st-on-surface-variant);
-    stroke-width:1.5;
-    stroke-linejoin:round;
-    stroke-linecap:round;
-    vector-effect:non-scaling-stroke;
-    opacity:.55;
-}
-
-.st-risk-trend-list-pct{
-    color:var(--st-on-surface-variant);
-    font-weight:600;
-}
-
 .st-risk-trend-point{
     position:absolute;
     width:12px;
@@ -332,10 +299,6 @@
     color:var(--st-on-surface-variant);
     font-size:13px;
     padding:24px 0 0;
-}
-
-.st-risk-trend-chart.is-empty .st-risk-trend-zone{
-    opacity:.35;
 }
 
 .st-profile-grid{

@@ -7,7 +7,6 @@ from flask import Blueprint, request
 from ..authz import current_user_id, role_required, teacher_for_user
 from ..db import fetch_all, fetch_one
 from ..helpers import error
-from ..services.learner_service import _learner_query, _shape_learner
 from ..services.prediction_service import InsufficientDataError, trigger_prediction
 
 bp = Blueprint("predictions", __name__)
@@ -62,31 +61,11 @@ def summary():
 @bp.get("/predictions/risk-distribution")
 @role_required("teacher")
 def distribution():
-    """Mirrors the Risk Distribution chart's counting rule on the main
-    dashboard (`/teacher/dashboard`) exactly -- same learner query, same
-    `_shape_learner` classification, same "awaiting prediction counts as
-    Low" bucketing -- so this endpoint can never drift into a
-    prediction-only/model-only count that disagrees with the KPI cards.
-    Not currently called by the frontend (the dashboard reuses its own
-    payload instead of a second round-trip), but kept correct rather than
-    left as a latent trap for future callers.
-    """
     teacher = teacher_for_user()
-    if not teacher:
-        return {"high": 0, "moderate": 0, "low": 0, "scale_max": 1}
-
-    rows = fetch_all(
-        _learner_query("WHERE lc.teacher_id = %s AND ce.enrollment_status = 'ENROLLED'"),
-        (teacher["teacher_id"],),
-    )
-    latest_by_learner = {}
-    for row in rows:
-        latest_by_learner.setdefault(row["learner_id"], row)
-    learners = [_shape_learner(row) for row in latest_by_learner.values()]
-
-    high = sum(l["risk"] == "High" for l in learners)
-    moderate = sum(l["risk"] == "Moderate" for l in learners)
-    low = sum(l["risk"] in ("Low", "Not Yet Assessed") for l in learners)
+    rows = [r for r in _risk_rows(teacher["teacher_id"]) if r.get("risk_level")]
+    high = sum(r["risk_level"] == "HIGH" for r in rows)
+    moderate = sum(r["risk_level"] == "MODERATE" for r in rows)
+    low = sum(r["risk_level"] == "LOW" for r in rows)
     return {"high": high, "moderate": moderate, "low": low, "scale_max": max(high, moderate, low, 1)}
 
 

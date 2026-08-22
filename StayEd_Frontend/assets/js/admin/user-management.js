@@ -353,9 +353,10 @@ async function reactivate(id){
   }
 }
 
-// Create Teacher Account
+// Create Account (Teacher or Admin)
 const createClcSelect=document.getElementById('cr-clc');
 const createMuniSelect=document.getElementById('cr-muni');
+let createRole='teacher';
 function populateCreateMuniOptions(){
   createMuniSelect.innerHTML='<option value="" disabled selected hidden>Select Municipality…</option>'+Object.keys(clcsByMuni).sort().map(m=>`<option>${m}</option>`).join('');
 }
@@ -364,10 +365,23 @@ function populateCreateClc(muni){
   createClcSelect.innerHTML='<option value="" disabled selected hidden>Select CLC…</option>'+list.map(c=>`<option>${c}</option>`).join('');
 }
 createMuniSelect.addEventListener('change',()=>populateCreateClc(createMuniSelect.value));
+
+function setCreateRole(role){
+  createRole=role;
+  document.querySelectorAll('#cr-role-toggle .role-toggle-btn').forEach(b=>b.classList.toggle('active',b.dataset.role===role));
+  const isTeacher=role==='teacher';
+  document.getElementById('cr-empid-field').style.display=isTeacher?'':'none';
+  document.getElementById('cr-clc-fields').style.display=isTeacher?'':'none';
+}
+document.querySelectorAll('#cr-role-toggle .role-toggle-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>setCreateRole(btn.dataset.role));
+});
+
 document.getElementById('createTeacherBtn').addEventListener('click',()=>{
   ['cr-first','cr-middle','cr-last','cr-email','cr-phone','cr-empid'].forEach(id=>document.getElementById(id).value='');
   createMuniSelect.selectedIndex=0;
   createClcSelect.innerHTML='<option value="" disabled selected hidden>Select CLC…</option>';
+  setCreateRole('teacher');
   openModal('modal-create');
 });
 document.getElementById('cr-save-btn').addEventListener('click',async()=>{
@@ -376,23 +390,27 @@ document.getElementById('cr-save-btn').addEventListener('click',async()=>{
   const email=document.getElementById('cr-email').value.trim();
   if(!first||!last||!email){ showToast('Please fill in first name, last name, and email'); return; }
   const payload={
+    role:createRole,
     firstName:first,
     middleName:document.getElementById('cr-middle').value.trim(),
     lastName:last,
     email,
     phone:document.getElementById('cr-phone').value.trim(),
-    employeeId:document.getElementById('cr-empid').value.trim(),
-    municipality:createMuniSelect.value,
-    clc:createClcSelect.value,
   };
+  if(createRole==='teacher'){
+    payload.employeeId=document.getElementById('cr-empid').value.trim();
+    payload.municipality=createMuniSelect.value;
+    payload.clc=createClcSelect.value;
+  }
   try{
     const response=await API.post('/admin/users',payload);
     closeModal('modal-create');
-    await loadTeachers();
+    if(createRole==='teacher') await loadTeachers();
     realPassword=response.temp_password; passwordVisible=false;
     document.getElementById('ps-name').textContent=response.data.name;
     document.getElementById('temp-pass-val').textContent='••••••••••••';
     openModal('modal-reset-success');
+    showToast(createRole==='admin'?'Admin account created':'Teacher account created');
   }catch(error){
     console.error('[UserManagement] Create failed',error);
     showToast(error?.data?.message||'Unable to create this account.');

@@ -29,7 +29,7 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
         <input id="searchInput" type="text" placeholder="Search by name or CLC…" />
       </div>
-      <button class="btn primary" id="createTeacherBtn">+ Create Teacher Account</button>
+      <button class="btn primary" id="createTeacherBtn">+ Create Account</button>
     </div>
     <table>
       <thead><tr><th>Teacher</th><th>Assigned CLC</th><th>Status</th><th>Actions</th></tr></thead>
@@ -220,12 +220,19 @@
   </div>
 </div>
 
-<!-- Create Teacher Account Modal -->
+<!-- Create Account Modal -->
 <div class="overlay" id="modal-create">
   <div class="modal wide">
-    <h2>Create Teacher Account</h2>
-    <div class="modal-sub">Create an account and assign the teacher to a Community Learning Center.</div>
-    <div class="field" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px 16px">
+    <h2>Create Account</h2>
+    <div class="modal-sub">Create a StayEd account and, for teachers, assign them to a Community Learning Center.</div>
+
+    <label style="display:block;font-size:14.5px;font-weight:700;margin-bottom:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Account Type</label>
+    <div class="role-toggle" id="cr-role-toggle" role="group" aria-label="Account type">
+      <button type="button" class="role-toggle-btn active" data-role="teacher">Teacher</button>
+      <button type="button" class="role-toggle-btn" data-role="admin">Admin</button>
+    </div>
+
+    <div class="field" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px 16px;margin-top:16px">
       <div><label for="cr-first">First Name</label><input id="cr-first" type="text" placeholder="e.g. Maria"/></div>
       <div><label for="cr-middle">Middle Name (Optional)</label><input id="cr-middle" type="text" placeholder="e.g. Clara"/></div>
       <div><label for="cr-last">Last Name</label><input id="cr-last" type="text" placeholder="e.g. Santos"/></div>
@@ -233,9 +240,9 @@
     <div class="field"><label for="cr-email">DepEd Email</label><input id="cr-email" type="email" placeholder="maria.santos@deped.gov.ph"/></div>
     <div class="field" style="display:grid;grid-template-columns:1fr 1fr;gap:14px 16px">
       <div><label for="cr-phone">Contact Number (Optional)</label><input id="cr-phone" type="text" placeholder="+63 9xx xxx xxxx"/></div>
-      <div><label for="cr-empid">Employee ID (Optional)</label><input id="cr-empid" type="text" placeholder="e.g. 1234567"/></div>
+      <div id="cr-empid-field"><label for="cr-empid">Employee ID (Optional)</label><input id="cr-empid" type="text" placeholder="e.g. 1234567"/></div>
     </div>
-    <div class="field" style="display:grid;grid-template-columns:1fr 1fr;gap:14px 16px">
+    <div class="field" id="cr-clc-fields" style="display:grid;grid-template-columns:1fr 1fr;gap:14px 16px">
       <div><label for="cr-muni">Municipality</label>
         <div class="select-wrap select-wrap--chevron"><select id="cr-muni"><option value="" disabled selected hidden>Select Municipality…</option></select></div>
       </div>

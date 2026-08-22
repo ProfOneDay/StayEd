@@ -479,10 +479,6 @@
     padding:0 16px 16px;
 }
 
-.st-mrb-actions--returned{
-    justify-content:flex-end;
-}
-
 .st-mrb-risk-bar{
     height:4px;
     border-radius:999px;

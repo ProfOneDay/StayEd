@@ -182,18 +182,9 @@ class LearnerProfilePage {
     const p = this.profile;
     const m = p.metrics || {};
 
+    this.set("[data-metric-engagement]", `${m.engagementScore} of ${m.engagementScoreMax}`);
     this.set("[data-metric-released]", m.modulesReleased);
     this.set("[data-metric-returned]", m.modulesReturned);
-
-    this.set(
-      "[data-metric-module-rate]",
-      m.moduleRate == null ? "—" : `${m.moduleRate}%`,
-    );
-    this.set("[data-metric-module-rate-sub]", m.moduleRateText || "—");
-
-    const bar = document.querySelector("[data-metric-module-rate-bar]");
-    if (bar) bar.style.width = `${m.moduleRate == null ? 0 : m.moduleRate}%`;
-
     this.set("[data-metric-active]", m.activeModules);
     this.set("[data-metric-last-activity]", m.lastActivity);
     this.set(
@@ -212,83 +203,38 @@ class LearnerProfilePage {
     );
   }
 
-  // Maps a risk probability (0-100) to a vertical position (0-100, "top%")
-  // inside the trend chart so a plotted point always lands inside the same
-  // colored zone its risk_level classification would predict. A single
-  // linear 0-100 -> 100-0 mapping would NOT do this, because the zones
-  // aren't equal thirds -- they mirror the backend's actual LOW/MODERATE/HIGH
-  // probability thresholds (40% and 70%), so the mapping has to be piecewise
-  // to keep a 39% dot inside the green Low band and a 41% dot inside the
-  // orange Moderate band. Within each band the position still moves
-  // proportionally with probability, so two Moderate points (e.g. 41% vs
-  // 63%) plot at different heights -- capturing "still Moderate, but
-  // worsening" the way a flat level-only mapping never could.
-  static riskYPercent(probability) {
-    const p = Math.max(0, Math.min(100, probability));
-    const LOW_MAX = 40;
-    const HIGH_MIN = 70;
-
-    if (p < LOW_MAX) {
-      return 100 - (p / LOW_MAX) * 30;
-    }
-    if (p < HIGH_MIN) {
-      return 70 - ((p - LOW_MAX) / (HIGH_MIN - LOW_MAX)) * 40;
-    }
-    return 30 - ((p - HIGH_MIN) / (100 - HIGH_MIN)) * 30;
-  }
-
   static renderRiskTrendChart(trend) {
     const points = document.querySelector("[data-risk-trend-points]");
     const list = document.querySelector("[data-risk-trend-list]");
-    const chart = document.querySelector("[data-risk-trend-chart]");
 
     if (!points || !list) return;
 
-    chart?.classList.remove("is-empty");
-
     if (!trend.length) {
       points.innerHTML = "";
-      list.innerHTML = `<p class="st-risk-trend-empty">No risk assessment available yet.</p>`;
-      chart?.classList.add("is-empty");
+      list.innerHTML = `<p class="st-risk-trend-empty">No risk assessments recorded yet.</p>`;
       return;
     }
 
-    const coords = trend.map((pt, i) => ({
-      x: trend.length === 1 ? 50 : (i / (trend.length - 1)) * 100,
-      y: this.riskYPercent(pt.probability ?? { High: 85, Moderate: 55, Low: 15 }[pt.level] ?? 50),
-      pt,
-    }));
+    const yFor = { High: 15, Moderate: 50, Low: 85 };
 
-    const line =
-      coords.length > 1
-        ? `<svg class="st-risk-trend-line" viewBox="0 0 100 100" preserveAspectRatio="none">
-             <polyline points="${coords.map((c) => `${c.x},${c.y}`).join(" ")}" />
-           </svg>`
-        : "";
-
-    const dots = coords
-      .map(
-        ({ x, y, pt }) =>
-          `<span class="st-risk-trend-point st-risk-trend-point--${pt.level.toLowerCase()}" style="left:${x}%;top:${y}%;" title="${pt.date}: ${pt.level} Risk${pt.probability != null ? ` (${pt.probability}%)` : ""}"></span>`,
-      )
+    points.innerHTML = trend
+      .map((pt, i) => {
+        const x = trend.length === 1 ? 50 : (i / (trend.length - 1)) * 100;
+        const y = yFor[pt.level] ?? 50;
+        return `<span class="st-risk-trend-point st-risk-trend-point--${pt.level.toLowerCase()}" style="left:${x}%;top:${y}%;" title="${pt.date}: ${pt.level} Risk"></span>`;
+      })
       .join("");
-
-    points.innerHTML = line + dots;
 
     list.innerHTML = trend
       .map(
         (pt) => `
           <div class="st-risk-trend-list-row">
-            <span>${pt.date}${pt.probability != null ? ` <span class="st-risk-trend-list-pct">${pt.probability}%</span>` : ""}</span>
+            <span>${pt.date}</span>
             <span class="st-risk-badge st-risk-badge--${pt.level.toLowerCase()}"><span class="st-risk-dot"></span>${pt.level}</span>
           </div>
         `,
       )
       .join("");
-
-    if (trend.length === 1) {
-      list.innerHTML += `<p class="st-risk-trend-empty">Only one assessment is available. Additional assessments are required to display a risk trend.</p>`;
-    }
   }
 
   static renderMonitoringSummaryTable() {

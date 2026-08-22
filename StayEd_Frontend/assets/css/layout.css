@@ -642,12 +642,6 @@ body {
   background: var(--st-error);
 
   border: 2px solid #fff;
-
-  display: none;
-}
-
-.st-notification-dot.is-visible {
-  display: block;
 }
 
 .st-navbar-divider {

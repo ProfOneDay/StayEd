@@ -26,15 +26,6 @@
     gap:16px;
 }
 
-.st-records-stats--clc{
-    grid-template-columns:repeat(2,1fr);
-    max-width:600px;
-}
-
-@media (max-width:600px){
-    .st-records-stats--clc{ grid-template-columns:1fr; max-width:none; }
-}
-
 .st-records-stat{
     background:#fff;
     border:1px solid rgba(195,198,207,.30);
@@ -567,9 +558,13 @@
     font-weight:600;
 }
 
-.st-enroll-field input[readonly]{
+.st-enroll-field input[readonly],
+.st-enroll-field textarea[readonly],
+.st-enroll-field select[disabled]{
     background:var(--st-surface-container-low);
     cursor:not-allowed;
+    opacity:1;
+    -webkit-text-fill-color:currentColor;
 }
 
 .st-avatar-btn{

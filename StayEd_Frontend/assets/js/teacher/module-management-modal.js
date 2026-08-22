@@ -74,8 +74,6 @@ class ModuleManagementModal {
       this.bodyEl.innerHTML = this.renderReleaseForm();
     } else if (this.view === "return") {
       this.bodyEl.innerHTML = this.renderReturnModal();
-    } else if (this.view === "edit") {
-      this.bodyEl.innerHTML = this.renderEditForm();
     } else {
       this.bodyEl.innerHTML = this.renderLogbook();
     }
@@ -171,11 +169,6 @@ class ModuleManagementModal {
               <span class="material-symbols-outlined">check</span> Returned
             </span>
           </button>
-          <div class="st-mrb-actions st-mrb-actions--returned">
-            <button type="button" class="st-icon-btn-sm" data-edit-batch="${batch.id}" aria-label="Edit release batch" title="Edit">
-              <span class="material-symbols-outlined">edit</span>
-            </button>
-          </div>
           ${expanded ? this.renderBatchExpanded(batch) : ""}
         </div>
       `;
@@ -215,9 +208,6 @@ class ModuleManagementModal {
               ${status.sub ? `<small>${status.sub}</small>` : ""}
             </span>
           </span>
-          <button type="button" class="st-icon-btn-sm" data-edit-batch="${batch.id}" aria-label="Edit release batch" title="Edit">
-            <span class="material-symbols-outlined">edit</span>
-          </button>
           <button type="button" class="st-btn st-btn-primary st-btn-xs" data-record-return="${batch.id}">Record Return</button>
         </div>
         ${expanded ? this.renderBatchExpanded(batch) : ""}
@@ -324,190 +314,6 @@ class ModuleManagementModal {
         };
         this.renderAll();
       });
-    });
-
-    root.querySelectorAll("[data-edit-batch]").forEach((el) => {
-      el.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const id = Number(el.dataset.editBatch);
-        this.openEditForm(id);
-      });
-    });
-  }
-
-  // ------------------------------------------------------------------
-  // Edit view -- correct a previously-encoded batch (item 8: teachers need
-  // a way to fix typos/mis-encoded dates without deleting history).
-  // ------------------------------------------------------------------
-
-  static openEditForm(batchId) {
-    const batch = this.batches.find((b) => b.id === batchId);
-    if (!batch) return;
-
-    this.editForm = {
-      batchId,
-      releaseDate: this.isoDate(batch.releaseDate),
-      modules: batch.strands.flatMap((s) =>
-        s.modules.map((m) => ({
-          id: m.id,
-          title: m.title,
-          strandCode: s.code,
-          remarks: m.remarks || "",
-          status: m.status,
-          returnDate: m.status === "returned" ? this.isoDate(m.returned) : "",
-        })),
-      ),
-    };
-    this.view = "edit";
-    this.renderAll();
-  }
-
-  static isoDate(displayDate) {
-    // Batch/module dates arrive from the backend already formatted
-    // ("August 05, 2026") for display -- convert back to YYYY-MM-DD for
-    // <input type="date">.
-    const d = new Date(displayDate);
-    if (Number.isNaN(d.getTime())) return new Date().toISOString().slice(0, 10);
-    return d.toISOString().slice(0, 10);
-  }
-
-  static renderEditForm() {
-    const form = this.editForm;
-    const batch = this.batches.find((b) => b.id === form.batchId);
-
-    return `
-      <div class="st-module-modal-header">
-        <button type="button" class="st-module-modal-close" data-module-close aria-label="Close">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-        <h1 class="st-module-modal-title">Edit Release Batch</h1>
-        <p class="st-mrf-subtitle">Correct incorrectly encoded release/return dates, module names, learning strands, or remarks. Changes are logged, not deleted.</p>
-      </div>
-
-      <div class="st-module-modal-body">
-        <h3 class="st-mrf-section-title">Release Details</h3>
-
-        <div class="st-schedule-modal-field">
-          <label for="mefReleaseDate">Release Date *</label>
-          <input type="date" id="mefReleaseDate" data-edit-release-date value="${form.releaseDate}">
-        </div>
-
-        <h3 class="st-mrf-section-title">Modules</h3>
-
-        ${form.modules
-          .map(
-            (m, i) => `
-          <div class="st-mrf-strand-block">
-            <div class="st-schedule-modal-field">
-              <label for="mefModuleName${i}">Module Name *</label>
-              <input type="text" id="mefModuleName${i}" data-edit-module-name="${i}" value="${m.title}">
-            </div>
-            <div class="st-schedule-modal-field">
-              <label for="mefStrand${i}">Learning Strand *</label>
-              <select id="mefStrand${i}" data-edit-module-strand="${i}">
-                ${this.strandOptions.map((s) => `<option value="${s.code}" ${m.strandCode === s.code ? "selected" : ""}>${s.code} – ${s.name}</option>`).join("")}
-              </select>
-            </div>
-            ${
-              m.status === "returned"
-                ? `<div class="st-schedule-modal-field">
-                     <label for="mefReturnDate${i}">Return Date</label>
-                     <input type="date" id="mefReturnDate${i}" data-edit-module-return="${i}" value="${m.returnDate}">
-                   </div>`
-                : `<p class="st-mrf-add-strand-hint">Not yet returned.</p>`
-            }
-            <div class="st-schedule-modal-field">
-              <label for="mefRemarks${i}">Remarks</label>
-              <textarea id="mefRemarks${i}" data-edit-module-remarks="${i}" rows="2">${m.remarks}</textarea>
-            </div>
-          </div>
-        `,
-          )
-          .join("")}
-      </div>
-
-      <div class="st-module-modal-footer">
-        <button type="button" class="st-btn-text" data-module-cancel>Cancel</button>
-        <button type="button" class="st-btn st-btn-primary" data-save-edit>
-          <span class="material-symbols-outlined">save</span>
-          Save Changes
-        </button>
-      </div>
-    `;
-  }
-
-  static bindEditForm(root) {
-    const form = this.editForm;
-
-    root.querySelector("[data-edit-release-date]")?.addEventListener("input", (e) => {
-      form.releaseDate = e.target.value;
-    });
-
-    root.querySelectorAll("[data-edit-module-name]").forEach((el) => {
-      el.addEventListener("input", (e) => {
-        form.modules[Number(el.dataset.editModuleName)].title = e.target.value;
-      });
-    });
-
-    root.querySelectorAll("[data-edit-module-strand]").forEach((el) => {
-      el.addEventListener("change", (e) => {
-        form.modules[Number(el.dataset.editModuleStrand)].strandCode = e.target.value;
-      });
-    });
-
-    root.querySelectorAll("[data-edit-module-return]").forEach((el) => {
-      el.addEventListener("input", (e) => {
-        form.modules[Number(el.dataset.editModuleReturn)].returnDate = e.target.value;
-      });
-    });
-
-    root.querySelectorAll("[data-edit-module-remarks]").forEach((el) => {
-      el.addEventListener("input", (e) => {
-        form.modules[Number(el.dataset.editModuleRemarks)].remarks = e.target.value;
-      });
-    });
-
-    root.querySelector("[data-module-cancel]")?.addEventListener("click", () => {
-      this.view = "logbook";
-      this.renderAll();
-    });
-
-    root.querySelector("[data-save-edit]")?.addEventListener("click", async (e) => {
-      const btn = e.currentTarget;
-      if (btn.disabled) return;
-
-      if (form.modules.some((m) => !m.title.trim())) {
-        Toast?.error("Module name cannot be blank.");
-        return;
-      }
-
-      btn.disabled = true;
-
-      const payload = {
-        releaseDate: form.releaseDate,
-        modules: form.modules.map((m) => ({
-          id: m.id,
-          moduleName: m.title.trim(),
-          strandCode: m.strandCode,
-          remarks: m.remarks.trim(),
-          ...(m.status === "returned" ? { returnDate: m.returnDate || null } : {}),
-        })),
-      };
-
-      try {
-        const response = await API.updateModuleBatch(this.learner.id, form.batchId, payload);
-        this.meta = response.learner || this.meta;
-        this.batches = response.batches || [];
-        this.expandedBatchId = form.batchId;
-        Toast?.success("Release batch updated.");
-        this.view = "logbook";
-        this.renderAll();
-        this.onUpdate?.();
-      } catch (error) {
-        console.error("[ModuleManagementModal] Edit failed", error);
-        Toast?.error(error?.data?.message || "Unable to save these changes.");
-        btn.disabled = false;
-      }
     });
   }
 
@@ -899,7 +705,6 @@ class ModuleManagementModal {
 
     if (this.view === "release") this.bindReleaseForm(root);
     else if (this.view === "return") this.bindReturnModal(root);
-    else if (this.view === "edit") this.bindEditForm(root);
     else this.bindLogbook(root);
   }
 }

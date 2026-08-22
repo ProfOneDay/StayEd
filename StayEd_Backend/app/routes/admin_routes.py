@@ -351,13 +351,14 @@ def create_user():
     if fetch_one("SELECT user_id FROM users WHERE LOWER(email) = LOWER(%s)", (email,)):
         return error("Email already exists.", 409)
 
+    account_role = str(data.get("role") or "teacher").strip().lower()
+    if account_role not in {"teacher", "admin"}:
+        return error("Role must be either 'teacher' or 'admin'.", 422)
+
     middle_name = str(data.get("middleName") or "").strip() or None
     contact_number = str(data.get("phone") or "").strip() or None
-    municipality = str(data.get("municipality") or "Unassigned").strip()
-    employee_id = str(data.get("employeeId") or "").strip()
-    clc_name = str(data.get("clc") or "").strip()
 
-    username_base = email.split("@", 1)[0][:80] or "teacher"
+    username_base = email.split("@", 1)[0][:80] or account_role
     username = username_base
     suffix = 1
     while fetch_one("SELECT user_id FROM users WHERE username = %s", (username,)):
@@ -369,49 +370,81 @@ def create_user():
     db = get_db()
     try:
         with db.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO users (username, password_hash, email, role, account_status)
-                VALUES (%s, %s, %s, 'TEACHER', 'ACTIVE')
-                RETURNING user_id
-                """,
-                (username, generate_password_hash(temp_password), email),
-            )
-            user_id = cur.fetchone()["user_id"]
-
-            final_employee_id = employee_id or f"ALS-TEACHER-{user_id}"
-            cur.execute(
-                """
-                INSERT INTO teacher (
-                    user_id, employee_id, first_name, middle_name, last_name,
-                    contact_number, municipality, status
-                )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, 'ACTIVE')
-                RETURNING teacher_id
-                """,
-                (user_id, final_employee_id, first_name, middle_name, last_name, contact_number, municipality),
-            )
-            teacher_id = cur.fetchone()["teacher_id"]
-
-            if clc_name:
+            if account_role == "admin":
+                # Admin accounts have no `teacher` row -- name/phone live
+                # directly on `users` (see sql/04_user_profile_fields.sql).
                 cur.execute(
-                    "SELECT clc_id FROM clc WHERE LOWER(clc_name) = LOWER(%s) LIMIT 1",
-                    (clc_name,),
-                )
-                clc_row = cur.fetchone()
-                if clc_row:
-                    cur.execute(
-                        """
-                        INSERT INTO teacher_clc (teacher_id, clc_id, school_year, assignment_status)
-                        VALUES (%s, %s, %s, 'ACTIVE')
-                        ON CONFLICT (teacher_id, clc_id, school_year) DO NOTHING
-                        """,
-                        (teacher_id, clc_row["clc_id"], str(data.get("schoolYear") or "").strip() or get_active_school_year()),
+                    """
+                    INSERT INTO users (
+                        username, password_hash, email, role, account_status,
+                        first_name, last_name, contact_number
                     )
+                    VALUES (%s, %s, %s, 'ADMIN', 'ACTIVE', %s, %s, %s)
+                    RETURNING user_id
+                    """,
+                    (username, generate_password_hash(temp_password), email, first_name, last_name, contact_number),
+                )
+                user_id = cur.fetchone()["user_id"]
+            else:
+                municipality = str(data.get("municipality") or "Unassigned").strip()
+                employee_id = str(data.get("employeeId") or "").strip()
+                clc_name = str(data.get("clc") or "").strip()
+
+                cur.execute(
+                    """
+                    INSERT INTO users (username, password_hash, email, role, account_status)
+                    VALUES (%s, %s, %s, 'TEACHER', 'ACTIVE')
+                    RETURNING user_id
+                    """,
+                    (username, generate_password_hash(temp_password), email),
+                )
+                user_id = cur.fetchone()["user_id"]
+
+                final_employee_id = employee_id or f"ALS-TEACHER-{user_id}"
+                cur.execute(
+                    """
+                    INSERT INTO teacher (
+                        user_id, employee_id, first_name, middle_name, last_name,
+                        contact_number, municipality, status
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, 'ACTIVE')
+                    RETURNING teacher_id
+                    """,
+                    (user_id, final_employee_id, first_name, middle_name, last_name, contact_number, municipality),
+                )
+                teacher_id = cur.fetchone()["teacher_id"]
+
+                if clc_name:
+                    cur.execute(
+                        "SELECT clc_id FROM clc WHERE LOWER(clc_name) = LOWER(%s) LIMIT 1",
+                        (clc_name,),
+                    )
+                    clc_row = cur.fetchone()
+                    if clc_row:
+                        cur.execute(
+                            """
+                            INSERT INTO teacher_clc (teacher_id, clc_id, school_year, assignment_status)
+                            VALUES (%s, %s, %s, 'ACTIVE')
+                            ON CONFLICT (teacher_id, clc_id, school_year) DO NOTHING
+                            """,
+                            (teacher_id, clc_row["clc_id"], str(data.get("schoolYear") or "").strip() or get_active_school_year()),
+                        )
         db.commit()
     except Exception:
         db.rollback()
         raise
+
+    if account_role == "admin":
+        return {
+            "message": "Admin account created.",
+            "data": {
+                "id": user_id,
+                "name": f"{first_name} {last_name}".strip(),
+                "email": email,
+                "role": "admin",
+            },
+            "temp_password": temp_password,
+        }, 201
 
     return {
         "message": "Teacher account created.",

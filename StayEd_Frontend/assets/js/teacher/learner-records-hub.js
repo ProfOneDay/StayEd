@@ -34,6 +34,17 @@ class LearnerRecordsHub {
     this.state.classId = classId || "";
     if (clcName) this.state.clc = clcName;
 
+    // Carry the current ?class=&clc= context onto Import/Enroll so their
+    // Back buttons can return here to the same class instead of the
+    // unfiltered Learner Records view.
+    const search = window.location.search;
+    document
+      .querySelector("[data-import-link]")
+      ?.setAttribute("href", `learner-import.html${search}`);
+    document
+      .querySelector("[data-enroll-link]")
+      ?.setAttribute("href", `learner-enroll.html${search}`);
+
     if (!classId || !banner) return;
 
     try {

@@ -57,118 +57,53 @@ def _relative_day_phrase(days: int) -> str:
 
 
 def _shape_activity(row):
-    """
-    Build the learner's latest activity from
-    actual recorded event dates.
+    """Build the learner's latest activity from actual recorded event dates.
 
     Sources:
       - Module release -> module_release_batch.release_date
       - Module return  -> module_record.date_returned
       - Consultation   -> contact_log.contact_date
 
-    Do not use created_at, updated_at, or
-    record-save timestamps.
+    Do not use created_at, updated_at, or record-save timestamps.
     """
-
+    # No released module means monitoring hasn't started yet.
     if not row.get("batch_count"):
-        return (
-            "No modules released yet",
-            "none",
-            0,
-        )
+        return "No modules released yet", "none", 0
 
-    modality_raw = (
-        row.get(
-            "learning_modality"
-        )
-        or ""
-    )
+    modality_raw = row.get("learning_modality") or ""
+    event_label = row.get("event_label")
+    event_date = row.get("event_date")
+    enrollment_date = row.get("enrollment_date")
 
-    event_label = row.get(
-        "event_label"
-    )
+    # The SQL query already determines the newest actual activity date.
+    reference_date = event_date or enrollment_date
 
-    event_date = row.get(
-        "event_date"
-    )
-
-    enrollment_date = row.get(
-        "enrollment_date"
-    )
-
-    reference_date = (
-        event_date
-        or enrollment_date
-    )
-
+    # Never allow a negative inactivity value.
     days_inactive = (
-        max(
-            0,
-            (
-                date.today()
-                - reference_date
-            ).days,
-        )
-        if reference_date
-        else 0
+        max(0, (date.today() - reference_date).days) if reference_date else 0
     )
 
-    if (
-        event_date is not None
-        and days_inactive <
-            ACTIVITY_WARNING_DAYS
-    ):
-        activity_text = (
-            f"{event_label} "
-            f"{_relative_day_phrase(days_inactive)}"
-        )
-
+    # Show the actual latest activity while it's within the warning window.
+    if event_date is not None and days_inactive < ACTIVITY_WARNING_DAYS:
+        activity_text = f"{event_label} {_relative_day_phrase(days_inactive)}"
     else:
         primary_noun = (
-            "consultation"
-            if modality_raw ==
-            "FACE_TO_FACE"
-            else "module return"
+            "consultation" if modality_raw == "FACE_TO_FACE" else "module return"
         )
-
         if days_inactive > 0:
-            day_word = (
-                "day"
-                if days_inactive == 1
-                else "days"
-            )
-
-            activity_text = (
-                f"No {primary_noun} "
-                f"for {days_inactive} "
-                f"{day_word}"
-            )
-
+            day_word = "day" if days_inactive == 1 else "days"
+            activity_text = f"No {primary_noun} for {days_inactive} {day_word}"
         else:
-            activity_text = (
-                "No activity recorded"
-            )
+            activity_text = "No activity recorded"
 
-    if (
-        days_inactive >=
-        ACTIVITY_DANGER_DAYS
-    ):
+    if days_inactive >= ACTIVITY_DANGER_DAYS:
         activity_status = "danger"
-
-    elif (
-        days_inactive >=
-        ACTIVITY_WARNING_DAYS
-    ):
+    elif days_inactive >= ACTIVITY_WARNING_DAYS:
         activity_status = "warning"
-
     else:
         activity_status = "ok"
 
-    return (
-        activity_text,
-        activity_status,
-        days_inactive,
-    )
+    return activity_text, activity_status, days_inactive
 
 
 def _shape_learner(row):
@@ -210,219 +145,6 @@ def _learner_query(
 ):
     return f"""
         SELECT
-            l.learner_id,
-            l.lrn,
-            l.first_name,
-            l.last_name,
-            l.sex,
-
-            DATE_PART(
-                'year',
-                AGE(
-                    CURRENT_DATE,
-                    l.date_of_birth
-                )
-            )::INT AS age,
-
-            l.date_of_birth,
-            l.employment_status,
-            l.civil_status,
-            l.contact_number,
-            l.guardian_contact_number,
-            l.is_4ps_beneficiary,
-
-            ce.enrollment_id,
-            ce.learning_modality,
-            ce.distance_from_clc_km,
-            ce.enrollment_status,
-            ce.is_re_enrollee,
-            ce.enrollment_date,
-
-            lc.class_id,
-            lc.learning_level,
-            lc.class_name,
-            lc.school_year,
-            lc.semester,
-
-            lc.teacher_id,
-            c.clc_id,
-            c.clc_name,
-
-            CONCAT_WS(
-                ' ',
-                t.first_name,
-                t.last_name
-            ) AS assigned_teacher,
-
-            risk.risk_assessment_id,
-            risk.risk_probability,
-            risk.risk_level,
-            risk.assessment_date,
-
-            0 AS assessment_avg,
-
-            latest_event.event_label,
-            latest_event.event_date,
-
-            (
-                SELECT COUNT(*)
-                FROM module_release_batch mrb
-                WHERE
-                    mrb.enrollment_id =
-                    ce.enrollment_id
-            ) AS batch_count
-
-        FROM learner l
-
-        JOIN class_enrollment ce
-            ON ce.learner_id =
-               l.learner_id
-
-        JOIN learning_class lc
-            ON lc.class_id =
-               ce.class_id
-
-        JOIN clc c
-            ON c.clc_id =
-               lc.clc_id
-
-        JOIN teacher t
-            ON t.teacher_id =
-               lc.teacher_id
-
-        {_latest_risk_join_sql()}
-
-        LEFT JOIN LATERAL (
-
-            SELECT
-                event_label,
-                event_date
-
-            FROM (
-
-                /*
-                 * MODULE RELEASE
-                 *
-                 * Use the actual batch release_date
-                 * entered for the module release.
-                 */
-                SELECT
-                    'Module released'
-                    AS event_label,
-
-                    MAX(
-                        mrb.release_date
-                    ) AS event_date,
-
-                    2 AS priority
-
-                FROM module_release_batch mrb
-
-                WHERE
-                    mrb.enrollment_id =
-                    ce.enrollment_id
-
-                HAVING
-                    MAX(
-                        mrb.release_date
-                    ) IS NOT NULL
-
-
-                UNION ALL
-
-
-                /*
-                 * MODULE RETURN
-                 *
-                 * Use the actual date_returned.
-                 */
-                SELECT
-                    'Module returned'
-                    AS event_label,
-
-                    MAX(
-                        mr.date_returned
-                    ) AS event_date,
-
-                    1 AS priority
-
-                FROM module_record mr
-
-                WHERE
-                    mr.enrollment_id =
-                    ce.enrollment_id
-
-                    AND mr.date_returned
-                        IS NOT NULL
-
-                HAVING
-                    MAX(
-                        mr.date_returned
-                    ) IS NOT NULL
-
-
-                UNION ALL
-
-
-                /*
-                 * CONSULTATION
-                 *
-                 * Use the actual consultation
-                 * date entered by the teacher.
-                 */
-                SELECT
-                    'Consultation completed'
-                    AS event_label,
-
-                    MAX(
-                        cl.contact_date
-                    ) AS event_date,
-
-                    1 AS priority
-
-                FROM contact_log cl
-
-                WHERE
-                    cl.enrollment_id =
-                    ce.enrollment_id
-
-                    AND cl.contact_result =
-                        'SUCCESSFUL'
-
-                    AND ce.learning_modality
-                        IN (
-                            'FACE_TO_FACE',
-                            'BLENDED'
-                        )
-
-                HAVING
-                    MAX(
-                        cl.contact_date
-                    ) IS NOT NULL
-
-            ) events
-
-            /*
-             * The newest actual event date wins.
-             *
-             * If two events occurred on the same
-             * date, priority 1 wins over priority 2.
-             */
-            ORDER BY
-                event_date DESC,
-                priority ASC
-
-            LIMIT 1
-
-        ) latest_event
-            ON TRUE
-
-        {where}
-
-        ORDER BY {order}
-    """
-    return f"""
-        SELECT
             l.learner_id, l.lrn, l.first_name, l.last_name, l.sex,
             DATE_PART('year', AGE(CURRENT_DATE, l.date_of_birth))::INT AS age,
             l.date_of_birth, l.employment_status, l.civil_status,
@@ -444,30 +166,22 @@ def _learner_query(
         {_latest_risk_join_sql()}
         LEFT JOIN LATERAL (
             SELECT event_label, event_date FROM (
-                -- No modality filter here: Modular/Blended always use module
-                -- release dates as a matter of course, and per the "Face-to-
-                -- Face: consultation dates; relevant module release/return
-                -- dates, if modules are also used" rule, a Face-to-Face
-                -- learner's release dates count too whenever module_record
-                -- rows actually exist for them (this subquery simply
-                -- contributes nothing when none do).
-                SELECT 'Modules released' AS event_label, MAX(mr.date_released) AS event_date, 2 AS priority
-                FROM module_record mr
-                WHERE mr.enrollment_id = ce.enrollment_id
-                GROUP BY event_label
-                HAVING MAX(mr.date_released) IS NOT NULL
+                -- Newest of: module release, module return, consultation.
+                -- Priority 1 beats priority 2 on same-date ties.
+                SELECT 'Module released' AS event_label, MAX(mrb.release_date) AS event_date, 2 AS priority
+                FROM module_release_batch mrb
+                WHERE mrb.enrollment_id = ce.enrollment_id
+                HAVING MAX(mrb.release_date) IS NOT NULL
                 UNION ALL
                 SELECT 'Module returned', MAX(mr.date_returned), 1
                 FROM module_record mr
                 WHERE mr.enrollment_id = ce.enrollment_id AND mr.date_returned IS NOT NULL
-                GROUP BY 1
                 HAVING MAX(mr.date_returned) IS NOT NULL
                 UNION ALL
                 SELECT 'Consultation completed', MAX(cl.contact_date), 1
                 FROM contact_log cl
                 WHERE cl.enrollment_id = ce.enrollment_id AND cl.contact_result = 'SUCCESSFUL'
                   AND ce.learning_modality IN ('FACE_TO_FACE', 'BLENDED')
-                GROUP BY 1
                 HAVING MAX(cl.contact_date) IS NOT NULL
             ) events
             ORDER BY event_date DESC, priority ASC

@@ -65,8 +65,6 @@ class NotificationsPage {
 
           this.render();
 
-          if (window.Layout) Layout.refreshNotificationDot();
-
           Toast?.success("All notifications marked as read.");
         } catch (error) {
           console.error(error);
@@ -126,7 +124,7 @@ class NotificationsPage {
     container.innerHTML = rows
       .map(
         (n) => `
-            <div class="st-notif-item ${n.read ? "" : "is-unread"}" data-notif-id="${n.id}" data-notif-open="${n.id}" role="button" tabindex="0">
+            <div class="st-notif-item ${n.read ? "" : "is-unread"}" data-notif-id="${n.id}">
                 <div class="st-notif-icon st-notif-icon--${n.type}">
                     <span class="material-symbols-outlined">${iconMap[n.type] || "notifications"}</span>
                 </div>
@@ -138,7 +136,7 @@ class NotificationsPage {
                     </div>
                     <p class="st-notif-text">${n.message}</p>
                     <p class="st-notif-time">${n.time}</p>
-                    ${n.link ? `<button type="button" class="st-btn st-btn-primary st-btn-xs" data-notif-action="${n.link}" data-notif-action-id="${n.id}">${n.type === "intervention" ? "View Intervention" : "View Learner"}</button>` : ""}
+                    ${n.link ? `<button type="button" class="st-btn st-btn-primary st-btn-xs" data-notif-action="${n.link}">${n.type === "intervention" ? "View Intervention" : "View Learner"}</button>` : ""}
                 </div>
                 <div class="st-notif-item-actions">
                     ${n.read ? "" : `<button type="button" class="st-icon-btn-sm" data-notif-mark-read="${n.id}" aria-label="Mark as read" title="Mark as read"><span class="material-symbols-outlined">done</span></button>`}
@@ -154,49 +152,10 @@ class NotificationsPage {
     this.bindItemActions(container);
   }
 
-  static async markReadLocally(id) {
-    const notif = this.all.find((n) => String(n.id) === String(id));
-
-    if (!notif || notif.read) return;
-
-    try {
-      await API.markNotificationRead(id);
-
-      notif.read = true;
-
-      this.renderCounts();
-
-      if (window.Layout) Layout.refreshNotificationDot();
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
   static bindItemActions(container) {
-    // Opening/clicking a notification is itself what marks it read (in
-    // addition to explicit "mark as read" / "Mark All Read") -- loading the
-    // Notifications page must never silently mark everything as read.
-    container.querySelectorAll("[data-notif-open]").forEach((el) => {
-      el.addEventListener("click", async (e) => {
-        if (e.target.closest("[data-notif-action], [data-notif-mark-read], [data-notif-delete]")) {
-          return;
-        }
-
-        const id = el.dataset.notifOpen;
-        const wasUnread = !this.all.find((n) => String(n.id) === String(id))?.read;
-
-        await this.markReadLocally(id);
-
-        if (wasUnread) this.render();
-      });
-    });
-
     container.querySelectorAll("[data-notif-action]").forEach((btn) => {
-      btn.addEventListener("click", async (e) => {
+      btn.addEventListener("click", (e) => {
         e.stopPropagation();
-
-        await this.markReadLocally(btn.dataset.notifActionId);
-
         window.location.href = btn.dataset.notifAction;
       });
     });
@@ -216,8 +175,6 @@ class NotificationsPage {
 
           this.renderCounts();
           this.render();
-
-          if (window.Layout) Layout.refreshNotificationDot();
         } catch (error) {
           console.error(error);
           Toast?.error("Unable to mark as read.");
@@ -238,8 +195,6 @@ class NotificationsPage {
 
           this.renderCounts();
           this.render();
-
-          if (window.Layout) Layout.refreshNotificationDot();
 
           Toast?.success("Notification removed.");
         } catch (error) {

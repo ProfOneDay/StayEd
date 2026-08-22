@@ -242,34 +242,11 @@ class Layout {
       });
     }
 
-    this.refreshNotificationDot();
-
     const settingsButton = document.querySelector("[data-st-settings]");
 
     settingsButton?.addEventListener("click", () => {
       Router?.go("/settings") ?? (window.location.href = "settings.html");
     });
-  }
-
-  // Single source of truth for the bell's red dot: it must reflect
-  // unread_count > 0, never the total notification count, and it must not
-  // assume it's up to date after the initial page load -- the Notifications
-  // page calls this again after mark-as-read/mark-all-read/delete so the
-  // bell in the *same* page's navbar updates without a full reload.
-  static async refreshNotificationDot() {
-    const dot = document.querySelector("[data-st-notification-dot]");
-
-    if (!dot || !window.API || !window.Auth || !Auth.authenticated()) return;
-
-    try {
-      const res = await API.getNotifications();
-
-      dot.classList.toggle("is-visible", (res?.unread || 0) > 0);
-    } catch (error) {
-      // Silent -- a failed background refresh shouldn't disrupt the page,
-      // and the dot simply stays in whatever state it was already in.
-      console.warn("[Layout] Unable to refresh notification indicator", error);
-    }
   }
 
   static initializeUserMenu() {
