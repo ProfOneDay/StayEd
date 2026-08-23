@@ -22,7 +22,7 @@ Start-Process powershell -WorkingDirectory $backend -ArgumentList @(
 Write-Host "Starting StayEd frontend on http://localhost:5500 ..." -ForegroundColor Cyan
 Start-Process powershell -WorkingDirectory $frontend -ArgumentList @(
     "-NoExit", "-Command",
-    "python -m http.server 5500"
+    "python serve.py 5500"
 )
 
 Write-Host ""

@@ -1748,12 +1748,25 @@ def import_preview():
     }
 
 
-def _insert_import_rows(rows, teacher):
-    class_row = _active_class(teacher["teacher_id"])
+def _insert_import_rows(rows, teacher, class_id=None):
+    class_row = None
+    if class_id:
+        class_row = fetch_one(
+            """
+            SELECT lc.*, c.clc_name
+            FROM learning_class lc
+            JOIN clc c ON c.clc_id = lc.clc_id
+            WHERE lc.class_id = %s AND lc.teacher_id = %s AND lc.status = 'ACTIVE'
+            """,
+            (class_id, teacher["teacher_id"]),
+        )
+    if not class_row:
+        class_row = _active_class(teacher["teacher_id"])
     if not class_row:
         raise ValueError("Create an active class before importing learners.")
     preview = _preview_rows(rows)
     valid = [r for r in preview if r["status"] == "valid"]
+    duplicates = [r for r in preview if r["status"] == "duplicate"]
     db = get_db()
     imported = []
     try:
@@ -1861,12 +1874,14 @@ def import_learners():
     try:
         if "file" in request.files:
             rows = _canonical_rows(_read_upload(request.files["file"]))
+            class_id = request.form.get("class_id") or request.form.get("class")
         else:
             data = request.get_json(silent=True) or {}
             rows = data.get("learners") or []
+            class_id = data.get("class_id") or data.get("class")
         if not rows:
             return error("No learner rows were provided.", 422)
-        summary = _insert_import_rows(rows, teacher)
+        summary = _insert_import_rows(rows, teacher, class_id=class_id)
     except ValueError as exc:
         return error(str(exc), 422)
     return {

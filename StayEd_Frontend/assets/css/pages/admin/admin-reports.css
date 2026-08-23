@@ -1,0 +1,51 @@
+.st-report-panel-head {
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.st-report-listing-actions {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 24px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.st-report-groupby {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--st-text-secondary);
+}
+
+.st-report-groupby select {
+  min-width: 220px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--st-outline-variant);
+  border-radius: var(--st-button-radius);
+  background: #fff;
+  font-family: var(--st-font-body);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--st-on-surface);
+}
+
+.st-report-groupby select:focus {
+  outline: none;
+  border-color: var(--st-secondary);
+  box-shadow: var(--st-focus-ring);
+}
+
+.st-report-listing-actions .st-btn {
+  height: 40px;
+}
+
+.st-report-preview-count {
+  padding: 0 24px;
+  margin: 4px 0 14px;
+}

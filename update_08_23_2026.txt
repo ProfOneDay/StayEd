@@ -1,0 +1,69 @@
+StayEd Updates - August 23, 2026
+=================================
+
+BUG FIX - LEARNER PROFILE
+---------------------------
+- Fixed "Unable to load learner profile" error in Student Registry. A
+  mangled if-block left over from an earlier merge conflict referenced
+  contact_date outside the block that defined it, throwing a NameError for
+  any learner with no successful contact_log entry (i.e. most learners who
+  haven't had a logged consultation yet). Replaced with a straight
+  three-line check.
+
+NEW FEATURE - REPORTS
+------------------------
+Added a Reports section for both roles (new "Reports" link in both
+sidebars). Every report opens in a new tab as a formatted, printable page
+with a "Print / Save as PDF" button - no new backend dependency required.
+
+Teacher / Facilitator Reports (reports.html):
+  - Individual Learner Progress: pick a learner, generates a report of
+    risk trend history, module monitoring history, intervention history,
+    risk contributors, and recommended actions. Reuses the existing
+    learner profile endpoint.
+  - At-Risk Learners List: learners currently flagged High or Moderate
+    risk of dropping out, optionally filtered by class.
+  - Intervention Tracking Report: every intervention logged per learner,
+    including the method applied, status, and outcome, optionally
+    filtered by class and/or status.
+
+Admin Reports (reports.html):
+  - Master Enrollment Listing: enrollment records across every learning
+    center, with a live filterable/groupable preview table before
+    generating. Filters: learning center (ALC), school year, academic
+    semester, assigned teacher, and learning delivery mode. Can be
+    generated flat or grouped into sections by any of those fields.
+
+Backend: new /api/reports/at-risk, /api/reports/interventions, and
+/api/reports/enrollment-listing endpoints (reports_routes.py).
+
+UI POLISH - ADMIN REPORTS
+----------------------------
+- Fixed the "Group report by" dropdown rendering as an unstyled native
+  select (it wasn't inside the container that gives the other dropdowns
+  their styling) so it now matches the rest of the page.
+- Fixed inconsistent left/right spacing between the filter toolbar and
+  the group-by/Generate Report row so both align to the same edge.
+- Removed the descriptive subtitle line under "Master Enrollment Listing".
+
+FILES CHANGED
+--------------
+Backend:
+  StayEd_Backend/app/__init__.py
+  StayEd_Backend/app/routes/learner_routes.py
+  StayEd_Backend/app/routes/reports_routes.py (new)
+
+Frontend:
+  StayEd_Frontend/assets/css/main.css
+  StayEd_Frontend/assets/css/pages/admin/admin-reports.css (new)
+  StayEd_Frontend/assets/css/pages/teacher/reports.css (new)
+  StayEd_Frontend/assets/js/admin/reports.js (new)
+  StayEd_Frontend/assets/js/core/api.js
+  StayEd_Frontend/assets/js/core/report-printer.js (new)
+  StayEd_Frontend/assets/js/teacher/reports.js (new)
+  StayEd_Frontend/components/layout/sidebar-admin.html
+  StayEd_Frontend/components/layout/sidebar.html
+  StayEd_Frontend/pages/admin/reports.html (new)
+  StayEd_Frontend/pages/teacher/reports.html (new)
+
+Not yet committed/pushed.

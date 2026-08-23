@@ -34,6 +34,7 @@ def create_app(config_object=Config):
     from .routes.intervention_routes import bp as intervention_bp
     from .routes.notification_routes import bp as notification_bp
     from .routes.admin_routes import bp as admin_bp
+    from .routes.reports_routes import bp as reports_bp
 
     for bp in (
         auth_bp,
@@ -46,6 +47,7 @@ def create_app(config_object=Config):
         intervention_bp,
         notification_bp,
         admin_bp,
+        reports_bp,
     ):
         app.register_blueprint(bp, url_prefix="/api")
 

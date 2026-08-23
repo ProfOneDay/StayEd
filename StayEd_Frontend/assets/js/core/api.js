@@ -694,6 +694,20 @@ class API {
   static addInterventionFollowUp(id, payload) {
     return this.post(`/interventions/${id}/follow-up`, payload);
   }
+
+  static getAtRiskReport(params = {}) {
+    const qs = params && Object.keys(params).length ? this.query(params) : "";
+    return this.get(`/reports/at-risk${qs}`);
+  }
+
+  static getInterventionReport(params = {}) {
+    const qs = params && Object.keys(params).length ? this.query(params) : "";
+    return this.get(`/reports/interventions${qs}`);
+  }
+
+  static getEnrollmentListingReport() {
+    return this.get("/reports/enrollment-listing");
+  }
 }
 
 window.API = API;

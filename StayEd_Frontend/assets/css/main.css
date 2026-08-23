@@ -15,7 +15,9 @@
 @import url("./pages/teacher/notifications.css");
 @import url("./pages/teacher/learner-records-hub.css");
 @import url("./pages/teacher/system-settings.css");
+@import url("./pages/teacher/reports.css");
 @import url("./pages/admin/admin-dashboard.css");
 @import url("./pages/admin/admin-clc-management.css");
 @import url("./pages/admin/admin-settings.css");
 @import url("./pages/admin/admin-user-management.css");
+@import url("./pages/admin/admin-reports.css");
