@@ -378,7 +378,7 @@ class LearnerImportPage {
 
           success?.classList.remove("st-hidden");
 
-          const addedCount = this.preview.valid + this.preview.duplicates;
+          const addedCount = result.imported + result.attached;
 
           this.set("[data-success-total]", this.preview.total);
           this.set("[data-success-imported]", addedCount);

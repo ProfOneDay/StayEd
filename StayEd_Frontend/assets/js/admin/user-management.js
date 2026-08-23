@@ -195,8 +195,11 @@ function openReject(id){
 document.getElementById('rj-confirm-btn').addEventListener('click',async()=>{
   const t=teachers.find(x=>x.id===activeTeacherId);
   const name=t.name;
+  const reasonInput=document.querySelector('input[name="reject-reason"]:checked');
+  const reason=reasonInput?reasonInput.value:'';
+  const remarks=document.getElementById('reject-remarks').value.trim();
   try{
-    await API.post(`/admin/users/${activeTeacherId}/reject`,{});
+    await API.post(`/admin/users/${activeTeacherId}/reject`,{reason,remarks});
     closeModal('modal-reject');
     await loadTeachers();
     showToast(`${name}'s registration rejected`);
@@ -239,7 +242,16 @@ function openEdit(id){
   document.getElementById('edit-phone').value=t.phone;
   document.getElementById('edit-email').value=t.email;
   const muniSel=document.getElementById('edit-muni');
-  muniSel.innerHTML=Object.keys(clcsByMuni).sort().map(m=>`<option ${m===t.municipality?'selected':''}>${m}</option>`).join('');
+  const muniOptions=Object.keys(clcsByMuni).sort();
+  // A teacher's current municipality might not have any registered CLC yet
+  // (e.g. it was left as "Unassigned" at creation) -- if we only render
+  // options from clcsByMuni, the browser silently selects whatever's first
+  // alphabetically instead of the teacher's real value, and a Save with no
+  // other changes would then silently overwrite it.
+  if(t.municipality && !muniOptions.includes(t.municipality)){
+    muniOptions.unshift(t.municipality);
+  }
+  muniSel.innerHTML=muniOptions.map(m=>`<option ${m===t.municipality?'selected':''}>${m}</option>`).join('');
   editClcDraft=[...(t.clcs||[])];
   renderEditClcList();
   document.getElementById('edit-status-val').innerHTML=statusBadge(t.status);

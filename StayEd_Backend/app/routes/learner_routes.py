@@ -88,9 +88,15 @@ def list_learners():
 
     rows = fetch_all(_learner_query("WHERE " + " AND ".join(clauses)), tuple(params))
     # A learner can appear in historical classes; keep the newest enrollment only.
-    unique = {}
+    # Compared explicitly rather than relying on query order, since the
+    # default ORDER BY is alphabetical by name (for display), not by
+    # enrollment_date -- a first-seen-wins dict insert would silently keep
+    # whichever enrollment row Postgres happened to return first.
+    unique: dict = {}
     for row in rows:
-        unique.setdefault(row["learner_id"], row)
+        existing = unique.get(row["learner_id"])
+        if existing is None or (row.get("enrollment_date") or date.min) > (existing.get("enrollment_date") or date.min):
+            unique[row["learner_id"]] = row
     data = [_shape_learner(r) for r in unique.values()]
     return {"total": len(data), "data": data}
 
@@ -646,24 +652,10 @@ def learner_profile(learner_id: int):
         (enrollment_id,),
     )
     days_since_contact = None
-
-    if (
-    last_contact_event
-    and last_contact_event.get(
-        "contact_date"
-    )
-):
-      contact_date = (
-        last_contact_event[
-            "contact_date"
-        ]
-    )
-
-    if contact_date <= date.today():
-        days_since_contact = (
-            date.today()
-            - contact_date
-        ).days
+    if last_contact_event and last_contact_event.get("contact_date"):
+        contact_date = last_contact_event["contact_date"]
+        if contact_date <= date.today():
+            days_since_contact = (date.today() - contact_date).days
 
     interventions = fetch_all(
         """
@@ -865,6 +857,8 @@ def learner_profile(learner_id: int):
         },
         "riskTrend": risk_trend,
         "metrics": {
+            "engagementScore": engagement_score,
+            "engagementScoreMax": 4,
             "modulesReleased": modules_released,
             "modulesReturned": modules_returned,
             "moduleRate": module_rate,
@@ -1345,7 +1339,7 @@ def update_module_planned_return(learner_id: int, batch_id: int, module_record_i
 
     module = fetch_one(
         """
-        SELECT mr.module_record_id FROM module_record mr
+        SELECT mr.module_record_id, mr.date_released FROM module_record mr
         JOIN module_release_batch mrb ON mrb.release_batch_id = mr.release_batch_id
         WHERE mr.module_record_id=%s AND mr.release_batch_id=%s AND mrb.enrollment_id=%s
         """,
@@ -1359,6 +1353,8 @@ def update_module_planned_return(learner_id: int, batch_id: int, module_record_i
         planned_return_date = date.fromisoformat(str(data.get("plannedReturnDate")))
     except (TypeError, ValueError):
         return error("Planned return date must use YYYY-MM-DD.", 422)
+    if planned_return_date < module["date_released"]:
+        return error("Planned return date cannot be earlier than the module's release date.", 422)
 
     execute(
         "UPDATE module_record SET planned_return_date=%s WHERE module_record_id=%s",
@@ -1804,10 +1800,43 @@ def _insert_import_rows(rows, teacher):
                 )
                 imported.append({"lrn": row["lrn"], "name": name, "level": row.get("level") or "Basic Literacy"})
 
+            # Duplicates (LRN already exists) are bypassed, not skipped: the
+            # matching existing learner is attached to this class rather than
+            # re-inserted, as long as they aren't already enrolled in it.
+            duplicates = [r for r in preview if r["status"] == "duplicate"]
+            attached = 0
+            for row in duplicates:
+                cur.execute("SELECT learner_id FROM learner WHERE lrn=%s", (row["lrn"],))
+                existing = cur.fetchone()
+                if not existing:
+                    continue
+                cur.execute(
+                    "SELECT enrollment_id FROM class_enrollment WHERE class_id=%s AND learner_id=%s",
+                    (class_row["class_id"], existing["learner_id"]),
+                )
+                if cur.fetchone():
+                    continue
+                cur.execute(
+                    """
+                    INSERT INTO class_enrollment (
+                        class_id, learner_id, learning_modality, is_re_enrollee,
+                        distance_from_clc_km, enrollment_status
+                    )
+                    VALUES (%s,%s,%s,%s,%s,'ENROLLED')
+                    """,
+                    (
+                        class_row["class_id"], existing["learner_id"], enum_modality(row.get("modality")),
+                        _parse_import_bool(row.get("re_enrollee")) if row.get("re_enrollee") is not None else True,
+                        _parse_import_distance(row.get("distance_from_clc_km")),
+                    ),
+                )
+                attached += 1
+
             summary = {
                 "total": len(preview),
                 "imported": len(imported),
-                "duplicates": sum(r["status"] == "duplicate" for r in preview),
+                "attached": attached,
+                "duplicates": len(duplicates),
                 "invalid": sum(r["status"] == "error" for r in preview),
                 "learners": imported[:25],
             }
@@ -1843,7 +1872,8 @@ def import_learners():
     return {
         "message": "Learners imported successfully.",
         "imported": summary["imported"],
-        "skipped": summary["duplicates"] + summary["invalid"],
+        "attached": summary["attached"],
+        "skipped": summary["invalid"],
     }
 
 

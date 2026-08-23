@@ -20,8 +20,6 @@ class LearnerRecordsHub {
 
     this.bindFilters();
 
-    this.bindSaveExport();
-
     await this.load();
   }
 
@@ -178,14 +176,6 @@ class LearnerRecordsHub {
 
   static resetPages() {
     this.state.page = { modular: 1, "face-to-face": 1, blended: 1 };
-  }
-
-  static bindSaveExport() {
-    document
-      .querySelector("[data-records-save]")
-      ?.addEventListener("click", () => {
-        Toast?.success("Changes saved.");
-      });
   }
 
   static filteredForModality(modality) {
@@ -433,16 +423,6 @@ class LearnerRecordsHub {
       });
     });
 
-    container.querySelectorAll("[data-open-schedule-modal]").forEach((el) => {
-      el.addEventListener("click", () => {
-        const id = el.dataset.openScheduleModal;
-        const learner = this.state.all.find((x) => String(x.id) === String(id));
-        if (learner && window.ScheduleAttendanceModal) {
-          ScheduleAttendanceModal.open(learner);
-        }
-      });
-    });
-
     container.querySelectorAll("[data-open-consultation-modal]").forEach((el) => {
       el.addEventListener("click", () => {
         const id = el.dataset.openConsultationModal;
@@ -471,10 +451,6 @@ class LearnerRecordsHub {
                     <button type="button" data-open-module-modal="${id}">
                         <span class="material-symbols-outlined">menu_book</span>
                         Open Module Progress
-                    </button>
-                    <button type="button" data-open-schedule-modal="${id}">
-                        <span class="material-symbols-outlined">event</span>
-                        Set Schedule
                     </button>
                     ${showConsultation ? `
                     <button type="button" data-open-consultation-modal="${id}">

@@ -216,7 +216,7 @@ class ClassAttendanceModal {
               (l) => `
               <label class="st-return-module-row">
                 <input type="checkbox" data-attendance-learner="${l.enrollmentId}" ${list.checked.has(l.enrollmentId) ? "checked" : ""}>
-                <span>${l.name} <em>(${l.modality})</em></span>
+                <span>${l.name} <em>(${l.modality}${l.noLongerEnrolled ? " — no longer enrolled" : ""})</em></span>
               </label>
             `,
             )

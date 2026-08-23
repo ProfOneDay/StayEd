@@ -423,6 +423,7 @@ class ModuleManagementModal {
   static isReleaseFormValid() {
     const form = this.releaseForm;
     if (!form.releaseDate) return false;
+    if (form.releaseDate > new Date().toISOString().slice(0, 10)) return false;
     if (!form.strands.length) return false;
     return form.strands.every((s) => s.strandCode && s.modules.some((m) => m.trim()));
   }
@@ -445,7 +446,7 @@ class ModuleManagementModal {
 
         <div class="st-schedule-modal-field">
           <label for="mrfReleaseDate">Release Date *</label>
-          <input type="date" id="mrfReleaseDate" data-release-date value="${form.releaseDate}">
+          <input type="date" id="mrfReleaseDate" data-release-date value="${form.releaseDate}" max="${new Date().toISOString().slice(0, 10)}">
         </div>
 
         <div class="st-schedule-modal-field">
@@ -706,7 +707,7 @@ class ModuleManagementModal {
 
         <div class="st-schedule-modal-field">
           <label for="mrReturnDate">Return Date *</label>
-          <input type="date" id="mrReturnDate" data-return-date value="${this.returnState.returnDate}">
+          <input type="date" id="mrReturnDate" data-return-date value="${this.returnState.returnDate}" max="${new Date().toISOString().slice(0, 10)}">
         </div>
 
         <div class="st-schedule-modal-field">
@@ -770,6 +771,11 @@ class ModuleManagementModal {
     root.querySelector("[data-record-return-submit]")?.addEventListener("click", async (e) => {
       if (!this.returnState.checked.size) {
         Toast?.error("Select at least one module to return.");
+        return;
+      }
+
+      if (this.returnState.returnDate > new Date().toISOString().slice(0, 10)) {
+        Toast?.error("Return date cannot be later than today.");
         return;
       }
 

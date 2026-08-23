@@ -226,6 +226,10 @@ def suspend_user(user_id: int):
 @bp.post("/admin/users/<int:user_id>/reject")
 @role_required("admin")
 def reject_user(user_id: int):
+    data = request.get_json(silent=True) or {}
+    reason = str(data.get("reason") or "").strip()
+    remarks = str(data.get("remarks") or "").strip()
+
     row = fetch_one(
         """
         SELECT u.user_id, u.email, t.first_name
@@ -241,6 +245,21 @@ def reject_user(user_id: int):
     db = get_db()
     try:
         with db.cursor() as cur:
+            # The applicant's row is about to be deleted, so the reason has
+            # nowhere to live afterward unless logged now, against the
+            # reviewing admin's own user_id.
+            description = f"Rejected {row.get('email')}"
+            if reason:
+                description += f" — reason: {reason}"
+            if remarks:
+                description += f" — remarks: {remarks}"
+            cur.execute(
+                """
+                INSERT INTO user_activity_log (user_id, action, table_name, record_id, description)
+                VALUES (%s, 'TEACHER_REGISTRATION_REJECTED', 'users', %s, %s)
+                """,
+                (current_user_id(), user_id, description),
+            )
             cur.execute("DELETE FROM teacher WHERE user_id=%s", (user_id,))
             cur.execute("DELETE FROM users WHERE user_id=%s", (user_id,))
         db.commit()
@@ -249,13 +268,16 @@ def reject_user(user_id: int):
         raise
 
     if row.get("email"):
+        reason_line = f"\n\nReason: {reason}" if reason else ""
+        remarks_line = f"\n\n{remarks}" if remarks else ""
         send_email(
             row["email"],
             "Your StayEd registration was not approved",
             f"Hi {row.get('first_name') or ''},\n\n"
             "Your StayEd teacher account registration was reviewed by a Division Administrator "
-            "and was not approved at this time. If you believe this was a mistake, please contact "
-            "your Division Office for more information.\n\n"
+            f"and was not approved at this time.{reason_line}{remarks_line}\n\n"
+            "If you believe this was a mistake, please contact your Division Office for more "
+            "information.\n\n"
             "— StayEd",
         )
 
