@@ -586,7 +586,14 @@ def learner_profile(learner_id: int):
         return error("Learner not found.", 404)
     shaped = _shape_learner(base)
     enrollment_id = base["enrollment_id"]
+    monitoring_started = bool(base.get("batch_count"))
 
+    # Gate risk history the same way _shape_learner gates the risk badge --
+    # a learner isn't "Not Yet Assessed" on one part of the profile and
+    # showing a colored trend point on another. In the normal app flow this
+    # can't diverge (trigger_prediction refuses to run before any module
+    # batch exists), but staying consistent here is cheap insurance against
+    # imported/seeded data that bypassed that guard.
     risk_history = fetch_all(
         """
         SELECT assessment_date, risk_probability, risk_level
@@ -595,9 +602,13 @@ def learner_profile(learner_id: int):
         ORDER BY assessment_date
         """,
         (enrollment_id,),
-    )
+    ) if monitoring_started else []
     risk_trend = [
-        {"date": r["assessment_date"].strftime("%b %d, %Y"), "level": title_enum(r["risk_level"])}
+        {
+            "date": r["assessment_date"].strftime("%b %d, %Y"),
+            "level": title_enum(r["risk_level"]),
+            "probability": round(float(r["risk_probability"]) * 100) if r.get("risk_probability") is not None else None,
+        }
         for r in risk_history[-6:]
     ]
 
@@ -606,8 +617,16 @@ def learner_profile(learner_id: int):
     modules_returned = totals["returned"]
     active_modules = totals["active"]
     last_returned = totals["last_returned"]
-    days_since_last_return = (date.today() - last_returned).days if last_returned else None
+    # A "days since" value must never be negative. A future-dated return
+    # (bad data entry, or a record that legitimately hasn't happened yet)
+    # is treated as invalid/unusable here rather than surfaced as e.g. -26 --
+    # the frontend falls back to "No return recorded yet" for None.
+    if last_returned and last_returned <= date.today():
+        days_since_last_return = (date.today() - last_returned).days
+    else:
+        days_since_last_return = None
     last_activity = shaped["activity_text"]
+    module_rate = round(100 * modules_returned / modules_released) if modules_released else None
 
     overdue_modules = fetch_one(
         """
@@ -626,7 +645,25 @@ def learner_profile(learner_id: int):
         """,
         (enrollment_id,),
     )
-    days_since_contact = (date.today() - last_contact_event["contact_date"]).days if last_contact_event else None
+    days_since_contact = None
+
+    if (
+    last_contact_event
+    and last_contact_event.get(
+        "contact_date"
+    )
+):
+      contact_date = (
+        last_contact_event[
+            "contact_date"
+        ]
+    )
+
+    if contact_date <= date.today():
+        days_since_contact = (
+            date.today()
+            - contact_date
+        ).days
 
     interventions = fetch_all(
         """
@@ -828,10 +865,12 @@ def learner_profile(learner_id: int):
         },
         "riskTrend": risk_trend,
         "metrics": {
-            "engagementScore": engagement_score,
-            "engagementScoreMax": 4,
             "modulesReleased": modules_released,
             "modulesReturned": modules_returned,
+            "moduleRate": module_rate,
+            "moduleRateText": (
+                f"{modules_returned} of {modules_released} modules returned" if modules_released else "Not Yet Available"
+            ),
             "activeModules": active_modules,
             "overdueModules": overdue_modules,
             "lastActivity": last_activity,
@@ -1152,6 +1191,9 @@ def release_module_batch(learner_id: int):
     except ValueError:
         return error("Release date must use YYYY-MM-DD.", 422)
 
+    if release_date > date.today():
+        return error("Release date cannot be later than the current date.", 422)
+
     if data.get("plannedReturnDate"):
         try:
             planned_return_date = date.fromisoformat(str(data.get("plannedReturnDate")))
@@ -1233,7 +1275,7 @@ def return_module_batch(learner_id: int, batch_id: int):
         return error("Learner not found.", 404)
 
     batch = fetch_one(
-        "SELECT release_batch_id FROM module_release_batch WHERE release_batch_id=%s AND enrollment_id=%s",
+        "SELECT release_batch_id, release_date FROM module_release_batch WHERE release_batch_id=%s AND enrollment_id=%s",
         (batch_id, base["enrollment_id"]),
     )
     if not batch:
@@ -1248,6 +1290,11 @@ def return_module_batch(learner_id: int, batch_id: int):
         return_date = date.fromisoformat(str(data.get("returnDate"))) if data.get("returnDate") else date.today()
     except ValueError:
         return error("Return date must use YYYY-MM-DD.", 422)
+
+    if return_date > date.today():
+        return error("Return date cannot be later than the current date.", 422)
+    if return_date < batch["release_date"]:
+        return error("Return date cannot be earlier than the module release date.", 422)
 
     remarks = data.get("remarks") or None
 
@@ -1322,6 +1369,199 @@ def update_module_planned_return(learner_id: int, batch_id: int, module_record_i
     learner_activity = _learner_activity_info(base)
     return {
         "message": "Planned return date updated.",
+        "learner": {
+            "name": f"{base['first_name']} {base['last_name']}",
+            "lrn": base["lrn"],
+            "clc": base["clc_name"],
+            "level": base["learning_level"],
+            **learner_activity,
+        },
+        **_logbook(base["enrollment_id"], learner_activity),
+    }
+
+
+def _audit(user_id: int, action: str, table_name: str, record_id: int, description: str) -> None:
+    """Append-only trail for corrections made via the Module Release Logbook
+    Edit action -- corrected records are updated in place (so the rest of the
+    app always reads one current value), but nothing about the prior value is
+    silently lost; it is always recoverable from user_activity_log."""
+    execute(
+        """
+        INSERT INTO user_activity_log (user_id, action, table_name, record_id, description)
+        VALUES (%s, %s, %s, %s, %s)
+        """,
+        (user_id, action, table_name, record_id, description),
+    )
+
+
+@bp.put("/learners/<int:learner_id>/module-batches/<int:batch_id>")
+@role_required("teacher")
+def edit_module_batch(learner_id: int, batch_id: int):
+    """Correct a previously-encoded release batch: the batch's Release Date,
+    and per module within it, Module Name / Learning Strand / Return Date /
+    Remarks. Teachers use this to fix typos and mis-encoded dates -- not to
+    delete history, so every applied field change is written to
+    user_activity_log before being applied (see _audit above)."""
+    base = _profile_base(learner_id)
+    if not base:
+        return error("Learner not found.", 404)
+    teacher = _teacher_scope()
+    user_id = current_user_id()
+
+    batch = fetch_one(
+        "SELECT release_batch_id, release_date FROM module_release_batch WHERE release_batch_id=%s AND enrollment_id=%s",
+        (batch_id, base["enrollment_id"]),
+    )
+    if not batch:
+        return error("Release batch not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    today = date.today()
+
+    new_release_date = batch["release_date"]
+    if "releaseDate" in data and data.get("releaseDate") not in (None, ""):
+        try:
+            new_release_date = date.fromisoformat(str(data.get("releaseDate")))
+        except ValueError:
+            return error("Release date must use YYYY-MM-DD.", 422)
+        if new_release_date > today:
+            return error("Release date cannot be later than the current date.", 422)
+
+    existing_modules = fetch_all(
+        """
+        SELECT module_record_id, module_name, learning_strand_id, date_returned, remarks
+        FROM module_record WHERE release_batch_id=%s
+        """,
+        (batch_id,),
+    )
+    existing_by_id = {m["module_record_id"]: m for m in existing_modules}
+
+    module_edits_in = data.get("modules") or []
+    if not isinstance(module_edits_in, list):
+        return error("modules must be a list.", 422)
+
+    planned: list[dict] = []
+    strand_cache: dict[str, int] = {}
+    for edit in module_edits_in:
+        try:
+            module_id = int(edit.get("id"))
+        except (TypeError, ValueError):
+            return error("Each module edit requires a valid id.", 422)
+        current = existing_by_id.get(module_id)
+        if not current:
+            return error(f"Module {module_id} does not belong to this release batch.", 422)
+
+        plan = {"id": module_id, "current": current}
+
+        if "moduleName" in edit and edit.get("moduleName") is not None:
+            name = str(edit["moduleName"]).strip()
+            if not name:
+                return error("Module name cannot be blank.", 422)
+            plan["module_name"] = name
+
+        if "strandCode" in edit and edit.get("strandCode") is not None:
+            code = str(edit["strandCode"]).strip().upper()
+            if code not in strand_cache:
+                strand_row = fetch_one("SELECT learning_strand_id FROM learning_strand WHERE strand_code=%s", (code,))
+                if not strand_row:
+                    return error(f"Unknown learning strand: {code}.", 422)
+                strand_cache[code] = strand_row["learning_strand_id"]
+            plan["learning_strand_id"] = strand_cache[code]
+
+        if "remarks" in edit:
+            plan["remarks"] = (str(edit["remarks"]).strip() or None) if edit.get("remarks") is not None else None
+
+        if "returnDate" in edit:
+            raw = edit.get("returnDate")
+            if raw in (None, ""):
+                plan["date_returned"] = None
+            else:
+                try:
+                    plan["date_returned"] = date.fromisoformat(str(raw))
+                except ValueError:
+                    return error("Return date must use YYYY-MM-DD.", 422)
+
+        planned.append(plan)
+
+    # Validate the resulting state of every module in the batch (not just the
+    # edited ones) against the *effective* release date, so an edit can never
+    # save a batch into an inconsistent state.
+    planned_by_id = {p["id"]: p for p in planned}
+    for module_id, current in existing_by_id.items():
+        plan = planned_by_id.get(module_id, {})
+        effective_return = plan["date_returned"] if "date_returned" in plan else current["date_returned"]
+        if effective_return is None:
+            continue
+        if effective_return > today:
+            return error("Return date cannot be later than the current date.", 422)
+        if effective_return < new_release_date:
+            return error("Return date cannot be earlier than the module release date.", 422)
+
+    db = get_db()
+    try:
+        with db.cursor() as cur:
+            if new_release_date != batch["release_date"]:
+                _audit(
+                    user_id, "MODULE_BATCH_EDIT", "module_release_batch", batch_id,
+                    f"release_date: {batch['release_date'].isoformat()} -> {new_release_date.isoformat()}",
+                )
+                cur.execute(
+                    "UPDATE module_release_batch SET release_date=%s WHERE release_batch_id=%s",
+                    (new_release_date, batch_id),
+                )
+                cur.execute(
+                    "UPDATE module_record SET date_released=%s WHERE release_batch_id=%s",
+                    (new_release_date, batch_id),
+                )
+
+            for plan in planned:
+                current = plan["current"]
+                sets, params, changes = [], [], []
+
+                if "module_name" in plan and plan["module_name"] != current["module_name"]:
+                    sets.append("module_name=%s")
+                    params.append(plan["module_name"])
+                    changes.append(f"module_name: {current['module_name']!r} -> {plan['module_name']!r}")
+
+                if "learning_strand_id" in plan and plan["learning_strand_id"] != current["learning_strand_id"]:
+                    sets.append("learning_strand_id=%s")
+                    params.append(plan["learning_strand_id"])
+                    changes.append(f"learning_strand_id: {current['learning_strand_id']} -> {plan['learning_strand_id']}")
+
+                if "remarks" in plan and plan["remarks"] != current["remarks"]:
+                    sets.append("remarks=%s")
+                    params.append(plan["remarks"])
+                    changes.append("remarks updated")
+
+                if "date_returned" in plan and plan["date_returned"] != current["date_returned"]:
+                    sets.append("date_returned=%s")
+                    params.append(plan["date_returned"])
+                    old_val = current["date_returned"].isoformat() if current["date_returned"] else "none"
+                    new_val = plan["date_returned"].isoformat() if plan["date_returned"] else "none"
+                    changes.append(f"date_returned: {old_val} -> {new_val}")
+
+                if not sets:
+                    continue
+
+                for change in changes:
+                    _audit(user_id, "MODULE_RECORD_EDIT", "module_record", plan["id"], change)
+
+                params.append(plan["id"])
+                cur.execute(f"UPDATE module_record SET {', '.join(sets)} WHERE module_record_id=%s", params)
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    try:
+        trigger_prediction(base["enrollment_id"], current_user_id())
+    except Exception:
+        pass
+
+    base = _profile_base(learner_id)
+    learner_activity = _learner_activity_info(base)
+    return {
+        "message": "Release batch updated.",
         "learner": {
             "name": f"{base['first_name']} {base['last_name']}",
             "lrn": base["lrn"],
@@ -1517,90 +1757,51 @@ def _insert_import_rows(rows, teacher):
     if not class_row:
         raise ValueError("Create an active class before importing learners.")
     preview = _preview_rows(rows)
-    # Duplicate rows (LRN already known to StayEd) are no longer skipped --
-    # the existing learner is looked up and attached to this class instead of
-    # being re-inserted into `learner`. Only genuine errors (bad LRN/missing
-    # required fields) are left out of the class roster.
-    importable = [r for r in preview if r["status"] in ("valid", "duplicate")]
+    valid = [r for r in preview if r["status"] == "valid"]
     db = get_db()
     imported = []
     try:
         with db.cursor() as cur:
-            for row in importable:
+            for row in valid:
                 name = row.get("name") or f"{row.get('first_name','')} {row.get('last_name','')}"
                 first, last = split_name(name)
-
-                if row["status"] == "duplicate":
-                    cur.execute("SELECT learner_id FROM learner WHERE lrn = %s", (row["lrn"],))
-                    existing = cur.fetchone()
-                    if not existing:
-                        continue
-                    learner_id = existing["learner_id"]
-                else:
-                    sex = str(row.get("sex") or "MALE").strip().upper()
-                    if sex not in {"MALE", "FEMALE"}:
-                        sex = "MALE"
-                    dob = _parse_import_birthdate(row.get("birthdate"))
-                    if not dob:
-                        continue
-                    cur.execute(
-                        """
-                        INSERT INTO learner (
-                            lrn, first_name, middle_name, last_name, sex, date_of_birth,
-                            employment_status, civil_status, contact_number, guardian_contact_number
-                        )
-                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING learner_id
-                        """,
-                        (
-                            row["lrn"], first, row.get("middle_name") or None, last, sex, dob,
-                            row.get("employment_status") or None,
-                            row.get("civil_status") or None,
-                            row.get("contact_number") or None,
-                            row.get("guardian_contact_number") or None,
-                        ),
-                    )
-                    learner_id = cur.fetchone()["learner_id"]
-
+                sex = str(row.get("sex") or "MALE").strip().upper()
+                if sex not in {"MALE", "FEMALE"}:
+                    sex = "MALE"
+                dob = _parse_import_birthdate(row.get("birthdate"))
+                if not dob:
+                    continue
                 cur.execute(
                     """
-                    SELECT enrollment_id
-                    FROM class_enrollment
-                    WHERE class_id = %s AND learner_id = %s
-                    LIMIT 1
+                    INSERT INTO learner (
+                        lrn, first_name, middle_name, last_name, sex, date_of_birth,
+                        employment_status, civil_status, contact_number, guardian_contact_number
+                    )
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING learner_id
                     """,
-                    (class_row["class_id"], learner_id),
+                    (
+                        row["lrn"], first, row.get("middle_name") or None, last, sex, dob,
+                        row.get("employment_status") or None,
+                        row.get("civil_status") or None,
+                        row.get("contact_number") or None,
+                        row.get("guardian_contact_number") or None,
+                    ),
                 )
-                prior_enrollment = cur.fetchone()
-                modality = enum_modality(row.get("modality"))
-                distance = _parse_import_distance(row.get("distance_from_clc_km"))
-                # A duplicate LRN means the learner was already known to
-                # StayEd before this import, so treat it as a re-enrollment
-                # by default even if the file didn't say so explicitly.
-                is_re_enrollee = _parse_import_bool(row.get("re_enrollee")) or row["status"] == "duplicate"
-
-                if prior_enrollment:
-                    cur.execute(
-                        """
-                        UPDATE class_enrollment
-                        SET learning_modality = %s,
-                            is_re_enrollee = %s,
-                            distance_from_clc_km = %s,
-                            enrollment_status = 'ENROLLED'
-                        WHERE enrollment_id = %s
-                        """,
-                        (modality, is_re_enrollee, distance, prior_enrollment["enrollment_id"]),
+                learner_id = cur.fetchone()["learner_id"]
+                cur.execute(
+                    """
+                    INSERT INTO class_enrollment (
+                        class_id, learner_id, learning_modality, is_re_enrollee,
+                        distance_from_clc_km, enrollment_status
                     )
-                else:
-                    cur.execute(
-                        """
-                        INSERT INTO class_enrollment (
-                            class_id, learner_id, learning_modality, is_re_enrollee,
-                            distance_from_clc_km, enrollment_status
-                        )
-                        VALUES (%s,%s,%s,%s,%s,'ENROLLED')
-                        """,
-                        (class_row["class_id"], learner_id, modality, is_re_enrollee, distance),
-                    )
+                    VALUES (%s,%s,%s,%s,%s,'ENROLLED')
+                    """,
+                    (
+                        class_row["class_id"], learner_id, enum_modality(row.get("modality")),
+                        _parse_import_bool(row.get("re_enrollee")),
+                        _parse_import_distance(row.get("distance_from_clc_km")),
+                    ),
+                )
                 imported.append({"lrn": row["lrn"], "name": name, "level": row.get("level") or "Basic Literacy"})
 
             summary = {
@@ -1642,8 +1843,7 @@ def import_learners():
     return {
         "message": "Learners imported successfully.",
         "imported": summary["imported"],
-        "duplicatesMerged": summary["duplicates"],
-        "skipped": summary["invalid"],
+        "skipped": summary["duplicates"] + summary["invalid"],
     }
 
 

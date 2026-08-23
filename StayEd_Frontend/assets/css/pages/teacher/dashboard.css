@@ -382,10 +382,11 @@
 
 .st-riskchart-bar-wrap{
     width:64px;
+    height:100%;
     display:flex;
     flex-direction:column;
     align-items:center;
-    gap:8px;
+    justify-content:flex-end;
     position:relative;
     z-index:1;
 }
@@ -395,14 +396,24 @@
     border-radius:4px 4px 0 0;
     transition:height .6s cubic-bezier(.16,1,.3,1), filter .2s ease;
     cursor:help;
-    min-height:4px;
+    min-height:0;
 }
 
-.st-riskchart-bar:hover{ filter:brightness(1.1); }
+.st-riskchart-bar:hover{
+    filter:brightness(1.1);
+}
 
-.st-riskchart-bar--high{ background:var(--st-risk-high); }
-.st-riskchart-bar--moderate{ background:var(--st-risk-moderate); }
-.st-riskchart-bar--low{ background:var(--st-risk-low); }
+.st-riskchart-bar--high{
+    background:var(--st-risk-high);
+}
+
+.st-riskchart-bar--moderate{
+    background:var(--st-risk-moderate);
+}
+
+.st-riskchart-bar--low{
+    background:var(--st-risk-low);
+}
 
 .st-riskchart-xaxis{
     display:flex;

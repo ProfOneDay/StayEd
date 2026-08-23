@@ -57,41 +57,44 @@ def _relative_day_phrase(days: int) -> str:
 
 
 def _shape_activity(row):
-    # Monitoring hasn't started at all until a module batch has been released
-    # -- the same signal _shape_learner uses to gate the risk badge to "Not
-    # Yet Assessed". Without this, a learner with zero released modules falls
-    # back to days-since-enrollment and gets told a module return is overdue,
-    # even though there was never a module to return in the first place.
+    """Build the learner's latest activity from actual recorded event dates.
+
+    Sources:
+      - Module release -> module_release_batch.release_date
+      - Module return  -> module_record.date_returned
+      - Consultation   -> contact_log.contact_date
+
+    Do not use created_at, updated_at, or record-save timestamps.
+    """
+    # No released module means monitoring hasn't started yet.
     if not row.get("batch_count"):
         return "No modules released yet", "none", 0
 
-    # Inactivity is always measured from the single most recent valid activity
-    # of any kind (release, return, or consultation -- whichever is newest),
-    # falling back to the enrollment date only when nothing has ever happened.
-    # A prior version measured the fallback text's day-count from a
-    # "primary event" (return-only) instead of this same reference, which let
-    # a fresh module release with zero returns fall back to days-since-
-    # enrollment for its inactivity count -- showing a batch released weeks
-    # ago as "1 day ago" whenever the learner happened to enroll recently.
     modality_raw = row.get("learning_modality") or ""
     event_label = row.get("event_label")
     event_date = row.get("event_date")
-    reference_date = event_date or row.get("enrollment_date")
+    enrollment_date = row.get("enrollment_date")
 
-    # Inactivity can never be negative -- a saved activity date shouldn't ever
-    # land in the future, but clamp defensively rather than ever surface a
-    # value like "-26 days inactive" if one somehow does (bad data entry,
-    # clock skew, etc).
-    days_inactive = max(0, (date.today() - reference_date).days) if reference_date else 0
+    # The SQL query already determines the newest actual activity date.
+    reference_date = event_date or enrollment_date
 
+    # Never allow a negative inactivity value.
+    days_inactive = (
+        max(0, (date.today() - reference_date).days) if reference_date else 0
+    )
+
+    # Show the actual latest activity while it's within the warning window.
     if event_date is not None and days_inactive < ACTIVITY_WARNING_DAYS:
         activity_text = f"{event_label} {_relative_day_phrase(days_inactive)}"
     else:
-        primary_noun = "consultation" if modality_raw == "FACE_TO_FACE" else "module return"
-        day_word = "day" if days_inactive == 1 else "days"
-        activity_text = (
-            f"No {primary_noun} for {days_inactive} {day_word}" if days_inactive > 0 else "No activity recorded"
+        primary_noun = (
+            "consultation" if modality_raw == "FACE_TO_FACE" else "module return"
         )
+        if days_inactive > 0:
+            day_word = "day" if days_inactive == 1 else "days"
+            activity_text = f"No {primary_noun} for {days_inactive} {day_word}"
+        else:
+            activity_text = "No activity recorded"
 
     if days_inactive >= ACTIVITY_DANGER_DAYS:
         activity_status = "danger"
@@ -132,31 +135,20 @@ def _shape_learner(row):
         "distance_km": float(row.get("distance_from_clc_km") or 0),
         "date_generated": row["assessment_date"].isoformat() if row.get("assessment_date") else None,
         "assigned_teacher": row.get("assigned_teacher") or "",
-        # Raw personal-info fields -- not used by the records table, but the
-        # "Existing Student" picker in the enrollment wizard prefills its form
-        # from this same shape and needs more than name/lrn/sex to do that.
-        "birthdate": row["date_of_birth"].isoformat() if row.get("date_of_birth") else None,
-        "civil_status": row.get("civil_status") or "",
-        "contact_number": row.get("contact_number") or "",
-        "email": row.get("email") or "",
-        "address": row.get("address") or "",
-        "guardian_name": row.get("guardian_name") or "",
-        "guardian_relationship": row.get("guardian_relationship") or "",
-        "guardian_contact_number": row.get("guardian_contact_number") or "",
-        "employment_status": row.get("employment_status") or "",
-        "last_grade_completed": row.get("last_grade_completed") or "",
-        "is_4ps_beneficiary": bool(row.get("is_4ps_beneficiary")),
+        "school_year": row.get("school_year") or "",
     }
 
 
-def _learner_query(where: str = "", order: str = "l.last_name, l.first_name"):
+def _learner_query(
+    where: str = "",
+    order: str = "l.last_name, l.first_name",
+):
     return f"""
         SELECT
             l.learner_id, l.lrn, l.first_name, l.last_name, l.sex,
             DATE_PART('year', AGE(CURRENT_DATE, l.date_of_birth))::INT AS age,
             l.date_of_birth, l.employment_status, l.civil_status,
             l.contact_number, l.guardian_contact_number, l.is_4ps_beneficiary,
-            l.email, l.address, l.guardian_name, l.guardian_relationship, l.last_grade_completed,
             ce.enrollment_id, ce.learning_modality, ce.distance_from_clc_km,
             ce.enrollment_status, ce.is_re_enrollee, ce.enrollment_date,
             lc.class_id, lc.learning_level, lc.class_name, lc.school_year, lc.semester,
@@ -174,24 +166,22 @@ def _learner_query(where: str = "", order: str = "l.last_name, l.first_name"):
         {_latest_risk_join_sql()}
         LEFT JOIN LATERAL (
             SELECT event_label, event_date FROM (
-                SELECT 'Modules released' AS event_label, MAX(mr.date_released) AS event_date, 2 AS priority
-                FROM module_record mr
-                WHERE mr.enrollment_id = ce.enrollment_id
-                  AND ce.learning_modality IN ('MODULAR', 'BLENDED')
-                GROUP BY event_label
-                HAVING MAX(mr.date_released) IS NOT NULL
+                -- Newest of: module release, module return, consultation.
+                -- Priority 1 beats priority 2 on same-date ties.
+                SELECT 'Module released' AS event_label, MAX(mrb.release_date) AS event_date, 2 AS priority
+                FROM module_release_batch mrb
+                WHERE mrb.enrollment_id = ce.enrollment_id
+                HAVING MAX(mrb.release_date) IS NOT NULL
                 UNION ALL
                 SELECT 'Module returned', MAX(mr.date_returned), 1
                 FROM module_record mr
                 WHERE mr.enrollment_id = ce.enrollment_id AND mr.date_returned IS NOT NULL
-                GROUP BY 1
                 HAVING MAX(mr.date_returned) IS NOT NULL
                 UNION ALL
                 SELECT 'Consultation completed', MAX(cl.contact_date), 1
                 FROM contact_log cl
                 WHERE cl.enrollment_id = ce.enrollment_id AND cl.contact_result = 'SUCCESSFUL'
                   AND ce.learning_modality IN ('FACE_TO_FACE', 'BLENDED')
-                GROUP BY 1
                 HAVING MAX(cl.contact_date) IS NOT NULL
             ) events
             ORDER BY event_date DESC, priority ASC

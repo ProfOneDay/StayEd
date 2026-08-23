@@ -33,6 +33,10 @@ class TeacherDashboard {
 
       this.state.learners = data.learners || [];
 
+      this.populateClcFilter();
+
+      this.populateSchoolYearFilter();
+
       this.applyRegistry({ recomputeStats: false });
     } catch (error) {
       console.error("[Dashboard]", error);
@@ -104,6 +108,65 @@ class TeacherDashboard {
     this.setText("[data-dash-school-year]", context.school_year);
 
     this.setText("[data-dash-trimester]", context.trimester);
+  }
+
+  static async populateClcFilter() {
+    const select = document.querySelector("[data-filter-clc]");
+
+    if (!select) return;
+
+    try {
+      const clcs = await API.getAssignedClcs();
+      const current = select.value;
+
+      select.replaceChildren();
+
+      const allOption = document.createElement("option");
+      allOption.textContent = "All CLCs";
+      select.appendChild(allOption);
+
+      clcs
+        .map((c) => c.name)
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b))
+        .forEach((name) => {
+          const option = document.createElement("option");
+          option.textContent = name;
+          select.appendChild(option);
+        });
+
+      const names = Array.from(select.options).map((o) => o.value);
+      select.value = names.includes(current) ? current : "All CLCs";
+    } catch (error) {
+      console.error("[Dashboard] Unable to load assigned CLCs", error);
+    }
+  }
+
+  static populateSchoolYearFilter() {
+    const select = document.querySelector("[data-filter-school-year]");
+
+    if (!select) return;
+
+    const current = select.value;
+
+    const years = [
+      ...new Set(this.state.learners.map((l) => l.school_year).filter(Boolean)),
+    ].sort((a, b) => b.localeCompare(a));
+
+    select.replaceChildren();
+
+    const allOption = document.createElement("option");
+    allOption.textContent = "All School Years";
+    select.appendChild(allOption);
+
+    years.forEach((year) => {
+      const option = document.createElement("option");
+      option.textContent = year;
+      select.appendChild(option);
+    });
+
+    const values = Array.from(select.options).map((o) => o.value);
+    select.value = values.includes(current) ? current : "All School Years";
   }
 
   static renderStatistics(stats = {}) {
@@ -205,7 +268,7 @@ class TeacherDashboard {
         "[data-filter-level] button.is-active",
       );
 
-      if (activeLevel && activeLevel.dataset.level) {
+      if (activeLevel && activeLevel.dataset.level && activeLevel.dataset.level !== "All") {
         rows = rows.filter((l) => l.level === activeLevel.dataset.level);
       }
 
@@ -217,8 +280,16 @@ class TeacherDashboard {
 
       const clc = document.querySelector("[data-filter-clc]")?.value;
 
-      if (clc && clc !== "All CLCs" && rows.some((l) => l.clc)) {
+      if (clc && clc !== "All CLCs") {
         rows = rows.filter((l) => l.clc === clc);
+      }
+
+      const schoolYear = document.querySelector(
+        "[data-filter-school-year]",
+      )?.value;
+
+      if (schoolYear && schoolYear !== "All School Years") {
+        rows = rows.filter((l) => l.school_year === schoolYear);
       }
     }
 
@@ -262,33 +333,43 @@ class TeacherDashboard {
 
     const high = count("High");
     const moderate = count("Moderate");
-    const low = count("Low") + count("Not Yet Assessed");
+    const notYetAssessed = count("Not Yet Assessed");
 
-    const scaleMax = Math.max(25, high, moderate, low) + 5;
+    // "Not Yet Assessed" learners are counted under Low for this KPI/chart.
+    const low = count("Low") + notYetAssessed;
 
-    const insights = [];
+    const registered = rows.length;
+    const predicted = registered - notYetAssessed;
+    const coverage = registered > 0 ? Math.round((predicted / registered) * 100) : 0;
 
-    if (!rows.length) {
+    // Scale the Y-axis to the largest visible category so bars don't
+    // render as tiny slivers (e.g. High=0, Moderate=3, Low=9 -> max 10).
+    const largestCategory = Math.max(high, moderate, low, 1);
+    const scaleMax = Math.max(5, Math.ceil(largestCategory / 5) * 5);
+
+    const insights = [
+      {
+        tone: high ? "error" : "primary",
+        text: `${high} learner(s) are currently classified as High Risk`,
+      },
+      {
+        tone: "primary",
+        text: `Prediction coverage is ${coverage}% of active learners`,
+      },
+    ];
+
+    if (!registered) {
       insights.push({
         text: "No learners match the current filters.",
         tone: "neutral",
-      });
-    } else if (low >= rows.length / 2) {
-      insights.push({
-        text: "Most learners in this view are currently classified as Low Risk.",
-        tone: "neutral",
-      });
-    } else {
-      insights.push({
-        text: "A significant share of learners in this view are at Moderate or High Risk.",
-        tone: "error",
       });
     }
 
     this.renderRiskChart(
       { scale_max: scaleMax, high, moderate, low },
       {
-        coverage: `${rows.length} learner${rows.length === 1 ? "" : "s"} in current view`,
+        coverage: `${coverage}%`,
+        confidence: predicted > 0 ? "Available" : "Pending",
         insights,
       },
     );
