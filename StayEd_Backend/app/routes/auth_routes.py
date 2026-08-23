@@ -9,7 +9,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from ..authz import current_user_id
 from ..db import execute, fetch_one, get_db
-from ..helpers import error, split_name
+from ..helpers import EMAIL_RE, error, split_name
 
 bp = Blueprint("auth", __name__)
 
@@ -128,6 +128,8 @@ def register():
     password = str(data.get("password", ""))
     if not full_name or not email or len(password) < 8:
         return error("Full name, email, and a password of at least 8 characters are required.", 422)
+    if not EMAIL_RE.match(email):
+        return error("Enter a valid email address.", 422)
 
     if fetch_one("SELECT user_id FROM users WHERE LOWER(email) = LOWER(%s)", (email,)):
         return error("Email already exists.", 409)
@@ -194,6 +196,9 @@ def change_password():
 def forgot_password():
     data = request.get_json(silent=True) or {}
     email = str(data.get("email", "")).strip().lower()
+    if not email or not EMAIL_RE.match(email):
+        return error("Enter a valid email address.", 422)
+
     row = fetch_one("SELECT user_id FROM users WHERE LOWER(email) = LOWER(%s)", (email,))
     if not row:
         # Do not reveal whether an account exists.

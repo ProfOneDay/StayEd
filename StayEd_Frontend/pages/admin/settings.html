@@ -87,6 +87,15 @@
         <button class="btn" id="openEditSchoolYearBtn">Change</button>
       </div>
     </div>
+
+    <div class="card">
+      <h2><span class="section-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>Module Return Default</h2>
+      <div class="card-sub">Default number of days after release a module is expected back. Used to auto-suggest each module's planned return date; teachers can still override it per module.</div>
+      <div class="settings-row">
+        <div><b>Default Duration</b><small id="moduleDurationDisplay">— days</small></div>
+        <button class="btn" id="openEditModuleDurationBtn">Change</button>
+      </div>
+    </div>
   </div>
 </main>
 </div>
@@ -219,6 +228,18 @@
     <div class="modal-actions">
       <button class="btn ghost" onclick="closeModal('modal-academic-year')">Cancel</button>
       <button class="btn primary" id="ay-save-btn">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-module-duration">
+  <div class="modal">
+    <h2>Change Module Return Default</h2>
+    <div class="modal-sub">Used only to pre-fill a module's planned return date at release time (release date + this many days). Teachers can still override it per module.</div>
+    <div class="field"><label for="md-duration-days">Default Duration (days)</label><input id="md-duration-days" type="number" min="1" max="180" placeholder="e.g. 21"/></div>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal('modal-module-duration')">Cancel</button>
+      <button class="btn primary" id="md-save-btn">Save Changes</button>
     </div>
   </div>
 </div>

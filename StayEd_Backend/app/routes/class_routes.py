@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from datetime import date
+
 from flask import Blueprint, request
 
 from ..authz import role_required, teacher_for_user
-from ..db import fetch_all, fetch_one, get_db
+from ..db import execute, fetch_all, fetch_one, get_db
 from ..helpers import enum_level, enum_semester, error, title_enum
 from ..services.settings_service import get_active_school_year
 
@@ -48,7 +50,10 @@ def teacher_class_cards():
         SELECT
             lc.class_id, lc.school_year, lc.learning_level, c.clc_name,
             COUNT(ce.enrollment_id)::INT AS learner_count,
-            COALESCE(MAX(ce.learning_modality::TEXT), 'BLENDED') AS modality
+            COALESCE(MAX(ce.learning_modality::TEXT), 'BLENDED') AS modality,
+            COUNT(ce.enrollment_id) FILTER (
+                WHERE ce.learning_modality IN ('FACE_TO_FACE', 'BLENDED')
+            )::INT AS f2f_learner_count
         FROM learning_class lc
         JOIN clc c ON c.clc_id = lc.clc_id
         LEFT JOIN class_enrollment ce ON ce.class_id = lc.class_id
@@ -81,6 +86,7 @@ def teacher_class_cards():
             "schoolYear": row["school_year"],
             "learnerCount": row["learner_count"],
             "icon": icons.get(row["learning_level"], "school"),
+            "hasF2FLearners": row["f2f_learner_count"] > 0,
         }
         for row in rows
     ]
@@ -256,3 +262,183 @@ def delete_class(class_id: int):
         raise
 
     return {"message": "Class deleted."}
+
+
+# ============================================================================
+# Ticket 3 -- F2F meet-up attendance
+# ============================================================================
+
+
+def _owned_class(class_id: int, teacher_id: int):
+    return fetch_one(
+        "SELECT class_id FROM learning_class WHERE class_id = %s AND teacher_id = %s",
+        (class_id, teacher_id),
+    )
+
+
+@bp.get("/classes/<int:class_id>/sessions")
+@role_required("teacher")
+def list_class_sessions(class_id: int):
+    teacher = teacher_for_user()
+    if not teacher or not _owned_class(class_id, teacher["teacher_id"]):
+        return error("Class not found.", 404)
+
+    rows = fetch_all(
+        """
+        SELECT cs.session_id, cs.session_date, cs.session_status,
+               COUNT(sa.attendance_id) FILTER (WHERE sa.attendance_status = 'PRESENT') AS present_count,
+               COUNT(sa.attendance_id) AS recorded_count
+        FROM class_session cs
+        LEFT JOIN session_attendance sa ON sa.session_id = cs.session_id
+        WHERE cs.class_id = %s
+        GROUP BY cs.session_id
+        ORDER BY cs.session_date DESC
+        """,
+        (class_id,),
+    )
+    return {
+        "total": len(rows),
+        "data": [
+            {
+                "id": r["session_id"],
+                "date": r["session_date"].strftime("%m/%d/%Y"),
+                "dateIso": r["session_date"].isoformat(),
+                "status": title_enum(r["session_status"]),
+                "presentCount": int(r["present_count"] or 0),
+                "recordedCount": int(r["recorded_count"] or 0),
+            }
+            for r in rows
+        ],
+    }
+
+
+@bp.post("/classes/<int:class_id>/sessions")
+@role_required("teacher")
+def create_class_session(class_id: int):
+    teacher = teacher_for_user()
+    if not teacher or not _owned_class(class_id, teacher["teacher_id"]):
+        return error("Class not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    try:
+        session_date = date.fromisoformat(str(data.get("date")))
+    except (TypeError, ValueError):
+        return error("Meet-up date must use YYYY-MM-DD.", 422)
+
+    existing = fetch_one(
+        "SELECT session_id FROM class_session WHERE class_id=%s AND session_date=%s",
+        (class_id, session_date),
+    )
+    if existing:
+        return {"id": existing["session_id"], "date": session_date.strftime("%m/%d/%Y")}
+
+    row = execute(
+        """
+        INSERT INTO class_session (class_id, session_date, created_by_teacher_id)
+        VALUES (%s, %s, %s)
+        RETURNING session_id
+        """,
+        (class_id, session_date, teacher["teacher_id"]),
+        returning=True,
+    )
+    return {"id": row["session_id"], "date": session_date.strftime("%m/%d/%Y")}, 201
+
+
+def _f2f_learners(class_id: int):
+    return fetch_all(
+        """
+        SELECT ce.enrollment_id, l.learner_id, l.first_name, l.last_name, ce.learning_modality
+        FROM class_enrollment ce
+        JOIN learner l ON l.learner_id = ce.learner_id
+        WHERE ce.class_id = %s AND ce.enrollment_status = 'ENROLLED'
+          AND ce.learning_modality IN ('FACE_TO_FACE', 'BLENDED')
+        ORDER BY l.last_name, l.first_name
+        """,
+        (class_id,),
+    )
+
+
+@bp.get("/classes/<int:class_id>/sessions/<int:session_id>/attendance")
+@role_required("teacher")
+def get_session_attendance(class_id: int, session_id: int):
+    teacher = teacher_for_user()
+    if not teacher or not _owned_class(class_id, teacher["teacher_id"]):
+        return error("Class not found.", 404)
+
+    session = fetch_one(
+        "SELECT session_id, session_date FROM class_session WHERE session_id=%s AND class_id=%s",
+        (session_id, class_id),
+    )
+    if not session:
+        return error("Meet-up date not found.", 404)
+
+    learners = _f2f_learners(class_id)
+    existing = {
+        r["enrollment_id"]: r["attendance_status"]
+        for r in fetch_all(
+            "SELECT enrollment_id, attendance_status FROM session_attendance WHERE session_id=%s",
+            (session_id,),
+        )
+    }
+
+    return {
+        "date": session["session_date"].strftime("%m/%d/%Y"),
+        "learners": [
+            {
+                "enrollmentId": l["enrollment_id"],
+                "name": f"{l['first_name']} {l['last_name']}".strip(),
+                "modality": title_enum(l["learning_modality"]),
+                "present": existing.get(l["enrollment_id"]) == "PRESENT",
+            }
+            for l in learners
+        ],
+    }
+
+
+@bp.post("/classes/<int:class_id>/sessions/<int:session_id>/attendance")
+@role_required("teacher")
+def save_session_attendance(class_id: int, session_id: int):
+    teacher = teacher_for_user()
+    if not teacher or not _owned_class(class_id, teacher["teacher_id"]):
+        return error("Class not found.", 404)
+
+    session = fetch_one(
+        "SELECT session_id FROM class_session WHERE session_id=%s AND class_id=%s",
+        (session_id, class_id),
+    )
+    if not session:
+        return error("Meet-up date not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    present_ids = {int(x) for x in (data.get("presentEnrollmentIds") or []) if str(x).isdigit()}
+
+    learners = _f2f_learners(class_id)
+    valid_ids = {l["enrollment_id"] for l in learners}
+
+    db = get_db()
+    try:
+        with db.cursor() as cur:
+            for enrollment_id in valid_ids:
+                status = "PRESENT" if enrollment_id in present_ids else "ABSENT"
+                cur.execute(
+                    """
+                    INSERT INTO session_attendance (
+                        session_id, enrollment_id, attendance_status, recorded_by_teacher_id
+                    ) VALUES (%s, %s, %s, %s)
+                    ON CONFLICT (session_id, enrollment_id) DO UPDATE
+                        SET attendance_status = EXCLUDED.attendance_status,
+                            recorded_by_teacher_id = EXCLUDED.recorded_by_teacher_id,
+                            updated_at = CURRENT_TIMESTAMP
+                    """,
+                    (session_id, enrollment_id, status, teacher["teacher_id"]),
+                )
+            cur.execute(
+                "UPDATE class_session SET session_status='COMPLETED' WHERE session_id=%s",
+                (session_id,),
+            )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    return {"message": "Attendance saved.", "presentCount": len(present_ids & valid_ids), "totalCount": len(valid_ids)}

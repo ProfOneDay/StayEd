@@ -139,6 +139,16 @@ class ClassManagement {
         this.confirmDelete(classId, cls?.level);
       });
     });
+
+    grid.querySelectorAll("[data-take-attendance]").forEach((el) => {
+      el.addEventListener("click", () => {
+        const classId = el.dataset.takeAttendance;
+        const cls = this.classes.find((x) => String(x.id) === String(classId));
+        if (cls && window.ClassAttendanceModal) {
+          ClassAttendanceModal.open(cls);
+        }
+      });
+    });
   }
 
   static card(c) {
@@ -172,6 +182,11 @@ class ClassManagement {
                         Open Class
                         <span class="material-symbols-outlined">arrow_forward</span>
                     </button>
+                    ${c.hasF2FLearners ? `
+                    <button type="button" class="st-icon-btn-sm" data-take-attendance="${c.id}" aria-label="Take attendance" title="Take attendance">
+                        <span class="material-symbols-outlined">checklist</span>
+                    </button>
+                    ` : ""}
                     <button type="button" class="st-icon-btn-sm st-icon-btn-sm--danger" data-delete-class="${c.id}" aria-label="Delete class" title="Delete class">
                         <span class="material-symbols-outlined">delete</span>
                     </button>

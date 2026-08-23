@@ -79,6 +79,34 @@ document.getElementById('ay-save-btn').addEventListener('click',async()=>{
   }
 });
 
+async function loadModuleDuration(){
+  try{
+    const result=await API.getModuleDurationSetting();
+    document.getElementById('moduleDurationDisplay').textContent=(result.defaultDurationDays||'—')+' days';
+  }catch(error){
+    console.error('[AdminSettings] Unable to load module duration setting',error);
+  }
+}
+loadModuleDuration();
+
+document.getElementById('openEditModuleDurationBtn').addEventListener('click',()=>{
+  document.getElementById('md-duration-days').value=parseInt(document.getElementById('moduleDurationDisplay').textContent,10)||'';
+  openModal('modal-module-duration');
+});
+document.getElementById('md-save-btn').addEventListener('click',async()=>{
+  const value=parseInt(document.getElementById('md-duration-days').value,10);
+  if(!value||value<1||value>180){ showToast('Enter a number of days between 1 and 180'); return; }
+  try{
+    await API.updateModuleDurationSetting(value);
+    document.getElementById('moduleDurationDisplay').textContent=value+' days';
+    closeModal('modal-module-duration');
+    showToast('Module return default updated');
+  }catch(error){
+    console.error('[AdminSettings] Unable to update module duration setting',error);
+    showToast(error?.data?.message||'Unable to update the module return default.');
+  }
+});
+
 // Change Password modal
 function setReq(id,met){
   const el=document.getElementById(id);
