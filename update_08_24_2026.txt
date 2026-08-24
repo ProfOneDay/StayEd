@@ -1,0 +1,60 @@
+StayEd Updates - August 24, 2026
+=================================
+
+ADMIN NOTIFICATIONS - NEW EVENTS
+-----------------------------------
+- New teacher registration: every active admin now gets a notification when
+  someone registers ("New Teacher Registration ... awaiting approval"),
+  linked straight to User Management. Previously admins had no way to know
+  a registration was waiting except by checking that page manually.
+- New CLC added by a teacher: every active admin now gets a notification
+  when a teacher registers a genuinely new Community Learning Center (not
+  when they're just assigned to one that already exists), linked to CLC
+  Management.
+- Both notification types auto-clear for all admins once the underlying
+  item is resolved: approving/rejecting a registration removes its
+  notification, so it doesn't linger for whichever admin didn't act on it.
+- Added icon + badge colors for these two new notification types (they
+  would otherwise have rendered as unstyled/transparent, since only the
+  risk and intervention types had colors defined).
+
+NOTIFICATION BELL - UNREAD DOT FIX
+--------------------------------------
+- The red dot on the notification bell was static -- it always showed,
+  regardless of whether there were actually any unread notifications, and
+  nothing in the code ever read the unread count.
+- Now reflects the real unread count on every page load (both teacher and
+  admin, since the navbar/layout code is shared), and updates immediately
+  after marking one/all notifications as read or deleting one, instead of
+  only on the next page load.
+
+ADMIN - ABOUT PAGE
+---------------------
+- Added pages/admin/about.html (same content as the teacher About page).
+- Added an "About StayEd" link to the admin sidebar footer, directly above
+  Logout -- matching where it already sits in the teacher sidebar.
+
+MISC
+------
+- SETUP.txt: noted that `Set-Execution Policy -Scope Process -ExecutionPolicy
+  Bypass` may be needed before `start.ps1` on machines that block script
+  execution.
+
+FILES CHANGED
+--------------
+Backend:
+  StayEd_Backend/app/routes/admin_routes.py
+  StayEd_Backend/app/routes/auth_routes.py
+  StayEd_Backend/app/routes/clc_routes.py
+
+Frontend:
+  StayEd_Frontend/assets/css/pages/teacher/notifications.css
+  StayEd_Frontend/assets/js/admin/notifications.js
+  StayEd_Frontend/assets/js/core/layout.js
+  StayEd_Frontend/assets/js/teacher/notifications.js
+  StayEd_Frontend/components/layout/navbar.html
+  StayEd_Frontend/components/layout/sidebar-admin.html
+  StayEd_Frontend/pages/admin/about.html (new)
+
+Other:
+  SETUP.txt

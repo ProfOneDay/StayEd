@@ -247,6 +247,22 @@ class Layout {
     settingsButton?.addEventListener("click", () => {
       Router?.go("/settings") ?? (window.location.href = "settings.html");
     });
+
+    this.updateNotificationDot();
+  }
+
+  static async updateNotificationDot() {
+    const dot = document.querySelector("[data-st-notification-dot]");
+
+    if (!dot || !window.API) return;
+
+    try {
+      const res = await API.getNotifications();
+
+      dot.classList.toggle("st-hidden", !(res.unread > 0));
+    } catch (error) {
+      console.error("[Layout] Unable to refresh notification dot", error);
+    }
   }
 
   static initializeUserMenu() {

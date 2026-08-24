@@ -65,6 +65,8 @@ class NotificationsPage {
 
           this.render();
 
+          window.Layout?.updateNotificationDot?.();
+
           Toast?.success("All notifications marked as read.");
         } catch (error) {
           console.error(error);
@@ -175,6 +177,8 @@ class NotificationsPage {
 
           this.renderCounts();
           this.render();
+
+          window.Layout?.updateNotificationDot?.();
         } catch (error) {
           console.error(error);
           Toast?.error("Unable to mark as read.");
@@ -195,6 +199,8 @@ class NotificationsPage {
 
           this.renderCounts();
           this.render();
+
+          window.Layout?.updateNotificationDot?.();
 
           Toast?.success("Notification removed.");
         } catch (error) {

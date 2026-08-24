@@ -63,6 +63,8 @@ class AdminNotificationsPage {
 
           this.render();
 
+          window.Layout?.updateNotificationDot?.();
+
           Toast?.success("All notifications marked as read.");
         } catch (error) {
           console.error(error);
@@ -107,6 +109,8 @@ class AdminNotificationsPage {
     const iconMap = {
       risk: "warning",
       intervention: "support_agent",
+      info: "how_to_reg",
+      system: "domain",
     };
 
     const metaBadgeClass = (n) => {
@@ -171,6 +175,8 @@ class AdminNotificationsPage {
 
           this.renderCounts();
           this.render();
+
+          window.Layout?.updateNotificationDot?.();
         } catch (error) {
           console.error(error);
           Toast?.error("Unable to mark as read.");
@@ -191,6 +197,8 @@ class AdminNotificationsPage {
 
           this.renderCounts();
           this.render();
+
+          window.Layout?.updateNotificationDot?.();
 
           Toast?.success("Notification removed.");
         } catch (error) {
