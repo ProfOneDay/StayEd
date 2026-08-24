@@ -116,7 +116,8 @@ class TeacherDashboard {
     if (!select) return;
 
     try {
-      const clcs = await API.getAssignedClcs();
+      const response = await API.getClcs();
+      const clcs = response.data || [];
       const current = select.value;
 
       select.replaceChildren();
