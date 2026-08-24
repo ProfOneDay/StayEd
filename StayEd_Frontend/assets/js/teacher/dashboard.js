@@ -117,7 +117,15 @@ class TeacherDashboard {
 
     try {
       const response = await API.getClcs();
-      const clcs = response.data || [];
+      const municipality = window.Auth ? Auth.municipality() : "";
+
+      // Teachers are assigned to a single municipality at account setup --
+      // scope this filter the same way CLC Overview does, rather than
+      // listing every CLC in the system regardless of municipality.
+      const clcs = (response.data || []).filter((c) =>
+        municipality ? c.municipality === municipality : true,
+      );
+
       const current = select.value;
 
       select.replaceChildren();
