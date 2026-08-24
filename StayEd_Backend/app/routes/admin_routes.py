@@ -177,6 +177,9 @@ def approve_user(user_id: int):
                     "UPDATE teacher SET status='ACTIVE' WHERE user_id=%s",
                     (user_id,),
                 )
+            # Clears the "pending registration" notice for every admin, not just
+            # whoever approved it -- it's resolved now, not just read by one of them.
+            cur.execute("DELETE FROM notification WHERE dedup_key=%s", (f"registration:{user_id}",))
         db.commit()
     except Exception:
         db.rollback()
@@ -262,6 +265,9 @@ def reject_user(user_id: int):
             )
             cur.execute("DELETE FROM teacher WHERE user_id=%s", (user_id,))
             cur.execute("DELETE FROM users WHERE user_id=%s", (user_id,))
+            # Clears the "pending registration" notice for every admin, not just
+            # whoever rejected it -- it's resolved now, not just read by one of them.
+            cur.execute("DELETE FROM notification WHERE dedup_key=%s", (f"registration:{user_id}",))
         db.commit()
     except Exception:
         db.rollback()

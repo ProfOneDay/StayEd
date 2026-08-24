@@ -250,10 +250,10 @@ class Layout {
 
     // ITEM 3 FIX:
     // Refresh the bell as soon as the navbar is initialized.
-    this.refreshNotificationIndicator();
+    this.updateNotificationDot();
   }
 
-  static async refreshNotificationIndicator() {
+  static async updateNotificationDot() {
     const dot = document.querySelector(
       "[data-st-notification-dot]",
     );
@@ -277,7 +277,7 @@ class Layout {
       dot.dataset.unreadCount = String(unreadCount);
     } catch (error) {
       console.error(
-        "[Layout] Unable to refresh notification bell",
+        "[Layout] Unable to refresh notification dot",
         error,
       );
     }

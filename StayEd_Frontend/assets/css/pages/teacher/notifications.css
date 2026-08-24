@@ -84,6 +84,8 @@
 
 .st-notif-icon--risk{ background:var(--st-risk-high-soft); color:var(--st-risk-high); }
 .st-notif-icon--intervention{ background:rgba(0,106,104,.10); color:var(--st-secondary); }
+.st-notif-icon--info{ background:var(--st-info-light); color:var(--st-info); }
+.st-notif-icon--system{ background:var(--st-primary-fixed); color:var(--st-primary); }
 
 .st-notif-body{
     flex:1;
@@ -117,6 +119,8 @@
 .st-notif-meta-badge--moderate{ background:var(--st-risk-moderate-soft); color:var(--st-risk-moderate); }
 .st-notif-meta-badge--low{ background:var(--st-risk-low-soft); color:var(--st-risk-low); }
 .st-notif-meta-badge--intervention{ background:rgba(0,106,104,.10); color:var(--st-secondary); }
+.st-notif-meta-badge--info{ background:var(--st-info-light); color:var(--st-info); }
+.st-notif-meta-badge--system{ background:var(--st-primary-fixed); color:var(--st-primary); }
 
 .st-notif-body .st-btn{
     margin-top:10px;

@@ -64,8 +64,6 @@ class NotificationsPage {
           this.renderCounts();
           this.render();
 
-          // ITEM 3 FIX:
-          // Mark All Read must remove the bell dot immediately.
           await this.refreshBellIndicator();
 
           Toast?.success("All notifications marked as read.");
@@ -262,6 +260,8 @@ class NotificationsPage {
           this.renderCounts();
           this.render();
           await this.refreshBellIndicator();
+
+          window.Layout?.updateNotificationDot?.();
 
           Toast?.success("Notification removed.");
         } catch (error) {

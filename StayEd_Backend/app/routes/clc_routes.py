@@ -230,6 +230,29 @@ def create_clc():
             created = cur.fetchone()
             if created:
                 clc_id = created["clc_id"]
+                # Only alert admins when a genuinely new CLC was inserted -- not
+                # when this resolved to an already-existing CLC via ON CONFLICT
+                # (that's just the teacher getting assigned to it).
+                teacher_name = " ".join(
+                    p for p in (teacher.get("first_name"), teacher.get("last_name")) if p
+                ).strip() or "A teacher"
+                admins = fetch_all("SELECT user_id FROM users WHERE role = 'ADMIN' AND account_status = 'ACTIVE'")
+                for admin in admins:
+                    cur.execute(
+                        """
+                        INSERT INTO notification (user_id, notification_type, title, message, link, meta_label, dedup_key)
+                        VALUES (%s, 'SYSTEM', %s, %s, %s, %s, %s)
+                        ON CONFLICT (user_id, dedup_key) WHERE dedup_key IS NOT NULL DO NOTHING
+                        """,
+                        (
+                            admin["user_id"],
+                            "New CLC Registered",
+                            f"{teacher_name} registered a new Community Learning Center: {name} ({municipality}).",
+                            "clc-management.html",
+                            "New",
+                            f"new_clc:{clc_id}",
+                        ),
+                    )
             else:
                 cur.execute(
                     """

@@ -8,7 +8,7 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_requir
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from ..authz import current_user_id
-from ..db import execute, fetch_one, get_db
+from ..db import execute, fetch_all, fetch_one, get_db
 from ..helpers import EMAIL_RE, error, split_name
 
 bp = Blueprint("auth", __name__)
@@ -162,6 +162,24 @@ def register():
                 """,
                 (user_id, f"PENDING-{user_id}", first_name, last_name, "Unassigned"),
             )
+
+            admins = fetch_all("SELECT user_id FROM users WHERE role = 'ADMIN' AND account_status = 'ACTIVE'")
+            for admin in admins:
+                cur.execute(
+                    """
+                    INSERT INTO notification (user_id, notification_type, title, message, link, meta_label, dedup_key)
+                    VALUES (%s, 'INFO', %s, %s, %s, %s, %s)
+                    ON CONFLICT (user_id, dedup_key) WHERE dedup_key IS NOT NULL DO NOTHING
+                    """,
+                    (
+                        admin["user_id"],
+                        "New Teacher Registration",
+                        f"{full_name} ({email}) has registered and is awaiting approval.",
+                        "user-management.html",
+                        "Pending",
+                        f"registration:{user_id}",
+                    ),
+                )
         db.commit()
     except Exception:
         db.rollback()
