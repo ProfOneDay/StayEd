@@ -7,6 +7,8 @@ from io import BytesIO
 import pandas as pd
 from flask import Blueprint, request
 
+from ..services.ai_intervention_service import generate_ai_recommendation
+
 from ..authz import current_user_id, role_required, teacher_for_user
 from ..db import execute, fetch_all, fetch_one, get_db
 from ..helpers import (
@@ -993,7 +995,6 @@ def create_intervention(learner_id: int):
     if not base:
         return error("Learner not found.", 404)
     teacher = _teacher_scope()
-
     data = request.get_json(silent=True) or {}
     intervention_type = str(data.get("type") or "").strip()
     description = str(data.get("description") or "").strip()
@@ -1001,7 +1002,6 @@ def create_intervention(learner_id: int):
         return error("Intervention type is required.", 422)
     if not description:
         return error("A short description is required.", 422)
-
     target_date = None
     if data.get("targetDate"):
         try:
@@ -1014,21 +1014,69 @@ def create_intervention(learner_id: int):
     except ValueError as exc:
         return error(str(exc), 503)
 
-    execute(
+    created_row = execute(
         """
-        INSERT INTO intervention (risk_assessment_id, assigned_to_teacher_id, intervention_type, description, target_date)
-        VALUES (%s, %s, %s, %s, %s)
+        INSERT INTO intervention (risk_assessment_id, assigned_to_teacher_id, intervention_type, description, target_date)        VALUES (%s, %s, %s, %s, %s)
+        RETURNING intervention_id
         """,
         (risk_assessment_id, teacher["teacher_id"], intervention_type, description, target_date),
+        returning=True,
     )
+    intervention_id = created_row["intervention_id"]
 
     try:
         trigger_prediction(base["enrollment_id"], current_user_id())
     except Exception:
         pass
 
-    return {"message": "Intervention assigned."}, 201
+    risk_row = fetch_one(
+        "SELECT risk_level, risk_probability FROM risk_assessment WHERE risk_assessment_id=%s",
+        (risk_assessment_id,),
+    )
+    factor_rows = fetch_all(
+        "SELECT factor_name AS name, factor_value AS value FROM risk_factors WHERE risk_assessment_id=%s",
+        (risk_assessment_id,),
+    )
 
+    ai_result = None
+    try:
+        ai_result = generate_ai_recommendation(
+            risk_level=risk_row["risk_level"] if risk_row else "Unknown",
+            risk_probability=float(risk_row["risk_probability"]) if risk_row and risk_row.get("risk_probability") else 0.0,
+            factors=[dict(f) for f in factor_rows],
+            intervention={
+                "title": intervention_type,
+                "priority": "High" if risk_row and risk_row.get("risk_level") == "HIGH" else "Medium",
+                "category": intervention_type,
+                "description": description,
+                "reason": description,
+                "recommended_action": description,
+            },
+        )
+        if ai_result:
+            execute(
+                """
+                UPDATE intervention
+                SET ai_title = %s,
+                    ai_priority = %s,
+                    ai_category = %s,
+                    ai_reason = %s,
+                    ai_recommended_action = %s
+                WHERE intervention_id = %s
+                """,
+                (
+                    ai_result.get("title"),
+                    ai_result.get("priority"),
+                    ai_result.get("category"),
+                    ai_result.get("reason"),
+                    ai_result.get("recommended_action"),
+                    intervention_id,
+                ),
+            )
+    except Exception as exc:
+        print("AI recommendation failed:", exc)
+
+    return {"message": "Intervention assigned.", "ai_recommendation": ai_result}, 201
 
 @bp.get("/learning-strands")
 @role_required("teacher")
