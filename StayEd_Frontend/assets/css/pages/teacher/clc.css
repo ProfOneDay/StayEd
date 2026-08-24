@@ -6,6 +6,15 @@
     gap:24px;
 }
 
+.st-records-stats--clc{
+    grid-template-columns:repeat(2,1fr);
+    max-width:520px;
+}
+
+@media (max-width:520px){
+    .st-records-stats--clc{ grid-template-columns:1fr; max-width:none; }
+}
+
 @media (max-width:1200px){
     .st-clc-grid{ grid-template-columns:repeat(2,1fr); }
 }

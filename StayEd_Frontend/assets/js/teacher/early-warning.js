@@ -39,7 +39,7 @@ class EarlyWarningPage {
         }))
         .sort((a, b) => (b.risk_probability || 0) - (a.risk_probability || 0));
 
-      this.populateClcFilter();
+      await this.populateClcFilter();
 
       this.renderSummary(learners);
 
@@ -52,14 +52,30 @@ class EarlyWarningPage {
     }
   }
 
-  static populateClcFilter() {
+  static async populateClcFilter() {
     const select = document.querySelector("[data-ewa-filter-clc]");
     if (!select) return;
 
     const current = this.state.clc;
-    const names = [...new Set(this.state.all.map((item) => item.clc))]
-      .filter(Boolean)
-      .sort((a, b) => a.localeCompare(b));
+
+    // Use the teacher's assigned CLC master list (the same source of truth
+    // as CLC Overview / Class Management) so every assigned CLC is listed
+    // here, not only CLCs that currently have a flagged learner.
+    let names = [];
+    try {
+      const response = await API.getClcs();
+      names = (response.data || [])
+        .map((c) => c.name)
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b));
+    } catch (error) {
+      console.error("[EarlyWarning] Unable to load assigned CLCs", error);
+      // Fall back to whatever CLC names are present in the flagged list so
+      // the filter still works even if the CLC master list is unavailable.
+      names = [...new Set(this.state.all.map((item) => item.clc))]
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b));
+    }
 
     select.replaceChildren();
 
@@ -177,13 +193,18 @@ class EarlyWarningPage {
     const pageRows = filtered.slice(start, start + perPage);
 
     if (!pageRows.length) {
+      const clcSelected = this.state.clc;
+      const title = clcSelected ? "No learners requiring attention in this CLC." : "No active alerts";
+      const text = clcSelected
+        ? "Try selecting a different CLC or clearing your filters."
+        : "Try adjusting your search or filters.";
       body.innerHTML = `
                 <tr>
                     <td colspan="9">
                         <div class="st-empty" style="border:none;background:transparent;">
                             <span class="material-symbols-outlined">verified_user</span>
-                            <p class="st-empty-title">No active alerts</p>
-                            <p class="st-empty-text">Try adjusting your search or filters.</p>
+                            <p class="st-empty-title">${title}</p>
+                            <p class="st-empty-text">${text}</p>
                         </div>
                     </td>
                 </tr>

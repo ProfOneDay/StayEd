@@ -507,6 +507,10 @@ class API {
     return this.post(`/learners/${learnerId}/module-batches/${batchId}/return`, payload);
   }
 
+  static editModuleBatch(learnerId, batchId, payload) {
+    return this.put(`/learners/${learnerId}/module-batches/${batchId}`, payload);
+  }
+
   static recordConsultation(learnerId, payload) {
     return this.post(`/learners/${learnerId}/consultations`, payload);
   }

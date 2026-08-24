@@ -182,7 +182,11 @@ class LearnerProfilePage {
     const p = this.profile;
     const m = p.metrics || {};
 
-    this.set("[data-metric-engagement]", `${m.engagementScore} of ${m.engagementScoreMax}`);
+    this.set(
+      "[data-metric-module-rate]",
+      m.moduleRate == null ? "Not Yet Available" : `${m.moduleRate}%`,
+    );
+    this.set("[data-metric-module-rate-text]", m.moduleRate == null ? "" : m.moduleRateText);
     this.set("[data-metric-released]", m.modulesReleased);
     this.set("[data-metric-returned]", m.modulesReturned);
     this.set("[data-metric-active]", m.activeModules);
@@ -209,28 +213,62 @@ class LearnerProfilePage {
 
     if (!points || !list) return;
 
+    // Fallback band midpoints, only used for the rare point that has no
+    // saved risk_probability (older/imported data) -- everything else uses
+    // the actual probability so real movement within a level (e.g. Moderate
+    // 40% -> Moderate 63%) is still visible on the chart.
+    const yFor = { High: 15, Moderate: 50, Low: 85 };
+    const yForPoint = (pt) =>
+      pt.probability == null ? (yFor[pt.level] ?? 50) : Math.max(0, Math.min(100, 100 - pt.probability));
+
     if (!trend.length) {
       points.innerHTML = "";
-      list.innerHTML = `<p class="st-risk-trend-empty">No risk assessments recorded yet.</p>`;
+      list.innerHTML = `<p class="st-risk-trend-empty">No risk assessment available yet.</p>`;
       return;
     }
 
-    const yFor = { High: 15, Moderate: 50, Low: 85 };
+    if (trend.length === 1) {
+      const pt = trend[0];
+      const y = yForPoint(pt);
+      points.innerHTML = `<span class="st-risk-trend-point st-risk-trend-point--${pt.level.toLowerCase()}" style="left:50%;top:${y}%;" title="${pt.date}: ${pt.level} Risk${pt.probability != null ? ` (${pt.probability}%)` : ""}"></span>`;
+      list.innerHTML = `
+        <div class="st-risk-trend-list-row">
+          <span>${pt.date}</span>
+          <span class="st-risk-badge st-risk-badge--${pt.level.toLowerCase()}"><span class="st-risk-dot"></span>${pt.level}</span>
+        </div>
+        <p class="st-risk-trend-empty">Only one assessment is available. Additional assessments are required to display a risk trend.</p>
+      `;
+      return;
+    }
 
-    points.innerHTML = trend
-      .map((pt, i) => {
-        const x = trend.length === 1 ? 50 : (i / (trend.length - 1)) * 100;
-        const y = yFor[pt.level] ?? 50;
-        return `<span class="st-risk-trend-point st-risk-trend-point--${pt.level.toLowerCase()}" style="left:${x}%;top:${y}%;" title="${pt.date}: ${pt.level} Risk"></span>`;
-      })
+    const coords = trend.map((pt, i) => ({
+      x: (i / (trend.length - 1)) * 100,
+      y: yForPoint(pt),
+      pt,
+    }));
+
+    const line = coords.map((c) => `${c.x},${c.y}`).join(" ");
+
+    const dots = coords
+      .map(
+        ({ x, y, pt }) =>
+          `<span class="st-risk-trend-point st-risk-trend-point--${pt.level.toLowerCase()}" style="left:${x}%;top:${y}%;" title="${pt.date}: ${pt.level} Risk${pt.probability != null ? ` (${pt.probability}%)` : ""}"></span>`,
+      )
       .join("");
+
+    points.innerHTML = `
+      <svg class="st-risk-trend-line" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <polyline points="${line}" fill="none" stroke="var(--st-primary)" stroke-width="1.5" vector-effect="non-scaling-stroke" />
+      </svg>
+      ${dots}
+    `;
 
     list.innerHTML = trend
       .map(
         (pt) => `
           <div class="st-risk-trend-list-row">
             <span>${pt.date}</span>
-            <span class="st-risk-badge st-risk-badge--${pt.level.toLowerCase()}"><span class="st-risk-dot"></span>${pt.level}</span>
+            <span class="st-risk-badge st-risk-badge--${pt.level.toLowerCase()}"><span class="st-risk-dot"></span>${pt.level}${pt.probability != null ? ` (${pt.probability}%)` : ""}</span>
           </div>
         `,
       )

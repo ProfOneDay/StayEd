@@ -610,25 +610,22 @@ def learner_profile(learner_id: int):
         """,
         (enrollment_id,),
     )
+    # ================================================================
+    # ITEM 2 FIX:
+    # Use the ACTUAL recorded consultation date to calculate the
+    # number of days since contact. Never use created_at, updated_at,
+    # or the time the teacher saved the record. Future dates are treated
+    # as invalid so this value can never become negative.
+    # ================================================================
     days_since_contact = None
 
-    if (
-    last_contact_event
-    and last_contact_event.get(
-        "contact_date"
-    )
-):
-      contact_date = (
-        last_contact_event[
-            "contact_date"
-        ]
-    )
+    if last_contact_event:
+        contact_date = last_contact_event.get("contact_date")
 
-    if contact_date <= date.today():
-        days_since_contact = (
-            date.today()
-            - contact_date
-        ).days
+        if contact_date and contact_date <= date.today():
+            days_since_contact = (
+                date.today() - contact_date
+            ).days
 
     interventions = fetch_all(
         """
@@ -1053,8 +1050,10 @@ def _logbook(enrollment_id: int, learner_activity: dict) -> dict:
                 "title": r["module_name"],
                 "status": "returned" if r["module_status"] == "RETURNED" else "active",
                 "returned": r["date_returned"].strftime("%B %d, %Y") if r["date_returned"] else None,
+                "returnedISO": r["date_returned"].isoformat() if r["date_returned"] else None,
                 "returnedRaw": r["date_returned"],
                 "remarks": r.get("remarks") or "",
+                "strandCode": strand_code,
             }
         )
 
@@ -1071,6 +1070,7 @@ def _logbook(enrollment_id: int, learner_activity: dict) -> dict:
             {
                 "id": batch["id"],
                 "releaseDate": batch["releaseDate"],
+                "releaseDateISO": batch["releaseDateRaw"].isoformat(),
                 "moduleCount": len(all_modules),
                 "strandCount": len(strands),
                 "strands": strands,

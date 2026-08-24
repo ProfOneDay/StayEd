@@ -247,6 +247,40 @@ class Layout {
     settingsButton?.addEventListener("click", () => {
       Router?.go("/settings") ?? (window.location.href = "settings.html");
     });
+
+    // ITEM 3 FIX:
+    // Refresh the bell as soon as the navbar is initialized.
+    this.refreshNotificationIndicator();
+  }
+
+  static async refreshNotificationIndicator() {
+    const dot = document.querySelector(
+      "[data-st-notification-dot]",
+    );
+
+    if (!dot || !window.API?.getNotifications) {
+      return;
+    }
+
+    try {
+      const res = await API.getNotifications();
+
+      const unreadCount = Array.isArray(res?.data)
+        ? res.data.filter((n) => !n.read).length
+        : Number(res?.unread || 0);
+
+      dot.classList.toggle(
+        "st-hidden",
+        unreadCount <= 0,
+      );
+
+      dot.dataset.unreadCount = String(unreadCount);
+    } catch (error) {
+      console.error(
+        "[Layout] Unable to refresh notification bell",
+        error,
+      );
+    }
   }
 
   static initializeUserMenu() {

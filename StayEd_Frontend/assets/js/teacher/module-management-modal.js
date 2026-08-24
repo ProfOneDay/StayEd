@@ -15,6 +15,8 @@ class ModuleManagementModal {
 
   static returnState = null;
 
+  static editState = null;
+
   static onUpdate = null;
 
   static async open(learner, onUpdate) {
@@ -74,6 +76,8 @@ class ModuleManagementModal {
       this.bodyEl.innerHTML = this.renderReleaseForm();
     } else if (this.view === "return") {
       this.bodyEl.innerHTML = this.renderReturnModal();
+    } else if (this.view === "edit") {
+      this.bodyEl.innerHTML = this.renderEditForm();
     } else {
       this.bodyEl.innerHTML = this.renderLogbook();
     }
@@ -165,10 +169,15 @@ class ModuleManagementModal {
             <div class="st-mrb-col st-mrb-col--returned">
               <span class="st-mrb-returned-text">Returned: ${batch.returnDate} (${batch.daysToReturn} day${batch.daysToReturn === 1 ? "" : "s"} after release)</span>
             </div>
+          </button>
+          <div class="st-mrb-actions">
             <span class="st-mrb-status-pill st-mrb-status-pill--returned">
               <span class="material-symbols-outlined">check</span> Returned
             </span>
-          </button>
+            <button type="button" class="st-mrb-edit-btn" data-edit-batch="${batch.id}" title="Edit this release batch" aria-label="Edit this release batch">
+              <span class="material-symbols-outlined">edit</span>
+            </button>
+          </div>
           ${expanded ? this.renderBatchExpanded(batch) : ""}
         </div>
       `;
@@ -209,6 +218,9 @@ class ModuleManagementModal {
             </span>
           </span>
           <button type="button" class="st-btn st-btn-primary st-btn-xs" data-record-return="${batch.id}">Record Return</button>
+          <button type="button" class="st-mrb-edit-btn" data-edit-batch="${batch.id}" title="Edit this release batch" aria-label="Edit this release batch">
+            <span class="material-symbols-outlined">edit</span>
+          </button>
         </div>
         ${expanded ? this.renderBatchExpanded(batch) : ""}
       </div>
@@ -311,6 +323,31 @@ class ModuleManagementModal {
           checked: new Set(),
           returnDate: new Date().toISOString().slice(0, 10),
           remarks: "",
+        };
+        this.renderAll();
+      });
+    });
+
+    root.querySelectorAll("[data-edit-batch]").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const id = Number(el.dataset.editBatch);
+        const batch = this.batches.find((b) => b.id === id);
+        if (!batch) return;
+        this.view = "edit";
+        this.editState = {
+          batchId: id,
+          releaseDate: batch.releaseDateISO || new Date().toISOString().slice(0, 10),
+          modules: batch.strands.flatMap((s) =>
+            s.modules.map((m) => ({
+              id: m.id,
+              title: m.title,
+              strandCode: m.strandCode || s.code,
+              returnDate: m.returnedISO || "",
+              remarks: m.remarks || "",
+            })),
+          ),
+          error: "",
         };
         this.renderAll();
       });
@@ -693,6 +730,179 @@ class ModuleManagementModal {
   }
 
   // ------------------------------------------------------------------
+  // Edit batch view
+  // ------------------------------------------------------------------
+
+  static renderEditForm() {
+    const state = this.editState;
+    const batch = this.batches.find((b) => b.id === state.batchId);
+    if (!batch) {
+      this.view = "logbook";
+      return this.renderLogbook();
+    }
+
+    const strandOptionsHtml = (selectedCode) =>
+      this.strandOptions
+        .map((s) => `<option value="${s.code}" ${selectedCode === s.code ? "selected" : ""}>${s.code} – ${s.name}</option>`)
+        .join("");
+
+    return `
+      <div class="st-module-modal-header">
+        <button type="button" class="st-module-modal-close" data-module-close aria-label="Close">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+        <h1 class="st-module-modal-title">Edit Release Batch</h1>
+        <p class="st-mrf-subtitle">Correct the release date, module details, or return dates for this batch.</p>
+      </div>
+
+      <div class="st-module-modal-body">
+        ${state.error ? `<p class="st-form-error">${state.error}</p>` : ""}
+
+        <div class="st-schedule-modal-field">
+          <label for="mreReleaseDate">Release Date *</label>
+          <input type="date" id="mreReleaseDate" data-edit-release-date value="${state.releaseDate}">
+        </div>
+
+        <h3 class="st-mrf-section-title">Modules</h3>
+
+        ${state.modules
+          .map(
+            (m, i) => `
+            <div class="st-mrf-strand-block">
+              <div class="st-mrf-strand-head">
+                <label>Module ${i + 1}</label>
+              </div>
+              <input type="text" value="${m.title}" data-edit-module-title="${i}" placeholder="Module name">
+
+              <label for="mreStrand${i}" style="margin-top:8px;">Learning Strand</label>
+              <select id="mreStrand${i}" data-edit-module-strand="${i}">
+                ${strandOptionsHtml(m.strandCode)}
+              </select>
+
+              <label for="mreReturn${i}" style="margin-top:8px;">Return Date</label>
+              <input type="date" id="mreReturn${i}" data-edit-module-return="${i}" value="${m.returnDate || ""}">
+
+              <label for="mreRemarks${i}" style="margin-top:8px;">Remarks</label>
+              <textarea id="mreRemarks${i}" data-edit-module-remarks="${i}" rows="2">${m.remarks || ""}</textarea>
+            </div>
+          `,
+          )
+          .join("")}
+      </div>
+
+      <div class="st-module-modal-footer">
+        <button type="button" class="st-btn-text" data-module-cancel>Cancel</button>
+        <button type="button" class="st-btn st-btn-primary" data-save-edit-submit>Save Changes</button>
+      </div>
+    `;
+  }
+
+  static bindEditForm(root) {
+    const state = this.editState;
+
+    root.querySelector("[data-edit-release-date]")?.addEventListener("input", (e) => {
+      state.releaseDate = e.target.value;
+    });
+
+    root.querySelectorAll("[data-edit-module-title]").forEach((el) => {
+      el.addEventListener("input", (e) => {
+        state.modules[Number(el.dataset.editModuleTitle)].title = e.target.value;
+      });
+    });
+
+    root.querySelectorAll("[data-edit-module-strand]").forEach((el) => {
+      el.addEventListener("change", (e) => {
+        state.modules[Number(el.dataset.editModuleStrand)].strandCode = e.target.value;
+      });
+    });
+
+    root.querySelectorAll("[data-edit-module-return]").forEach((el) => {
+      el.addEventListener("input", (e) => {
+        state.modules[Number(el.dataset.editModuleReturn)].returnDate = e.target.value;
+      });
+    });
+
+    root.querySelectorAll("[data-edit-module-remarks]").forEach((el) => {
+      el.addEventListener("input", (e) => {
+        state.modules[Number(el.dataset.editModuleRemarks)].remarks = e.target.value;
+      });
+    });
+
+    root.querySelector("[data-module-cancel]")?.addEventListener("click", () => {
+      this.view = "logbook";
+      this.renderAll();
+    });
+
+    root.querySelector("[data-save-edit-submit]")?.addEventListener("click", async (e) => {
+      const today = new Date().toISOString().slice(0, 10);
+
+      // Mirror the backend's validation here so the teacher sees a clear
+      // message immediately, without waiting on a round trip -- the backend
+      // still re-validates and is the final authority.
+      if (!state.releaseDate) {
+        state.error = "Release date is required.";
+        this.renderAll();
+        return;
+      }
+      if (state.releaseDate > today) {
+        state.error = "Release date cannot be later than the current date.";
+        this.renderAll();
+        return;
+      }
+      for (const m of state.modules) {
+        if (!m.title.trim()) {
+          state.error = "Module name cannot be blank.";
+          this.renderAll();
+          return;
+        }
+        if (m.returnDate) {
+          if (m.returnDate > today) {
+            state.error = "Return date cannot be later than the current date.";
+            this.renderAll();
+            return;
+          }
+          if (m.returnDate < state.releaseDate) {
+            state.error = "Return date cannot be earlier than the module release date.";
+            this.renderAll();
+            return;
+          }
+        }
+      }
+
+      state.error = "";
+      const btn = e.currentTarget;
+      if (btn.disabled) return;
+      btn.disabled = true;
+
+      const payload = {
+        releaseDate: state.releaseDate,
+        modules: state.modules.map((m) => ({
+          id: m.id,
+          moduleName: m.title.trim(),
+          strandCode: m.strandCode,
+          returnDate: m.returnDate || null,
+          remarks: m.remarks.trim(),
+        })),
+      };
+
+      try {
+        const response = await API.editModuleBatch(this.learner.id, state.batchId, payload);
+        this.meta = response.learner || this.meta;
+        this.batches = response.batches || [];
+        this.expandedBatchId = state.batchId;
+        Toast?.success("Release batch updated.");
+        this.view = "logbook";
+        this.renderAll();
+        this.onUpdate?.();
+      } catch (error) {
+        console.error("[ModuleManagementModal] Edit failed", error);
+        state.error = error?.data?.message || "Unable to update this release batch.";
+        this.renderAll();
+      }
+    });
+  }
+
+  // ------------------------------------------------------------------
   // Shared bind dispatcher
   // ------------------------------------------------------------------
 
@@ -705,6 +915,7 @@ class ModuleManagementModal {
 
     if (this.view === "release") this.bindReleaseForm(root);
     else if (this.view === "return") this.bindReturnModal(root);
+    else if (this.view === "edit") this.bindEditForm(root);
     else this.bindLogbook(root);
   }
 }

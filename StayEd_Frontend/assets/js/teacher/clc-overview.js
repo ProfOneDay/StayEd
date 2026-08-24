@@ -68,16 +68,6 @@ class ClcOverview {
       "[data-clc-learners]",
       all.reduce((sum, c) => sum + (c.totalLearners || 0), 0).toLocaleString(),
     );
-
-    this.set(
-      "[data-clc-high-risk]",
-      all.reduce((sum, c) => sum + (c.highRiskLearners || 0), 0),
-    );
-
-    this.set(
-      "[data-clc-active]",
-      all.filter((c) => c.status === "Active").length,
-    );
   }
 
   static apply() {
