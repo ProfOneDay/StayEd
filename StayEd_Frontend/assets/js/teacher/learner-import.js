@@ -31,6 +31,13 @@ class LearnerImportPage {
     });
   }
 
+  // The class this import should attach learners to, carried over from
+  // learner-records-hub.js via ?class=<id> on the link into this page.
+  static getClassId() {
+    const params = new URLSearchParams(window.location.search || "");
+    return params.get("class") || params.get("class_id") || null;
+  }
+
   static downloadTemplate() {
     Utils.downloadLearnerImportTemplate();
 
@@ -366,8 +373,11 @@ class LearnerImportPage {
           // "Duplicate" status in the preview, but the matching existing
           // learner is still attached to this class. Only error rows are
           // left out of the submission.
+          const classId = this.getClassId();
+
           const result = await API.importLearners({
             learners: this.preview.rows.filter((r) => r.status !== "error"),
+            ...(classId ? { class_id: classId } : {}),
           });
 
           document
@@ -378,7 +388,7 @@ class LearnerImportPage {
 
           success?.classList.remove("st-hidden");
 
-          const addedCount = this.preview.valid + this.preview.duplicates;
+          const addedCount = result.imported + result.attached;
 
           this.set("[data-success-total]", this.preview.total);
           this.set("[data-success-imported]", addedCount);

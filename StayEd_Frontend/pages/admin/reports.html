@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StayEd | Reports</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/css/main.css" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="../../assets/img/brand/favicon.ico"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="../../assets/img/brand/apple-touch-icon.png"
+    />
+  </head>
+  <body class="st-app" data-page="Reports">
+    <div data-component="layout/sidebar-admin"></div>
+
+    <div class="st-main">
+      <div data-component="layout/navbar"></div>
+
+      <main class="st-content">
+        <div class="st-page-header">
+          <div>
+            <h1 class="st-page-header-title">Reports</h1>
+            <p class="st-page-header-subtitle">
+              Generate the Master Enrollment Listing across every learning
+              center, filtered and grouped the way you need.
+            </p>
+          </div>
+        </div>
+
+        <div class="st-panel col-12">
+          <div class="st-panel-head st-report-panel-head">
+            <h3 class="st-panel-title">Master Enrollment Listing</h3>
+          </div>
+
+          <div class="st-records-toolbar">
+            <div class="st-records-toolbar-filters">
+              <select
+                data-report-filter-clc
+                aria-label="Filter by learning center"
+              >
+                <option value="">All Learning Centers</option>
+              </select>
+              <select
+                data-report-filter-year
+                aria-label="Filter by school year"
+              >
+                <option value="">All School Years</option>
+              </select>
+              <select
+                data-report-filter-semester
+                aria-label="Filter by academic semester"
+              >
+                <option value="">All Semesters</option>
+              </select>
+              <select
+                data-report-filter-teacher
+                aria-label="Filter by assigned teacher"
+              >
+                <option value="">All Teachers</option>
+              </select>
+              <select
+                data-report-filter-modality
+                aria-label="Filter by learning delivery mode"
+              >
+                <option value="">All Modalities</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="st-report-listing-actions">
+            <label class="st-report-groupby">
+              Group report by
+              <select data-report-group-by aria-label="Group report by">
+                <option value="">No grouping</option>
+                <option value="clc_name">Learning Center</option>
+                <option value="teacher_name">Assigned Teacher</option>
+                <option value="semester">Academic Semester</option>
+                <option value="learning_modality">
+                  Learning Delivery Mode
+                </option>
+              </select>
+            </label>
+            <button
+              type="button"
+              class="st-btn st-btn-primary"
+              data-generate-enrollment-listing
+            >
+              <span class="material-symbols-outlined">description</span>
+              Generate Report
+            </button>
+          </div>
+
+          <p
+            class="st-pagination-info st-report-preview-count"
+            data-report-preview-count
+          >
+            Loading enrollment records…
+          </p>
+
+          <div class="st-table-scroll st-table-scroll--sticky">
+            <table class="st-data-table">
+              <thead>
+                <tr>
+                  <th>LRN</th>
+                  <th>Learner</th>
+                  <th>Learning Center</th>
+                  <th>Assigned Teacher</th>
+                  <th>School Year / Semester</th>
+                  <th>Modality</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody data-report-preview-body>
+                <tr>
+                  <td colspan="7" class="st-table-empty-cell">Loading…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+
+      <div data-component="layout/footer"></div>
+    </div>
+
+    <div data-component="layout/toast"></div>
+    <div data-component="layout/modal"></div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/core/utils.js"></script>
+    <script src="../../assets/js/core/router.js"></script>
+    <script src="../../assets/js/core/api.js"></script>
+    <script src="../../assets/js/core/auth.js"></script>
+    <script src="../../assets/js/core/guards.js"></script>
+    <script src="../../assets/js/core/layout.js"></script>
+    <script src="../../assets/js/core/skeletons.js"></script>
+    <script src="../../assets/js/core/app.js"></script>
+    <script src="../../assets/js/components/component-loader.js"></script>
+    <script src="../../assets/js/components/toast.js"></script>
+    <script src="../../assets/js/components/modal.js"></script>
+    <script src="../../assets/js/core/report-printer.js"></script>
+    <script src="../../assets/js/admin/reports.js"></script>
+  </body>
+</html>

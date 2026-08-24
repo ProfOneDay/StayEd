@@ -107,6 +107,10 @@ class LearnerProfilePage {
     this.set("[data-profile-clc]", p.clc || "—");
     this.set("[data-profile-level]", p.level);
     this.set("[data-profile-modality]", p.modality);
+    this.set(
+      "[data-profile-modality-since]",
+      h.modalitySince && h.modalitySince !== "—" ? `(Since ${h.modalitySince})` : "",
+    );
     this.set("[data-profile-school-year]", h.schoolYear);
     this.set("[data-profile-date-enrolled]", h.dateEnrolled);
     this.set("[data-profile-assigned-teacher]", h.assignedTeacher);
@@ -131,12 +135,24 @@ class LearnerProfilePage {
   static openEditLearnerModal() {
     if (!window.Modal) return;
     const bg = this.profile.background || {};
+    const currentModality = this.profile.modality || "Face-to-Face";
+    const modalities = ["Face-to-Face", "Modular", "Blended"];
 
     Modal.show({
       title: "Edit Learner",
       size: "sm",
       confirmLabel: "Save Changes",
       message: `
+        <div class="st-schedule-modal-field">
+          <label for="elModality">Modality</label>
+          <select id="elModality">
+            ${modalities.map((m) => `<option value="${m}" ${m === currentModality ? "selected" : ""}>${m}</option>`).join("")}
+          </select>
+        </div>
+        <div class="st-schedule-modal-field" id="elModalityReasonField" style="display:none;">
+          <label for="elModalityReason">Reason for Modality Change</label>
+          <input id="elModalityReason" type="text" placeholder="e.g. Schedule constraints">
+        </div>
         <div class="st-schedule-modal-field">
           <label for="elCivil">Civil Status</label>
           <input id="elCivil" type="text" value="${bg.civilStatusRaw || ""}" placeholder="e.g. Single">
@@ -159,7 +175,12 @@ class LearnerProfilePage {
         </div>
       `,
       onConfirm: async () => {
+        const modality = document.getElementById("elModality")?.value;
+        const modalityReason = document.getElementById("elModalityReason")?.value.trim();
+
         const payload = {
+          modality,
+          modality_change_reason: modalityReason || undefined,
           civil_status: document.getElementById("elCivil")?.value.trim(),
           employment_status: document.getElementById("elEmployment")?.value.trim(),
           distance_from_clc_km: parseFloat(document.getElementById("elDistance")?.value) || 0,
@@ -176,6 +197,18 @@ class LearnerProfilePage {
         }
       },
     });
+
+    const modalitySelect = document.getElementById("elModality");
+    const reasonField = document.getElementById("elModalityReasonField");
+
+    const syncReasonVisibility = () => {
+      if (reasonField) {
+        reasonField.style.display = modalitySelect?.value === currentModality ? "none" : "";
+      }
+    };
+
+    modalitySelect?.addEventListener("change", syncReasonVisibility);
+    syncReasonVisibility();
   }
 
   static renderOverview() {
@@ -195,6 +228,7 @@ class LearnerProfilePage {
       "[data-metric-days-since]",
       m.daysSinceLastReturn == null ? "—" : m.daysSinceLastReturn,
     );
+    this.set("[data-metric-overdue]", m.overdueModules ?? 0);
 
     this.renderRiskTrendChart(p.riskTrend || []);
 
@@ -341,6 +375,7 @@ class LearnerProfilePage {
       module: "menu_book",
       intervention: "support_agent",
       risk: "trending_up",
+      modality: "swap_horiz",
     };
 
     container.innerHTML = items

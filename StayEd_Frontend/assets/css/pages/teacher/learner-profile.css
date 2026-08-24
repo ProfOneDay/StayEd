@@ -452,6 +452,7 @@
 .st-timeline-dot--module{ border-color:var(--st-risk-moderate); color:var(--st-risk-moderate); }
 .st-timeline-dot--intervention{ border-color:var(--st-secondary); color:var(--st-secondary); }
 .st-timeline-dot--risk{ border-color:var(--st-primary); color:var(--st-primary); }
+.st-timeline-dot--modality{ border-color:var(--st-outline); color:var(--st-outline); }
 
 .st-timeline-card{
     background:#fff;

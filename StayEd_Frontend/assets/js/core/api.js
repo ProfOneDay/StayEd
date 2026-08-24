@@ -511,6 +511,37 @@ class API {
     return this.put(`/learners/${learnerId}/module-batches/${batchId}`, payload);
   }
 
+  static updateModulePlannedReturn(learnerId, batchId, moduleRecordId, plannedReturnDate) {
+    return this.patch(
+      `/learners/${learnerId}/module-batches/${batchId}/modules/${moduleRecordId}`,
+      { plannedReturnDate },
+    );
+  }
+
+  static getModuleDurationSetting() {
+    return this.get("/settings/module-duration");
+  }
+
+  static updateModuleDurationSetting(defaultDurationDays) {
+    return this.put("/admin/settings/module-duration", { defaultDurationDays });
+  }
+
+  static getClassSessions(classId) {
+    return this.get(`/classes/${classId}/sessions`);
+  }
+
+  static createClassSession(classId, date) {
+    return this.post(`/classes/${classId}/sessions`, { date });
+  }
+
+  static getSessionAttendance(classId, sessionId) {
+    return this.get(`/classes/${classId}/sessions/${sessionId}/attendance`);
+  }
+
+  static saveSessionAttendance(classId, sessionId, presentEnrollmentIds) {
+    return this.post(`/classes/${classId}/sessions/${sessionId}/attendance`, { presentEnrollmentIds });
+  }
+
   static recordConsultation(learnerId, payload) {
     return this.post(`/learners/${learnerId}/consultations`, payload);
   }
@@ -666,6 +697,20 @@ class API {
 
   static addInterventionFollowUp(id, payload) {
     return this.post(`/interventions/${id}/follow-up`, payload);
+  }
+
+  static getAtRiskReport(params = {}) {
+    const qs = params && Object.keys(params).length ? this.query(params) : "";
+    return this.get(`/reports/at-risk${qs}`);
+  }
+
+  static getInterventionReport(params = {}) {
+    const qs = params && Object.keys(params).length ? this.query(params) : "";
+    return this.get(`/reports/interventions${qs}`);
+  }
+
+  static getEnrollmentListingReport() {
+    return this.get("/reports/enrollment-listing");
   }
 }
 

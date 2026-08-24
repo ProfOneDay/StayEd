@@ -9,7 +9,13 @@ from werkzeug.security import generate_password_hash
 from ..authz import current_user_id, role_required
 from ..db import execute, fetch_all, fetch_one, get_db
 from ..helpers import error, split_name
-from ..services.settings_service import get_active_school_year, set_active_school_year
+from ..services.mailer import send_email
+from ..services.settings_service import (
+    get_active_school_year,
+    get_default_module_duration_days,
+    set_active_school_year,
+    set_default_module_duration_days,
+)
 
 bp = Blueprint("admin", __name__)
 
@@ -144,7 +150,7 @@ def approve_user(user_id: int):
 
     row = fetch_one(
         """
-        SELECT u.user_id, u.account_status, t.teacher_id, t.employee_id
+        SELECT u.user_id, u.account_status, u.email, t.teacher_id, t.employee_id, t.first_name
         FROM users u
         JOIN teacher t ON t.user_id = u.user_id
         WHERE u.user_id = %s AND u.role = 'TEACHER'
@@ -175,6 +181,16 @@ def approve_user(user_id: int):
     except Exception:
         db.rollback()
         raise
+
+    if row.get("email"):
+        send_email(
+            row["email"],
+            "Your StayEd account has been approved",
+            f"Hi {row.get('first_name') or ''},\n\n"
+            "Your StayEd teacher account has been approved by a Division Administrator. "
+            "You can now log in at StayEd using the email and password you registered with.\n\n"
+            "— StayEd",
+        )
 
     return {"success": True, "message": "Teacher account approved."}
 
@@ -210,8 +226,17 @@ def suspend_user(user_id: int):
 @bp.post("/admin/users/<int:user_id>/reject")
 @role_required("admin")
 def reject_user(user_id: int):
+    data = request.get_json(silent=True) or {}
+    reason = str(data.get("reason") or "").strip()
+    remarks = str(data.get("remarks") or "").strip()
+
     row = fetch_one(
-        "SELECT user_id FROM users WHERE user_id=%s AND role='TEACHER' AND account_status='INACTIVE'",
+        """
+        SELECT u.user_id, u.email, t.first_name
+        FROM users u
+        JOIN teacher t ON t.user_id = u.user_id
+        WHERE u.user_id=%s AND u.role='TEACHER' AND u.account_status='INACTIVE'
+        """,
         (user_id,),
     )
     if not row:
@@ -220,12 +245,42 @@ def reject_user(user_id: int):
     db = get_db()
     try:
         with db.cursor() as cur:
+            # The applicant's row is about to be deleted, so the reason has
+            # nowhere to live afterward unless logged now, against the
+            # reviewing admin's own user_id.
+            description = f"Rejected {row.get('email')}"
+            if reason:
+                description += f" — reason: {reason}"
+            if remarks:
+                description += f" — remarks: {remarks}"
+            cur.execute(
+                """
+                INSERT INTO user_activity_log (user_id, action, table_name, record_id, description)
+                VALUES (%s, 'TEACHER_REGISTRATION_REJECTED', 'users', %s, %s)
+                """,
+                (current_user_id(), user_id, description),
+            )
             cur.execute("DELETE FROM teacher WHERE user_id=%s", (user_id,))
             cur.execute("DELETE FROM users WHERE user_id=%s", (user_id,))
         db.commit()
     except Exception:
         db.rollback()
         raise
+
+    if row.get("email"):
+        reason_line = f"\n\nReason: {reason}" if reason else ""
+        remarks_line = f"\n\n{remarks}" if remarks else ""
+        send_email(
+            row["email"],
+            "Your StayEd registration was not approved",
+            f"Hi {row.get('first_name') or ''},\n\n"
+            "Your StayEd teacher account registration was reviewed by a Division Administrator "
+            f"and was not approved at this time.{reason_line}{remarks_line}\n\n"
+            "If you believe this was a mistake, please contact your Division Office for more "
+            "information.\n\n"
+            "— StayEd",
+        )
+
     return {"success": True, "message": "Registration rejected."}
 
 
@@ -623,3 +678,23 @@ def update_school_year():
         return error("School year must be in the format YYYY-YYYY.", 422)
     set_active_school_year(value, current_user_id())
     return {"schoolYear": value}
+
+
+@bp.get("/settings/module-duration")
+@role_required("teacher", "admin", "coordinator")
+def get_module_duration():
+    return {"defaultDurationDays": get_default_module_duration_days()}
+
+
+@bp.put("/admin/settings/module-duration")
+@role_required("admin")
+def update_module_duration():
+    data = request.get_json(silent=True) or {}
+    try:
+        value = int(data.get("defaultDurationDays"))
+    except (TypeError, ValueError):
+        return error("Default duration must be a whole number of days.", 422)
+    if value < 1 or value > 180:
+        return error("Default duration must be between 1 and 180 days.", 422)
+    set_default_module_duration_days(value, current_user_id())
+    return {"defaultDurationDays": value}

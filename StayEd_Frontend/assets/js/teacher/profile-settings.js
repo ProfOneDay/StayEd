@@ -73,11 +73,19 @@ class ProfileSettingsPage {
     profileForm?.addEventListener("submit", async (event) => {
       event.preventDefault();
 
+      const email = document.getElementById("settingsEmail")?.value.trim();
+
+      if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        Toast?.error("Enter a valid email address.");
+
+        return;
+      }
+
       try {
         await Auth.updateProfile({
           first_name: document.getElementById("settingsFirstName")?.value.trim(),
           last_name: document.getElementById("settingsLastName")?.value.trim(),
-          email: document.getElementById("settingsEmail")?.value.trim(),
+          email,
         });
 
         window.UnsavedChanges?.clear(profileForm);

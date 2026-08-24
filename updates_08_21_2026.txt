@@ -1,0 +1,88 @@
+StayEd Updates - August 21, 2026
+=================================
+
+TEACHER - LEARNER ENROLLMENT & IMPORT
+--------------------------------------
+- Back button on learner-enroll.html and learner-import.html now returns to
+  the specific class's Learner Records page instead of the unfiltered view.
+  Learner Records' "Import Students" / "Enroll Student" links carry the
+  current class context (?class=&clc=) forward, and both pages carry it back.
+- learner-enroll.html: added an initial "New Student or Existing Student"
+  step before the enrollment wizard.
+    - New Student: proceeds through the wizard as before.
+    - Existing Student: search/select from the teacher's known learners;
+      selecting one prefills and locks the Personal/Contact/Guardian fields
+      and marks the learner as a re-enrollee.
+  The wizard's Back button on step 1 now returns to this gate (relabeled
+  "Back" instead of "Previous"). The header Back link was relabeled
+  "Return to Learner Records".
+- learner-import.html: duplicate rows are no longer skipped. The existing
+  learner is attached to the class instead (keeping their "Duplicate" status
+  in the preview/summary). Only rows with real errors are skipped.
+- Backend: /learners now returns full personal-info fields (birthdate,
+  civil status, contact info, address, guardian info, etc.) needed for the
+  existing-student prefill. Import now inserts duplicate rows into the
+  class roster via the existing learner record instead of dropping them.
+
+ADMIN - DASHBOARD MAP
+----------------------
+- Interactive municipality map is scoped to Pangasinan School Division II's
+  24 municipalities/cities (the rest of the province still renders for
+  geographic context but stays non-interactive/gray).
+- All Division II municipalities are now colored by risk level (green by
+  default), not just ones with a registered CLC.
+- Selecting a municipality lists its CLCs (name, barangay, learner/teacher
+  counts, active/archived status), shown 3 at a time with prev/next paging.
+- Added assets/js/admin/division-ii-municipalities.js as the single shared
+  source of truth for the Division II municipality list.
+
+ADMIN - NOTIFICATIONS
+-----------------------
+- Added pages/admin/notifications.html and assets/js/admin/notifications.js
+  so the notification bell works for admin users (it was 404ing before).
+
+ADMIN - USER MANAGEMENT
+-------------------------
+- "Create Teacher Account" renamed to "Create Account" with a Teacher/Admin
+  toggle. Choosing Admin hides the teacher-only fields (Employee ID,
+  Municipality, CLC).
+- Backend: POST /admin/users accepts a role field ("teacher" or "admin") and
+  creates the account accordingly.
+
+ADMIN - CLC MANAGEMENT
+------------------------
+- "Add New CLC" municipality dropdown now lists all 24 Division II
+  municipalities up front, instead of only municipalities that already had
+  a CLC registered.
+- Removed the "+ New municipality..." manual-entry option (no longer needed
+  now that all Division II municipalities are listed).
+
+FILES CHANGED
+--------------
+Backend:
+  StayEd_Backend/app/routes/admin_routes.py
+  StayEd_Backend/app/routes/learner_routes.py
+  StayEd_Backend/app/services/learner_service.py
+
+Frontend:
+  StayEd_Frontend/assets/css/pages/admin/admin-dashboard.css
+  StayEd_Frontend/assets/css/pages/admin/admin-user-management.css
+  StayEd_Frontend/assets/css/pages/teacher/data-upload.css
+  StayEd_Frontend/assets/css/pages/teacher/learner-records.css
+  StayEd_Frontend/assets/js/admin/clc-management.js
+  StayEd_Frontend/assets/js/admin/dashboard.js
+  StayEd_Frontend/assets/js/admin/division-ii-municipalities.js (new)
+  StayEd_Frontend/assets/js/admin/notifications.js (new)
+  StayEd_Frontend/assets/js/admin/user-management.js
+  StayEd_Frontend/assets/js/teacher/learner-enroll.js
+  StayEd_Frontend/assets/js/teacher/learner-import.js
+  StayEd_Frontend/assets/js/teacher/learner-records-hub.js
+  StayEd_Frontend/pages/admin/clc-management.html
+  StayEd_Frontend/pages/admin/dashboard.html
+  StayEd_Frontend/pages/admin/notifications.html (new)
+  StayEd_Frontend/pages/admin/user-management.html
+  StayEd_Frontend/pages/teacher/learner-enroll.html
+  StayEd_Frontend/pages/teacher/learner-import.html
+  StayEd_Frontend/pages/teacher/learner-records.html
+
+Pushed to GitHub as commit 869e0b9 on main (github.com/ProfOneDay/StayEd).

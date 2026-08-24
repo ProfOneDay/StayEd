@@ -478,14 +478,19 @@ class StudentRegistry {
       title: "Delete Learners",
       message: `Are you sure you want to permanently remove <strong>${ids.length}</strong> selected learner(s)? This action cannot be undone.`,
       onConfirm: async () => {
+        const deletedIds = new Set();
+
         for (const id of ids) {
           try {
             await API.deleteLearner(id);
-          } catch {}
+            deletedIds.add(id);
+          } catch (error) {
+            console.error(error);
+          }
         }
 
         this.state.all = this.state.all.filter(
-          (l) => !this.state.selected.has(l.id),
+          (l) => !deletedIds.has(String(l.id)) && !deletedIds.has(l.id),
         );
 
         this.state.selected.clear();
@@ -494,7 +499,11 @@ class StudentRegistry {
 
         this.apply();
 
-        Toast?.success(`${ids.length} learner(s) deleted.`);
+        if (deletedIds.size === ids.length) {
+          Toast?.success(`${deletedIds.size} learner(s) deleted.`);
+        } else {
+          Toast?.warning(`${deletedIds.size} of ${ids.length} learner(s) were deleted.`);
+        }
       },
     });
   }

@@ -9,6 +9,7 @@ from flask import jsonify
 
 
 LRN_RE = re.compile(r"^\d{12}$")
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 def json_ready(value: Any):

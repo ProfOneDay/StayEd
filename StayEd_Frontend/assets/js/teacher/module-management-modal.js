@@ -7,6 +7,10 @@ class ModuleManagementModal {
 
   static strandOptions = [];
 
+  static defaultDurationDays = 21;
+
+  static editingPlannedModuleId = null;
+
   static view = "logbook";
 
   static expandedBatchId = null;
@@ -24,6 +28,7 @@ class ModuleManagementModal {
     this.onUpdate = onUpdate || null;
     this.view = "logbook";
     this.expandedBatchId = null;
+    this.editingPlannedModuleId = null;
 
     const body = Modal.showCustom({
       title: "",
@@ -41,13 +46,15 @@ class ModuleManagementModal {
     </div>`;
 
     try {
-      const [logbook, strandsResponse] = await Promise.all([
+      const [logbook, strandsResponse, durationResponse] = await Promise.all([
         API.getModuleLogbook(learner.id),
         API.get("/learning-strands"),
+        API.getModuleDurationSetting().catch(() => null),
       ]);
       this.meta = logbook.learner || {};
       this.batches = logbook.batches || [];
       this.strandOptions = strandsResponse.data || [];
+      this.defaultDurationDays = durationResponse?.defaultDurationDays || 21;
       if (this.batches.length) this.expandedBatchId = this.batches[0].id;
     } catch (error) {
       console.error("[ModuleManagementModal] Failed to load logbook", error);
@@ -252,7 +259,28 @@ class ModuleManagementModal {
                     (m) => `
                     <li class="st-mrb-module-status-item ${m.status === "returned" ? "is-returned" : "is-pending"}">
                       <span class="material-symbols-outlined">${m.status === "returned" ? "check_box" : "check_box_outline_blank"}</span>
-                      <span>${m.title} <em>(${m.status === "returned" ? "Returned" : "Pending"})</em></span>
+                      <span>
+                        ${m.title} <em>(${m.status === "returned" ? "Returned" : "Pending"})</em>
+                        ${m.status !== "returned" ? `
+                          <br>
+                          ${this.editingPlannedModuleId === m.id ? `
+                            <small style="display:inline-flex;align-items:center;gap:6px;">
+                              Planned Return:
+                              <input type="date" data-planned-input="${m.id}" value="${m.plannedReturnIso || ""}" style="font-size:12px;padding:2px 4px;">
+                              <button type="button" class="st-btn st-btn-primary st-btn-xs" data-save-planned="${m.id}">Save</button>
+                              <button type="button" class="st-btn-text" data-cancel-planned="${m.id}">Cancel</button>
+                            </small>
+                          ` : `
+                            <small>
+                              Planned Return: ${m.plannedReturn || "—"}
+                              ${m.overdue ? `<strong style="color:var(--st-risk-high);"> · Overdue by ${m.daysOverdue} day${m.daysOverdue === 1 ? "" : "s"}</strong>` : ""}
+                              <button type="button" class="st-icon-btn-sm" data-edit-planned="${m.id}" title="Edit planned return date" style="vertical-align:middle;">
+                                <span class="material-symbols-outlined" style="font-size:14px;">edit</span>
+                              </button>
+                            </small>
+                          `}
+                        ` : ""}
+                      </span>
                     </li>
                   `,
                   )
@@ -305,8 +333,11 @@ class ModuleManagementModal {
 
     root.querySelector("[data-open-release-form]")?.addEventListener("click", () => {
       this.view = "release";
+      const releaseDate = new Date().toISOString().slice(0, 10);
       this.releaseForm = {
-        releaseDate: new Date().toISOString().slice(0, 10),
+        releaseDate,
+        plannedReturnDate: this.addDays(releaseDate, this.defaultDurationDays),
+        plannedReturnTouched: false,
         strands: [{ strandCode: "", modules: [""] }],
       };
       this.renderAll();
@@ -352,6 +383,58 @@ class ModuleManagementModal {
         this.renderAll();
       });
     });
+
+    root.querySelectorAll("[data-edit-planned]").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.editingPlannedModuleId = Number(el.dataset.editPlanned);
+        this.renderAll();
+      });
+    });
+
+    root.querySelectorAll("[data-cancel-planned]").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.editingPlannedModuleId = null;
+        this.renderAll();
+      });
+    });
+
+    root.querySelectorAll("[data-save-planned]").forEach((el) => {
+      el.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        const moduleId = Number(el.dataset.savePlanned);
+        const input = root.querySelector(`[data-planned-input="${moduleId}"]`);
+        const value = input?.value;
+        if (!value) {
+          Toast?.error("Please choose a date.");
+          return;
+        }
+
+        const batch = this.batches.find((b) =>
+          b.strands.some((s) => s.modules.some((m) => m.id === moduleId)),
+        );
+        if (!batch) return;
+
+        el.disabled = true;
+        try {
+          const response = await API.updateModulePlannedReturn(
+            this.learner.id, batch.id, moduleId, value,
+          );
+          this.meta = response.learner || this.meta;
+          this.batches = response.batches || [];
+          this.expandedBatchId = batch.id;
+          this.editingPlannedModuleId = null;
+          Toast?.success("Planned return date updated.");
+          this.renderAll();
+          this.onUpdate?.();
+        } catch (error) {
+          console.error("[ModuleManagementModal] Update planned return failed", error);
+          Toast?.error(error?.data?.message || "Unable to update the planned return date.");
+          el.disabled = false;
+        }
+      });
+    });
   }
 
   // ------------------------------------------------------------------
@@ -368,9 +451,16 @@ class ModuleManagementModal {
     return this.strandOptions.filter((s) => !usedElsewhere.has(s.code));
   }
 
+  static addDays(isoDate, days) {
+    const d = new Date(`${isoDate}T00:00:00`);
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
+  }
+
   static isReleaseFormValid() {
     const form = this.releaseForm;
     if (!form.releaseDate) return false;
+    if (form.releaseDate > new Date().toISOString().slice(0, 10)) return false;
     if (!form.strands.length) return false;
     return form.strands.every((s) => s.strandCode && s.modules.some((m) => m.trim()));
   }
@@ -393,7 +483,15 @@ class ModuleManagementModal {
 
         <div class="st-schedule-modal-field">
           <label for="mrfReleaseDate">Release Date *</label>
-          <input type="date" id="mrfReleaseDate" data-release-date value="${form.releaseDate}">
+          <input type="date" id="mrfReleaseDate" data-release-date value="${form.releaseDate}" max="${new Date().toISOString().slice(0, 10)}">
+        </div>
+
+        <div class="st-schedule-modal-field">
+          <label for="mrfPlannedReturn">Planned Return Date</label>
+          <input type="date" id="mrfPlannedReturn" data-planned-return value="${form.plannedReturnDate}">
+          <p class="st-mrf-subtitle" style="margin-top:4px;">
+            Auto-suggested (${this.defaultDurationDays} days from release). Adjust if needed.
+          </p>
         </div>
 
         ${form.strands.map((s, i) => this.renderStrandBlock(s, i)).join("")}
@@ -467,7 +565,17 @@ class ModuleManagementModal {
   static bindReleaseForm(root) {
     root.querySelector("[data-release-date]")?.addEventListener("input", (e) => {
       this.releaseForm.releaseDate = e.target.value;
+      if (!this.releaseForm.plannedReturnTouched) {
+        this.releaseForm.plannedReturnDate = this.addDays(e.target.value, this.defaultDurationDays);
+        const plannedInput = root.querySelector("[data-planned-return]");
+        if (plannedInput) plannedInput.value = this.releaseForm.plannedReturnDate;
+      }
       this.refreshReleaseValidity(root);
+    });
+
+    root.querySelector("[data-planned-return]")?.addEventListener("input", (e) => {
+      this.releaseForm.plannedReturnDate = e.target.value;
+      this.releaseForm.plannedReturnTouched = true;
     });
 
     root.querySelectorAll("[data-strand-select]").forEach((el) => {
@@ -529,6 +637,7 @@ class ModuleManagementModal {
 
       const payload = {
         releaseDate: this.releaseForm.releaseDate,
+        plannedReturnDate: this.releaseForm.plannedReturnDate || undefined,
         strands: this.releaseForm.strands.map((s) => ({
           strandCode: s.strandCode,
           modules: s.modules.map((m) => m.trim()).filter(Boolean),
@@ -635,7 +744,7 @@ class ModuleManagementModal {
 
         <div class="st-schedule-modal-field">
           <label for="mrReturnDate">Return Date *</label>
-          <input type="date" id="mrReturnDate" data-return-date value="${this.returnState.returnDate}">
+          <input type="date" id="mrReturnDate" data-return-date value="${this.returnState.returnDate}" max="${new Date().toISOString().slice(0, 10)}">
         </div>
 
         <div class="st-schedule-modal-field">
@@ -699,6 +808,11 @@ class ModuleManagementModal {
     root.querySelector("[data-record-return-submit]")?.addEventListener("click", async (e) => {
       if (!this.returnState.checked.size) {
         Toast?.error("Select at least one module to return.");
+        return;
+      }
+
+      if (this.returnState.returnDate > new Date().toISOString().slice(0, 10)) {
+        Toast?.error("Return date cannot be later than today.");
         return;
       }
 

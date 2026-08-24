@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StayEd | Reports</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/css/main.css" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="../../assets/img/brand/favicon.ico"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="../../assets/img/brand/apple-touch-icon.png"
+    />
+  </head>
+  <body class="st-app" data-page="Reports">
+    <div data-component="layout/sidebar"></div>
+
+    <div class="st-main">
+      <div data-component="layout/navbar"></div>
+
+      <main class="st-content">
+        <div class="st-page-header">
+          <div>
+            <h1 class="st-page-header-title">Reports</h1>
+            <p class="st-page-header-subtitle">
+              Generate printable reports for individual learners, at-risk
+              monitoring, and intervention tracking.
+            </p>
+          </div>
+        </div>
+
+        <div class="st-report-grid">
+          <div class="st-report-card">
+            <div class="st-report-card-head">
+              <div class="st-report-card-icon">
+                <span class="material-symbols-outlined">person_search</span>
+              </div>
+              <div>
+                <p class="st-report-card-title">
+                  Individual Learner Progress
+                </p>
+                <p class="st-report-card-desc">
+                  Detailed learning milestones and overall academic progress
+                  for one learner.
+                </p>
+              </div>
+            </div>
+            <div class="st-report-card-controls">
+              <select data-report-learner aria-label="Select learner">
+                <option value="">Select a learner…</option>
+              </select>
+              <button
+                type="button"
+                class="st-btn st-btn-primary"
+                data-generate-progress
+              >
+                <span class="material-symbols-outlined">description</span>
+                Generate Report
+              </button>
+            </div>
+          </div>
+
+          <div class="st-report-card">
+            <div class="st-report-card-head">
+              <div class="st-report-card-icon">
+                <span class="material-symbols-outlined">warning</span>
+              </div>
+              <div>
+                <p class="st-report-card-title">At-Risk Learners List</p>
+                <p class="st-report-card-desc">
+                  Learners currently flagged High or Moderate risk of
+                  dropping out.
+                </p>
+              </div>
+            </div>
+            <div class="st-report-card-controls">
+              <select
+                data-report-atrisk-class
+                aria-label="Filter by class"
+              >
+                <option value="">All Classes</option>
+              </select>
+              <button
+                type="button"
+                class="st-btn st-btn-primary"
+                data-generate-atrisk
+              >
+                <span class="material-symbols-outlined">description</span>
+                Generate Report
+              </button>
+            </div>
+          </div>
+
+          <div class="st-report-card">
+            <div class="st-report-card-head">
+              <div class="st-report-card-icon">
+                <span class="material-symbols-outlined">fact_check</span>
+              </div>
+              <div>
+                <p class="st-report-card-title">
+                  Intervention Tracking Report
+                </p>
+                <p class="st-report-card-desc">
+                  Corrective actions logged per learner, including the
+                  method applied and its outcome.
+                </p>
+              </div>
+            </div>
+            <div class="st-report-card-controls">
+              <select
+                data-report-intervention-class
+                aria-label="Filter by class"
+              >
+                <option value="">All Classes</option>
+              </select>
+              <select
+                data-report-intervention-status
+                aria-label="Filter by status"
+              >
+                <option value="">All Statuses</option>
+                <option value="PLANNED">Pending</option>
+                <option value="ONGOING">In Progress</option>
+                <option value="COMPLETED">Completed</option>
+                <option value="CANCELLED">Cancelled</option>
+              </select>
+              <button
+                type="button"
+                class="st-btn st-btn-primary"
+                data-generate-intervention
+              >
+                <span class="material-symbols-outlined">description</span>
+                Generate Report
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <div data-component="layout/footer"></div>
+    </div>
+
+    <div data-component="layout/toast"></div>
+    <div data-component="layout/modal"></div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/core/utils.js"></script>
+    <script src="../../assets/js/core/router.js"></script>
+    <script src="../../assets/js/core/api.js"></script>
+    <script src="../../assets/js/core/auth.js"></script>
+    <script src="../../assets/js/core/guards.js"></script>
+    <script src="../../assets/js/core/layout.js"></script>
+    <script src="../../assets/js/core/skeletons.js"></script>
+    <script src="../../assets/js/core/app.js"></script>
+    <script src="../../assets/js/components/component-loader.js"></script>
+    <script src="../../assets/js/components/toast.js"></script>
+    <script src="../../assets/js/components/modal.js"></script>
+    <script src="../../assets/js/core/report-printer.js"></script>
+    <script src="../../assets/js/teacher/reports.js"></script>
+  </body>
+</html>

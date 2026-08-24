@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from io import BytesIO
 
 import pandas as pd
@@ -28,6 +28,7 @@ from ..services.learner_service import (
     _shape_learner,
 )
 from ..services.prediction_service import trigger_prediction
+from ..services.settings_service import get_default_module_duration_days
 
 bp = Blueprint("learners", __name__)
 
@@ -87,9 +88,15 @@ def list_learners():
 
     rows = fetch_all(_learner_query("WHERE " + " AND ".join(clauses)), tuple(params))
     # A learner can appear in historical classes; keep the newest enrollment only.
-    unique = {}
+    # Compared explicitly rather than relying on query order, since the
+    # default ORDER BY is alphabetical by name (for display), not by
+    # enrollment_date -- a first-seen-wins dict insert would silently keep
+    # whichever enrollment row Postgres happened to return first.
+    unique: dict = {}
     for row in rows:
-        unique.setdefault(row["learner_id"], row)
+        existing = unique.get(row["learner_id"])
+        if existing is None or (row.get("enrollment_date") or date.min) > (existing.get("enrollment_date") or date.min):
+            unique[row["learner_id"]] = row
     data = [_shape_learner(r) for r in unique.values()]
     return {"total": len(data), "data": data}
 
@@ -299,7 +306,7 @@ def update_learner(learner_id: int):
     teacher = _teacher_scope()
     row = fetch_one(
         """
-        SELECT l.*, ce.enrollment_id, ce.is_re_enrollee, ce.distance_from_clc_km
+        SELECT l.*, ce.enrollment_id, ce.is_re_enrollee, ce.distance_from_clc_km, ce.learning_modality
         FROM learner l
         JOIN class_enrollment ce ON ce.learner_id=l.learner_id
         JOIN learning_class lc ON lc.class_id=ce.class_id
@@ -367,6 +374,31 @@ def update_learner(learner_id: int):
         except Exception:
             db.rollback()
             raise
+
+    if "modality" in data:
+        new_modality = enum_modality(data.get("modality"))
+        old_modality = row.get("learning_modality")
+        if new_modality != old_modality:
+            reason = str(data.get("modality_change_reason") or "").strip() or None
+            db = get_db()
+            try:
+                with db.cursor() as cur:
+                    cur.execute(
+                        "UPDATE class_enrollment SET learning_modality=%s WHERE enrollment_id=%s",
+                        (new_modality, row["enrollment_id"]),
+                    )
+                    cur.execute(
+                        """
+                        INSERT INTO modality_change_log (
+                            enrollment_id, old_modality, new_modality, reason, changed_by_teacher_id
+                        ) VALUES (%s,%s,%s,%s,%s)
+                        """,
+                        (row["enrollment_id"], old_modality, new_modality, reason, teacher["teacher_id"]),
+                    )
+                db.commit()
+            except Exception:
+                db.rollback()
+                raise
 
     refreshed = fetch_one(
         _learner_query("WHERE l.learner_id = %s AND lc.teacher_id = %s", "ce.enrollment_date DESC") + " LIMIT 1",
@@ -602,6 +634,15 @@ def learner_profile(learner_id: int):
     last_activity = shaped["activity_text"]
     module_rate = round(100 * modules_returned / modules_released) if modules_released else None
 
+    overdue_modules = fetch_one(
+        """
+        SELECT COUNT(*)::INT AS n FROM module_record
+        WHERE enrollment_id=%s AND date_returned IS NULL
+          AND planned_return_date IS NOT NULL AND planned_return_date < CURRENT_DATE
+        """,
+        (enrollment_id,),
+    )["n"]
+
     last_contact_event = fetch_one(
         """
         SELECT contact_method, contact_date FROM contact_log
@@ -748,7 +789,29 @@ def learner_profile(learner_id: int):
         (enrollment_id,),
     )
 
+    modality_changes = fetch_all(
+        """
+        SELECT old_modality, new_modality, change_date, reason
+        FROM modality_change_log
+        WHERE enrollment_id=%s
+        ORDER BY change_date DESC, modality_change_id DESC
+        """,
+        (enrollment_id,),
+    )
+    modality_since = (
+        modality_changes[0]["change_date"].strftime("%B %d, %Y") if modality_changes
+        else (base["enrollment_date"].strftime("%B %d, %Y") if base.get("enrollment_date") else None)
+    )
+
     timeline = []
+    for m in modality_changes:
+        text = f"{title_enum(m['old_modality']) or 'Unknown'} → {title_enum(m['new_modality'])}"
+        if m.get("reason"):
+            text += f" — Reason: {m['reason']}"
+        timeline.append({
+            "type": "modality", "title": "Modality Changed", "text": text,
+            "date": m["change_date"].strftime("%b %d, %Y"), "_sort": m["change_date"],
+        })
     for b in release_batches:
         timeline.append({
             "type": "module", "title": f"Released {b['n']} Module{'s' if b['n'] != 1 else ''}",
@@ -801,9 +864,12 @@ def learner_profile(learner_id: int):
             "dateEnrolled": base["enrollment_date"].strftime("%B %d, %Y") if base.get("enrollment_date") else "—",
             "assignedTeacher": base.get("assigned_teacher") or "—",
             "currentClass": base.get("class_name") or "—",
+            "modalitySince": modality_since or "—",
         },
         "riskTrend": risk_trend,
         "metrics": {
+            "engagementScore": engagement_score,
+            "engagementScoreMax": 4,
             "modulesReleased": modules_released,
             "modulesReturned": modules_returned,
             "moduleRate": module_rate,
@@ -811,6 +877,7 @@ def learner_profile(learner_id: int):
                 f"{modules_returned} of {modules_released} modules returned" if modules_released else "Not Yet Available"
             ),
             "activeModules": active_modules,
+            "overdueModules": overdue_modules,
             "lastActivity": last_activity,
             "daysSinceLastReturn": days_since_last_return,
         },
@@ -1010,11 +1077,27 @@ def _batch_status(modules: list[dict], release_date: date, learner_activity: dic
     }
 
 
+def _module_overdue_info(date_returned, planned_return_date) -> dict:
+    if date_returned is not None or planned_return_date is None:
+        return {
+            "plannedReturn": None, "plannedReturnIso": None, "plannedReturnRaw": None,
+            "overdue": False, "daysOverdue": None,
+        }
+    overdue = date.today() > planned_return_date
+    return {
+        "plannedReturn": planned_return_date.strftime("%m/%d/%Y"),
+        "plannedReturnIso": planned_return_date.isoformat(),
+        "plannedReturnRaw": planned_return_date,
+        "overdue": overdue,
+        "daysOverdue": (date.today() - planned_return_date).days if overdue else None,
+    }
+
+
 def _logbook(enrollment_id: int, learner_activity: dict) -> dict:
     rows = fetch_all(
         """
         SELECT mr.module_record_id, mr.module_name, mr.date_released, mr.date_returned,
-               mr.module_status, mr.remarks, mr.release_batch_id,
+               mr.module_status, mr.remarks, mr.release_batch_id, mr.planned_return_date,
                ls.strand_code, ls.strand_name,
                mrb.release_date AS batch_release_date
         FROM module_record mr
@@ -1054,6 +1137,7 @@ def _logbook(enrollment_id: int, learner_activity: dict) -> dict:
                 "returnedRaw": r["date_returned"],
                 "remarks": r.get("remarks") or "",
                 "strandCode": strand_code,
+                **_module_overdue_info(r["date_returned"], r.get("planned_return_date")),
             }
         )
 
@@ -1066,6 +1150,7 @@ def _logbook(enrollment_id: int, learner_activity: dict) -> dict:
         for s in strands:
             for m in s["modules"]:
                 m.pop("returnedRaw", None)
+                m.pop("plannedReturnRaw", None)
         shaped.append(
             {
                 "id": batch["id"],
@@ -1117,6 +1202,14 @@ def release_module_batch(learner_id: int):
     if release_date > date.today():
         return error("Release date cannot be later than the current date.", 422)
 
+    if data.get("plannedReturnDate"):
+        try:
+            planned_return_date = date.fromisoformat(str(data.get("plannedReturnDate")))
+        except ValueError:
+            return error("Planned return date must use YYYY-MM-DD.", 422)
+    else:
+        planned_return_date = release_date + timedelta(days=get_default_module_duration_days())
+
     strands_in = data.get("strands") or []
     inserts = []
     for strand in strands_in:
@@ -1149,10 +1242,13 @@ def release_module_batch(learner_id: int):
                     """
                     INSERT INTO module_record (
                         enrollment_id, learning_strand_id, module_name, date_released,
-                        recorded_by_teacher_id, release_batch_id
-                    ) VALUES (%s, %s, %s, %s, %s, %s)
+                        recorded_by_teacher_id, release_batch_id, planned_return_date
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s)
                     """,
-                    (base["enrollment_id"], learning_strand_id, title, release_date, teacher["teacher_id"], batch_id),
+                    (
+                        base["enrollment_id"], learning_strand_id, title, release_date,
+                        teacher["teacher_id"], batch_id, planned_return_date,
+                    ),
                 )
         db.commit()
     except Exception:
@@ -1237,6 +1333,52 @@ def return_module_batch(learner_id: int, batch_id: int):
     learner_activity = _learner_activity_info(base)
     return {
         "message": "Module return recorded.",
+        "learner": {
+            "name": f"{base['first_name']} {base['last_name']}",
+            "lrn": base["lrn"],
+            "clc": base["clc_name"],
+            "level": base["learning_level"],
+            **learner_activity,
+        },
+        **_logbook(base["enrollment_id"], learner_activity),
+    }
+
+
+@bp.patch("/learners/<int:learner_id>/module-batches/<int:batch_id>/modules/<int:module_record_id>")
+@role_required("teacher")
+def update_module_planned_return(learner_id: int, batch_id: int, module_record_id: int):
+    base = _profile_base(learner_id)
+    if not base:
+        return error("Learner not found.", 404)
+
+    module = fetch_one(
+        """
+        SELECT mr.module_record_id, mr.date_released FROM module_record mr
+        JOIN module_release_batch mrb ON mrb.release_batch_id = mr.release_batch_id
+        WHERE mr.module_record_id=%s AND mr.release_batch_id=%s AND mrb.enrollment_id=%s
+        """,
+        (module_record_id, batch_id, base["enrollment_id"]),
+    )
+    if not module:
+        return error("Module not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    try:
+        planned_return_date = date.fromisoformat(str(data.get("plannedReturnDate")))
+    except (TypeError, ValueError):
+        return error("Planned return date must use YYYY-MM-DD.", 422)
+    if planned_return_date < module["date_released"]:
+        return error("Planned return date cannot be earlier than the module's release date.", 422)
+
+    execute(
+        "UPDATE module_record SET planned_return_date=%s WHERE module_record_id=%s",
+        (planned_return_date, module_record_id),
+    )
+
+    base = _profile_base(learner_id)
+    learner_activity = _learner_activity_info(base)
+    return {
+        "message": "Planned return date updated.",
         "learner": {
             "name": f"{base['first_name']} {base['last_name']}",
             "lrn": base["lrn"],
@@ -1620,12 +1762,25 @@ def import_preview():
     }
 
 
-def _insert_import_rows(rows, teacher):
-    class_row = _active_class(teacher["teacher_id"])
+def _insert_import_rows(rows, teacher, class_id=None):
+    class_row = None
+    if class_id:
+        class_row = fetch_one(
+            """
+            SELECT lc.*, c.clc_name
+            FROM learning_class lc
+            JOIN clc c ON c.clc_id = lc.clc_id
+            WHERE lc.class_id = %s AND lc.teacher_id = %s AND lc.status = 'ACTIVE'
+            """,
+            (class_id, teacher["teacher_id"]),
+        )
+    if not class_row:
+        class_row = _active_class(teacher["teacher_id"])
     if not class_row:
         raise ValueError("Create an active class before importing learners.")
     preview = _preview_rows(rows)
     valid = [r for r in preview if r["status"] == "valid"]
+    duplicates = [r for r in preview if r["status"] == "duplicate"]
     db = get_db()
     imported = []
     try:
@@ -1672,10 +1827,43 @@ def _insert_import_rows(rows, teacher):
                 )
                 imported.append({"lrn": row["lrn"], "name": name, "level": row.get("level") or "Basic Literacy"})
 
+            # Duplicates (LRN already exists) are bypassed, not skipped: the
+            # matching existing learner is attached to this class rather than
+            # re-inserted, as long as they aren't already enrolled in it.
+            duplicates = [r for r in preview if r["status"] == "duplicate"]
+            attached = 0
+            for row in duplicates:
+                cur.execute("SELECT learner_id FROM learner WHERE lrn=%s", (row["lrn"],))
+                existing = cur.fetchone()
+                if not existing:
+                    continue
+                cur.execute(
+                    "SELECT enrollment_id FROM class_enrollment WHERE class_id=%s AND learner_id=%s",
+                    (class_row["class_id"], existing["learner_id"]),
+                )
+                if cur.fetchone():
+                    continue
+                cur.execute(
+                    """
+                    INSERT INTO class_enrollment (
+                        class_id, learner_id, learning_modality, is_re_enrollee,
+                        distance_from_clc_km, enrollment_status
+                    )
+                    VALUES (%s,%s,%s,%s,%s,'ENROLLED')
+                    """,
+                    (
+                        class_row["class_id"], existing["learner_id"], enum_modality(row.get("modality")),
+                        _parse_import_bool(row.get("re_enrollee")) if row.get("re_enrollee") is not None else True,
+                        _parse_import_distance(row.get("distance_from_clc_km")),
+                    ),
+                )
+                attached += 1
+
             summary = {
                 "total": len(preview),
                 "imported": len(imported),
-                "duplicates": sum(r["status"] == "duplicate" for r in preview),
+                "attached": attached,
+                "duplicates": len(duplicates),
                 "invalid": sum(r["status"] == "error" for r in preview),
                 "learners": imported[:25],
             }
@@ -1700,18 +1888,21 @@ def import_learners():
     try:
         if "file" in request.files:
             rows = _canonical_rows(_read_upload(request.files["file"]))
+            class_id = request.form.get("class_id") or request.form.get("class")
         else:
             data = request.get_json(silent=True) or {}
             rows = data.get("learners") or []
+            class_id = data.get("class_id") or data.get("class")
         if not rows:
             return error("No learner rows were provided.", 422)
-        summary = _insert_import_rows(rows, teacher)
+        summary = _insert_import_rows(rows, teacher, class_id=class_id)
     except ValueError as exc:
         return error(str(exc), 422)
     return {
         "message": "Learners imported successfully.",
         "imported": summary["imported"],
-        "skipped": summary["duplicates"] + summary["invalid"],
+        "attached": summary["attached"],
+        "skipped": summary["invalid"],
     }
 
 

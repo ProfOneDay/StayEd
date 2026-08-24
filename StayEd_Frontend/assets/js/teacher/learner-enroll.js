@@ -7,22 +7,6 @@ class LearnerEnrollWizard {
 
   static existingLearnerId = null;
 
-  static PREFILLED_FIELD_IDS = [
-    "wFullName",
-    "wLrn",
-    "wSex",
-    "wBirthdate",
-    "wCivilStatus",
-    "wPhone",
-    "wEmail",
-    "wAddress",
-    "wGuardianName",
-    "wGuardianRelation",
-    "wGuardianContact",
-  ];
-
-  static LOCKED_SELECT_IDS = ["wSex", "wCivilStatus", "wGuardianRelation"];
-
   static async init() {
     if (window.Guards) Guards.teacher();
 
@@ -176,16 +160,6 @@ class LearnerEnrollWizard {
     set("wEmployment", learner.employment_status);
     set("wLastGrade", learner.last_grade_completed);
 
-    this.PREFILLED_FIELD_IDS.forEach((id) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      if (this.LOCKED_SELECT_IDS.includes(id)) {
-        el.disabled = true;
-      } else {
-        el.setAttribute("readonly", "readonly");
-      }
-    });
-
     const hidden = document.getElementById("wReenrollee");
     if (hidden) hidden.value = "Yes";
 
@@ -207,13 +181,6 @@ class LearnerEnrollWizard {
 
   static clearExistingLearnerPrefill() {
     this.existingLearnerId = null;
-
-    this.PREFILLED_FIELD_IDS.forEach((id) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.removeAttribute("readonly");
-      el.disabled = false;
-    });
 
     document
       .querySelector("[data-existing-learner-banner]")

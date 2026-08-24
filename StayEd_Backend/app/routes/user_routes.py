@@ -7,7 +7,7 @@ from flask_jwt_extended import jwt_required
 
 from ..authz import current_user_id, teacher_for_user
 from ..db import execute, fetch_one, get_db
-from ..helpers import error, split_name
+from ..helpers import EMAIL_RE, error, split_name
 
 bp = Blueprint("users", __name__)
 
@@ -29,6 +29,8 @@ def update_profile():
         last_name = str(data.get("last_name") or teacher["last_name"]).strip()
 
     email = str(data.get("email") or teacher.get("email") or "").strip().lower()
+    if email and not EMAIL_RE.match(email):
+        return error("Enter a valid email address.", 422)
     municipality = str(data.get("municipality") or teacher.get("municipality") or "Unassigned").strip()
     contact_number = str(data.get("contact_number") or data.get("phone") or teacher.get("contact_number") or "").strip() or None
 

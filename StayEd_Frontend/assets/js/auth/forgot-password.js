@@ -28,6 +28,12 @@ class ForgotPasswordPage {
       return;
     }
 
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      Toast.warning("Enter a valid email address.");
+
+      return;
+    }
+
     try {
       await Auth.forgotPassword(email);
 
