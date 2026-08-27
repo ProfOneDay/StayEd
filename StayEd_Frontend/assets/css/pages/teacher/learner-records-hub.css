@@ -1102,17 +1102,17 @@
 .st-class-context-banner{
     display:flex;
     align-items:center;
-    gap:12px;
-    background:var(--st-primary-fixed);
-    border:1px solid rgba(18,53,91,.15);
+    gap:14px;
+    background:var(--st-primary);
     border-radius:var(--st-radius-lg);
-    padding:12px 20px;
+    box-shadow:var(--st-shadow-sm);
+    padding:16px 24px;
     margin-bottom:24px;
 }
 
-.st-class-context-banner .material-symbols-outlined{
-    color:var(--st-primary);
-    font-size:22px;
+.st-class-context-banner-icon{
+    color:var(--st-on-primary);
+    font-size:28px;
     flex-shrink:0;
 }
 
@@ -1123,15 +1123,32 @@
     min-width:0;
 }
 
+.st-class-context-banner-clc{
+    font-size:13px;
+    font-weight:600;
+    color:var(--st-on-primary-container);
+}
+
+.st-class-context-banner-level{
+    font-size:21px;
+    font-weight:800;
+    color:var(--st-on-primary);
+    line-height:1.3;
+}
+
+/* Single-line variant: used by the Class Management page's CLC banner,
+   which only has one name to show (no CLC/level split needed there). */
 .st-class-context-banner-name{
-    font-size:14px;
-    font-weight:700;
-    color:var(--st-primary);
+    font-size:21px;
+    font-weight:800;
+    color:var(--st-on-primary);
+    line-height:1.3;
 }
 
 .st-class-context-banner-meta{
     font-size:12px;
-    color:var(--st-on-surface-variant);
+    color:var(--st-on-primary-container);
+    margin-top:2px;
 }
 
 .st-class-context-banner-switch{
@@ -1140,7 +1157,7 @@
     gap:4px;
     font-size:13px;
     font-weight:700;
-    color:var(--st-secondary);
+    color:var(--st-primary-fixed-dim);
     white-space:nowrap;
     flex-shrink:0;
 }
@@ -1150,6 +1167,23 @@
 }
 
 .st-class-context-banner-switch .material-symbols-outlined{
-    color:var(--st-secondary);
+    color:var(--st-primary-fixed-dim);
     font-size:16px;
+}
+
+@media (max-width:600px){
+    .st-class-context-banner{
+        flex-wrap:wrap;
+        row-gap:8px;
+    }
+
+    .st-class-context-banner-text{
+        flex-basis:100%;
+        order:1;
+    }
+
+    .st-class-context-banner-switch{
+        order:2;
+        margin-left:auto;
+    }
 }

@@ -49,6 +49,13 @@ class Router {
       { label: "Class Management", href: "class-management.html" },
       { label: "Learner Records" },
     ],
+    "module-management.html": [
+      { label: "Dashboard", href: "dashboard.html" },
+      { label: "Learner", href: "class-management.html" },
+      { label: "Class Management", href: "class-management.html" },
+      { label: "Learner Records", href: "learner-records.html" },
+      { label: "Manage Modules" },
+    ],
     "student-registry.html": [
       { label: "Dashboard", href: "dashboard.html" },
       { label: "Learner", href: "class-management.html" },

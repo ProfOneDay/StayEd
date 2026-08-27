@@ -1,0 +1,116 @@
+/* Manage Modules page (class-level module catalog + bulk release). Reuses
+   .st-panel/.st-data-table/.st-schedule-modal-field/.st-empty/.st-badge-*/
+   .st-search from the shared component styles -- only the pieces with no
+   existing equivalent are defined here. */
+
+.st-module-summary-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.st-module-summary-stat {
+  background: #fff;
+  border: 1px solid rgba(195, 198, 207, 0.35);
+  border-radius: var(--st-card-radius);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.st-module-summary-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--st-primary);
+}
+
+.st-module-summary-label {
+  font-size: 13px;
+  color: var(--st-on-surface-variant);
+}
+
+.st-module-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.st-module-search {
+  flex: 1;
+  min-width: 220px;
+  max-width: 320px;
+}
+
+.st-module-toolbar select {
+  padding: 9px 12px;
+  border: 1px solid var(--st-outline-variant);
+  border-radius: var(--st-button-radius);
+  font: inherit;
+  color: var(--st-on-surface);
+  background: #fff;
+}
+
+.st-module-topic {
+  font-size: 12.5px;
+  color: var(--st-on-surface-variant);
+  margin-top: 2px;
+}
+
+.st-module-detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 12px 0 20px;
+  flex-wrap: wrap;
+}
+
+.st-module-bulk-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--st-primary-fixed);
+  border-radius: var(--st-radius-lg);
+  padding: 10px 16px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--st-primary);
+}
+
+.st-table-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.st-roster-checklist {
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid var(--st-outline-variant);
+  border-radius: var(--st-radius-lg);
+  padding: 4px 12px;
+}
+
+.st-roster-checklist-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--st-outline-variant);
+  font-size: 14px;
+}
+
+.st-roster-checklist-row:last-child {
+  border-bottom: none;
+}
+
+.st-roster-checklist-row input[type="checkbox"] {
+  margin-right: 8px;
+}

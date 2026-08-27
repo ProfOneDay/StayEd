@@ -1,13 +1,15 @@
 from __future__ import annotations
 
-from datetime import date
+import threading
+from datetime import date, timedelta
 
-from flask import Blueprint, request
+from flask import Blueprint, current_app, request
 
-from ..authz import role_required, teacher_for_user
+from ..authz import current_user_id, role_required, teacher_for_user
 from ..db import execute, fetch_all, fetch_one, get_db
 from ..helpers import enum_level, enum_semester, error, title_enum
-from ..services.settings_service import get_active_school_year
+from ..services.prediction_service import trigger_prediction
+from ..services.settings_service import get_active_school_year, get_default_module_duration_days
 
 bp = Blueprint("classes", __name__)
 
@@ -473,3 +475,415 @@ def save_session_attendance(class_id: int, session_id: int):
         raise
 
     return {"message": "Attendance saved.", "presentCount": len(present_ids & valid_ids), "totalCount": len(valid_ids)}
+
+
+# ----------------------------------------------------------------------
+# Class module catalog -- "what modules exist for this class" (Module 1,
+# 2, 3...), set up once and reused for every release, separate from
+# "who has received/returned which module" (still module_record, per
+# learner, unchanged).
+#
+# Existing-data note: module_record rows created before this catalog
+# existed (class_module_id IS NULL) are intentionally left as they are, not
+# auto-migrated into a fabricated class_module entry. Their module_name was
+# typed independently per student with no guarantee of matching spelling
+# across learners (e.g. "Module 1" vs "Mod. 1: Comm Skills"), so grouping
+# them under one catalog row could silently merge records that don't
+# actually belong together -- worse than leaving them alone. They remain
+# fully visible via the unchanged Module Release Logbook (per-learner
+# history). Only releases made through this new class-level flow use the
+# catalog going forward.
+# ----------------------------------------------------------------------
+
+
+def _class_module_row(class_id: int, class_module_id: int):
+    return fetch_one(
+        "SELECT class_module_id FROM class_module WHERE class_module_id=%s AND class_id=%s",
+        (class_module_id, class_id),
+    )
+
+
+def _enrolled_learner_count(class_id: int) -> int:
+    row = fetch_one(
+        "SELECT COUNT(*) AS n FROM class_enrollment WHERE class_id=%s AND enrollment_status='ENROLLED'",
+        (class_id,),
+    )
+    return int(row["n"]) if row else 0
+
+
+def _shape_class_module(r: dict, total_learners: int) -> dict:
+    released_count = int(r["released_count"] or 0)
+    return {
+        "id": r["class_module_id"],
+        "title": r["module_name"],
+        "topic": r.get("topic"),
+        "description": r.get("description"),
+        "strandCode": r["strand_code"],
+        "strandName": r["strand_name"],
+        "sequenceNumber": r["sequence_number"],
+        "releasedCount": released_count,
+        "returnedCount": int(r["returned_count"] or 0),
+        "totalLearners": total_learners,
+        "lastReleaseDate": r["last_release_date"].strftime("%B %d, %Y") if r.get("last_release_date") else None,
+        "isFullyReleased": total_learners > 0 and released_count >= total_learners,
+        # Class-level release status is always derived from actual
+        # module_record rows, never stored -- a stored status field could
+        # drift out of sync with reality; this can't.
+        "releaseStatus": "Released" if released_count > 0 else "Not Released",
+        "isArchived": bool(r.get("is_archived")),
+    }
+
+
+@bp.get("/classes/<int:class_id>/modules")
+@role_required("teacher")
+def list_class_modules(class_id: int):
+    teacher = teacher_for_user()
+    if not teacher or not _owned_class(class_id, teacher["teacher_id"]):
+        return error("Class not found.", 404)
+
+    total_learners = _enrolled_learner_count(class_id)
+    include_archived = str(request.args.get("includeArchived") or "").lower() in ("1", "true")
+
+    rows = fetch_all(
+        f"""
+        SELECT cm.class_module_id, cm.module_name, cm.topic, cm.description,
+               cm.sequence_number, cm.created_at, cm.is_archived,
+               ls.strand_code, ls.strand_name,
+               COUNT(DISTINCT mr.enrollment_id) AS released_count,
+               COUNT(DISTINCT mr.enrollment_id) FILTER (WHERE mr.date_returned IS NOT NULL) AS returned_count,
+               MAX(mr.date_released) AS last_release_date
+        FROM class_module cm
+        JOIN learning_strand ls ON ls.learning_strand_id = cm.learning_strand_id
+        LEFT JOIN module_record mr ON mr.class_module_id = cm.class_module_id
+        WHERE cm.class_id = %s {"" if include_archived else "AND cm.is_archived = FALSE"}
+        GROUP BY cm.class_module_id, cm.module_name, cm.topic, cm.description, cm.sequence_number,
+                 cm.created_at, cm.is_archived, ls.strand_code, ls.strand_name
+        ORDER BY cm.sequence_number NULLS LAST, cm.created_at
+        """,
+        (class_id,),
+    )
+
+    data = [_shape_class_module(r, total_learners) for r in rows]
+
+    released_modules = sum(1 for m in data if m["releasedCount"] > 0)
+    active_transactions = sum(m["releasedCount"] - m["returnedCount"] for m in data)
+    returned_transactions = sum(m["returnedCount"] for m in data)
+
+    return {
+        "total": len(data),
+        "totalLearners": total_learners,
+        "summary": {
+            "totalModules": len(data),
+            "releasedModules": released_modules,
+            "notYetReleased": len(data) - released_modules,
+            "activeTransactions": active_transactions,
+            "returnedTransactions": returned_transactions,
+        },
+        "data": data,
+    }
+
+
+@bp.post("/classes/<int:class_id>/modules")
+@role_required("teacher")
+def create_class_module(class_id: int):
+    teacher = teacher_for_user()
+    if not teacher or not _owned_class(class_id, teacher["teacher_id"]):
+        return error("Class not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    strand_code = str(data.get("strandCode") or "").strip().upper()
+    title = str(data.get("title") or "").strip()
+    topic = str(data.get("topic") or "").strip() or None
+    description = str(data.get("description") or "").strip() or None
+
+    if not strand_code or not title:
+        return error("A learning strand and module title are required.", 422)
+
+    strand = fetch_one("SELECT learning_strand_id FROM learning_strand WHERE strand_code = %s", (strand_code,))
+    if not strand:
+        return error(f"Unknown learning strand: {strand_code}.", 422)
+
+    next_seq = fetch_one(
+        "SELECT COALESCE(MAX(sequence_number), 0) + 1 AS n FROM class_module WHERE class_id=%s",
+        (class_id,),
+    )["n"]
+
+    row = execute(
+        """
+        INSERT INTO class_module (
+            class_id, learning_strand_id, module_name, topic, description,
+            sequence_number, created_by_teacher_id
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        RETURNING class_module_id, created_at
+        """,
+        (class_id, strand["learning_strand_id"], title, topic, description, next_seq, teacher["teacher_id"]),
+        returning=True,
+    )
+
+    return {
+        "id": row["class_module_id"],
+        "title": title,
+        "topic": topic,
+        "description": description,
+        "strandCode": strand_code,
+        "sequenceNumber": next_seq,
+        "releasedCount": 0,
+        "returnedCount": 0,
+        "totalLearners": _enrolled_learner_count(class_id),
+        "lastReleaseDate": None,
+        "isFullyReleased": False,
+        "releaseStatus": "Not Released",
+        "isArchived": False,
+    }, 201
+
+
+@bp.put("/classes/<int:class_id>/modules/<int:class_module_id>")
+@role_required("teacher")
+def update_class_module(class_id: int, class_module_id: int):
+    teacher = teacher_for_user()
+    if not teacher or not _owned_class(class_id, teacher["teacher_id"]):
+        return error("Class not found.", 404)
+    if not _class_module_row(class_id, class_module_id):
+        return error("Module not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    updates = {}
+
+    if "title" in data:
+        title = str(data.get("title") or "").strip()
+        if not title:
+            return error("Module title cannot be blank.", 422)
+        updates["module_name"] = title
+
+    if "strandCode" in data:
+        strand_code = str(data.get("strandCode") or "").strip().upper()
+        strand = fetch_one("SELECT learning_strand_id FROM learning_strand WHERE strand_code = %s", (strand_code,))
+        if not strand:
+            return error(f"Unknown learning strand: {strand_code}.", 422)
+        updates["learning_strand_id"] = strand["learning_strand_id"]
+
+    if "topic" in data:
+        updates["topic"] = str(data.get("topic") or "").strip() or None
+
+    if "description" in data:
+        updates["description"] = str(data.get("description") or "").strip() or None
+
+    if "sequenceNumber" in data:
+        try:
+            updates["sequence_number"] = int(data.get("sequenceNumber"))
+        except (TypeError, ValueError):
+            return error("Module number must be a number.", 422)
+
+    if updates:
+        columns = list(updates)
+        values = [updates[c] for c in columns]
+        set_clause = ", ".join(f"{c}=%s" for c in columns)
+        execute(
+            f"UPDATE class_module SET {set_clause} WHERE class_module_id=%s",
+            (*values, class_module_id),
+        )
+
+    return {"message": "Module updated."}
+
+
+@bp.post("/classes/<int:class_id>/modules/<int:class_module_id>/archive")
+@role_required("teacher")
+def archive_class_module(class_id: int, class_module_id: int):
+    teacher = teacher_for_user()
+    if not teacher or not _owned_class(class_id, teacher["teacher_id"]):
+        return error("Class not found.", 404)
+    if not _class_module_row(class_id, class_module_id):
+        return error("Module not found.", 404)
+
+    # Archiving only hides the module from the active catalog -- it never
+    # touches module_record, so historical learner transactions (and every
+    # page that reads them: Module Release Logbook, Learner Profile,
+    # dashboard, risk prediction) are completely unaffected either way.
+    execute("UPDATE class_module SET is_archived = TRUE WHERE class_module_id=%s", (class_module_id,))
+    return {"message": "Module archived."}
+
+
+@bp.post("/classes/<int:class_id>/modules/<int:class_module_id>/unarchive")
+@role_required("teacher")
+def unarchive_class_module(class_id: int, class_module_id: int):
+    teacher = teacher_for_user()
+    if not teacher or not _owned_class(class_id, teacher["teacher_id"]):
+        return error("Class not found.", 404)
+    if not _class_module_row(class_id, class_module_id):
+        return error("Module not found.", 404)
+
+    execute("UPDATE class_module SET is_archived = FALSE WHERE class_module_id=%s", (class_module_id,))
+    return {"message": "Module unarchived."}
+
+
+@bp.post("/classes/<int:class_id>/modules/<int:class_module_id>/release")
+@role_required("teacher")
+def release_class_module(class_id: int, class_module_id: int):
+    teacher = teacher_for_user()
+    if not teacher or not _owned_class(class_id, teacher["teacher_id"]):
+        return error("Class not found.", 404)
+
+    catalog_row = fetch_one(
+        "SELECT class_module_id, learning_strand_id, module_name FROM class_module WHERE class_module_id=%s AND class_id=%s",
+        (class_module_id, class_id),
+    )
+    if not catalog_row:
+        return error("Module not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    try:
+        release_date = date.fromisoformat(str(data.get("releaseDate"))) if data.get("releaseDate") else date.today()
+    except ValueError:
+        return error("Release date must use YYYY-MM-DD.", 422)
+
+    if release_date > date.today():
+        return error("Release date cannot be later than the current date.", 422)
+
+    if data.get("plannedReturnDate"):
+        try:
+            planned_return_date = date.fromisoformat(str(data.get("plannedReturnDate")))
+        except ValueError:
+            return error("Planned return date must use YYYY-MM-DD.", 422)
+    else:
+        planned_return_date = release_date + timedelta(days=get_default_module_duration_days())
+
+    requested_ids = data.get("learnerIds")
+
+    enrolled = fetch_all(
+        "SELECT enrollment_id FROM class_enrollment WHERE class_id=%s AND enrollment_status='ENROLLED'",
+        (class_id,),
+    )
+    enrolled_ids = {r["enrollment_id"] for r in enrolled}
+
+    if requested_ids:
+        try:
+            target_ids = {int(x) for x in requested_ids}
+        except (TypeError, ValueError):
+            return error("learnerIds must be a list of enrollment ids.", 422)
+        invalid = target_ids - enrolled_ids
+        if invalid:
+            return error("One or more selected learners are not enrolled in this class.", 422)
+    else:
+        target_ids = set(enrolled_ids)
+
+    already_released = fetch_all(
+        "SELECT DISTINCT enrollment_id FROM module_record WHERE class_module_id=%s",
+        (class_module_id,),
+    )
+    already_released_ids = {r["enrollment_id"] for r in already_released}
+
+    to_release = sorted(target_ids - already_released_ids)
+    skipped = sorted(target_ids & already_released_ids)
+
+    if not to_release:
+        return error(
+            "All selected learners already have this module released. Nothing to do.", 422
+        )
+
+    db = get_db()
+    try:
+        with db.cursor() as cur:
+            for enrollment_id in to_release:
+                cur.execute(
+                    """
+                    INSERT INTO module_release_batch (enrollment_id, release_date, recorded_by_teacher_id)
+                    VALUES (%s, %s, %s) RETURNING release_batch_id
+                    """,
+                    (enrollment_id, release_date, teacher["teacher_id"]),
+                )
+                batch_id = cur.fetchone()["release_batch_id"]
+                cur.execute(
+                    """
+                    INSERT INTO module_record (
+                        enrollment_id, learning_strand_id, module_name, date_released,
+                        recorded_by_teacher_id, release_batch_id, planned_return_date, class_module_id
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    (
+                        enrollment_id, catalog_row["learning_strand_id"], catalog_row["module_name"],
+                        release_date, teacher["teacher_id"], batch_id, planned_return_date, class_module_id,
+                    ),
+                )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    # trigger_prediction() shells out to the model bridge per enrollment and
+    # is genuinely slow (this is the same subprocess call every other
+    # single-learner write already triggers synchronously). Doing that N
+    # times in a row here, in the request/response cycle, is exactly the
+    # kind of delay that produces a "release failed" timeout on the frontend
+    # even though the release itself already committed successfully -- so
+    # for a bulk release specifically, refresh predictions in the background
+    # instead of making the teacher wait on all of them before the response
+    # returns. Each background call still catches/ignores its own failure,
+    # matching trigger_prediction()'s documented "best-effort" contract.
+    app_obj = current_app._get_current_object()
+    changed_by = current_user_id()
+
+    def _refresh_predictions_in_background(enrollment_ids, user_id):
+        with app_obj.app_context():
+            for eid in enrollment_ids:
+                try:
+                    trigger_prediction(eid, user_id)
+                except Exception:
+                    pass
+
+    threading.Thread(
+        target=_refresh_predictions_in_background,
+        args=(to_release, changed_by),
+        daemon=True,
+    ).start()
+
+    return {
+        "message": f"Module released to {len(to_release)} learner(s).",
+        "releasedCount": len(to_release),
+        "skippedCount": len(skipped),
+    }, 201
+
+
+@bp.get("/classes/<int:class_id>/modules/<int:class_module_id>/roster")
+@role_required("teacher")
+def class_module_roster(class_id: int, class_module_id: int):
+    teacher = teacher_for_user()
+    if not teacher or not _owned_class(class_id, teacher["teacher_id"]):
+        return error("Class not found.", 404)
+    if not _class_module_row(class_id, class_module_id):
+        return error("Module not found.", 404)
+
+    rows = fetch_all(
+        """
+        SELECT ce.enrollment_id, l.learner_id, l.first_name, l.last_name,
+               mr.module_record_id, mr.release_batch_id, mr.date_released, mr.date_returned
+        FROM class_enrollment ce
+        JOIN learner l ON l.learner_id = ce.learner_id
+        LEFT JOIN module_record mr
+            ON mr.enrollment_id = ce.enrollment_id AND mr.class_module_id = %s
+        WHERE ce.class_id = %s AND ce.enrollment_status = 'ENROLLED'
+        ORDER BY l.last_name, l.first_name
+        """,
+        (class_module_id, class_id),
+    )
+
+    return {
+        "data": [
+            {
+                # enrollmentId is what release/return actions target (a
+                # learner can have more than one enrollment across classes
+                # or re-enrollment periods); learnerId is only for display
+                # / linking to the Learner Profile.
+                "enrollmentId": r["enrollment_id"],
+                "learnerId": r["learner_id"],
+                "name": f"{r['first_name']} {r['last_name']}".strip(),
+                "moduleRecordId": r["module_record_id"],
+                "releaseBatchId": r["release_batch_id"],
+                "released": r["date_released"] is not None,
+                "releaseDate": r["date_released"].strftime("%B %d, %Y") if r["date_released"] else None,
+                "returned": r["date_returned"] is not None,
+                "returnDate": r["date_returned"].strftime("%B %d, %Y") if r["date_returned"] else None,
+            }
+            for r in rows
+        ]
+    }

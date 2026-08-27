@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import json
+import threading
 from datetime import date, datetime, timedelta
 from io import BytesIO
 
 import pandas as pd
-from flask import Blueprint, request
+from flask import Blueprint, current_app, request
 
 from ..services.ai_intervention_service import generate_ai_recommendation
 
@@ -308,7 +309,8 @@ def update_learner(learner_id: int):
     teacher = _teacher_scope()
     row = fetch_one(
         """
-        SELECT l.*, ce.enrollment_id, ce.is_re_enrollee, ce.distance_from_clc_km, ce.learning_modality
+        SELECT l.*, ce.enrollment_id, ce.is_re_enrollee, ce.distance_from_clc_km,
+               ce.learning_modality, ce.enrollment_date
         FROM learner l
         JOIN class_enrollment ce ON ce.learner_id=l.learner_id
         JOIN learning_class lc ON lc.class_id=ce.class_id
@@ -382,6 +384,36 @@ def update_learner(learner_id: int):
         old_modality = row.get("learning_modality")
         if new_modality != old_modality:
             reason = str(data.get("modality_change_reason") or "").strip() or None
+
+            try:
+                effective_date = (
+                    date.fromisoformat(str(data.get("modality_effective_date")))
+                    if data.get("modality_effective_date")
+                    else date.today()
+                )
+            except ValueError:
+                return error("Effective date must use YYYY-MM-DD.", 422)
+
+            if effective_date > date.today():
+                return error("Effective date cannot be later than the current date.", 422)
+
+            enrollment_date = row.get("enrollment_date")
+            if enrollment_date and effective_date < enrollment_date:
+                return error(
+                    "Effective date cannot be before the learner's enrollment date.", 422
+                )
+
+            last_change = fetch_one(
+                "SELECT MAX(change_date) AS last_date FROM modality_change_log WHERE enrollment_id=%s",
+                (row["enrollment_id"],),
+            )
+            last_change_date = last_change.get("last_date") if last_change else None
+            if last_change_date and effective_date < last_change_date:
+                return error(
+                    "Effective date cannot be before the learner's last recorded modality change.",
+                    422,
+                )
+
             db = get_db()
             try:
                 with db.cursor() as cur:
@@ -392,10 +424,14 @@ def update_learner(learner_id: int):
                     cur.execute(
                         """
                         INSERT INTO modality_change_log (
-                            enrollment_id, old_modality, new_modality, reason, changed_by_teacher_id
-                        ) VALUES (%s,%s,%s,%s,%s)
+                            enrollment_id, old_modality, new_modality, reason,
+                            changed_by_teacher_id, change_date
+                        ) VALUES (%s,%s,%s,%s,%s,%s)
                         """,
-                        (row["enrollment_id"], old_modality, new_modality, reason, teacher["teacher_id"]),
+                        (
+                            row["enrollment_id"], old_modality, new_modality, reason,
+                            teacher["teacher_id"], effective_date,
+                        ),
                     )
                 db.commit()
             except Exception:
@@ -1303,10 +1339,23 @@ def release_module_batch(learner_id: int):
         db.rollback()
         raise
 
-    try:
-        trigger_prediction(base["enrollment_id"], current_user_id())
-    except Exception:
-        pass
+    # Backgrounded for the same reason the bulk class-module release does
+    # this: trigger_prediction() shells out to the model bridge and can take
+    # long enough that waiting on it here risks the frontend's request
+    # timing out (or the teacher perceiving a "release failed") even though
+    # the release itself already committed successfully above.
+    app_obj = current_app._get_current_object()
+    enrollment_id = base["enrollment_id"]
+    changed_by = current_user_id()
+
+    def _refresh_prediction_in_background():
+        with app_obj.app_context():
+            try:
+                trigger_prediction(enrollment_id, changed_by)
+            except Exception:
+                pass
+
+    threading.Thread(target=_refresh_prediction_in_background, daemon=True).start()
 
     base = _profile_base(learner_id)
     learner_activity = _learner_activity_info(base)
