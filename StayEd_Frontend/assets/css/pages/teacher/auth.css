@@ -440,6 +440,7 @@ img.auth-brand-icon{
     align-items:center;
     transition:var(--st-transition-color);
     padding:0;
+    z-index:2;
 }
 
 .password-toggle:hover{

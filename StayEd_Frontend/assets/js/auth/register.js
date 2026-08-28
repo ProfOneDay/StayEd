@@ -21,6 +21,33 @@ class RegisterPage {
         this.submit();
       },
     );
+
+    this.bindPasswordToggles();
+  }
+
+  static bindPasswordToggles() {
+    document.querySelectorAll(".password-toggle").forEach((toggle) => {
+      toggle.addEventListener("click", () => {
+        const targetId = toggle.dataset.toggle;
+        const input = targetId
+          ? document.getElementById(targetId)
+          : toggle.closest(".password-wrapper")?.querySelector("input");
+
+        if (!input) return;
+
+        const icon = toggle.querySelector(".material-symbols-outlined");
+
+        if (input.type === "password") {
+          input.type = "text";
+          if (icon) icon.textContent = "visibility_off";
+          toggle.setAttribute("aria-label", "Hide password");
+        } else {
+          input.type = "password";
+          if (icon) icon.textContent = "visibility";
+          toggle.setAttribute("aria-label", "Show password");
+        }
+      });
+    });
   }
 
   static async submit() {
