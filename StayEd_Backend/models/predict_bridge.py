@@ -33,13 +33,21 @@ def _top_factors(pipeline, row: pd.DataFrame, limit: int = 3) -> list[dict]:
         # encoded_name looks like "categorical__sex_MALE" or "numeric__age"
         raw_name = encoded_name.split("__", 1)[-1]
         base_feature = next((f for f in FEATURE_COLUMNS if raw_name == f or raw_name.startswith(f + "_")), raw_name)
-        # risk_factors.factor_value is NUMERIC; only numeric features can
-        # populate it, categorical ones (e.g. sex, modality) leave it null.
-        value = row.iloc[0].get(base_feature) if base_feature in NUMERIC_FEATURES else None
+                # Numeric features (age, distance_km) populate factor_value.
+        # Categorical/boolean features (sex, modality, is_re_enrollee, etc.)
+        # populate factor_value_text instead, so they're never displayed
+        # as "n/a" even though they're counted toward the risk score.
+        raw_value = row.iloc[0].get(base_feature)
+        is_numeric = base_feature in NUMERIC_FEATURES
+        value = float(raw_value) if is_numeric and raw_value is not None and pd.notna(raw_value) else None
+        value_text = None
+        if not is_numeric and raw_value is not None and pd.notna(raw_value):
+            value_text = str(raw_value)
         factors.append(
             {
                 "name": base_feature,
-                "value": float(value) if value is not None and pd.notna(value) else None,
+                "value": value,
+                "value_text": value_text,
                 "importance": round(float(importance), 6),
             }
         )

@@ -330,11 +330,21 @@
                 <p class="st-prediction-summary-box" data-risk-summary></p>
               </div>
 
-              <div class="st-prediction-card">
-                <h4 class="st-panel-title" style="margin-bottom: 16px">
-                  Why? Contributing Factors
+                            <div class="st-prediction-card">
+                <h4 class="st-panel-title" style="margin-bottom: 4px">
+                  Risk Factors from the Prediction Model
                 </h4>
+                <p style="font-size: 13px; color: var(--st-text-muted, #6b7280); margin-bottom: 12px;" data-risk-model-explanation></p>
                 <div class="st-stack-col-md" data-risk-contributors></div>
+              </div>
+              <div class="st-prediction-card">
+                <h4 class="st-panel-title" style="margin-bottom: 4px">
+                  Related Monitoring Information
+                </h4>
+                <p style="font-size: 13px; color: var(--st-text-muted, #6b7280); margin-bottom: 16px;">
+                  This information is not part of the prediction model, but may help explain the learner's current situation.
+                </p>
+                <div class="st-stack-col-md" data-risk-monitoring-context></div>
               </div>
 
               <div class="st-prediction-card" data-risk-changes-card>

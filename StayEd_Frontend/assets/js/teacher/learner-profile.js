@@ -506,6 +506,7 @@ class LearnerProfilePage {
     if (badge) badge.innerHTML = this.riskPill(this.profile.risk);
 
     this.set("[data-risk-summary]", r.summary);
+    this.set("[data-risk-model-explanation]", r.modelExplanation);
 
     const changesList = document.querySelector("[data-risk-changes]");
     const changesCard = document.querySelector("[data-risk-changes-card]");
@@ -551,7 +552,26 @@ class LearnerProfilePage {
         )
         .join("");
     }
+    const monitoringContext = document.querySelector("[data-risk-monitoring-context]");
 
+    if (monitoringContext) {
+      if (!r.monitoringContext || !r.monitoringContext.length) {
+        monitoringContext.innerHTML = `<p class="st-contributor-text">No additional monitoring information is available for this learner yet.</p>`;
+      } else {
+        monitoringContext.innerHTML = r.monitoringContext
+          .map(
+            (m) => `
+                <div class="st-contributor-item">
+                    <span class="material-symbols-outlined" style="color:var(--st-text-muted,#6b7280);font-size:18px;">${m.icon}</span>
+                    <div>
+                        <p class="st-contributor-text">${m.text}</p>
+                    </div>
+                </div>
+            `,
+          )
+          .join("");
+      }
+    }
     const recommendedAction = document.querySelector("[data-risk-recommended-action]");
 
     if (recommendedAction) {

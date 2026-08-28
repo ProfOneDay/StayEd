@@ -148,14 +148,15 @@ def trigger_prediction(
                 continue
             cur.execute(
                 """
-                INSERT INTO risk_factors (risk_assessment_id, factor_name, factor_value, importance_score)
-                VALUES (%s,%s,%s,%s)
+                INSERT INTO risk_factors (risk_assessment_id, factor_name, factor_value, factor_value_text, importance_score)
+                VALUES (%s,%s,%s,%s,%s)
                 ON CONFLICT (risk_assessment_id, factor_name)
-                DO UPDATE SET factor_value=EXCLUDED.factor_value, importance_score=EXCLUDED.importance_score
+                DO UPDATE SET factor_value=EXCLUDED.factor_value, factor_value_text=EXCLUDED.factor_value_text, importance_score=EXCLUDED.importance_score
                 """,
                 (
                     saved["risk_assessment_id"], name,
                     factor.get("value") if factor.get("value") is not None else factor.get("factor_value"),
+                    factor.get("value_text") if factor.get("value_text") is not None else factor.get("factor_value_text"),
                     factor.get("importance") if factor.get("importance") is not None else factor.get("importance_score"),
                 ),
             )

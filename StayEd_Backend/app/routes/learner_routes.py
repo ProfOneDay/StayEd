@@ -726,7 +726,7 @@ def learner_profile(learner_id: int):
     if base.get("risk_assessment_id"):
         factors = fetch_all(
             """
-            SELECT factor_name, factor_value, importance_score
+            SELECT factor_name, factor_value, factor_value_text, importance_score
             FROM risk_factors WHERE risk_assessment_id=%s
             ORDER BY importance_score DESC NULLS LAST
             """,
@@ -744,10 +744,12 @@ def learner_profile(learner_id: int):
         name = f["factor_name"].replace("_", " ").title()
         importance = float(f.get("importance_score") or 0)
         level = "High" if importance >= .6 else "Moderate" if importance >= .3 else "Low"
+        tone = "error" if level == "High" else "moderate" if level == "Moderate" else "low"
+        display_value = f.get("factor_value_text") or f.get("factor_value")
         contributor_rows.append({
-            "icon": "analytics", "tone": "error" if level == "High" else "moderate",
+            "icon": "analytics", "tone": tone,
             "title": name, "level": level,
-            "text": f"Current value: {f.get('factor_value') if f.get('factor_value') is not None else 'n/a'}.",
+            "text": f"Current value: {display_value if display_value is not None else 'not recorded'}.",
         })
     if not contributor_rows:
         if days_since_last_return is None:
@@ -940,13 +942,36 @@ def learner_profile(learner_id: int):
             ],
             "timeline": timeline,
         },
-        "riskExplanation": {
+                "riskExplanation": {
             "currentRiskLevel": current_risk,
             "summary": f"StayEd currently classifies this learner as {current_risk} Risk based on the latest available monitoring data.",
+            "modelExplanation": (
+                "This learner's risk level was primarily influenced by: "
+                + ", ".join(c["title"] for c in contributor_rows[:2])
+                + "."
+                if contributor_rows
+                else f"This learner is currently classified as {current_risk} Risk. Not enough factor data is available yet to explain which specific inputs drove this result."
+            ),
             "previousRisk": f"{prev_risk} Risk",
             "currentRisk": f"{current_risk} Risk",
             "changes": risk_changes,
             "contributors": contributor_rows,
+            "monitoringContext": [
+                item for item in [
+                    {
+                        "icon": "event_busy",
+                        "text": f"This learner currently has {overdue_modules} overdue module(s)." if overdue_modules else None,
+                    } if overdue_modules else None,
+                    {
+                        "icon": "menu_book",
+                        "text": f"No module has been returned in {days_since_last_return} days." if days_since_last_return is not None else None,
+                    } if days_since_last_return is not None else None,
+                    {
+                        "icon": "phone_missed",
+                        "text": f"No consultation contact has been recorded in {days_since_contact} days." if days_since_contact is not None and days_since_contact >= 30 else None,
+                    } if days_since_contact is not None and days_since_contact >= 30 else None,
+                ] if item is not None
+            ],
             "recommendedAction": recommendation,
             "recordsUsed": "Modules, Interventions, Consultation Contacts, and Enrollment Context",
         },
