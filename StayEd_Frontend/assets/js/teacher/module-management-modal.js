@@ -137,23 +137,28 @@ class ModuleManagementModal {
   }
 
   static statusMeta(batch) {
-    // Batch status is purely operational (module completion + follow-up
-    // timing) -- never the ML risk tier. Risk is rendered as its own badge
-    // in renderBatchRow(), separate from this pill.
+    // This pill describes module return timing only. Learner risk belongs on
+    // learner/profile surfaces, not in the Module Release Logbook.
     if (batch.status === "returned") {
-      return { label: "Fully Returned", icon: "check", cssClass: "returned" };
+      return { label: "Returned", icon: "check", cssClass: "returned" };
     }
     if (batch.status === "overdue") {
-      return { label: "Follow-up Overdue", sub: `${batch.daysInactive} days inactive`, icon: "warning", cssClass: "overdue" };
+      const sub = batch.daysOverdue != null
+        ? `Overdue by ${batch.daysOverdue} day${batch.daysOverdue === 1 ? "" : "s"}`
+        : "Past planned return date";
+      return { label: "Overdue", sub, icon: "warning", cssClass: "overdue" };
     }
     if (batch.status === "due") {
-      return { label: "Follow-up Due", sub: `${batch.daysInactive} days inactive`, icon: "schedule", cssClass: "due" };
-    }
-    if (batch.status === "partial") {
-      return { label: "Partially Returned", icon: "incomplete_circle", cssClass: "partial" };
+      let sub = "Planned return date is approaching";
+      if (batch.daysUntilDue === 0) sub = "Due today";
+      else if (batch.daysUntilDue != null) {
+        sub = `Due in ${batch.daysUntilDue} day${batch.daysUntilDue === 1 ? "" : "s"}`;
+      }
+      return { label: "Due Soon", sub, icon: "schedule", cssClass: "due" };
     }
     return { label: "Pending", icon: "hourglass_empty", cssClass: "pending" };
   }
+
 
   static renderBatchRow(batch) {
     const expanded = this.expandedBatchId === batch.id;
@@ -196,7 +201,7 @@ class ModuleManagementModal {
           <span class="material-symbols-outlined st-mrb-chevron">${expanded ? "expand_less" : "chevron_right"}</span>
           <div class="st-mrb-col st-mrb-col--date">
             <span class="st-mrb-label">Released</span>
-            <span class="st-mrb-date">${batch.releaseDate}${batch.daysInactive != null ? ` <span class="st-mrb-days-ago">(${batch.daysInactive} days ago)</span>` : ""}</span>
+            <span class="st-mrb-date">${batch.releaseDate}</span>
           </div>
           <div class="st-mrb-stat st-mrb-stat--progress">
             <span class="st-mrb-label">Release Progress</span>
@@ -213,10 +218,6 @@ class ModuleManagementModal {
           </div>
         </button>
         <div class="st-mrb-actions">
-          ${batch.status === "due" || batch.status === "overdue" ? `<div class="st-mrb-risk-bar st-mrb-risk-bar--${status.cssClass}" style="width:${Math.min(100, Math.round((batch.daysInactive / 30) * 100))}%;"></div>` : ""}
-          <span class="st-risk-badge st-risk-badge--${this.riskBadgeCssClass(batch.risk)}">
-            <span class="st-risk-dot"></span>${batch.risk || "Not Yet Assessed"}
-          </span>
           <span class="st-mrb-status-pill st-mrb-status-pill--${status.cssClass}">
             <span class="material-symbols-outlined">${status.icon}</span>
             <span>
@@ -235,19 +236,22 @@ class ModuleManagementModal {
   }
 
   static renderBatchExpanded(batch) {
-    const overdue = batch.activityStatus === "danger";
+    const timingMessage = batch.status === "overdue"
+      ? `Module return overdue${batch.deadlineDate ? ` — planned return was ${batch.deadlineDate}` : ""}`
+      : batch.status === "due"
+        ? `Module return due soon${batch.deadlineDate ? ` — planned return is ${batch.deadlineDate}` : ""}`
+        : batch.status === "returned"
+          ? "All modules in this release batch have been returned."
+          : `Module return pending${batch.deadlineDate ? ` — planned return is ${batch.deadlineDate}` : ""}`;
+    const timingAlert = batch.status === "overdue";
 
     return `
       <div class="st-mrb-expanded">
-        <p class="st-mrb-followup ${overdue ? "st-mrb-followup--overdue" : ""}">
-          <span class="material-symbols-outlined">${overdue ? "warning" : "info"}</span>
-          ${
-            overdue
-              ? `Follow-up Overdue — No recorded learner activity for ${batch.daysInactive} days`
-              : "Recommended Follow-up Period: Within 1 Month"
-          }
+        <p class="st-mrb-followup ${timingAlert ? "st-mrb-followup--overdue" : ""}">
+          <span class="material-symbols-outlined">${timingAlert ? "warning" : "info"}</span>
+          ${timingMessage}
         </p>
-        ${this.renderLastContactBlock(batch, { showRiskBadge: batch.status === "returned" })}
+        ${this.renderLastContactBlock(batch)}
         <div class="st-mrb-strand-grid">
           ${batch.strands
             .map(
@@ -294,33 +298,28 @@ class ModuleManagementModal {
     `;
   }
 
-  static riskBadgeCssClass(risk) {
-    return { High: "high", Moderate: "moderate", Low: "low" }[risk] || "neutral";
-  }
-
-  static renderLastContactBlock(batch, { showRiskBadge = true } = {}) {
+  static renderLastContactBlock(batch) {
     const dateLine =
       batch.status === "returned"
         ? `Returned: ${batch.returnDate}`
         : `Released: ${batch.releaseDate}`;
 
-    const risk = batch.risk || this.meta.risk;
+    const activityText = batch.activityText || this.meta.activityText || "";
+    const isRedundantReleaseActivity = /^Module released(?:\s|$)/i.test(activityText.trim());
 
     return `
       <div class="st-mrb-last-contact">
         <span class="st-return-eyebrow">Last Contact</span>
         <p class="st-mrb-last-contact-date">${dateLine}</p>
-        <p class="st-mrb-last-contact-activity">${batch.activityText || this.meta.activityText || "—"}</p>
         ${
-          showRiskBadge
-            ? `<span class="st-risk-badge st-risk-badge--${this.riskBadgeCssClass(risk)}">
-                <span class="st-risk-dot"></span>${risk || "Not Yet Assessed"}
-              </span>`
+          activityText && !isRedundantReleaseActivity
+            ? `<p class="st-mrb-last-contact-activity">${activityText}</p>`
             : ""
         }
       </div>
     `;
   }
+
 
   static bindLogbook(root) {
     root.querySelectorAll("[data-batch-toggle]").forEach((el) => {

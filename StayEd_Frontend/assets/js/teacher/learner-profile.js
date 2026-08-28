@@ -116,6 +116,17 @@ class LearnerProfilePage {
     this.set("[data-profile-assigned-teacher]", h.assignedTeacher);
     this.set("[data-profile-current-class]", h.currentClass);
 
+    const classButton = document.querySelector("[data-profile-class-btn]");
+    if (classButton) {
+      if (h.classId) {
+        classButton.href = `learner-records.html?class=${encodeURIComponent(h.classId)}`;
+        classButton.hidden = false;
+      } else {
+        classButton.removeAttribute("href");
+        classButton.hidden = true;
+      }
+    }
+
     const badge = document.querySelector("[data-profile-risk-badge]");
 
     if (badge) badge.innerHTML = this.riskPill(p.risk);
