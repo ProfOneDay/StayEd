@@ -423,7 +423,16 @@ class LearnerRecordsHub {
       });
     });
 
-    container.querySelectorAll("[data-open-consultation-modal]").forEach((el) => {
+       container.querySelectorAll("[data-open-schedule-modal]").forEach((el) => {
+     el.addEventListener("click", () => {
+       const id = el.dataset.openScheduleModal;
+       const learner = this.state.all.find((x) => String(x.id) === String(id));
+       if (learner && window.ScheduleAttendanceModal) {
+         ScheduleAttendanceModal.open(learner);
+       }
+     });
+   });
+       container.querySelectorAll("[data-open-consultation-modal]").forEach((el) => {
       el.addEventListener("click", () => {
         const id = el.dataset.openConsultationModal;
         const learner = this.state.all.find((x) => String(x.id) === String(id));
@@ -435,9 +444,10 @@ class LearnerRecordsHub {
 
   }
 
-  static rowActionsMenu(l) {
+    static rowActionsMenu(l) {
     const id = l.id;
     const showConsultation = l.modality !== "Modular";
+    const showSchedule = l.modality !== "Modular";
     return `
             <div class="st-row-menu" data-row-menu>
                 <button type="button" class="st-row-menu-trigger" data-row-menu-trigger aria-label="More actions">
@@ -452,6 +462,12 @@ class LearnerRecordsHub {
                         <span class="material-symbols-outlined">menu_book</span>
                         Open Module Progress
                     </button>
+                    ${showSchedule ? `
+                    <button type="button" data-open-schedule-modal="${id}">
+                        <span class="material-symbols-outlined">event</span>
+                        Set Schedule
+                    </button>
+                    ` : ""}
                     ${showConsultation ? `
                     <button type="button" data-open-consultation-modal="${id}">
                         <span class="material-symbols-outlined">support</span>

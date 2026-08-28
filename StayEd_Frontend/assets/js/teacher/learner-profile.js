@@ -594,6 +594,13 @@ class LearnerProfilePage {
                         <div style="margin-top:10px;">
                             <span class="st-pill st-pill--teal">${iv.active.status}</span>
                         </div>
+                        ${iv.active.aiReason ? `
+                        <div style="margin-top:12px;padding:10px 12px;background:#F5F3FF;border-left:3px solid #7C3AED;border-radius:6px;">
+                            <p style="font-size:11px;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:4px;">AI Insight</p>
+                            <p style="font-size:13px;color:#374151;margin-bottom:6px;">${iv.active.aiReason}</p>
+                            ${iv.active.aiRecommendedAction ? `<p style="font-size:12px;color:#4B5563;"><strong>Suggested next step:</strong> ${iv.active.aiRecommendedAction}</p>` : ""}
+                        </div>
+                        ` : ""}
                     </div>
                     <div style="display:flex;gap:8px;flex-shrink:0;">
                         <button type="button" class="st-btn st-btn-outline st-btn-xs" data-update-status>Update Status</button>

@@ -923,6 +923,11 @@ def learner_profile(learner_id: int):
                 "followUp": active["target_date"].strftime("%B %d, %Y") if active.get("target_date") else "—",
                 "status": title_enum(active["status"]),
                 "assignedBy": base.get("assigned_teacher") or "—",
+                "aiTitle": active.get("ai_title"),
+                "aiPriority": active.get("ai_priority"),
+                "aiCategory": active.get("ai_category"),
+                "aiReason": active.get("ai_reason"),
+                "aiRecommendedAction": active.get("ai_recommended_action"),
             } if active else None,
             "history": [
                 {
