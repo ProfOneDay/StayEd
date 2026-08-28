@@ -390,12 +390,6 @@
     color:var(--st-primary);
 }
 
-.st-mrb-days-ago{
-    font-size:12px;
-    font-weight:500;
-    color:var(--st-on-surface-variant);
-}
-
 .st-mrb-summary-text,
 .st-mrb-returned-text{
     font-size:13px;
@@ -453,12 +447,6 @@
     border-color:var(--st-risk-neutral-border);
 }
 
-.st-mrb-status-pill--partial{
-    background:var(--st-primary-fixed);
-    color:var(--st-primary);
-    border-color:transparent;
-}
-
 .st-mrb-status-pill--due{
     background:var(--st-risk-moderate-soft);
     color:var(--st-risk-moderate);
@@ -478,17 +466,6 @@
     flex-wrap:wrap;
     padding:0 16px 16px;
 }
-
-.st-mrb-risk-bar{
-    height:4px;
-    border-radius:999px;
-    flex:1;
-    min-width:60px;
-    max-width:160px;
-}
-
-.st-mrb-risk-bar--due{ background:var(--st-risk-moderate); }
-.st-mrb-risk-bar--overdue{ background:var(--st-risk-high); }
 
 .st-mrb-edit-btn{
     display:inline-flex;

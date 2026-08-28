@@ -1,12 +1,9 @@
 from __future__ import annotations
 
-from datetime import datetime
-
 from flask import Blueprint
 
 from ..authz import role_required, teacher_for_user
 from ..db import fetch_all, fetch_one
-from ..helpers import title_enum
 from .learner_routes import _learner_query, _shape_learner
 
 bp = Blueprint("dashboard", __name__)
@@ -44,16 +41,15 @@ def dashboard():
         (teacher["teacher_id"],),
     )
     if current_class:
-        selected_class = f"{title_enum(current_class['learning_level'])}, {current_class['clc_name']}"
         school_year = current_class["school_year"]
         trimester = {"FIRST": "First Trimester", "SECOND": "Second Trimester", "SUMMER": "Third Trimester", "WHOLE_YEAR": "Whole Year"}.get(current_class["semester"], current_class["semester"])
     else:
-        selected_class, school_year, trimester = "No active class", "—", "—"
+        school_year, trimester = "—", "—"
 
     learner_rows = fetch_all(
         _learner_query(
             "WHERE lc.teacher_id = %s AND ce.enrollment_status = 'ENROLLED'",
-            "ce.enrollment_date DESC, l.last_name, l.first_name",
+            "ce.enrollment_date DESC, ce.enrollment_id DESC, l.last_name, l.first_name",
         ),
         (teacher["teacher_id"],),
     )
@@ -106,7 +102,6 @@ def dashboard():
     return {
         "context": {
             "registered_learners": registered,
-            "selected_class": selected_class,
             "school_year": school_year,
             "trimester": trimester,
             "last_updated": latest_date.strftime("%B %d, %Y") if latest_date else "No prediction run yet",
@@ -117,9 +112,6 @@ def dashboard():
             "high": high,
             "moderate": moderate,
             "low": low,
-            "high_delta": 0,
-            "moderate_trend": "Stable",
-            "low_trend": "Includes learners awaiting prediction",
         },
         "riskDistribution": dist,
         "predictionSummary": {

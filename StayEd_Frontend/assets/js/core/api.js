@@ -454,6 +454,10 @@ class API {
     return this.get("/clcs");
   }
 
+  static getTeacherClcs() {
+    return this.get("/teacher/clcs");
+  }
+
   static getCurrentClc() {
     return this.get("/clcs/current");
   }
@@ -528,10 +532,6 @@ class API {
 
   static returnModuleBatch(learnerId, batchId, payload) {
     return this.post(`/learners/${learnerId}/module-batches/${batchId}/return`, payload);
-  }
-
-  static undoModuleReturn(learnerId, batchId, payload) {
-    return this.post(`/learners/${learnerId}/module-batches/${batchId}/undo-return`, payload);
   }
 
   static editModuleBatch(learnerId, batchId, payload) {
