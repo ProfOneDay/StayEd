@@ -43,29 +43,55 @@ class LearnerRecordsHub {
       .querySelector("[data-enroll-link]")
       ?.setAttribute("href", `learner-enroll.html${search}`);
 
+    // Module Management is class-scoped (a per-class module catalog), so it
+    // only makes sense -- and is only shown -- once a specific class is
+    // selected, same gating as the class-context banner below.
+    const manageModulesLink = document.querySelector("[data-manage-modules-link]");
+    if (classId && manageModulesLink) {
+      manageModulesLink.setAttribute("href", `module-management.html${search}`);
+      manageModulesLink.classList.remove("st-hidden");
+    }
+
     if (!classId || !banner) return;
 
-    try {
+    const findClass = async () => {
       const response = await API.getTeacherClasses();
-      const match = (response?.data || []).find(
+      return (response?.data || []).find(
         (item) => String(item.id) === String(classId),
       );
+    };
 
-      if (!match) return;
-
-      banner.classList.remove("st-hidden");
-      this.set("[data-class-context-name]", `${match.clc} — ${match.level}`);
-      this.set(
-        "[data-class-context-meta]",
-        `${match.modality} · School Year ${match.schoolYear} · ${match.learnerCount} Enrolled Learners`,
-      );
-      this.set(
-        "[data-records-subtitle]",
-        `Viewing records for ${match.clc}, ${match.level} (SY ${match.schoolYear}).`,
-      );
+    let match;
+    try {
+      match = await findClass();
     } catch (error) {
       console.error("[LearnerRecordsHub] Unable to load class context", error);
+      // One retry -- a slow/transient request shouldn't permanently hide
+      // the banner for the rest of the session.
+      try {
+        match = await findClass();
+      } catch (retryError) {
+        console.error(
+          "[LearnerRecordsHub] Retry failed to load class context",
+          retryError,
+        );
+        return;
+      }
     }
+
+    if (!match) return;
+
+    banner.classList.remove("st-hidden");
+    this.set("[data-class-context-clc]", match.clc);
+    this.set("[data-class-context-level]", match.level);
+    this.set(
+      "[data-class-context-meta]",
+      `${match.modality} · School Year ${match.schoolYear} · ${match.learnerCount} Enrolled Learners`,
+    );
+    this.set(
+      "[data-records-subtitle]",
+      `Viewing records for ${match.clc}, ${match.level} (SY ${match.schoolYear}).`,
+    );
   }
 
   static async load() {

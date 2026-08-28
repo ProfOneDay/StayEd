@@ -23,6 +23,15 @@ class Modal {
     hideConfirm = false,
 
     closeOnBackdrop = true,
+
+    // Opt-in: when true, the confirm button disables itself (blocking
+    // double-submits), awaits onConfirm(), and only hides the modal once
+    // that resolves. If onConfirm throws, the button re-enables and the
+    // modal stays open -- the caller's own catch is expected to show a
+    // Toast with the specific reason, so the modal doesn't duplicate it.
+    // Default (false) keeps every existing call site's behavior exactly as
+    // it was: hide immediately, don't wait on onConfirm's result.
+    asyncConfirm = false,
   } = {}) {
     const modal = document.getElementById("st-modal");
 
@@ -52,11 +61,29 @@ class Modal {
 
     confirmBtn.style.display = hideConfirm ? "none" : "";
 
-    confirmBtn.onclick = () => {
-      if (onConfirm) onConfirm();
+    if (asyncConfirm) {
+      confirmBtn.onclick = async () => {
+        if (confirmBtn.disabled) return;
 
-      this.hide();
-    };
+        confirmBtn.disabled = true;
+
+        try {
+          if (onConfirm) await onConfirm();
+
+          this.hide();
+        } catch (err) {
+          console.error("[Modal] asyncConfirm onConfirm failed", err);
+        } finally {
+          confirmBtn.disabled = false;
+        }
+      };
+    } else {
+      confirmBtn.onclick = () => {
+        if (onConfirm) onConfirm();
+
+        this.hide();
+      };
+    }
 
     cancelBtn.textContent = cancelLabel;
 

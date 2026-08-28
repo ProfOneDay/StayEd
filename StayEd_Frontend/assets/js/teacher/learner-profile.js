@@ -132,11 +132,21 @@ class LearnerProfilePage {
       ?.addEventListener("click", () => this.openEditLearnerModal());
   }
 
+  static formatModalityDate(iso) {
+    if (!iso) return "—";
+    return new Date(`${iso}T00:00:00`).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  }
+
   static openEditLearnerModal() {
     if (!window.Modal) return;
     const bg = this.profile.background || {};
     const currentModality = this.profile.modality || "Face-to-Face";
     const modalities = ["Face-to-Face", "Modular", "Blended"];
+    const today = new Date().toISOString().slice(0, 10);
 
     Modal.show({
       title: "Edit Learner",
@@ -149,8 +159,12 @@ class LearnerProfilePage {
             ${modalities.map((m) => `<option value="${m}" ${m === currentModality ? "selected" : ""}>${m}</option>`).join("")}
           </select>
         </div>
+        <div class="st-schedule-modal-field" id="elModalityEffectiveField" style="display:none;">
+          <label for="elModalityEffective">Effective Date</label>
+          <input id="elModalityEffective" type="date" value="${today}" max="${today}">
+        </div>
         <div class="st-schedule-modal-field" id="elModalityReasonField" style="display:none;">
-          <label for="elModalityReason">Reason for Modality Change</label>
+          <label for="elModalityReason">Reason for Modality Change (optional)</label>
           <input id="elModalityReason" type="text" placeholder="e.g. Schedule constraints">
         </div>
         <div class="st-schedule-modal-field">
@@ -174,41 +188,81 @@ class LearnerProfilePage {
           <label for="el4Ps">4Ps Beneficiary</label>
         </div>
       `,
-      onConfirm: async () => {
+      onConfirm: () => {
         const modality = document.getElementById("elModality")?.value;
         const modalityReason = document.getElementById("elModalityReason")?.value.trim();
+        const modalityEffective = document.getElementById("elModalityEffective")?.value;
 
-        const payload = {
-          modality,
-          modality_change_reason: modalityReason || undefined,
+        const otherFields = {
           civil_status: document.getElementById("elCivil")?.value.trim(),
           employment_status: document.getElementById("elEmployment")?.value.trim(),
           distance_from_clc_km: parseFloat(document.getElementById("elDistance")?.value) || 0,
           is_re_enrollee: document.getElementById("elReenrollee")?.checked,
           is4Ps: document.getElementById("el4Ps")?.checked,
         };
-        try {
-          await API.updateLearner(this.getLearnerId(), payload);
-          Toast?.success("Learner updated.");
-          await this.load();
-        } catch (error) {
-          console.error("[LearnerProfile] Edit failed", error);
-          Toast?.error(error?.data?.message || "Unable to update learner.");
+
+        const saveLearner = async (extra = {}) => {
+          try {
+            await API.updateLearner(this.getLearnerId(), {
+              modality,
+              ...otherFields,
+              ...extra,
+            });
+            Toast?.success("Learner updated.");
+            await this.load();
+          } catch (error) {
+            console.error("[LearnerProfile] Edit failed", error);
+            Toast?.error(error?.data?.message || "Unable to update learner.");
+          }
+        };
+
+        if (modality !== currentModality) {
+          // Modal is a single shared #st-modal instance -- its confirm
+          // button calls hide() right after this onConfirm returns, so
+          // showing the confirmation modal synchronously here would just
+          // have it immediately hidden again. Deferring to the next tick
+          // lets that hide() finish first.
+          setTimeout(() => {
+            Modal.show({
+              title: "Change Modality?",
+              size: "sm",
+              confirmLabel: "Confirm Change",
+              message: `
+                <p><strong>Current modality:</strong> ${currentModality}</p>
+                <p><strong>New modality:</strong> ${modality}</p>
+                <p><strong>Effective date:</strong> ${this.formatModalityDate(modalityEffective)}</p>
+                ${modalityReason ? `<p><strong>Reason:</strong> ${modalityReason}</p>` : ""}
+                <p style="color:var(--st-on-surface-variant);font-size:13px;margin-top:12px;">
+                  This will update the learner's current modality. The previous modality will remain in the learner's modality history.
+                </p>
+              `,
+              onConfirm: () => {
+                saveLearner({
+                  modality_change_reason: modalityReason || undefined,
+                  modality_effective_date: modalityEffective || undefined,
+                });
+              },
+            });
+          }, 0);
+          return;
         }
+
+        saveLearner();
       },
     });
 
     const modalitySelect = document.getElementById("elModality");
     const reasonField = document.getElementById("elModalityReasonField");
+    const effectiveField = document.getElementById("elModalityEffectiveField");
 
-    const syncReasonVisibility = () => {
-      if (reasonField) {
-        reasonField.style.display = modalitySelect?.value === currentModality ? "none" : "";
-      }
+    const syncModalityChangeFields = () => {
+      const changed = modalitySelect?.value !== currentModality;
+      if (reasonField) reasonField.style.display = changed ? "" : "none";
+      if (effectiveField) effectiveField.style.display = changed ? "" : "none";
     };
 
-    modalitySelect?.addEventListener("change", syncReasonVisibility);
-    syncReasonVisibility();
+    modalitySelect?.addEventListener("change", syncModalityChangeFields);
+    syncModalityChangeFields();
   }
 
   static renderOverview() {

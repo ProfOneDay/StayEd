@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>StayEd | Class Management</title>
+    <title>StayEd | Manage Modules</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -25,7 +25,7 @@
       href="../../assets/img/brand/apple-touch-icon.png"
     />
   </head>
-  <body class="st-app" data-page="Class Management">
+  <body class="st-app" data-page="Manage Modules">
     <div data-component="layout/sidebar"></div>
 
     <div class="st-main">
@@ -34,51 +34,64 @@
       <main class="st-content">
         <div class="st-page-header">
           <div>
-            <h1 class="st-page-header-title">Class Management</h1>
+            <h1 class="st-page-header-title">Manage Modules</h1>
             <p class="st-page-header-subtitle">
-              Your assigned classes. Open a class to manage attendance, module
-              progress, and enroll learners into it.
+              Set up this class's modules once, then track who has received
+              and returned each one.
             </p>
           </div>
           <div class="st-page-header-actions">
             <button
               type="button"
               class="st-btn st-btn-primary"
-              data-add-class-btn
+              data-add-module-btn
             >
               <span class="material-symbols-outlined">add</span>
-              Add Class
+              Add Module
             </button>
           </div>
         </div>
 
-        <!-- CLC context banner: shows which CLC these classes belong to.
-             Populated from ?clc= in the URL (arriving from CLC Overview),
-             falling back to the teacher's current CLC assignment. -->
-        <div class="st-class-context-banner" data-clc-context-banner>
+        <!-- Class context banner: same component/markup as Learner Records
+             (see learner-records-hub.css .st-class-context-banner*), so
+             module management shows the same CLC/class identity. -->
+        <div
+          class="st-class-context-banner st-hidden"
+          data-class-context-banner
+        >
           <span class="material-symbols-outlined st-class-context-banner-icon"
-            >hub</span
+            >school</span
           >
           <div class="st-class-context-banner-text">
-            <span class="st-class-context-banner-name" data-clc-context-name
+            <span class="st-class-context-banner-clc" data-class-context-clc
               >—</span
             >
-            <span class="st-class-context-banner-meta" data-clc-context-meta
-              >Community Learning Center</span
+            <span
+              class="st-class-context-banner-level"
+              data-class-context-level
+              >—</span
+            >
+            <span class="st-class-context-banner-meta" data-class-context-meta
+              >—</span
             >
           </div>
-          <a href="clc-overview.html" class="st-class-context-banner-switch">
-            Switch CLC
+          <a
+            href="class-management.html"
+            class="st-class-context-banner-switch"
+          >
+            Switch Class
             <span class="material-symbols-outlined">swap_horiz</span>
           </a>
         </div>
 
-        <div class="st-clc-grid" data-class-grid>
-          <div class="st-empty col-12" style="grid-column: 1/-1">
-            <span class="material-symbols-outlined">hourglass_empty</span>
-            <p class="st-empty-title">Loading your classes…</p>
-          </div>
+        <div class="st-panel st-panel-pad" data-no-class-notice style="display:none">
+          <p class="st-panel-subtitle">
+            Open Module Management from a specific class in Learner Records
+            to manage its modules.
+          </p>
         </div>
+
+        <div data-view-root></div>
       </main>
 
       <div data-component="layout/footer"></div>
@@ -99,7 +112,6 @@
     <script src="../../assets/js/components/component-loader.js"></script>
     <script src="../../assets/js/components/toast.js"></script>
     <script src="../../assets/js/components/modal.js"></script>
-    <script src="../../assets/js/teacher/class-attendance-modal.js"></script>
-    <script src="../../assets/js/teacher/class-management.js"></script>
+    <script src="../../assets/js/teacher/module-management.js"></script>
   </body>
 </html>

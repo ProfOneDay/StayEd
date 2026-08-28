@@ -134,26 +134,21 @@ class API {
       if (window.Auth) {
         Auth.clearSession();
       }
-
-      throw new Error("Your session has expired.");
     }
 
-    if (error.status === 403) {
-      throw new Error("You are not authorized to perform this action.");
-    }
+    // For every real HTTP error response, prefer the backend's own message
+    // (error.data.message, set by the shared `error()` helper server-side)
+    // over a generic fallback -- discarding it here previously meant a
+    // caller checking `error?.data?.message` silently got `undefined` even
+    // when the server sent a specific, useful reason for the failure.
+    if (error.status) {
+      const fallback = {
+        401: "Your session has expired.",
+        403: "You are not authorized to perform this action.",
+        404: "The requested resource could not be found.",
+      }[error.status] || (error.status >= 500 ? "The server encountered an unexpected error." : "The request could not be completed.");
 
-    if (error.status === 404) {
-      throw new Error("The requested resource could not be found.");
-    }
-
-    if (error.status >= 500) {
-      throw new Error("The server encountered an unexpected error.");
-    }
-
-    if (error.data) {
-      const apiError = new Error(
-        error.data.message || "The request could not be completed."
-      );
+      const apiError = new Error(error?.data?.message || fallback);
       apiError.status = error.status;
       apiError.data = error.data;
 
@@ -495,6 +490,34 @@ class API {
     return this.delete(`/classes/${id}`);
   }
 
+  static getClassModules(classId) {
+    return this.get(`/classes/${classId}/modules`);
+  }
+
+  static createClassModule(classId, payload) {
+    return this.post(`/classes/${classId}/modules`, payload);
+  }
+
+  static updateClassModule(classId, classModuleId, payload) {
+    return this.put(`/classes/${classId}/modules/${classModuleId}`, payload);
+  }
+
+  static archiveClassModule(classId, classModuleId) {
+    return this.post(`/classes/${classId}/modules/${classModuleId}/archive`);
+  }
+
+  static unarchiveClassModule(classId, classModuleId) {
+    return this.post(`/classes/${classId}/modules/${classModuleId}/unarchive`);
+  }
+
+  static releaseClassModule(classId, classModuleId, payload) {
+    return this.post(`/classes/${classId}/modules/${classModuleId}/release`, payload);
+  }
+
+  static getClassModuleRoster(classId, classModuleId) {
+    return this.get(`/classes/${classId}/modules/${classModuleId}/roster`);
+  }
+
   static getModuleLogbook(learnerId) {
     return this.get(`/learners/${learnerId}/modules`);
   }
@@ -505,6 +528,10 @@ class API {
 
   static returnModuleBatch(learnerId, batchId, payload) {
     return this.post(`/learners/${learnerId}/module-batches/${batchId}/return`, payload);
+  }
+
+  static undoModuleReturn(learnerId, batchId, payload) {
+    return this.post(`/learners/${learnerId}/module-batches/${batchId}/undo-return`, payload);
   }
 
   static editModuleBatch(learnerId, batchId, payload) {

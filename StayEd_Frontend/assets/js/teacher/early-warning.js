@@ -17,6 +17,22 @@ class EarlyWarningPage {
     await this.load();
   }
 
+  // Ticket 2: `new Date(...).toLocaleDateString()` with no locale argument
+  // renders using the viewer's own OS/browser locale -- under an en-GB-style
+  // locale that flips to DD/MM/YYYY (confirmed: 2026-08-03 renders "8/3/2026"
+  // under en-US but "03/08/2026" under en-GB). date_generated is already a
+  // safe, unambiguous ISO string from the backend; only this display step
+  // was locale-dependent, so no stored/historical data is affected by this
+  // fix -- it only changes how the same value is rendered on screen.
+  static formatDateMDY(iso) {
+    if (!iso) return "—";
+    return new Date(`${iso}T00:00:00`).toLocaleDateString("en-US", {
+      month: "2-digit",
+      day: "2-digit",
+      year: "numeric",
+    });
+  }
+
   static async load() {
     if (window.Layout) Layout.showLoader();
 
@@ -253,7 +269,7 @@ class EarlyWarningPage {
                 </td>
                 <td>${this.riskBadge(l.risk)}</td>
                 <td><span class="st-pill">${l.status}</span></td>
-                <td style="font-size:12px;">${l.dateGenerated ? new Date(l.dateGenerated).toLocaleDateString() : "Not generated"}</td>
+                <td style="font-size:12px;">${l.dateGenerated ? EarlyWarningPage.formatDateMDY(l.dateGenerated) : "Not generated"}</td>
                 <td style="font-size:12px;">${l.assignedTeacher}</td>
                 <td class="is-center">
                     <button type="button" class="st-btn st-btn-primary st-btn-xs" data-open-profile="${l.id}">
