@@ -101,7 +101,7 @@ Go back to the main project folder (StayEd-1, the one with
 "start.ps1" in it) and run:
 
   cd ..
-  *Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass(optional if error)
+  "Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass"(optional if error)
   .\start.ps1
 
 This single command:

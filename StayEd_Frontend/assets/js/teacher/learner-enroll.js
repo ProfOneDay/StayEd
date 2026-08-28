@@ -1,7 +1,7 @@
 class LearnerEnrollWizard {
   static currentStep = 1;
 
-  static totalSteps = 9;
+  static totalSteps = 8;
 
   static currentClc = null;
 
@@ -204,15 +204,6 @@ class LearnerEnrollWizard {
   }
 
   static async loadClassContext() {
-    const teacherName = (window.Auth && Auth.user && Auth.user()) || {};
-    const name =
-      teacherName.full_name ||
-      [teacherName.first_name, teacherName.last_name].filter(Boolean).join(" ") ||
-      "";
-
-    const teacherField = document.getElementById("wAssignedTeacher");
-    if (teacherField && name) teacherField.value = name;
-
     try {
       this.currentClc = await API.getCurrentClc();
 
@@ -355,7 +346,7 @@ class LearnerEnrollWizard {
 
     this.updateProgress();
 
-    if (step === 7) {
+    if (step === 6) {
       this.checkReenrolleeStatus();
     }
 
@@ -466,7 +457,6 @@ class LearnerEnrollWizard {
       {
         title: "Learning Modality",
         rows: [
-          ["Learning Level", this.getSegmentValue("level")],
           ["Modality", this.getSegmentValue("modality")],
         ],
       },
@@ -476,13 +466,6 @@ class LearnerEnrollWizard {
           ["CLC", val("wClc")],
           ["Distance Category", val("wDistance")],
           ["School Year", val("wSchoolYear")],
-        ],
-      },
-      {
-        title: "Program Assignment",
-        rows: [
-          ["Program", val("wProgram")],
-          ["Assigned Teacher", val("wAssignedTeacher")],
         ],
       },
       {
