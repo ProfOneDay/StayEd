@@ -90,8 +90,14 @@ def _shape_activity(row):
     )
 
     # Show the actual latest activity while it's within the warning window.
+    # Module releases are displayed with their recorded release date instead
+    # of a relative day phrase. This keeps release messaging consistent
+    # anywhere the shared learner shape is rendered.
     if event_date is not None and days_inactive < ACTIVITY_WARNING_DAYS:
-        activity_text = f"{event_label} {_relative_day_phrase(days_inactive)}"
+        if str(event_label).strip().lower() == "module released":
+            activity_text = f"Module released {event_date.strftime('%B %d, %Y')}"
+        else:
+            activity_text = f"{event_label} {_relative_day_phrase(days_inactive)}"
     else:
         primary_noun = (
             "consultation" if modality_raw == "FACE_TO_FACE" else "module return"

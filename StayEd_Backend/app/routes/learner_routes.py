@@ -35,6 +35,11 @@ from ..services.settings_service import get_default_module_duration_days
 
 bp = Blueprint("learners", __name__)
 
+# A module is considered "Due Soon" when its planned return date is within
+# this many calendar days (inclusive). Keep this operational deadline
+# threshold separate from learner-risk/inactivity thresholds.
+MODULE_DUE_SOON_DAYS = 7
+
 
 def _teacher_scope():
     teacher = teacher_for_user()
@@ -476,7 +481,7 @@ def delete_learner(learner_id: int):
 def _profile_base(learner_id: int):
     teacher = _teacher_scope()
     return fetch_one(
-        _learner_query("WHERE l.learner_id = %s AND lc.teacher_id = %s", "ce.enrollment_date DESC") + " LIMIT 1",
+        _learner_query("WHERE l.learner_id = %s AND lc.teacher_id = %s", "ce.enrollment_date DESC, ce.enrollment_id DESC") + " LIMIT 1",
         (learner_id, teacher["teacher_id"]),
     )
 
@@ -904,6 +909,7 @@ def learner_profile(learner_id: int):
             "dateEnrolled": base["enrollment_date"].strftime("%B %d, %Y") if base.get("enrollment_date") else "—",
             "assignedTeacher": base.get("assigned_teacher") or "—",
             "currentClass": base.get("class_name") or "—",
+            "classId": base.get("class_id"),
             "modalitySince": modality_since or "—",
         },
         "riskTrend": risk_trend,
@@ -1165,28 +1171,46 @@ def _batch_status(modules: list[dict], release_date: date, learner_activity: dic
             "returnDate": return_date.strftime("%B %d, %Y"),
             "daysToReturn": (return_date - release_date).days,
             "returnedCount": returned,
+            "deadlineDate": None,
+            "daysOverdue": None,
+            "daysUntilDue": None,
+            **learner_activity,
         }
 
-    # Batch status is purely operational -- module completion plus whether
-    # the recommended follow-up window has been exceeded -- and must never be
-    # derived from the ML risk tier. A batch with modules pending isn't
-    # "Moderate Risk"; that's a coincidence of two unrelated concepts. Risk
-    # is still reported via **learner_activity below so the frontend can show
-    # it as its own separate badge.
-    if learner_activity["activityStatus"] == "danger":
+    # Module-return timing is based only on each outstanding module's planned
+    # return date. Learner risk and generic inactivity are separate concepts.
+    outstanding = [m for m in modules if m["status"] != "returned"]
+    planned_dates = [
+        m.get("plannedReturnRaw") for m in outstanding if m.get("plannedReturnRaw")
+    ]
+    today = date.today()
+
+    overdue_dates = [planned for planned in planned_dates if planned < today]
+    if overdue_dates:
+        # Surface the oldest missed deadline so "overdue by" communicates the
+        # longest outstanding delay in the batch.
+        deadline = min(overdue_dates)
         status = "overdue"
-    elif learner_activity["activityStatus"] == "warning":
-        status = "due"
-    elif returned > 0:
-        status = "partial"
+        days_overdue = (today - deadline).days
+        days_until_due = None
     else:
-        status = "pending"
+        future_or_today = [planned for planned in planned_dates if planned >= today]
+        deadline = min(future_or_today) if future_or_today else None
+        days_until_due = (deadline - today).days if deadline else None
+        if days_until_due is not None and days_until_due <= MODULE_DUE_SOON_DAYS:
+            status = "due"
+        else:
+            status = "pending"
+        days_overdue = None
 
     return {
         "status": status,
         "returnDate": None,
         "daysToReturn": None,
         "returnedCount": returned,
+        "deadlineDate": deadline.strftime("%B %d, %Y") if deadline else None,
+        "daysOverdue": days_overdue,
+        "daysUntilDue": days_until_due,
         **learner_activity,
     }
 
@@ -1195,15 +1219,24 @@ def _module_overdue_info(date_returned, planned_return_date) -> dict:
     if date_returned is not None or planned_return_date is None:
         return {
             "plannedReturn": None, "plannedReturnIso": None, "plannedReturnRaw": None,
-            "overdue": False, "daysOverdue": None,
+            "overdue": False, "dueSoon": False, "daysOverdue": None, "daysUntilDue": None,
         }
-    overdue = date.today() > planned_return_date
+
+    today = date.today()
+    overdue = today > planned_return_date
+    days_until_due = (planned_return_date - today).days if not overdue else None
+    due_soon = (
+        days_until_due is not None
+        and 0 <= days_until_due <= MODULE_DUE_SOON_DAYS
+    )
     return {
         "plannedReturn": planned_return_date.strftime("%m/%d/%Y"),
         "plannedReturnIso": planned_return_date.isoformat(),
         "plannedReturnRaw": planned_return_date,
         "overdue": overdue,
-        "daysOverdue": (date.today() - planned_return_date).days if overdue else None,
+        "dueSoon": due_soon,
+        "daysOverdue": (today - planned_return_date).days if overdue else None,
+        "daysUntilDue": days_until_due,
     }
 
 
@@ -1460,67 +1493,6 @@ def return_module_batch(learner_id: int, batch_id: int):
     learner_activity = _learner_activity_info(base)
     return {
         "message": "Module return recorded.",
-        "learner": {
-            "name": f"{base['first_name']} {base['last_name']}",
-            "lrn": base["lrn"],
-            "clc": base["clc_name"],
-            "level": base["learning_level"],
-            **learner_activity,
-        },
-        **_logbook(base["enrollment_id"], learner_activity),
-    }
-
-
-@bp.post("/learners/<int:learner_id>/module-batches/<int:batch_id>/undo-return")
-@role_required("teacher")
-def undo_module_return(learner_id: int, batch_id: int):
-    """Reverts a mistaken 'Mark as Returned' back to Released -- clears
-    date_returned/remarks and flips module_status back, without touching
-    date_released or anything else about the original release transaction.
-    """
-    base = _profile_base(learner_id)
-    if not base:
-        return error("Learner not found.", 404)
-
-    batch = fetch_one(
-        "SELECT release_batch_id FROM module_release_batch WHERE release_batch_id=%s AND enrollment_id=%s",
-        (batch_id, base["enrollment_id"]),
-    )
-    if not batch:
-        return error("Release batch not found.", 404)
-
-    data = request.get_json(silent=True) or {}
-    module_ids = [int(m) for m in (data.get("moduleIds") or []) if str(m).strip().lstrip("-").isdigit()]
-    if not module_ids:
-        return error("Select at least one module to undo.", 422)
-
-    owned = fetch_all(
-        "SELECT module_record_id, module_status FROM module_record WHERE release_batch_id=%s AND module_record_id = ANY(%s)",
-        (batch_id, module_ids),
-    )
-    if len(owned) != len(set(module_ids)):
-        return error("One or more selected modules do not belong to this batch.", 422)
-    if any(r["module_status"] != "RETURNED" for r in owned):
-        return error("One or more selected modules have not been returned yet.", 422)
-
-    execute(
-        """
-        UPDATE module_record
-        SET date_returned=NULL, module_status='RELEASED', remarks=NULL
-        WHERE release_batch_id=%s AND module_record_id = ANY(%s)
-        """,
-        (batch_id, module_ids),
-    )
-
-    try:
-        trigger_prediction(base["enrollment_id"], current_user_id())
-    except Exception:
-        pass
-
-    base = _profile_base(learner_id)
-    learner_activity = _learner_activity_info(base)
-    return {
-        "message": "Module return undone.",
         "learner": {
             "name": f"{base['first_name']} {base['last_name']}",
             "lrn": base["lrn"],

@@ -249,20 +249,11 @@
     line-height:1.1;
 }
 
-.st-stat-card-meta{
-    margin-top:4px;
-    font-size:11px;
-    line-height:1.3;
-    color:var(--st-outline);
-}
-
 .st-stat-card--primary .st-stat-card-icon,
 .st-stat-card--primary .st-stat-card-value{ color:var(--st-primary); }
 
 .st-stat-card--high .st-stat-card-icon,
 .st-stat-card--high .st-stat-card-value{ color:var(--st-risk-high); }
-
-.st-stat-card--high .st-stat-card-meta{ color:var(--st-error); font-weight:500; }
 
 .st-stat-card--moderate .st-stat-card-icon,
 .st-stat-card--moderate .st-stat-card-value{ color:var(--st-risk-moderate); }

@@ -132,6 +132,125 @@ def list_clcs():
     return {"total": len(rows), "data": [_clc_card(r) for r in rows]}
 
 
+@bp.get("/teacher/clcs")
+@role_required("teacher")
+def list_teacher_clcs():
+    """Return CLC cards scoped to the logged-in teacher.
+
+    The general /clcs endpoint intentionally remains system-wide because it is
+    also used by setup/admin flows. This teacher-specific endpoint makes the
+    CLC Overview and Dashboard use the same learner population: one latest
+    ENROLLED record per learner across classes owned by this teacher.
+    """
+    teacher = teacher_for_user()
+    if not teacher:
+        return error("Teacher profile not found.", 404)
+
+    teacher_id = teacher["teacher_id"]
+    municipality = str(teacher.get("municipality") or "").strip()
+
+    # CLC Overview is a municipality overview for the teacher. Keep every CLC
+    # in the teacher's municipality visible (the seeded Binalonan setup, for
+    # example, has six CLCs), even when this teacher currently has zero
+    # learners in one of them. Learner counts below remain teacher-scoped.
+    if municipality:
+        clc_rows = fetch_all(
+            """
+            SELECT
+                c.clc_id, c.clc_name, c.municipality, c.barangay, c.address, c.status,
+                COUNT(DISTINCT tc_all.teacher_id) FILTER (
+                    WHERE tc_all.assignment_status = 'ACTIVE'
+                ) AS teachers,
+                MAX(tc_all.school_year) AS school_year
+            FROM clc c
+            LEFT JOIN teacher_clc tc_all
+              ON tc_all.clc_id = c.clc_id
+            WHERE LOWER(c.municipality) = LOWER(%s)
+            GROUP BY c.clc_id
+            ORDER BY c.clc_name
+            """,
+            (municipality,),
+        )
+    else:
+        # Defensive fallback for an incomplete teacher profile: retain the
+        # narrower assignment/class behavior instead of exposing every CLC.
+        clc_rows = fetch_all(
+            """
+            SELECT
+                c.clc_id, c.clc_name, c.municipality, c.barangay, c.address, c.status,
+                COUNT(DISTINCT tc_all.teacher_id) FILTER (
+                    WHERE tc_all.assignment_status = 'ACTIVE'
+                ) AS teachers,
+                COALESCE(MAX(tc_self.school_year), MAX(lc_self.school_year)) AS school_year
+            FROM clc c
+            LEFT JOIN teacher_clc tc_all
+              ON tc_all.clc_id = c.clc_id
+            LEFT JOIN teacher_clc tc_self
+              ON tc_self.clc_id = c.clc_id
+             AND tc_self.teacher_id = %s
+             AND tc_self.assignment_status = 'ACTIVE'
+            LEFT JOIN learning_class lc_self
+              ON lc_self.clc_id = c.clc_id
+             AND lc_self.teacher_id = %s
+            WHERE tc_self.teacher_clc_id IS NOT NULL
+               OR EXISTS (
+                    SELECT 1
+                    FROM learning_class lc_enrolled
+                    JOIN class_enrollment ce_enrolled
+                      ON ce_enrolled.class_id = lc_enrolled.class_id
+                    WHERE lc_enrolled.clc_id = c.clc_id
+                      AND lc_enrolled.teacher_id = %s
+                      AND ce_enrolled.enrollment_status = 'ENROLLED'
+               )
+            GROUP BY c.clc_id
+            ORDER BY c.clc_name
+            """,
+            (teacher_id, teacher_id, teacher_id),
+        )
+
+    learner_rows = fetch_all(
+        f"""
+        SELECT
+            ce.learner_id, ce.enrollment_id, ce.enrollment_date,
+            lc.clc_id, risk.risk_level
+        FROM class_enrollment ce
+        JOIN learning_class lc ON lc.class_id = ce.class_id
+        {_latest_risk_join_sql()}
+        WHERE lc.teacher_id = %s
+          AND ce.enrollment_status = 'ENROLLED'
+        ORDER BY ce.enrollment_date DESC, ce.enrollment_id DESC
+        """,
+        (teacher_id,),
+    )
+
+    # Mirror Dashboard semantics: one current/latest ENROLLED record per
+    # learner. Historical/duplicate class rows cannot inflate the totals.
+    latest_by_learner = {}
+    for row in learner_rows:
+        latest_by_learner.setdefault(row["learner_id"], row)
+
+    totals_by_clc = {}
+    high_by_clc = {}
+    for row in latest_by_learner.values():
+        clc_id = row["clc_id"]
+        totals_by_clc[clc_id] = totals_by_clc.get(clc_id, 0) + 1
+        if row.get("risk_level") == "HIGH":
+            high_by_clc[clc_id] = high_by_clc.get(clc_id, 0) + 1
+
+    cards = []
+    for row in clc_rows:
+        shaped_row = dict(row)
+        shaped_row["total_learners"] = totals_by_clc.get(row["clc_id"], 0)
+        shaped_row["high_risk_learners"] = high_by_clc.get(row["clc_id"], 0)
+        cards.append(_clc_card(shaped_row))
+
+    return {
+        "total": len(cards),
+        "totalLearners": len(latest_by_learner),
+        "data": cards,
+    }
+
+
 @bp.get("/clcs/current")
 @role_required("teacher")
 def current_clc():

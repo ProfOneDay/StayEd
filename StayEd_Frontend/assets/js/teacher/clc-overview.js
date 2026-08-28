@@ -4,6 +4,7 @@ class ClcOverview {
     filtered: [],
     search: "",
     municipality: "",
+    totalLearners: 0,
   };
 
   static async init() {
@@ -22,16 +23,12 @@ class ClcOverview {
     this.showSkeleton();
 
     try {
-      const response = await API.getClcs();
+      // The backend already scopes this list and its learner counts to the
+      // logged-in teacher. Do not broaden it again by municipality.
+      const response = await API.getTeacherClcs();
 
-      const all = response.data || [];
-
-      // Teachers are assigned to a single municipality at account setup —
-      // this page only ever shows CLCs within that municipality. Picking a
-      // different municipality is an Admin/ALS Division Supervisor action.
-      this.state.all = this.state.municipality
-        ? all.filter((c) => c.municipality === this.state.municipality)
-        : all;
+      this.state.all = response.data || [];
+      this.state.totalLearners = Number(response.totalLearners || 0);
 
       this.renderMunicipalityLabel();
 
@@ -66,7 +63,7 @@ class ClcOverview {
 
     this.set(
       "[data-clc-learners]",
-      all.reduce((sum, c) => sum + (c.totalLearners || 0), 0).toLocaleString(),
+      this.state.totalLearners.toLocaleString(),
     );
   }
 

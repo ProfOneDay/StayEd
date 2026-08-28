@@ -116,15 +116,10 @@ class TeacherDashboard {
     if (!select) return;
 
     try {
-      const response = await API.getClcs();
-      const municipality = window.Auth ? Auth.municipality() : "";
-
-      // Teachers are assigned to a single municipality at account setup --
-      // scope this filter the same way CLC Overview does, rather than
-      // listing every CLC in the system regardless of municipality.
-      const clcs = (response.data || []).filter((c) =>
-        municipality ? c.municipality === municipality : true,
-      );
+      // Use the same teacher-scoped CLC population as CLC Overview so the
+      // dashboard filter cannot include another teacher's centers/learners.
+      const response = await API.getTeacherClcs();
+      const clcs = response.data || [];
 
       const current = select.value;
 
@@ -180,29 +175,9 @@ class TeacherDashboard {
 
   static renderStatistics(stats = {}) {
     this.setText("[data-stat-total]", stats.registered);
-
-    this.setText(
-      "[data-stat-total-meta]",
-      this.state.context?.selected_class || "Current class",
-    );
-
     this.setText("[data-stat-high]", stats.high);
-
-    this.setText(
-      "[data-stat-high-meta]",
-      stats.high_delta
-        ? `\u2191 ${stats.high_delta} since last prediction`
-        : "Stable",
-    );
-
     this.setText("[data-stat-moderate]", stats.moderate);
-    this.setText("[data-stat-moderate-meta]", stats.moderate_trend || "Stable");
-
     this.setText("[data-stat-low]", stats.low);
-    this.setText(
-      "[data-stat-low-meta]",
-      stats.low_trend || "Includes learners awaiting prediction",
-    );
   }
 
   static renderRiskChart(dist = {}, summary = {}) {
