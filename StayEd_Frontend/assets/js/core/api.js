@@ -530,6 +530,10 @@ class API {
     return this.post(`/learners/${learnerId}/module-batches/${batchId}/return`, payload);
   }
 
+  static undoModuleReturn(learnerId, batchId, payload) {
+    return this.post(`/learners/${learnerId}/module-batches/${batchId}/undo-return`, payload);
+  }
+
   static editModuleBatch(learnerId, batchId, payload) {
     return this.put(`/learners/${learnerId}/module-batches/${batchId}`, payload);
   }

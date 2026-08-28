@@ -1441,6 +1441,67 @@ def return_module_batch(learner_id: int, batch_id: int):
     }
 
 
+@bp.post("/learners/<int:learner_id>/module-batches/<int:batch_id>/undo-return")
+@role_required("teacher")
+def undo_module_return(learner_id: int, batch_id: int):
+    """Reverts a mistaken 'Mark as Returned' back to Released -- clears
+    date_returned/remarks and flips module_status back, without touching
+    date_released or anything else about the original release transaction.
+    """
+    base = _profile_base(learner_id)
+    if not base:
+        return error("Learner not found.", 404)
+
+    batch = fetch_one(
+        "SELECT release_batch_id FROM module_release_batch WHERE release_batch_id=%s AND enrollment_id=%s",
+        (batch_id, base["enrollment_id"]),
+    )
+    if not batch:
+        return error("Release batch not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    module_ids = [int(m) for m in (data.get("moduleIds") or []) if str(m).strip().lstrip("-").isdigit()]
+    if not module_ids:
+        return error("Select at least one module to undo.", 422)
+
+    owned = fetch_all(
+        "SELECT module_record_id, module_status FROM module_record WHERE release_batch_id=%s AND module_record_id = ANY(%s)",
+        (batch_id, module_ids),
+    )
+    if len(owned) != len(set(module_ids)):
+        return error("One or more selected modules do not belong to this batch.", 422)
+    if any(r["module_status"] != "RETURNED" for r in owned):
+        return error("One or more selected modules have not been returned yet.", 422)
+
+    execute(
+        """
+        UPDATE module_record
+        SET date_returned=NULL, module_status='RELEASED', remarks=NULL
+        WHERE release_batch_id=%s AND module_record_id = ANY(%s)
+        """,
+        (batch_id, module_ids),
+    )
+
+    try:
+        trigger_prediction(base["enrollment_id"], current_user_id())
+    except Exception:
+        pass
+
+    base = _profile_base(learner_id)
+    learner_activity = _learner_activity_info(base)
+    return {
+        "message": "Module return undone.",
+        "learner": {
+            "name": f"{base['first_name']} {base['last_name']}",
+            "lrn": base["lrn"],
+            "clc": base["clc_name"],
+            "level": base["learning_level"],
+            **learner_activity,
+        },
+        **_logbook(base["enrollment_id"], learner_activity),
+    }
+
+
 @bp.patch("/learners/<int:learner_id>/module-batches/<int:batch_id>/modules/<int:module_record_id>")
 @role_required("teacher")
 def update_module_planned_return(learner_id: int, batch_id: int, module_record_id: int):

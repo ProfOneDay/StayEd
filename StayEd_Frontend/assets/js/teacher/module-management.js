@@ -241,7 +241,7 @@ class ModuleManagement {
   }
 
   static renderCatalogRow(m) {
-    const statusClass = m.releaseStatus === "Released" ? "success" : "info";
+    const statusClass = this.badgeClassFor(m.releaseStatus);
     return `
       <tr data-module-row="${m.id}">
         <td><strong>Module ${m.sequenceNumber ?? ""}</strong></td>
@@ -432,13 +432,36 @@ class ModuleManagement {
 
   static async loadRoster() {
     try {
-      const response = await API.getClassModuleRoster(this.classId, this.activeModuleId);
-      this.roster = response.data || [];
+      const [rosterResponse, catalogResponse] = await Promise.all([
+        API.getClassModuleRoster(this.classId, this.activeModuleId),
+        // Also refresh the module's own catalog entry -- a release/return
+        // changes its releasedCount/returnedCount/releaseStatus, and the
+        // detail header (Overall Status badge) reads from `this.modules`,
+        // not from the roster response, so skipping this left the header
+        // showing a stale status right after a release/return.
+        API.getClassModules(this.classId),
+      ]);
+      this.roster = rosterResponse.data || [];
+      this.modules = catalogResponse.data || [];
+      this.totalLearners = catalogResponse.totalLearners || 0;
+      this.summary = catalogResponse.summary || null;
       this.renderDetailView();
     } catch (error) {
       console.error("[ModuleManagement] Unable to load roster", error);
       Toast?.error("Unable to load this module's student list.");
     }
+  }
+
+  // Single source of truth for status/stage colors, so "Released" (etc.)
+  // is never a different color depending on which table it's shown in.
+  // Not Released = info (blue), Released = warning (amber, still pending
+  // a return), Returned = success (green, the only "fully done" state --
+  // module-level status has no equivalent, since a module itself doesn't
+  // get "returned").
+  static badgeClassFor(label) {
+    if (label === "Returned") return "success";
+    if (label === "Released") return "warning";
+    return "info";
   }
 
   static stageFor(r) {
@@ -478,7 +501,7 @@ class ModuleManagement {
             </h3>
             <p class="st-panel-subtitle">
               Class: ${this.classInfo?.level || ""} · Overall Status:
-              <span class="st-badge st-badge-${module?.releaseStatus === "Released" ? "success" : "info"}">${module?.releaseStatus || "—"}</span>
+              <span class="st-badge st-badge-${this.badgeClassFor(module?.releaseStatus)}">${module?.releaseStatus || "—"}</span>
             </p>
             ${module?.topic ? `<p class="st-panel-subtitle">Topic: ${module.topic}</p>` : ""}
           </div>
@@ -579,11 +602,18 @@ class ModuleManagement {
         if (r) this.openReturnModal(r);
       });
     });
+
+    root.querySelectorAll("[data-undo-return]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const r = this.roster.find((row) => row.enrollmentId === Number(btn.dataset.undoReturn));
+        if (r) this.confirmUndoReturn(r);
+      });
+    });
   }
 
   static renderDetailRow(r) {
     const stage = this.stageFor(r);
-    const badgeClass = stage === "Returned" ? "success" : stage === "Released" ? "warning" : "info";
+    const badgeClass = this.badgeClassFor(stage);
     const checked = this.selectedEnrollmentIds.has(r.enrollmentId) ? "checked" : "";
 
     let actionHtml = "";
@@ -591,6 +621,8 @@ class ModuleManagement {
       actionHtml = `<button type="button" class="st-btn st-btn-outline st-btn-xs" data-release-one="${r.enrollmentId}">Release</button>`;
     } else if (stage === "Released") {
       actionHtml = `<button type="button" class="st-btn st-btn-primary st-btn-xs" data-return-one="${r.enrollmentId}">Mark as Returned</button>`;
+    } else if (stage === "Returned") {
+      actionHtml = `<button type="button" class="st-btn-text" data-undo-return="${r.enrollmentId}">Undo</button>`;
     }
 
     return `
@@ -686,6 +718,36 @@ class ModuleManagement {
         } catch (error) {
           console.error("[ModuleManagement] Return failed", error);
           Toast?.error(error?.data?.message || "Unable to record this return.");
+          throw error;
+        }
+      },
+    });
+  }
+
+  static confirmUndoReturn(rosterRow) {
+    if (!window.Modal) return;
+
+    Modal.show({
+      title: "Undo Return?",
+      size: "sm",
+      confirmLabel: "Undo Return",
+      asyncConfirm: true,
+      message: `
+        <p><strong>${rosterRow.name}</strong></p>
+        <p style="color:var(--st-on-surface-variant);font-size:14px;margin-top:8px;">
+          This will revert this module back to "Released" for this learner (returned on ${rosterRow.returnDate}). Use this if the return was recorded by mistake.
+        </p>
+      `,
+      onConfirm: async () => {
+        try {
+          await API.undoModuleReturn(rosterRow.learnerId, rosterRow.releaseBatchId, {
+            moduleIds: [rosterRow.moduleRecordId],
+          });
+          Toast?.success("Return undone.");
+          await this.loadRoster();
+        } catch (error) {
+          console.error("[ModuleManagement] Undo return failed", error);
+          Toast?.error(error?.data?.message || "Unable to undo this return.");
           throw error;
         }
       },

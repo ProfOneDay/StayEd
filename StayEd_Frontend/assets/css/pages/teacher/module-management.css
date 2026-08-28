@@ -3,27 +3,44 @@
    .st-search from the shared component styles -- only the pieces with no
    existing equivalent are defined here. */
 
+/* Deliberate no-op placeholder rule. Confirmed by direct testing: the
+   literal first rule of this file was being silently dropped by the
+   browser's CSS parser when loaded through the @import chain (reproducible,
+   not a syntax error -- the exact same rule parsed fine as inline <style>,
+   and the network response byte-for-byte contained it). Keeping a throwaway
+   rule ahead of everything real sidesteps whatever that boundary condition
+   is. Do not delete this without re-verifying the rule after it still
+   applies (check getComputedStyle, not just visually). */
+.st-module-management-root {
+  display: block;
+}
+
 .st-module-summary-row {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 14px;
-  margin-bottom: 20px;
+  margin-bottom: 32px;
 }
 
 .st-module-summary-stat {
   background: #fff;
   border: 1px solid rgba(195, 198, 207, 0.35);
   border-radius: var(--st-card-radius);
+  aspect-ratio: 1 / 1;
   padding: 14px 16px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
 }
 
 .st-module-summary-value {
-  font-size: 26px;
+  font-size: 30px;
   font-weight: 700;
   color: var(--st-primary);
+  line-height: 1;
 }
 
 .st-module-summary-label {
