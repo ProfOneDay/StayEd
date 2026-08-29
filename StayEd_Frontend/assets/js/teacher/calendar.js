@@ -15,7 +15,8 @@
 class TeacherCalendar {
   // ── State ──────────────────────────────────────────────────────────────────
   static view = "month";          // "month" | "week"
-  static cursor = new Date();     // currently displayed month/week
+  static cursor = new Date();     // currently displayed month/week on the main calendar
+  static miniCursor = new Date(); // currently displayed month on the mini-month sidebar
   static today = new Date();
   static selectedDate = null;     // ISO date string of open day panel
   static classes = [];            // fetched teacher classes
@@ -28,6 +29,11 @@ class TeacherCalendar {
 
     // Normalise cursor to midnight
     this.cursor = new Date(
+      this.today.getFullYear(),
+      this.today.getMonth(),
+      1,
+    );
+    this.miniCursor = new Date(
       this.today.getFullYear(),
       this.today.getMonth(),
       1,
@@ -356,8 +362,8 @@ class TeacherCalendar {
 
   // ---- Mini-month (left sidebar) ------------------------------------------
   static renderMiniMonth() {
-    const year  = this.cursor.getFullYear();
-    const month = this.cursor.getMonth();
+    const year  = this.miniCursor.getFullYear();
+    const month = this.miniCursor.getMonth();
 
     const label = document.getElementById("miniMonthLabel");
     if (label) {
@@ -404,6 +410,7 @@ class TeacherCalendar {
       el.addEventListener("click", () => {
         const date = el.dataset.miniDate;
         const d = new Date(date + "T00:00:00");
+        this.miniCursor = new Date(d.getFullYear(), d.getMonth(), 1);
         this.cursor = new Date(d.getFullYear(), d.getMonth(), 1);
         this.render();
         this.openDayPanel(date);
@@ -1140,6 +1147,11 @@ class TeacherCalendar {
         this.today.getMonth(),
         1,
       );
+      this.miniCursor = new Date(
+        this.today.getFullYear(),
+        this.today.getMonth(),
+        1,
+      );
       this.render();
     });
   }
@@ -1159,6 +1171,11 @@ class TeacherCalendar {
         this.cursor.getDate() + dir * 7,
       );
     }
+    this.miniCursor = new Date(
+      this.cursor.getFullYear(),
+      this.cursor.getMonth(),
+      1,
+    );
     this.loadEvents().then(() => {
       this.render();
       this.renderUpcoming();
@@ -1167,26 +1184,20 @@ class TeacherCalendar {
 
   static bindMiniNav() {
     document.getElementById("miniPrev")?.addEventListener("click", () => {
-      this.cursor = new Date(
-        this.cursor.getFullYear(),
-        this.cursor.getMonth() - 1,
+      this.miniCursor = new Date(
+        this.miniCursor.getFullYear(),
+        this.miniCursor.getMonth() - 1,
         1,
       );
-      this.loadEvents().then(() => {
-        this.render();
-        this.renderUpcoming();
-      });
+      this.renderMiniMonth();
     });
     document.getElementById("miniNext")?.addEventListener("click", () => {
-      this.cursor = new Date(
-        this.cursor.getFullYear(),
-        this.cursor.getMonth() + 1,
+      this.miniCursor = new Date(
+        this.miniCursor.getFullYear(),
+        this.miniCursor.getMonth() + 1,
         1,
       );
-      this.loadEvents().then(() => {
-        this.render();
-        this.renderUpcoming();
-      });
+      this.renderMiniMonth();
     });
   }
 
