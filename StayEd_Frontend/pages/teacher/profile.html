@@ -191,12 +191,17 @@
                       />
                     </div>
                     <div class="st-settings-field">
-                      <label for="settingsClcAssign">CLC Assignment</label>
-                      <select id="settingsClcAssign">
-                        <option selected>San Felipe Sur CLC</option>
-                        <option>Manila North CLC</option>
-                        <option>Quezon City Central CLC</option>
-                      </select>
+                      <label for="settingsClcAssign">Assigned CLC</label>
+                      <input
+                        id="settingsClcAssign"
+                        type="text"
+                        value="San Felipe Sur CLC"
+                        readonly
+                        style="
+                          background: var(--st-surface-container-low);
+                          cursor: not-allowed;
+                        "
+                      />
                     </div>
                     <div class="st-settings-form-footer">
                       <button type="submit" class="st-btn st-btn-primary">
