@@ -14,6 +14,51 @@
     color:var(--st-on-surface-variant);
 }
 
+.st-modality-tab,
+.st-entry-tab,
+.st-enroll-card-title,
+.st-enroll-field label,
+.st-enroll-field input,
+.st-enroll-field select,
+.st-enroll-field textarea,
+.st-enroll-radio-row label,
+.st-enroll-segment button,
+.st-learner-name-link,
+.st-bulk-bar-count,
+.st-bulk-btn,
+.st-confidence-value,
+.st-confidence-label,
+.st-table-scroll--sticky .st-data-table thead th,
+.st-data-table th,
+.st-data-table td,
+.st-progress-cell-count,
+.st-progress-link,
+.st-row-menu-list button,
+.st-row-menu-trigger,
+.st-records-toolbar select,
+.st-records-stat-label,
+.st-records-stat-value,
+.st-learner-modal-name,
+.st-learner-modal-id,
+.st-learner-modal-field-label,
+.st-learner-modal-field-value,
+.st-learner-modal-section-title,
+.st-enroll-field input,
+.st-enroll-field select,
+.st-enroll-field textarea,
+.st-enroll-radio-row input,
+.st-enroll-radio-row label {
+    font-size: 16px;
+}
+
+.st-data-table th {
+    font-size: 18px;
+}
+
+.st-data-table td {
+    font-size: 18px;
+}
+
 .st-page-header-actions{
     display:flex;
     align-items:center;
