@@ -330,9 +330,95 @@ class TeacherCalendar {
     return `learner-records.html?${params.toString()}`;
   }
 
-  static _handleEventClick(evt) {
+  static _navigateToEventRecord(evt) {
     if (!evt?.classId) return;
     window.location.href = this._eventDestination(evt);
+  }
+
+  static _openEventDetailPopup(evt) {
+    if (!evt?.classId && !evt?.type) return;
+
+    const type = evt.type;
+    const classId = evt.classId;
+    const cls = this.classes.find((c) => String(c.id) === String(classId));
+    const className = cls
+      ? (cls.level || cls.learningLevel || cls.className || cls.class_name || `Class ${classId}`)
+      : `Class ${classId || "—"}`;
+
+    const eventLabel = evt.label || (
+      type === "attendance" ? "Attendance Session" :
+      type === "module" ? "Module Release" :
+      type === "return" ? "Return Due" : "Calendar Event"
+    );
+    const eventMeta = evt.meta || "Scheduled event";
+    const eventDate = evt.date ? new Date(evt.date + "T00:00:00") : null;
+    const formattedDate = eventDate
+      ? eventDate.toLocaleDateString("en-PH", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })
+      : "Date not specified";
+
+    const colors = {
+      attendance: "var(--st-secondary)",
+      module:     "var(--st-primary)",
+      return:     "#e67700",
+    };
+
+    const body = `
+      <div class="st-cal-event-detail">
+        <div class="st-cal-event-detail-header">
+          <span class="st-cal-panel-event-dot" style="background:${colors[type] || "#888"};"></span>
+          <div>
+            <button
+              type="button"
+              class="st-cal-event-detail-title-link"
+              title="Open learner record"
+              data-event-nav="true"
+              data-event-type="${this._esc(type)}"
+              data-event-class-id="${this._esc(classId ?? "") }"
+              data-event-session-id="${this._esc(evt.sessionId ?? "") }"
+              data-event-module-id="${this._esc(evt.moduleId ?? "") }"
+            >
+              ${this._esc(eventLabel)}
+            </button>
+            <p class="st-cal-event-detail-meta">${this._esc(eventMeta)}</p>
+          </div>
+        </div>
+        <div class="st-cal-event-detail-grid">
+          <div>
+            <span class="st-cal-event-detail-label">Class</span>
+            <strong>${this._esc(className)}</strong>
+          </div>
+          <div>
+            <span class="st-cal-event-detail-label">Date</span>
+            <strong>${this._esc(formattedDate)}</strong>
+          </div>
+        </div>
+      </div>`;
+
+    Modal?.showCustom({
+      title: "Event Details",
+      bodyHtml: body,
+      size: "md",
+      hideFooter: true,
+    });
+
+    requestAnimationFrame(() => {
+      const link = document.querySelector(".st-cal-event-detail-title-link");
+      if (!link) return;
+      link.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this._navigateToEventRecord({
+          type,
+          classId,
+          sessionId: evt.sessionId || null,
+          moduleId: evt.moduleId || null,
+        });
+      });
+    });
   }
 
   static _bindEventClicks(container) {
@@ -344,8 +430,11 @@ class TeacherCalendar {
           classId: el.dataset.calEventClassId,
           sessionId: el.dataset.calEventSessionId || null,
           moduleId: el.dataset.calEventModuleId || null,
+          date: el.dataset.calEventDate || null,
+          label: el.dataset.calEventLabel || null,
+          meta: el.dataset.calEventMeta || null,
         };
-        this._handleEventClick(evt);
+        this._openEventDetailPopup(evt);
       });
     });
   }
@@ -515,7 +604,7 @@ class TeacherCalendar {
     const visible  = evts.slice(0, MAX_VISIBLE);
     const overflow = evts.length - MAX_VISIBLE;
 
-    const chips = visible.map((e) => this._eventChipHtml(e)).join("");
+    const chips = visible.map((e) => this._eventChipHtml(date, e)).join("");
     const more  = overflow > 0
       ? `<span class="st-cal-more" data-cal-date="${date}">+${overflow} more</span>`
       : "";
@@ -530,7 +619,7 @@ class TeacherCalendar {
       </div>`;
   }
 
-  static _eventChipHtml(evt) {
+  static _eventChipHtml(date, evt) {
     const icons = {
       attendance: "how_to_reg",
       module:     "inventory_2",
@@ -545,6 +634,9 @@ class TeacherCalendar {
         data-cal-event-class-id="${this._esc(evt.classId ?? "") }"
         data-cal-event-session-id="${this._esc(evt.sessionId ?? "") }"
         data-cal-event-module-id="${this._esc(evt.moduleId ?? "") }"
+        data-cal-event-date="${this._esc(date)}"
+        data-cal-event-label="${this._esc(evt.label)}"
+        data-cal-event-meta="${this._esc(evt.meta)}"
       >
         <span class="material-symbols-outlined">${icons[evt.type] || "event"}</span>
         ${this._esc(evt.label)}
@@ -611,7 +703,7 @@ class TeacherCalendar {
         isSelected ? "is-selected" : "",
       ].filter(Boolean).join(" ");
 
-      const chips = evts.map((e) => this._eventChipHtml(e)).join("");
+      const chips = evts.map((e) => this._eventChipHtml(date, e)).join("");
 
       html += `
         <div class="${cls}" data-cal-date="${date}">
@@ -668,6 +760,9 @@ class TeacherCalendar {
             data-cal-event-class-id="${this._esc(item.classId ?? "") }"
             data-cal-event-session-id="${this._esc(item.sessionId ?? "") }"
             data-cal-event-module-id="${this._esc(item.moduleId ?? "") }"
+            data-cal-event-date="${this._esc(item.date)}"
+            data-cal-event-label="${this._esc(item.label)}"
+            data-cal-event-meta="${this._esc(item.meta)}"
           >
             <span class="st-cal-upcoming-dot" style="background:${colors[item.type] || "#888"}"></span>
             <div class="st-cal-upcoming-info">
@@ -746,7 +841,7 @@ class TeacherCalendar {
     list.querySelectorAll("[data-event-nav]").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
-        this._handleEventClick({
+        this._navigateToEventRecord({
           type: btn.dataset.eventType,
           classId: btn.dataset.eventClassId,
           sessionId: btn.dataset.eventSessionId || null,
@@ -798,7 +893,7 @@ class TeacherCalendar {
           return;
         }
 
-        this._handleEventClick({ type, classId });
+        this._navigateToEventRecord({ type, classId });
       });
     });
 
