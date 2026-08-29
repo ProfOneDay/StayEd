@@ -680,20 +680,28 @@
 
 .st-schedule-modal-field--inline{
     display:grid;
-    grid-template-columns: auto minmax(180px, 1fr) auto;
-    align-items:end;
-    gap:12px;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items:center;
+    gap:8px;
     margin-bottom:20px;
+    width:30%;
+    min-width:200px;
+    max-width:280px;
+    justify-self:end;
 }
 
 .st-schedule-modal-field--inline label{
     margin-bottom:0;
     white-space:nowrap;
     padding-bottom:0;
+    display:flex;
+    align-items:center;
 }
 
-.st-schedule-modal-field--inline input{
-    min-width:180px;
+.st-schedule-modal-field--inline input,
+.st-schedule-modal-field--inline .st-btn{
+    width:100%;
+    min-width:0;
 }
 
 .st-schedule-modal-field--inline .st-btn{

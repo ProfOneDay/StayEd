@@ -9,12 +9,15 @@ class ClassAttendanceModal {
 
   static newDate = "";
 
+  static currentPage = 1;
+
   static checklist = null; // { sessionId, date, learners: [...], checked: Set }
 
   static async open(classInfo, onUpdate) {
     this.classInfo = classInfo;
     this.onUpdate = onUpdate || null;
     this.view = "dates";
+    this.currentPage = 1;
     this.newDate = classInfo.prefillDate || new Date().toISOString().slice(0, 10);
 
     const body = Modal.showCustom({ title: "", size: "lg", hideFooter: true });
@@ -79,31 +82,36 @@ class ClassAttendanceModal {
 
   static renderDates() {
     const c = this.classInfo;
+    const pageSize = 5;
+    const totalPages = Math.max(1, Math.ceil(this.sessions.length / pageSize));
+    if (this.currentPage > totalPages) this.currentPage = totalPages;
+    const startIndex = (this.currentPage - 1) * pageSize;
+    const visibleSessions = this.sessions.slice(startIndex, startIndex + pageSize);
 
     return `
       <div class="st-module-modal-header">
         <button type="button" class="st-module-modal-close" data-attendance-close aria-label="Close">
           <span class="material-symbols-outlined">close</span>
         </button>
-        <div class="st-module-modal-title-row">
+        <div class="st-module-modal-title-row st-module-modal-title-row--with-actions">
           <div>
             <h1 class="st-module-modal-title">Attendance — Meet-up Dates</h1>
             <p class="st-module-modal-meta">${c.clc || "—"} • ${c.level || "—"}</p>
+          </div>
+          <div class="st-schedule-modal-field st-schedule-modal-field--inline st-schedule-modal-field--header">
+            <label for="attNewDate">Add Meet-up Date</label>
+            <input type="date" id="attNewDate" value="${this.newDate}">
+            <button type="button" class="st-btn st-btn-primary" data-add-date>
+              <span class="material-symbols-outlined" style="font-size:18px;">add</span>
+              Add Date
+            </button>
           </div>
         </div>
       </div>
 
       <div class="st-module-modal-body">
-        <div class="st-schedule-modal-field st-schedule-modal-field--inline">
-          <label for="attNewDate">Add Meet-up Date</label>
-          <input type="date" id="attNewDate" value="${this.newDate}">
-          <button type="button" class="st-btn st-btn-primary" data-add-date>
-            <span class="material-symbols-outlined" style="font-size:18px;">add</span>
-            Add Date
-          </button>
-        </div>
-
-        ${this.sessions.length ? this.renderSessionList() : this.renderDatesEmpty()}
+        ${this.sessions.length ? this.renderSessionList(visibleSessions) : this.renderDatesEmpty()}
+        ${this.sessions.length > pageSize ? this.renderDatePager(totalPages) : ""}
       </div>
     `;
   }
@@ -118,10 +126,10 @@ class ClassAttendanceModal {
     `;
   }
 
-  static renderSessionList() {
+  static renderSessionList(visibleSessions = this.sessions) {
     return `
       <div style="display:flex;flex-direction:column;gap:12px;margin-top:20px;">
-        ${this.sessions
+        ${visibleSessions
           .map(
             (s) => `
             <div class="st-mrb-row">
@@ -144,6 +152,29 @@ class ClassAttendanceModal {
     `;
   }
 
+  static renderDatePager(totalPages) {
+    const pages = Array.from({ length: totalPages }, (_, index) => {
+      const page = index + 1;
+      const isActive = page === this.currentPage;
+      return `
+        <button
+          type="button"
+          class="st-btn ${isActive ? "st-btn-primary" : "st-btn-outline"} st-btn-xs"
+          data-date-page="${page}"
+          ${isActive ? "aria-current=\"page\"" : ""}
+        >
+          ${page}
+        </button>
+      `;
+    }).join("");
+
+    return `
+      <div class="st-mrb-pagination">
+        ${pages}
+      </div>
+    `;
+  }
+
   static bindDates(root) {
     root.querySelector("[data-add-date]")?.addEventListener("click", async () => {
       const dateValue = document.getElementById("attNewDate")?.value;
@@ -155,6 +186,9 @@ class ClassAttendanceModal {
       try {
         const res = await API.createClassSession(this.classInfo.id, dateValue);
         Toast?.success("Meet-up date added.");
+        this.currentPage = 1;
+        await this.loadSessions();
+        this.renderAll();
         await this.openChecklist(res.id);
       } catch (error) {
         console.error("[ClassAttendanceModal] Failed to add date", error);
@@ -164,6 +198,20 @@ class ClassAttendanceModal {
 
     root.querySelectorAll("[data-open-session]").forEach((el) => {
       el.addEventListener("click", () => this.openChecklist(Number(el.dataset.openSession)));
+    });
+
+    root.querySelectorAll("[data-date-page]").forEach((el) => {
+      el.addEventListener("click", () => {
+        const pageValue = el.dataset.datePage;
+        const pageSize = 5;
+        const totalPages = Math.max(1, Math.ceil(this.sessions.length / pageSize));
+        const nextPage = Number(pageValue);
+
+        if (Number.isInteger(nextPage) && nextPage >= 1 && nextPage <= totalPages) {
+          this.currentPage = nextPage;
+          this.renderAll();
+        }
+      });
     });
   }
 

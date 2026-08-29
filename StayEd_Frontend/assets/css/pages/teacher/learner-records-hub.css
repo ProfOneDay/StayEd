@@ -249,9 +249,14 @@
 .st-module-modal-title-row{
     display:flex;
     justify-content:space-between;
-    align-items:flex-start;
+    align-items:center;
     gap:16px;
     margin-bottom:16px;
+    width:100%;
+}
+
+.st-module-modal-title-row--with-actions{
+    align-items:center;
 }
 
 .st-module-modal-title{
@@ -360,6 +365,25 @@
 
 .st-mrb-row-main:hover{
     background:var(--st-surface-container-low);
+}
+
+.st-mrb-pagination{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    margin-top:16px;
+    padding-top:12px;
+    border-top:1px solid rgba(195,198,207,.30);
+    flex-wrap:wrap;
+}
+
+.st-mrb-pagination .st-btn{
+    min-width:38px;
+    width:38px;
+    padding-left:0;
+    padding-right:0;
+    justify-content:center;
 }
 
 .st-mrb-chevron{
