@@ -421,6 +421,10 @@
   border: var(--st-card-border);
   border-radius: var(--st-card-radius);
   overflow: hidden;
+  min-height: 760px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ---- Toolbar ---- */
@@ -546,6 +550,9 @@
   transition: background 0.12s;
   min-height: 110px;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .st-cal-cell:nth-child(7n) {
@@ -596,6 +603,9 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* ---- Event chips inside cells ---- */
@@ -613,6 +623,9 @@
   overflow: hidden;
   text-overflow: ellipsis;
   transition: opacity 0.1s;
+  max-width: 100%;
+  width: 100%;
+  flex-shrink: 0;
 }
 
 .st-cal-event:hover {
@@ -657,7 +670,13 @@
 
 .st-cal-week {
   display: grid;
-  grid-template-columns: 60px repeat(7, 1fr);
+  grid-template-columns: 60px repeat(7, minmax(120px, 1fr));
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 620px;
+  height: 100%;
+  width: 100%;
+  flex: 1;
+  align-items: stretch;
 }
 
 .st-cal-week-head {
@@ -719,9 +738,15 @@
   padding: 4px 6px;
   border-bottom: 1px solid var(--st-outline-variant);
   border-right: 1px solid var(--st-outline-variant);
-  min-height: 40px;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: stretch;
   cursor: pointer;
   transition: background 0.12s;
+  overflow: hidden;
 }
 
 .st-cal-week-allday-cell:last-child {
@@ -871,6 +896,20 @@
   border: 1px solid var(--st-outline-variant);
 }
 
+.st-cal-panel-event-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+}
+
 .st-cal-panel-event-dot {
   width: 10px;
   height: 10px;
@@ -896,6 +935,18 @@
 .st-cal-panel-event-meta {
   font-size: 12px;
   color: var(--st-on-surface-variant);
+}
+
+.st-cal-panel-event-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.st-cal-panel-event-actions .st-btn {
+  min-width: 70px;
+  justify-content: center;
 }
 
 /* Action buttons in panel */

@@ -348,6 +348,32 @@ def create_class_session(class_id: int):
     return {"id": row["session_id"], "date": session_date.strftime("%m/%d/%Y")}, 201
 
 
+@bp.delete("/classes/<int:class_id>/sessions/<int:session_id>")
+@role_required("teacher")
+def delete_class_session(class_id: int, session_id: int):
+    teacher = teacher_for_user()
+    if not teacher or not _owned_class(class_id, teacher["teacher_id"]):
+        return error("Class not found.", 404)
+
+    session = fetch_one(
+        "SELECT session_id FROM class_session WHERE session_id=%s AND class_id=%s",
+        (session_id, class_id),
+    )
+    if not session:
+        return error("Meet-up date not found.", 404)
+
+    db = get_db()
+    try:
+        with db.cursor() as cur:
+            cur.execute("DELETE FROM class_session WHERE session_id=%s AND class_id=%s", (session_id, class_id))
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    return {"message": "Meet-up date deleted."}
+
+
 def _f2f_learners(class_id: int, session_date):
     # A learner only belongs on a given meet-up's checklist if they were
     # already enrolled by that date -- without this, saving attendance for

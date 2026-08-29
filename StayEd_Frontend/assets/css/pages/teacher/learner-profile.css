@@ -678,6 +678,29 @@
     gap:8px;
 }
 
+.st-schedule-modal-field--inline{
+    display:grid;
+    grid-template-columns: auto minmax(180px, 1fr) auto;
+    align-items:end;
+    gap:12px;
+    margin-bottom:20px;
+}
+
+.st-schedule-modal-field--inline label{
+    margin-bottom:0;
+    white-space:nowrap;
+    padding-bottom:0;
+}
+
+.st-schedule-modal-field--inline input{
+    min-width:180px;
+}
+
+.st-schedule-modal-field--inline .st-btn{
+    min-width:150px;
+    justify-content:center;
+}
+
 .st-risk-factor-item{
     display:flex;
     gap:10px;

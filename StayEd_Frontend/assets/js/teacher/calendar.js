@@ -313,6 +313,37 @@ class TeacherCalendar {
     this.events[date].push(event);
   }
 
+  static _eventDestination(evt) {
+    if (!evt?.classId) return "learner-records.html";
+
+    const params = new URLSearchParams({ class: String(evt.classId) });
+
+    if (evt.type === "module") params.set("tab", "modular");
+    if (evt.type === "attendance") params.set("tab", "face-to-face");
+
+    return `learner-records.html?${params.toString()}`;
+  }
+
+  static _handleEventClick(evt) {
+    if (!evt?.classId) return;
+    window.location.href = this._eventDestination(evt);
+  }
+
+  static _bindEventClicks(container) {
+    container.querySelectorAll("[data-cal-event-type]").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const evt = {
+          type: el.dataset.calEventType,
+          classId: el.dataset.calEventClassId,
+          sessionId: el.dataset.calEventSessionId || null,
+          moduleId: el.dataset.calEventModuleId || null,
+        };
+        this._handleEventClick(evt);
+      });
+    });
+  }
+
   // ── Rendering ──────────────────────────────────────────────────────────────
   static render() {
     this.renderMiniMonth();
@@ -444,10 +475,11 @@ class TeacherCalendar {
     }
 
     grid.innerHTML = html;
+    this._bindEventClicks(grid);
 
     grid.querySelectorAll("[data-cal-date]").forEach((cell) => {
       cell.addEventListener("click", (e) => {
-        if (e.target.closest(".st-cal-more")) return;
+        if (e.target.closest(".st-cal-more") || e.target.closest("[data-cal-event-type]")) return;
         this.openDayPanel(cell.dataset.calDate);
       });
     });
@@ -498,10 +530,18 @@ class TeacherCalendar {
       return:     "assignment_return",
     };
     return `
-      <div class="st-cal-event st-cal-event--${evt.type}" title="${this._esc(evt.label)} — ${this._esc(evt.meta)}">
+      <button
+        type="button"
+        class="st-cal-event st-cal-event--${evt.type}"
+        title="${this._esc(evt.label)} — ${this._esc(evt.meta)}"
+        data-cal-event-type="${this._esc(evt.type)}"
+        data-cal-event-class-id="${this._esc(evt.classId ?? "") }"
+        data-cal-event-session-id="${this._esc(evt.sessionId ?? "") }"
+        data-cal-event-module-id="${this._esc(evt.moduleId ?? "") }"
+      >
         <span class="material-symbols-outlined">${icons[evt.type] || "event"}</span>
         ${this._esc(evt.label)}
-      </div>`;
+      </button>`;
   }
 
   // ---- Week grid -----------------------------------------------------------
@@ -573,9 +613,13 @@ class TeacherCalendar {
     });
 
     week.innerHTML = html;
+    this._bindEventClicks(week);
 
     week.querySelectorAll("[data-cal-date]").forEach((cell) => {
-      cell.addEventListener("click", () => this.openDayPanel(cell.dataset.calDate));
+      cell.addEventListener("click", (e) => {
+        if (e.target.closest("[data-cal-event-type]")) return;
+        this.openDayPanel(cell.dataset.calDate);
+      });
     });
   }
 
@@ -610,15 +654,24 @@ class TeacherCalendar {
           { month: "short", day: "numeric" },
         );
         return `
-          <div class="st-cal-upcoming-item">
+          <button
+            type="button"
+            class="st-cal-upcoming-item"
+            data-cal-event-type="${this._esc(item.type)}"
+            data-cal-event-class-id="${this._esc(item.classId ?? "") }"
+            data-cal-event-session-id="${this._esc(item.sessionId ?? "") }"
+            data-cal-event-module-id="${this._esc(item.moduleId ?? "") }"
+          >
             <span class="st-cal-upcoming-dot" style="background:${colors[item.type] || "#888"}"></span>
             <div class="st-cal-upcoming-info">
               <span class="st-cal-upcoming-label">${this._esc(item.label)}</span>
               <span class="st-cal-upcoming-meta">${dateLabel} · ${this._esc(item.meta)}</span>
             </div>
-          </div>`;
+          </button>`;
       })
       .join("");
+
+    this._bindEventClicks(container);
   }
 
   // ── Day detail panel ───────────────────────────────────────────────────────
@@ -658,15 +711,89 @@ class TeacherCalendar {
         .map(
           (e) => `
           <div class="st-cal-panel-event">
-            <span class="st-cal-panel-event-dot" style="background:${colors[e.type] || "#888"}"></span>
-            <div class="st-cal-panel-event-body">
-              <span class="st-cal-panel-event-title">${this._esc(e.label)}</span>
-              <span class="st-cal-panel-event-meta">${this._esc(e.meta)}</span>
+            <button
+              type="button"
+              class="st-cal-panel-event-main"
+              data-event-nav="true"
+              data-event-type="${this._esc(e.type)}"
+              data-event-class-id="${this._esc(e.classId ?? "") }"
+              data-event-date="${date}"
+              data-event-session-id="${this._esc(e.sessionId ?? "") }"
+              data-event-module-id="${this._esc(e.moduleId ?? "") }"
+            >
+              <span class="st-cal-panel-event-dot" style="background:${colors[e.type] || "#888"}"></span>
+              <div class="st-cal-panel-event-body">
+                <span class="st-cal-panel-event-title">${this._esc(e.label)}</span>
+                <span class="st-cal-panel-event-meta">${this._esc(e.meta)}</span>
+              </div>
+            </button>
+            <div class="st-cal-panel-event-actions">
+              <button type="button" class="st-btn st-btn-xs st-btn-outline" data-event-action="edit" data-event-type="${this._esc(e.type)}" data-event-class-id="${this._esc(e.classId ?? "") }" data-event-date="${date}" data-event-session-id="${this._esc(e.sessionId ?? "") }" data-event-module-id="${this._esc(e.moduleId ?? "") }">Edit</button>
+              <button type="button" class="st-btn st-btn-xs st-btn-text" data-event-action="remove" data-event-type="${this._esc(e.type)}" data-event-class-id="${this._esc(e.classId ?? "") }" data-event-date="${date}" data-event-session-id="${this._esc(e.sessionId ?? "") }" data-event-module-id="${this._esc(e.moduleId ?? "") }">Remove</button>
             </div>
           </div>`,
         )
         .join("");
     }
+
+    list.querySelectorAll("[data-event-nav]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this._handleEventClick({
+          type: btn.dataset.eventType,
+          classId: btn.dataset.eventClassId,
+          sessionId: btn.dataset.eventSessionId || null,
+          moduleId: btn.dataset.eventModuleId || null,
+        });
+      });
+    });
+
+    list.querySelectorAll("[data-event-action]").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        const type = btn.dataset.eventType;
+        const classId = btn.dataset.eventClassId;
+        const dateValue = btn.dataset.eventDate;
+        const sessionId = btn.dataset.eventSessionId;
+
+        if (btn.dataset.eventAction === "edit") {
+          if (type === "attendance") {
+            this.openAttendanceDialog(dateValue);
+          } else {
+            this.openModuleReleaseDialog(dateValue);
+          }
+          return;
+        }
+
+        if (type === "attendance" && sessionId) {
+          const confirmed = await new Promise((resolve) => {
+            Modal?.show({
+              title: "Remove attendance session",
+              message: "This will delete the meet-up date and all recorded attendance for that date. Continue?",
+              confirmLabel: "Remove",
+              cancelLabel: "Cancel",
+              onConfirm: () => resolve(true),
+              onCancel: () => resolve(false),
+            });
+          });
+          if (!confirmed) return;
+
+          try {
+            await API.deleteClassSession(classId, sessionId);
+            Toast?.success("Meet-up date removed.");
+            await this.loadEvents();
+            this.render();
+            this.renderUpcoming();
+            this.closeDayPanel();
+          } catch (error) {
+            Toast?.error(error?.message || "Unable to remove this meet-up date.");
+          }
+          return;
+        }
+
+        this._handleEventClick({ type, classId });
+      });
+    });
 
     // Wire action buttons
     const btnAttendance = document.getElementById("panelRecordAttendance");

@@ -94,11 +94,9 @@ class ClassAttendanceModal {
       </div>
 
       <div class="st-module-modal-body">
-        <div class="st-schedule-modal-field st-schedule-modal-field--row" style="align-items:flex-end;gap:12px;">
-          <div style="flex:1;">
-            <label for="attNewDate">Add Meet-up Date</label>
-            <input type="date" id="attNewDate" value="${this.newDate}">
-          </div>
+        <div class="st-schedule-modal-field st-schedule-modal-field--inline">
+          <label for="attNewDate">Add Meet-up Date</label>
+          <input type="date" id="attNewDate" value="${this.newDate}">
           <button type="button" class="st-btn st-btn-primary" data-add-date>
             <span class="material-symbols-outlined" style="font-size:18px;">add</span>
             Add Date

@@ -538,6 +538,10 @@ class API {
     return this.put(`/learners/${learnerId}/module-batches/${batchId}`, payload);
   }
 
+  static deleteModuleBatch(learnerId, batchId) {
+    return this.delete(`/learners/${learnerId}/module-batches/${batchId}`);
+  }
+
   static updateModulePlannedReturn(learnerId, batchId, moduleRecordId, plannedReturnDate) {
     return this.patch(
       `/learners/${learnerId}/module-batches/${batchId}/modules/${moduleRecordId}`,
@@ -559,6 +563,10 @@ class API {
 
   static createClassSession(classId, date) {
     return this.post(`/classes/${classId}/sessions`, { date });
+  }
+
+  static deleteClassSession(classId, sessionId) {
+    return this.delete(`/classes/${classId}/sessions/${sessionId}`);
   }
 
   static getSessionAttendance(classId, sessionId) {

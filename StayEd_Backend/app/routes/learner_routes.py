@@ -1743,6 +1743,50 @@ def edit_module_batch(learner_id: int, batch_id: int):
     }
 
 
+@bp.delete("/learners/<int:learner_id>/module-batches/<int:batch_id>")
+@role_required("teacher")
+def delete_module_batch(learner_id: int, batch_id: int):
+    base = _profile_base(learner_id)
+    if not base:
+        return error("Learner not found.", 404)
+
+    batch = fetch_one(
+        "SELECT release_batch_id FROM module_release_batch WHERE release_batch_id=%s AND enrollment_id=%s",
+        (batch_id, base["enrollment_id"]),
+    )
+    if not batch:
+        return error("Release batch not found.", 404)
+
+    db = get_db()
+    try:
+        with db.cursor() as cur:
+            cur.execute("DELETE FROM module_record WHERE release_batch_id=%s", (batch_id,))
+            cur.execute("DELETE FROM module_release_batch WHERE release_batch_id=%s", (batch_id,))
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    try:
+        trigger_prediction(base["enrollment_id"], current_user_id())
+    except Exception:
+        pass
+
+    base = _profile_base(learner_id)
+    learner_activity = _learner_activity_info(base)
+    return {
+        "message": "Release batch deleted.",
+        "learner": {
+            "name": f"{base['first_name']} {base['last_name']}",
+            "lrn": base["lrn"],
+            "clc": base["clc_name"],
+            "level": base["learning_level"],
+            **learner_activity,
+        },
+        **_logbook(base["enrollment_id"], learner_activity),
+    }
+
+
 CONTACT_METHODS = {"CALL", "SMS", "CHAT", "HOME_VISIT", "OTHER"}
 CONTACT_RESULTS = {"SUCCESSFUL", "UNSUCCESSFUL"}
 
