@@ -912,16 +912,20 @@
     border:1px solid rgba(195,198,207,.30);
     border-radius:var(--st-radius-lg);
     padding:14px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:10px 14px;
+    max-height:420px;
+    overflow-y:auto;
+    align-items:start;
 }
 
 .st-return-checkall{
+    grid-column:1 / -1;
     display:flex;
     align-items:center;
     gap:10px;
-    font-size:13px;
+    font-size:16px;
     font-weight:700;
     color:var(--st-primary);
     padding-bottom:8px;
@@ -946,7 +950,7 @@
     display:flex;
     align-items:center;
     gap:10px;
-    font-size:13px;
+    font-size:16px;
     color:var(--st-on-surface);
     padding:4px 0;
     cursor:pointer;

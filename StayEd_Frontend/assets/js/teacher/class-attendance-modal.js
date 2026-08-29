@@ -236,6 +236,18 @@ class ClassAttendanceModal {
     }
   }
 
+  static formatDisplayName(name) {
+    const value = (name || "").trim();
+    if (!value) return "";
+
+    const parts = value.split(/\s+/).filter(Boolean);
+    if (parts.length <= 1) return value;
+
+    const lastName = parts.pop();
+    const firstName = parts.join(" ");
+    return `${lastName}, ${firstName}`;
+  }
+
   static renderChecklist() {
     const c = this.classInfo;
     const list = this.checklist;
@@ -283,7 +295,7 @@ class ClassAttendanceModal {
               (l) => `
               <label class="st-return-module-row">
                 <input type="checkbox" data-attendance-learner="${l.enrollmentId}" ${list.checked.has(l.enrollmentId) ? "checked" : ""}>
-                <span>${l.name} <em>(${l.modality}${l.noLongerEnrolled ? " — no longer enrolled" : ""})</em></span>
+                <span>${this.formatDisplayName(l.name)} <em>(${l.modality}${l.noLongerEnrolled ? " — no longer enrolled" : ""})</em></span>
               </label>
             `,
             )

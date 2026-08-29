@@ -289,10 +289,22 @@ class LearnerRecordsHub {
   // Shared cell markup for LRN / Learner / Modules / Latest Activity / Risk
   // Level \u2014 kept identical across all three modality tables so only the
   // underlying data (and each tab's "Latest ..." column header) differs.
+  static formatDisplayName(name) {
+    const value = (name || "").trim();
+    if (!value) return "";
+
+    const parts = value.split(/\s+/).filter(Boolean);
+    if (parts.length <= 1) return value;
+
+    const lastName = parts.pop();
+    const firstName = parts.join(" ");
+    return `${lastName}, ${firstName}`;
+  }
+
   static recordCells(l) {
     return `
             <td style="font-family:monospace;font-size:12px;color:var(--st-on-surface-variant);">${l.lrn}</td>
-            <td style="font-weight:600;color:var(--st-on-surface);">${l.name}</td>
+            <td style="font-weight:600;color:var(--st-on-surface);">${this.formatDisplayName(l.name)}</td>
             <td>${this.modulesCell(l)}</td>
             <td>${this.activityCell(l)}</td>
             <td>${this.riskBadge(l.risk)}</td>
