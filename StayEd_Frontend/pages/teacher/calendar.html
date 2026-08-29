@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StayEd | Calendar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/css/main.css" />
+    <link rel="icon" type="image/x-icon" href="../../assets/img/brand/favicon.ico" />
+    <link rel="apple-touch-icon" href="../../assets/img/brand/apple-touch-icon.png" />
+  </head>
+  <body class="st-app" data-page="Calendar">
+    <div data-component="layout/sidebar"></div>
+
+    <div class="st-main">
+      <div data-component="layout/navbar"></div>
+
+      <main class="st-content">
+
+        <!-- Page Header -->
+        <div class="st-page-header">
+          <div>
+            <h1 class="st-page-header-title">Calendar</h1>
+            <p class="st-page-header-subtitle">
+              View schedules, attendance sessions, and module release dates. Select any date to record attendance or set a module release.
+            </p>
+          </div>
+          <div class="st-page-header-actions">
+              <div class="st-cal-class-search-wrap" id="calClassSearchWrap">
+                <div class="st-cal-class-search-field">
+                  <span class="material-symbols-outlined">search</span>
+                  <input
+                    type="text"
+                    id="calClassSearchInput"
+                    placeholder="Search CLC or class…"
+                    autocomplete="off"
+                    aria-label="Search CLC or class"
+                    aria-expanded="false"
+                    aria-haspopup="listbox"
+                  />
+                  <button
+                    type="button"
+                    class="st-cal-class-search-clear st-hidden"
+                    id="calClassSearchClear"
+                    aria-label="Clear selection"
+                  >
+                    <span class="material-symbols-outlined">close</span>
+                  </button>
+                </div>
+                <div
+                  class="st-cal-class-search-dropdown st-hidden"
+                  id="calClassSearchDropdown"
+                  role="listbox"
+                  aria-label="Class results"
+                ></div>
+              </div>
+            </div>
+        </div>
+
+        <!-- Calendar Shell -->
+        <div class="st-cal-shell">
+
+          <!-- Left: Mini-month + Legend + Upcoming -->
+          <aside class="st-cal-sidebar">
+
+            <!-- Mini-month navigator -->
+            <div class="st-cal-mini">
+              <div class="st-cal-mini-header">
+                <button type="button" class="st-cal-mini-nav" id="miniPrev" aria-label="Previous month">
+                  <span class="material-symbols-outlined">chevron_left</span>
+                </button>
+                <span class="st-cal-mini-title" id="miniMonthLabel"></span>
+                <button type="button" class="st-cal-mini-nav" id="miniNext" aria-label="Next month">
+                  <span class="material-symbols-outlined">chevron_right</span>
+                </button>
+              </div>
+              <div class="st-cal-mini-grid">
+                <span class="st-cal-mini-dow">Su</span>
+                <span class="st-cal-mini-dow">Mo</span>
+                <span class="st-cal-mini-dow">Tu</span>
+                <span class="st-cal-mini-dow">We</span>
+                <span class="st-cal-mini-dow">Th</span>
+                <span class="st-cal-mini-dow">Fr</span>
+                <span class="st-cal-mini-dow">Sa</span>
+              </div>
+              <div class="st-cal-mini-days" id="miniDays"></div>
+            </div>
+
+            <!-- Legend -->
+            <div class="st-cal-legend">
+              <p class="st-cal-legend-title">Legend</p>
+              <div class="st-cal-legend-item">
+                <span class="st-cal-dot st-cal-dot--attendance"></span>
+                Attendance Session
+              </div>
+              <div class="st-cal-legend-item">
+                <span class="st-cal-dot st-cal-dot--module"></span>
+                Module Release
+              </div>
+              <div class="st-cal-legend-item">
+                <span class="st-cal-dot st-cal-dot--return"></span>
+                Module Return Due
+              </div>
+              <div class="st-cal-legend-item">
+                <span class="st-cal-dot st-cal-dot--today"></span>
+                Today
+              </div>
+            </div>
+
+            <!-- Upcoming events -->
+            <div class="st-cal-upcoming">
+              <p class="st-cal-legend-title">Upcoming (7 days)</p>
+              <div class="st-cal-upcoming-list" id="upcomingList">
+                <p class="st-cal-upcoming-empty">Loading…</p>
+              </div>
+            </div>
+
+          </aside>
+
+          <!-- Right: Main calendar grid -->
+          <div class="st-cal-main">
+
+            <!-- Main calendar toolbar -->
+            <div class="st-cal-toolbar">
+              <div class="st-cal-toolbar-left">
+                <button type="button" class="st-btn st-btn-outline st-cal-today-btn" id="calTodayBtn">Today</button>
+                <button type="button" class="st-cal-nav-btn" id="calPrev" aria-label="Previous">
+                  <span class="material-symbols-outlined">chevron_left</span>
+                </button>
+                <button type="button" class="st-cal-nav-btn" id="calNext" aria-label="Next">
+                  <span class="material-symbols-outlined">chevron_right</span>
+                </button>
+                <h2 class="st-cal-month-label" id="calMonthLabel"></h2>
+              </div>
+              <div class="st-cal-toolbar-right">
+                <div class="st-cal-view-toggle" role="group" aria-label="Calendar view">
+                  <button type="button" class="st-cal-view-btn is-active" data-view="month">Month</button>
+                  <button type="button" class="st-cal-view-btn" data-view="week">Week</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Day-of-week header -->
+            <div class="st-cal-dow-row">
+              <span>Sunday</span>
+              <span>Monday</span>
+              <span>Tuesday</span>
+              <span>Wednesday</span>
+              <span>Thursday</span>
+              <span>Friday</span>
+              <span>Saturday</span>
+            </div>
+
+            <!-- Calendar grid (month view) -->
+            <div class="st-cal-grid" id="calGrid" role="grid" aria-label="Calendar"></div>
+
+            <!-- Week view (hidden by default) -->
+            <div class="st-cal-week st-hidden" id="calWeek"></div>
+
+          </div>
+        </div>
+
+      </main>
+
+      <div data-component="layout/footer"></div>
+    </div>
+
+    <!-- Day detail panel (slide-in from right) -->
+    <div class="st-cal-day-panel st-hidden" id="calDayPanel" role="dialog" aria-modal="true" aria-label="Day detail">
+      <div class="st-cal-day-panel-backdrop" id="calDayPanelBackdrop"></div>
+      <div class="st-cal-day-panel-card">
+        <div class="st-cal-day-panel-header">
+          <div>
+            <p class="st-cal-day-panel-date" id="panelDateLabel"></p>
+            <p class="st-cal-day-panel-class" id="panelClassLabel"></p>
+          </div>
+          <button type="button" class="st-cal-day-panel-close" id="calDayPanelClose" aria-label="Close">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <div class="st-cal-day-panel-body">
+
+          <!-- Events on this day -->
+          <div class="st-cal-day-panel-section" id="panelEvents">
+            <p class="st-cal-day-panel-section-title">Events on this day</p>
+            <div id="panelEventsList" class="st-cal-day-panel-events-list">
+              <p class="st-cal-day-empty">No events recorded for this date.</p>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="st-cal-day-panel-section">
+            <p class="st-cal-day-panel-section-title">Actions</p>
+            <div class="st-cal-day-panel-actions">
+              <button type="button" class="st-btn st-btn-primary" id="panelRecordAttendance">
+                <span class="material-symbols-outlined">how_to_reg</span>
+                Record Attendance
+              </button>
+              <button type="button" class="st-btn st-btn-outline" id="panelSetModuleRelease">
+                <span class="material-symbols-outlined">inventory_2</span>
+                Set Module Release Date
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div data-component="layout/toast"></div>
+    <div data-component="layout/modal"></div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/core/utils.js"></script>
+    <script src="../../assets/js/core/router.js"></script>
+    <script src="../../assets/js/core/api.js"></script>
+    <script src="../../assets/js/core/auth.js"></script>
+    <script src="../../assets/js/core/guards.js"></script>
+    <script src="../../assets/js/core/layout.js"></script>
+    <script src="../../assets/js/core/skeletons.js"></script>
+    <script src="../../assets/js/core/app.js"></script>
+    <script src="../../assets/js/components/component-loader.js"></script>
+    <script src="../../assets/js/components/toast.js"></script>
+    <script src="../../assets/js/components/modal.js"></script>
+    <script src="../../assets/js/teacher/class-attendance-modal.js"></script>
+    <script src="../../assets/js/teacher/calendar.js"></script>
+  </body>
+</html>

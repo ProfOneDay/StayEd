@@ -15,7 +15,7 @@ class ClassAttendanceModal {
     this.classInfo = classInfo;
     this.onUpdate = onUpdate || null;
     this.view = "dates";
-    this.newDate = new Date().toISOString().slice(0, 10);
+    this.newDate = classInfo.prefillDate || new Date().toISOString().slice(0, 10);
 
     const body = Modal.showCustom({ title: "", size: "lg", hideFooter: true });
 
@@ -29,6 +29,27 @@ class ClassAttendanceModal {
     </div>`;
 
     await this.loadSessions();
+
+    // If a prefill date was provided, check if a session already exists for
+    // that date and open the checklist directly; otherwise pre-fill the date
+    // input and stay on the dates view so the teacher can add it.
+    if (classInfo.prefillDate) {
+      const parseIso = (str) => {
+        if (!str) return null;
+        if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str.slice(0, 10);
+        const m = String(str).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+        return m ? `${m[3]}-${m[1].padStart(2,"0")}-${m[2].padStart(2,"0")}` : null;
+      };
+      const existing = this.sessions.find(
+        (s) => (s.dateIso?.slice(0, 10) || parseIso(s.date)) === classInfo.prefillDate,
+      );
+      if (existing) {
+        await this.openChecklist(existing.id);
+        return;
+      }
+      // No session yet — stay on dates view with the date pre-filled
+    }
+
     this.renderAll();
   }
 

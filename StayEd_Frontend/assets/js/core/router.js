@@ -14,6 +14,7 @@ class Router {
     "/setup/wizard-5": "setup/setup-wizard-5.html",
 
     "/dashboard": "teacher/dashboard.html",
+    "/calendar": "teacher/calendar.html",
     "/learner-records": "teacher/learner-records.html",
     "/notifications": "teacher/notifications.html",
     "/settings": "teacher/settings.html",
@@ -21,6 +22,11 @@ class Router {
 
   static BREADCRUMBS = {
     "dashboard.html": [{ label: "Dashboard" }],
+
+    "calendar.html": [
+      { label: "Dashboard", href: "dashboard.html" },
+      { label: "Calendar" },
+    ],
 
     "clc-overview.html": [
       { label: "Dashboard", href: "dashboard.html" },
