@@ -36,8 +36,8 @@
           <div>
             <h1 class="st-page-header-title">Reports</h1>
             <p class="st-page-header-subtitle">
-              Generate the Master Enrollment Listing across every learning
-              center, filtered and grouped the way you need.
+              Export the Master Enrollment Listing CSV across every learning
+              center, filtered the way you need.
             </p>
           </div>
         </div>
@@ -49,6 +49,23 @@
 
           <div class="st-records-toolbar">
             <div class="st-records-toolbar-filters">
+              <div class="st-search st-report-search" style="min-width: 260px;">
+                <span class="material-symbols-outlined">search</span>
+                <input
+                  type="text"
+                  data-report-filter-search
+                  placeholder="Search name, LRN, CLC, or teacher…"
+                  aria-label="Search enrollment records"
+                />
+                <button
+                  type="button"
+                  class="st-report-search-clear st-hidden"
+                  data-report-filter-clear
+                  aria-label="Clear search"
+                >
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </div>
               <select
                 data-report-filter-clc
                 aria-label="Filter by learning center"
@@ -80,28 +97,13 @@
                 <option value="">All Modalities</option>
               </select>
             </div>
-          </div>
-
-          <div class="st-report-listing-actions">
-            <label class="st-report-groupby">
-              Group report by
-              <select data-report-group-by aria-label="Group report by">
-                <option value="">No grouping</option>
-                <option value="clc_name">Learning Center</option>
-                <option value="teacher_name">Assigned Teacher</option>
-                <option value="semester">Academic Semester</option>
-                <option value="learning_modality">
-                  Learning Delivery Mode
-                </option>
-              </select>
-            </label>
             <button
               type="button"
               class="st-btn st-btn-primary"
-              data-generate-enrollment-listing
+              data-export-csv-enrollment-listing
             >
-              <span class="material-symbols-outlined">description</span>
-              Generate Report
+              <span class="material-symbols-outlined">download</span>
+              Export CSV
             </button>
           </div>
 

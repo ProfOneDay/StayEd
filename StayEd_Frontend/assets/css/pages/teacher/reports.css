@@ -53,3 +53,148 @@
   gap: 10px;
   margin-top: auto;
 }
+
+.st-report-btn-group {
+  display: flex;
+  gap: 8px;
+}
+
+.st-report-btn-group .st-btn {
+  flex: 1;
+  justify-content: center;
+  font-size: 13px;
+  padding: 8px 12px;
+}
+
+.st-report-search-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.st-report-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.st-report-search input {
+  width: 100%;
+  height: 44px;
+  padding: 0 40px 0 48px;
+}
+
+/* Clear (X) button */
+.st-report-search-clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  color: var(--st-text-secondary, #5f6368);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  z-index: 10;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.st-report-search-clear:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--st-text-primary, #202124);
+}
+
+.st-report-search-clear.st-hidden {
+  display: none !important;
+}
+
+/* Ensure the icon stays inside the button and is not affected by .st-search .material-symbols-outlined */
+.st-search .st-report-search-clear .material-symbols-outlined,
+.st-report-search .st-report-search-clear .material-symbols-outlined,
+.st-report-search-clear .material-symbols-outlined {
+  position: static !important;
+  left: auto !important;
+  top: auto !important;
+  transform: none !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+  color: inherit !important;
+  display: inline-block !important;
+  pointer-events: none !important;
+}
+
+.st-report-search-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid var(--st-outline-variant, #c3c6cf);
+  border-radius: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+  z-index: 200;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+}
+
+.st-report-search-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f3f7;
+  transition: background 0.15s ease;
+  text-align: left;
+  width: 100%;
+  background: transparent;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  font-family: inherit;
+}
+
+.st-report-search-item:last-child {
+  border-bottom: none;
+}
+
+.st-report-search-item:hover,
+.st-report-search-item.active,
+.st-report-search-item:focus {
+  background: #f0f4f9;
+  outline: none;
+}
+
+.st-report-search-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.st-report-search-item-name {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--st-text-primary);
+}
+
+.st-report-search-item-meta {
+  font-size: 11.5px;
+  color: var(--st-text-secondary);
+}
+
+.st-report-search-empty {
+  padding: 12px 14px;
+  font-size: 12.5px;
+  color: var(--st-text-secondary);
+  text-align: center;
+  font-style: italic;
+}
+

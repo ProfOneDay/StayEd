@@ -9,6 +9,14 @@ class ReportPrinter {
     })[ch]);
   }
 
+  static stripHtml(value) {
+    if (value === null || value === undefined) return "";
+    if (typeof value === "object" && "html" in value) {
+      return String(value.html).replace(/<[^>]*>/g, "").trim();
+    }
+    return String(value).replace(/<[^>]*>/g, "").trim();
+  }
+
   static cell(value) {
     if (value === null || value === undefined || value === "") return "—";
     if (typeof value === "object" && "html" in value) return value.html;
@@ -18,6 +26,91 @@ class ReportPrinter {
   static riskBadge(risk) {
     const cls = { High: "high", Moderate: "moderate", Low: "low" }[risk] || "neutral";
     return { html: `<span class="badge badge-${cls}">${this.escape(risk || "Not Yet Assessed")}</span>` };
+  }
+
+  static downloadCsv(filename, headers, rows) {
+    const allRows = [headers, ...(rows || [])];
+    const csvContent = allRows
+      .map((row) =>
+        row
+          .map((cell) => `"${String(this.stripHtml(cell)).replace(/"/g, '""')}"`)
+          .join(","),
+      )
+      .join("\r\n");
+
+    const blob = new Blob(["\uFEFF" + csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename.endsWith(".csv") ? filename : `${filename}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  static exportCsv({ filename, title, subtitle, meta = [], sections = [] }) {
+    const lines = [];
+
+    // Header information
+    if (title) lines.push(`"${String(title).replace(/"/g, '""')}"`);
+    if (subtitle) lines.push(`"${String(subtitle).replace(/"/g, '""')}"`);
+    lines.push(`"Generated: ${new Date().toLocaleString("en-PH")}"`);
+    lines.push("");
+
+    // Metadata
+    if (meta && meta.length) {
+      lines.push('"Report Summary / Filters:"');
+      meta.forEach((m) => {
+        lines.push(`"${String(m.label).replace(/"/g, '""')}","${String(m.value).replace(/"/g, '""')}"`);
+      });
+      lines.push("");
+    }
+
+    // Sections
+    sections.forEach((sec) => {
+      if (sec.title) {
+        lines.push(`"${String(sec.title).replace(/"/g, '""')}"`);
+      }
+      if (sec.columns && sec.columns.length) {
+        lines.push(
+          sec.columns
+            .map((c) => `"${String(this.stripHtml(c)).replace(/"/g, '""')}"`)
+            .join(","),
+        );
+      }
+      const rows = sec.rows || [];
+      if (rows.length) {
+        rows.forEach((r) => {
+          lines.push(
+            r
+              .map((c) => `"${String(this.stripHtml(c)).replace(/"/g, '""')}"`)
+              .join(","),
+          );
+        });
+      } else {
+        lines.push(`"${String(sec.emptyText || "No records found.").replace(/"/g, '""')}"`);
+      }
+      lines.push("");
+    });
+
+    const csvContent = lines.join("\r\n");
+    const blob = new Blob(["\uFEFF" + csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const safeTitle = (filename || title || "StayEd_Report")
+      .replace(/[^a-zA-Z0-9_-]/g, "_")
+      .replace(/__+/g, "_");
+    link.href = url;
+    link.download = safeTitle.endsWith(".csv") ? safeTitle : `${safeTitle}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 
   static open({ title, subtitle, meta = [], sections = [] }) {
@@ -38,6 +131,8 @@ class ReportPrinter {
       dateStyle: "long",
       timeStyle: "short",
     });
+
+    const reportJson = JSON.stringify({ title, subtitle, meta, sections });
 
     return `<!doctype html>
 <html>
@@ -124,17 +219,34 @@ class ReportPrinter {
     margin-bottom: 4px;
     display: flex;
     justify-content: flex-end;
+    gap: 12px;
   }
   .print-toolbar button {
     border: 1px solid var(--st-primary);
     background: var(--st-primary);
     color: #fff;
-    padding: 9px 20px;
+    padding: 9px 18px;
     border-radius: 4px;
     font-weight: 600;
     font-size: 13px;
     cursor: pointer;
     font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .print-toolbar button.btn-csv {
+    background: #006a68;
+    border-color: #006a68;
+  }
+  .print-toolbar button.btn-close {
+    background: transparent;
+    border-color: #43474e;
+    color: #43474e;
+  }
+  .print-toolbar button.btn-close:hover {
+    background: #f1f3f5;
+    opacity: 1;
   }
   .print-toolbar button:hover { opacity: .9; }
   @media print {
@@ -144,7 +256,20 @@ class ReportPrinter {
 </style>
 </head>
 <body>
-  <div class="print-toolbar"><button onclick="window.print()">Print / Save as PDF</button></div>
+  <div class="print-toolbar">
+    <button type="button" class="btn-close" onclick="window.close()">
+      <svg style="width:15px;height:15px;fill:currentColor;" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      Close Preview
+    </button>
+    <button type="button" class="btn-csv" onclick="downloadReportCsv()">
+      <svg style="width:15px;height:15px;fill:currentColor;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+      Export as CSV
+    </button>
+    <button type="button" class="btn-print" onclick="window.print()">
+      <svg style="width:15px;height:15px;fill:currentColor;" viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+      Print / Save as PDF
+    </button>
+  </div>
   <div class="report-header">
     <div>
       <div class="report-brand">StayEd</div>
@@ -159,6 +284,67 @@ class ReportPrinter {
     ${meta.map((m) => `<div><span class="label">${this.escape(m.label)}</span><span class="value">${this.escape(m.value)}</span></div>`).join("")}
   </div>
   ${sections.map((s) => this.renderSection(s)).join("")}
+
+  <script>
+    const REPORT_DATA = ${reportJson};
+
+    function stripHtml(val) {
+      if (val === null || val === undefined) return "";
+      if (typeof val === "object" && "html" in val) {
+        return String(val.html).replace(/<[^>]*>/g, "").trim();
+      }
+      return String(val).replace(/<[^>]*>/g, "").trim();
+    }
+
+    function downloadReportCsv() {
+      const lines = [];
+      const title = REPORT_DATA.title || "StayEd_Report";
+      const subtitle = REPORT_DATA.subtitle || "";
+      const meta = REPORT_DATA.meta || [];
+      const sections = REPORT_DATA.sections || [];
+
+      if (title) lines.push('"' + String(title).replace(/"/g, '""') + '"');
+      if (subtitle) lines.push('"' + String(subtitle).replace(/"/g, '""') + '"');
+      lines.push('"Generated: ' + new Date().toLocaleString("en-PH") + '"');
+      lines.push("");
+
+      if (meta.length) {
+        lines.push('"Report Summary / Filters:"');
+        meta.forEach(m => {
+          lines.push('"' + String(m.label).replace(/"/g, '""') + '","' + String(m.value).replace(/"/g, '""') + '"');
+        });
+        lines.push("");
+      }
+
+      sections.forEach(sec => {
+        if (sec.title) lines.push('"' + String(sec.title).replace(/"/g, '""') + '"');
+        if (sec.columns && sec.columns.length) {
+          lines.push(sec.columns.map(c => '"' + String(stripHtml(c)).replace(/"/g, '""') + '"').join(","));
+        }
+        const rows = sec.rows || [];
+        if (rows.length) {
+          rows.forEach(r => {
+            lines.push(r.map(c => '"' + String(stripHtml(c)).replace(/"/g, '""') + '"').join(","));
+          });
+        } else {
+          lines.push('"' + String(sec.emptyText || "No records found.").replace(/"/g, '""') + '"');
+        }
+        lines.push("");
+      });
+
+      const csv = lines.join("\\r\\n");
+      const blob = new Blob(["\\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const safeTitle = title.replace(/[^a-zA-Z0-9_-]/g, "_").replace(/__+/g, "_");
+      link.href = url;
+      link.download = safeTitle + ".csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+  </script>
 </body>
 </html>`;
   }

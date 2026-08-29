@@ -736,6 +736,16 @@ class API {
     return this.get(`/reports/interventions${qs}`);
   }
 
+  static getClassListReport(params = {}) {
+    const qs = params && Object.keys(params).length ? this.query(params) : "";
+    return this.get(`/reports/class-list${qs}`);
+  }
+
+  static getAttendanceReport(params = {}) {
+    const qs = params && Object.keys(params).length ? this.query(params) : "";
+    return this.get(`/reports/attendance-list${qs}`);
+  }
+
   static getEnrollmentListingReport() {
     return this.get("/reports/enrollment-listing");
   }

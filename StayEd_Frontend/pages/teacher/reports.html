@@ -36,8 +36,8 @@
           <div>
             <h1 class="st-page-header-title">Reports</h1>
             <p class="st-page-header-subtitle">
-              Generate printable reports for individual learners, at-risk
-              monitoring, and intervention tracking.
+              Generate CSV reports for individual learners, class rosters,
+              attendance records, at-risk monitoring, and intervention tracking.
             </p>
           </div>
         </div>
@@ -53,22 +53,144 @@
                   Individual Learner Progress
                 </p>
                 <p class="st-report-card-desc">
-                  Detailed learning milestones and overall academic progress
-                  for one learner.
+                  Detailed learning milestones, risk trend, module monitoring,
+                  and intervention history for one learner.
                 </p>
               </div>
             </div>
             <div class="st-report-card-controls">
-              <select data-report-learner aria-label="Select learner">
-                <option value="">Select a learner…</option>
-              </select>
+              <div class="st-report-search-wrap">
+                <div class="st-search st-report-search">
+                  <span class="material-symbols-outlined">search</span>
+                  <input
+                    type="text"
+                    data-report-learner-search
+                    placeholder="Search learner by name or LRN…"
+                    autocomplete="off"
+                    aria-label="Search learner by name or LRN"
+                  />
+                  <button
+                    type="button"
+                    class="st-report-search-clear st-hidden"
+                    data-report-learner-clear
+                    aria-label="Clear learner search"
+                  >
+                    <span class="material-symbols-outlined">close</span>
+                  </button>
+                </div>
+                <div
+                  class="st-report-search-dropdown st-hidden"
+                  data-report-learner-results
+                ></div>
+                <input type="hidden" data-report-learner-id />
+              </div>
               <button
                 type="button"
                 class="st-btn st-btn-primary"
-                data-generate-progress
+                data-export-csv-progress
               >
-                <span class="material-symbols-outlined">description</span>
-                Generate Report
+                <span class="material-symbols-outlined">preview</span>
+                Preview &amp; Export
+              </button>
+            </div>
+          </div>
+
+          <div class="st-report-card">
+            <div class="st-report-card-head">
+              <div class="st-report-card-icon">
+                <span class="material-symbols-outlined">groups</span>
+              </div>
+              <div>
+                <p class="st-report-card-title">Class List Report</p>
+                <p class="st-report-card-desc">
+                  Complete class roster of enrolled learners with demographics,
+                  modality, and enrollment status.
+                </p>
+              </div>
+            </div>
+            <div class="st-report-card-controls">
+              <div class="st-report-search-wrap">
+                <div class="st-search st-report-search">
+                  <span class="material-symbols-outlined">search</span>
+                  <input
+                    type="text"
+                    data-report-classlist-search
+                    placeholder="Search class or section (e.g. Elementary, JHS)…"
+                    autocomplete="off"
+                    aria-label="Search class roster"
+                  />
+                  <button
+                    type="button"
+                    class="st-report-search-clear st-hidden"
+                    data-report-classlist-clear
+                    aria-label="Clear class search"
+                  >
+                    <span class="material-symbols-outlined">close</span>
+                  </button>
+                </div>
+                <div
+                  class="st-report-search-dropdown st-hidden"
+                  data-report-classlist-results
+                ></div>
+                <input type="hidden" data-report-classlist-class-id />
+              </div>
+              <button
+                type="button"
+                class="st-btn st-btn-primary"
+                data-export-csv-classlist
+              >
+                <span class="material-symbols-outlined">preview</span>
+                Preview &amp; Export
+              </button>
+            </div>
+          </div>
+
+          <div class="st-report-card">
+            <div class="st-report-card-head">
+              <div class="st-report-card-icon">
+                <span class="material-symbols-outlined">event_available</span>
+              </div>
+              <div>
+                <p class="st-report-card-title">Attendance List Report</p>
+                <p class="st-report-card-desc">
+                  Meet-up session attendance tracking, attendance rates, and
+                  absence records per learner.
+                </p>
+              </div>
+            </div>
+            <div class="st-report-card-controls">
+              <div class="st-report-search-wrap">
+                <div class="st-search st-report-search">
+                  <span class="material-symbols-outlined">search</span>
+                  <input
+                    type="text"
+                    data-report-attendance-search
+                    placeholder="Search class or section (e.g. Elementary, JHS)…"
+                    autocomplete="off"
+                    aria-label="Search attendance records"
+                  />
+                  <button
+                    type="button"
+                    class="st-report-search-clear st-hidden"
+                    data-report-attendance-clear
+                    aria-label="Clear attendance search"
+                  >
+                    <span class="material-symbols-outlined">close</span>
+                  </button>
+                </div>
+                <div
+                  class="st-report-search-dropdown st-hidden"
+                  data-report-attendance-results
+                ></div>
+                <input type="hidden" data-report-attendance-class-id />
+              </div>
+              <button
+                type="button"
+                class="st-btn st-btn-primary"
+                data-export-csv-attendance
+              >
+                <span class="material-symbols-outlined">preview</span>
+                Preview &amp; Export
               </button>
             </div>
           </div>
@@ -87,19 +209,38 @@
               </div>
             </div>
             <div class="st-report-card-controls">
-              <select
-                data-report-atrisk-class
-                aria-label="Filter by class"
-              >
-                <option value="">All Classes</option>
-              </select>
+              <div class="st-report-search-wrap">
+                <div class="st-search st-report-search">
+                  <span class="material-symbols-outlined">search</span>
+                  <input
+                    type="text"
+                    data-report-atrisk-search
+                    placeholder="Search class or section (e.g. Elementary, JHS)…"
+                    autocomplete="off"
+                    aria-label="Search at-risk learners"
+                  />
+                  <button
+                    type="button"
+                    class="st-report-search-clear st-hidden"
+                    data-report-atrisk-clear
+                    aria-label="Clear at-risk search"
+                  >
+                    <span class="material-symbols-outlined">close</span>
+                  </button>
+                </div>
+                <div
+                  class="st-report-search-dropdown st-hidden"
+                  data-report-atrisk-results
+                ></div>
+                <input type="hidden" data-report-atrisk-class-id />
+              </div>
               <button
                 type="button"
                 class="st-btn st-btn-primary"
-                data-generate-atrisk
+                data-export-csv-atrisk
               >
-                <span class="material-symbols-outlined">description</span>
-                Generate Report
+                <span class="material-symbols-outlined">preview</span>
+                Preview &amp; Export
               </button>
             </div>
           </div>
@@ -120,29 +261,39 @@
               </div>
             </div>
             <div class="st-report-card-controls">
-              <select
-                data-report-intervention-class
-                aria-label="Filter by class"
-              >
-                <option value="">All Classes</option>
-              </select>
-              <select
-                data-report-intervention-status
-                aria-label="Filter by status"
-              >
-                <option value="">All Statuses</option>
-                <option value="PLANNED">Pending</option>
-                <option value="ONGOING">In Progress</option>
-                <option value="COMPLETED">Completed</option>
-                <option value="CANCELLED">Cancelled</option>
-              </select>
+              <div class="st-report-search-wrap">
+                <div class="st-search st-report-search">
+                  <span class="material-symbols-outlined">search</span>
+                  <input
+                    type="text"
+                    data-report-intervention-search
+                    placeholder="Search class, method, or status (e.g. Completed)…"
+                    autocomplete="off"
+                    aria-label="Search interventions"
+                  />
+                  <button
+                    type="button"
+                    class="st-report-search-clear st-hidden"
+                    data-report-intervention-clear
+                    aria-label="Clear intervention search"
+                  >
+                    <span class="material-symbols-outlined">close</span>
+                  </button>
+                </div>
+                <div
+                  class="st-report-search-dropdown st-hidden"
+                  data-report-intervention-results
+                ></div>
+                <input type="hidden" data-report-intervention-class-id />
+                <input type="hidden" data-report-intervention-status-val />
+              </div>
               <button
                 type="button"
                 class="st-btn st-btn-primary"
-                data-generate-intervention
+                data-export-csv-intervention
               >
-                <span class="material-symbols-outlined">description</span>
-                Generate Report
+                <span class="material-symbols-outlined">preview</span>
+                Preview &amp; Export
               </button>
             </div>
           </div>
