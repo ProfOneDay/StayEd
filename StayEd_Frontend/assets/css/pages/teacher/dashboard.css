@@ -637,7 +637,7 @@
 
 .st-data-table th{
     padding:16px 24px;
-    font-size:11px;
+    font-size:20px;
     font-weight:700;
     letter-spacing:.05em;
     text-transform:uppercase;
@@ -656,19 +656,19 @@
 
 .st-data-table td{
     padding:16px 24px;
-    font-size:14px;
+    font-size:20px;
     color:var(--st-on-surface-variant);
     vertical-align:middle;
 }
 
 .st-learner-name{
-    font-size:14px;
+    font-size:18px;
     font-weight:600;
     color:var(--st-primary);
 }
 
 .st-learner-id{
-    font-size:10px;
+    font-size:12px;
     color:var(--st-outline);
 }
 

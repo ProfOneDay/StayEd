@@ -260,6 +260,18 @@ class StudentRegistry {
     this.renderPagination();
   }
 
+  static formatDisplayName(name) {
+    const value = (name || "").trim();
+    if (!value) return "";
+
+    const parts = value.split(/\s+/).filter(Boolean);
+    if (parts.length <= 1) return value;
+
+    const lastName = parts.pop();
+    const firstName = parts.join(" ");
+    return `${lastName}, ${firstName}`;
+  }
+
   static row(l) {
     const initialsTheme = ["", "--teal", "--blue"][(l.id || 0) % 3];
 
@@ -283,13 +295,11 @@ class StudentRegistry {
                         ${this.state.selected.has(l.id) ? "checked" : ""}
                         aria-label="Select ${l.name}">
                 </td>
-                <td style="font-weight:600;color:var(--st-primary);">${l.lrn}</td>
+                <td style="font-family:monospace;font-size:12px;font-weight:600;color:var(--st-on-surface);">${l.lrn}</td>
                 <td>
                     <div style="display:flex;align-items:center;gap:12px;">
-                        <button type="button" class="st-avatar-initials st-avatar-initials${initialsTheme} st-avatar-btn"
-                            data-view-learner="${l.id}" aria-label="View ${l.name}'s profile">${initials}</button>
                         <div>
-                            <button type="button" class="st-learner-name st-learner-name-link" data-view-learner="${l.id}">${l.name}</button>
+                            <div class="st-learner-name">${this.formatDisplayName(l.name)}</div>
                             <p class="st-learner-id">${l.sex || ""}${l.age ? ", " + l.age + " yrs" : ""}</p>
                         </div>
                     </div>
