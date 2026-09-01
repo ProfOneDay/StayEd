@@ -518,6 +518,10 @@ class LearnerProfilePage {
 
     this.set("[data-risk-summary]", r.summary);
     this.set("[data-risk-model-explanation]", r.modelExplanation);
+    this.set(
+      "[data-risk-records-used]",
+      r.recordsUsed ? `Based on ${r.recordsUsed}.` : "",
+    );
 
     const changesList = document.querySelector("[data-risk-changes]");
     const changesCard = document.querySelector("[data-risk-changes-card]");
@@ -583,32 +587,11 @@ class LearnerProfilePage {
           .join("");
       }
     }
-    const recommendedAction = document.querySelector("[data-risk-recommended-action]");
-
-    if (recommendedAction) {
-      recommendedAction.innerHTML = (r.recommendedAction || [])
-        .map(
-          (a) => `
-              <div class="st-action-item">
-                  <span class="material-symbols-outlined" style="color:var(--st-primary);font-size:18px;">arrow_right</span>
-                  <div>
-                      <p class="st-action-item-title">${a.title}</p>
-                      <p class="st-action-item-text">${a.text}</p>
-                  </div>
-              </div>
-          `,
-        )
-        .join("");
-    }
-
-    const details = document.querySelector("[data-risk-details]");
-
-    if (details) {
-      details.innerHTML = `
-                <div class="st-sidebar-info-row"><span>Current Risk</span><span>${r.currentRisk || "—"}</span></div>
-                <div class="st-sidebar-info-row"><span>Records Used</span><span style="text-align:right;">${r.recordsUsed || "—"}</span></div>
-            `;
-    }
+    // "Recommended Teacher Action" and the "Details" sidebar were removed
+    // from the Risk Explanation tab -- both were redundant with information
+    // already shown elsewhere (the risk badge above, and the Recommended
+    // Interventions list on the Interventions tab). recordsUsed is now
+    // folded into a caption line under the summary instead (see above).
   }
 
   static renderInterventions() {

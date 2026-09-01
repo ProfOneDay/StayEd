@@ -323,58 +323,53 @@
 
         <!-- RISK EXPLANATION PANEL -->
         <div class="st-profile-panel" data-profile-panel="risk">
-          <div class="st-profile-grid">
-            <div class="st-stack-col-lg">
-              <div class="st-prediction-card">
-                <div
-                  style="
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                  "
-                >
-                  <h4 class="st-panel-title">Current Risk</h4>
-                  <div data-risk-current-badge></div>
-                </div>
-                <p class="st-prediction-summary-box" data-risk-summary></p>
-              </div>
-
-                            <div class="st-prediction-card">
-                <h4 class="st-panel-title" style="margin-bottom: 4px">
-                  Risk Factors from the Prediction Model
-                </h4>
-                <p style="font-size: 13px; color: var(--st-text-muted, #6b7280); margin-bottom: 12px;" data-risk-model-explanation></p>
-                <div class="st-stack-col-md" data-risk-contributors></div>
-              </div>
-              <div class="st-prediction-card">
-                <h4 class="st-panel-title" style="margin-bottom: 4px">
-                  Related Monitoring Information
-                </h4>
-                <p style="font-size: 13px; color: var(--st-text-muted, #6b7280); margin-bottom: 16px;">
-                  This information is not part of the prediction model, but may help explain the learner's current situation.
-                </p>
-                <div class="st-stack-col-md" data-risk-monitoring-context></div>
-              </div>
-
-              <div class="st-prediction-card" data-risk-changes-card>
-                <h4 class="st-panel-title" style="margin-bottom: 16px">
-                  Risk Level History
-                </h4>
-                <ul class="st-change-list" data-risk-changes></ul>
-              </div>
+          <div class="st-prediction-card">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+              "
+            >
+              <h4 class="st-panel-title">Current Risk</h4>
+              <div data-risk-current-badge></div>
             </div>
+            <p class="st-prediction-summary-box" data-risk-summary></p>
+            <p class="st-prediction-meta-line" data-risk-records-used></p>
 
-            <div class="st-stack-col-lg">
-              <div class="st-sidebar-info-card">
-                <h4 class="st-sidebar-info-title">Recommended Teacher Action</h4>
-                <div class="st-stack-col-md" data-risk-recommended-action></div>
-              </div>
+            <h5 class="st-prediction-subsection-title">
+              Contributing Factors
+            </h5>
+            <p class="st-prediction-explanation" data-risk-model-explanation></p>
+            <div class="st-stack-col-md" data-risk-contributors></div>
+          </div>
 
-              <div class="st-sidebar-info-card">
-                <h4 class="st-sidebar-info-title">Details</h4>
-                <div data-risk-details></div>
-              </div>
+          <div class="st-prediction-card">
+            <div class="st-card-title-row">
+              <h4 class="st-panel-title" style="margin-bottom: 0">
+                Related Monitoring Information
+              </h4>
+              <span
+                class="st-info-tooltip"
+                data-tooltip-text="This information is not part of the prediction model, but may help explain the learner's current situation."
+                tabindex="0"
+                role="note"
+              >
+                <span class="material-symbols-outlined">info</span>
+              </span>
             </div>
+            <div
+              class="st-stack-col-md"
+              data-risk-monitoring-context
+              style="margin-top: 14px"
+            ></div>
+          </div>
+
+          <div class="st-prediction-card" data-risk-changes-card>
+            <h4 class="st-panel-title" style="margin-bottom: 16px">
+              Risk Level History
+            </h4>
+            <ul class="st-change-list" data-risk-changes></ul>
           </div>
         </div>
 
