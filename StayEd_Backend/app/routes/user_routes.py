@@ -104,10 +104,18 @@ def update_avatar():
     avatar = data.get("avatar")
 
     if avatar is not None:
-        if not isinstance(avatar, str) or not avatar.startswith("data:image/"):
-            return error("avatar must be a base64 image data URI.", 422)
+        allowed_prefixes = (
+            "data:image/jpeg;base64,",
+            "data:image/png;base64,",
+            "data:image/webp;base64,",
+        )
+        if not isinstance(avatar, str) or not avatar.startswith(allowed_prefixes):
+            return error("Profile photo must be a JPG, PNG, or WEBP image.", 422)
+        # The browser limits the source file to 2 MB. Base64 encoding expands
+        # the payload by roughly one third, so 3 MB safely accommodates the
+        # encoded image while still preventing unusually large values.
         if len(avatar) > 3 * 1024 * 1024:
-            return error("Image is too large. Please choose a smaller photo.", 422)
+            return error("Image is too large. Please choose a photo that is 2 MB or smaller.", 422)
 
     execute("UPDATE users SET avatar = %s WHERE user_id = %s", (avatar, user_id))
 

@@ -75,6 +75,7 @@ map.addEventListener('click',e=>{if(justPanned){e.stopPropagation();justPanned=f
 function riskLevel(d){if(!d.total)return 'low';const rate=d.high/d.total; return rate>=.20?'high':rate>=.10?'moderate':'low'}
 function riskColor(d){return {high:'#D64545',moderate:'#F39422',low:'#6BBF59'}[riskLevel(d)]}
 const levelKeys=['BLP','Elementary','JHS','SHS'];
+const levelLabels={BLP:'Basic Literacy Program',Elementary:'Elementary',JHS:'Junior High School',SHS:'Senior High School'};
 function recolorMap(){
   // Every Division II municipality gets a risk color, whether or not it has
   // a CLC registered yet -- riskLevel() defaults an empty bucket to "low"
@@ -157,10 +158,12 @@ function selectMunicipality(id){const d=municipalityData[id]||emptyBucket(id);ma
   document.getElementById('clcListSection').hidden=false;
   document.getElementById('municipalitySelect').value=id;
   ['total','clcs','high','moderate'].forEach(k=>document.getElementById(k).textContent=d[k]);
+  document.getElementById('lowSummary').textContent=d.low;
+  document.getElementById('scopeMeta').textContent=`Municipality view · ${d.clcs} CLC${d.clcs===1?'':'s'} represented`;
   const pct=k=>d.total?Math.round(d[k]/d.total*100):0;
-  [['high','highBar','highPct'],['moderate','modBar','modPct'],['low','lowBar','lowPct']].forEach(([k,b,p])=>{document.getElementById(b).style.width=pct(k)+'%';document.getElementById(p).textContent=pct(k)+'%'});
+  [['high','highBar','highPct','highCountText'],['moderate','modBar','modPct','modCountText'],['low','lowBar','lowPct','lowCountText']].forEach(([k,b,p,c])=>{document.getElementById(b).style.width=pct(k)+'%';document.getElementById(p).textContent=pct(k)+'%';document.getElementById(c).textContent=`${d[k]} learner${d[k]===1?'':'s'}`});
   const max=Math.max(1,...Object.values(d.levels),...Object.values(levelAverages));
-  document.getElementById('levels').innerHTML=levelKeys.map(label=>{const val=d.levels[label];const avgPct=Math.min(100,levelAverages[label]/max*100);return `<div class="levelbar"><span>${label}</span><div class="track level-track"><div class="fill" style="width:${val/max*100}%"></div><div class="avg-mark" style="left:${avgPct}%" title="Division average: ${levelAverages[label].toFixed(1)}"></div></div><b>${val}</b></div>`}).join('');
+  document.getElementById('levels').innerHTML=levelKeys.map(label=>{const val=d.levels[label];const avgPct=Math.min(100,levelAverages[label]/max*100);return `<div class="levelbar"><span class="levelbar-label"><strong>${levelLabels[label]}</strong><small>${val} learner${val===1?'':'s'}</small></span><div class="track level-track"><div class="fill" style="width:${val/max*100}%"></div><div class="avg-mark" style="left:${avgPct}%" title="Division average: ${levelAverages[label].toFixed(1)} learners"></div></div><b>${val}</b></div>`}).join('');
   clcListPage=1;
   renderClcList(id);
 }
@@ -182,10 +185,12 @@ function selectAllMunicipalities(){
   document.getElementById('clcs').textContent=t.clcs;
   document.getElementById('high').textContent=t.high;
   document.getElementById('moderate').textContent=t.moderate;
+  document.getElementById('lowSummary').textContent=t.low;
+  document.getElementById('scopeMeta').textContent=`Division-wide snapshot · ${Object.keys(municipalityData).length} municipalities`;
   const pct=k=>t.total?Math.round(t[k]/t.total*100):0;
-  [['high','highBar','highPct'],['moderate','modBar','modPct'],['low','lowBar','lowPct']].forEach(([k,b,p])=>{document.getElementById(b).style.width=pct(k)+'%';document.getElementById(p).textContent=pct(k)+'%'});
+  [['high','highBar','highPct','highCountText'],['moderate','modBar','modPct','modCountText'],['low','lowBar','lowPct','lowCountText']].forEach(([k,b,p,c])=>{document.getElementById(b).style.width=pct(k)+'%';document.getElementById(p).textContent=pct(k)+'%';document.getElementById(c).textContent=`${t[k]} learner${t[k]===1?'':'s'}`});
   const max=Math.max(1,...Object.values(lv));
-  document.getElementById('levels').innerHTML=levelKeys.map(label=>{const val=lv[label];return `<div class="levelbar"><span>${label}</span><div class="track level-track"><div class="fill" style="width:${val/max*100}%"></div></div><b>${val}</b></div>`}).join('');
+  document.getElementById('levels').innerHTML=levelKeys.map(label=>{const val=lv[label];return `<div class="levelbar"><span class="levelbar-label"><strong>${levelLabels[label]}</strong><small>${val} learner${val===1?'':'s'}</small></span><div class="track level-track"><div class="fill" style="width:${val/max*100}%"></div></div><b>${val}</b></div>`}).join('');
 }
 // Only Division II municipalities are interactive -- the rest of the
 // province renders for geographic context but is not part of this scope.
