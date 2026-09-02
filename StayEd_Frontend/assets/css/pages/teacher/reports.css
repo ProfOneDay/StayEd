@@ -34,14 +34,14 @@
 }
 
 .st-report-card-title {
-  font-size:0.9375rem;
+  font-size: var(--st-font-size-body-lg);
   font-weight: 600;
   color: var(--st-text-primary);
   margin: 0 0 4px;
 }
 
 .st-report-card-desc {
-  font-size:0.8125rem;
+  font-size: var(--st-font-size-caption);
   color: var(--st-text-secondary);
   margin: 0;
   line-height: 1.5;
@@ -62,7 +62,7 @@
 .st-report-btn-group .st-btn {
   flex: 1;
   justify-content: center;
-  font-size:0.8125rem;
+  font-size: var(--st-font-size-caption);
   padding: 8px 12px;
 }
 
@@ -181,18 +181,18 @@
 
 .st-report-search-item-name {
   font-weight: 600;
-  font-size:0.8125rem;
+  font-size: var(--st-font-size-caption);
   color: var(--st-text-primary);
 }
 
 .st-report-search-item-meta {
-  font-size:0.71875rem;
+  font-size: var(--st-font-size-micro);
   color: var(--st-text-secondary);
 }
 
 .st-report-search-empty {
   padding: 12px 14px;
-  font-size:0.78125rem;
+  font-size: var(--st-font-size-caption);
   color: var(--st-text-secondary);
   text-align: center;
   font-style: italic;

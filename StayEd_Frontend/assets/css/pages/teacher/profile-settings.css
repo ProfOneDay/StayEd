@@ -64,14 +64,14 @@
 
 .st-profile-summary-name{
     font-family:var(--st-font-heading);
-    font-size:1.25rem;
+    font-size: var(--st-font-size-body-lg);
     font-weight:700;
     color:var(--st-primary);
     margin-bottom:4px;
 }
 
 .st-profile-summary-role{
-    font-size:0.8125rem;
+    font-size: var(--st-font-size-caption);
     color:var(--st-on-surface-variant);
     margin-bottom:16px;
 }
@@ -84,7 +84,7 @@
     border-radius:999px;
     background:var(--st-risk-low-soft);
     color:var(--st-risk-low);
-    font-size:0.75rem;
+    font-size: var(--st-font-size-caption);
     font-weight:700;
     margin-bottom:20px;
 }
@@ -108,7 +108,7 @@
 
 .st-profile-summary-details label{
     display:block;
-    font-size:0.625rem;
+    font-size: var(--st-font-size-micro);
     font-weight:700;
     text-transform:uppercase;
     letter-spacing:.04em;
@@ -117,7 +117,7 @@
 }
 
 .st-profile-summary-details p{
-    font-size:0.875rem;
+    font-size: var(--st-font-size-label);
     font-weight:600;
     color:var(--st-primary);
 }
@@ -136,7 +136,7 @@
 }
 
 .st-quick-stat-value{
-    font-size:1.375rem;
+    font-size: var(--st-font-size-heading);
     font-weight:700;
     color:var(--st-primary);
 }
@@ -144,7 +144,7 @@
 .st-quick-stat-value--teal{ color:var(--st-secondary); }
 
 .st-quick-stat-label{
-    font-size:0.6875rem;
+    font-size: var(--st-font-size-micro);
     color:var(--st-on-surface-variant);
     margin-top:2px;
 }
@@ -190,7 +190,7 @@
 
 .st-settings-section-title{
     font-family:var(--st-font-heading);
-    font-size:1.125rem;
+    font-size: var(--st-font-size-body);
     font-weight:700;
     color:var(--st-primary);
 }
@@ -253,7 +253,7 @@
 }
 
 .st-settings-field label{
-    font-size:0.8125rem;
+    font-size: var(--st-font-size-caption);
     font-weight:600;
     color:var(--st-on-surface);
 }
@@ -266,7 +266,7 @@
     border-radius:var(--st-radius-lg);
     background:#fff;
     font-family:var(--st-font-body);
-    font-size:0.875rem;
+    font-size: var(--st-font-size-label);
     color:var(--st-on-surface);
     transition:var(--st-transition);
 }
@@ -301,7 +301,7 @@
 }
 
 .st-settings-info-box p{
-    font-size:0.75rem;
+    font-size: var(--st-font-size-caption);
     color:var(--st-on-surface-variant);
 }
 
@@ -316,13 +316,13 @@
 .st-toggle-row:last-child{ border-bottom:none; }
 
 .st-toggle-row-title{
-    font-size:0.875rem;
+    font-size: var(--st-font-size-label);
     font-weight:600;
     color:var(--st-on-surface);
 }
 
 .st-toggle-row-sub{
-    font-size:0.75rem;
+    font-size: var(--st-font-size-caption);
     color:var(--st-on-surface-variant);
     margin-top:2px;
 }

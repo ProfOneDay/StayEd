@@ -19,7 +19,7 @@
     background:var(--st-surface-container-low);
     border:none;
     color:var(--st-on-surface-variant);
-    font-size:0.8125rem;
+    font-size: var(--st-font-size-caption);
     font-weight:600;
     cursor:pointer;
     transition:var(--st-transition);
@@ -98,7 +98,7 @@
 }
 
 .st-notif-title{
-    font-size:0.875rem;
+    font-size: var(--st-font-size-label);
     font-weight:700;
     color:var(--st-on-surface);
 }
@@ -108,7 +108,7 @@
     align-items:center;
     padding:2px 10px;
     border-radius:999px;
-    font-size:0.625rem;
+    font-size: var(--st-font-size-micro);
     font-weight:700;
     text-transform:uppercase;
     flex-shrink:0;
@@ -135,13 +135,13 @@
 }
 
 .st-notif-text{
-    font-size:0.8125rem;
+    font-size: var(--st-font-size-caption);
     color:var(--st-on-surface-variant);
     margin-top:2px;
 }
 
 .st-notif-time{
-    font-size:0.6875rem;
+    font-size: var(--st-font-size-micro);
     color:var(--st-outline);
     margin-top:6px;
 }

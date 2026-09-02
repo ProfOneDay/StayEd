@@ -50,7 +50,7 @@
 
 .st-profile-hero-name{
     font-family:var(--st-font-heading);
-    font-size:1.375rem;
+    font-size: var(--st-font-size-heading);
     font-weight:700;
     color:var(--st-on-surface);
     margin-bottom:6px;
@@ -63,7 +63,7 @@
 }
 
 .st-profile-hero-meta p{
-    font-size:0.875rem;
+    font-size: var(--st-font-size-label);
     color:var(--st-on-surface-variant);
 }
 
@@ -96,7 +96,7 @@
 }
 
 .st-profile-hero-risk-label{
-    font-size:0.625rem;
+    font-size: var(--st-font-size-micro);
     font-weight:700;
     text-transform:uppercase;
     letter-spacing:.06em;
@@ -128,7 +128,7 @@
     background:transparent;
     border:none;
     border-bottom:3px solid transparent;
-    font-size:0.875rem;
+    font-size: var(--st-font-size-label);
     font-weight:600;
     color:var(--st-on-surface-variant);
     cursor:pointer;
@@ -186,7 +186,7 @@
 }
 
 .st-metric-card-label{
-    font-size:0.6875rem;
+    font-size: var(--st-font-size-micro);
     font-weight:700;
     text-transform:uppercase;
     letter-spacing:.04em;
@@ -195,18 +195,18 @@
 }
 
 .st-metric-card-value{
-    font-size:1.375rem;
+    font-size: var(--st-font-size-heading);
     font-weight:700;
     color:var(--st-on-surface);
 }
 
 .st-metric-card-value--sm{
-    font-size:0.875rem;
+    font-size: var(--st-font-size-label);
     display:block;
 }
 
 .st-metric-card-subtext{
-    font-size:0.75rem;
+    font-size: var(--st-font-size-caption);
     color:var(--st-on-surface-variant);
     margin-top:4px;
 }
@@ -229,7 +229,7 @@
     display:flex;
     align-items:center;
     gap:6px;
-    font-size:0.625rem;
+    font-size: var(--st-font-size-micro);
     font-weight:700;
     color:var(--st-on-surface-variant);
 }
@@ -258,7 +258,7 @@
 }
 
 .st-risk-trend-zone span{
-    font-size:0.5625rem;
+    font-size: var(--st-font-size-micro);
     font-weight:700;
     text-transform:uppercase;
 }
@@ -301,7 +301,7 @@
     display:flex;
     justify-content:space-between;
     align-items:center;
-    font-size:0.75rem;
+    font-size: var(--st-font-size-caption);
     padding:8px 4px;
     border-bottom:1px solid rgba(195,198,207,.15);
 }
@@ -311,7 +311,7 @@
 .st-risk-trend-empty{
     text-align:center;
     color:var(--st-on-surface-variant);
-    font-size:0.8125rem;
+    font-size: var(--st-font-size-caption);
     padding:24px 0 0;
 }
 
@@ -332,7 +332,7 @@
     display:inline-flex;
     padding:2px 8px;
     border-radius:var(--st-radius-sm);
-    font-size:0.625rem;
+    font-size: var(--st-font-size-micro);
     font-weight:700;
     text-transform:uppercase;
     color:#fff;
@@ -351,7 +351,7 @@
 }
 
 .st-sidebar-info-title{
-    font-size:0.875rem;
+    font-size: var(--st-font-size-label);
     font-weight:700;
     color:var(--st-primary);
     margin-bottom:16px;
@@ -383,7 +383,7 @@
     border-radius:999px;
     background:var(--st-surface-container-low);
     color:var(--st-on-surface-variant);
-    font-size:0.75rem;
+    font-size: var(--st-font-size-caption);
     font-weight:600;
     border:none;
     cursor:pointer;
@@ -460,19 +460,19 @@
 }
 
 .st-timeline-card-title{
-    font-size:0.8125rem;
+    font-size: var(--st-font-size-body-lg);
     font-weight:700;
     color:var(--st-on-surface);
 }
 
 .st-timeline-card-date{
-    font-size:0.6875rem;
+    font-size: var(--st-font-size-micro);
     color:var(--st-outline);
     white-space:nowrap;
 }
 
 .st-timeline-card-text{
-    font-size:0.75rem;
+    font-size: var(--st-font-size-caption);
     color:var(--st-on-surface-variant);
 }
 
@@ -489,26 +489,26 @@
     background:var(--st-surface-container-low);
     border-radius:var(--st-radius-md);
     padding:16px;
-    font-size:0.9375rem;
+    font-size: var(--st-font-size-small);
     color:var(--st-on-surface-variant);
     line-height:1.6;
 }
 
 .st-prediction-meta-line{
-    font-size:0.78125rem;
+    font-size: var(--st-font-size-caption);
     color:var(--st-outline);
     margin-top:8px;
 }
 
 .st-prediction-subsection-title{
-    font-size:0.875rem;
+    font-size: var(--st-font-size-caption);
     font-weight:700;
     color:var(--st-on-surface);
     margin:20px 0 4px;
 }
 
 .st-prediction-explanation{
-    font-size:0.84375rem;
+    font-size: var(--st-font-size-label);
     color:var(--st-on-surface-variant);
     margin-bottom:14px;
 }
@@ -542,7 +542,7 @@
     color:#fff;
     padding:10px 12px;
     border-radius:var(--st-radius-sm);
-    font-size:0.78125rem;
+    font-size: var(--st-font-size-caption);
     font-weight:500;
     line-height:1.5;
     white-space:normal;
@@ -569,7 +569,7 @@
     display:flex;
     justify-content:space-between;
     align-items:center;
-    font-size:0.8125rem;
+    font-size: var(--st-font-size-caption);
 }
 
 .st-change-list-label{
@@ -582,7 +582,7 @@
 
 .st-change-list-empty{
     color:var(--st-on-surface-variant);
-    font-size:0.8125rem;
+    font-size: var(--st-font-size-caption);
 }
 
 .st-contributor-item{
@@ -607,13 +607,13 @@
 }
 
 .st-contributor-title{
-    font-size:0.9375rem;
+    font-size: var(--st-font-size-body-lg);
     font-weight:700;
     color:var(--st-on-surface);
 }
 
 .st-contributor-badge{
-    font-size:0.6875rem;
+    font-size: var(--st-font-size-micro);
     font-weight:700;
     text-transform:uppercase;
     padding:2px 7px;
@@ -621,7 +621,7 @@
 }
 
 .st-contributor-text{
-    font-size:0.8125rem;
+    font-size: var(--st-font-size-caption);
     color:var(--st-on-surface-variant);
 }
 
@@ -651,19 +651,19 @@
 }
 
 .st-intervention-rank{
-    font-size:0.6875rem;
+    font-size: var(--st-font-size-micro);
     font-weight:700;
     color:var(--st-on-surface-variant);
 }
 
 .st-intervention-card-text{
-    font-size:0.8125rem;
+    font-size: var(--st-font-size-caption);
     color:var(--st-on-surface);
     margin-bottom:12px;
 }
 
 .st-intervention-card-factor{
-    font-size:0.6875rem;
+    font-size: var(--st-font-size-micro);
     color:var(--st-on-surface-variant);
     margin-bottom:8px;
 }
@@ -676,7 +676,7 @@
 }
 
 .st-intervention-action-hint{
-    font-size:0.6875rem;
+    font-size: var(--st-font-size-micro);
     font-style:italic;
     color:var(--st-secondary);
 }
@@ -693,7 +693,7 @@
 .st-active-intervention-meta{
     display:flex;
     gap:16px;
-    font-size:0.75rem;
+    font-size: var(--st-font-size-caption);
     color:var(--st-on-surface-variant);
     margin-top:4px;
 }
@@ -702,7 +702,7 @@
     text-align:center;
     padding:24px;
     color:var(--st-on-surface-variant);
-    font-size:0.8125rem;
+    font-size: var(--st-font-size-caption);
 }
 
 .st-schedule-modal-field--row{

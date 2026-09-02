@@ -17,7 +17,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size:0.8125rem;
+  font-size: var(--st-font-size-caption);
   font-weight: 600;
   color: var(--st-text-secondary);
 }
@@ -30,7 +30,7 @@
   border-radius: var(--st-button-radius);
   background: #fff;
   font-family: var(--st-font-body);
-  font-size:0.8125rem;
+  font-size: var(--st-font-size-caption);
   font-weight: 400;
   color: var(--st-on-surface);
 }
@@ -164,6 +164,9 @@
   vertical-align:middle;
   line-height:1.35;
 }
+
+.st-report-table-wrap .st-data-table th{ font-size: var(--st-font-size-label); }
+.st-report-table-wrap .st-data-table td{ font-size: var(--st-font-size-small); }
 
 .st-report-table-wrap .st-data-table th{
   white-space:nowrap;

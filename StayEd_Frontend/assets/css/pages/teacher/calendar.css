@@ -36,7 +36,7 @@
   border: none;
   background: transparent;
   font-family: var(--st-font-body);
-  font-size:1rem;
+  font-size: var(--st-font-size-small);
   color: var(--st-on-surface);
   outline: none;
   min-width: 0;
@@ -93,7 +93,7 @@
   align-items: center;
   gap: 6px;
   padding: 8px 12px 4px;
-  font-size:0.75rem;
+  font-size: var(--st-font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -117,7 +117,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
-  font-size:0.9375rem;
+  font-size: var(--st-font-size-small);
   font-weight: 500;
   color: var(--st-on-surface);
   cursor: pointer;
@@ -159,7 +159,7 @@
 }
 
 .st-cal-search-class-name {
-  font-size:0.9375rem;
+  font-size: var(--st-font-size-small);
   font-weight: 500;
   color: var(--st-on-surface);
   white-space: nowrap;
@@ -168,13 +168,13 @@
 }
 
 .st-cal-search-class-meta {
-  font-size:0.8125rem;
+  font-size: var(--st-font-size-caption);
   color: var(--st-on-surface-variant);
 }
 
 .st-cal-search-empty {
   padding: 16px 12px;
-  font-size:0.9375rem;
+  font-size: var(--st-font-size-small);
   color: var(--st-outline);
   text-align: center;
   font-style: italic;
@@ -223,7 +223,7 @@
 }
 
 .st-cal-mini-title {
-  font-size:0.9375rem;
+  font-size: var(--st-font-size-small);
   font-weight: 600;
   color: var(--st-on-surface);
 }
@@ -257,7 +257,7 @@
 
 .st-cal-mini-dow {
   text-align: center;
-  font-size:0.625rem;
+  font-size: var(--st-font-size-micro);
   font-weight: 600;
   color: var(--st-outline);
   text-transform: uppercase;
@@ -275,7 +275,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size:0.8125rem;
+  font-size: var(--st-font-size-caption);
   border-radius: 50%;
   cursor: pointer;
   color: var(--st-on-surface);
@@ -330,7 +330,7 @@
 }
 
 .st-cal-legend-title {
-  font-size:0.8125rem;
+  font-size: var(--st-font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -342,7 +342,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size:0.9375rem;
+  font-size: var(--st-font-size-small);
   color: var(--st-on-surface-variant);
 }
 
@@ -374,7 +374,7 @@
 }
 
 .st-cal-upcoming-empty {
-  font-size:0.75rem;
+  font-size: var(--st-font-size-caption);
   color: var(--st-outline);
   margin: 0;
   font-style: italic;
@@ -405,14 +405,14 @@
 }
 
 .st-cal-upcoming-label {
-  font-size:0.9375rem;
+  font-size: var(--st-font-size-small);
   font-weight: 500;
   color: var(--st-on-surface);
   line-height: 1.3;
 }
 
 .st-cal-upcoming-meta {
-  font-size:0.875rem;
+  font-size: var(--st-font-size-label);
   color: var(--st-outline);
 }
 
@@ -457,7 +457,7 @@
 .st-cal-today-btn {
   height: 34px;
   padding: 0 14px;
-  font-size:0.9375rem;
+  font-size: var(--st-font-size-small);
 }
 
 .st-cal-nav-btn {
@@ -484,7 +484,7 @@
 }
 
 .st-cal-month-label {
-  font-size:1.25rem;
+  font-size: var(--st-font-size-body-lg);
   font-weight: 700;
   color: var(--st-on-surface);
   margin: 0;
@@ -502,7 +502,7 @@
   background: transparent;
   border: none;
   padding: 5px 14px;
-  font-size:0.9375rem;
+  font-size: var(--st-font-size-small);
   font-weight: 500;
   border-radius: calc(var(--st-button-radius) - 1px);
   cursor: pointer;
@@ -529,7 +529,7 @@
 .st-cal-dow-row span {
   text-align: center;
   padding: 8px 4px;
-  font-size:0.8125rem;
+  font-size: var(--st-font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -597,7 +597,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  font-size:0.9375rem;
+  font-size: var(--st-font-size-small);
   font-weight: 500;
   color: var(--st-on-surface);
   margin-bottom: 4px;
@@ -619,7 +619,7 @@
   gap: 4px;
   padding: 2px 6px;
   border-radius: 3px;
-  font-size:0.8125rem;
+  font-size: var(--st-font-size-caption);
   font-weight: 500;
   line-height: 1.4;
   cursor: pointer;
@@ -657,7 +657,7 @@
 }
 
 .st-cal-more {
-  font-size:0.8125rem;
+  font-size: var(--st-font-size-caption);
   color: var(--st-outline);
   padding: 1px 6px;
   cursor: pointer;
@@ -704,7 +704,7 @@
 
 .st-cal-week-head-dow {
   display: block;
-  font-size:0.8125rem;
+  font-size: var(--st-font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -718,7 +718,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  font-size:1.0625rem;
+  font-size: var(--st-font-size-body);
   font-weight: 600;
   color: var(--st-on-surface);
   margin-top: 2px;
@@ -731,7 +731,7 @@
 
 .st-cal-week-allday-gutter {
   padding: 6px 8px;
-  font-size:0.75rem;
+  font-size: var(--st-font-size-caption);
   color: var(--st-outline);
   text-align: right;
   border-bottom: 1px solid var(--st-outline-variant);
@@ -822,7 +822,7 @@
 }
 
 .st-cal-day-panel-date {
-  font-size:1.25rem;
+  font-size: var(--st-font-size-body-lg);
   font-weight: 700;
   color: var(--st-primary);
   margin: 0;
@@ -830,7 +830,7 @@
 }
 
 .st-cal-day-panel-class {
-  font-size:0.875rem;
+  font-size: var(--st-font-size-label);
   color: var(--st-outline);
   margin: 2px 0 0;
 }
@@ -868,7 +868,7 @@
 }
 
 .st-cal-day-panel-section-title {
-  font-size:0.8125rem;
+  font-size: var(--st-font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -883,7 +883,7 @@
 }
 
 .st-cal-day-empty {
-  font-size:0.9375rem;
+  font-size: var(--st-font-size-small);
   color: var(--st-outline);
   font-style: italic;
   margin: 0;
@@ -908,7 +908,7 @@
   border: none;
   background: transparent;
   color: var(--st-primary);
-  font-size: 1.2rem;
+  font-size: var(--st-font-size-body-lg);
   font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -924,7 +924,7 @@
 .st-cal-event-detail-meta {
   margin: 4px 0 0;
   color: var(--st-on-surface-variant);
-  font-size: 0.9rem;
+  font-size: var(--st-font-size-label);
 }
 
 .st-cal-event-detail-grid {
@@ -945,7 +945,7 @@
 }
 
 .st-cal-event-detail-label {
-  font-size:0.6875rem;
+  font-size: var(--st-font-size-micro);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--st-outline);
@@ -993,13 +993,13 @@
 }
 
 .st-cal-panel-event-title {
-  font-size:0.8125rem;
+  font-size: var(--st-font-size-caption);
   font-weight: 600;
   color: var(--st-on-surface);
 }
 
 .st-cal-panel-event-meta {
-  font-size:0.75rem;
+  font-size: var(--st-font-size-caption);
   color: var(--st-on-surface-variant);
 }
 
@@ -1046,7 +1046,7 @@
   border: 1px solid var(--st-outline-variant);
   border-radius: var(--st-radius-sm);
   padding: 10px 12px;
-  font-size:0.8125rem;
+  font-size: var(--st-font-size-caption);
   color: var(--st-on-surface-variant);
 }
 
@@ -1107,13 +1107,13 @@
 }
 
 .st-cal-modal-class-name {
-  font-size:0.8125rem;
+  font-size: var(--st-font-size-caption);
   font-weight: 600;
   color: var(--st-on-surface);
 }
 
 .st-cal-modal-class-meta {
-  font-size:0.75rem;
+  font-size: var(--st-font-size-caption);
   color: var(--st-on-surface-variant);
 }
 
@@ -1127,7 +1127,7 @@
   justify-content: center;
   padding: 48px;
   color: var(--st-outline);
-  font-size:0.8125rem;
+  font-size: var(--st-font-size-caption);
   gap: 8px;
 }
 
@@ -1147,7 +1147,7 @@
 
 @media (max-width: 640px) {
   .st-cal-dow-row span {
-    font-size:0.5625rem;
+    font-size: var(--st-font-size-micro);
     padding: 6px 2px;
   }
 
@@ -1157,7 +1157,7 @@
   }
 
   .st-cal-event {
-    font-size:0.625rem;
+    font-size: var(--st-font-size-micro);
     padding: 1px 4px;
   }
 
@@ -1166,6 +1166,6 @@
   }
 
   .st-cal-month-label {
-    font-size:0.9375rem;
+    font-size: var(--st-font-size-small);
   }
 }
