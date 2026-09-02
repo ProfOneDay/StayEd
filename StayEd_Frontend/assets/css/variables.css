@@ -88,14 +88,22 @@
 
   --st-font-body: "Inter", sans-serif;
 
-  --st-font-size-display: 34px;
-  --st-font-size-title: 26px;
-  --st-font-size-heading: 22px;
+  /* rem, not px: these need to scale when the user picks a larger text
+     size in Settings (Accessibility -> Font Size). Values are identical to
+     the old px ones at the default 16px root (level 3 below), just
+     expressed relative to it so a root font-size change cascades here. */
+  --st-font-size-display: 2.125rem; /* 34px */
+  --st-font-size-title: 1.625rem; /* 26px */
+  --st-font-size-heading: 1.375rem; /* 22px */
 
-  --st-font-size-body-lg: 20px;
-  --st-font-size-body: 18px;
-  --st-font-size-small: 16px;
-  --st-font-size-caption: 13px;
+  --st-font-size-body-lg: 1.25rem; /* 20px */
+  --st-font-size-body: 1.125rem; /* 18px */
+  --st-font-size-small: 1rem; /* 16px */
+  /* Nav links, form labels/inputs, tab/toggle labels, table `th` headers. */
+  --st-font-size-label: 0.875rem; /* 14px */
+  --st-font-size-caption: 0.8125rem; /* 13px */
+  /* Tiny eyebrow/status labels, badge & pill text, axis ticks. */
+  --st-font-size-micro: 0.6875rem; /* 11px */
 
   --st-font-weight-regular: 400;
   --st-font-weight-medium: 500;
@@ -304,3 +312,15 @@
 
   --st-focus-ring: 0 0 0 3px rgba(0, 106, 104, 0.18);
 }
+
+/* Accessibility text-size preference (Settings -> Accessibility). One
+   attribute on <html>, five discrete steps, level 3 = today's unchanged
+   default (16px root) -- every font-size in the app is now in rem, so this
+   single rule rescales the whole UI. Set by the inline bootstrap snippet in
+   each page's <head> (from localStorage, flash-free) and reconciled against
+   the saved preference by core/app.js on load. */
+html[data-font-scale="1"] { font-size: 14px; } /* Small */
+html[data-font-scale="2"] { font-size: 15px; } /* Medium-Small */
+html[data-font-scale="3"] { font-size: 16px; } /* Default */
+html[data-font-scale="4"] { font-size: 18px; } /* Large */
+html[data-font-scale="5"] { font-size: 20px; } /* Extra Large */

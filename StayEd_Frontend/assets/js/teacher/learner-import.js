@@ -184,7 +184,7 @@ class LearnerImportPage {
         .map(
           (row, index) => `
                 <tr class="${row.status !== "valid" ? `st-import-row--${row.status}` : ""}">
-                    <td style="font-family:monospace;font-size:12px;">${this.cell(row.lrn)}</td>
+                    <td style="font-family:monospace;font-size:0.75rem;">${this.cell(row.lrn)}</td>
                     <td style="font-weight:600;">${this.cell(row.last_name)}</td>
                     <td style="font-weight:600;">${this.cell(row.first_name)}</td>
                     <td>${this.cell(row.middle_name)}</td>
@@ -199,7 +199,7 @@ class LearnerImportPage {
                     <td>${this.cell(row.contact_number)}</td>
                     <td>${this.cell(row.guardian_contact_number)}</td>
                     <td>${this.statusBadge(row.status)}</td>
-                    <td style="font-size:12px;color:var(--st-on-surface-variant);">${this.cell(row.issue)}</td>
+                    <td style="font-size:0.75rem;color:var(--st-on-surface-variant);">${this.cell(row.issue)}</td>
                     <td>
                         <div class="st-row-actions">
                             <button type="button" class="st-icon-btn-sm" data-edit-row="${index}" aria-label="Edit row" title="Edit">

@@ -295,7 +295,7 @@ class ModuleManagement {
           <label for="amDescription">Description (optional)</label>
           <textarea id="amDescription" rows="3" placeholder="Notes about this module..."></textarea>
         </div>
-        <p style="color:var(--st-on-surface-variant);font-size:13px;margin-top:8px;">
+        <p style="color:var(--st-on-surface-variant);font-size:0.8125rem;margin-top:8px;">
           This defines the module once for the whole class -- you'll choose who receives it and when from Module Details.
         </p>
       `,
@@ -490,7 +490,7 @@ class ModuleManagement {
     root.innerHTML = `
       <div class="st-panel st-panel-pad">
         <button type="button" class="st-btn-text" data-back-to-catalog>
-          <span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px;">arrow_back</span>
+          <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:-3px;">arrow_back</span>
           Back to Modules
         </button>
 
@@ -652,7 +652,7 @@ class ModuleManagement {
       confirmLabel: "Confirm Release",
       asyncConfirm: true,
       message: `
-        <p style="color:var(--st-on-surface-variant);font-size:14px;">${names.join(", ")}</p>
+        <p style="color:var(--st-on-surface-variant);font-size:0.875rem;">${names.join(", ")}</p>
         <div class="st-schedule-modal-field">
           <label for="rmReleaseDate">Release Date</label>
           <input type="date" id="rmReleaseDate" value="${today}" max="${today}">
@@ -700,7 +700,7 @@ class ModuleManagement {
       confirmLabel: "Confirm Return",
       asyncConfirm: true,
       message: `
-        <p style="color:var(--st-on-surface-variant);font-size:14px;">${rosterRow.name}</p>
+        <p style="color:var(--st-on-surface-variant);font-size:0.875rem;">${rosterRow.name}</p>
         <div class="st-schedule-modal-field">
           <label for="rtReturnDate">Return Date</label>
           <input type="date" id="rtReturnDate" value="${today}" max="${today}">
@@ -734,7 +734,7 @@ class ModuleManagement {
       asyncConfirm: true,
       message: `
         <p><strong>${rosterRow.name}</strong></p>
-        <p style="color:var(--st-on-surface-variant);font-size:14px;margin-top:8px;">
+        <p style="color:var(--st-on-surface-variant);font-size:0.875rem;margin-top:8px;">
           This will revert this module back to "Released" for this learner (returned on ${rosterRow.returnDate}). Use this if the return was recorded by mistake.
         </p>
       `,

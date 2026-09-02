@@ -416,7 +416,7 @@ class TeacherDashboard {
                 <td>${l.level}</td>
                 <td>${this.modalityPill(l.modality)}</td>
                 <td>${this.riskBadge(l.risk)}</td>
-                <td style="font-size:12px;">${l.activity_text || "\u2014"}</td>
+                <td style="font-size:0.75rem;">${l.activity_text || "\u2014"}</td>
                 <td>
                     <div class="st-row-actions">
                         <button class="st-btn st-btn-primary st-btn-xs"
@@ -452,7 +452,7 @@ class TeacherDashboard {
 
     let html = `
             <button class="st-page-btn" ${page === 1 ? "disabled" : ""} data-page-prev>
-                <span class="material-symbols-outlined" style="font-size:16px;">chevron_left</span>
+                <span class="material-symbols-outlined" style="font-size:1rem;">chevron_left</span>
             </button>
         `;
 
@@ -465,7 +465,7 @@ class TeacherDashboard {
 
     html += `
             <button class="st-page-btn" ${page === pages ? "disabled" : ""} data-page-next>
-                <span class="material-symbols-outlined" style="font-size:16px;">chevron_right</span>
+                <span class="material-symbols-outlined" style="font-size:1rem;">chevron_right</span>
             </button>
         `;
 

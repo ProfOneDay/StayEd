@@ -1,6 +1,14 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script data-stayed-font-scale-bootstrap>
+      (function () {
+        try {
+          var v = localStorage.getItem("stayed_font_scale");
+          if (v) document.documentElement.setAttribute("data-font-scale", v);
+        } catch (e) {}
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StayEd | Import Learners</title>
@@ -119,7 +127,7 @@
         <div id="importPreviewSection" class="st-hidden">
           <div class="st-import-preview-summary">
             <span class="st-import-preview-chip st-import-preview-chip--valid">
-              <span class="material-symbols-outlined" style="font-size: 16px"
+              <span class="material-symbols-outlined" style="font-size:1rem"
                 >check_circle</span
               >
               <span data-preview-valid-count>0</span> Valid
@@ -127,13 +135,13 @@
             <span
               class="st-import-preview-chip st-import-preview-chip--duplicate"
             >
-              <span class="material-symbols-outlined" style="font-size: 16px"
+              <span class="material-symbols-outlined" style="font-size:1rem"
                 >content_copy</span
               >
               <span data-preview-duplicate-count>0</span> Duplicates
             </span>
             <span class="st-import-preview-chip st-import-preview-chip--error">
-              <span class="material-symbols-outlined" style="font-size: 16px"
+              <span class="material-symbols-outlined" style="font-size:1rem"
                 >error</span
               >
               <span data-preview-error-count>0</span> Errors
@@ -172,7 +180,7 @@
           <div class="st-clc-form-footer st-mt-md">
             <span
               class="st-clc-form-footer-left"
-              style="font-size: 13px; color: var(--st-on-surface-variant)"
+              style="font-size:0.8125rem; color: var(--st-on-surface-variant)"
             >
               Duplicate rows use the learner's existing record and are still
               added to this class. Error rows will be skipped.

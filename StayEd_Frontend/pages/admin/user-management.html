@@ -1,6 +1,14 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <script data-stayed-font-scale-bootstrap>
+    (function () {
+      try {
+        var v = localStorage.getItem("stayed_font_scale");
+        if (v) document.documentElement.setAttribute("data-font-scale", v);
+      } catch (e) {}
+    })();
+  </script>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -50,7 +58,7 @@
     <div class="review-header">
       <div class="avatar-lg" id="rv-avatar">—</div>
       <div>
-        <div style="font-weight:800;font-size:19px" id="rv-name">—</div>
+        <div style="font-weight:800;font-size:1.1875rem" id="rv-name">—</div>
         <div class="verified-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>DepEd Verified Account</div>
       </div>
     </div>
@@ -98,7 +106,7 @@
     <div class="info-card" style="grid-template-columns:1fr">
       <div><small>Teacher</small><b id="rj-name">—</b><div class="email" id="rj-email" style="margin-top:2px">—</div></div>
     </div>
-    <label style="display:block;font-size:15.5px;font-weight:700;margin:14px 0 8px">Reason for rejection</label>
+    <label style="display:block;font-size:0.96875rem;font-weight:700;margin:14px 0 8px">Reason for rejection</label>
     <div class="radio-list">
       <label class="radio-item"><input type="radio" name="reject-reason" value="Duplicate account"/>Duplicate account</label>
       <label class="radio-item"><input type="radio" name="reject-reason" value="Invalid or non-DepEd email"/>Invalid or non-DepEd email</label>
@@ -119,13 +127,13 @@
   <div class="modal wide">
     <h2>Edit Teacher Account</h2>
     <div class="modal-sub">Update credentials and view administrative metadata.</div>
-    <label style="display:block;font-size:14.5px;font-weight:700;margin-bottom:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Personal Information</label>
+    <label style="display:block;font-size:0.90625rem;font-weight:700;margin-bottom:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Personal Information</label>
     <div class="field" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px 16px">
       <div><label for="edit-first">First Name</label><input id="edit-first" type="text"/></div>
       <div><label for="edit-middle">Middle Name</label><input id="edit-middle" type="text"/></div>
       <div><label for="edit-last">Last Name</label><input id="edit-last" type="text"/></div>
     </div>
-    <label style="display:block;font-size:14.5px;font-weight:700;margin:2px 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Employment &amp; Contact</label>
+    <label style="display:block;font-size:0.90625rem;font-weight:700;margin:2px 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Employment &amp; Contact</label>
     <div class="field" style="display:grid;grid-template-columns:1fr 1fr;gap:14px 16px">
       <div><label for="edit-empid">Employee ID</label><input id="edit-empid" type="text"/></div>
       <div><label for="edit-phone">Contact Number</label><input id="edit-phone" type="text"/></div>
@@ -185,7 +193,7 @@
     <div class="detail-grid" style="grid-template-columns:1fr;margin:12px 0 4px">
       <div><small>Teacher Name</small><b id="ps-name">—</b></div>
     </div>
-    <label style="display:block;font-size:15.5px;font-weight:700;margin:10px 0 6px">Temporary Password</label>
+    <label style="display:block;font-size:0.96875rem;font-weight:700;margin:10px 0 6px">Temporary Password</label>
     <div class="password-field">
       <span id="temp-pass-val">••••••••••••</span>
       <button class="icon-btn" id="toggle-pass-btn" type="button" aria-label="Show or hide password" title="Show/hide">
@@ -226,7 +234,7 @@
     <h2>Create Account</h2>
     <div class="modal-sub">Create a StayEd account and, for teachers, assign them to a Community Learning Center.</div>
 
-    <label style="display:block;font-size:14.5px;font-weight:700;margin-bottom:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Account Type</label>
+    <label style="display:block;font-size:0.90625rem;font-weight:700;margin-bottom:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Account Type</label>
     <div class="role-toggle" id="cr-role-toggle" role="group" aria-label="Account type">
       <button type="button" class="role-toggle-btn active" data-role="teacher">Teacher</button>
       <button type="button" class="role-toggle-btn" data-role="admin">Admin</button>

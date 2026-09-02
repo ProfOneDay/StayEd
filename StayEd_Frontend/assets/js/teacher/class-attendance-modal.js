@@ -102,7 +102,7 @@ class ClassAttendanceModal {
             <label for="attNewDate">Add Meet-up Date</label>
             <input type="date" id="attNewDate" value="${this.newDate}">
             <button type="button" class="st-btn st-btn-primary" data-add-date>
-              <span class="material-symbols-outlined" style="font-size:18px;">add</span>
+              <span class="material-symbols-outlined" style="font-size:1.125rem;">add</span>
               Add Date
             </button>
           </div>

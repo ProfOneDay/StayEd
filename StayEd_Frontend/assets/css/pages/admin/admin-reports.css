@@ -17,7 +17,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 13px;
+  font-size:0.8125rem;
   font-weight: 600;
   color: var(--st-text-secondary);
 }
@@ -30,7 +30,7 @@
   border-radius: var(--st-button-radius);
   background: #fff;
   font-family: var(--st-font-body);
-  font-size: 13px;
+  font-size:0.8125rem;
   font-weight: 400;
   color: var(--st-on-surface);
 }
@@ -103,7 +103,7 @@
   left: auto !important;
   top: auto !important;
   transform: none !important;
-  font-size: 18px !important;
+  font-size:1.125rem !important;
   line-height: 1 !important;
   color: inherit !important;
   display: inline-block !important;

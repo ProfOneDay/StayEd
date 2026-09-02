@@ -295,7 +295,7 @@ class StudentRegistry {
                         ${this.state.selected.has(l.id) ? "checked" : ""}
                         aria-label="Select ${l.name}">
                 </td>
-                <td style="font-family:monospace;font-size:12px;font-weight:600;color:var(--st-on-surface);">${l.lrn}</td>
+                <td style="font-family:monospace;font-size:0.75rem;font-weight:600;color:var(--st-on-surface);">${l.lrn}</td>
                 <td>
                     <div style="display:flex;align-items:center;gap:12px;">
                         <div>
@@ -374,7 +374,7 @@ class StudentRegistry {
 
     let html = `
             <button class="st-page-btn" ${page === 1 ? "disabled" : ""} data-prev>
-                <span class="material-symbols-outlined" style="font-size:16px;">chevron_left</span>
+                <span class="material-symbols-outlined" style="font-size:1rem;">chevron_left</span>
             </button>
         `;
 
@@ -384,7 +384,7 @@ class StudentRegistry {
 
     html += `
             <button class="st-page-btn" ${page === pages ? "disabled" : ""} data-next>
-                <span class="material-symbols-outlined" style="font-size:16px;">chevron_right</span>
+                <span class="material-symbols-outlined" style="font-size:1rem;">chevron_right</span>
             </button>
         `;
 

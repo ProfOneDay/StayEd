@@ -1,6 +1,14 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <script data-stayed-font-scale-bootstrap>
+    (function () {
+      try {
+        var v = localStorage.getItem("stayed_font_scale");
+        if (v) document.documentElement.setAttribute("data-font-scale", v);
+      } catch (e) {}
+    })();
+  </script>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -91,7 +99,7 @@
         <button class="btn primary" id="as-add-btn" type="button" style="white-space:nowrap">Assign Teacher</button>
       </div>
     </div>
-    <label style="display:block;font-size:15.5px;font-weight:700;margin:16px 0 8px">Currently assigned</label>
+    <label style="display:block;font-size:0.96875rem;font-weight:700;margin:16px 0 8px">Currently assigned</label>
     <div class="assign-current" id="assign-current"></div>
     <div class="modal-actions">
       <button class="btn ghost" onclick="closeModal('modal-assign')">Cancel</button>

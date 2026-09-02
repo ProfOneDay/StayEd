@@ -1,6 +1,14 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script data-stayed-font-scale-bootstrap>
+      (function () {
+        try {
+          var v = localStorage.getItem("stayed_font_scale");
+          if (v) document.documentElement.setAttribute("data-font-scale", v);
+        } catch (e) {}
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StayEd | Class Management</title>

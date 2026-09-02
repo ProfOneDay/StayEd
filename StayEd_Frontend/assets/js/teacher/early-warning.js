@@ -269,8 +269,8 @@ class EarlyWarningPage {
                 </td>
                 <td>${this.riskBadge(l.risk)}</td>
                 <td><span class="st-pill">${l.status}</span></td>
-                <td style="font-size:12px;">${l.dateGenerated ? EarlyWarningPage.formatDateMDY(l.dateGenerated) : "Not generated"}</td>
-                <td style="font-size:12px;">${l.assignedTeacher}</td>
+                <td style="font-size:0.75rem;">${l.dateGenerated ? EarlyWarningPage.formatDateMDY(l.dateGenerated) : "Not generated"}</td>
+                <td style="font-size:0.75rem;">${l.assignedTeacher}</td>
                 <td class="is-center">
                     <button type="button" class="st-btn st-btn-primary st-btn-xs" data-open-profile="${l.id}">
                         View Profile
@@ -302,7 +302,7 @@ class EarlyWarningPage {
 
     let html = `
             <button class="st-page-btn" ${page === 1 ? "disabled" : ""} data-prev>
-                <span class="material-symbols-outlined" style="font-size:16px;">chevron_left</span>
+                <span class="material-symbols-outlined" style="font-size:1rem;">chevron_left</span>
             </button>
         `;
 
@@ -312,7 +312,7 @@ class EarlyWarningPage {
 
     html += `
             <button class="st-page-btn" ${page === pages ? "disabled" : ""} data-next>
-                <span class="material-symbols-outlined" style="font-size:16px;">chevron_right</span>
+                <span class="material-symbols-outlined" style="font-size:1rem;">chevron_right</span>
             </button>
         `;
 

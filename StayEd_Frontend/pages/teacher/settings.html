@@ -1,6 +1,14 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script data-stayed-font-scale-bootstrap>
+      (function () {
+        try {
+          var v = localStorage.getItem("stayed_font_scale");
+          if (v) document.documentElement.setAttribute("data-font-scale", v);
+        } catch (e) {}
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StayEd | System Settings</title>
@@ -93,6 +101,54 @@
                     ><span class="st-toggle-thumb"></span
                   ></span>
                 </label>
+              </div>
+            </div>
+
+            <!-- Accessibility Settings -->
+            <div class="st-bento-card">
+              <div class="st-bento-card-head">
+                <span class="material-symbols-outlined">accessibility_new</span>
+                <h3 class="st-bento-card-title">Accessibility</h3>
+              </div>
+              <div class="st-font-size-control">
+                <div class="st-font-size-control-head">
+                  <p class="st-toggle-row-title">Font Size</p>
+                  <span class="st-font-size-current" data-font-size-label
+                    >Default</span
+                  >
+                </div>
+                <p class="st-toggle-row-sub">
+                  Adjust text size across StayEd to make it easier to read.
+                </p>
+                <div class="st-font-size-slider-row">
+                  <span class="st-font-size-endpoint st-font-size-endpoint--sm"
+                    >A</span
+                  >
+                  <input
+                    type="range"
+                    min="1"
+                    max="5"
+                    step="1"
+                    value="3"
+                    list="fontSizeTicks"
+                    class="st-font-size-slider"
+                    data-font-size-slider
+                    aria-label="Font size"
+                  />
+                  <datalist id="fontSizeTicks">
+                    <option value="1"></option>
+                    <option value="2"></option>
+                    <option value="3"></option>
+                    <option value="4"></option>
+                    <option value="5"></option>
+                  </datalist>
+                  <span class="st-font-size-endpoint st-font-size-endpoint--lg"
+                    >A</span
+                  >
+                </div>
+                <div class="st-font-size-preview" data-font-size-preview>
+                  This is a preview of how text will look.
+                </div>
               </div>
             </div>
 

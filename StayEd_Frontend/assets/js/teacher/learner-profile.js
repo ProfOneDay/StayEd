@@ -243,7 +243,7 @@ class LearnerProfilePage {
                 <p><strong>New modality:</strong> ${modality}</p>
                 <p><strong>Effective date:</strong> ${this.formatModalityDate(modalityEffective)}</p>
                 ${modalityReason ? `<p><strong>Reason:</strong> ${modalityReason}</p>` : ""}
-                <p style="color:var(--st-on-surface-variant);font-size:13px;margin-top:12px;">
+                <p style="color:var(--st-on-surface-variant);font-size:0.8125rem;margin-top:12px;">
                   This will update the learner's current modality. The previous modality will remain in the learner's modality history.
                 </p>
               `,
@@ -554,7 +554,7 @@ class LearnerProfilePage {
         .map(
           (c) => `
                 <div class="st-contributor-item">
-                    <span class="material-symbols-outlined" style="color:var(--st-risk-${c.tone === "error" ? "high" : c.tone === "moderate" ? "moderate" : "low"});font-size:18px;">${c.icon}</span>
+                    <span class="material-symbols-outlined" style="color:var(--st-risk-${c.tone === "error" ? "high" : c.tone === "moderate" ? "moderate" : "low"});font-size:1.125rem;">${c.icon}</span>
                     <div>
                         <div class="st-contributor-title-row">
                             <p class="st-contributor-title">${c.title}</p>
@@ -577,7 +577,7 @@ class LearnerProfilePage {
           .map(
             (m) => `
                 <div class="st-contributor-item">
-                    <span class="material-symbols-outlined" style="color:var(--st-text-muted,#6b7280);font-size:18px;">${m.icon}</span>
+                    <span class="material-symbols-outlined" style="color:var(--st-on-surface-variant);font-size:1.125rem;">${m.icon}</span>
                     <div>
                         <p class="st-contributor-text">${m.text}</p>
                     </div>
@@ -610,7 +610,7 @@ class LearnerProfilePage {
                     <div class="st-intervention-card-head">
                         <div class="st-intervention-card-title-row">
                             <span class="st-priority-chip st-priority-chip--${r.priority.toLowerCase().includes("high") ? "high" : "medium"}">${r.priority}</span>
-                            <p style="font-weight:700;color:var(--st-primary);font-size:14px;">${r.title}</p>
+                            <p style="font-weight:700;color:var(--st-primary);font-size:0.875rem;">${r.title}</p>
                         </div>
                         <span class="st-intervention-rank">Rank #${r.rank}</span>
                     </div>
@@ -651,8 +651,8 @@ class LearnerProfilePage {
                 <div class="st-active-intervention">
                     <div>
                         <div style="display:flex;align-items:center;gap:8px;">
-                            <p style="font-weight:700;font-size:14px;">${iv.active.title}</p>
-                            <span style="font-size:10px;font-weight:700;color:var(--st-risk-high);text-transform:uppercase;">${iv.active.priority}</span>
+                            <p style="font-weight:700;font-size:0.875rem;">${iv.active.title}</p>
+                            <span style="font-size:0.625rem;font-weight:700;color:var(--st-risk-high);text-transform:uppercase;">${iv.active.priority}</span>
                         </div>
                         <div class="st-active-intervention-meta">
                             <span>Assigned: ${iv.active.assigned}</span>
@@ -664,9 +664,9 @@ class LearnerProfilePage {
                         </div>
                         ${iv.active.aiReason ? `
                         <div style="margin-top:12px;padding:10px 12px;background:#F5F3FF;border-left:3px solid #7C3AED;border-radius:6px;">
-                            <p style="font-size:11px;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:4px;">AI Insight</p>
-                            <p style="font-size:13px;color:#374151;margin-bottom:6px;">${iv.active.aiReason}</p>
-                            ${iv.active.aiRecommendedAction ? `<p style="font-size:12px;color:#4B5563;"><strong>Suggested next step:</strong> ${iv.active.aiRecommendedAction}</p>` : ""}
+                            <p style="font-size:0.6875rem;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:4px;">AI Insight</p>
+                            <p style="font-size:0.8125rem;color:#374151;margin-bottom:6px;">${iv.active.aiReason}</p>
+                            ${iv.active.aiRecommendedAction ? `<p style="font-size:0.75rem;color:#4B5563;"><strong>Suggested next step:</strong> ${iv.active.aiRecommendedAction}</p>` : ""}
                         </div>
                         ` : ""}
                     </div>
@@ -727,8 +727,8 @@ class LearnerProfilePage {
                 <div class="st-risk-factor-item">
                     <span class="st-risk-factor-dot" style="background:${toneMap[c.tone] || "var(--st-outline)"};"></span>
                     <div>
-                        <p style="font-weight:600;font-size:13px;">${c.level} Impact: ${c.title}</p>
-                        <p style="font-size:11px;color:var(--st-on-surface-variant);">${c.text}</p>
+                        <p style="font-weight:600;font-size:0.8125rem;">${c.level} Impact: ${c.title}</p>
+                        <p style="font-size:0.6875rem;color:var(--st-on-surface-variant);">${c.text}</p>
                     </div>
                 </div>
             `,
@@ -880,7 +880,7 @@ class LearnerProfilePage {
     const cls =
       { High: "high", Moderate: "moderate", Low: "low" }[risk] || "neutral";
     const label = cls === "neutral" ? "Not Yet Assessed" : `${risk} Risk`;
-    return `<span class="st-risk-badge st-risk-badge--${cls}" style="padding:4px 16px;font-size:12px;"><span class="st-risk-dot"></span>${label}</span>`;
+    return `<span class="st-risk-badge st-risk-badge--${cls}" style="padding:4px 16px;font-size:0.75rem;"><span class="st-risk-dot"></span>${label}</span>`;
   }
 
   static capitalize(s) {

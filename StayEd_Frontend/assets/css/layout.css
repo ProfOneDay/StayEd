@@ -128,7 +128,7 @@ body {
 
   border-radius: var(--st-radius-sm);
 
-  font-size: 12px;
+  font-size:0.75rem;
 
   font-weight: 600;
 
@@ -165,13 +165,13 @@ body {
 .st-sidebar-brand h2 {
   font-family: var(--st-font-heading);
 
-  font-size: 24px;
+  font-size:1.5rem;
   
   color: #FFFFFF;
 }
 
 .st-brand-icon {
-  font-size: 30px;
+  font-size:1.875rem;
 
   color: var(--st-secondary-container);
 }
@@ -197,7 +197,7 @@ body {
 .st-sidebar-divider {
   margin: 24px 12px 10px;
 
-  font-size: 11px;
+  font-size:0.6875rem;
 
   font-weight: 700;
 
@@ -223,6 +223,10 @@ body {
 
   border-radius: var(--st-button-radius);
 
+  font-family: var(--st-font-body);
+
+  font-size: 0.875rem;
+
   transition: var(--st-transition);
 }
 
@@ -241,7 +245,7 @@ body {
 }
 
 .st-sidebar-nav a .material-symbols-outlined {
-  font-size: 20px;
+  font-size:1.25rem;
 }
 
 .st-submenu-trigger {
@@ -269,7 +273,7 @@ body {
 
   font-family: var(--st-font-body);
 
-  font-size: 14px;
+  font-size:0.875rem;
 
   cursor: pointer;
 
@@ -287,13 +291,13 @@ body {
 }
 
 .st-submenu-trigger .material-symbols-outlined {
-  font-size: 20px;
+  font-size:1.25rem;
 }
 
 .st-submenu-caret {
   margin-left: auto;
 
-  font-size: 20px !important;
+  font-size:1.25rem !important;
 
   transition: transform 0.2s ease;
 }
@@ -337,7 +341,7 @@ body {
 
   border-radius: var(--st-button-radius);
 
-  font-size: 13px;
+  font-size:0.8125rem;
 
   transition: var(--st-transition);
 
@@ -381,7 +385,7 @@ body {
 }
 
 .st-submenu-list a .material-symbols-outlined {
-  font-size: 18px;
+  font-size:1.125rem;
 }
 
 .st-sidebar.is-collapsed .st-submenu-list {
@@ -447,7 +451,7 @@ body {
 
   text-decoration: none;
 
-  font-size: 14px;
+  font-size:0.875rem;
 
   transition: var(--st-transition);
 }
@@ -459,7 +463,7 @@ body {
 }
 
 .st-sidebar-secondary .material-symbols-outlined {
-  font-size: 18px;
+  font-size:1.125rem;
 }
 
 .st-sidebar-logout {
@@ -483,7 +487,7 @@ body {
 
   font-family: var(--st-font-body);
 
-  font-size: 14px;
+  font-size:0.875rem;
 
   cursor: pointer;
 
@@ -497,7 +501,7 @@ body {
 }
 
 .st-sidebar-logout .material-symbols-outlined {
-  font-size: 18px;
+  font-size:1.125rem;
 }
 
 .st-main {
@@ -573,7 +577,7 @@ body {
 
   gap: 8px;
 
-  font-size: 12px;
+  font-size:0.75rem;
 
   color: var(--st-text-secondary);
 
@@ -587,7 +591,7 @@ body {
 }
 
 .st-breadcrumb-icon {
-  font-size: 16px;
+  font-size:1rem;
 
   color: var(--st-outline);
 }
@@ -621,7 +625,7 @@ body {
 }
 
 .st-icon-button .material-symbols-outlined {
-  font-size: 22px;
+  font-size:1.375rem;
 
   color: var(--st-text-secondary);
 }
@@ -665,7 +669,7 @@ body {
 }
 
 .st-user-name {
-  font-size: 14px;
+  font-size:0.875rem;
 
   font-weight: 600;
 
@@ -673,7 +677,7 @@ body {
 }
 
 .st-user-role {
-  font-size: 11px;
+  font-size:0.6875rem;
 
   color: var(--st-text-secondary);
 }
@@ -716,6 +720,28 @@ body {
   margin-bottom: 24px;
 }
 
+/* Canonical page h1 + subtitle -- previously only defined inside
+   learner-records.css and left unstyled (bare UA default) everywhere
+   else, so every other page's title silently didn't scale with the
+   rest of the type system. */
+.st-page-header-title {
+  font-family: var(--st-font-heading);
+
+  font-size: var(--st-font-size-title);
+
+  font-weight: 700;
+
+  color: var(--st-primary);
+}
+
+.st-page-header-subtitle {
+  margin-top: 4px;
+
+  font-size: var(--st-font-size-body);
+
+  color: var(--st-on-surface-variant);
+}
+
 .st-footer {
   background: var(--st-footer-background);
 
@@ -749,7 +775,7 @@ body {
 
   color: var(--st-text-secondary);
 
-  font-size: 13px;
+  font-size:0.8125rem;
 }
 
 .st-footer-version {
@@ -771,7 +797,7 @@ body {
 
   color: var(--st-text-secondary);
 
-  font-size: 13px;
+  font-size:0.8125rem;
 
   transition: var(--st-transition-color);
 }

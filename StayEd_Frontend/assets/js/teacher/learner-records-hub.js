@@ -303,7 +303,7 @@ class LearnerRecordsHub {
 
   static recordCells(l) {
     return `
-            <td style="font-family:monospace;font-size:12px;color:var(--st-on-surface-variant);">${l.lrn}</td>
+            <td style="font-family:monospace;font-size:0.75rem;color:var(--st-on-surface-variant);">${l.lrn}</td>
             <td style="font-weight:600;color:var(--st-on-surface);">${this.formatDisplayName(l.name)}</td>
             <td>${this.modulesCell(l)}</td>
             <td>${this.activityCell(l)}</td>
@@ -324,7 +324,7 @@ class LearnerRecordsHub {
                 </div>
                 <button type="button" class="st-progress-link" data-open-module-modal="${l.id}">
                     View Logbook
-                    <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span>
+                    <span class="material-symbols-outlined" style="font-size:1rem;">arrow_forward</span>
                 </button>
             </div>
         `;
@@ -343,7 +343,7 @@ class LearnerRecordsHub {
     return `
             <div style="display:flex;align-items:center;gap:6px;">
                 <span class="st-consult-dot ${dotClass}"></span>
-                <span style="font-size:13px;">${l.activity_text || "\u2014"}</span>
+                <span style="font-size:0.8125rem;">${l.activity_text || "\u2014"}</span>
             </div>
         `;
   }
@@ -412,7 +412,7 @@ class LearnerRecordsHub {
 
     let html = `
             <button class="st-page-btn" ${current === 1 ? "disabled" : ""} data-prev>
-                <span class="material-symbols-outlined" style="font-size:16px;">chevron_left</span>
+                <span class="material-symbols-outlined" style="font-size:1rem;">chevron_left</span>
             </button>
         `;
 
@@ -422,7 +422,7 @@ class LearnerRecordsHub {
 
     html += `
             <button class="st-page-btn" ${current === pages ? "disabled" : ""} data-next>
-                <span class="material-symbols-outlined" style="font-size:16px;">chevron_right</span>
+                <span class="material-symbols-outlined" style="font-size:1rem;">chevron_right</span>
             </button>
         `;
 

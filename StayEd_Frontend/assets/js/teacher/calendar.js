@@ -965,7 +965,7 @@ class TeacherCalendar {
               <span class="st-cal-modal-class-name">${name}</span>
               <span class="st-cal-modal-class-meta">${[clc, level, sy ? `SY ${sy}` : ""].filter(Boolean).join(" · ")}</span>
             </div>
-            <span class="material-symbols-outlined" style="font-size:18px;color:var(--st-outline);">chevron_right</span>
+            <span class="material-symbols-outlined" style="font-size:1.125rem;color:var(--st-outline);">chevron_right</span>
           </div>`;
       })
       .join("");
@@ -1089,7 +1089,7 @@ class TeacherCalendar {
               <span class="st-cal-modal-class-name">${this._esc(getName(c))}</span>
               <span class="st-cal-modal-class-meta">${this._esc(clcName)}${sy ? ` · SY ${this._esc(sy)}` : ""}</span>
             </div>
-            <span class="material-symbols-outlined" style="font-size:18px;color:var(--st-outline);">chevron_right</span>
+            <span class="material-symbols-outlined" style="font-size:1.125rem;color:var(--st-outline);">chevron_right</span>
           </div>`;
       });
     });
@@ -1159,7 +1159,7 @@ class TeacherCalendar {
           <span class="material-symbols-outlined">hub</span>
           <div>
             <strong>${this._esc(getLevel(cls) || "Class")}</strong> &mdash; ${this._esc(getClc(cls))}
-            ${getSY(cls) ? `<br><span style="font-size:12px;color:var(--st-outline);">SY ${this._esc(getSY(cls))}</span>` : ""}
+            ${getSY(cls) ? `<br><span style="font-size:0.75rem;color:var(--st-outline);">SY ${this._esc(getSY(cls))}</span>` : ""}
           </div>
         </div>
         <div class="st-schedule-modal-field">

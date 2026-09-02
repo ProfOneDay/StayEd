@@ -36,25 +36,25 @@
 }
 
 .st-upload-zone-icon .material-symbols-outlined{
-    font-size:36px;
+    font-size:2.25rem;
     color:var(--st-primary);
     font-variation-settings:"FILL" 1;
 }
 
 .st-upload-zone h3{
     font-family:var(--st-font-heading);
-    font-size:20px;
+    font-size:1.25rem;
     font-weight:600;
     color:var(--st-primary);
 }
 
 .st-upload-zone p{
-    font-size:14px;
+    font-size:0.875rem;
     color:var(--st-on-surface-variant);
 }
 
 .st-upload-zone-hint{
-    font-size:12px;
+    font-size:0.75rem;
     color:var(--st-outline);
 }
 
@@ -84,13 +84,13 @@
 .st-upload-file-meta{ flex:1; }
 
 .st-upload-file-meta h4{
-    font-size:14px;
+    font-size:0.875rem;
     font-weight:600;
     color:var(--st-on-surface);
 }
 
 .st-upload-file-meta p{
-    font-size:12px;
+    font-size:0.75rem;
     color:var(--st-on-surface-variant);
 }
 
@@ -120,13 +120,13 @@
     display:flex;
     gap:12px;
     align-items:flex-start;
-    font-size:14px;
+    font-size:0.875rem;
     color:var(--st-on-surface-variant);
     line-height:1.5;
 }
 
 .st-upload-guide-item .material-symbols-outlined{
-    font-size:20px;
+    font-size:1.25rem;
     color:var(--st-secondary);
     flex-shrink:0;
 }
@@ -147,7 +147,7 @@
     gap:6px;
     padding:6px 14px;
     border-radius:999px;
-    font-size:13px;
+    font-size:0.8125rem;
     font-weight:700;
 }
 
@@ -180,7 +180,7 @@
     gap:4px;
     padding:2px 10px;
     border-radius:999px;
-    font-size:11px;
+    font-size:0.6875rem;
     font-weight:700;
 }
 
@@ -222,13 +222,13 @@
 }
 
 .st-import-success-stat-value{
-    font-size:22px;
+    font-size:1.375rem;
     font-weight:700;
     color:var(--st-primary);
 }
 
 .st-import-success-stat-label{
-    font-size:11px;
+    font-size:0.6875rem;
     color:var(--st-on-surface-variant);
     margin-top:2px;
 }
@@ -276,7 +276,7 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:12px;
+    font-size:0.75rem;
     font-weight:700;
     color:var(--st-on-surface-variant);
     z-index:1;
@@ -296,7 +296,7 @@
 }
 
 .st-enroll-progress-label{
-    font-size:10px;
+    font-size:0.625rem;
     font-weight:600;
     color:var(--st-on-surface-variant);
     text-align:center;
@@ -329,7 +329,7 @@
     align-items:center;
     gap:10px;
     font-family:var(--st-font-heading);
-    font-size:18px;
+    font-size:1.125rem;
     font-weight:700;
     color:var(--st-primary);
     margin-bottom:20px;
@@ -342,7 +342,7 @@
 }
 
 .st-enroll-review-section-title{
-    font-size:12px;
+    font-size:0.75rem;
     font-weight:700;
     text-transform:uppercase;
     color:var(--st-secondary);
@@ -358,13 +358,13 @@
 .st-enroll-review-row{
     display:flex;
     flex-direction:column;
-    font-size:13px;
+    font-size:0.8125rem;
     padding:6px 0;
     border-bottom:1px solid rgba(195,198,207,.15);
 }
 
 .st-enroll-review-row label{
-    font-size:10px;
+    font-size:0.625rem;
     color:var(--st-on-surface-variant);
     text-transform:uppercase;
 }
@@ -386,7 +386,7 @@
 }
 
 .st-enroll-gate-intro{
-    font-size:14px;
+    font-size:0.875rem;
     color:var(--st-on-surface-variant);
     margin-bottom:16px;
 }
@@ -420,7 +420,7 @@
 }
 
 .st-enroll-gate-option .material-symbols-outlined{
-    font-size:26px;
+    font-size:1.625rem;
     color:var(--st-primary);
     flex-shrink:0;
 }
@@ -432,12 +432,12 @@
 }
 
 .st-enroll-gate-option-text strong{
-    font-size:14px;
+    font-size:0.875rem;
     color:var(--st-on-surface);
 }
 
 .st-enroll-gate-option-text span{
-    font-size:12px;
+    font-size:0.75rem;
     color:var(--st-on-surface-variant);
     line-height:1.4;
 }
@@ -487,17 +487,17 @@
 }
 
 .st-enroll-gate-result-info strong{
-    font-size:13px;
+    font-size:0.8125rem;
     color:var(--st-on-surface);
 }
 
 .st-enroll-gate-result-info small{
-    font-size:11px;
+    font-size:0.6875rem;
     color:var(--st-on-surface-variant);
 }
 
 .st-enroll-gate-hint{
-    font-size:13px;
+    font-size:0.8125rem;
     color:var(--st-on-surface-variant);
     padding:12px 0;
 }

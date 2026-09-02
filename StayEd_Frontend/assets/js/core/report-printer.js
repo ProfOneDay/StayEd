@@ -162,12 +162,12 @@ class ReportPrinter {
     padding-bottom: 16px;
     margin-bottom: 20px;
   }
-  .report-brand { font-weight: 700; color: var(--st-primary); font-size: 18px; }
-  .report-header p { margin: 4px 0 0; color: var(--st-text-secondary); font-size: 13px; }
+  .report-brand { font-weight: 700; color: var(--st-primary); font-size:1.125rem; }
+  .report-header p { margin: 4px 0 0; color: var(--st-text-secondary); font-size:0.8125rem; }
   .report-header-right { text-align: right; }
   .report-header h1 {
     font-family: 'Libre Franklin', sans-serif;
-    font-size: 21px;
+    font-size:1.3125rem;
     color: var(--st-primary);
     margin: 0;
   }
@@ -176,12 +176,12 @@ class ReportPrinter {
     flex-wrap: wrap;
     gap: 16px 32px;
     margin-bottom: 26px;
-    font-size: 13px;
+    font-size:0.8125rem;
   }
   .report-meta .label {
     display: block;
     color: #73777f;
-    font-size: 10.5px;
+    font-size:0.65625rem;
     text-transform: uppercase;
     letter-spacing: .04em;
     margin-bottom: 2px;
@@ -189,20 +189,20 @@ class ReportPrinter {
   .report-meta .value { font-weight: 600; }
   .report-section { margin-bottom: 28px; page-break-inside: avoid; }
   .report-section h2 {
-    font-size: 14.5px;
+    font-size:0.90625rem;
     color: var(--st-primary);
     border-bottom: 1px solid var(--st-outline-variant);
     padding-bottom: 6px;
     margin: 0 0 10px;
   }
-  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table { width: 100%; border-collapse: collapse; font-size:0.78125rem; }
   th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid #e3e5ea; vertical-align: top; }
   th { background: #f8f9fb; font-weight: 600; color: var(--st-text-secondary); }
   .badge {
     display: inline-block;
     padding: 2px 9px;
     border-radius: 999px;
-    font-size: 11px;
+    font-size:0.6875rem;
     font-weight: 600;
     white-space: nowrap;
   }
@@ -228,7 +228,7 @@ class ReportPrinter {
     padding: 9px 18px;
     border-radius: 4px;
     font-weight: 600;
-    font-size: 13px;
+    font-size:0.8125rem;
     cursor: pointer;
     font-family: inherit;
     display: inline-flex;

@@ -259,7 +259,7 @@ class ClassManagement {
             </div>
             <div class="st-schedule-modal-field">
               <label>School Year</label>
-              <p class="st-schedule-modal-learner">${activeSchoolYear} <span style="font-weight:400;font-size:12px;color:var(--st-outline);">(set by your administrator)</span></p>
+              <p class="st-schedule-modal-learner">${activeSchoolYear} <span style="font-weight:400;font-size:0.75rem;color:var(--st-outline);">(set by your administrator)</span></p>
             </div>
           `,
           onConfirm: async () => {

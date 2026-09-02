@@ -1,6 +1,14 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script data-stayed-font-scale-bootstrap>
+      (function () {
+        try {
+          var v = localStorage.getItem("stayed_font_scale");
+          if (v) document.documentElement.setAttribute("data-font-scale", v);
+        } catch (e) {}
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StayEd | Learner Profile</title>
@@ -52,7 +60,7 @@
                 <p>LRN: <span data-profile-lrn>—</span></p>
                 <p>CLC: <span data-profile-clc>—</span></p>
                 <p>Level: <span data-profile-level>—</span></p>
-                <p>Modality: <span data-profile-modality>—</span> <span style="font-size:11px;color:var(--st-on-surface-variant);" data-profile-modality-since></span></p>
+                <p>Modality: <span data-profile-modality>—</span> <span style="font-size:0.6875rem;color:var(--st-on-surface-variant);" data-profile-modality-since></span></p>
                 <p>School Year: <span data-profile-school-year>—</span></p>
                 <p>Enrolled: <span data-profile-date-enrolled>—</span></p>
                 <p>Teacher: <span data-profile-assigned-teacher>—</span></p>
@@ -186,7 +194,7 @@
               "
             >
               <div>
-                <h4 class="st-panel-title" style="font-size: 18px">
+                <h4 class="st-panel-title" style="font-size:1.125rem">
                   Risk Trend Over Time
                 </h4>
                 <p class="st-panel-subtitle">

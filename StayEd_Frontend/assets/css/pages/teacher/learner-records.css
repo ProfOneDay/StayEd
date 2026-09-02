@@ -2,7 +2,7 @@
 
 .st-page-header-title{
     font-family:var(--st-font-heading);
-    font-size:30px;
+    font-size:1.875rem;
     font-weight:700;
     color:var(--st-primary);
     line-height:1.2;
@@ -10,7 +10,7 @@
 
 .st-page-header-subtitle{
     margin-top:4px;
-    font-size:17px;
+    font-size:1.0625rem;
     color:var(--st-on-surface-variant);
 }
 
@@ -48,15 +48,15 @@
 .st-enroll-field textarea,
 .st-enroll-radio-row input,
 .st-enroll-radio-row label {
-    font-size: 16px;
+    font-size:1rem;
 }
 
 .st-data-table th {
-    font-size: 18px;
+    font-size:1.125rem;
 }
 
 .st-data-table td {
-    font-size: 18px;
+    font-size:1.125rem;
 }
 
 .st-page-header-actions{
@@ -92,7 +92,7 @@
     flex-shrink:0;
 }
 
-.st-records-stat-icon .material-symbols-outlined{ font-size:22px; }
+.st-records-stat-icon .material-symbols-outlined{ font-size:1.375rem; }
 
 .st-records-stat--total .st-records-stat-icon{ background:var(--st-primary-fixed); color:var(--st-primary); }
 .st-records-stat--high .st-records-stat-icon{ background:var(--st-risk-high-soft); color:var(--st-risk-high); }
@@ -100,14 +100,14 @@
 .st-records-stat--low .st-records-stat-icon{ background:var(--st-risk-low-soft); color:var(--st-risk-low); }
 
 .st-records-stat-value{
-    font-size:22px;
+    font-size:1.375rem;
     font-weight:700;
     color:var(--st-on-surface);
     line-height:1.1;
 }
 
 .st-records-stat-label{
-    font-size:12px;
+    font-size:0.75rem;
     color:var(--st-on-surface-variant);
 }
 
@@ -135,7 +135,7 @@
     border-radius:var(--st-button-radius);
     background:#fff;
     font-family:var(--st-font-body);
-    font-size:13px;
+    font-size:0.8125rem;
     color:var(--st-on-surface);
     cursor:pointer;
 }
@@ -156,7 +156,7 @@
 }
 
 .st-data-table th .st-sort-icon{
-    font-size:14px;
+    font-size:0.875rem;
     vertical-align:middle;
     opacity:.4;
 }
@@ -179,20 +179,20 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:24px;
+    font-size:1.5rem;
     font-weight:700;
     flex-shrink:0;
 }
 
 .st-learner-modal-name{
     font-family:var(--st-font-heading);
-    font-size:20px;
+    font-size:1.25rem;
     font-weight:600;
     color:var(--st-on-surface);
 }
 
 .st-learner-modal-id{
-    font-size:13px;
+    font-size:0.8125rem;
     color:var(--st-on-surface-variant);
 }
 
@@ -204,7 +204,7 @@
 }
 
 .st-learner-modal-field-label{
-    font-size:11px;
+    font-size:0.6875rem;
     font-weight:600;
     text-transform:uppercase;
     letter-spacing:.02em;
@@ -213,7 +213,7 @@
 }
 
 .st-learner-modal-field-value{
-    font-size:14px;
+    font-size:0.875rem;
     font-weight:500;
     color:var(--st-on-surface);
 }
@@ -237,7 +237,7 @@
 .st-risk-meter-fill--low{ background:var(--st-risk-low); }
 
 .st-learner-modal-section-title{
-    font-size:13px;
+    font-size:0.8125rem;
     font-weight:700;
     color:var(--st-primary);
     margin-bottom:12px;
@@ -292,7 +292,7 @@
 }
 
 .st-bulk-bar-count{
-    font-size:13px;
+    font-size:0.8125rem;
     font-weight:700;
     color:var(--st-primary);
 }
@@ -312,7 +312,7 @@
     border:1px solid var(--st-outline-variant);
     background:#fff;
     color:var(--st-on-surface-variant);
-    font-size:12px;
+    font-size:0.75rem;
     font-weight:600;
     cursor:pointer;
     transition:var(--st-transition);
@@ -330,18 +330,18 @@
 }
 
 .st-bulk-btn .material-symbols-outlined{
-    font-size:16px;
+    font-size:1rem;
 }
 
 .st-confidence-value{
-    font-size:14px;
+    font-size:0.875rem;
     font-weight:700;
     color:var(--st-primary);
     text-align:center;
 }
 
 .st-confidence-label{
-    font-size:10px;
+    font-size:0.625rem;
     color:var(--st-outline);
     text-align:center;
 }
@@ -351,7 +351,7 @@
 }
 
 @media (max-width:768px){
-    .st-page-header-title{ font-size:26px; }
+    .st-page-header-title{ font-size:1.625rem; }
     .st-records-toolbar{ padding:16px; }
     .st-learner-modal-grid{ grid-template-columns:1fr; }
 }
@@ -377,7 +377,7 @@
     border:none;
     background:transparent;
     border-radius:var(--st-radius-md);
-    font-size:14px;
+    font-size:0.875rem;
     font-weight:600;
     color:var(--st-on-surface-variant);
     cursor:pointer;
@@ -395,7 +395,7 @@
 }
 
 .st-entry-tab .material-symbols-outlined{
-    font-size:20px;
+    font-size:1.25rem;
 }
 
 .st-entry-panel{
@@ -438,7 +438,7 @@
     display:flex;
     align-items:center;
     gap:8px;
-    font-size:15px;
+    font-size:0.9375rem;
     font-weight:600;
     color:var(--st-on-surface);
     margin-bottom:16px;
@@ -467,7 +467,7 @@
 }
 
 .st-enroll-field label{
-    font-size:12px;
+    font-size:0.75rem;
     font-weight:600;
     color:var(--st-on-surface-variant);
 }
@@ -483,7 +483,7 @@
     border-radius:var(--st-radius-md);
     background:#fff;
     font-family:var(--st-font-body);
-    font-size:14px;
+    font-size:0.875rem;
     color:var(--st-on-surface);
     transition:var(--st-transition);
 }
@@ -518,7 +518,7 @@
     display:flex;
     align-items:center;
     gap:6px;
-    font-size:13px;
+    font-size:0.8125rem;
     font-weight:500;
     color:var(--st-on-surface);
     cursor:pointer;
@@ -543,7 +543,7 @@
     border:none;
     background:#fff;
     color:var(--st-on-surface-variant);
-    font-size:13px;
+    font-size:0.8125rem;
     font-weight:600;
     cursor:pointer;
     transition:var(--st-transition);
@@ -576,7 +576,7 @@
 
 .st-import-intro-title{
     font-family:var(--st-font-heading);
-    font-size:20px;
+    font-size:1.25rem;
     font-weight:600;
     color:var(--st-primary);
     margin-bottom:8px;

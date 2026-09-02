@@ -114,7 +114,7 @@ class ModuleManagementModal {
             </p>
           </div>
           <button type="button" class="st-btn st-btn-primary" data-open-release-form>
-            <span class="material-symbols-outlined" style="font-size:18px;">add</span>
+            <span class="material-symbols-outlined" style="font-size:1.125rem;">add</span>
             Add Modules
           </button>
         </div>
@@ -270,7 +270,7 @@ class ModuleManagementModal {
                           ${this.editingPlannedModuleId === m.id ? `
                             <small style="display:inline-flex;align-items:center;gap:6px;">
                               Planned Return:
-                              <input type="date" data-planned-input="${m.id}" value="${m.plannedReturnIso || ""}" style="font-size:12px;padding:2px 4px;">
+                              <input type="date" data-planned-input="${m.id}" value="${m.plannedReturnIso || ""}" style="font-size:0.75rem;padding:2px 4px;">
                               <button type="button" class="st-btn st-btn-primary st-btn-xs" data-save-planned="${m.id}">Save</button>
                               <button type="button" class="st-btn-text" data-cancel-planned="${m.id}">Cancel</button>
                             </small>
@@ -279,7 +279,7 @@ class ModuleManagementModal {
                               Planned Return: ${m.plannedReturn || "—"}
                               ${m.overdue ? `<strong style="color:var(--st-risk-high);"> · Overdue by ${m.daysOverdue} day${m.daysOverdue === 1 ? "" : "s"}</strong>` : ""}
                               <button type="button" class="st-icon-btn-sm" data-edit-planned="${m.id}" title="Edit planned return date" style="vertical-align:middle;">
-                                <span class="material-symbols-outlined" style="font-size:14px;">edit</span>
+                                <span class="material-symbols-outlined" style="font-size:0.875rem;">edit</span>
                               </button>
                             </small>
                           `}
