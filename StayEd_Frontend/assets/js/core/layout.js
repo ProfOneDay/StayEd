@@ -77,15 +77,28 @@ class Layout {
         element.textContent = user.role || "ALS Teacher";
       });
 
-    document
+    const initials = fullName
+      .split(" ")
+      .filter(Boolean)
+      .map((part) => part[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "T";
 
-      .querySelectorAll("[data-st-user-avatar]")
+    document.querySelectorAll("[data-st-user-initials]").forEach((element) => {
+      element.textContent = initials;
+      element.hidden = Boolean(user.avatar);
+    });
 
-      .forEach((image) => {
-        if (user.avatar) {
-          image.src = user.avatar;
-        }
-      });
+    document.querySelectorAll("[data-st-user-avatar]").forEach((image) => {
+      if (user.avatar) {
+        image.src = user.avatar;
+        image.hidden = false;
+      } else {
+        image.removeAttribute("src");
+        image.hidden = true;
+      }
+    });
   }
 
   static initializeSidebar() {

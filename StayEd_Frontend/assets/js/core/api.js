@@ -614,8 +614,20 @@ class API {
     return this.get(`/learners/${id}/profile`);
   }
 
+  static runPrediction(learnerId) {
+    return this.post("/predictions/run", { learner_id: learnerId });
+  }
+
   static getLearnerRecordsDetail(id) {
     return this.get(`/learners/${id}/records-detail`);
+  }
+
+  static getLearnerSessionSchedule(id) {
+    return this.get(`/learners/${id}/session-schedule`);
+  }
+
+  static updateLearnerSessionSchedule(id, payload) {
+    return this.put(`/learners/${id}/session-schedule`, payload);
   }
 
   static createLearner(payload) {

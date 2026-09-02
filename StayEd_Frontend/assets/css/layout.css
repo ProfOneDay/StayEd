@@ -682,6 +682,17 @@ body {
   color: var(--st-text-secondary);
 }
 
+.st-user-avatar-wrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
 .st-user-avatar {
   width: 42px;
 

@@ -1,10 +1,13 @@
-"""Train the StayEd dropout-risk Random Forest on the demo dataset and
+"""Train the StayEd dropout-risk XGBoost classifier on the demo dataset and
 register it in the database (model_info / model_metrics), the same tables
 the read-only dashboards already query.
 
-This is the Python equivalent of the team's model_eval_1.r evaluation
-approach (Random Forest, 70/30 split, Accuracy/Precision/Recall/F1/AUC) but
-exports a usable artifact via joblib, which the R script never did.
+XGBoost replaced the original Random Forest after the team's R model
+comparison (model_eval_1_v2.r / model_eval_3.r) showed it winning on AUC
+both overall and per-modality. Same feature set, same 70/30 split, same
+Accuracy/Precision/Recall/F1/AUC evaluation -- only the classifier changed,
+so predict_bridge.py needed no changes (it only ever calls the generic
+pipeline.predict_proba() / classifier.feature_importances_).
 
 Run it from StayEd_Backend with the venv active:
     python models/train_model.py
@@ -20,24 +23,24 @@ import pandas as pd
 import psycopg
 from dotenv import load_dotenv
 from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
+from xgboost import XGBClassifier
 
 from features import BOOLEAN_FEATURES, CATEGORICAL_FEATURES, FEATURE_COLUMNS, NUMERIC_FEATURES, TARGET_COLUMN
 
 MODEL_DIR = Path(__file__).resolve().parent
 DATA_PATH = MODEL_DIR / "data" / "stayed_modeling_dataset_demo.csv"
-ARTIFACT_PATH = MODEL_DIR / "stayed_rf_v1.joblib"
+ARTIFACT_PATH = MODEL_DIR / "stayed_xgb_v1.joblib"
 
-MODEL_VERSION = "stayed-rf-v1"
+MODEL_VERSION = "stayed-xgb-v1"
 RANDOM_STATE = 2026
 
 
-def build_pipeline() -> Pipeline:
+def build_pipeline(scale_pos_weight: float = 1.0) -> Pipeline:
     preprocessor = ColumnTransformer(
         transformers=[
             ("numeric", SimpleImputer(strategy="median"), NUMERIC_FEATURES),
@@ -52,9 +55,21 @@ def build_pipeline() -> Pipeline:
             ("boolean", SimpleImputer(strategy="most_frequent"), BOOLEAN_FEATURES),
         ]
     )
-    classifier = RandomForestClassifier(
-        n_estimators=300,
-        class_weight="balanced",
+    # Params mirror the team's R evaluation (model_eval_1_v2.r / model_eval_3.r:
+    # max_depth 6, eta/learning_rate 0.1, subsample/colsample_bytree 0.8,
+    # 100 rounds) so this is the same model that was validated there.
+    # scale_pos_weight substitutes for RandomForest's class_weight="balanced"
+    # -- XGBoost has no direct equivalent, so it's computed from the training
+    # split's class ratio and passed in explicitly (see train()).
+    classifier = XGBClassifier(
+        n_estimators=100,
+        max_depth=6,
+        learning_rate=0.1,
+        subsample=0.8,
+        colsample_bytree=0.8,
+        objective="binary:logistic",
+        eval_metric="logloss",
+        scale_pos_weight=scale_pos_weight,
         random_state=RANDOM_STATE,
     )
     return Pipeline([("preprocess", preprocessor), ("classify", classifier)])
@@ -69,7 +84,12 @@ def train() -> dict:
         X, y, test_size=0.30, stratify=y, random_state=RANDOM_STATE
     )
 
-    pipeline = build_pipeline()
+    # Target is 1 = NotCompleted (at-risk) -- the minority-ish class here --
+    # so weight it by the majority/minority ratio in the training split.
+    class_counts = y_train.value_counts()
+    scale_pos_weight = class_counts.get(0, 1) / max(class_counts.get(1, 1), 1)
+
+    pipeline = build_pipeline(scale_pos_weight=scale_pos_weight)
     pipeline.fit(X_train, y_train)
 
     y_pred = pipeline.predict(X_test)
@@ -105,7 +125,7 @@ def register_model(metrics: dict) -> None:
                 """,
                 (
                     "StayEd Dropout Risk Classifier",
-                    "Random Forest (scikit-learn)",
+                    "XGBoost (gradient boosting)",
                     MODEL_VERSION,
                     date.today(),
                     f"Trained on {DATA_PATH.name} ({len(pd.read_csv(DATA_PATH))} rows). "

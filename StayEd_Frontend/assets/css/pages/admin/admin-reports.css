@@ -109,3 +109,83 @@
   display: inline-block !important;
   pointer-events: none !important;
 }
+
+/* Adviser revision: make the Master Enrollment Listing easier to scan. */
+.st-report-master-panel{
+  overflow:hidden;
+}
+
+.st-report-toolbar{
+  align-items:flex-end;
+  gap:16px;
+  padding:18px 24px 20px;
+  border-top:1px solid rgba(195,198,207,.18);
+  border-bottom:1px solid rgba(195,198,207,.22);
+  background:var(--st-surface-container-lowest);
+}
+
+.st-report-filter-grid{
+  flex:1 1 760px;
+  display:grid;
+  grid-template-columns:minmax(280px,2fr) repeat(5,minmax(145px,1fr));
+  gap:10px;
+  align-items:center;
+}
+
+.st-report-filter-grid .st-search,
+.st-report-filter-grid select{
+  width:100%;
+  min-width:0 !important;
+  height:42px;
+}
+
+.st-report-toolbar > .st-btn{
+  height:42px;
+  padding-inline:18px;
+  white-space:nowrap;
+  flex:none;
+}
+
+.st-report-preview-count{
+  padding:14px 24px 8px;
+  margin:0;
+  color:var(--st-on-surface-variant);
+}
+
+.st-report-table-wrap{
+  margin:0 24px 24px;
+  border:1px solid rgba(195,198,207,.28);
+  border-radius:var(--st-radius-lg);
+}
+
+.st-report-table-wrap .st-data-table th,
+.st-report-table-wrap .st-data-table td{
+  padding:13px 16px;
+  vertical-align:middle;
+  line-height:1.35;
+}
+
+.st-report-table-wrap .st-data-table th{
+  white-space:nowrap;
+}
+
+@media (max-width:1400px){
+  .st-report-filter-grid{
+    grid-template-columns:minmax(260px,2fr) repeat(3,minmax(150px,1fr));
+  }
+}
+
+@media (max-width:900px){
+  .st-report-toolbar{align-items:stretch;}
+  .st-report-filter-grid{grid-template-columns:1fr 1fr;}
+  .st-report-filter-grid .st-report-search{grid-column:1 / -1;}
+  .st-report-toolbar > .st-btn{width:100%;justify-content:center;}
+}
+
+@media (max-width:600px){
+  .st-report-toolbar{padding:16px;}
+  .st-report-filter-grid{grid-template-columns:1fr;}
+  .st-report-filter-grid .st-report-search{grid-column:auto;}
+  .st-report-preview-count{padding-inline:16px;}
+  .st-report-table-wrap{margin:0 16px 16px;}
+}

@@ -29,6 +29,7 @@ def _safe_user(row):
         "phone": row.get("contact_number") or "",
         "school": row.get("clc_name") or "",
         "municipality": row.get("municipality") or "",
+        "avatar": row.get("avatar") or "",
     }
 
 
@@ -36,7 +37,7 @@ def _user_by_email(email: str):
     return fetch_one(
         """
         SELECT
-            u.user_id, u.username, u.password_hash, u.email, u.role, u.account_status,
+            u.user_id, u.username, u.password_hash, u.email, u.role, u.account_status, u.avatar,
             t.teacher_id, t.middle_name, t.municipality,
             COALESCE(t.first_name, u.first_name) AS first_name,
             COALESCE(t.last_name, u.last_name) AS last_name,
@@ -94,7 +95,7 @@ def me():
     row = fetch_one(
         """
         SELECT
-            u.user_id, u.username, u.email, u.role, u.account_status,
+            u.user_id, u.username, u.email, u.role, u.account_status, u.avatar,
             t.middle_name, t.municipality,
             COALESCE(t.first_name, u.first_name) AS first_name,
             COALESCE(t.last_name, u.last_name) AS last_name,

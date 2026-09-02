@@ -192,9 +192,10 @@ def create_class():
                     semester, learning_level, data.get("className"),
                 ),
             )
-            created = cur.fetchone()
-            if created:
-                class_id = created["class_id"]
+            created_row = cur.fetchone()
+            was_created = created_row is not None
+            if was_created:
+                class_id = created_row["class_id"]
             else:
                 cur.execute(
                     """
@@ -229,7 +230,8 @@ def create_class():
         "SELECT lc.*, c.clc_name FROM learning_class lc JOIN clc c ON c.clc_id=lc.clc_id WHERE lc.class_id=%s",
         (class_id,),
     )
-    return {"message": "Class created successfully.", "data": _shape(row)}, 201
+    message = "Class created successfully." if was_created else "Class already exists; no duplicate was created."
+    return {"message": message, "created": was_created, "data": _shape(row)}, 201 if was_created else 200
 
 
 @bp.delete("/classes/<int:class_id>")
@@ -394,6 +396,20 @@ def _f2f_learners(class_id: int, session_date):
     )
 
 
+def _session_attendance_by_enrollment(class_id: int, session_id: int):
+    """Return recorded attendance belonging to this session's class only."""
+    rows = fetch_all(
+        """
+        SELECT sa.enrollment_id, sa.attendance_status
+        FROM session_attendance sa
+        JOIN class_enrollment ce ON ce.enrollment_id = sa.enrollment_id
+        WHERE sa.session_id = %s AND ce.class_id = %s
+        """,
+        (session_id, class_id),
+    )
+    return {row["enrollment_id"]: row["attendance_status"] for row in rows}
+
+
 @bp.get("/classes/<int:class_id>/sessions/<int:session_id>/attendance")
 @role_required("teacher")
 def get_session_attendance(class_id: int, session_id: int):
@@ -409,11 +425,7 @@ def get_session_attendance(class_id: int, session_id: int):
         return error("Meet-up date not found.", 404)
 
     learners = _f2f_learners(class_id, session["session_date"])
-    existing_rows = fetch_all(
-        "SELECT enrollment_id, attendance_status FROM session_attendance WHERE session_id=%s",
-        (session_id,),
-    )
-    existing = {r["enrollment_id"]: r["attendance_status"] for r in existing_rows}
+    existing = _session_attendance_by_enrollment(class_id, session_id)
 
     result = [
         {
@@ -472,12 +484,14 @@ def save_session_attendance(class_id: int, session_id: int):
     present_ids = {int(x) for x in (data.get("presentEnrollmentIds") or []) if str(x).isdigit()}
 
     learners = _f2f_learners(class_id, session["session_date"])
-    valid_ids = {l["enrollment_id"] for l in learners}
+    current_ids = {l["enrollment_id"] for l in learners}
+    historical_ids = set(_session_attendance_by_enrollment(class_id, session_id))
+    editable_ids = current_ids | historical_ids
 
     db = get_db()
     try:
         with db.cursor() as cur:
-            for enrollment_id in valid_ids:
+            for enrollment_id in editable_ids:
                 status = "PRESENT" if enrollment_id in present_ids else "ABSENT"
                 cur.execute(
                     """
@@ -500,7 +514,11 @@ def save_session_attendance(class_id: int, session_id: int):
         db.rollback()
         raise
 
-    return {"message": "Attendance saved.", "presentCount": len(present_ids & valid_ids), "totalCount": len(valid_ids)}
+    return {
+        "message": "Attendance saved.",
+        "presentCount": len(present_ids & editable_ids),
+        "totalCount": len(editable_ids),
+    }
 
 
 # ----------------------------------------------------------------------

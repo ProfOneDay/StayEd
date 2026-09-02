@@ -379,3 +379,37 @@
     outline-offset:2px;
 }
 
+
+.st-profile-photo-help{
+    margin:-8px 0 12px;
+    color:var(--st-on-surface-variant);
+    font-size:11px;
+}
+
+.st-avatar-preview-dialog{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:8px 0;
+}
+
+.st-avatar-preview-dialog img{
+    width:96px;
+    height:96px;
+    border-radius:50%;
+    object-fit:cover;
+    border:4px solid var(--st-surface-container);
+    flex:none;
+}
+
+.st-avatar-preview-dialog strong{
+    display:block;
+    color:var(--st-on-surface);
+    overflow-wrap:anywhere;
+}
+
+.st-avatar-preview-dialog p{
+    margin-top:4px;
+    color:var(--st-on-surface-variant);
+    font-size:12px;
+}

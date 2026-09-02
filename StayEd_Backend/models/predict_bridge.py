@@ -19,7 +19,7 @@ import pandas as pd
 
 from features import FEATURE_COLUMNS, NUMERIC_FEATURES
 
-ARTIFACT_PATH = Path(__file__).resolve().parent / "stayed_rf_v1.joblib"
+ARTIFACT_PATH = Path(__file__).resolve().parent / "stayed_xgb_v1.joblib"
 
 
 def _top_factors(pipeline, row: pd.DataFrame, limit: int = 3) -> list[dict]:

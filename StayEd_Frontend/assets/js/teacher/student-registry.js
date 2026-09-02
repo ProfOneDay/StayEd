@@ -3,6 +3,7 @@ class StudentRegistry {
     all: [],
     filtered: [],
     selected: new Set(),
+    predicting: new Set(),
     page: 1,
     perPage: 8,
     search: "",
@@ -251,6 +252,12 @@ class StudentRegistry {
           this.archiveOne(btn.dataset.archiveLearner),
         );
       });
+
+      body.querySelectorAll("[data-run-prediction]").forEach((btn) => {
+        btn.addEventListener("click", () =>
+          this.runPrediction(btn.dataset.runPrediction),
+        );
+      });
     }
 
     this.syncSelectAllState();
@@ -315,6 +322,12 @@ class StudentRegistry {
                 <td>
                     <div class="st-row-actions">
                         <button class="st-btn st-btn-primary st-btn-xs" data-view-learner="${l.id}">View Profile</button>
+                        <button class="st-icon-btn-sm" data-run-prediction="${l.id}"
+                            aria-label="Run prediction"
+                            title="Run Prediction"
+                            ${this.state.predicting.has(String(l.id)) ? "disabled" : ""}>
+                            <span class="material-symbols-outlined">${this.state.predicting.has(String(l.id)) ? "progress_activity" : "bolt"}</span>
+                        </button>
                         <button class="st-icon-btn-sm" data-archive-learner="${l.id}"
                             aria-label="${isArchived ? "Restore" : "Archive"} learner"
                             title="${isArchived ? "Restore" : "Archive"}">
@@ -440,6 +453,36 @@ class StudentRegistry {
     } catch (error) {
       console.error(error);
       Toast?.error("Unable to update learner status.");
+    }
+  }
+
+  // Same manual trigger as Learner Profile's "Run Prediction" button, just
+  // reachable per-row here without leaving the registry table. Updates the
+  // row in place from the response instead of a full reload.
+  static async runPrediction(id) {
+    const key = String(id);
+    if (this.state.predicting.has(key)) return;
+
+    this.state.predicting.add(key);
+    this.apply();
+
+    try {
+      const result = await API.runPrediction(id);
+      const l = this.state.all.find((x) => String(x.id) === key);
+      if (l) {
+        l.risk =
+          result.risk_level.charAt(0) + result.risk_level.slice(1).toLowerCase();
+        l.risk_probability = result.risk_probability;
+      }
+      Toast?.success(
+        `Prediction updated: ${result.risk_level} risk (${Math.round(result.risk_probability * 100)}%).`,
+      );
+    } catch (error) {
+      console.error("[StudentRegistry] runPrediction", error);
+      Toast?.error(error?.message || "Unable to run a prediction for this learner.");
+    } finally {
+      this.state.predicting.delete(key);
+      this.apply();
     }
   }
 

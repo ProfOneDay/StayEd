@@ -40,6 +40,15 @@ bp = Blueprint("learners", __name__)
 # threshold separate from learner-risk/inactivity thresholds.
 MODULE_DUE_SOON_DAYS = 7
 
+LEARNER_SESSION_SCHEDULE_STATUSES = {
+    "SCHEDULED",
+    "ATTENDANCE_PENDING",
+    "ATTENDED",
+    "ABSENT",
+    "EXCUSED",
+}
+LEARNER_SESSION_SCHEDULE_NOTE_MAX_LENGTH = 2000
+
 
 def _teacher_scope():
     teacher = teacher_for_user()
@@ -497,6 +506,172 @@ def _learner_activity_info(base) -> dict:
     }
 
 
+def _shape_learner_session_schedule(row: dict | None) -> dict:
+    """Return one stable frontend shape for saved and class fallback sessions."""
+    if not row:
+        return {
+            "date": "—",
+            "dateIso": None,
+            "time": None,
+            "status": "—",
+            "statusCode": None,
+            "note": "",
+            "source": None,
+        }
+
+    session_date = row.get("session_date")
+    session_time = row.get("session_time")
+    status_code = row.get("schedule_status") or "SCHEDULED"
+    return {
+        "date": session_date.strftime("%b %d, %Y") if session_date else "—",
+        "dateIso": session_date.isoformat() if session_date else None,
+        "time": session_time.strftime("%H:%M") if session_time else None,
+        "status": title_enum(status_code),
+        "statusCode": status_code,
+        "note": row.get("note") or "",
+        "source": row.get("source") or "learner",
+    }
+
+
+def _next_session_schedule(base: dict) -> dict:
+    """Prefer the learner-specific schedule, then retain the class fallback."""
+    personal = fetch_one(
+        """
+        SELECT session_date, session_time, schedule_status, note,
+               'learner' AS source
+        FROM learner_session_schedule
+        WHERE enrollment_id=%s
+        """,
+        (base["enrollment_id"],),
+    )
+    if personal:
+        return _shape_learner_session_schedule(personal)
+
+    class_session = fetch_one(
+        """
+        SELECT session_date, NULL::TIME AS session_time,
+               'SCHEDULED' AS schedule_status, NULL::TEXT AS note,
+               'class' AS source
+        FROM class_session
+        WHERE class_id=%s AND session_date >= CURRENT_DATE
+          AND session_status='SCHEDULED'
+        ORDER BY session_date, session_id
+        LIMIT 1
+        """,
+        (base["class_id"],),
+    )
+    return _shape_learner_session_schedule(class_session)
+
+
+def _validate_learner_session_schedule(data: dict, enrollment_date: date | None) -> dict:
+    raw_date = str(data.get("date") or "").strip()
+    if not raw_date:
+        raise ValueError("Session date is required.")
+    try:
+        session_date = date.fromisoformat(raw_date)
+    except ValueError as exc:
+        raise ValueError("Session date must use YYYY-MM-DD.") from exc
+
+    if enrollment_date and session_date < enrollment_date:
+        raise ValueError("Session date cannot be before the learner's enrollment date.")
+
+    raw_time = str(data.get("time") or "").strip()
+    if not raw_time:
+        raise ValueError("Session time is required.")
+    try:
+        session_time = datetime.strptime(raw_time, "%H:%M").time()
+    except ValueError as exc:
+        raise ValueError("Session time must use HH:MM in 24-hour time.") from exc
+
+    schedule_status = (
+        str(data.get("status") or "")
+        .strip()
+        .upper()
+        .replace("-", "_")
+        .replace(" ", "_")
+    )
+    if schedule_status not in LEARNER_SESSION_SCHEDULE_STATUSES:
+        allowed = ", ".join(
+            title_enum(value) for value in sorted(LEARNER_SESSION_SCHEDULE_STATUSES)
+        )
+        raise ValueError(f"Status must be one of: {allowed}.")
+
+    note = str(data.get("note") or "").strip() or None
+    if note and len(note) > LEARNER_SESSION_SCHEDULE_NOTE_MAX_LENGTH:
+        raise ValueError(
+            f"Session note cannot exceed {LEARNER_SESSION_SCHEDULE_NOTE_MAX_LENGTH} characters."
+        )
+
+    return {
+        "session_date": session_date,
+        "session_time": session_time,
+        "schedule_status": schedule_status,
+        "note": note,
+    }
+
+
+@bp.get("/learners/<int:learner_id>/session-schedule")
+@role_required("teacher")
+def get_learner_session_schedule(learner_id: int):
+    base = _profile_base(learner_id)
+    if not base:
+        return error("Learner not found.", 404)
+    return {"schedule": _next_session_schedule(base)}
+
+
+@bp.put("/learners/<int:learner_id>/session-schedule")
+@role_required("teacher")
+def update_learner_session_schedule(learner_id: int):
+    base = _profile_base(learner_id)
+    if not base:
+        return error("Learner not found.", 404)
+    if base.get("learning_modality") not in {"FACE_TO_FACE", "BLENDED"}:
+        return error(
+            "Session scheduling is available only for Face-to-Face and Blended learners.",
+            422,
+        )
+
+    try:
+        clean = _validate_learner_session_schedule(
+            request.get_json(silent=True) or {},
+            base.get("enrollment_date"),
+        )
+    except ValueError as exc:
+        return error(str(exc), 422)
+
+    teacher = _teacher_scope()
+    saved = execute(
+        """
+        INSERT INTO learner_session_schedule (
+            enrollment_id, session_date, session_time, schedule_status,
+            note, recorded_by_teacher_id
+        ) VALUES (%s, %s, %s, %s, %s, %s)
+        ON CONFLICT (enrollment_id) DO UPDATE SET
+            session_date=EXCLUDED.session_date,
+            session_time=EXCLUDED.session_time,
+            schedule_status=EXCLUDED.schedule_status,
+            note=EXCLUDED.note,
+            recorded_by_teacher_id=EXCLUDED.recorded_by_teacher_id,
+            updated_at=CURRENT_TIMESTAMP
+        RETURNING session_date, session_time, schedule_status, note,
+                  'learner' AS source
+        """,
+        (
+            base["enrollment_id"],
+            clean["session_date"],
+            clean["session_time"],
+            clean["schedule_status"],
+            clean["note"],
+            teacher["teacher_id"],
+        ),
+        returning=True,
+    )
+    return {
+        "message": "Session schedule saved.",
+        "schedule": _shape_learner_session_schedule(saved),
+    }
+
+
 @bp.get("/learners/<int:learner_id>/records-detail")
 @role_required("teacher")
 def records_detail(learner_id: int):
@@ -556,14 +731,7 @@ def records_detail(learner_id: int):
         """,
         (enrollment_id,),
     )
-    next_session = fetch_one(
-        """
-        SELECT session_date FROM class_session
-        WHERE class_id=%s AND session_date >= CURRENT_DATE AND session_status='SCHEDULED'
-        ORDER BY session_date LIMIT 1
-        """,
-        (base["class_id"],),
-    )
+    next_session = _next_session_schedule(base)
     return {
         "modules": {
             "total": totals["released"],
@@ -580,10 +748,7 @@ def records_detail(learner_id: int):
                 "date": last_session["session_date"].strftime("%b %d, %Y") if last_session else "—",
                 "status": title_enum(last_session["attendance_status"]) if last_session else "—",
             },
-            "nextSession": {
-                "date": next_session["session_date"].strftime("%b %d, %Y") if next_session else "—",
-                "status": "Scheduled" if next_session else "—",
-            },
+            "nextSession": next_session,
         },
         "moduleGroups": [
             {"strand": strand, "icon": "menu_book", "modules": rows}
