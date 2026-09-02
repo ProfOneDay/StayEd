@@ -141,6 +141,37 @@ class LearnerProfilePage {
     document
       .querySelector("[data-profile-edit-btn]")
       ?.addEventListener("click", () => this.openEditLearnerModal());
+
+    document
+      .querySelector("[data-profile-run-prediction-btn]")
+      ?.addEventListener("click", (e) => this.runPrediction(e.currentTarget));
+  }
+
+  // Manual trigger for the same prediction call that already fires
+  // automatically off module-release/return/modality-change events (see
+  // trigger_prediction() call sites backend-side) -- this exists purely so
+  // a teacher can force a fresh score without waiting for one of those
+  // events, e.g. right after a consultation that didn't touch modules.
+  static async runPrediction(button) {
+    if (!button || button.disabled) return;
+
+    const originalHtml = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = `<span class="material-symbols-outlined">progress_activity</span> Running…`;
+
+    try {
+      const result = await API.runPrediction(this.getLearnerId());
+      Toast?.success(
+        `Prediction updated: ${result.risk_level} risk (${Math.round(result.risk_probability * 100)}%).`,
+      );
+      await this.load();
+    } catch (error) {
+      console.error("[LearnerProfile] runPrediction", error);
+      Toast?.error(error?.message || "Unable to run a prediction for this learner.");
+    } finally {
+      button.disabled = false;
+      button.innerHTML = originalHtml;
+    }
   }
 
   static formatModalityDate(iso) {

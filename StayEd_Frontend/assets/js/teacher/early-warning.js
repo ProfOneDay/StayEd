@@ -2,6 +2,7 @@ class EarlyWarningPage {
   static state = {
     all: [],
     filtered: [],
+    predicting: new Set(),
     page: 1,
     perPage: 8,
     search: "",
@@ -233,6 +234,12 @@ class EarlyWarningPage {
           window.location.href = `learner-profile.html?id=${encodeURIComponent(el.dataset.openProfile)}`;
         });
       });
+
+      body.querySelectorAll("[data-run-prediction]").forEach((btn) => {
+        btn.addEventListener("click", () =>
+          this.runPrediction(btn.dataset.runPrediction),
+        );
+      });
     }
 
     this.renderPagination();
@@ -272,9 +279,17 @@ class EarlyWarningPage {
                 <td style="font-size:12px;">${l.dateGenerated ? EarlyWarningPage.formatDateMDY(l.dateGenerated) : "Not generated"}</td>
                 <td style="font-size:12px;">${l.assignedTeacher}</td>
                 <td class="is-center">
-                    <button type="button" class="st-btn st-btn-primary st-btn-xs" data-open-profile="${l.id}">
-                        View Profile
-                    </button>
+                    <div class="st-row-actions" style="justify-content:center;">
+                        <button type="button" class="st-btn st-btn-primary st-btn-xs" data-open-profile="${l.id}">
+                            View Profile
+                        </button>
+                        <button class="st-icon-btn-sm" data-run-prediction="${l.id}"
+                            aria-label="Run prediction"
+                            title="Run Prediction"
+                            ${this.state.predicting.has(String(l.id)) ? "disabled" : ""}>
+                            <span class="material-symbols-outlined">${this.state.predicting.has(String(l.id)) ? "progress_activity" : "bolt"}</span>
+                        </button>
+                    </div>
                 </td>
             </tr>
         `;
@@ -345,6 +360,45 @@ class EarlyWarningPage {
 
     if (body && window.Skeletons) {
       body.innerHTML = Skeletons.tableRows(6, 9);
+    }
+  }
+
+  // Same manual trigger as Learner Profile / Student Registry. This list's
+  // whole premise is "learners currently at High/Moderate risk", so unlike
+  // those two pages a refreshed Low score removes the row here instead of
+  // just updating it in place -- leaving it would misrepresent who still
+  // needs attention.
+  static async runPrediction(id) {
+    const key = String(id);
+    if (this.state.predicting.has(key)) return;
+
+    this.state.predicting.add(key);
+    this.renderPage();
+
+    try {
+      const result = await API.runPrediction(id);
+      const riskLevel =
+        result.risk_level.charAt(0) + result.risk_level.slice(1).toLowerCase();
+
+      if (riskLevel === "Low") {
+        this.state.all = this.state.all.filter((x) => String(x.id) !== key);
+        Toast?.success("Learner is no longer at elevated risk -- removed from this list.");
+      } else {
+        const l = this.state.all.find((x) => String(x.id) === key);
+        if (l) {
+          l.risk = riskLevel;
+          l.risk_probability = result.risk_probability;
+        }
+        Toast?.success(
+          `Prediction updated: ${result.risk_level} risk (${Math.round(result.risk_probability * 100)}%).`,
+        );
+      }
+    } catch (error) {
+      console.error("[EarlyWarning] runPrediction", error);
+      Toast?.error(error?.message || "Unable to run a prediction for this learner.");
+    } finally {
+      this.state.predicting.delete(key);
+      this.apply();
     }
   }
 

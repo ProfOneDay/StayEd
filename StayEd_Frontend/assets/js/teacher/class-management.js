@@ -272,7 +272,7 @@ class ClassManagement {
             }
 
             try {
-              await API.createClass({
+              const response = await API.createClass({
                 communityLearningCenter: this.clcName,
                 municipality: this.municipality,
                 learningLevel,
@@ -280,7 +280,7 @@ class ClassManagement {
                 className: `${learningLevel} ${activeSchoolYear}`,
               });
 
-              Toast?.success("Class created.");
+              Toast?.success(response?.message || "Class saved.");
               await this.load();
             } catch (error) {
               console.error(error);
