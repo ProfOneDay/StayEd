@@ -792,6 +792,27 @@ def _engagement_score(enrollment_id: int) -> int:
     return sum(1 for v in row.values() if v)
 
 
+def _generate_recommended_ai_insight(r: dict, contributor_rows: list) -> dict | None:
+    """AI Insight for a single Recommended Intervention (Layer 1), shown
+    before the teacher clicks Assign. Uses the same OpenAI-backed service
+    as the Active Intervention's AI Insight.
+    """
+    try:
+        return generate_ai_recommendation(
+            risk_level=r.get("priority", "").title() or "Unknown",
+            risk_probability=0.0,
+            factors=[dict(f) for f in contributor_rows] if contributor_rows else [],
+            intervention={
+                "title": r.get("title", "").title(),
+                "priority": r.get("priority", ""),
+                "category": r.get("title", "").title(),
+                "description": r.get("text", ""),
+                "reason": r.get("text", ""),
+                "recommended_action": r.get("title", "").title(),
+            },
+        )
+    except Exception:
+        return None
 @bp.get("/learners/<int:learner_id>/profile")
 @role_required("teacher")
 def learner_profile(learner_id: int):
@@ -890,7 +911,14 @@ def learner_profile(learner_id: int):
         """,
         (enrollment_id,),
     )
-    active = next((i for i in interventions if i["status"] in {"PLANNED", "ONGOING"}), None)
+    active = next(
+        (
+            i for i in interventions
+            if i["status"] in {"PLANNED", "ONGOING"}
+            or (i["status"] in {"COMPLETED", "CANCELLED"} and not i.get("moved_to_history"))
+        ),
+        None,
+    )
 
     factors = []
     if base.get("risk_assessment_id"):
@@ -1160,17 +1188,23 @@ def learner_profile(learner_id: int):
                 "aiCategory": active.get("ai_category"),
                 "aiReason": active.get("ai_reason"),
                 "aiRecommendedAction": active.get("ai_recommended_action"),
+                "hasOutcome": bool(active.get("follow_up_outcome") or active.get("follow_up_notes")),
+                "canSaveToHistory": active["status"] in {"COMPLETED", "CANCELLED"},
             } if active else None,
             "history": [
                 {
+                    "id": i["intervention_id"],
                     "date": i["date_assigned"].strftime("%B %d, %Y"),
                     "intervention": i["intervention_type"],
                     "reason": title_enum(i.get("risk_level")),
                     "priority": "High" if i.get("risk_level") == "HIGH" else "Medium",
-                    "status": title_enum(i["status"]),
-                    "outcome": "Completed" if i["status"] == "COMPLETED" else "Pending",
-                    "remarks": i.get("follow_up_notes") or i.get("follow_up_outcome") or "—",
-                } for i in interventions
+                    "remarks": "Completed" if i["status"] == "COMPLETED" else "Cancelled",
+                    "description": i.get("description") or "",
+                    "aiReason": i.get("ai_reason") or "",
+                    "aiRecommendedAction": i.get("ai_recommended_action") or "",
+                    "outcome": i.get("follow_up_outcome") or "",
+                    "outcomeNotes": i.get("follow_up_notes") or "",
+                    } for i in interventions if i["status"] in {"COMPLETED", "CANCELLED"} and i.get("moved_to_history")
             ],
             "recommended": [
                 {
@@ -1180,6 +1214,7 @@ def learner_profile(learner_id: int):
                     "factor": contributor_rows[min(idx, len(contributor_rows) - 1)]["title"] if contributor_rows else "",
                     "text": r["text"],
                     "action": r["title"].title(),
+                    "aiInsight": _generate_recommended_ai_insight(r, contributor_rows),
                 }
                 for idx, r in enumerate(recommendation)
             ],

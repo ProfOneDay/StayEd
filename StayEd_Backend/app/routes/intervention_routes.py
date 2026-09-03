@@ -57,6 +57,31 @@ def update_intervention_status(intervention_id: int):
         return error("Intervention not found.", 404)
 
     data = request.get_json(silent=True) or {}
+
+    # Editable fields (Edit action on the History table): only applied when present.
+    if "interventionType" in data or "description" in data or "targetDate" in data:
+        sets, params = [], []
+        if "interventionType" in data:
+            sets.append("intervention_type=%s")
+            params.append(str(data.get("interventionType") or "").strip())
+        if "description" in data:
+            sets.append("description=%s")
+            params.append(str(data.get("description") or "").strip())
+        if "targetDate" in data:
+            raw = data.get("targetDate")
+            if raw:
+                try:
+                    params.append(date.fromisoformat(str(raw)))
+                except ValueError:
+                    return error("Target date must use YYYY-MM-DD.", 422)
+            else:
+                params.append(None)
+            sets.append("target_date=%s")
+        if sets:
+            params.append(intervention_id)
+            execute(f"UPDATE intervention SET {', '.join(sets)} WHERE intervention_id=%s", params)
+        return {"message": "Intervention updated."}
+
     status = str(data.get("status") or "").strip().upper()
     if status not in INTERVENTION_STATUSES:
         return error(f"Status must be one of {', '.join(sorted(INTERVENTION_STATUSES))}.", 422)
@@ -110,6 +135,23 @@ def update_intervention_status(intervention_id: int):
     return {"message": "Intervention status updated."}
 
 
+@bp.delete("/interventions/<int:intervention_id>")
+@role_required("teacher")
+def delete_intervention(intervention_id: int):
+    teacher = teacher_for_user()
+    row = fetch_one(
+        "SELECT intervention_id FROM intervention WHERE intervention_id=%s AND assigned_to_teacher_id=%s",
+        (intervention_id, teacher["teacher_id"]),
+    )
+    if not row:
+        return error("Intervention not found.", 404)
+
+    execute("DELETE FROM follow_up WHERE intervention_id=%s", (intervention_id,))
+    execute("DELETE FROM intervention WHERE intervention_id=%s", (intervention_id,))
+
+    return {"message": "Intervention deleted."}
+
+
 @bp.post("/interventions/<int:intervention_id>/follow-up")
 @role_required("teacher")
 def add_intervention_follow_up(intervention_id: int):
@@ -136,3 +178,23 @@ def add_intervention_follow_up(intervention_id: int):
     )
 
     return {"message": "Follow-up recorded."}, 201
+@bp.post("/interventions/<int:intervention_id>/move-to-history")
+@role_required("teacher")
+def move_intervention_to_history(intervention_id: int):
+    teacher = teacher_for_user()
+    row = fetch_one(
+        "SELECT intervention_id, status FROM intervention WHERE intervention_id=%s AND assigned_to_teacher_id=%s",
+        (intervention_id, teacher["teacher_id"]),
+    )
+    if not row:
+        return error("Intervention not found.", 404)
+
+    if row["status"] not in {"COMPLETED", "CANCELLED"}:
+        return error("Only completed or cancelled interventions can be saved to history.", 422)
+
+    execute(
+        "UPDATE intervention SET moved_to_history=TRUE, history_saved_at=CURRENT_TIMESTAMP WHERE intervention_id=%s",
+        (intervention_id,),
+    )
+
+    return {"message": "Intervention saved to history."}

@@ -403,14 +403,6 @@
                       manually.
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    class="st-btn st-btn-primary st-btn-xs"
-                    data-add-intervention-btn
-                  >
-                    <span class="material-symbols-outlined">add</span>
-                    Add Intervention
-                  </button>
                 </div>
                 <div
                   class="st-stack-col-md"
@@ -418,25 +410,35 @@
                 ></div>
               </div>
 
-              <div class="st-panel st-panel-pad">
-                <div
-                  style="
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    margin-bottom: 20px;
-                  "
-                >
-                  <span
-                    class="material-symbols-outlined"
-                    style="color: var(--st-secondary)"
-                    >assignment_turned_in</span
+                              <div class="st-panel st-panel-pad">
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                      gap: 8px;
+                      margin-bottom: 20px;
+                    "
                   >
-                  <h4 class="st-panel-title">Active Intervention</h4>
+                    <div style="display: flex; align-items: center; gap: 8px">
+                      <span
+                        class="material-symbols-outlined"
+                        style="color: var(--st-secondary)"
+                        >assignment_turned_in</span
+                      >
+                      <h4 class="st-panel-title">Active Intervention</h4>
+                    </div>
+                    <button
+                      type="button"
+                      class="st-btn st-btn-primary st-btn-xs"
+                      data-add-intervention-btn
+                    >
+                      <span class="material-symbols-outlined">add</span>
+                      Add Intervention
+                    </button>
+                  </div>
+                  <div data-active-intervention></div>
                 </div>
-                <div data-active-intervention></div>
-              </div>
-
               <div class="st-panel">
                 <div class="st-panel-head st-panel-head--flush">
                   <h4 class="st-panel-title">Intervention History</h4>
@@ -447,8 +449,8 @@
                       <tr>
                         <th>Date</th>
                         <th>Intervention</th>
-                        <th>Status</th>
                         <th>Remarks</th>
+                        <th>Action</th>
                       </tr>
                     </thead>
                     <tbody data-intervention-history></tbody>

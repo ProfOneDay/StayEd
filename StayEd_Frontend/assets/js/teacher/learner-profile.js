@@ -645,11 +645,17 @@ class LearnerProfilePage {
                         </div>
                         <span class="st-intervention-rank">Rank #${r.rank}</span>
                     </div>
-                    <p class="st-intervention-card-factor"><strong>Factor:</strong> ${r.factor || "—"}</p>
-                    <p class="st-intervention-card-text">${r.text}</p>
-                    <div class="st-intervention-card-footer">
-                        <span class="st-intervention-action-hint">Action: ${r.action}</span>
-                        <button type="button" class="st-btn st-btn-primary st-btn-xs" data-assign-recommendation="${r.rank}">Assign</button>
+                                          <p class="st-intervention-card-factor"><strong>Factor:</strong> ${r.factor || "â€”"}</p>
+                      <p class="st-intervention-card-text">${r.text}</p>
+                      ${r.aiInsight ? `
+                      <div style="margin-top:12px;padding:10px 12px;background:#F5F3FF;border-left:3px solid #7C3AED;border-radius:6px;">
+                          <p style="font-size:0.6875rem;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:4px;">AI Insight</p>
+                          <p style="font-size:0.8125rem;color:#374151;margin-bottom:6px;">${r.aiInsight.reason}</p>
+                      </div>
+                      ` : ""}
+                      <div class="st-intervention-card-footer">
+                          <span class="st-intervention-action-hint">Action: ${r.action}</span>
+                          <button type="button" class="st-btn st-btn-primary st-btn-xs" data-assign-recommendation="${r.rank}">Assign</button>
                     </div>
                 </div>
             `,
@@ -687,8 +693,6 @@ class LearnerProfilePage {
                         </div>
                         <div class="st-active-intervention-meta">
                             <span>Assigned: ${iv.active.assigned}</span>
-                            <span>Follow-up: ${iv.active.followUp}</span>
-                            <span>Assigned by: ${iv.active.assignedBy}</span>
                         </div>
                         <div style="margin-top:10px;">
                             <span class="st-pill st-pill--teal">${iv.active.status}</span>
@@ -697,13 +701,13 @@ class LearnerProfilePage {
                         <div style="margin-top:12px;padding:10px 12px;background:#F5F3FF;border-left:3px solid #7C3AED;border-radius:6px;">
                             <p style="font-size:0.6875rem;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:4px;">AI Insight</p>
                             <p style="font-size:0.8125rem;color:#374151;margin-bottom:6px;">${iv.active.aiReason}</p>
-                            ${iv.active.aiRecommendedAction ? `<p style="font-size:0.75rem;color:#4B5563;"><strong>Suggested next step:</strong> ${iv.active.aiRecommendedAction}</p>` : ""}
-                        </div>
+                            ${iv.active.hasOutcome && iv.active.aiRecommendedAction ? `<p style="font-size:0.75rem;color:#4B5563;"><strong>Suggested next step:</strong> ${iv.active.aiRecommendedAction}</p>` : ""}                        </div>
                         ` : ""}
                     </div>
                     <div style="display:flex;gap:8px;flex-shrink:0;">
                         <button type="button" class="st-btn st-btn-outline st-btn-xs" data-update-status>Update Status</button>
-                        <button type="button" class="st-btn st-btn-primary st-btn-xs" data-add-outcome>Add Outcome</button>
+                        ${["ONGOING", "COMPLETED"].includes(iv.active.status?.toUpperCase()) ? `<button type="button" class="st-btn st-btn-primary st-btn-xs" data-add-outcome>Add Outcome</button>` : ""}
+                        ${iv.active.canSaveToHistory ? `<button type="button" class="st-btn st-btn-outline st-btn-xs" data-save-to-history>Save to History</button>` : ""}
                     </div>
                 </div>
             `;
@@ -715,6 +719,21 @@ class LearnerProfilePage {
         active
           .querySelector("[data-add-outcome]")
           ?.addEventListener("click", () => this.openAddOutcomeModal(iv.active.id));
+
+          
+        active
+          .querySelector("[data-save-to-history]")
+          ?.addEventListener("click", async () => {
+            try {
+              await API.moveInterventionToHistory(iv.active.id);
+              Toast?.success("Intervention saved to history.");
+              await this.load();
+              document.querySelector('[data-profile-tab="interventions"]')?.click();
+            } catch (error) {
+              console.error("[LearnerProfile] Save to history failed", error);
+              Toast?.error(error?.data?.message || "Unable to save to history.");
+            }
+          });
       }
     }
 
@@ -722,20 +741,43 @@ class LearnerProfilePage {
 
     if (history) {
       if (!iv.history || !iv.history.length) {
-        history.innerHTML = `<tr><td colspan="4" class="st-table-empty-cell">No interventions have been assigned yet.</td></tr>`;
+                history.innerHTML = `<tr><td colspan="4" class="st-table-empty-cell">No interventions have been assigned yet.</td></tr>`;
       } else {
-        history.innerHTML = iv.history
+                history.innerHTML = iv.history
           .map(
             (h) => `
                 <tr>
                     <td>${h.date}</td>
-                    <td style="font-weight:600;">${h.intervention}</td>
-                    <td>${h.status}</td>
+                    <td style="font-weight:600;color:var(--st-primary);cursor:pointer;text-decoration:underline;" data-view-history="${h.id}">${h.intervention}</td>
                     <td>${h.remarks}</td>
+                    <td>
+                        <button type="button" class="st-btn st-btn-outline st-btn-xs" data-edit-history="${h.id}">Edit</button>
+                        <button type="button" class="st-btn st-btn-outline st-btn-xs" data-delete-history="${h.id}">Delete</button>
+                    </td>
                 </tr>
             `,
           )
           .join("");
+                  history.querySelectorAll("[data-view-history]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const id = Number(btn.dataset.viewHistory);
+            const h = iv.history.find((x) => x.id === id);
+            this.openViewHistoryModal(h);
+          });
+        });
+        history.querySelectorAll("[data-edit-history]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const id = Number(btn.dataset.editHistory);
+            const h = iv.history.find((x) => x.id === id);
+            this.openEditHistoryModal(h);
+          });
+        });
+        history.querySelectorAll("[data-delete-history]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const id = Number(btn.dataset.deleteHistory);
+            this.openDeleteHistoryModal(id);
+          });
+        });
       }
     }
 
@@ -859,20 +901,33 @@ class LearnerProfilePage {
       title: "Add Outcome",
       size: "sm",
       confirmLabel: "Save Outcome",
-      message: `
-        <div class="st-schedule-modal-field">
-          <label for="ivOutcome">Outcome</label>
-          <input id="ivOutcome" type="text" placeholder="e.g. Learner responded positively">
-        </div>
-        <div class="st-schedule-modal-field">
-          <label for="ivNotes">Notes</label>
-          <textarea id="ivNotes" rows="3" placeholder="Details from the follow-up..."></textarea>
-        </div>
-      `,
-      onConfirm: async () => {
-        const outcome = document.getElementById("ivOutcome")?.value.trim();
-        const notes = document.getElementById("ivNotes")?.value.trim();
-
+              message: `
+          <div class="st-schedule-modal-field">
+            <label for="ivOutcome">Outcome</label>
+              <select id="ivOutcome" onchange="document.getElementById('ivOutcomeOtherField').style.display = this.value === 'Others' ? '' : 'none';">
+              <option value="Successful">Successful</option>
+              <option value="Failed">Failed</option>
+              <option value="Others">Others</option>
+            </select>
+          </div>
+          <div class="st-schedule-modal-field" id="ivOutcomeOtherField" style="display:none;">
+            <label for="ivOutcomeOther">Please specify</label>
+            <input id="ivOutcomeOther" type="text" placeholder="Describe the outcome...">
+          </div>
+          <div class="st-schedule-modal-field">
+            <label for="ivNotes">Notes</label>
+            <textarea id="ivNotes" rows="3" placeholder="Details from the follow-up..."></textarea>
+          </div>
+        `,
+                onConfirm: async () => {
+          const outcomeSelect = document.getElementById("ivOutcome")?.value;
+          const outcomeOther = document.getElementById("ivOutcomeOther")?.value.trim();
+          const outcome = outcomeSelect === "Others" ? outcomeOther : outcomeSelect;
+          const notes = document.getElementById("ivNotes")?.value.trim();
+        if (outcomeSelect === "Others" && !outcomeOther) {
+          Toast?.error("Please specify the outcome.");
+          return;
+        }
         if (!notes) {
           Toast?.error("Notes are required.");
           return;
@@ -886,6 +941,78 @@ class LearnerProfilePage {
         } catch (error) {
           console.error("[LearnerProfile] Add outcome failed", error);
           Toast?.error(error?.data?.message || "Unable to save outcome.");
+        }
+      },
+    });
+    }
+    static openViewHistoryModal(h) {
+    if (!window.Modal || !h) return;
+    Modal.show({
+      title: h.intervention,
+      size: "md",
+      confirmLabel: "Close",
+      message: `
+        <p style="font-size:13px;color:#6B7280;margin-bottom:10px;">Assigned: ${h.date} — ${h.remarks}</p>
+        <p style="font-size:14px;margin-bottom:12px;">${h.description || "No description recorded."}</p>
+        ${h.aiReason ? `
+        <div style="padding:10px 12px;background:#F5F3FF;border-left:3px solid #7C3AED;border-radius:6px;margin-bottom:12px;">
+          <p style="font-size:11px;font-weight:700;color:#7C3AED;text-transform:uppercase;margin-bottom:4px;">AI Insight</p>
+          <p style="font-size:13px;color:#374151;">${h.aiReason}</p>
+        </div>
+        ` : ""}
+                  ${h.outcome ? `<p style="font-size:13px;"><strong>Outcome:</strong> ${h.outcome}</p>` : ""}
+          ${h.outcomeNotes ? `<p style="font-size:13px;"><strong>Outcome Notes:</strong> ${h.outcomeNotes}</p>` : ""}
+      `,
+      onConfirm: async () => {},
+    });
+  }
+  static openEditHistoryModal(h) {
+    if (!window.Modal || !h) return;
+    Modal.show({
+      title: "Edit Intervention",
+      size: "sm",
+      confirmLabel: "Save Changes",
+      message: `
+        <div class="st-schedule-modal-field">
+          <label for="editIvType">Intervention Type</label>
+          <input id="editIvType" type="text" value="${h.intervention || ""}">
+        </div>
+        <div class="st-schedule-modal-field">
+          <label for="editIvDesc">Description</label>
+          <textarea id="editIvDesc">${h.description || ""}</textarea>
+        </div>
+      `,
+      onConfirm: async () => {
+        const interventionType = document.getElementById("editIvType")?.value?.trim();
+        const description = document.getElementById("editIvDesc")?.value?.trim();
+        try {
+          await API.updateInterventionRecord(h.id, { interventionType, description });
+          Toast?.success("Intervention updated.");
+          await this.load();
+          document.querySelector('[data-profile-tab="interventions"]')?.click();
+        } catch (error) {
+          console.error("[LearnerProfile] Edit history failed", error);
+          Toast?.error(error?.data?.message || "Unable to update intervention.");
+        }
+      },
+    });
+  }
+  static openDeleteHistoryModal(id) {
+    if (!window.Modal || !id) return;
+    Modal.show({
+      title: "Delete Intervention",
+      size: "sm",
+      confirmLabel: "Delete",
+      message: `<p>Are you sure you want to delete this intervention record? This cannot be undone.</p>`,
+      onConfirm: async () => {
+        try {
+          await API.deleteIntervention(id);
+          Toast?.success("Intervention deleted.");
+          await this.load();
+          document.querySelector('[data-profile-tab="interventions"]')?.click();
+        } catch (error) {
+          console.error("[LearnerProfile] Delete history failed", error);
+          Toast?.error(error?.data?.message || "Unable to delete intervention.");
         }
       },
     });

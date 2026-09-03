@@ -742,8 +742,16 @@ class API {
     return this.patch(`/interventions/${id}`, payload);
   }
 
+  
+  static moveInterventionToHistory(id) {
+    return this.post(`/interventions/${id}/move-to-history`, {});
+  }
+
   static addInterventionFollowUp(id, payload) {
     return this.post(`/interventions/${id}/follow-up`, payload);
+  }
+  static deleteIntervention(id) {
+    return this.delete(`/interventions/${id}`);
   }
 
   static getAtRiskReport(params = {}) {
