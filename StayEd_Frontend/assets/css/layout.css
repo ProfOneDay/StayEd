@@ -108,6 +108,10 @@ body {
   position: relative;
 }
 
+.st-sidebar-backdrop {
+  display: none;
+}
+
 .st-sidebar.is-collapsed .st-sidebar-nav a::after,
 .st-sidebar.is-collapsed .st-submenu-trigger::after {
   content: attr(data-tooltip);
@@ -556,6 +560,12 @@ body {
   flex-direction: column;
 
   justify-content: center;
+
+  /* Lets this flex child shrink below its breadcrumb's natural content
+     width instead of forcing the navbar (and page) to overflow. */
+  min-width: 0;
+
+  flex: 1;
 }
 
 .st-navbar-toggle {
@@ -582,6 +592,24 @@ body {
   color: var(--st-text-secondary);
 
   margin-bottom: 20px;
+
+  /* On narrow screens a deep trail (Dashboard > ... > Module Management)
+     scrolls within its own box instead of pushing the page wider. */
+  max-width: 100%;
+
+  overflow-x: auto;
+
+  white-space: nowrap;
+
+  scrollbar-width: none;
+}
+
+.st-breadcrumb::-webkit-scrollbar {
+  display: none;
+}
+
+.st-breadcrumb span {
+  flex-shrink: 0;
 }
 
 .st-breadcrumb .active {
@@ -890,8 +918,37 @@ body {
     transition: transform 0.3s ease;
   }
 
+  /* Above the navbar (z-index 200) too -- otherwise the sticky navbar
+     renders over the top of the open drawer, hiding its own brand
+     header behind the navbar strip. */
   .st-sidebar.open {
     transform: translateX(0);
+
+    z-index: 250;
+  }
+
+  .st-sidebar-backdrop {
+    display: block;
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.4);
+
+    z-index: 240;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition: opacity 0.25s ease;
+  }
+
+  .st-sidebar.open ~ .st-sidebar-backdrop {
+    opacity: 1;
+
+    pointer-events: auto;
   }
 
   .st-main {

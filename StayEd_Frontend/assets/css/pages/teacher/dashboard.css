@@ -721,6 +721,8 @@
     display:flex;
     align-items:center;
     gap:4px;
+    flex-wrap:wrap;
+    max-width:100%;
 }
 
 .st-page-btn{
@@ -801,7 +803,25 @@
     .col-3{ grid-column:span 12; }
     .st-term-card{ width:100%; overflow-x:auto; }
     .st-notif-banner{ padding:8px 16px; }
-    .st-segment{ flex-wrap:wrap; }
+    /* Scoped to mobile only -- forcing these at desktop widths made the
+       4-column filter grid's equal `1fr` tracks fight over the widest
+       cell's content (the Apply Filters button), overflowing the row.
+       A single column here sidesteps that entirely. */
+    .st-filter-row{ width:100%; min-width:0; }
+    .st-filter-controls{ min-width:0; grid-template-columns:1fr; }
+    /* A wrapped row of flex:1 segment buttons still doesn't fit at
+       narrow widths (each keeps a text-driven minimum width) -- scroll
+       the strip horizontally within its own bounds instead, the same
+       pattern native segmented controls use on small screens. */
+    .st-filter-group--level{ flex:1 1 100%; min-width:0; }
+    .st-segment{
+        flex-wrap:nowrap;
+        overflow-x:auto;
+        -webkit-overflow-scrolling:touch;
+        scrollbar-width:none;
+    }
+    .st-segment::-webkit-scrollbar{ display:none; }
+    .st-segment button{ flex:0 0 auto; }
     .st-registry-head{ padding:16px; }
     .st-data-table th,
     .st-data-table td{ padding:12px 16px; }

@@ -58,6 +58,7 @@
 
 .setup-progress{
     flex:1;
+    min-width:0;
     max-width:520px;
     margin:0 auto;
     display:flex;
@@ -741,6 +742,18 @@
     .setup-topbar{ padding:0 16px; }
     .setup-topbar-brand h1{ display:none; }
     .setup-progress-steps span{ font-size: var(--st-font-size-micro); }
+    /* 5 step labels (incl. two-word ones) can't all fit even at the
+       smallest text tier on a narrow phone -- scroll the strip within
+       its own bounds instead of clipping/overflowing the page. */
+    .setup-progress-steps{
+        justify-content:flex-start;
+        gap:16px;
+        overflow-x:auto;
+        -webkit-overflow-scrolling:touch;
+        scrollbar-width:none;
+    }
+    .setup-progress-steps::-webkit-scrollbar{ display:none; }
+    .setup-progress-steps span{ flex-shrink:0; }
     .setup-main{ padding:24px 16px 140px; }
     .setup-heading h1,
     .setup-welcome-body h1,

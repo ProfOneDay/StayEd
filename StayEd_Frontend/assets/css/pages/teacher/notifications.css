@@ -10,6 +10,7 @@
 
 .st-notif-tabs{
     display:flex;
+    flex-wrap:wrap;
     gap:8px;
 }
 
@@ -89,6 +90,7 @@
 
 .st-notif-body{
     flex:1;
+    min-width:0;
 }
 
 .st-notif-title-row{

@@ -175,6 +175,7 @@
 
 @media (max-width:600px){
     .st-profile-metrics--engagement{ grid-template-columns:1fr 1fr; }
+    .st-profile-hero-meta{ grid-template-columns:1fr; }
 }
 
 .st-metric-card{
