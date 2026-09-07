@@ -260,3 +260,157 @@ h1,h2,h3,.profile-name{font-family:var(--st-font-heading)}
     overflow:visible;
   }
 }
+
+
+/* Cleaner desktop map/dashboard spacing revision. */
+@media (min-width:981px) and (min-height:721px){
+  body[data-page="Admin Dashboard"] .st-content{
+    padding:12px 16px 14px;
+    gap:10px;
+  }
+  body[data-page="Admin Dashboard"] .st-page-header{
+    align-items:center;
+    margin-bottom:6px;
+  }
+  body[data-page="Admin Dashboard"] .grid{
+    grid-template-columns:minmax(560px,1.22fr) minmax(430px,.9fr);
+    gap:14px;
+    align-items:start;
+  }
+  body[data-page="Admin Dashboard"] .grid > .card:first-child{
+    height:100%;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-summary-card{
+    align-self:start;
+    height:auto;
+    max-height:100%;
+    overflow-y:auto;
+    scrollbar-width:thin;
+  }
+  body[data-page="Admin Dashboard"] .card{
+    padding:14px;
+    border-radius:14px;
+  }
+  body[data-page="Admin Dashboard"] .card h2{
+    font-size:17px;
+  }
+  body[data-page="Admin Dashboard"] .mapwrap{
+    flex:none;
+    height:clamp(390px,calc(100vh - 250px),510px);
+    border-radius:10px;
+    border:1px solid rgba(15,60,96,.08);
+  }
+  body[data-page="Admin Dashboard"] .toolbar{
+    margin:6px 0 8px;
+  }
+  body[data-page="Admin Dashboard"] .search-box{
+    max-width:260px;
+  }
+  body[data-page="Admin Dashboard"] .legend-hint{
+    margin-left:auto;
+    color:var(--muted);
+  }
+  body[data-page="Admin Dashboard"] .map-legend-head{
+    margin-top:8px;
+    padding-top:8px;
+  }
+  body[data-page="Admin Dashboard"] .legend{
+    margin-top:5px;
+    gap:6px;
+  }
+  body[data-page="Admin Dashboard"] .legend-item{
+    padding:4px 8px;
+  }
+  body[data-page="Admin Dashboard"] .selected-title{
+    font-size:18px;
+    line-height:1.2;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-summary-card .stats{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+    margin:10px 0 8px;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-summary-card .stat{
+    min-height:62px;
+    padding:9px 10px;
+    border-radius:10px;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-summary-card .stat:last-child{
+    grid-column:1 / -1;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-summary-card .stat small{
+    font-size:9px;
+    line-height:1.15;
+    letter-spacing:.01em;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-summary-card .stat b{
+    font-size:21px;
+    margin-top:3px;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-summary-card .stat span{
+    font-size:8px;
+    margin-top:3px;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-section{
+    padding-top:9px;
+    margin-top:7px;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-section-head{
+    margin-bottom:5px;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-section-head h3{
+    font-size:12px;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-section-head p{
+    font-size:9px;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-summary-card .barrow{
+    grid-template-columns:100px 1fr 34px;
+    gap:7px;
+    margin:5px 0;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-summary-card .track{
+    height:9px;
+  }
+  body[data-page="Admin Dashboard"] .bar-label>span{
+    font-size:10px;
+  }
+  body[data-page="Admin Dashboard"] .bar-label small{
+    font-size:7.5px;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-summary-card .levelchart{
+    gap:5px;
+    margin-top:4px;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-summary-card .levelbar{
+    grid-template-columns:126px 1fr 25px;
+    gap:7px;
+  }
+  body[data-page="Admin Dashboard"] .levelbar-label strong{
+    font-size:9px;
+  }
+  body[data-page="Admin Dashboard"] .levelbar-label small{
+    font-size:7px;
+  }
+}
+
+@media (min-width:1300px) and (min-height:721px){
+  body[data-page="Admin Dashboard"] .grid{
+    grid-template-columns:minmax(620px,1.28fr) minmax(455px,.88fr);
+  }
+  body[data-page="Admin Dashboard"] .mapwrap{
+    height:clamp(410px,calc(100vh - 245px),535px);
+  }
+}
+
+/* Follow-up fix: remove extra empty space under the map legend on desktop. */
+@media (min-width:981px) and (min-height:721px){
+  body[data-page="Admin Dashboard"] .grid > .card:first-child{
+    height:auto;
+    align-self:start;
+  }
+
+  body[data-page="Admin Dashboard"] .mapwrap{
+    height:clamp(380px,calc(100vh - 315px),520px);
+  }
+}
