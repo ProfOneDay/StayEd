@@ -71,12 +71,15 @@ class App {
             .join(" ");
       });
 
+    const rawRole = String(user.role || "teacher").trim().toLowerCase();
+    const roleLabel = rawRole === "teacher" ? "ALS Teacher" : rawRole === "admin" ? "Administrator" : (user.role || "");
+
     document
 
       .querySelectorAll("[data-st-user-role]")
 
       .forEach((element) => {
-        element.textContent = user.role || "";
+        element.textContent = roleLabel;
       });
 
     document
@@ -87,6 +90,24 @@ class App {
         element.textContent = user.email || "";
       });
 
+    const fullName =
+      user.full_name ||
+      [user.first_name, user.last_name].filter(Boolean).join(" ") ||
+      "Teacher";
+    const initials =
+      fullName
+        .split(" ")
+        .filter(Boolean)
+        .map((part) => part[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase() || "T";
+
+    document.querySelectorAll("[data-st-user-initials]").forEach((element) => {
+      element.textContent = initials;
+      element.hidden = Boolean(user.avatar);
+    });
+
     document
 
       .querySelectorAll("[data-st-user-avatar]")
@@ -94,6 +115,10 @@ class App {
       .forEach((image) => {
         if (user.avatar) {
           image.src = user.avatar;
+          image.hidden = false;
+        } else {
+          image.removeAttribute("src");
+          image.hidden = true;
         }
       });
   }

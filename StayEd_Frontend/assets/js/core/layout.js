@@ -69,12 +69,15 @@ class Layout {
         element.textContent = fullName;
       });
 
+    const rawRole = String(user.role || "teacher").trim().toLowerCase();
+    const roleLabel = rawRole === "teacher" ? "ALS Teacher" : rawRole === "admin" ? "Administrator" : (user.role || "ALS Teacher");
+
     document
 
       .querySelectorAll("[data-st-user-role]")
 
       .forEach((element) => {
-        element.textContent = user.role || "ALS Teacher";
+        element.textContent = roleLabel;
       });
 
     const initials = fullName

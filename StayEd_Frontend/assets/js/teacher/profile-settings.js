@@ -61,14 +61,19 @@ class ProfileSettingsPage {
     } else {
       photo.textContent = initials || "T";
     }
+
+    const removeButton = document.querySelector("[data-remove-photo]");
+    if (removeButton) removeButton.hidden = !avatar;
   }
 
   static bindAvatarUpload() {
     const input = document.querySelector("[data-profile-photo-input]");
     const button = document.querySelector("[data-change-photo]");
+    const removeButton = document.querySelector("[data-remove-photo]");
     if (!input || !button) return;
 
     button.addEventListener("click", () => input.click());
+    removeButton?.addEventListener("click", () => this.confirmRemoveAvatar());
 
     input.addEventListener("change", () => {
       const file = input.files?.[0];
@@ -129,6 +134,55 @@ class ProfileSettingsPage {
         }
       },
     });
+  }
+
+  static confirmRemoveAvatar() {
+    const user = Auth.user() || {};
+    if (!user.avatar) return;
+
+    const remove = async () => {
+      try {
+        await API.updateAvatar(null);
+        const updatedUser = Auth.updateUser({ avatar: "" });
+        const name =
+          updatedUser.full_name ||
+          [updatedUser.first_name, updatedUser.last_name].filter(Boolean).join(" ") ||
+          "Teacher";
+        const initials = name
+          .split(" ")
+          .filter(Boolean)
+          .map((part) => part[0])
+          .slice(0, 2)
+          .join("")
+          .toUpperCase();
+
+        this.renderAvatar("", initials);
+        Layout?.restoreUser?.();
+        App?.restoreUser?.();
+        Toast?.success("Profile photo removed.");
+      } catch (error) {
+        console.error("[ProfileSettings] Avatar removal failed", error);
+        Toast?.error(
+          error?.data?.message || error?.message || "Unable to remove profile photo.",
+        );
+        throw error;
+      }
+    };
+
+    if (window.Modal) {
+      Modal.show({
+        title: "Remove Profile Photo",
+        size: "sm",
+        confirmLabel: "Remove Photo",
+        asyncConfirm: true,
+        message:
+          "Remove your current profile photo? Your initials will be shown instead.",
+        onConfirm: remove,
+      });
+      return;
+    }
+
+    if (window.confirm("Remove your current profile photo?")) remove();
   }
 
   static escapeHtml(value) {
