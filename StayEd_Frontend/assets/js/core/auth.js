@@ -250,11 +250,17 @@ class Auth {
   }
 
   static async register(data) {
-    return API.post(
+    const response = await API.post(
       "/auth/register",
 
       data,
     );
+
+    if (window.CONFIG?.USE_MOCK_API || window.CONFIG?.DEMO_MODE) {
+      API.addMockTeacherRegistration(data.full_name, data.email);
+    }
+
+    return response;
   }
 
   static async verifyEmail(token) {

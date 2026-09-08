@@ -1,12 +1,12 @@
 :root{--navy:var(--st-primary);--ink:var(--st-on-surface);--muted:var(--st-on-surface-variant);--line:var(--st-outline-variant);--surface:var(--st-surface-container-lowest);--bg:var(--st-background);--low:var(--st-risk-low);--moderate:var(--st-risk-moderate);--high:var(--st-error)}
 *{box-sizing:border-box} body{margin:0;font:var(--st-font-size-body)/var(--st-line-height-body) var(--st-font-body);background:var(--bg);color:var(--ink)}
 h1,h2,h3,.profile-name{font-family:var(--st-font-heading)}
-.sub{color:var(--muted);font-size: var(--st-font-size-body);margin-top:4px}
+.sub{color:var(--muted);font-size: var(--st-font-size-caption);margin-top:4px}
 .grid{display:grid;grid-template-columns:minmax(520px,1.5fr) minmax(300px,.8fr);gap:18px;flex:1;min-height:0} .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--st-card-radius);padding:var(--st-card-padding);box-shadow:var(--st-shadow-sm);display:flex;flex-direction:column;min-height:0}
-.card h2{font-size:var(--st-font-size-heading);font-weight:600;color:var(--ink)}
+.card h2{font-size:var(--st-font-size-body-lg);font-weight:600;color:var(--ink)}
 .mapwrap{flex:1;min-height:420px;position:relative;overflow:hidden;cursor:grab;touch-action:none} .mapwrap svg{width:100%;height:100%;display:block}
 .mapwrap.dragging{cursor:grabbing;user-select:none} .mapwrap.dragging *{cursor:grabbing!important} .legend{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:8px;color:var(--muted)} .dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px}
-.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0} .stat{border:1px solid var(--line);border-radius:var(--st-radius-xl);padding:12px} .stat b{display:block;font-size: var(--st-font-size-display);font-weight:700} .stat small{color:var(--muted);font-size:var(--st-font-size-caption)}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0} .stat{border:1px solid var(--line);border-radius:var(--st-radius-xl);padding:12px} .stat b{display:block;font-size: var(--st-font-size-title);font-weight:700} .stat small{color:var(--muted);font-size:var(--st-font-size-caption)}
 .barrow{display:grid;grid-template-columns:78px 1fr 36px;gap:8px;align-items:center;margin:10px 0} .track{height:12px;border-radius:99px;background:#edf1f6;overflow:hidden} .fill{height:100%;width:0;border-radius:99px;transition:width .35s ease} .high{background:var(--high)} .moderate{background:var(--moderate)} .low{background:var(--low)}
 .levelchart{display:grid;gap:9px;margin-top:16px} .levelbar{display:grid;grid-template-columns:80px 1fr 34px;gap:8px;align-items:center} .levelbar .fill{background:var(--st-chart-tertiary)}
 .notice{background:var(--st-info-light);border:1px solid var(--line);border-radius:var(--st-radius-xl);padding:11px;color:var(--ink);margin-top:12px} .selected-title{font-size:var(--st-font-size-heading);font-weight:800;margin:3px 0 2px;display:flex;align-items:center;gap:9px} .empty{color:var(--muted);padding:22px 0;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;flex:1}
@@ -108,34 +108,34 @@ h1,h2,h3,.profile-name{font-family:var(--st-font-heading)}
   padding-top:12px;
   border-top:1px solid var(--line);
 }
-.map-legend-head strong{font-size:13px;color:var(--ink)}
-.map-legend-head span{font-size:11px;color:var(--muted);text-align:right}
+.map-legend-head strong{font-size:var(--st-font-size-caption);color:var(--ink)}
+.map-legend-head span{font-size:var(--st-font-size-micro);color:var(--muted);text-align:right}
 .legend-hint{display:flex;align-items:center;gap:5px}
-.legend-hint .material-symbols-outlined{font-size:16px}
+.legend-hint .material-symbols-outlined{font-size:1.125rem}
 .dashboard-summary-card{gap:0}
-.summary-eyebrow{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-.scope-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.summary-eyebrow{font-size:var(--st-font-size-micro);font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.scope-meta{font-size:var(--st-font-size-caption);color:var(--muted);margin-top:2px}
 .dashboard-summary-card .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:18px 0}
 .dashboard-summary-card .stat{position:relative;padding:14px 15px;background:#fff}
-.dashboard-summary-card .stat b{font-size:26px;line-height:1.1;margin-top:3px}
-.dashboard-summary-card .stat span{display:block;margin-top:5px;font-size:10px;color:var(--muted);line-height:1.25}
+.dashboard-summary-card .stat b{font-size:var(--st-font-size-title);line-height:1.1;margin-top:3px}
+.dashboard-summary-card .stat span{display:block;margin-top:5px;font-size:var(--st-font-size-micro);color:var(--muted);line-height:1.25}
 .dashboard-summary-card .stat--high{border-left:4px solid var(--high)}
 .dashboard-summary-card .stat--moderate{border-left:4px solid var(--moderate)}
 .dashboard-summary-card .stat--low{border-left:4px solid var(--low)}
 .dashboard-section{padding-top:16px;margin-top:4px;border-top:1px solid var(--line)}
 .dashboard-section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}
-.dashboard-section-head h3{margin:0;font-size:14px}
-.dashboard-section-head p{margin:3px 0 0;font-size:11px;color:var(--muted);line-height:1.35}
-.dashboard-summary-card .barrow{grid-template-columns:128px 1fr 44px;margin:12px 0}
+.dashboard-section-head h3{margin:0;font-size:var(--st-font-size-body-lg)}
+.dashboard-section-head p{margin:3px 0 0;font-size:var(--st-font-size-caption);color:var(--muted);line-height:1.35}
+.dashboard-summary-card .barrow{grid-template-columns:130px 1fr 44px;margin:12px 0}
 .bar-label{display:flex;flex-direction:column;gap:1px}
-.bar-label>span{font-size:12px;font-weight:700;color:var(--ink)}
-.bar-label small{font-size:10px;color:var(--muted)}
-.dashboard-summary-card .track{height:14px}
+.bar-label>span{font-size:var(--st-font-size-label);font-weight:700;color:var(--ink)}
+.bar-label small{font-size:var(--st-font-size-micro);color:var(--muted)}
+.dashboard-summary-card .track{height:12px}
 .dashboard-summary-card .levelchart{gap:12px;margin-top:10px}
 .dashboard-summary-card .levelbar{grid-template-columns:150px 1fr 34px;gap:10px}
 .levelbar-label{display:flex;flex-direction:column;min-width:0}
-.levelbar-label strong{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.levelbar-label small{font-size:9px;color:var(--muted)}
+.levelbar-label strong{font-size:var(--st-font-size-label);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.levelbar-label small{font-size:var(--st-font-size-micro);color:var(--muted)}
 @media(min-width:1200px){
   .dashboard-summary-card .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
@@ -148,269 +148,330 @@ h1,h2,h3,.profile-name{font-family:var(--st-font-heading)}
 }
 
 
-/* Desktop dashboard optimization: keep the full map summary visible in one viewport. */
-@media (min-width:981px){
-  body[data-page="Admin Dashboard"]{overflow:hidden;}
-  body[data-page="Admin Dashboard"] .st-content{
-    height:calc(100vh - var(--st-navbar-height));
-    min-height:0;
-    overflow:hidden;
-    padding:14px 18px 16px;
-    gap:8px;
+/* Desktop layout: placeholders expand to the bottom of the entire page */
+@media (min-width: 981px) {
+  body[data-page="Admin Dashboard"] {
+    overflow: hidden;
   }
-  body[data-page="Admin Dashboard"] .st-page-header{
-    flex:none;
-    margin:0 0 4px;
-    gap:12px;
-    flex-wrap:nowrap;
+  body[data-page="Admin Dashboard"] .st-main {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
-  body[data-page="Admin Dashboard"] .st-page-header-title{
-    font-size:clamp(20px,1.55vw,26px);
-    line-height:1.15;
-    white-space:nowrap;
+  body[data-page="Admin Dashboard"] .st-content {
+    flex: 1 1 0;
+    min-height: 0;
+    height: auto;
+    overflow: hidden;
+    padding: 14px 24px 10px;
+    gap: 10px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
   }
-  body[data-page="Admin Dashboard"] .st-page-header-subtitle{
-    margin:0 0 0 auto;
-    font-size:11px;
-    white-space:nowrap;
+  body[data-page="Admin Dashboard"] .st-footer {
+    flex: 0 0 auto;
+    padding: 10px var(--st-margin-desktop);
+    min-height: 48px;
+    background: var(--st-footer-background);
+    border-top: var(--st-footer-border);
   }
-  body[data-page="Admin Dashboard"] .grid{
-    min-height:0;
-    height:100%;
-    gap:12px;
-    grid-template-columns:minmax(520px,1.48fr) minmax(360px,.82fr);
+  body[data-page="Admin Dashboard"] .st-page-header {
+    flex: 0 0 auto;
+    margin: 0;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: nowrap;
   }
-  body[data-page="Admin Dashboard"] .card{
-    padding:12px 14px;
-    min-height:0;
-    overflow:hidden;
+  body[data-page="Admin Dashboard"] .st-page-header-title {
+    font-size: var(--st-font-size-title);
+    line-height: 1.2;
+    white-space: nowrap;
   }
-  body[data-page="Admin Dashboard"] .card h2{font-size:16px;line-height:1.15;}
-  body[data-page="Admin Dashboard"] .sub{font-size:10px;margin-top:2px;}
-  body[data-page="Admin Dashboard"] .toolbar{margin:4px 0 7px;gap:8px;}
-  body[data-page="Admin Dashboard"] .search-box select{padding:7px 30px 7px 10px;font-size:11px;}
-  body[data-page="Admin Dashboard"] .legend-hint{font-size:10px;}
-  body[data-page="Admin Dashboard"] .mapwrap{min-height:0;height:auto;flex:1;}
-  body[data-page="Admin Dashboard"] .zoom-controls{right:8px;bottom:8px;}
-  body[data-page="Admin Dashboard"] .zoom-controls button{width:28px;height:28px;font-size:14px;}
-  body[data-page="Admin Dashboard"] .map-legend-head{margin-top:6px;padding-top:6px;gap:8px;}
-  body[data-page="Admin Dashboard"] .map-legend-head strong{font-size:10px;}
-  body[data-page="Admin Dashboard"] .map-legend-head span{font-size:9px;}
-  body[data-page="Admin Dashboard"] .legend{margin-top:3px;gap:3px;}
-  body[data-page="Admin Dashboard"] .legend-item{padding:3px 6px;font-size:10px;gap:4px;}
-  body[data-page="Admin Dashboard"] .legend-count{font-size:9px;padding:1px 5px;}
+  body[data-page="Admin Dashboard"] .st-page-header-subtitle {
+    margin: 0 0 0 auto;
+    font-size: var(--st-font-size-small);
+    white-space: nowrap;
+  }
+  body[data-page="Admin Dashboard"] .grid {
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    gap: 16px;
+    display: grid;
+    grid-template-columns: minmax(560px, 1.28fr) minmax(420px, 0.92fr);
+    align-items: stretch;
+  }
+  body[data-page="Admin Dashboard"] .card {
+    height: 100%;
+    min-height: 0;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  body[data-page="Admin Dashboard"] .card h2 {
+    font-size: var(--st-font-size-body-lg);
+    line-height: 1.25;
+    flex: 0 0 auto;
+  }
+  body[data-page="Admin Dashboard"] .sub {
+    font-size: var(--st-font-size-caption);
+    margin-top: 2px;
+    flex: 0 0 auto;
+  }
+  body[data-page="Admin Dashboard"] .toolbar {
+    margin: 8px 0 10px;
+    gap: 10px;
+    flex: 0 0 auto;
+  }
+  body[data-page="Admin Dashboard"] .search-box {
+    max-width: 260px;
+  }
+  body[data-page="Admin Dashboard"] .search-box select {
+    padding: 8px 32px 8px 12px;
+    font-size: var(--st-font-size-label);
+  }
+  body[data-page="Admin Dashboard"] .legend-hint {
+    font-size: var(--st-font-size-caption);
+    margin-left: auto;
+  }
+  body[data-page="Admin Dashboard"] .mapwrap {
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    border-radius: 10px;
+    border: 1px solid rgba(15, 60, 96, 0.08);
+    position: relative;
+    overflow: hidden;
+  }
+  body[data-page="Admin Dashboard"] .mapwrap svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  body[data-page="Admin Dashboard"] .zoom-controls {
+    right: 10px;
+    bottom: 10px;
+  }
+  body[data-page="Admin Dashboard"] .zoom-controls button {
+    width: 32px;
+    height: 32px;
+    font-size: var(--st-font-size-body);
+  }
+  body[data-page="Admin Dashboard"] .map-legend-head {
+    margin-top: 10px;
+    padding-top: 10px;
+    gap: 8px;
+    flex: 0 0 auto;
+  }
+  body[data-page="Admin Dashboard"] .map-legend-head strong {
+    font-size: var(--st-font-size-caption);
+  }
+  body[data-page="Admin Dashboard"] .map-legend-head span {
+    font-size: var(--st-font-size-micro);
+  }
+  body[data-page="Admin Dashboard"] .legend {
+    margin-top: 6px;
+    gap: 6px;
+    flex: 0 0 auto;
+  }
+  body[data-page="Admin Dashboard"] .legend-item {
+    padding: 4px 8px;
+    font-size: var(--st-font-size-caption);
+    gap: 4px;
+  }
+  body[data-page="Admin Dashboard"] .legend-count {
+    font-size: var(--st-font-size-micro);
+    padding: 1px 6px;
+  }
 
-  body[data-page="Admin Dashboard"] .dashboard-summary-card{overflow:hidden;}
-  body[data-page="Admin Dashboard"] .summary-eyebrow{font-size:9px;}
-  body[data-page="Admin Dashboard"] .selected-title{font-size:17px;margin:1px 0;}
-  body[data-page="Admin Dashboard"] .scope-meta{font-size:9px;margin-top:0;}
-  body[data-page="Admin Dashboard"] .dashboard-summary-card .stats{
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:6px;
-    margin:8px 0;
+  /* Right-side summary card */
+  body[data-page="Admin Dashboard"] .dashboard-summary-card {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    scrollbar-width: thin;
   }
-  body[data-page="Admin Dashboard"] .dashboard-summary-card .stat{
-    padding:7px 8px;
-    border-radius:10px;
+  body[data-page="Admin Dashboard"] .summary-eyebrow {
+    font-size: var(--st-font-size-micro);
+    flex: 0 0 auto;
   }
-  body[data-page="Admin Dashboard"] .dashboard-summary-card .stat small{font-size:8.5px;line-height:1.1;}
-  body[data-page="Admin Dashboard"] .dashboard-summary-card .stat b{font-size:19px;line-height:1;margin-top:2px;}
-  body[data-page="Admin Dashboard"] .dashboard-summary-card .stat span{font-size:7.5px;margin-top:2px;line-height:1.1;}
-  body[data-page="Admin Dashboard"] .dashboard-section{
-    padding-top:7px;
-    margin-top:1px;
+  body[data-page="Admin Dashboard"] .selected-title {
+    font-size: var(--st-font-size-heading);
+    margin: 2px 0;
+    flex: 0 0 auto;
   }
-  body[data-page="Admin Dashboard"] .dashboard-section-head{margin-bottom:4px;gap:6px;}
-  body[data-page="Admin Dashboard"] .dashboard-section-head h3{font-size:11px;line-height:1.1;}
-  body[data-page="Admin Dashboard"] .dashboard-section-head p{font-size:8.5px;margin-top:1px;line-height:1.2;}
-  body[data-page="Admin Dashboard"] .clc-list{gap:3px;margin-top:4px;}
-  body[data-page="Admin Dashboard"] .clc-row{padding:5px 7px;border-radius:8px;gap:6px;}
-  body[data-page="Admin Dashboard"] .clc-row-name{font-size:9.5px;}
-  body[data-page="Admin Dashboard"] .clc-row-meta{font-size:8px;}
-  body[data-page="Admin Dashboard"] .clc-row-status{font-size:7.5px;padding:2px 6px;}
-  body[data-page="Admin Dashboard"] .clc-list-pager{gap:8px;margin-top:2px;}
-  body[data-page="Admin Dashboard"] .clc-pager-btn{width:20px;height:20px;font-size:9px;}
-  body[data-page="Admin Dashboard"] .clc-pager-info{font-size:8px;}
-  body[data-page="Admin Dashboard"] .dashboard-summary-card .barrow{
-    grid-template-columns:96px 1fr 34px;
-    gap:6px;
-    margin:5px 0;
+  body[data-page="Admin Dashboard"] .scope-meta {
+    font-size: var(--st-font-size-caption);
+    margin-top: 2px;
+    flex: 0 0 auto;
   }
-  body[data-page="Admin Dashboard"] .bar-label{gap:0;}
-  body[data-page="Admin Dashboard"] .bar-label>span{font-size:9.5px;line-height:1.05;}
-  body[data-page="Admin Dashboard"] .bar-label small{font-size:7.5px;}
-  body[data-page="Admin Dashboard"] .dashboard-summary-card .track{height:8px;}
-  body[data-page="Admin Dashboard"] .dashboard-summary-card .barrow>b{font-size:9.5px;}
-  body[data-page="Admin Dashboard"] .dashboard-summary-card .levelchart{gap:4px;margin-top:3px;}
-  body[data-page="Admin Dashboard"] .dashboard-summary-card .levelbar{
-    grid-template-columns:112px 1fr 24px;
-    gap:6px;
+  body[data-page="Admin Dashboard"] .empty {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 0;
+    font-size: var(--st-font-size-small);
   }
-  body[data-page="Admin Dashboard"] .levelbar-label strong{font-size:8.5px;line-height:1.05;}
-  body[data-page="Admin Dashboard"] .levelbar-label small{font-size:7px;line-height:1.05;}
-  body[data-page="Admin Dashboard"] .levelbar>b{font-size:9px;}
-  body[data-page="Admin Dashboard"] .empty{padding:10px 0;font-size:10px;}
+  body[data-page="Admin Dashboard"] #panel {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-summary-card .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 10px 0;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-summary-card .stat {
+    padding: 10px 12px;
+    border-radius: 10px;
+    min-height: 62px;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-summary-card .stat:last-child {
+    grid-column: 1 / -1;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-summary-card .stat small {
+    font-size: var(--st-font-size-caption);
+    line-height: 1.2;
+    letter-spacing: .01em;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-summary-card .stat b {
+    font-size: var(--st-font-size-title);
+    line-height: 1.1;
+    margin-top: 2px;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-summary-card .stat span {
+    font-size: var(--st-font-size-micro);
+    margin-top: 2px;
+    line-height: 1.2;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-section {
+    padding-top: 10px;
+    margin-top: 6px;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-section-head {
+    margin-bottom: 6px;
+    gap: 6px;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-section-head h3 {
+    font-size: var(--st-font-size-body-lg);
+    line-height: 1.2;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-section-head p {
+    font-size: var(--st-font-size-caption);
+    margin-top: 2px;
+    line-height: 1.3;
+  }
+  body[data-page="Admin Dashboard"] .clc-list {
+    gap: 4px;
+    margin-top: 6px;
+  }
+  body[data-page="Admin Dashboard"] .clc-row {
+    padding: 8px 10px;
+    border-radius: 8px;
+    gap: 8px;
+  }
+  body[data-page="Admin Dashboard"] .clc-row-name {
+    font-size: var(--st-font-size-label);
+  }
+  body[data-page="Admin Dashboard"] .clc-row-meta {
+    font-size: var(--st-font-size-caption);
+  }
+  body[data-page="Admin Dashboard"] .clc-row-status {
+    font-size: var(--st-font-size-micro);
+    padding: 2px 7px;
+  }
+  body[data-page="Admin Dashboard"] .clc-list-pager {
+    gap: 10px;
+    margin-top: 4px;
+  }
+  body[data-page="Admin Dashboard"] .clc-pager-btn {
+    width: 24px;
+    height: 24px;
+    font-size: var(--st-font-size-caption);
+  }
+  body[data-page="Admin Dashboard"] .clc-pager-info {
+    font-size: var(--st-font-size-caption);
+  }
+  body[data-page="Admin Dashboard"] .dashboard-summary-card .barrow {
+    grid-template-columns: 120px 1fr 38px;
+    gap: 8px;
+    margin: 8px 0;
+  }
+  body[data-page="Admin Dashboard"] .bar-label {
+    gap: 1px;
+  }
+  body[data-page="Admin Dashboard"] .bar-label > span {
+    font-size: var(--st-font-size-label);
+    line-height: 1.15;
+  }
+  body[data-page="Admin Dashboard"] .bar-label small {
+    font-size: var(--st-font-size-micro);
+  }
+  body[data-page="Admin Dashboard"] .dashboard-summary-card .track {
+    height: 10px;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-summary-card .barrow > b {
+    font-size: var(--st-font-size-label);
+  }
+  body[data-page="Admin Dashboard"] .dashboard-summary-card .levelchart {
+    gap: 6px;
+    margin-top: 6px;
+  }
+  body[data-page="Admin Dashboard"] .dashboard-summary-card .levelbar {
+    grid-template-columns: 135px 1fr 30px;
+    gap: 8px;
+  }
+  body[data-page="Admin Dashboard"] .levelbar-label strong {
+    font-size: var(--st-font-size-label);
+    line-height: 1.15;
+  }
+  body[data-page="Admin Dashboard"] .levelbar-label small {
+    font-size: var(--st-font-size-micro);
+    line-height: 1.15;
+  }
+  body[data-page="Admin Dashboard"] .levelbar > b {
+    font-size: var(--st-font-size-label);
+  }
 }
 
-@media (max-width:980px), (max-height:720px){
-  body[data-page="Admin Dashboard"]{overflow:auto;}
-  body[data-page="Admin Dashboard"] .st-content{
-    height:auto;
-    min-height:calc(100vh - var(--st-navbar-height));
-    overflow:visible;
+/* Widescreen optimization */
+@media (min-width: 1300px) {
+  body[data-page="Admin Dashboard"] .grid {
+    grid-template-columns: minmax(620px, 1.28fr) minmax(455px, 0.88fr);
   }
 }
 
-
-/* Cleaner desktop map/dashboard spacing revision. */
-@media (min-width:981px) and (min-height:721px){
-  body[data-page="Admin Dashboard"] .st-content{
-    padding:12px 16px 14px;
-    gap:10px;
+/* Mobile & narrow viewports */
+@media (max-width: 980px), (max-height: 560px) {
+  body[data-page="Admin Dashboard"] {
+    overflow: auto;
   }
-  body[data-page="Admin Dashboard"] .st-page-header{
-    align-items:center;
-    margin-bottom:6px;
+  body[data-page="Admin Dashboard"] .st-content {
+    height: auto;
+    min-height: calc(100vh - var(--st-navbar-height));
+    overflow: visible;
+    padding: 16px;
   }
-  body[data-page="Admin Dashboard"] .grid{
-    grid-template-columns:minmax(560px,1.22fr) minmax(430px,.9fr);
-    gap:14px;
-    align-items:start;
+  body[data-page="Admin Dashboard"] .grid {
+    grid-template-columns: 1fr;
+    height: auto;
   }
-  body[data-page="Admin Dashboard"] .grid > .card:first-child{
-    height:100%;
+  body[data-page="Admin Dashboard"] .mapwrap {
+    height: 480px;
+    flex: none;
   }
-  body[data-page="Admin Dashboard"] .dashboard-summary-card{
-    align-self:start;
-    height:auto;
-    max-height:100%;
-    overflow-y:auto;
-    scrollbar-width:thin;
-  }
-  body[data-page="Admin Dashboard"] .card{
-    padding:14px;
-    border-radius:14px;
-  }
-  body[data-page="Admin Dashboard"] .card h2{
-    font-size:17px;
-  }
-  body[data-page="Admin Dashboard"] .mapwrap{
-    flex:none;
-    height:clamp(390px,calc(100vh - 250px),510px);
-    border-radius:10px;
-    border:1px solid rgba(15,60,96,.08);
-  }
-  body[data-page="Admin Dashboard"] .toolbar{
-    margin:6px 0 8px;
-  }
-  body[data-page="Admin Dashboard"] .search-box{
-    max-width:260px;
-  }
-  body[data-page="Admin Dashboard"] .legend-hint{
-    margin-left:auto;
-    color:var(--muted);
-  }
-  body[data-page="Admin Dashboard"] .map-legend-head{
-    margin-top:8px;
-    padding-top:8px;
-  }
-  body[data-page="Admin Dashboard"] .legend{
-    margin-top:5px;
-    gap:6px;
-  }
-  body[data-page="Admin Dashboard"] .legend-item{
-    padding:4px 8px;
-  }
-  body[data-page="Admin Dashboard"] .selected-title{
-    font-size:18px;
-    line-height:1.2;
-  }
-  body[data-page="Admin Dashboard"] .dashboard-summary-card .stats{
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:8px;
-    margin:10px 0 8px;
-  }
-  body[data-page="Admin Dashboard"] .dashboard-summary-card .stat{
-    min-height:62px;
-    padding:9px 10px;
-    border-radius:10px;
-  }
-  body[data-page="Admin Dashboard"] .dashboard-summary-card .stat:last-child{
-    grid-column:1 / -1;
-  }
-  body[data-page="Admin Dashboard"] .dashboard-summary-card .stat small{
-    font-size:9px;
-    line-height:1.15;
-    letter-spacing:.01em;
-  }
-  body[data-page="Admin Dashboard"] .dashboard-summary-card .stat b{
-    font-size:21px;
-    margin-top:3px;
-  }
-  body[data-page="Admin Dashboard"] .dashboard-summary-card .stat span{
-    font-size:8px;
-    margin-top:3px;
-  }
-  body[data-page="Admin Dashboard"] .dashboard-section{
-    padding-top:9px;
-    margin-top:7px;
-  }
-  body[data-page="Admin Dashboard"] .dashboard-section-head{
-    margin-bottom:5px;
-  }
-  body[data-page="Admin Dashboard"] .dashboard-section-head h3{
-    font-size:12px;
-  }
-  body[data-page="Admin Dashboard"] .dashboard-section-head p{
-    font-size:9px;
-  }
-  body[data-page="Admin Dashboard"] .dashboard-summary-card .barrow{
-    grid-template-columns:100px 1fr 34px;
-    gap:7px;
-    margin:5px 0;
-  }
-  body[data-page="Admin Dashboard"] .dashboard-summary-card .track{
-    height:9px;
-  }
-  body[data-page="Admin Dashboard"] .bar-label>span{
-    font-size:10px;
-  }
-  body[data-page="Admin Dashboard"] .bar-label small{
-    font-size:7.5px;
-  }
-  body[data-page="Admin Dashboard"] .dashboard-summary-card .levelchart{
-    gap:5px;
-    margin-top:4px;
-  }
-  body[data-page="Admin Dashboard"] .dashboard-summary-card .levelbar{
-    grid-template-columns:126px 1fr 25px;
-    gap:7px;
-  }
-  body[data-page="Admin Dashboard"] .levelbar-label strong{
-    font-size:9px;
-  }
-  body[data-page="Admin Dashboard"] .levelbar-label small{
-    font-size:7px;
-  }
-}
-
-@media (min-width:1300px) and (min-height:721px){
-  body[data-page="Admin Dashboard"] .grid{
-    grid-template-columns:minmax(620px,1.28fr) minmax(455px,.88fr);
-  }
-  body[data-page="Admin Dashboard"] .mapwrap{
-    height:clamp(410px,calc(100vh - 245px),535px);
-  }
-}
-
-/* Follow-up fix: remove extra empty space under the map legend on desktop. */
-@media (min-width:981px) and (min-height:721px){
-  body[data-page="Admin Dashboard"] .grid > .card:first-child{
-    height:auto;
-    align-self:start;
-  }
-
-  body[data-page="Admin Dashboard"] .mapwrap{
-    height:clamp(380px,calc(100vh - 315px),520px);
+  body[data-page="Admin Dashboard"] .dashboard-summary-card {
+    height: auto;
+    max-height: none;
   }
 }

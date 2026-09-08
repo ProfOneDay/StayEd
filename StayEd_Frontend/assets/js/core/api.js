@@ -431,18 +431,251 @@ class API {
   }
 
   static getNotifications() {
-    return this.get("/notifications");
+    if (window.CONFIG?.USE_MOCK_API || window.CONFIG?.DEMO_MODE) {
+      return Promise.resolve(this.mockNotifications());
+    }
+
+    return this.get("/notifications").catch(() => this.mockNotifications());
+  }
+
+  static mockNotificationKey() {
+    const role = window.Auth?.role ? Auth.role() : "teacher";
+    return `stayed_demo_notifications_${role || "teacher"}`;
+  }
+
+  static mockNotificationSeed() {
+    return [
+      {
+        id: 1,
+        type: "risk",
+        title: "High-risk learner follow-up",
+        message: "Three high-risk learners in San Jose CLC, Binalonan municipality, need intervention review this week.",
+        read: false,
+        time: "2 hours ago",
+        metaLabel: "High",
+        link: "dashboard.html?municipality=binalonan",
+      },
+      {
+        id: 2,
+        type: "system",
+        title: "System update",
+        message: "The demo database has been refreshed for testing and sample data review.",
+        read: true,
+        time: "Yesterday",
+        metaLabel: "Demo",
+        link: "settings.html",
+      },
+    ];
+  }
+
+  static mockNotifications() {
+    const key = this.mockNotificationKey();
+    let notifications;
+
+    try {
+      notifications = JSON.parse(localStorage.getItem(key) || "null");
+    } catch {
+      notifications = null;
+    }
+
+    if (Array.isArray(notifications)) {
+      notifications = notifications.filter(
+        (notification) => notification.title !== "New learner registration",
+      );
+      notifications = notifications.map((notification) =>
+        notification.title === "High-risk learner follow-up"
+          ? {
+              ...notification,
+              message: "Three high-risk learners in San Jose CLC, Binalonan municipality, need intervention review this week.",
+              link: "dashboard.html?municipality=binalonan",
+            }
+          : notification,
+      );
+    }
+
+    if (!Array.isArray(notifications)) {
+      notifications = this.mockNotificationSeed();
+    }
+
+    localStorage.setItem(key, JSON.stringify(notifications));
+
+    return {
+      data: notifications,
+    };
+  }
+
+  static updateMockNotifications(update) {
+    const current = this.mockNotifications().data;
+    const next = update(current);
+    localStorage.setItem(this.mockNotificationKey(), JSON.stringify(next));
+    return { data: next };
+  }
+
+  static addMockTeacherRegistration(fullName, email) {
+    const key = "stayed_demo_notifications_admin";
+    let notifications;
+
+    try {
+      notifications = JSON.parse(localStorage.getItem(key) || "null");
+    } catch {
+      notifications = null;
+    }
+
+    notifications = Array.isArray(notifications)
+      ? notifications.filter((notification) => notification.title !== "New learner registration")
+      : this.mockNotificationSeed();
+
+    notifications.unshift({
+      id: Date.now(),
+      type: "info",
+      title: "New Teacher Registration",
+      message: `${fullName} (${email}) has registered and is awaiting approval.`,
+      read: false,
+      time: "Just now",
+      metaLabel: "Pending",
+      link: "user-management.html",
+    });
+    localStorage.setItem(key, JSON.stringify(notifications));
+  }
+
+  static mockEnrollmentListing() {
+    return {
+      data: [
+        {
+          learner_id: 101,
+          lrn: "123456789012",
+          first_name: "Maria",
+          last_name: "Santos",
+          sex: "Female",
+          enrollment_id: 1,
+          enrollment_status: "ENROLLED",
+          enrollment_date: "2026-08-01",
+          learning_modality: "FACE_TO_FACE",
+          class_id: 11,
+          class_name: "Elementary 2026",
+          learning_level: "ELEMENTARY",
+          school_year: "2026-2027",
+          semester: "FIRST",
+          clc_id: 1,
+          clc_name: "San Jose CLC",
+          teacher_id: 21,
+          teacher_name: "Ana Dela Cruz",
+        },
+        {
+          learner_id: 102,
+          lrn: "123456789013",
+          first_name: "Jose",
+          last_name: "Reyes",
+          sex: "Male",
+          enrollment_id: 2,
+          enrollment_status: "ENROLLED",
+          enrollment_date: "2026-08-02",
+          learning_modality: "MODULAR",
+          class_id: 12,
+          class_name: "JHS 2026",
+          learning_level: "JUNIOR_HIGH_SCHOOL",
+          school_year: "2026-2027",
+          semester: "SECOND",
+          clc_id: 2,
+          clc_name: "Mabini CLC",
+          teacher_id: 22,
+          teacher_name: "Ramon Castro",
+        },
+        {
+          learner_id: 103,
+          lrn: "123456789014",
+          first_name: "Cristina",
+          last_name: "Luna",
+          sex: "Female",
+          enrollment_id: 3,
+          enrollment_status: "ENROLLED",
+          enrollment_date: "2026-08-03",
+          learning_modality: "BLENDED",
+          class_id: 13,
+          class_name: "SHS 2026",
+          learning_level: "SENIOR_HIGH_SCHOOL",
+          school_year: "2026-2027",
+          semester: "SUMMER",
+          clc_id: 3,
+          clc_name: "Laoac CLC",
+          teacher_id: 23,
+          teacher_name: "Joel Mendoza",
+        },
+        {
+          learner_id: 104,
+          lrn: "123456789015",
+          first_name: "Ruben",
+          last_name: "Bautista",
+          sex: "Male",
+          enrollment_id: 4,
+          enrollment_status: "ENROLLED",
+          enrollment_date: "2026-08-04",
+          learning_modality: "FACE_TO_FACE",
+          class_id: 14,
+          class_name: "Elementary 2026",
+          learning_level: "ELEMENTARY",
+          school_year: "2025-2026",
+          semester: "WHOLE_YEAR",
+          clc_id: 1,
+          clc_name: "San Jose CLC",
+          teacher_id: 21,
+          teacher_name: "Ana Dela Cruz",
+        },
+        {
+          learner_id: 105,
+          lrn: "123456789016",
+          first_name: "Leah",
+          last_name: "Navarro",
+          sex: "Female",
+          enrollment_id: 5,
+          enrollment_status: "ENROLLED",
+          enrollment_date: "2026-08-05",
+          learning_modality: "MODULAR",
+          class_id: 15,
+          class_name: "BLP 2026",
+          learning_level: "BLP",
+          school_year: "2025-2026",
+          semester: "FIRST",
+          clc_id: 4,
+          clc_name: "Aguilar CLC",
+          teacher_id: 24,
+          teacher_name: "Sofia Ramos",
+        },
+      ],
+    };
   }
 
   static markNotificationRead(id) {
+    if (window.CONFIG?.USE_MOCK_API || window.CONFIG?.DEMO_MODE) {
+      return Promise.resolve(this.updateMockNotifications((notifications) =>
+        notifications.map((notification) =>
+          String(notification.id) === String(id)
+            ? { ...notification, read: true }
+            : notification,
+        ),
+      ));
+    }
+
     return this.post(`/notifications/${id}/read`);
   }
 
   static markAllNotificationsRead() {
+    if (window.CONFIG?.USE_MOCK_API || window.CONFIG?.DEMO_MODE) {
+      return Promise.resolve(this.updateMockNotifications((notifications) =>
+        notifications.map((notification) => ({ ...notification, read: true })),
+      ));
+    }
+
     return this.post("/notifications/read-all");
   }
 
   static deleteNotification(id) {
+    if (window.CONFIG?.USE_MOCK_API || window.CONFIG?.DEMO_MODE) {
+      return Promise.resolve(this.updateMockNotifications((notifications) =>
+        notifications.filter((notification) => String(notification.id) !== String(id)),
+      ));
+    }
+
     return this.delete(`/notifications/${id}`);
   }
 
@@ -775,7 +1008,11 @@ class API {
   }
 
   static getEnrollmentListingReport() {
-    return this.get("/reports/enrollment-listing");
+    if (window.CONFIG?.USE_MOCK_API || window.CONFIG?.DEMO_MODE) {
+      return Promise.resolve(this.mockEnrollmentListing());
+    }
+
+    return this.get("/reports/enrollment-listing").catch(() => this.mockEnrollmentListing());
   }
 }
 

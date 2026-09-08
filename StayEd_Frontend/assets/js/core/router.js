@@ -17,7 +17,10 @@ class Router {
     "/calendar": "teacher/calendar.html",
     "/learner-records": "teacher/learner-records.html",
     "/notifications": "teacher/notifications.html",
+    "/admin/notifications": "admin/notifications.html",
     "/settings": "teacher/settings.html",
+    "/admin/settings": "admin/settings.html",
+    "/admin/dashboard": "admin/dashboard.html",
   };
 
   static BREADCRUMBS = {
@@ -117,6 +120,14 @@ class Router {
     ],
 
     "admin/dashboard.html": [{ label: "Dashboard" }],
+    "admin/notifications.html": [
+      { label: "Dashboard", href: "dashboard.html" },
+      { label: "Notifications" },
+    ],
+    "admin/reports.html": [
+      { label: "Dashboard", href: "dashboard.html" },
+      { label: "Reports" },
+    ],
     "admin/user-management.html": [
       { label: "Dashboard", href: "dashboard.html" },
       { label: "User Management" },
@@ -147,6 +158,20 @@ class Router {
   }
 
   static resolve(route) {
+    const currentRole = window.Auth?.role ? Auth.role() : "teacher";
+
+    if (route === "/notifications" && currentRole === "admin") {
+      return this.toPagesRelative("admin/notifications.html");
+    }
+
+    if (route === "/settings" && currentRole === "admin") {
+      return this.toPagesRelative("admin/settings.html");
+    }
+
+    if (route === "/dashboard" && currentRole === "admin") {
+      return this.toPagesRelative("admin/dashboard.html");
+    }
+
     const target = this.ROUTES[route];
 
     if (!target) {

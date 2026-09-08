@@ -15,7 +15,7 @@ const map=document.querySelector('.mapwrap svg');
 const zoomGroup=document.getElementById('zoomGroup');
 const wrap=document.querySelector('.mapwrap');
 const VB_CENTER={x:400,y:266.5};
-const MIN_SCALE=1,MAX_SCALE=5,DEFAULT_SCALE=1;
+const MIN_SCALE=0.8,MAX_SCALE=5,DEFAULT_SCALE=1.2;
 let mapScaleState=DEFAULT_SCALE;
 let mapTx=VB_CENTER.x*(1-DEFAULT_SCALE), mapTy=VB_CENTER.y*(1-DEFAULT_SCALE);
 function applyMapTransform(){
@@ -245,7 +245,12 @@ async function loadDashboard(){
   });
   recolorMap();
   populateMunicipalitySelect();
-  selectAllMunicipalities();
+  const requestedMunicipality = new URLSearchParams(window.location.search).get('municipality');
+  if (requestedMunicipality && municipalityData[requestedMunicipality]) {
+    selectMunicipality(requestedMunicipality);
+  } else {
+    selectAllMunicipalities();
+  }
 }
 loadDashboard();
 

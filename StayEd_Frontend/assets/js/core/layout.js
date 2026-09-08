@@ -253,6 +253,13 @@ class Layout {
 
     if (button) {
       button.addEventListener("click", () => {
+        const userRole = window.Auth?.role ? Auth.role() : "teacher";
+
+        if (userRole === "admin") {
+          window.location.href = "notifications.html";
+          return;
+        }
+
         Router?.go("/notifications") ??
           (window.location.href = "notifications.html");
       });

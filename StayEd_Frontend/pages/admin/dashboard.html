@@ -16,6 +16,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Libre+Franklin:wght@600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 <link rel="stylesheet" href="../../assets/css/main.css" />
+<link
+  rel="icon"
+  type="image/x-icon"
+  href="../../assets/img/brand/favicon.ico"
+/>
+<link
+  rel="apple-touch-icon"
+  href="../../assets/img/brand/apple-touch-icon.png"
+/>
 <title>StayEd Admin Risk Map Demo</title>
 </head>
 <body class="st-app" data-page="Admin Dashboard">
@@ -80,7 +89,9 @@
 <section class="card dashboard-summary-card"><div class="summary-eyebrow">Selected Area</div><div id="name" class="selected-title" aria-live="polite">Choose a municipality</div><div id="scopeMeta" class="scope-meta">Select an area to view its learner summary.</div><div id="empty" class="empty">Click a municipality on the map to load its data here.</div><div id="panel" hidden><div class="stats"><div class="stat"><small>Total learners</small><b id="total">0</b><span>Current learners in this view</span></div><div class="stat"><small>Community Learning Centers</small><b id="clcs">0</b><span>CLCs represented</span></div><div class="stat stat--high"><small>High risk</small><b id="high">0</b><span>Needs closer follow-up</span></div><div class="stat stat--moderate"><small>Moderate risk</small><b id="moderate">0</b><span>Needs monitoring</span></div><div class="stat stat--low"><small>Low risk</small><b id="lowSummary">0</b><span>Currently lower concern</span></div></div>
 <div id="clcListSection" class="dashboard-section"><div class="dashboard-section-head"><div><h3>Community Learning Centers</h3><p>Centers included in the selected municipality.</p></div></div><div id="clcList" class="clc-list"></div></div>
 <div class="dashboard-section"><div class="dashboard-section-head"><div><h3>Risk Distribution</h3><p>Current learner risk levels for the selected area.</p></div></div><div class="barrow"><div class="bar-label"><span>High Risk</span><small id="highCountText">0 learners</small></div><div class="track"><div id="highBar" class="fill high"></div></div><b id="highPct">0%</b></div><div class="barrow"><div class="bar-label"><span>Moderate Risk</span><small id="modCountText">0 learners</small></div><div class="track"><div id="modBar" class="fill moderate"></div></div><b id="modPct">0%</b></div><div class="barrow"><div class="bar-label"><span>Low Risk</span><small id="lowCountText">0 learners</small></div><div class="track"><div id="lowBar" class="fill low"></div></div><b id="lowPct">0%</b></div></div>
-<div class="dashboard-section"><div class="dashboard-section-head"><div><h3>Learning Level Distribution</h3><p>Shows how learners are distributed across ALS learning levels.</p></div></div><div id="levels" class="levelchart"></div></div></div></section></div></main></div>
+<div class="dashboard-section"><div class="dashboard-section-head"><div><h3>Learning Level Distribution</h3><p>Shows how learners are distributed across ALS learning levels.</p></div></div><div id="levels" class="levelchart"></div></div></div></section></div></main>
+<div data-component="layout/footer"></div>
+</div>
 <div data-component="layout/toast"></div>
 <div data-component="layout/modal"></div>
 <div class="toast" id="toast"></div>
