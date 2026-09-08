@@ -164,7 +164,7 @@ h1,h2,h3,.profile-name{font-family:var(--st-font-heading)}
     min-height: 0;
     height: auto;
     overflow: hidden;
-    padding: 14px 24px 10px;
+    padding: 14px var(--st-margin-desktop) 10px;
     gap: 10px;
     box-sizing: border-box;
     display: flex;
@@ -200,7 +200,7 @@ h1,h2,h3,.profile-name{font-family:var(--st-font-heading)}
     height: 100%;
     gap: 16px;
     display: grid;
-    grid-template-columns: minmax(560px, 1.28fr) minmax(420px, 0.92fr);
+    grid-template-columns: minmax(0, 1.28fr) minmax(0, 0.92fr);
     align-items: stretch;
   }
   body[data-page="Admin Dashboard"] .card {
