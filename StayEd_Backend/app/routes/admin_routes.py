@@ -447,9 +447,18 @@ def create_user():
                 )
                 user_id = cur.fetchone()["user_id"]
             else:
-                municipality = str(data.get("municipality") or "Unassigned").strip()
+                municipality = str(data.get("municipality") or "").strip()
                 employee_id = str(data.get("employeeId") or "").strip()
                 clc_name = str(data.get("clc") or "").strip()
+
+                if not municipality or not clc_name:
+                    return error("Municipality and CLC assignment are required for teacher accounts.", 422)
+
+                if not fetch_one(
+                    "SELECT clc_id FROM clc WHERE LOWER(clc_name)=LOWER(%s) AND status='ACTIVE'",
+                    (clc_name,),
+                ):
+                    return error("The selected CLC is not available for assignment.", 422)
 
                 cur.execute(
                     """

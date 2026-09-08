@@ -419,6 +419,10 @@ document.getElementById('cr-save-btn').addEventListener('click',async()=>{
     payload.employeeId=document.getElementById('cr-empid').value.trim();
     payload.municipality=createMuniSelect.value;
     payload.clc=createClcSelect.value;
+    if(!payload.municipality||!payload.clc){
+      showToast('Please select a municipality and assign a CLC');
+      return;
+    }
   }
   try{
     const response=await API.post('/admin/users',payload);
