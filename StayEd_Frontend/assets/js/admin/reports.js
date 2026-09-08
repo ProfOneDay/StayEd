@@ -158,7 +158,51 @@ class AdminReports {
       this.apply();
     });
 
-    on("[data-export-csv-enrollment-listing]", "click", () => this.exportCsv());
+    on("[data-preview-enrollment-report]", "click", () => this.previewReport());
+  }
+
+  static previewReport() {
+    const rows = this.state.filtered;
+
+    if (!rows.length) {
+      Toast?.error("No enrollment records match the current filters.");
+      return;
+    }
+
+    ReportPrinter.open({
+      title: "Master Enrollment Listing",
+      subtitle: "StayEd Division-wide enrollment report",
+      meta: [
+        ["Generated", new Date().toLocaleString()],
+        ["Records", String(rows.length)],
+      ],
+      sections: [
+        {
+          title: "Enrollment Records",
+          columns: [
+            "LRN",
+            "Learner",
+            "Learning Level",
+            "Learning Center",
+            "Assigned Teacher",
+            "School Year / Semester",
+            "Modality",
+            "Status",
+          ],
+          rows: rows.map((r) => [
+            r.lrn,
+            `${r.first_name || ""} ${r.last_name || ""}`.trim(),
+            r.learning_level || "—",
+            r.clc_name || "—",
+            r.teacher_name || "—",
+            `${r.school_year || "—"} · ${REPORT_SEMESTER_LABELS[r.semester] || r.semester || "—"}`,
+            REPORT_MODALITY_LABELS[r.learning_modality] || r.learning_modality || "—",
+            r.enrollment_status || "—",
+          ]),
+          emptyText: "No enrollment records match the current filters.",
+        },
+      ],
+    });
   }
 
   static exportCsv() {
@@ -174,6 +218,7 @@ class AdminReports {
       "Last Name",
       "First Name",
       "Sex",
+      "Learning Level",
       "Learning Center",
       "Assigned Teacher",
       "School Year",
@@ -187,6 +232,7 @@ class AdminReports {
       r.last_name || "",
       r.first_name || "",
       r.sex || "—",
+      r.learning_level || "—",
       r.clc_name || "—",
       r.teacher_name || "—",
       r.school_year || "—",
@@ -240,7 +286,7 @@ class AdminReports {
     );
 
     if (!rows.length) {
-      body.innerHTML = `<tr><td colspan="7" class="st-table-empty-cell">No enrollment records match these filters.</td></tr>`;
+      body.innerHTML = `<tr><td colspan="8" class="st-table-empty-cell">No enrollment records match these filters.</td></tr>`;
       return;
     }
 
@@ -252,6 +298,7 @@ class AdminReports {
       <tr>
         <td>${r.lrn}</td>
         <td>${r.first_name} ${r.last_name}</td>
+        <td>${r.learning_level || "—"}</td>
         <td>${r.clc_name || "—"}</td>
         <td>${r.teacher_name || "—"}</td>
         <td>${r.school_year || "—"} · ${REPORT_SEMESTER_LABELS[r.semester] || r.semester || "—"}</td>
@@ -262,7 +309,7 @@ class AdminReports {
       .join("");
 
     if (rows.length > preview.length) {
-      body.innerHTML += `<tr><td colspan="7" class="st-table-empty-cell">…and ${rows.length - preview.length} more. Export the CSV report to see the full listing.</td></tr>`;
+      body.innerHTML += `<tr><td colspan="8" class="st-table-empty-cell">…and ${rows.length - preview.length} more. Export the CSV report to see the full listing.</td></tr>`;
     }
   }
 
