@@ -431,11 +431,7 @@ class API {
   }
 
   static getNotifications() {
-    if (window.CONFIG?.USE_MOCK_API || window.CONFIG?.DEMO_MODE) {
-      return Promise.resolve(this.mockNotifications());
-    }
-
-    return this.get("/notifications").catch(() => this.mockNotifications());
+    return this.get("/notifications");
   }
 
   static mockNotificationKey() {
@@ -1008,11 +1004,7 @@ class API {
   }
 
   static getEnrollmentListingReport() {
-    if (window.CONFIG?.USE_MOCK_API || window.CONFIG?.DEMO_MODE) {
-      return Promise.resolve(this.mockEnrollmentListing());
-    }
-
-    return this.get("/reports/enrollment-listing").catch(() => this.mockEnrollmentListing());
+    return this.get("/reports/enrollment-listing");
   }
 }
 

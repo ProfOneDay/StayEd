@@ -9,12 +9,12 @@ const CONFIG = {
 
   MOCK_DELAY: 400,
 
-  // Use the live Flask backend instead of the bundled mock database.
-  USE_MOCK_API: true,
+  // Use the live Flask backend and PostgreSQL database.
+  USE_MOCK_API: false,
 
   DEBUG: true,
 
-  DEMO_MODE: true,
+  DEMO_MODE: false,
 };
 
 window.CONFIG = CONFIG;
