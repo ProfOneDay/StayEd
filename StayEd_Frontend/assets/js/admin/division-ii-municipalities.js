@@ -10,7 +10,6 @@ const DIVISION_II_MUNICIPALITIES = [
   { id: "balungao", name: "Balungao" },
   { id: "bautista", name: "Bautista" },
   { id: "binalonan", name: "Binalonan" },
-  { id: "dagupan-city", name: "Dagupan City" },
   { id: "laoac", name: "Laoac" },
   { id: "manaoag", name: "Manaoag" },
   { id: "mangaldan", name: "Mangaldan" },
@@ -22,12 +21,11 @@ const DIVISION_II_MUNICIPALITIES = [
   { id: "san-manuel", name: "San Manuel" },
   { id: "san-nicolas", name: "San Nicolas" },
   { id: "san-quintin", name: "San Quintin" },
-  { id: "santa-maria", name: "Santa Maria" },
   { id: "santo-tomas", name: "Santo Tomas" },
   { id: "sison", name: "Sison" },
+  { id: "santa-maria", name: "Santa Maria" },
   { id: "tayug", name: "Tayug" },
   { id: "umingan", name: "Umingan" },
-  { id: "urdaneta-city", name: "Urdaneta City" },
   { id: "villasis", name: "Villasis" },
 ];
 

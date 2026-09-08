@@ -1,0 +1,485 @@
+StayEd Admin and Teacher Reports Manual
+========================================
+
+Purpose
+-------
+This manual explains the StayEd administrator pages and, in the final section,
+the Teacher Reports page. It describes what each page displays, what the main
+buttons do, and how the user should use the page.
+
+The system uses the live StayEd backend and PostgreSQL database. Information
+shown in the pages depends on the signed-in account and the records currently
+stored in the database.
+
+
+GENERAL ADMIN NAVIGATION
+-------------------------
+The admin sidebar contains these links:
+
+- Dashboard: Opens the Pangasinan II risk overview.
+- User Management: Reviews teacher registrations and manages teacher accounts.
+- CLC Management: Manages Community Learning Centers and teacher assignments.
+- Reports: Opens the division-wide enrollment report.
+- Notifications: Opens admin alerts and updates.
+- Settings: Manages the administrator profile, security, and academic settings.
+- About StayEd: Shows information about the StayEd system.
+- Logout: Signs out of the current account and returns to the login page.
+
+The top-right navigation contains:
+
+- Bell icon: Opens the notifications page. For an admin, it opens the admin
+  notifications page.
+- Settings icon: Opens the admin Settings page.
+- User area: Displays the signed-in user name, role, and avatar or initials.
+
+A red or visible notification indicator on the bell means that unread
+notifications exist.
+
+
+1. ADMIN DASHBOARD
+------------------
+Page name: Pangasinan II Risk Overview
+
+Description
+The Admin Dashboard provides a division-wide view of learner risk by
+municipality. It combines learner risk information and Community Learning
+Center information from the database.
+
+What is shown
+- Interactive Pangasinan II municipality map.
+- Municipalities outside the configured Division II scope appear gray and are
+  not selectable.
+- Division-wide risk totals for Low, Moderate, and High risk.
+- A municipality selector for jumping directly to a municipality.
+- Selected Area summary showing:
+  - Total learners
+  - Number of Community Learning Centers
+  - High-risk learners
+  - Moderate-risk learners
+  - Low-risk learners
+- Community Learning Centers in the selected municipality.
+- CLC barangay, learner count, teacher count, and active or archived status.
+- Risk Distribution bars.
+- Learning Level Distribution for BLP, Elementary, Junior High School, and
+  Senior High School.
+
+Buttons and controls
+- Municipality selector: Select All (Pangasinan II) or a specific municipality.
+- Map municipality: Click a colored municipality to select it and load its
+  summary.
+- Low, Moderate, High legend buttons: Filter or dim the map to show areas in
+  the selected risk category.
+- Outside scope: Highlights municipalities outside Division II.
+- Zoom in (+): Enlarges the map.
+- Zoom out (-): Reduces the map.
+- Reset view: Restores the default map zoom and position.
+- CLC next and previous buttons: Move through CLCs when the selected
+  municipality has more than one page of CLC results.
+
+Expected result
+Selecting a municipality updates the summary cards, risk bars, learning-level
+chart, and CLC list for that municipality. The dashboard can also open with a
+specific municipality already selected when reached from a notification.
+
+
+2. USER MANAGEMENT
+-------------------
+Page name: User Management
+
+Description
+User Management is used by administrators to review teacher registrations,
+approve or reject applications, edit teacher information, reset passwords,
+deactivate accounts, and create accounts.
+
+What is shown
+- Total teachers.
+- Pending registrations.
+- Active accounts.
+- Deactivated accounts.
+- Searchable teacher table with:
+  - Teacher name
+  - Assigned CLC
+  - Account status
+  - Available actions
+
+Buttons and controls
+- Total teachers KPI: Shows all teacher accounts.
+- Pending registrations KPI: Filters the table to teacher accounts waiting for
+  approval. A notification dot indicates pending registrations.
+- Active accounts KPI: Filters to active teachers.
+- Deactivated KPI: Filters to deactivated or suspended teachers.
+- Search box: Searches by teacher name or CLC.
+- Create Account: Opens the account creation form.
+- Review: Opens the teacher registration details.
+- Approve Account: Opens an approval confirmation. Confirming activates the
+  teacher account.
+- Reject Application: Opens the rejection form. Select a reason, optionally
+  enter remarks, and confirm the rejection.
+- Edit: Opens the teacher account editor.
+- Save Changes: Saves name, employee ID, contact number, email, municipality,
+  and CLC assignments.
+- Add CLC: Adds another CLC to the teacher's current assignments.
+- Deactivate: Removes the teacher's ability to sign in. Existing learner and
+  monitoring records remain in the system.
+- Activate or Restore: Re-enables an inactive teacher account when available.
+- Reset Password: Opens password reset confirmation.
+- Copy password: Copies the generated temporary password after a reset.
+- Show or hide password: Displays or masks the temporary password.
+- Create Account modal:
+  - Teacher or Admin account type buttons select the account role.
+  - Name, email, phone, employee ID, municipality, and optional CLC fields
+    collect the new account information.
+  - Create Account saves the new account and displays the temporary password
+    when applicable.
+- Cancel or Close: Leaves a dialog without saving changes.
+
+Expected result
+Approving a registration activates the teacher account and removes the pending
+registration notification. Rejecting removes the registration and records the
+review action. Creating or updating an account refreshes the user table.
+
+
+3. CLC MANAGEMENT
+------------------
+Page name: CLC Management
+
+Description
+CLC Management maintains the Community Learning Center directory and the
+teachers assigned to each center.
+
+What is shown
+- Total CLCs.
+- Active CLCs.
+- Inactive or archived CLCs.
+- CLC table with:
+  - CLC name
+  - Municipality
+  - Assigned teacher count
+  - Status
+  - Actions
+
+Buttons and controls
+- Total CLCs KPI: Shows all centers.
+- Active KPI: Filters to active centers.
+- Inactive KPI: Filters to archived centers.
+- Search box: Searches by CLC name or municipality.
+- Municipality filter: Shows CLCs in a selected municipality.
+- Add new CLC: Opens the CLC registration form.
+- Add CLC modal fields:
+  - Municipality
+  - Barangay
+  - CLC name
+  - Street or building number
+- Add CLC: Saves a new center to the database.
+- Edit: Opens the CLC form with the existing values.
+- Save Changes: Saves updated CLC details.
+- Assign Teachers: Opens the teacher assignment dialog.
+- Add new teacher: Selects an active teacher for the CLC.
+- Assign Teacher: Adds the selected teacher to the current assignment list.
+- Remove assignment: Removes a teacher from the pending assignment list.
+- Save assignments: Saves all teacher assignments.
+- Archive CLC: Marks the center inactive. Existing learner records remain.
+- Restore CLC: Reactivates an archived center.
+- Cancel: Closes the current dialog without saving.
+
+Expected result
+Adding or editing a CLC updates the directory. Teacher assignments determine
+which teachers can work with that center. Archived CLCs remain available for
+historical records but are not treated as active centers.
+
+
+4. ADMIN REPORTS
+----------------
+Page name: Reports
+
+Description
+Admin Reports provides a division-wide Master Enrollment Listing using live
+database enrollment records from all CLCs.
+
+What is shown
+The report table contains:
+- LRN
+- Learner name
+- Learning Level
+- Learning Center
+- Assigned Teacher
+- School Year and Semester
+- Learning Delivery Mode
+- Enrollment Status
+
+Filters and controls
+- Search box: Searches by learner name, LRN, CLC, or teacher.
+- Learning Center filter: Limits records to one CLC.
+- School Year filter: Limits records to one school year.
+- Academic Semester filter: Limits records to one semester.
+- Assigned Teacher filter: Limits records to one teacher.
+- Learning Delivery Mode filter: Limits records to Face-to-Face, Modular, or
+  Blended records.
+- Clear search button: Removes the search text and restores the filtered list.
+- Preview & Export: Opens a formatted report preview for the records currently
+  matching the filters.
+
+Preview window buttons
+- Export as CSV: Downloads the complete filtered report as a CSV file.
+- Print / Save as PDF: Opens the browser print dialog.
+- Close: Closes the report preview window.
+
+Expected result
+Changing a filter refreshes the visible table and matching record count. The
+Preview & Export action uses the same filtered records shown in the table.
+
+
+5. ADMIN NOTIFICATIONS
+----------------------
+Page name: Notifications
+
+Description
+Admin Notifications shows alerts generated for the signed-in administrator,
+such as actual teacher account registrations, risk alerts, CLC changes, or
+system updates.
+
+What is shown
+- All notification count.
+- Unread notification count.
+- Notification title, message, time, category, and optional status label.
+- Unread indicator on notifications that have not been opened or marked read.
+
+Buttons and controls
+- All tab: Shows every notification.
+- Unread tab: Shows only unread notifications.
+- Bell icon: Opens this page from the top navigation.
+- Mark All Read: Marks all notifications for the signed-in admin as read.
+- Mark as read: Marks one notification as read and updates the bell indicator.
+- View: Opens the related page. For a high-risk alert, it opens the admin
+  dashboard with the related municipality selected when that information is
+  available.
+- Delete: Removes the notification from the signed-in user's list.
+
+Important behavior
+A teacher registration notification is created only when an actual teacher
+account registration succeeds. It is not a permanent sample alert. Approval or
+rejection removes the pending registration notification.
+
+
+6. ADMIN SETTINGS
+------------------
+Page name: Settings
+
+Description
+Admin Settings controls the administrator profile, security preferences, and
+system-wide academic settings.
+
+Profile tab
+What is shown:
+- Administrator name and role.
+- Account status.
+- Last login information when available.
+- DepEd email.
+- Contact number.
+- Employee ID and join date when available.
+
+Buttons and controls:
+- Edit Profile: Opens the profile editor.
+- Change photo: Selects a JPG or PNG avatar up to 2 MB.
+- Save Changes: Saves the administrator name, employee ID, phone number, email,
+  and avatar.
+- Log Out: Ends the current session.
+- Deactivate: Suspends the administrator account after confirmation. The system
+  prevents the last active administrator from deactivating without another
+  active administrator.
+
+Security tab
+Buttons and controls:
+- Change Password: Opens the password form.
+- Current Password: Verifies the existing password.
+- New Password: Must have at least 8 characters, one uppercase letter, one
+  lowercase letter, and one number.
+- Confirm New Password: Must match the new password.
+- Show or hide password: Toggles password visibility.
+- Update Password: Saves the new password.
+- Forgot password: Sends a reset link to the registered email.
+- Two-Factor Authentication: Saves the administrator's two-factor preference.
+
+Academic Year tab
+Buttons and controls:
+- Active School Year Change button: Opens the school-year editor.
+- Save Changes: Saves a value in YYYY-YYYY format. This becomes the active
+  school year used by teachers, classes, enrollments, and reports.
+- Module Return Default Change button: Opens the duration editor.
+- Default Duration: Sets the number of days after module release that a module
+  is expected to be returned. Valid values are 1 through 180 days.
+- Save Changes: Saves the module return default.
+
+
+7. ABOUT STAYED
+---------------
+Page name: About StayEd
+
+Description
+The About page explains the purpose of StayEd as an Early Dropout Risk
+Decision Support System for the Philippine Alternative Learning System.
+
+What is shown
+- StayEd purpose and intended users.
+- Version information.
+- Department of Education and Community Learning Center context.
+
+Buttons and controls
+- Sidebar navigation: Opens another admin page.
+- Bell icon: Opens admin notifications.
+- Settings icon: Opens admin settings.
+- Logout: Signs out of the system.
+
+The About page is informational and does not edit database records.
+
+
+ADMIN WORKFLOW SUMMARY
+----------------------
+1. Open Notifications and review new teacher registrations or risk alerts.
+2. Use User Management to review, approve, or reject teacher applications.
+3. Use CLC Management to maintain centers and teacher assignments.
+4. Use the Dashboard to review learner risk by municipality and CLC.
+5. Use Reports to filter enrollment data and preview or export the results.
+6. Use Settings to maintain the active school year, module defaults, profile,
+   and security settings.
+
+
+==========================================================================
+TEACHER REPORTS MANUAL
+==========================================================================
+
+Page name: Teacher Reports
+
+Description
+Teacher Reports provides reports for the signed-in teacher's own learners and
+classes. Each report has a search or class selector and a Preview & Export
+button. The preview window contains formatted report data, CSV export, and
+Print / Save as PDF controls.
+
+General teacher report behavior
+- Search fields find learners, classes, methods, or statuses depending on the
+  report.
+- Search suggestions can be selected to use a specific learner or class.
+- Preview & Export loads the latest records from the database.
+- Export as CSV downloads the report data.
+- Print / Save as PDF opens the browser print dialog.
+- A teacher sees records associated with the teacher's own classes and learners.
+
+
+A. INDIVIDUAL LEARNER PROGRESS
+------------------------------
+Purpose
+Shows detailed progress and support information for one learner.
+
+What is shown
+- Learner identity and LRN.
+- Enrollment and class details.
+- Learning milestones and module progress.
+- Risk level and risk trend.
+- Module monitoring information.
+- Intervention history.
+- Risk contributors.
+- Recommended actions.
+
+Controls
+- Search learner by name or LRN: Finds a learner.
+- Learner result: Selects the learner for the report.
+- Clear search: Removes the learner search.
+- Preview & Export: Opens the detailed learner report.
+
+
+B. CLASS LIST REPORT
+--------------------
+Purpose
+Shows the complete roster for a selected class or class search.
+
+What is shown
+- Learner name and LRN.
+- Demographics.
+- Learning level.
+- Learning modality.
+- Enrollment status.
+- Class and CLC information.
+
+Controls
+- Search class or section: Searches by class name or learning level, such as
+  Elementary or JHS.
+- Class result: Selects the class.
+- Clear search: Removes the class search.
+- Preview & Export: Opens the class roster preview and export options.
+
+
+C. ATTENDANCE LIST REPORT
+-------------------------
+Purpose
+Shows attendance information for learners in face-to-face or blended sessions.
+
+What is shown
+- Learner and class information.
+- Learning modality.
+- Total scheduled sessions.
+- Sessions attended.
+- Sessions missed.
+- Attendance rate.
+- Last present date.
+- Enrollment status.
+
+Controls
+- Search class or section: Finds an attendance class.
+- Class result: Selects the class.
+- Clear search: Removes the search.
+- Preview & Export: Opens the attendance report preview and export options.
+
+
+D. AT-RISK LEARNERS LIST
+------------------------
+Purpose
+Lists learners currently classified as High or Moderate risk of dropping out.
+
+What is shown
+- Learner identity and LRN.
+- Class and CLC.
+- Learning level and modality.
+- Current risk classification.
+- Risk-related learner information supplied by the database.
+
+Controls
+- Search class or section: Limits the at-risk report to a class.
+- Class result: Selects the class.
+- Clear search: Removes the search.
+- Preview & Export: Opens the at-risk report preview and export options.
+
+
+E. INTERVENTION TRACKING REPORT
+-------------------------------
+Purpose
+Tracks interventions assigned to learners and their outcomes.
+
+What is shown
+- Learner name and LRN.
+- Intervention method.
+- Description.
+- Date assigned.
+- Target date.
+- Completion date.
+- Intervention status.
+- Follow-up notes and outcome when available.
+
+Controls
+- Search class, method, or status: Finds intervention records.
+- Class result: Limits the report to a class.
+- Status selector: Limits results by intervention status when available.
+- Clear search: Removes the search.
+- Preview & Export: Opens the intervention tracking preview and export options.
+
+
+TEACHER REPORT PREVIEW WINDOW
+-----------------------------
+- Report title and description: Identifies the selected report.
+- Report metadata: Shows generation time and selected filters when available.
+- Data table: Shows the report records in a printable format.
+- Export as CSV: Downloads the displayed report data.
+- Print / Save as PDF: Uses the browser print dialog.
+- Close: Closes the preview window.
+
+End of manual.

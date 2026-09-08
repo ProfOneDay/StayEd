@@ -192,7 +192,18 @@ function selectAllMunicipalities(){
   const max=Math.max(1,...Object.values(lv));
   document.getElementById('levels').innerHTML=levelKeys.map(label=>{const val=lv[label];return `<div class="levelbar"><span class="levelbar-label"><strong>${levelLabels[label]}</strong><small>${val} learner${val===1?'':'s'}</small></span><div class="track level-track"><div class="fill" style="width:${val/max*100}%"></div></div><b>${val}</b></div>`}).join('');
 }
-// Only Division II municipalities are interactive -- the rest of the
+// Normalize the SVG asset against the canonical list. The map contains other
+// province areas for context, but only the requested municipalities are
+// selectable and included in the dashboard scope.
+map.querySelectorAll('.division-ii').forEach(el=>{
+  if(DIVISION_II_IDS.has(el.id))return;
+  el.classList.remove('division-ii');
+  el.classList.add('outside-division');
+  el.dataset.divisionIi='false';
+  el.tabIndex=-1;
+});
+
+// Only canonical Division II municipalities are interactive -- the rest of the
 // province renders for geographic context but is not part of this scope.
 map.querySelectorAll('.division-ii').forEach(el=>{
   el.addEventListener('mouseenter',e=>showTooltip(el,e));
