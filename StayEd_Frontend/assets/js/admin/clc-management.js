@@ -15,7 +15,10 @@ function fromApiShape(c){
 async function loadClcs(){
   try{
     const response=await API.getAdminClcs();
-    clcs=(response.data||[]).map(fromApiShape);
+    const allowedMunicipalities=new Set(DIVISION_II_MUNICIPALITIES.map(m=>m.name.toLowerCase()));
+    clcs=(response.data||[])
+      .filter(c=>allowedMunicipalities.has(String(c.municipality||'').toLowerCase()))
+      .map(fromApiShape);
   }catch(error){
     console.error('[AdminClcManagement] Unable to load CLCs',error);
     showToast('Unable to load Community Learning Centers.');

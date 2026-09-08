@@ -1,12 +1,14 @@
 // Must run first, before anything else on this page executes.
 Guards.admin();
 let clcsByMuni={};
+let allClcs=[];
 async function loadClcOptions(){
   try{
-    const response=await API.get('/clcs');
+    const response=await API.getAdminClcs();
     const list=response.data||[];
     const grouped={};
-    list.forEach(c=>{
+    allClcs=list.map(c=>({name:c.name,municipality:c.municipality,status:c.status}));
+    allClcs.forEach(c=>{
       if(!grouped[c.municipality]) grouped[c.municipality]=[];
       grouped[c.municipality].push(c.name);
     });
@@ -210,12 +212,16 @@ document.getElementById('rj-confirm-btn').addEventListener('click',async()=>{
 });
 
 let editClcDraft=[];
+function availableClcOptions(includeAssigned=false){
+  const assigned=new Set(editClcDraft);
+  return allClcs
+    .filter(c=>c.status==='active'||(includeAssigned&&assigned.has(c.name)))
+    .sort((a,b)=>a.name.localeCompare(b.name));
+}
 function renderEditClcList(){
-  const muni=document.getElementById('edit-muni').value;
   const select=document.getElementById('edit-clc-select');
-  const pool=clcsByMuni[muni]||[];
-  const available=pool.filter(c=>!editClcDraft.includes(c));
-  select.innerHTML='<option value="" disabled selected hidden>Select CLC…</option>'+available.map(c=>`<option>${c}</option>`).join('');
+  const available=availableClcOptions(true).filter(c=>!editClcDraft.includes(c.name));
+  select.innerHTML='<option value="" disabled selected hidden>Select CLC…</option>'+available.map(c=>`<option value="${c.name}">${c.name} — ${c.municipality}</option>`).join('');
   const list=document.getElementById('edit-clc-list');
   if(!editClcDraft.length){
     list.innerHTML='<div class="empty-note">No CLCs assigned yet.</div>';
@@ -242,7 +248,7 @@ function openEdit(id){
   document.getElementById('edit-phone').value=t.phone;
   document.getElementById('edit-email').value=t.email;
   const muniSel=document.getElementById('edit-muni');
-  const muniOptions=Object.keys(clcsByMuni).sort();
+  const muniOptions=DIVISION_II_MUNICIPALITIES.map(m=>m.name);
   // A teacher's current municipality might not have any registered CLC yet
   // (e.g. it was left as "Unassigned" at creation) -- if we only render
   // options from clcsByMuni, the browser silently selects whatever's first
@@ -370,11 +376,11 @@ const createClcSelect=document.getElementById('cr-clc');
 const createMuniSelect=document.getElementById('cr-muni');
 let createRole='teacher';
 function populateCreateMuniOptions(){
-  createMuniSelect.innerHTML='<option value="" disabled selected hidden>Select Municipality…</option>'+Object.keys(clcsByMuni).sort().map(m=>`<option>${m}</option>`).join('');
+  createMuniSelect.innerHTML='<option value="" disabled selected hidden>Select Municipality…</option>'+DIVISION_II_MUNICIPALITIES.map(m=>`<option>${m.name}</option>`).join('');
 }
 function populateCreateClc(muni){
-  const list=clcsByMuni[muni]||[];
-  createClcSelect.innerHTML='<option value="" disabled selected hidden>Select CLC…</option>'+list.map(c=>`<option>${c}</option>`).join('');
+  const list=allClcs.filter(c=>c.status==='active').sort((a,b)=>a.name.localeCompare(b.name));
+  createClcSelect.innerHTML='<option value="" disabled selected hidden>Select CLC…</option>'+list.map(c=>`<option value="${c.name}">${c.name} — ${c.municipality}</option>`).join('');
 }
 createMuniSelect.addEventListener('change',()=>populateCreateClc(createMuniSelect.value));
 
@@ -392,7 +398,7 @@ document.querySelectorAll('#cr-role-toggle .role-toggle-btn').forEach(btn=>{
 document.getElementById('createTeacherBtn').addEventListener('click',()=>{
   ['cr-first','cr-middle','cr-last','cr-email','cr-phone','cr-empid'].forEach(id=>document.getElementById(id).value='');
   createMuniSelect.selectedIndex=0;
-  createClcSelect.innerHTML='<option value="" disabled selected hidden>Select CLC…</option>';
+  populateCreateClc('');
   setCreateRole('teacher');
   openModal('modal-create');
 });
