@@ -424,6 +424,35 @@
                       <option>Employed</option>
                     </select>
                   </div>
+                  <div class="st-enroll-field">
+                    <label for="wOccupation"
+                      >Socio-economic Status
+                      <span style="font-weight:400;font-size:11px;"
+                        >(learner's job, or parent's/guardian's if not
+                        employed)</span
+                      ></label
+                    >
+                    <select id="wOccupation">
+                      <option value="" disabled selected>Select Status</option>
+                      <option>Unemployed / No Income</option>
+                      <option>Informal / Contractual Worker</option>
+                      <option>Formal Employment</option>
+                      <option>Self-Employed / Business Owner</option>
+                      <option>OFW (Overseas Filipino Worker)</option>
+                      <option>Retired / Pensioner</option>
+                      <option>Other</option>
+                    </select>
+                  </div>
+                  <div class="st-enroll-field">
+                    <label for="wMonthlyIncome">Monthly Household Income (₱)</label>
+                    <input
+                      id="wMonthlyIncome"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="e.g. 12000"
+                    />
+                  </div>
                   <div class="st-enroll-field st-enroll-field--full">
                     <label for="wLastGrade">Last Grade/Level Completed</label>
                     <input

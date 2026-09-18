@@ -10,10 +10,15 @@ Every field here has a direct, honest source in StayEd's own schema:
   modality        <- class_enrollment.learning_modality(FACE_TO_FACE / MODULAR / BLENDED)
   is_re_enrollee  <- class_enrollment.is_re_enrollee   (nullable boolean -> 0/1)
   distance_km     <- class_enrollment.distance_from_clc_km (nullable)
+  monthly_income  <- learner.monthly_income (nullable -- new field, no historical data yet)
+  occupation      <- learner.occupation (nullable -- fixed dropdown of socio-economic
+                      status categories, not free text, so it stays a small, clean
+                      set of categories for one-hot encoding instead of unbounded
+                      job-title strings)
 """
 
-NUMERIC_FEATURES = ["age", "distance_km"]
-CATEGORICAL_FEATURES = ["sex", "learning_level", "modality"]
+NUMERIC_FEATURES = ["age", "distance_km", "monthly_income"]
+CATEGORICAL_FEATURES = ["sex", "learning_level", "modality", "occupation"]
 BOOLEAN_FEATURES = ["is_re_enrollee"]
 FEATURE_COLUMNS = NUMERIC_FEATURES + CATEGORICAL_FEATURES + BOOLEAN_FEATURES
 

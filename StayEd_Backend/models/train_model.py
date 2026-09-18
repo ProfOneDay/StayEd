@@ -22,6 +22,7 @@ import joblib
 import pandas as pd
 import psycopg
 from dotenv import load_dotenv
+from imblearn.over_sampling import SMOTENC
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
@@ -34,10 +35,15 @@ from features import BOOLEAN_FEATURES, CATEGORICAL_FEATURES, FEATURE_COLUMNS, NU
 
 MODEL_DIR = Path(__file__).resolve().parent
 DATA_PATH = MODEL_DIR / "data" / "stayed_modeling_dataset_demo.csv"
-ARTIFACT_PATH = MODEL_DIR / "stayed_xgb_v1.joblib"
+ARTIFACT_PATH = MODEL_DIR / "stayed_xgb_v2.joblib"
 
-MODEL_VERSION = "stayed-xgb-v1"
+MODEL_VERSION = "stayed-xgb-v2"
 RANDOM_STATE = 2026
+
+# Index (within FEATURE_COLUMNS/X_train's column order) of every feature
+# SMOTENC should treat as categorical rather than continuous -- everything
+# after the numeric block, i.e. CATEGORICAL_FEATURES + BOOLEAN_FEATURES.
+_SMOTENC_CATEGORICAL_INDICES = list(range(len(NUMERIC_FEATURES), len(FEATURE_COLUMNS)))
 
 
 def build_pipeline(scale_pos_weight: float = 1.0) -> Pipeline:
@@ -75,6 +81,35 @@ def build_pipeline(scale_pos_weight: float = 1.0) -> Pipeline:
     return Pipeline([("preprocess", preprocessor), ("classify", classifier)])
 
 
+def _balance_training_split(X_train: pd.DataFrame, y_train: pd.Series) -> tuple[pd.DataFrame, pd.Series]:
+    """Balance the training split's two classes via SMOTENC (synthetic
+    minority over-sampling, categorical-aware) so the model trains on an
+    even Completed/NotCompleted split rather than the raw ~60/40 mix.
+
+    Only ever applied to the training split -- X_test/y_test stay exactly
+    as sampled from the real data, so the reported evaluation metrics are
+    still measuring performance on the true, unbalanced population the
+    model will actually see in production, not on synthetic data.
+
+    SMOTENC needs a fully imputed input (it computes nearest-neighbor
+    distances, which NaN breaks), so missing values are filled here first
+    using the same simple strategy the pipeline's own imputers use. This
+    doesn't change what the deployed pipeline does with raw/missing input
+    at prediction time -- it's only how this one balancing step gets clean
+    data to interpolate from.
+    """
+    X_filled = X_train.copy()
+    for col in NUMERIC_FEATURES:
+        X_filled[col] = X_filled[col].fillna(X_filled[col].median())
+    for col in CATEGORICAL_FEATURES + BOOLEAN_FEATURES:
+        mode = X_filled[col].mode(dropna=True)
+        X_filled[col] = X_filled[col].fillna(mode.iloc[0] if not mode.empty else "Unknown")
+
+    smote = SMOTENC(categorical_features=_SMOTENC_CATEGORICAL_INDICES, random_state=RANDOM_STATE)
+    X_balanced, y_balanced = smote.fit_resample(X_filled, y_train)
+    return X_balanced, y_balanced
+
+
 def train() -> dict:
     df = pd.read_csv(DATA_PATH)
     X = df[FEATURE_COLUMNS]
@@ -84,13 +119,12 @@ def train() -> dict:
         X, y, test_size=0.30, stratify=y, random_state=RANDOM_STATE
     )
 
-    # Target is 1 = NotCompleted (at-risk) -- the minority-ish class here --
-    # so weight it by the majority/minority ratio in the training split.
-    class_counts = y_train.value_counts()
-    scale_pos_weight = class_counts.get(0, 1) / max(class_counts.get(1, 1), 1)
+    X_train_balanced, y_train_balanced = _balance_training_split(X_train, y_train)
 
-    pipeline = build_pipeline(scale_pos_weight=scale_pos_weight)
-    pipeline.fit(X_train, y_train)
+    # Balancing already evens out the classes, so no additional
+    # scale_pos_weight correction is needed on top of it.
+    pipeline = build_pipeline(scale_pos_weight=1.0)
+    pipeline.fit(X_train_balanced, y_train_balanced)
 
     y_pred = pipeline.predict(X_test)
     y_prob = pipeline.predict_proba(X_test)[:, 1]
@@ -128,9 +162,10 @@ def register_model(metrics: dict) -> None:
                     "XGBoost (gradient boosting)",
                     MODEL_VERSION,
                     date.today(),
-                    f"Trained on {DATA_PATH.name} ({len(pd.read_csv(DATA_PATH))} rows). "
-                    "Predicts P(NotCompleted) from age, sex, learning_level, modality, "
-                    "is_re_enrollee, distance_km.",
+                    f"Trained on {DATA_PATH.name} ({len(pd.read_csv(DATA_PATH))} rows), "
+                    "SMOTENC-balanced training split. Predicts P(NotCompleted) from age, "
+                    "sex, learning_level, modality, is_re_enrollee, distance_km, "
+                    "monthly_income, occupation (socio-economic status).",
                 ),
             )
             model_id = cur.fetchone()[0]

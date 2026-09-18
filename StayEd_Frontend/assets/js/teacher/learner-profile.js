@@ -221,6 +221,30 @@ class LearnerProfilePage {
           <label for="elDistance">Distance from CLC (km)</label>
           <input id="elDistance" type="number" step="0.1" min="0" value="${bg.distanceKm || 0}">
         </div>
+        <div class="st-schedule-modal-field">
+          <label for="elOccupation">Socio-economic Status</label>
+          <select id="elOccupation">
+            <option value="" ${!bg.occupation ? "selected" : ""}>Select Status</option>
+            ${[
+              "Unemployed / No Income",
+              "Informal / Contractual Worker",
+              "Formal Employment",
+              "Self-Employed / Business Owner",
+              "OFW (Overseas Filipino Worker)",
+              "Retired / Pensioner",
+              "Other",
+            ]
+              .map(
+                (opt) =>
+                  `<option ${bg.occupation === opt ? "selected" : ""}>${opt}</option>`,
+              )
+              .join("")}
+          </select>
+        </div>
+        <div class="st-schedule-modal-field">
+          <label for="elMonthlyIncome">Monthly Household Income (₱)</label>
+          <input id="elMonthlyIncome" type="number" min="0" step="0.01" value="${bg.monthlyIncome ?? ""}" placeholder="e.g. 12000">
+        </div>
         <div class="st-schedule-modal-field st-schedule-modal-field--row">
           <input id="elReenrollee" type="checkbox" ${bg.isReenrollee ? "checked" : ""}>
           <label for="elReenrollee">Re-enrollee</label>
@@ -238,6 +262,8 @@ class LearnerProfilePage {
         const otherFields = {
           civil_status: document.getElementById("elCivil")?.value.trim(),
           employment_status: document.getElementById("elEmployment")?.value.trim(),
+          occupation: document.getElementById("elOccupation")?.value.trim(),
+          monthly_income: document.getElementById("elMonthlyIncome")?.value || null,
           distance_from_clc_km: parseFloat(document.getElementById("elDistance")?.value) || 0,
           is_re_enrollee: document.getElementById("elReenrollee")?.checked,
           is4Ps: document.getElementById("el4Ps")?.checked,

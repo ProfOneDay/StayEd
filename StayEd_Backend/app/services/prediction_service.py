@@ -32,7 +32,9 @@ def _compute_features(enrollment_id: int) -> dict:
             lc.learning_level,
             ce.learning_modality AS modality,
             ce.is_re_enrollee,
-            ce.distance_from_clc_km AS distance_km
+            ce.distance_from_clc_km AS distance_km,
+            l.monthly_income,
+            l.occupation
         FROM class_enrollment ce
         JOIN learner l ON l.learner_id = ce.learner_id
         JOIN learning_class lc ON lc.class_id = ce.class_id
@@ -47,6 +49,8 @@ def _compute_features(enrollment_id: int) -> dict:
         "modality": row["modality"],
         "is_re_enrollee": int(row["is_re_enrollee"]) if row["is_re_enrollee"] is not None else None,
         "distance_km": float(row["distance_km"]) if row["distance_km"] is not None else None,
+        "monthly_income": float(row["monthly_income"]) if row["monthly_income"] is not None else None,
+        "occupation": row["occupation"],
     }
 
 

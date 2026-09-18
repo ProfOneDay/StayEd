@@ -10,6 +10,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from ..authz import current_user_id
 from ..db import execute, fetch_all, fetch_one, get_db
 from ..helpers import EMAIL_RE, error, split_name
+from ..services.roster_service import is_on_teacher_roster
 
 bp = Blueprint("auth", __name__)
 
@@ -134,6 +135,17 @@ def register():
 
     if fetch_one("SELECT user_id FROM users WHERE LOWER(email) = LOWER(%s)", (email,)):
         return error("Email already exists.", 409)
+
+    # Panel requirement: only names on the division's official ALS Teachers
+    # roster may self-register. Checked here, before any account is
+    # created, so an unlisted name is rejected outright rather than merely
+    # flagged for admin review.
+    if not is_on_teacher_roster(full_name):
+        return error(
+            "This name was not found in the official ALS Teachers roster for this division. "
+            "Please contact your school administrator if you believe this is an error.",
+            403,
+        )
 
     first_name, last_name = split_name(full_name)
     username_base = email.split("@", 1)[0][:80] or "teacher"

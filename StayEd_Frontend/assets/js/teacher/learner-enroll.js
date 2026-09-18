@@ -532,6 +532,8 @@ class LearnerEnrollWizard {
       guardian_relationship: document.getElementById("wGuardianRelation")?.value || null,
       guardian_contact_number: document.getElementById("wGuardianContact")?.value.trim() || null,
       employment_status: document.getElementById("wEmployment")?.value || null,
+      occupation: document.getElementById("wOccupation")?.value.trim() || null,
+      monthly_income: document.getElementById("wMonthlyIncome")?.value || null,
       last_grade_completed: document.getElementById("wLastGrade")?.value.trim() || null,
       distance_km: distanceKmByCategory[distanceCategory] ?? null,
     };

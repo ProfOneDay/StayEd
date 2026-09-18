@@ -203,9 +203,20 @@ def _validate_learner_payload(data, *, partial=False):
         ("guardian_name", "guardian_name"),
         ("guardian_relationship", "guardian_relationship"),
         ("last_grade_completed", "last_grade_completed"),
+        ("occupation", "occupation"),
     ):
         if src in data:
             result[dest] = data.get(src) or None
+
+    if "monthly_income" in data:
+        income = data.get("monthly_income")
+        if income in (None, ""):
+            result["monthly_income"] = None
+        else:
+            try:
+                result["monthly_income"] = float(income)
+            except (TypeError, ValueError):
+                raise ValueError("Monthly income must be a number.")
 
     if "is_4ps_beneficiary" in data or "is4Ps" in data:
         result["is_4ps_beneficiary"] = bool(data.get("is_4ps_beneficiary", data.get("is4Ps")))
@@ -246,8 +257,9 @@ def create_learner():
                     INSERT INTO learner (
                         lrn, first_name, last_name, sex, date_of_birth,
                         employment_status, civil_status, contact_number, guardian_contact_number,
-                        email, address, guardian_name, guardian_relationship, last_grade_completed
-                    ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                        email, address, guardian_name, guardian_relationship, last_grade_completed,
+                        monthly_income, occupation
+                    ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                     RETURNING learner_id
                     """,
                     (
@@ -256,6 +268,7 @@ def create_learner():
                         clean.get("contact_number"), clean.get("guardian_contact_number"),
                         clean.get("email"), clean.get("address"), clean.get("guardian_name"),
                         clean.get("guardian_relationship"), clean.get("last_grade_completed"),
+                        clean.get("monthly_income"), clean.get("occupation"),
                     ),
                 )
                 learner_id = cur.fetchone()["learner_id"]
@@ -355,6 +368,7 @@ def update_learner(learner_id: int):
         "employment_status", "civil_status", "contact_number", "guardian_contact_number",
         "is_4ps_beneficiary", "is4Ps",
         "email", "address", "guardian_name", "guardian_relationship", "last_grade_completed",
+        "monthly_income", "occupation",
     }}
     if editable:
         try:
@@ -813,6 +827,36 @@ def _generate_recommended_ai_insight(r: dict, contributor_rows: list) -> dict | 
         )
     except Exception:
         return None
+
+
+# Per-feature "why this matters" text for the Risk Explanation tab -- the
+# risk_factors table only stores the raw factor_name/value/importance the
+# model actually used, so without this a teacher just sees e.g. "Current
+# value: 7.0" with no indication of which direction it pushes risk or why.
+# Keyed on model feature names (models/features.py), so a new predictor
+# added there without an entry here still renders (falls back to a plain
+# value line) rather than crashing.
+_FACTOR_REASONS = {
+    "age": "Age can affect available study time and competing responsibilities outside school.",
+    "distance_km": "Learners farther from their CLC tend to find it harder to attend sessions and return modules on time.",
+    "monthly_income": "Lower household income is associated with competing economic needs that can interrupt schooling.",
+    "occupation": "Household economic stability -- the learner's own job, or a parent's/guardian's -- is linked to dropout risk.",
+    "sex": "Included as a demographic factor the model weighs alongside the others.",
+    "learning_level": "Different ALS levels carry different pacing and completion demands.",
+    "modality": "Modality affects how much in-person structure and support a learner has day to day.",
+    "is_re_enrollee": "Learners who previously dropped out and re-enrolled carry a historically higher risk of dropping out again.",
+}
+
+
+def _factor_reason(factor_key: str, display_value, importance: float) -> str:
+    value_text = str(display_value) if display_value is not None else "not recorded"
+    reason = _FACTOR_REASONS.get(factor_key)
+    contribution = f"Contributed about {round(importance * 100)}% of this prediction."
+    if reason:
+        return f"Current value: {value_text}. {reason} {contribution}"
+    return f"Current value: {value_text}. {contribution}"
+
+
 @bp.get("/learners/<int:learner_id>/profile")
 @role_required("teacher")
 def learner_profile(learner_id: int):
@@ -939,7 +983,8 @@ def learner_profile(learner_id: int):
 
     contributor_rows = []
     for f in factors[:4]:
-        name = f["factor_name"].replace("_", " ").title()
+        factor_key = f["factor_name"]
+        name = factor_key.replace("_", " ").title()
         importance = float(f.get("importance_score") or 0)
         level = "High" if importance >= .6 else "Moderate" if importance >= .3 else "Low"
         tone = "error" if level == "High" else "moderate" if level == "Moderate" else "low"
@@ -947,7 +992,7 @@ def learner_profile(learner_id: int):
         contributor_rows.append({
             "icon": "analytics", "tone": tone,
             "title": name, "level": level,
-            "text": f"Current value: {display_value if display_value is not None else 'not recorded'}.",
+            "text": _factor_reason(factor_key, display_value, importance),
         })
     if not contributor_rows:
         if days_since_last_return is None:
@@ -1131,6 +1176,8 @@ def learner_profile(learner_id: int):
             "is4Ps": bool(base.get("is_4ps_beneficiary")),
             "civilStatusRaw": base.get("civil_status") or "",
             "employmentRaw": base.get("employment_status") or "",
+            "monthlyIncome": float(base["monthly_income"]) if base.get("monthly_income") is not None else None,
+            "occupation": base.get("occupation") or "",
         },
         "recentActivity": timeline[:5],
         "recommendedActions": recommendation,

@@ -184,6 +184,7 @@ def _learner_query(
             l.date_of_birth, l.employment_status, l.civil_status,
             l.contact_number, l.guardian_contact_number, l.is_4ps_beneficiary,
             l.email, l.address, l.guardian_name, l.guardian_relationship, l.last_grade_completed,
+            l.monthly_income, l.occupation,
             ce.enrollment_id, ce.learning_modality, ce.distance_from_clc_km,
             ce.enrollment_status, ce.is_re_enrollee, ce.enrollment_date,
             lc.class_id, lc.learning_level, lc.class_name, lc.school_year, lc.semester,
