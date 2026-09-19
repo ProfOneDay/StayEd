@@ -131,7 +131,17 @@
 
         <div class="st-panel col-12 st-report-master-panel">
           <div class="st-panel-head st-report-panel-head">
-            <h3 class="st-panel-title">Master Enrollment Listing</h3>
+            <div>
+              <h3 class="st-panel-title" data-report-mode-title>Master Enrollment Listing</h3>
+              <p class="st-panel-subtitle" data-report-mode-subtitle>
+                Export the Master Enrollment Listing CSV across every learning
+                center, filtered the way you need.
+              </p>
+            </div>
+            <div class="chart-type-toggle" role="group" aria-label="Choose report subject" id="reportModeToggle">
+              <button type="button" class="chart-type-btn is-active" data-report-mode="learners">Learners</button>
+              <button type="button" class="chart-type-btn" data-report-mode="teachers">Teachers</button>
+            </div>
           </div>
 
           <div class="st-records-toolbar st-report-toolbar">
@@ -161,27 +171,42 @@
               </select>
               <select
                 data-report-filter-year
+                data-mode-only="learners"
                 aria-label="Filter by school year"
               >
                 <option value="">All School Years</option>
               </select>
               <select
                 data-report-filter-semester
+                data-mode-only="learners"
                 aria-label="Filter by academic semester"
               >
                 <option value="">All Semesters</option>
               </select>
               <select
                 data-report-filter-teacher
+                data-mode-only="learners"
                 aria-label="Filter by assigned teacher"
               >
                 <option value="">All Teachers</option>
               </select>
               <select
                 data-report-filter-modality
+                data-mode-only="learners"
                 aria-label="Filter by learning delivery mode"
               >
                 <option value="">All Modalities</option>
+              </select>
+              <select
+                data-report-filter-teacher-status
+                data-mode-only="teachers"
+                aria-label="Filter by account status"
+                style="display: none"
+              >
+                <option value="">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="pending">Pending</option>
+                <option value="deactivated">Deactivated</option>
               </select>
             </div>
             <button
@@ -204,7 +229,7 @@
           <div class="st-table-scroll st-table-scroll--sticky st-report-table-wrap">
             <table class="st-data-table">
               <thead>
-                <tr>
+                <tr data-report-preview-head>
                   <th>LRN</th>
                   <th>Learner</th>
                   <th>Sex</th>

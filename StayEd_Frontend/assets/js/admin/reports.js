@@ -18,16 +18,26 @@ const REPORT_GROUP_LABELS = {
   learning_modality: "Learning Delivery Mode",
 };
 
+const TEACHER_STATUS_LABELS = {
+  active: "Active",
+  pending: "Pending",
+  deactivated: "Deactivated",
+};
+
 class AdminReports {
   static state = {
+    mode: "learners", // "learners" | "teachers"
     all: [],
     filtered: [],
+    teachersAll: [],
+    filteredTeachers: [],
     search: "",
     clc: "",
     schoolYear: "",
     semester: "",
     teacher: "",
     modality: "",
+    teacherStatus: "",
     groupBy: "",
     submissions: [],
     submissionSearch: "",
@@ -39,12 +49,77 @@ class AdminReports {
     if (window.Guards) Guards.admin();
 
     this.bindControls();
+    this.bindReportModeToggle();
     this.bindSubmissionFilters();
 
     await Promise.all([this.load(), this.loadSubmittedReports()]);
 
     const submissionId = new URLSearchParams(window.location.search).get("submission");
     if (submissionId) this.viewSubmittedReport(Number(submissionId));
+  }
+
+  // ---------------------------------------------------------------------------
+  // Learners / Teachers toggle for the Master Enrollment Listing panel --
+  // same dataset, filters, and export button, just a different subject.
+  // ---------------------------------------------------------------------------
+
+  static bindReportModeToggle() {
+    document.querySelectorAll("#reportModeToggle .chart-type-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (btn.dataset.reportMode === this.state.mode) return;
+        document.querySelectorAll("#reportModeToggle .chart-type-btn").forEach((b) => b.classList.toggle("is-active", b === btn));
+        this.state.mode = btn.dataset.reportMode;
+        this.onReportModeChange();
+      });
+    });
+  }
+
+  static onReportModeChange() {
+    const isTeachers = this.state.mode === "teachers";
+
+    // Filter dropdowns get fully rebuilt below (their option lists differ
+    // per mode) with no selection preserved, so the underlying filter state
+    // needs to reset in step -- otherwise a stale value (e.g. a school year
+    // picked in Learners mode) would keep silently filtering Teachers mode
+    // even though its dropdown shows "All".
+    this.state.search = "";
+    this.state.clc = "";
+    this.state.schoolYear = "";
+    this.state.semester = "";
+    this.state.teacher = "";
+    this.state.modality = "";
+    this.state.teacherStatus = "";
+    const searchInputEl = document.querySelector("[data-report-filter-search]");
+    if (searchInputEl) searchInputEl.value = "";
+    document.querySelector("[data-report-filter-clear]")?.classList.add("st-hidden");
+
+    document.querySelectorAll('[data-mode-only="learners"]').forEach((el) => {
+      el.style.display = isTeachers ? "none" : "";
+    });
+    document.querySelectorAll('[data-mode-only="teachers"]').forEach((el) => {
+      el.style.display = isTeachers ? "" : "none";
+    });
+
+    this.set(
+      "[data-report-mode-title]",
+      isTeachers ? "Teacher Directory" : "Master Enrollment Listing",
+    );
+    this.set(
+      "[data-report-mode-subtitle]",
+      isTeachers
+        ? "Export a directory of every registered teacher across the division."
+        : "Export the Master Enrollment Listing CSV across every learning center, filtered the way you need.",
+    );
+
+    const searchInput = document.querySelector("[data-report-filter-search]");
+    if (searchInput) {
+      searchInput.placeholder = isTeachers
+        ? "Search name, employee ID, email, or CLC…"
+        : "Search name, LRN, CLC, or teacher…";
+    }
+
+    this.populateFilters();
+    this.apply();
   }
 
   // ---------------------------------------------------------------------------
@@ -335,8 +410,12 @@ class AdminReports {
     if (window.Layout) Layout.showLoader();
 
     try {
-      const res = await API.getEnrollmentListingReport();
-      this.state.all = res.data || [];
+      const [enrollRes, teacherRes] = await Promise.all([
+        API.getEnrollmentListingReport(),
+        API.get("/admin/users"),
+      ]);
+      this.state.all = enrollRes.data || [];
+      this.state.teachersAll = teacherRes.data || [];
 
       this.populateFilters();
       this.apply();
@@ -353,6 +432,16 @@ class AdminReports {
   }
 
   static populateFilters() {
+    if (this.state.mode === "teachers") {
+      this.fillSelect(
+        "[data-report-filter-clc]",
+        [...new Set(this.state.teachersAll.map((t) => t.clc).filter(Boolean))].sort(),
+        "All Learning Centers",
+        (v) => v,
+      );
+      return;
+    }
+
     this.fillSelect(
       "[data-report-filter-clc]",
       this.uniqueValues("clc_name"),
@@ -450,10 +539,67 @@ class AdminReports {
       this.apply();
     });
 
+    on("[data-report-filter-teacher-status]", "change", (e) => {
+      this.state.teacherStatus = e.target.value;
+      this.apply();
+    });
+
     on("[data-preview-enrollment-report]", "click", () => this.previewReport());
   }
 
   static previewReport() {
+    if (this.state.mode === "teachers") {
+      this.previewTeacherReport();
+    } else {
+      this.previewLearnerReport();
+    }
+  }
+
+  static previewTeacherReport() {
+    const rows = this.state.filteredTeachers;
+
+    if (!rows.length) {
+      Toast?.error("No teachers match the current filters.");
+      return;
+    }
+
+    ReportPrinter.open({
+      title: "Teacher Directory",
+      subtitle: "StayEd Division-wide teacher directory",
+      meta: [
+        ["Generated", new Date().toLocaleString("en-PH")],
+        ["Records", String(rows.length)],
+      ],
+      sections: [
+        {
+          title: "Teacher Records",
+          columns: [
+            "Employee ID",
+            "Teacher Name",
+            "Email",
+            "Phone",
+            "Learning Center(s)",
+            "Municipality",
+            "Status",
+            "Date Joined",
+          ],
+          rows: rows.map((t) => [
+            t.employeeId || "—",
+            t.name || "—",
+            t.email || "—",
+            t.phone || "—",
+            (t.clcs && t.clcs.length ? t.clcs.join(", ") : t.clc) || "—",
+            t.municipality || "—",
+            TEACHER_STATUS_LABELS[t.status] || t.status || "—",
+            t.date || "—",
+          ]),
+          emptyText: "No teachers match the current filters.",
+        },
+      ],
+    });
+  }
+
+  static previewLearnerReport() {
     const rows = this.state.filtered;
 
     if (!rows.length) {
@@ -500,6 +646,36 @@ class AdminReports {
   }
 
   static apply() {
+    if (this.state.mode === "teachers") {
+      this.applyTeacherFilters();
+    } else {
+      this.applyLearnerFilters();
+    }
+  }
+
+  static applyTeacherFilters() {
+    const { teachersAll, search, clc, teacherStatus } = this.state;
+
+    let rows = [...teachersAll];
+    if (search) {
+      const term = search.toLowerCase();
+      rows = rows.filter(
+        (t) =>
+          (t.name || "").toLowerCase().includes(term) ||
+          (t.employeeId || "").toLowerCase().includes(term) ||
+          (t.email || "").toLowerCase().includes(term) ||
+          (t.clc || "").toLowerCase().includes(term) ||
+          (t.municipality || "").toLowerCase().includes(term),
+      );
+    }
+    if (clc) rows = rows.filter((t) => t.clc === clc || (t.clcs || []).includes(clc));
+    if (teacherStatus) rows = rows.filter((t) => t.status === teacherStatus);
+
+    this.state.filteredTeachers = rows;
+    this.renderPreview();
+  }
+
+  static applyLearnerFilters() {
     const { all, search, clc, schoolYear, semester, teacher, modality } = this.state;
 
     let rows = [...all];
@@ -525,8 +701,63 @@ class AdminReports {
   }
 
   static renderPreview() {
+    if (this.state.mode === "teachers") {
+      this.renderTeacherPreview();
+    } else {
+      this.renderLearnerPreview();
+    }
+  }
+
+  static renderTeacherPreview() {
     const body = document.querySelector("[data-report-preview-body]");
+    const head = document.querySelector("[data-report-preview-head]");
     if (!body) return;
+
+    const columns = ["Employee ID", "Teacher", "Email", "Phone", "Learning Center(s)", "Municipality", "Status", "Date Joined"];
+    if (head) head.innerHTML = columns.map((c) => `<th>${c}</th>`).join("");
+
+    const rows = this.state.filteredTeachers;
+
+    this.set(
+      "[data-report-preview-count]",
+      `${rows.length} teacher(s) match the current filters.`,
+    );
+
+    if (!rows.length) {
+      body.innerHTML = `<tr><td colspan="${columns.length}" class="st-table-empty-cell">No teachers match these filters.</td></tr>`;
+      return;
+    }
+
+    const preview = rows.slice(0, 50);
+
+    body.innerHTML = preview
+      .map(
+        (t) => `
+      <tr>
+        <td>${t.employeeId || "—"}</td>
+        <td>${t.name || "—"}</td>
+        <td>${t.email || "—"}</td>
+        <td>${t.phone || "—"}</td>
+        <td>${(t.clcs && t.clcs.length ? t.clcs.join(", ") : t.clc) || "—"}</td>
+        <td>${t.municipality || "—"}</td>
+        <td>${TEACHER_STATUS_LABELS[t.status] || t.status || "—"}</td>
+        <td>${t.date || "—"}</td>
+      </tr>`,
+      )
+      .join("");
+
+    if (rows.length > preview.length) {
+      body.innerHTML += `<tr><td colspan="${columns.length}" class="st-table-empty-cell">…and ${rows.length - preview.length} more. Export the CSV report to see the full listing.</td></tr>`;
+    }
+  }
+
+  static renderLearnerPreview() {
+    const body = document.querySelector("[data-report-preview-body]");
+    const head = document.querySelector("[data-report-preview-head]");
+    if (!body) return;
+
+    const columns = ["LRN", "Learner", "Sex", "Learning Level", "Learning Center", "Assigned Teacher", "School Year / Semester", "Modality", "Status"];
+    if (head) head.innerHTML = columns.map((c) => `<th>${c}</th>`).join("");
 
     const rows = this.state.filtered;
 
@@ -536,7 +767,7 @@ class AdminReports {
     );
 
     if (!rows.length) {
-      body.innerHTML = `<tr><td colspan="9" class="st-table-empty-cell">No enrollment records match these filters.</td></tr>`;
+      body.innerHTML = `<tr><td colspan="${columns.length}" class="st-table-empty-cell">No enrollment records match these filters.</td></tr>`;
       return;
     }
 
@@ -560,7 +791,7 @@ class AdminReports {
       .join("");
 
     if (rows.length > preview.length) {
-      body.innerHTML += `<tr><td colspan="9" class="st-table-empty-cell">…and ${rows.length - preview.length} more. Export the CSV report to see the full listing.</td></tr>`;
+      body.innerHTML += `<tr><td colspan="${columns.length}" class="st-table-empty-cell">…and ${rows.length - preview.length} more. Export the CSV report to see the full listing.</td></tr>`;
     }
   }
 
