@@ -1,14 +1,25 @@
 from __future__ import annotations
 
+import json
+
 from flask import Blueprint, request
 
-from ..authz import role_required, teacher_for_user
-from ..db import fetch_all
-from ..helpers import enum_modality, title_enum
+from ..authz import current_user_id, role_required, teacher_for_user
+from ..db import execute, fetch_all, fetch_one
+from ..helpers import enum_modality, error, title_enum
 from ..services.learner_service import _learner_query, _shape_learner
 from .intervention_routes import INTERVENTION_STATUS_LABELS, INTERVENTION_STATUSES
 
 bp = Blueprint("reports", __name__)
+
+# Every report a teacher can generate can also be escalated to admins.
+REPORT_SUBMISSION_TYPES = {
+    "AT_RISK": "At-Risk Learners List",
+    "INTERVENTION": "Intervention Tracking Report",
+    "LEARNER_PROGRESS": "Individual Learner Progress Report",
+    "CLASS_LIST": "Class List Report",
+    "ATTENDANCE": "Attendance List Report",
+}
 
 
 @bp.get("/reports/at-risk")
@@ -262,4 +273,147 @@ def enrollment_listing_report():
         for r in rows
     ]
     return {"total": len(data), "data": data}
+
+
+def _shape_submission(row):
+    return {
+        "id": row["submission_id"],
+        "reportType": row["report_type"],
+        "reportTypeLabel": REPORT_SUBMISSION_TYPES.get(row["report_type"], row["report_type"]),
+        "title": row["title"],
+        "subtitle": row.get("subtitle"),
+        "teacherName": row.get("teacher_name"),
+        "status": row["status"],
+        "submittedAt": row["submitted_at"].strftime("%B %d, %Y %I:%M %p"),
+        "reviewedAt": row["reviewed_at"].strftime("%B %d, %Y %I:%M %p") if row.get("reviewed_at") else None,
+    }
+
+
+@bp.post("/reports/submissions")
+@role_required("teacher")
+def submit_report_to_admin():
+    """A teacher escalates an already-generated report to admins. The exact
+    snapshot the teacher was looking at (meta + sections, same shape the
+    ReportPrinter renders) is stored so the admin sees precisely what was
+    sent, not a live re-query that could have moved on since."""
+    teacher = teacher_for_user()
+    if not teacher:
+        return error("Teacher profile not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    report_type = str(data.get("reportType") or "").strip().upper()
+    title = str(data.get("title") or "").strip()
+    subtitle = str(data.get("subtitle") or "").strip() or None
+    meta = data.get("meta") or []
+    sections = data.get("sections") or []
+
+    if report_type not in REPORT_SUBMISSION_TYPES:
+        return error("This report type cannot be sent to admin.", 422)
+    if not title or not sections:
+        return error("A report title and at least one section are required.", 422)
+
+    snapshot = json.dumps({"meta": meta, "sections": sections})
+
+    row = execute(
+        """
+        INSERT INTO teacher_report_submission (teacher_id, report_type, title, subtitle, snapshot)
+        VALUES (%s, %s, %s, %s, %s::jsonb)
+        RETURNING submission_id, submitted_at
+        """,
+        (teacher["teacher_id"], report_type, title, subtitle, snapshot),
+        returning=True,
+    )
+
+    teacher_name = f"{teacher['first_name']} {teacher['last_name']}".strip()
+    admins = fetch_all("SELECT user_id FROM users WHERE role='ADMIN' AND account_status='ACTIVE'")
+    for admin in admins:
+        execute(
+            """
+            INSERT INTO notification (user_id, notification_type, title, message, link, meta_label, dedup_key)
+            VALUES (%s, 'REPORT', %s, %s, %s, %s, %s)
+            ON CONFLICT (user_id, dedup_key) WHERE dedup_key IS NOT NULL DO NOTHING
+            """,
+            (
+                admin["user_id"],
+                "New Report Submitted",
+                f"{teacher_name} sent a {REPORT_SUBMISSION_TYPES[report_type]}: \"{title}\".",
+                "reports.html?submission=" + str(row["submission_id"]),
+                REPORT_SUBMISSION_TYPES[report_type],
+                f"report_submission:{row['submission_id']}",
+            ),
+        )
+
+    return {"message": "Report sent to admin.", "id": row["submission_id"]}, 201
+
+
+@bp.get("/admin/reports/submissions")
+@role_required("admin")
+def list_report_submissions():
+    status = str(request.args.get("status") or "").strip().upper()
+    clauses = []
+    params: list = []
+    if status in ("UNREVIEWED", "REVIEWED"):
+        clauses.append("s.status = %s")
+        params.append(status)
+    where_sql = ("WHERE " + " AND ".join(clauses)) if clauses else ""
+
+    rows = fetch_all(
+        f"""
+        SELECT s.submission_id, s.report_type, s.title, s.subtitle, s.status,
+               s.submitted_at, s.reviewed_at,
+               CONCAT_WS(' ', t.first_name, t.last_name) AS teacher_name
+        FROM teacher_report_submission s
+        JOIN teacher t ON t.teacher_id = s.teacher_id
+        {where_sql}
+        ORDER BY s.submitted_at DESC
+        """,
+        tuple(params),
+    )
+    data = [_shape_submission(r) for r in rows]
+    return {"total": len(data), "unreviewed": sum(r["status"] == "UNREVIEWED" for r in data), "data": data}
+
+
+@bp.get("/admin/reports/submissions/<int:submission_id>")
+@role_required("admin")
+def get_report_submission(submission_id: int):
+    row = fetch_one(
+        """
+        SELECT s.submission_id, s.report_type, s.title, s.subtitle, s.status,
+               s.submitted_at, s.reviewed_at, s.snapshot,
+               CONCAT_WS(' ', t.first_name, t.last_name) AS teacher_name
+        FROM teacher_report_submission s
+        JOIN teacher t ON t.teacher_id = s.teacher_id
+        WHERE s.submission_id = %s
+        """,
+        (submission_id,),
+    )
+    if not row:
+        return error("Report submission not found.", 404)
+
+    return {
+        **_shape_submission(row),
+        "meta": (row["snapshot"] or {}).get("meta", []),
+        "sections": (row["snapshot"] or {}).get("sections", []),
+    }
+
+
+@bp.post("/admin/reports/submissions/<int:submission_id>/review")
+@role_required("admin")
+def review_report_submission(submission_id: int):
+    row = fetch_one(
+        "SELECT submission_id FROM teacher_report_submission WHERE submission_id=%s",
+        (submission_id,),
+    )
+    if not row:
+        return error("Report submission not found.", 404)
+
+    execute(
+        """
+        UPDATE teacher_report_submission
+        SET status='REVIEWED', reviewed_at=NOW(), reviewed_by_user_id=%s
+        WHERE submission_id=%s
+        """,
+        (current_user_id(), submission_id),
+    )
+    return {"message": "Marked as reviewed."}
 

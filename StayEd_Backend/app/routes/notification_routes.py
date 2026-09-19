@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import date
 
-from flask import Blueprint
+from flask import Blueprint, request
 
 from ..authz import current_user_id, role_required, teacher_for_user
 from ..db import execute, fetch_all, fetch_one
@@ -10,6 +10,11 @@ from ..helpers import error
 from ..services.learner_service import _learner_query, _shape_learner
 
 bp = Blueprint("notifications", __name__)
+
+BROADCAST_KINDS = {
+    "ANNOUNCEMENT": "Announcement",
+    "REPORT_REQUEST": "Report Request",
+}
 
 
 def _shape(row):
@@ -157,3 +162,59 @@ def delete_notification(notification_id: int):
         (notification_id, current_user_id()),
     )
     return {"message": "Notification removed."}
+
+
+@bp.get("/admin/notifications/teachers")
+@role_required("admin")
+def list_notifiable_teachers():
+    """Active teachers an admin can pick as recipients when sending an
+    announcement or report request."""
+    rows = fetch_all(
+        """
+        SELECT u.user_id AS id, CONCAT_WS(' ', t.first_name, t.last_name) AS name, t.municipality
+        FROM users u
+        JOIN teacher t ON t.user_id = u.user_id
+        WHERE u.role = 'TEACHER' AND u.account_status = 'ACTIVE'
+        ORDER BY t.last_name, t.first_name
+        """
+    )
+    return {"total": len(rows), "data": [dict(r) for r in rows]}
+
+
+@bp.post("/admin/notifications/broadcast")
+@role_required("admin")
+def broadcast_notification():
+    """Admin sends a one-off announcement or report request to one or more
+    teachers -- lands in each teacher's existing notification inbox. Unlike
+    the auto-generated risk/intervention alerts, these are never deduped:
+    every send is a deliberate, individually-authored message."""
+    data = request.get_json(silent=True) or {}
+    kind = str(data.get("kind") or "").strip().upper()
+    title = str(data.get("title") or "").strip()
+    message = str(data.get("message") or "").strip()
+    teacher_user_ids = data.get("teacherUserIds")
+
+    if kind not in BROADCAST_KINDS:
+        return error("Notification kind must be ANNOUNCEMENT or REPORT_REQUEST.", 422)
+    if not title or not message:
+        return error("A title and message are required.", 422)
+    if not isinstance(teacher_user_ids, list) or not teacher_user_ids:
+        return error("Select at least one teacher to notify.", 422)
+
+    try:
+        target_ids = list({int(x) for x in teacher_user_ids})
+    except (TypeError, ValueError):
+        return error("teacherUserIds must be a list of user ids.", 422)
+
+    valid_rows = fetch_all(
+        "SELECT user_id FROM users WHERE user_id = ANY(%s) AND role='TEACHER' AND account_status='ACTIVE'",
+        (target_ids,),
+    )
+    valid_ids = [r["user_id"] for r in valid_rows]
+    if not valid_ids:
+        return error("None of the selected teachers could be notified.", 422)
+
+    for user_id in valid_ids:
+        _insert_alert(user_id, kind, title, message, None, BROADCAST_KINDS[kind], None)
+
+    return {"message": f"Sent to {len(valid_ids)} teacher(s).", "sent": len(valid_ids)}

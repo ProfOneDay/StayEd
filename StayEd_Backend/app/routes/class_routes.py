@@ -781,8 +781,10 @@ def release_class_module(class_id: int, class_module_id: int):
     except ValueError:
         return error("Release date must use YYYY-MM-DD.", 422)
 
-    if release_date > date.today():
-        return error("Release date cannot be later than the current date.", 422)
+    # Unlike the per-learner release endpoint (learner_routes.edit_module_batch),
+    # this class-level release is also used from the Calendar's "Set Module
+    # Release Date" flow, which schedules releases for a chosen day -- before
+    # or after today -- so no today-bound restriction applies here.
 
     if data.get("plannedReturnDate"):
         try:
@@ -888,6 +890,122 @@ def release_class_module(class_id: int, class_module_id: int):
     }, 201
 
 
+@bp.put("/classes/<int:class_id>/modules/<int:class_module_id>/release")
+@role_required("teacher")
+def move_class_module_release_date(class_id: int, class_module_id: int):
+    """Moves an existing class-wide release from one date to another -- used
+    by the Calendar's "Edit" action on a module-release marker. Release
+    itself (release_class_module above) only ever targets not-yet-released
+    learners, so it can't be reused to correct a date after the fact; this
+    updates the date in place instead, for whichever of that day's releases
+    haven't been returned yet."""
+    teacher = teacher_for_user()
+    if not teacher or not _owned_class(class_id, teacher["teacher_id"]):
+        return error("Class not found.", 404)
+    if not _class_module_row(class_id, class_module_id):
+        return error("Module not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    try:
+        old_date = date.fromisoformat(str(data.get("oldDate")))
+        new_date = date.fromisoformat(str(data.get("newDate")))
+    except (TypeError, ValueError):
+        return error("Both oldDate and newDate must use YYYY-MM-DD.", 422)
+
+    # Class-level releases (this endpoint's release_class_module) always
+    # create one release_batch_id per enrollment holding exactly this one
+    # module -- unlike the per-learner "release several modules at once"
+    # flow -- so moving the whole batch's date can't shift any other
+    # module's date along with it.
+    batch_rows = fetch_all(
+        """
+        SELECT DISTINCT release_batch_id FROM module_record
+        WHERE class_module_id=%s AND date_released=%s
+          AND date_returned IS NULL AND release_batch_id IS NOT NULL
+        """,
+        (class_module_id, old_date),
+    )
+    batch_ids = [r["release_batch_id"] for r in batch_rows]
+    if not batch_ids:
+        return error("No pending (not yet returned) release found for this module on that date.", 404)
+
+    db = get_db()
+    try:
+        with db.cursor() as cur:
+            cur.execute(
+                "UPDATE module_record SET date_released=%s WHERE release_batch_id = ANY(%s)",
+                (new_date, batch_ids),
+            )
+            cur.execute(
+                "UPDATE module_release_batch SET release_date=%s WHERE release_batch_id = ANY(%s)",
+                (new_date, batch_ids),
+            )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    return {"message": f"Moved the release date for {len(batch_ids)} learner(s) to {new_date.isoformat()}."}
+
+
+@bp.delete("/classes/<int:class_id>/modules/<int:class_module_id>/release")
+@role_required("teacher")
+def remove_class_module_release(class_id: int, class_module_id: int):
+    """Removes a class-wide release for a given date -- used by the
+    Calendar's "Remove" action on a module-release marker. Only touches
+    learners who haven't returned it yet; anyone who already has keeps
+    their return on record untouched."""
+    teacher = teacher_for_user()
+    if not teacher or not _owned_class(class_id, teacher["teacher_id"]):
+        return error("Class not found.", 404)
+    if not _class_module_row(class_id, class_module_id):
+        return error("Module not found.", 404)
+
+    try:
+        release_date = date.fromisoformat(str(request.args.get("date")))
+    except (TypeError, ValueError):
+        return error("A valid ?date=YYYY-MM-DD is required.", 422)
+
+    total = fetch_one(
+        "SELECT COUNT(*) AS n FROM module_record WHERE class_module_id=%s AND date_released=%s",
+        (class_module_id, release_date),
+    )["n"]
+    if not total:
+        return error("No release found for this module on that date.", 404)
+
+    removable = fetch_all(
+        "SELECT module_record_id FROM module_record WHERE class_module_id=%s AND date_released=%s AND date_returned IS NULL",
+        (class_module_id, release_date),
+    )
+    removable_ids = [r["module_record_id"] for r in removable]
+    skipped = total - len(removable_ids)
+
+    if not removable_ids:
+        return error("Every learner who received this module on that date has already returned it, so it can't be removed.", 422)
+
+    db = get_db()
+    try:
+        with db.cursor() as cur:
+            cur.execute("DELETE FROM module_record WHERE module_record_id = ANY(%s)", (removable_ids,))
+            # A now-empty batch (every module_record that pointed at it just
+            # got deleted above) is orphaned -- clean those up too.
+            cur.execute(
+                """
+                DELETE FROM module_release_batch mrb
+                WHERE NOT EXISTS (SELECT 1 FROM module_record mr WHERE mr.release_batch_id = mrb.release_batch_id)
+                """
+            )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    message = f"Removed the release for {len(removable_ids)} learner(s)."
+    if skipped:
+        message += f" {skipped} learner(s) had already returned it and were left as-is."
+    return {"message": message, "removed": len(removable_ids), "skipped": skipped}
+
+
 @bp.get("/classes/<int:class_id>/modules/<int:class_module_id>/roster")
 @role_required("teacher")
 def class_module_roster(class_id: int, class_module_id: int):
@@ -899,7 +1017,7 @@ def class_module_roster(class_id: int, class_module_id: int):
 
     rows = fetch_all(
         """
-        SELECT ce.enrollment_id, l.learner_id, l.first_name, l.last_name,
+        SELECT ce.enrollment_id, l.learner_id, l.first_name, l.last_name, ce.learning_modality,
                mr.module_record_id, mr.release_batch_id, mr.date_released, mr.date_returned
         FROM class_enrollment ce
         JOIN learner l ON l.learner_id = ce.learner_id
@@ -921,6 +1039,7 @@ def class_module_roster(class_id: int, class_module_id: int):
                 "enrollmentId": r["enrollment_id"],
                 "learnerId": r["learner_id"],
                 "name": f"{r['first_name']} {r['last_name']}".strip(),
+                "modality": title_enum(r["learning_modality"]),
                 "moduleRecordId": r["module_record_id"],
                 "releaseBatchId": r["release_batch_id"],
                 "released": r["date_released"] is not None,

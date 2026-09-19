@@ -616,6 +616,10 @@ _ADMIN_DASHBOARD_LEVEL_MAP = {
 }
 
 
+def _empty_gender_bucket():
+    return {"total": 0, "high": 0, "moderate": 0, "low": 0, "highRiskRate": 0.0}
+
+
 @bp.get("/admin/dashboard")
 @role_required("admin")
 def admin_dashboard():
@@ -629,7 +633,7 @@ def admin_dashboard():
         """
         WITH latest AS (
             SELECT DISTINCT ON (ce.enrollment_id)
-                ce.enrollment_id, lc.clc_id, lc.learning_level, ra.risk_level
+                ce.enrollment_id, ce.learner_id, lc.clc_id, lc.learning_level, ra.risk_level
             FROM class_enrollment ce
             JOIN learning_class lc ON lc.class_id = ce.class_id
             LEFT JOIN risk_assessment ra
@@ -638,9 +642,22 @@ def admin_dashboard():
             WHERE ce.enrollment_status = 'ENROLLED'
             ORDER BY ce.enrollment_id, ra.assessment_date DESC NULLS LAST
         )
-        SELECT c.municipality, latest.learning_level, latest.risk_level
+        SELECT c.municipality, latest.learning_level, latest.risk_level, l.sex
         FROM latest
         JOIN clc c ON c.clc_id = latest.clc_id
+        JOIN learner l ON l.learner_id = latest.learner_id
+        """
+    )
+    # Last 6 months of every prediction run (not just each enrollment's
+    # current one) -- a line-chart trend of how the assessed population
+    # looked at the time each batch of predictions ran, division-wide.
+    trend_rows = fetch_all(
+        """
+        SELECT date_trunc('month', ra.assessment_date) AS month, ra.risk_level, COUNT(*) AS n
+        FROM risk_assessment ra
+        WHERE ra.data_sufficiency_status = 'PREDICTION_GENERATED'
+          AND ra.assessment_date >= (CURRENT_DATE - INTERVAL '6 months')
+        GROUP BY 1, 2
         """
     )
 
@@ -661,6 +678,8 @@ def admin_dashboard():
         bucket = result.setdefault(slug, _empty_bucket(row["municipality"]))
         bucket["clcs"] = row["clc_count"]
 
+    gender_risk = {"MALE": _empty_gender_bucket(), "FEMALE": _empty_gender_bucket()}
+
     for row in learner_rows:
         slug = _slugify(row["municipality"])
         bucket = result.setdefault(slug, _empty_bucket(row["municipality"]))
@@ -675,7 +694,50 @@ def admin_dashboard():
         elif row["risk_level"] == "LOW":
             bucket["low"] += 1
 
-    return result
+        gender_bucket = gender_risk.get(row["sex"])
+        if gender_bucket is not None:
+            gender_bucket["total"] += 1
+            if row["risk_level"] == "HIGH":
+                gender_bucket["high"] += 1
+            elif row["risk_level"] == "MODERATE":
+                gender_bucket["moderate"] += 1
+            elif row["risk_level"] == "LOW":
+                gender_bucket["low"] += 1
+
+    for bucket in gender_risk.values():
+        bucket["highRiskRate"] = round((bucket["high"] / bucket["total"]) * 100, 1) if bucket["total"] else 0.0
+
+    male, female = gender_risk["MALE"], gender_risk["FEMALE"]
+    if not male["total"] and not female["total"]:
+        higher_risk_gender = None
+    elif male["highRiskRate"] > female["highRiskRate"]:
+        higher_risk_gender = "male"
+    elif female["highRiskRate"] > male["highRiskRate"]:
+        higher_risk_gender = "female"
+    else:
+        higher_risk_gender = "tie"
+
+    trend_by_month: dict = {}
+    for row in trend_rows:
+        key = row["month"].strftime("%Y-%m")
+        bucket = trend_by_month.setdefault(key, {"month": row["month"].strftime("%b %Y"), "high": 0, "moderate": 0, "low": 0})
+        if row["risk_level"] == "HIGH":
+            bucket["high"] += row["n"]
+        elif row["risk_level"] == "MODERATE":
+            bucket["moderate"] += row["n"]
+        elif row["risk_level"] == "LOW":
+            bucket["low"] += row["n"]
+    risk_trend = [trend_by_month[k] for k in sorted(trend_by_month.keys())]
+
+    return {
+        "municipalities": result,
+        "genderRisk": {
+            "male": male,
+            "female": female,
+            "higherRiskGender": higher_risk_gender,
+        },
+        "riskTrend": risk_trend,
+    }
 
 
 @bp.get("/settings/school-year")

@@ -99,6 +99,36 @@ def dashboard():
     )
 
     dist = {"high": high, "moderate": moderate, "low": low, "scale_max": max(high, moderate, low, 1)}
+
+    # Last 6 months of this teacher's own prediction runs, for the dashboard's
+    # Risk Distribution "Trend" chart view -- mirrors the admin dashboard's
+    # division-wide riskTrend (admin_routes.admin_dashboard), scoped here to
+    # just this teacher's learners.
+    trend_rows = fetch_all(
+        """
+        SELECT date_trunc('month', ra.assessment_date) AS month, ra.risk_level, COUNT(*) AS n
+        FROM risk_assessment ra
+        JOIN class_enrollment ce ON ce.enrollment_id = ra.enrollment_id
+        JOIN learning_class lc ON lc.class_id = ce.class_id
+        WHERE lc.teacher_id = %s
+          AND ra.data_sufficiency_status = 'PREDICTION_GENERATED'
+          AND ra.assessment_date >= (CURRENT_DATE - INTERVAL '6 months')
+        GROUP BY 1, 2
+        """,
+        (teacher["teacher_id"],),
+    )
+    trend_by_month: dict = {}
+    for row in trend_rows:
+        key = row["month"].strftime("%Y-%m")
+        bucket = trend_by_month.setdefault(key, {"month": row["month"].strftime("%b %Y"), "high": 0, "moderate": 0, "low": 0})
+        if row["risk_level"] == "HIGH":
+            bucket["high"] += row["n"]
+        elif row["risk_level"] == "MODERATE":
+            bucket["moderate"] += row["n"]
+        elif row["risk_level"] == "LOW":
+            bucket["low"] += row["n"]
+    risk_trend = [trend_by_month[k] for k in sorted(trend_by_month.keys())]
+
     return {
         "context": {
             "registered_learners": registered,
@@ -114,6 +144,7 @@ def dashboard():
             "low": low,
         },
         "riskDistribution": dist,
+        "riskTrend": risk_trend,
         "predictionSummary": {
             "date": latest_date.strftime("%B %d, %Y") if latest_date else "No prediction yet",
             "coverage": f"{coverage}%",

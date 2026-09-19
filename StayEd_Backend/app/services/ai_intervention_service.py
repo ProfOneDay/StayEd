@@ -20,14 +20,7 @@ from openai import OpenAI
 # --------------------------------------------------------------------
 
 _api_key = os.getenv("OPENAI_API_KEY", "").strip()
-
-if not _api_key:
-    raise RuntimeError(
-        "OPENAI_API_KEY is not set. Add it to your .env file before "
-        "starting the backend."
-    )
-
-_client = OpenAI(api_key=_api_key)
+_client = OpenAI(api_key=_api_key) if _api_key else None
 
 _MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
@@ -115,6 +108,16 @@ def generate_ai_recommendation(
         Dictionary containing the recommended intervention.
     """
     factors = factors or []
+
+    if _client is None:
+        return {
+            "title": "Teacher Review Recommended",
+            "priority": "MEDIUM",
+            "category": "MONITORING",
+            "description": "Review the learner's risk profile and assigned support needs.",
+            "reason": "AI recommendations are unavailable because no OpenAI API key is configured.",
+            "recommended_action": "Review the learner details and follow up with the learner.",
+        }
 
     prompt = _build_prompt(risk_level, risk_probability, factors, intervention)
 
