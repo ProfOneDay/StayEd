@@ -544,6 +544,12 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-auto-rows: minmax(110px, auto);
+  /* .st-cal-main is a column flexbox with min-height:760px, but this grid
+     (unlike .st-cal-week below, which already has flex:1) had no flex-grow
+     of its own -- a short month (5 rows) or a tall viewport left empty
+     space below the grid instead of the cells stretching to fill the
+     card, since neither the toolbar nor the dow-row above it grow either. */
+  flex: 1;
 }
 
 .st-cal-cell {

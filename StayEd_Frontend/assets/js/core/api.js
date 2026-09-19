@@ -747,6 +747,14 @@ class API {
     return this.post(`/classes/${classId}/modules/${classModuleId}/release`, payload);
   }
 
+  static moveClassModuleReleaseDate(classId, classModuleId, payload) {
+    return this.put(`/classes/${classId}/modules/${classModuleId}/release`, payload);
+  }
+
+  static removeClassModuleRelease(classId, classModuleId, releaseDate) {
+    return this.delete(`/classes/${classId}/modules/${classModuleId}/release?date=${encodeURIComponent(releaseDate)}`);
+  }
+
   static getClassModuleRoster(classId, classModuleId) {
     return this.get(`/classes/${classId}/modules/${classModuleId}/roster`);
   }
@@ -1005,6 +1013,31 @@ class API {
 
   static getEnrollmentListingReport() {
     return this.get("/reports/enrollment-listing");
+  }
+
+  static submitReportToAdmin(payload) {
+    return this.post("/reports/submissions", payload);
+  }
+
+  static getAdminReportSubmissions(params = {}) {
+    const qs = params && Object.keys(params).length ? this.query(params) : "";
+    return this.get(`/admin/reports/submissions${qs}`);
+  }
+
+  static getAdminReportSubmission(id) {
+    return this.get(`/admin/reports/submissions/${id}`);
+  }
+
+  static reviewAdminReportSubmission(id) {
+    return this.post(`/admin/reports/submissions/${id}/review`);
+  }
+
+  static getNotifiableTeachers() {
+    return this.get("/admin/notifications/teachers");
+  }
+
+  static sendTeacherBroadcast(payload) {
+    return this.post("/admin/notifications/broadcast", payload);
   }
 }
 

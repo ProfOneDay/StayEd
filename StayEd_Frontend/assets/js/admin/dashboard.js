@@ -11,6 +11,16 @@ function emptyBucket(name){return {name,total:0,high:0,moderate:0,low:0,levels:{
 let municipalityData={};
 let clcsByMunicipality={};
 let levelAverages={BLP:0,Elementary:0,JHS:0,SHS:0};
+let genderRiskData=null;
+let riskTrendData=[];
+let currentRiskCounts={high:0,moderate:0,low:0};
+let currentLevelCounts={BLP:0,Elementary:0,JHS:0,SHS:0};
+let riskChartType='bar';
+let levelChartType='bar';
+let genderChartType='bar';
+let riskChartInstance=null;
+let levelChartInstance=null;
+let genderChartInstance=null;
 const map=document.querySelector('.mapwrap svg');
 const zoomGroup=document.getElementById('zoomGroup');
 const wrap=document.querySelector('.mapwrap');
@@ -166,6 +176,10 @@ function selectMunicipality(id){const d=municipalityData[id]||emptyBucket(id);ma
   document.getElementById('levels').innerHTML=levelKeys.map(label=>{const val=d.levels[label];const avgPct=Math.min(100,levelAverages[label]/max*100);return `<div class="levelbar"><span class="levelbar-label"><strong>${levelLabels[label]}</strong><small>${val} learner${val===1?'':'s'}</small></span><div class="track level-track"><div class="fill" style="width:${val/max*100}%"></div><div class="avg-mark" style="left:${avgPct}%" title="Division average: ${levelAverages[label].toFixed(1)} learners"></div></div><b>${val}</b></div>`}).join('');
   clcListPage=1;
   renderClcList(id);
+  currentRiskCounts={high:d.high,moderate:d.moderate,low:d.low};
+  currentLevelCounts={...d.levels};
+  renderRiskChart();
+  renderLevelChart();
 }
 function selectAllMunicipalities(){
   map.querySelectorAll('.municipality').forEach(x=>x.classList.remove('selected'));
@@ -191,7 +205,185 @@ function selectAllMunicipalities(){
   [['high','highBar','highPct','highCountText'],['moderate','modBar','modPct','modCountText'],['low','lowBar','lowPct','lowCountText']].forEach(([k,b,p,c])=>{document.getElementById(b).style.width=pct(k)+'%';document.getElementById(p).textContent=pct(k)+'%';document.getElementById(c).textContent=`${t[k]} learner${t[k]===1?'':'s'}`});
   const max=Math.max(1,...Object.values(lv));
   document.getElementById('levels').innerHTML=levelKeys.map(label=>{const val=lv[label];return `<div class="levelbar"><span class="levelbar-label"><strong>${levelLabels[label]}</strong><small>${val} learner${val===1?'':'s'}</small></span><div class="track level-track"><div class="fill" style="width:${val/max*100}%"></div></div><b>${val}</b></div>`}).join('');
+  currentRiskCounts={high:t.high,moderate:t.moderate,low:t.low};
+  currentLevelCounts={...lv};
+  renderRiskChart();
+  renderLevelChart();
 }
+
+// ── Chart type toggles: Risk Distribution (Bar/Pie/Trend), Learning Level
+// (Bar/Pie), Risk by Gender (Bar/Compare/Pie) -- all rendered with Chart.js,
+// loaded from cdnjs in dashboard.html. ───────────────────────────────────────
+function renderGenderRisk(){
+  if(!genderRiskData) return;
+  const {male,female,higherRiskGender}=genderRiskData;
+  const pct=(bucket)=>bucket.total?Math.round(bucket.high/bucket.total*100):0;
+  document.getElementById('maleBar').style.width=pct(male)+'%';
+  document.getElementById('malePct').textContent=pct(male)+'%';
+  document.getElementById('maleCountText').textContent=`${male.high} of ${male.total} learner${male.total===1?'':'s'}`;
+  document.getElementById('femaleBar').style.width=pct(female)+'%';
+  document.getElementById('femalePct').textContent=pct(female)+'%';
+  document.getElementById('femaleCountText').textContent=`${female.high} of ${female.total} learner${female.total===1?'':'s'}`;
+  const callout=document.getElementById('genderRiskCallout');
+  if(callout){
+    let text;
+    if(higherRiskGender==='male') text=`Male learners currently show a higher High-Risk rate (${male.highRiskRate}% vs ${female.highRiskRate}% for female learners).`;
+    else if(higherRiskGender==='female') text=`Female learners currently show a higher High-Risk rate (${female.highRiskRate}% vs ${male.highRiskRate}% for male learners).`;
+    else if(higherRiskGender==='tie') text=`Male and female learners currently show the same High-Risk rate (${male.highRiskRate}%).`;
+    else text='Not enough assessed learners yet to compare risk by gender.';
+    callout.innerHTML=`<span class="material-symbols-outlined">insights</span>${text}`;
+  }
+  renderGenderChart();
+}
+
+// Chart.js is loaded from a CDN script tag -- if that request ever fails
+// (offline, blocked CDN), every chart-type view should say so plainly
+// instead of silently rendering an empty canvas.
+function chartJsReady(canvas,note){
+  if(typeof Chart!=='undefined') return true;
+  if(note) note.textContent='Chart library failed to load -- check your connection and reload the page.';
+  return false;
+}
+
+function renderRiskChart(){
+  const barView=document.getElementById('riskBarView');
+  const chartView=document.getElementById('riskChartView');
+  if(!barView||!chartView) return;
+
+  if(riskChartType==='bar'){
+    barView.hidden=false; chartView.hidden=true;
+    if(riskChartInstance){riskChartInstance.destroy();riskChartInstance=null;}
+    return;
+  }
+  barView.hidden=true; chartView.hidden=false;
+  const note=document.getElementById('riskChartNote');
+  const canvas=document.getElementById('riskChartCanvas');
+  if(riskChartInstance){riskChartInstance.destroy();riskChartInstance=null;}
+  if(!canvas||!chartJsReady(canvas,note)) return;
+
+  if(riskChartType==='pie'){
+    note.textContent='Current risk distribution for the selected area.';
+    riskChartInstance=new Chart(canvas.getContext('2d'),{
+      type:'pie',
+      data:{
+        labels:['High Risk','Moderate Risk','Low Risk'],
+        datasets:[{data:[currentRiskCounts.high,currentRiskCounts.moderate,currentRiskCounts.low],backgroundColor:['#D64545','#F39422','#6BBF59'],borderColor:'#fff',borderWidth:2}],
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}},
+    });
+    return;
+  }
+
+  if(riskChartType==='line'){
+    if(!riskTrendData.length){
+      note.textContent='No prediction runs recorded in the last 6 months yet.';
+      return;
+    }
+    note.textContent='Division-wide monthly trend of assessed risk levels (last 6 months) -- not filtered by the selected area.';
+    riskChartInstance=new Chart(canvas.getContext('2d'),{
+      type:'line',
+      data:{
+        labels:riskTrendData.map(m=>m.month),
+        datasets:[
+          {label:'High',data:riskTrendData.map(m=>m.high),borderColor:'#D64545',backgroundColor:'#D6454522',tension:.3},
+          {label:'Moderate',data:riskTrendData.map(m=>m.moderate),borderColor:'#F39422',backgroundColor:'#F3942222',tension:.3},
+          {label:'Low',data:riskTrendData.map(m=>m.low),borderColor:'#6BBF59',backgroundColor:'#6BBF5922',tension:.3},
+        ],
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}},
+    });
+  }
+}
+
+function renderLevelChart(){
+  const barView=document.getElementById('levelBarView');
+  const chartView=document.getElementById('levelChartView');
+  if(!barView||!chartView) return;
+
+  if(levelChartType==='bar'){
+    barView.hidden=false; chartView.hidden=true;
+    if(levelChartInstance){levelChartInstance.destroy();levelChartInstance=null;}
+    return;
+  }
+  barView.hidden=true; chartView.hidden=false;
+  const note=document.getElementById('levelChartNote');
+  const canvas=document.getElementById('levelChartCanvas');
+  if(levelChartInstance){levelChartInstance.destroy();levelChartInstance=null;}
+  if(!canvas||!chartJsReady(canvas,note)) return;
+
+  note.textContent='Learner count per ALS learning level for the selected area.';
+  levelChartInstance=new Chart(canvas.getContext('2d'),{
+    type:'pie',
+    data:{
+      labels:levelKeys.map(k=>levelLabels[k]),
+      datasets:[{data:levelKeys.map(k=>currentLevelCounts[k]||0),backgroundColor:['#3B7DDD','#6BBF59','#F39422','#8E5BD6'],borderColor:'#fff',borderWidth:2}],
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}},
+  });
+}
+
+function renderGenderChart(){
+  const barView=document.getElementById('genderBarView');
+  const chartView=document.getElementById('genderChartView');
+  if(!barView||!chartView) return;
+
+  if(genderChartType==='bar'){
+    barView.hidden=false; chartView.hidden=true;
+    if(genderChartInstance){genderChartInstance.destroy();genderChartInstance=null;}
+    return;
+  }
+  barView.hidden=true; chartView.hidden=false;
+  const note=document.getElementById('genderChartNote');
+  const canvas=document.getElementById('genderChartCanvas');
+  if(genderChartInstance){genderChartInstance.destroy();genderChartInstance=null;}
+  if(!canvas||!chartJsReady(canvas,note)) return;
+  if(!genderRiskData){
+    note.textContent='Not enough assessed learners yet to compare risk by gender.';
+    return;
+  }
+  const {male,female}=genderRiskData;
+
+  if(genderChartType==='grouped'){
+    note.textContent='Risk-level counts compared side by side, male vs female.';
+    genderChartInstance=new Chart(canvas.getContext('2d'),{
+      type:'bar',
+      data:{
+        labels:['High Risk','Moderate Risk','Low Risk'],
+        datasets:[
+          {label:'Male',data:[male.high,male.moderate,male.low],backgroundColor:'#3B7DDD'},
+          {label:'Female',data:[female.high,female.moderate,female.low],backgroundColor:'#D6459A'},
+        ],
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}},
+    });
+    return;
+  }
+
+  if(genderChartType==='pie'){
+    note.textContent='Share of all currently High-Risk learners, by gender.';
+    genderChartInstance=new Chart(canvas.getContext('2d'),{
+      type:'pie',
+      data:{
+        labels:['Male (High Risk)','Female (High Risk)'],
+        datasets:[{data:[male.high,female.high],backgroundColor:['#3B7DDD','#D6459A'],borderColor:'#fff',borderWidth:2}],
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}},
+    });
+  }
+}
+
+function bindChartToggle(toggleId,onChange){
+  document.querySelectorAll(`#${toggleId} .chart-type-btn`).forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll(`#${toggleId} .chart-type-btn`).forEach(b=>b.classList.toggle('is-active',b===btn));
+      onChange(btn.dataset.chartType);
+    });
+  });
+}
+
+bindChartToggle('riskChartToggle',(type)=>{riskChartType=type;renderRiskChart();});
+bindChartToggle('levelChartToggle',(type)=>{levelChartType=type;renderLevelChart();});
+bindChartToggle('genderChartToggle',(type)=>{genderChartType=type;renderGenderChart();});
 // Normalize the SVG asset against the canonical list. The map contains other
 // province areas for context, but only the requested municipalities are
 // selectable and included in the dashboard scope.
@@ -233,9 +425,11 @@ async function loadDashboard(){
     // with no division filter -- restrict to Division II here so a CLC
     // mistakenly registered outside the division can't leak onto this map.
     municipalityData={};
-    Object.entries(dashboardData||{}).forEach(([id,d])=>{
+    Object.entries(dashboardData?.municipalities||{}).forEach(([id,d])=>{
       if(DIVISION_II_IDS.has(id)) municipalityData[id]=d;
     });
+    genderRiskData=dashboardData?.genderRisk||null;
+    riskTrendData=dashboardData?.riskTrend||[];
     clcsByMunicipality={};
     (clcResponse?.data||[]).forEach(clc=>{
       const slug=slugifyMunicipality(clc.municipality);
@@ -247,6 +441,8 @@ async function loadDashboard(){
     showToast('Unable to load division risk data.');
     municipalityData={};
     clcsByMunicipality={};
+    genderRiskData=null;
+    riskTrendData=[];
   }
   // Guarantee every Division II municipality has a bucket -- the API only
   // returns entries for municipalities that already have CLCs/learners, but
@@ -255,6 +451,7 @@ async function loadDashboard(){
     if(!municipalityData[id]) municipalityData[id]=emptyBucket(name);
   });
   recolorMap();
+  renderGenderRisk();
   populateMunicipalitySelect();
   const requestedMunicipality = new URLSearchParams(window.location.search).get('municipality');
   if (requestedMunicipality && municipalityData[requestedMunicipality]) {

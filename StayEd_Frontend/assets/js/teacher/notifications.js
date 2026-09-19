@@ -115,6 +115,8 @@ class NotificationsPage {
     const iconMap = {
       risk: "warning",
       intervention: "support_agent",
+      announcement: "campaign",
+      report_request: "description",
     };
 
     const metaBadgeClass = (n) => {

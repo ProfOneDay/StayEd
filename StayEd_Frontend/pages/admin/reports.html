@@ -50,6 +50,85 @@
           </div>
         </div>
 
+        <div class="st-panel col-12 st-report-master-panel" data-submitted-reports-panel>
+          <div class="st-panel-head st-report-panel-head">
+            <div>
+              <h3 class="st-panel-title">
+                Reports from Teachers
+                <span class="st-badge st-badge-warning st-hidden" data-submitted-reports-unread-badge></span>
+              </h3>
+              <p class="st-panel-subtitle">
+                At-risk, intervention, class list, attendance, and individual
+                learner progress reports teachers have sent up for review.
+              </p>
+            </div>
+          </div>
+
+          <div class="st-records-toolbar st-report-toolbar">
+            <div
+              class="st-records-toolbar-filters st-report-filter-grid"
+              style="grid-template-columns: minmax(220px, 2fr) repeat(2, minmax(170px, 1fr));"
+            >
+              <div class="st-search st-report-search">
+                <span class="material-symbols-outlined">search</span>
+                <input
+                  type="text"
+                  data-submitted-reports-search
+                  placeholder="Search title or teacher…"
+                  aria-label="Search reports from teachers"
+                />
+                <button
+                  type="button"
+                  class="st-report-search-clear st-hidden"
+                  data-submitted-reports-search-clear
+                  aria-label="Clear search"
+                >
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </div>
+              <select data-submitted-reports-type-filter aria-label="Filter by report type">
+                <option value="">All Report Types</option>
+                <option value="AT_RISK">At-Risk Learners List</option>
+                <option value="INTERVENTION">Intervention Tracking Report</option>
+                <option value="LEARNER_PROGRESS">Individual Learner Progress</option>
+                <option value="CLASS_LIST">Class List Report</option>
+                <option value="ATTENDANCE">Attendance List Report</option>
+              </select>
+              <select data-submitted-reports-status-filter aria-label="Filter by status">
+                <option value="">All Statuses</option>
+                <option value="UNREVIEWED">New</option>
+                <option value="REVIEWED">Reviewed</option>
+              </select>
+            </div>
+            <button type="button" class="st-btn st-btn-primary" data-notify-teachers-btn>
+              <span class="material-symbols-outlined">campaign</span>
+              Notify Teachers
+            </button>
+          </div>
+
+          <p class="st-report-preview-count" data-submitted-reports-count></p>
+
+          <div class="st-table-scroll st-table-scroll--sticky st-report-table-wrap">
+            <table class="st-data-table">
+              <thead>
+                <tr>
+                  <th>Report</th>
+                  <th>Type</th>
+                  <th>Submitted By</th>
+                  <th>Submitted</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody data-submitted-reports-body>
+                <tr>
+                  <td colspan="6" class="st-table-empty-cell">Loading…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <div class="st-panel col-12 st-report-master-panel">
           <div class="st-panel-head st-report-panel-head">
             <h3 class="st-panel-title">Master Enrollment Listing</h3>
@@ -128,6 +207,7 @@
                 <tr>
                   <th>LRN</th>
                   <th>Learner</th>
+                  <th>Sex</th>
                   <th>Learning Level</th>
                   <th>Learning Center</th>
                   <th>Assigned Teacher</th>
@@ -138,7 +218,7 @@
               </thead>
               <tbody data-report-preview-body>
                 <tr>
-                  <td colspan="8" class="st-table-empty-cell">Loading…</td>
+                  <td colspan="9" class="st-table-empty-cell">Loading…</td>
                 </tr>
               </tbody>
             </table>

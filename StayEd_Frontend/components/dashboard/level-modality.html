@@ -1,0 +1,37 @@
+<div class="st-panel st-panel-pad col-6" style="min-height: 320px">
+  <div class="st-panel-head">
+    <div>
+      <h3 class="st-panel-title">Learning Level Distribution</h3>
+      <p class="st-panel-subtitle">
+        How your currently filtered learners are spread across ALS levels.
+      </p>
+    </div>
+    <div class="chart-type-toggle" role="group" aria-label="Choose chart type" id="levelChartToggle">
+      <button type="button" class="chart-type-btn is-active" data-chart-type="bar">Bar</button>
+      <button type="button" class="chart-type-btn" data-chart-type="pie">Pie</button>
+    </div>
+  </div>
+  <div class="chart-canvas-wrap">
+    <canvas id="levelChartCanvas" height="220"></canvas>
+    <p class="chart-canvas-note" id="levelChartNote"></p>
+  </div>
+</div>
+
+<div class="st-panel st-panel-pad col-6" style="min-height: 320px">
+  <div class="st-panel-head">
+    <div>
+      <h3 class="st-panel-title">Modality Distribution</h3>
+      <p class="st-panel-subtitle">
+        How your currently filtered learners are split by learning delivery mode.
+      </p>
+    </div>
+    <div class="chart-type-toggle" role="group" aria-label="Choose chart type" id="modalityChartToggle">
+      <button type="button" class="chart-type-btn is-active" data-chart-type="pie">Pie</button>
+      <button type="button" class="chart-type-btn" data-chart-type="bar">Bar</button>
+    </div>
+  </div>
+  <div class="chart-canvas-wrap">
+    <canvas id="modalityChartCanvas" height="220"></canvas>
+    <p class="chart-canvas-note" id="modalityChartNote"></p>
+  </div>
+</div>

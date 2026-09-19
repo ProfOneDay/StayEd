@@ -615,27 +615,47 @@ class TeacherReports {
     document
       .querySelector("[data-export-csv-intervention]")
       ?.addEventListener("click", () => this.exportInterventionCsv());
+
+    document
+      .querySelector("[data-send-admin-progress]")
+      ?.addEventListener("click", () => this.sendProgressReportToAdmin());
+
+    document
+      .querySelector("[data-send-admin-classlist]")
+      ?.addEventListener("click", () => this.sendClassListReportToAdmin());
+
+    document
+      .querySelector("[data-send-admin-attendance]")
+      ?.addEventListener("click", () => this.sendAttendanceReportToAdmin());
+
+    document
+      .querySelector("[data-send-admin-atrisk]")
+      ?.addEventListener("click", () => this.sendAtRiskReportToAdmin());
+
+    document
+      .querySelector("[data-send-admin-intervention]")
+      ?.addEventListener("click", () => this.sendInterventionReportToAdmin());
   }
 
   // ---------------------------------------------------------------------------
   // Export CSV Handlers
   // ---------------------------------------------------------------------------
 
-  static async exportProgressCsv() {
+  static async buildProgressReportModel() {
     const learnerId =
       this.state.selectedLearnerId ||
       document.querySelector("[data-report-learner-id]")?.value;
 
     if (!learnerId) {
       Toast?.error("Please search and select a learner first.");
-      return;
+      return null;
     }
 
     try {
       const profile = await API.getLearnerProfile(learnerId);
       const riskPct = Math.round((profile.risk_probability || 0) * 100);
 
-      const reportModel = {
+      return {
         title: "Individual Learner Progress Report",
         subtitle: `${profile.name} — LRN ${profile.lrn}`,
         meta: [
@@ -710,15 +730,24 @@ class TeacherReports {
           },
         ],
       };
-
-      ReportPrinter.open(reportModel);
     } catch (error) {
       console.error("[TeacherReports]", error);
       Toast?.error("Unable to load the learner progress report.");
+      return null;
     }
   }
 
-  static async exportClassListCsv() {
+  static async exportProgressCsv() {
+    const reportModel = await this.buildProgressReportModel();
+    if (reportModel) ReportPrinter.open(reportModel);
+  }
+
+  static async sendProgressReportToAdmin() {
+    const reportModel = await this.buildProgressReportModel();
+    if (reportModel) await this.sendToAdmin("LEARNER_PROGRESS", reportModel);
+  }
+
+  static async buildClassListReportModel() {
     const classId =
       document.querySelector("[data-report-classlist-class-id]")?.value || "";
     const search =
@@ -746,7 +775,7 @@ class TeacherReports {
 
       if (!rows.length) {
         Toast?.error("No learners match the specified search criteria.");
-        return;
+        return null;
       }
 
       const columns = [
@@ -779,7 +808,7 @@ class TeacherReports {
         l.risk_probability ? `${Math.round(l.risk_probability * 100)}%` : "0%",
       ]);
 
-      ReportPrinter.open({
+      return {
         title: "Class List Report",
         subtitle: search || "All Classes",
         meta: [
@@ -795,14 +824,25 @@ class TeacherReports {
             emptyText: "No learners found.",
           },
         ],
-      });
+      };
     } catch (error) {
       console.error("[TeacherReports]", error);
       Toast?.error("Unable to load the class list report.");
+      return null;
     }
   }
 
-  static async exportAttendanceCsv() {
+  static async exportClassListCsv() {
+    const reportModel = await this.buildClassListReportModel();
+    if (reportModel) ReportPrinter.open(reportModel);
+  }
+
+  static async sendClassListReportToAdmin() {
+    const reportModel = await this.buildClassListReportModel();
+    if (reportModel) await this.sendToAdmin("CLASS_LIST", reportModel);
+  }
+
+  static async buildAttendanceReportModel() {
     const classId =
       document.querySelector("[data-report-attendance-class-id]")?.value || "";
     const search =
@@ -829,7 +869,7 @@ class TeacherReports {
 
       if (!rows.length) {
         Toast?.error("No attendance records match the specified search criteria.");
-        return;
+        return null;
       }
 
       const columns = [
@@ -857,7 +897,7 @@ class TeacherReports {
         r.status || "—",
       ]);
 
-      ReportPrinter.open({
+      return {
         title: "Attendance List Report",
         subtitle: search || "All Classes",
         meta: [
@@ -873,14 +913,25 @@ class TeacherReports {
             emptyText: "No attendance records found.",
           },
         ],
-      });
+      };
     } catch (error) {
       console.error("[TeacherReports]", error);
       Toast?.error("Unable to load the attendance list report.");
+      return null;
     }
   }
 
-  static async exportAtRiskCsv() {
+  static async exportAttendanceCsv() {
+    const reportModel = await this.buildAttendanceReportModel();
+    if (reportModel) ReportPrinter.open(reportModel);
+  }
+
+  static async sendAttendanceReportToAdmin() {
+    const reportModel = await this.buildAttendanceReportModel();
+    if (reportModel) await this.sendToAdmin("ATTENDANCE", reportModel);
+  }
+
+  static async buildAtRiskReportModel() {
     const classId =
       document.querySelector("[data-report-atrisk-class-id]")?.value || "";
     const search =
@@ -907,7 +958,7 @@ class TeacherReports {
 
       if (!rows.length) {
         Toast?.error("No at-risk learners match the specified search criteria.");
-        return;
+        return null;
       }
 
       const columns = [
@@ -925,7 +976,7 @@ class TeacherReports {
         l.activity_text,
       ]);
 
-      ReportPrinter.open({
+      return {
         title: "At-Risk Learners List",
         subtitle: search || "All Classes",
         meta: [
@@ -941,14 +992,25 @@ class TeacherReports {
             emptyText: "No at-risk learners found.",
           },
         ],
-      });
+      };
     } catch (error) {
       console.error("[TeacherReports]", error);
       Toast?.error("Unable to load the at-risk report.");
+      return null;
     }
   }
 
-  static async exportInterventionCsv() {
+  static async exportAtRiskCsv() {
+    const reportModel = await this.buildAtRiskReportModel();
+    if (reportModel) ReportPrinter.open(reportModel);
+  }
+
+  static async sendAtRiskReportToAdmin() {
+    const reportModel = await this.buildAtRiskReportModel();
+    if (reportModel) await this.sendToAdmin("AT_RISK", reportModel);
+  }
+
+  static async buildInterventionReportModel() {
     const classId =
       document.querySelector("[data-report-intervention-class-id]")?.value ||
       "";
@@ -983,7 +1045,7 @@ class TeacherReports {
 
       if (!rows.length) {
         Toast?.error("No interventions found matching your search criteria.");
-        return;
+        return null;
       }
 
       const columns = [
@@ -998,16 +1060,16 @@ class TeacherReports {
         r.class_name || "—",
         r.intervention_type,
         r.description,
-        Utils.formatDate(r.date_assigned),
-        Utils.formatDate(r.target_date),
-        Utils.formatDate(r.date_completed),
+        r.date_assigned ? Utils.formatDate(r.date_assigned) : "—",
+        r.target_date ? Utils.formatDate(r.target_date) : "—",
+        r.date_completed ? Utils.formatDate(r.date_completed) : "—",
         r.status,
-        Utils.formatDate(r.follow_up_date),
+        r.follow_up_date ? Utils.formatDate(r.follow_up_date) : "—",
         r.follow_up_outcome || "—",
         r.follow_up_notes || "—",
       ]);
 
-      ReportPrinter.open({
+      return {
         title: "Intervention Tracking Report",
         subtitle: search || (status ? `Status: ${status}` : "All Classes"),
         meta: [
@@ -1023,10 +1085,41 @@ class TeacherReports {
             emptyText: "No interventions found.",
           },
         ],
-      });
+      };
     } catch (error) {
       console.error("[TeacherReports]", error);
       Toast?.error("Unable to load the intervention report.");
+      return null;
+    }
+  }
+
+  static async exportInterventionCsv() {
+    const reportModel = await this.buildInterventionReportModel();
+    if (reportModel) ReportPrinter.open(reportModel);
+  }
+
+  static async sendInterventionReportToAdmin() {
+    const reportModel = await this.buildInterventionReportModel();
+    if (reportModel) await this.sendToAdmin("INTERVENTION", reportModel);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Send to Admin
+  // ---------------------------------------------------------------------------
+
+  static async sendToAdmin(reportType, reportModel) {
+    try {
+      await API.submitReportToAdmin({
+        reportType,
+        title: reportModel.title,
+        subtitle: reportModel.subtitle,
+        meta: reportModel.meta,
+        sections: reportModel.sections,
+      });
+      Toast?.success("Report sent to admin.");
+    } catch (error) {
+      console.error("[TeacherReports]", error);
+      Toast?.error(error?.data?.message || "Unable to send this report to admin.");
     }
   }
 }

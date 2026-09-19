@@ -131,3 +131,21 @@
 .st-roster-checklist-row input[type="checkbox"] {
   margin-right: 8px;
 }
+
+/* Overrides .st-schedule-modal-field's generic uppercase/micro label style
+   (equal specificity, wins on source order) -- these labels are learner
+   names, not field labels, so they should read like normal body text. */
+.st-roster-checklist-row label {
+  font-size: var(--st-font-size-label);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--st-on-surface);
+  margin: 0;
+  cursor: pointer;
+}
+
+.st-schedule-modal-field label .required {
+  color: var(--st-error);
+  margin-left: 2px;
+}

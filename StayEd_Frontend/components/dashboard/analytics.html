@@ -6,13 +6,25 @@
         Distribution of learners based on the latest prediction results.
       </p>
     </div>
-    <a class="st-panel-link" href="early-warning.html">
-      View Details
-      <span class="material-symbols-outlined">arrow_forward</span>
-    </a>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <div class="chart-type-toggle" role="group" aria-label="Choose chart type" id="riskChartToggle">
+        <button type="button" class="chart-type-btn is-active" data-chart-type="bar">Bar</button>
+        <button type="button" class="chart-type-btn" data-chart-type="pie">Pie</button>
+        <button type="button" class="chart-type-btn" data-chart-type="line">Trend</button>
+      </div>
+      <a class="st-panel-link" href="early-warning.html">
+        View Details
+        <span class="material-symbols-outlined">arrow_forward</span>
+      </a>
+    </div>
   </div>
 
-  <div class="st-riskchart">
+  <div id="riskChartView" class="chart-canvas-wrap" hidden>
+    <canvas id="riskChartCanvas" height="220"></canvas>
+    <p class="chart-canvas-note" id="riskChartNote"></p>
+  </div>
+
+  <div class="st-riskchart" id="riskBarView">
     <!-- Plot -->
     <div class="st-riskchart-plot">
       <div class="st-riskchart-bars" data-riskchart>

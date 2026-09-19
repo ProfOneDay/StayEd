@@ -3,6 +3,13 @@
   padding-right: 24px;
 }
 
+/* "Reports from Teachers" and "Master Enrollment Listing" titles specifically
+   -- not every .st-panel-title site-wide. */
+.st-report-panel-head .st-panel-title {
+  font-size: calc(var(--st-font-size-body-lg) + 2px);
+  margin-top: 6px;
+}
+
 .st-report-listing-actions {
   display: flex;
   align-items: flex-end;

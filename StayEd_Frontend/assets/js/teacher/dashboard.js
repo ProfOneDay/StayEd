@@ -7,12 +7,18 @@ class TeacherDashboard {
     search: "",
     sortByRisk: true,
     filtersApplied: false,
+    riskTrend: [],
+    currentRiskCounts: { high: 0, moderate: 0, low: 0 },
   };
+
+  static chartType = { risk: "bar", level: "bar", modality: "pie" };
+  static chartInstances = { risk: null, level: null, modality: null };
 
   static async init() {
     if (window.Guards) Guards.teacher();
 
     this.bindStaticUI();
+    this.bindChartToggles();
 
     if (window.Layout) Layout.showLoader();
 
@@ -27,6 +33,8 @@ class TeacherDashboard {
 
       this.renderStatistics(data.statistics);
 
+      this.state.riskTrend = data.riskTrend || [];
+
       this.renderRiskChart(data.riskDistribution, data.predictionSummary);
 
       this.renderInterventionTip(data.interventions);
@@ -38,6 +46,8 @@ class TeacherDashboard {
       this.populateSchoolYearFilter();
 
       this.applyRegistry({ recomputeStats: false });
+
+      this.renderLevelModalityCharts(this.state.filtered);
     } catch (error) {
       console.error("[Dashboard]", error);
 
@@ -232,6 +242,153 @@ class TeacherDashboard {
         )
         .join("");
     }
+
+    this.state.currentRiskCounts = { high: dist.high || 0, moderate: dist.moderate || 0, low: dist.low || 0 };
+    this.renderRiskChartTypeView();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Chart-type toggles (Bar/Pie/Trend for Risk Distribution; Bar/Pie for the
+  // Learning Level and Modality distribution panels). Chart.js is loaded via
+  // CDN in dashboard.html; renderRiskChart()'s existing custom CSS bars stay
+  // the default "Bar" view so nothing already working changes visually.
+  // ---------------------------------------------------------------------------
+
+  static bindChartToggles() {
+    const bind = (toggleId, key, onChange) => {
+      document.querySelectorAll(`#${toggleId} .chart-type-btn`).forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(`#${toggleId} .chart-type-btn`).forEach((b) => b.classList.toggle("is-active", b === btn));
+          this.chartType[key] = btn.dataset.chartType;
+          onChange();
+        });
+      });
+    };
+    bind("riskChartToggle", "risk", () => this.renderRiskChartTypeView());
+    bind("levelChartToggle", "level", () => this.renderLevelModalityCharts(this.state.filtered));
+    bind("modalityChartToggle", "modality", () => this.renderLevelModalityCharts(this.state.filtered));
+  }
+
+  static chartJsReady(note) {
+    if (typeof Chart !== "undefined") return true;
+    if (note) note.textContent = "Chart library failed to load -- check your connection and reload the page.";
+    return false;
+  }
+
+  static renderRiskChartTypeView() {
+    const barView = document.getElementById("riskBarView");
+    const chartView = document.getElementById("riskChartView");
+    if (!barView || !chartView) return;
+
+    if (this.chartType.risk === "bar") {
+      barView.hidden = false;
+      chartView.hidden = true;
+      this.chartInstances.risk?.destroy();
+      this.chartInstances.risk = null;
+      return;
+    }
+
+    barView.hidden = true;
+    chartView.hidden = false;
+    const note = document.getElementById("riskChartNote");
+    const canvas = document.getElementById("riskChartCanvas");
+    this.chartInstances.risk?.destroy();
+    this.chartInstances.risk = null;
+    if (!canvas || !this.chartJsReady(note)) return;
+
+    const { high, moderate, low } = this.state.currentRiskCounts;
+
+    if (this.chartType.risk === "pie") {
+      note.textContent = "Current risk distribution for your filtered learners.";
+      this.chartInstances.risk = new Chart(canvas.getContext("2d"), {
+        type: "pie",
+        data: {
+          labels: ["High Risk", "Moderate Risk", "Low Risk"],
+          datasets: [{ data: [high, moderate, low], backgroundColor: ["#ba1a1a", "#f39422", "#6bbf59"], borderColor: "#fff", borderWidth: 2 }],
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } },
+      });
+      return;
+    }
+
+    if (this.chartType.risk === "line") {
+      const trend = this.state.riskTrend;
+      if (!trend.length) {
+        note.textContent = "No prediction runs recorded in the last 6 months yet.";
+        return;
+      }
+      note.textContent = "Monthly trend of your learners' assessed risk levels (last 6 months).";
+      this.chartInstances.risk = new Chart(canvas.getContext("2d"), {
+        type: "line",
+        data: {
+          labels: trend.map((m) => m.month),
+          datasets: [
+            { label: "High", data: trend.map((m) => m.high), borderColor: "#ba1a1a", backgroundColor: "#ba1a1a22", tension: 0.3 },
+            { label: "Moderate", data: trend.map((m) => m.moderate), borderColor: "#f39422", backgroundColor: "#f3942222", tension: 0.3 },
+            { label: "Low", data: trend.map((m) => m.low), borderColor: "#6bbf59", backgroundColor: "#6bbf5922", tension: 0.3 },
+          ],
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } },
+      });
+    }
+  }
+
+  static renderLevelModalityCharts(rows = []) {
+    const levelOrder = ["Basic Literacy", "Elementary", "Junior High", "Senior High"];
+    const modalityOrder = ["Face-to-Face", "Modular", "Blended"];
+
+    const countBy = (order, field) => order.map((key) => rows.filter((r) => r[field] === key).length);
+
+    this.renderDistributionChart({
+      key: "level",
+      canvasId: "levelChartCanvas",
+      noteId: "levelChartNote",
+      labels: levelOrder,
+      values: countBy(levelOrder, "level"),
+      colors: ["#3B7DDD", "#6bbf59", "#f39422", "#8E5BD6"],
+      noteText: "Learner count per ALS learning level for your currently filtered learners.",
+    });
+
+    this.renderDistributionChart({
+      key: "modality",
+      canvasId: "modalityChartCanvas",
+      noteId: "modalityChartNote",
+      labels: modalityOrder,
+      values: countBy(modalityOrder, "modality"),
+      colors: ["#3B7DDD", "#f39422", "#8E5BD6"],
+      noteText: "Learner count per learning delivery mode for your currently filtered learners.",
+    });
+  }
+
+  // Shared renderer for the Learning Level / Modality panels -- both only
+  // ever toggle between Bar and Pie (no custom CSS bar view to preserve like
+  // Risk Distribution has), so a single Chart.js bar/pie is swapped in place.
+  static renderDistributionChart({ key, canvasId, noteId, labels, values, colors, noteText }) {
+    const note = document.getElementById(noteId);
+    const canvas = document.getElementById(canvasId);
+    this.chartInstances[key]?.destroy();
+    this.chartInstances[key] = null;
+    if (!canvas || !this.chartJsReady(note)) return;
+
+    note.textContent = noteText;
+    const type = this.chartType[key] === "pie" ? "pie" : "bar";
+    this.chartInstances[key] = new Chart(canvas.getContext("2d"), {
+      type,
+      data: {
+        labels,
+        datasets: [
+          type === "pie"
+            ? { data: values, backgroundColor: colors, borderColor: "#fff", borderWidth: 2 }
+            : { label: "Learners", data: values, backgroundColor: colors },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: "bottom", display: type === "pie" } },
+        scales: type === "pie" ? {} : { y: { beginAtZero: true, ticks: { precision: 0 } } },
+      },
+    });
   }
 
   static renderInterventionTip(interventions = []) {
@@ -298,6 +455,8 @@ class TeacherDashboard {
       this.renderStatisticsFromRows(rows);
 
       this.renderRiskChartFromRows(rows);
+
+      this.renderLevelModalityCharts(rows);
     }
   }
 

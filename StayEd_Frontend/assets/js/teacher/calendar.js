@@ -829,10 +829,16 @@ class TeacherCalendar {
                 <span class="st-cal-panel-event-meta">${this._esc(e.meta)}</span>
               </div>
             </button>
-            <div class="st-cal-panel-event-actions">
-              <button type="button" class="st-btn st-btn-xs st-btn-outline" data-event-action="edit" data-event-type="${this._esc(e.type)}" data-event-class-id="${this._esc(e.classId ?? "") }" data-event-date="${date}" data-event-session-id="${this._esc(e.sessionId ?? "") }" data-event-module-id="${this._esc(e.moduleId ?? "") }">Edit</button>
-              <button type="button" class="st-btn st-btn-xs st-btn-text" data-event-action="remove" data-event-type="${this._esc(e.type)}" data-event-class-id="${this._esc(e.classId ?? "") }" data-event-date="${date}" data-event-session-id="${this._esc(e.sessionId ?? "") }" data-event-module-id="${this._esc(e.moduleId ?? "") }">Remove</button>
-            </div>
+            ${
+              // "return" markers are a computed +14-day hint, not a real
+              // record -- there's nothing to edit or remove.
+              e.type === "attendance" || e.type === "module"
+                ? `<div class="st-cal-panel-event-actions">
+                    <button type="button" class="st-btn st-btn-xs st-btn-outline" data-event-action="edit" data-event-type="${this._esc(e.type)}" data-event-class-id="${this._esc(e.classId ?? "") }" data-event-date="${date}" data-event-session-id="${this._esc(e.sessionId ?? "") }" data-event-module-id="${this._esc(e.moduleId ?? "") }">Edit</button>
+                    <button type="button" class="st-btn st-btn-xs st-btn-text" data-event-action="remove" data-event-type="${this._esc(e.type)}" data-event-class-id="${this._esc(e.classId ?? "") }" data-event-date="${date}" data-event-session-id="${this._esc(e.sessionId ?? "") }" data-event-module-id="${this._esc(e.moduleId ?? "") }">Remove</button>
+                  </div>`
+                : ""
+            }
           </div>`,
         )
         .join("");
@@ -857,6 +863,16 @@ class TeacherCalendar {
         const classId = btn.dataset.eventClassId;
         const dateValue = btn.dataset.eventDate;
         const sessionId = btn.dataset.eventSessionId;
+        const moduleId = btn.dataset.eventModuleId;
+
+        if (type === "module" && moduleId) {
+          if (btn.dataset.eventAction === "edit") {
+            this.openEditModuleReleaseDateDialog(classId, moduleId, dateValue);
+          } else {
+            this.confirmRemoveModuleRelease(classId, moduleId, dateValue);
+          }
+          return;
+        }
 
         if (btn.dataset.eventAction === "edit") {
           if (type === "attendance") {
@@ -1172,7 +1188,7 @@ class TeacherCalendar {
         <div class="st-schedule-modal-row">
           <div class="st-schedule-modal-field">
             <label for="calModRelease">Release Date <span style="color:#ba1a1a;">*</span></label>
-            <input type="date" id="calModRelease" value="${date}" max="${this._fmt(this.today)}" />
+            <input type="date" id="calModRelease" value="${date}" />
           </div>
           <div class="st-schedule-modal-field">
             <label for="calModReturn">Planned Return Date</label>
@@ -1202,12 +1218,6 @@ class TeacherCalendar {
           throw new Error("validation");
         }
 
-        // Backend rejects future release dates
-        if (releaseDate > this._fmt(this.today)) {
-          Toast?.error("Release date cannot be later than today.");
-          throw new Error("validation");
-        }
-
         try {
           await API.releaseClassModule(cls.id, moduleId, {
             releaseDate,
@@ -1224,6 +1234,83 @@ class TeacherCalendar {
         this.render();
         this.openDayPanel(releaseDate);
         this.renderUpcoming();
+      },
+    });
+  }
+
+  // "Set Module Release Date" (above) only ever targets not-yet-released
+  // learners, so re-submitting it for an already-released module always
+  // fails with "nothing to do" -- these two operate on the existing release
+  // itself instead (moveClassModuleReleaseDate / removeClassModuleRelease).
+  static async openEditModuleReleaseDateDialog(classId, moduleId, oldDate) {
+    if (!Modal) return;
+
+    Modal.show({
+      title: "Move Release Date",
+      size: "sm",
+      confirmLabel: "Save Changes",
+      cancelLabel: "Cancel",
+      asyncConfirm: true,
+      message: `
+        <div class="st-cal-modal-body">
+          <div class="st-schedule-modal-field">
+            <label for="calModNewDate">New Release Date</label>
+            <input type="date" id="calModNewDate" value="${oldDate}">
+          </div>
+          <p class="st-mrf-subtitle" style="margin-top:4px;">
+            Only applies to learners who haven't returned this module yet.
+          </p>
+        </div>
+      `,
+      onConfirm: async () => {
+        const newDate = document.getElementById("calModNewDate")?.value;
+        if (!newDate) {
+          Toast?.error("Please choose a date.");
+          throw new Error("validation");
+        }
+        try {
+          const response = await API.moveClassModuleReleaseDate(classId, moduleId, {
+            oldDate,
+            newDate,
+          });
+          Toast?.success(response?.message || "Release date updated.");
+          await this.loadEvents();
+          this.render();
+          this.renderUpcoming();
+          this.openDayPanel(newDate);
+        } catch (err) {
+          Toast?.error(err?.message || err?.data?.message || "Unable to move this release date.");
+          throw err;
+        }
+      },
+    });
+  }
+
+  static confirmRemoveModuleRelease(classId, moduleId, releaseDate) {
+    if (!Modal) return;
+
+    Modal.show({
+      title: "Remove Module Release",
+      size: "sm",
+      confirmLabel: "Remove",
+      cancelLabel: "Cancel",
+      asyncConfirm: true,
+      message: `
+        This removes the release recorded for this date. Learners who have
+        already returned the module keep that record and are left as-is.
+      `,
+      onConfirm: async () => {
+        try {
+          const response = await API.removeClassModuleRelease(classId, moduleId, releaseDate);
+          Toast?.success(response?.message || "Release removed.");
+          await this.loadEvents();
+          this.render();
+          this.renderUpcoming();
+          this.closeDayPanel();
+        } catch (err) {
+          Toast?.error(err?.message || err?.data?.message || "Unable to remove this release.");
+          throw err;
+        }
       },
     });
   }

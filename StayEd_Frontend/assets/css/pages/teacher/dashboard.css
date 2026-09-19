@@ -208,6 +208,7 @@
 
 .col-3{ grid-column:span 3; }
 .col-4{ grid-column:span 4; }
+.col-6{ grid-column:span 6; }
 .col-8{ grid-column:span 8; }
 .col-12{ grid-column:span 12; }
 
@@ -323,6 +324,19 @@
     flex:1;
 }
 
+/* Author rules always beat the UA [hidden]{display:none} default regardless
+   of specificity/order, so .st-riskchart's own display:flex above would
+   otherwise keep this visible even with the hidden attribute set (it's
+   toggled via JS when switching the Risk Distribution chart type away from
+   "Bar") -- this needs to explicitly out-specificity that rule.
+   Scoped to this page: the admin dashboard reuses the same #riskBarView /
+   #riskChartView ids for its own (differently-styled) chart toggle, and
+   main.css loads every page's CSS everywhere, so an unscoped rule here
+   would otherwise leak into and resize/mis-hide admin's version. */
+body[data-page="Teacher Dashboard"] #riskBarView[hidden]{
+    display:none;
+}
+
 .st-riskchart-plot{
     flex:1;
     display:flex;
@@ -404,6 +418,30 @@
 
 .st-riskchart-bar--low{
     background:var(--st-risk-low);
+}
+
+.chart-type-toggle{ display:flex; flex-shrink:0; border:1px solid rgba(195,198,207,.35); border-radius:99px; padding:2px; background:#fff; }
+.chart-type-btn{ border:none; background:transparent; padding:5px 12px; font-size:var(--st-font-size-caption); font-weight:600; color:var(--st-outline); border-radius:99px; cursor:pointer; white-space:nowrap; }
+.chart-type-btn.is-active{ background:var(--st-primary); color:#fff; }
+.chart-type-btn:hover:not(.is-active){ background:var(--st-info-light); }
+/* A fixed-height box with a Chart.js canvas that's told to fill 100% of it
+   left no room for the caption <p> below -- it doesn't get clipped (the box
+   has no overflow:hidden), it just spills out and visually overlaps
+   whatever sits below the card. Laying this out as a column with the canvas
+   as the only flexible child reserves real space for the caption instead. */
+.chart-canvas-wrap{ position:relative; height:280px; margin-top:10px; min-height:0; }
+.chart-canvas-wrap:not([hidden]){ display:flex; flex-direction:column; }
+.chart-canvas-wrap canvas{ flex:1; min-height:0; max-width:100%; }
+.chart-canvas-note{ flex-shrink:0; margin:8px 0 0; font-size:var(--st-font-size-caption); color:var(--st-outline); text-align:center; }
+
+/* Risk Distribution's Pie/Trend view swaps in place of .st-riskchart. The
+   analytics card only has min-height:400px (not a fixed height), so an
+   earlier attempt to flex:1-fill it here had nothing concrete to grow
+   against and could render tiny while the card still showed a big empty
+   gap. A fixed, self-contained height (like every other chart-canvas-wrap)
+   is what actually fits reliably regardless of the card's own sizing. */
+body[data-page="Teacher Dashboard"] #riskChartView.chart-canvas-wrap{
+    height:320px;
 }
 
 .st-riskchart-xaxis{
@@ -792,6 +830,7 @@
 
 @media (max-width:992px){
     .col-3{ grid-column:span 6; }
+    .col-6{ grid-column:span 12; }
     .st-filter-controls{ grid-template-columns:1fr 1fr; }
     .st-notif-banner,
     .st-riskchart{ flex-wrap:wrap; }

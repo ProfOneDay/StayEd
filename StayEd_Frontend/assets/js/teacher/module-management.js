@@ -14,7 +14,7 @@ class ModuleManagement {
   static selectedEnrollmentIds = new Set();
 
   static catalogFilters = { search: "", status: "all", sortBy: "number" };
-  static detailFilters = { search: "", stage: "all" };
+  static detailFilters = { search: "", stage: "all", modality: "all" };
 
   static async init() {
     if (window.Guards) Guards.teacher();
@@ -93,6 +93,16 @@ class ModuleManagement {
   static addDays(isoDate, days) {
     const d = new Date(`${isoDate}T00:00:00`);
     d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
+  }
+
+  // The roster only returns release/return dates as long locale strings
+  // (e.g. "August 15, 2026"), not ISO -- convert back to "YYYY-MM-DD" so an
+  // edit modal can prefill a native <input type="date">.
+  static parseLongDate(str) {
+    if (!str) return null;
+    const d = new Date(str);
+    if (isNaN(d.getTime())) return null;
     return d.toISOString().slice(0, 10);
   }
 
@@ -192,14 +202,13 @@ class ModuleManagement {
                 <th>Title/Topic</th>
                 <th>Module Status</th>
                 <th>Learners</th>
-                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               ${
                 list.length
                   ? list.map((m) => this.renderCatalogRow(m)).join("")
-                  : `<tr><td colspan="6">
+                  : `<tr><td colspan="5">
                       <div class="st-empty" style="border:none;background:transparent;">
                         <span class="material-symbols-outlined">inventory_2</span>
                         <p class="st-empty-title">${this.modules.length ? "No modules match your filters" : "No modules set up yet"}</p>
@@ -226,24 +235,15 @@ class ModuleManagement {
       this.renderCatalogView();
     });
 
-    root.querySelectorAll("[data-manage-module]").forEach((btn) => {
-      btn.addEventListener("click", () => this.openModuleDetail(Number(btn.dataset.manageModule)));
-    });
-    root.querySelectorAll("[data-edit-module]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const m = this.modules.find((mod) => mod.id === Number(btn.dataset.editModule));
-        if (m) this.openEditModuleModal(m);
-      });
-    });
-    root.querySelectorAll("[data-archive-module]").forEach((btn) => {
-      btn.addEventListener("click", () => this.confirmArchiveModule(Number(btn.dataset.archiveModule)));
+    root.querySelectorAll("[data-module-row]").forEach((tr) => {
+      tr.addEventListener("click", () => this.openModuleDetail(Number(tr.dataset.moduleRow)));
     });
   }
 
   static renderCatalogRow(m) {
     const statusClass = this.badgeClassFor(m.releaseStatus);
     return `
-      <tr data-module-row="${m.id}">
+      <tr data-module-row="${m.id}" style="cursor:pointer;">
         <td><strong>Module ${m.sequenceNumber ?? ""}</strong></td>
         <td>${m.strandCode || "—"}</td>
         <td>
@@ -252,13 +252,6 @@ class ModuleManagement {
         </td>
         <td><span class="st-badge st-badge-${statusClass}">${m.releaseStatus}</span></td>
         <td>${m.releasedCount} of ${m.totalLearners}</td>
-        <td>
-          <div class="st-table-actions">
-            <button type="button" class="st-btn st-btn-primary st-btn-xs" data-manage-module="${m.id}">Manage</button>
-            <button type="button" class="st-btn-text" data-edit-module="${m.id}">Edit</button>
-            <button type="button" class="st-btn-text" data-archive-module="${m.id}">Archive</button>
-          </div>
-        </td>
       </tr>
     `;
   }
@@ -284,7 +277,7 @@ class ModuleManagement {
           </select>
         </div>
         <div class="st-schedule-modal-field">
-          <label for="amTitle">Module Title</label>
+          <label for="amTitle">Module Title <span class="required">*</span></label>
           <input id="amTitle" type="text" placeholder="e.g. Communication Skills">
         </div>
         <div class="st-schedule-modal-field">
@@ -409,7 +402,7 @@ class ModuleManagement {
     this.view = "detail";
     this.activeModuleId = classModuleId;
     this.selectedEnrollmentIds = new Set();
-    this.detailFilters = { search: "", stage: "all" };
+    this.detailFilters = { search: "", stage: "all", modality: "all" };
     document.querySelector("[data-add-module-btn]").style.display = "none";
 
     if (pushState) this.updateUrl();
@@ -427,10 +420,10 @@ class ModuleManagement {
       console.error("[ModuleManagement] Unable to load module catalog", error);
     }
 
-    await this.loadRoster();
+    await this.loadRoster({ resetSelection: true });
   }
 
-  static async loadRoster() {
+  static async loadRoster({ resetSelection = false } = {}) {
     try {
       const [rosterResponse, catalogResponse] = await Promise.all([
         API.getClassModuleRoster(this.classId, this.activeModuleId),
@@ -445,6 +438,17 @@ class ModuleManagement {
       this.modules = catalogResponse.data || [];
       this.totalLearners = catalogResponse.totalLearners || 0;
       this.summary = catalogResponse.summary || null;
+      // "Select All Students" is the default: every learner who hasn't
+      // received this module yet starts pre-selected, so a teacher can
+      // release to everyone with no extra clicks and only has to
+      // deselect the exceptions. Only reset on a fresh open of this
+      // module (not after every roster refresh), so manual deselections
+      // made mid-session survive a release/return/undo refresh.
+      if (resetSelection) {
+        this.selectedEnrollmentIds = new Set(
+          this.roster.filter((r) => this.stageFor(r) === "Not Released").map((r) => r.enrollmentId),
+        );
+      }
       this.renderDetailView();
     } catch (error) {
       console.error("[ModuleManagement] Unable to load roster", error);
@@ -471,10 +475,11 @@ class ModuleManagement {
   }
 
   static filteredRoster() {
-    const { search, stage } = this.detailFilters;
+    const { search, stage, modality } = this.detailFilters;
     return this.roster.filter((r) => {
       if (search && !r.name.toLowerCase().includes(search.toLowerCase())) return false;
       if (stage !== "all" && this.stageFor(r) !== stage) return false;
+      if (modality !== "all" && r.modality !== modality) return false;
       return true;
     });
   }
@@ -486,13 +491,21 @@ class ModuleManagement {
     const module = this.modules.find((m) => m.id === this.activeModuleId);
     const list = this.filteredRoster();
     const selectedCount = this.selectedEnrollmentIds.size;
+    // Only "Not Released" rows carry a checkbox at all (see renderDetailRow),
+    // so "select all" only ever targets those -- and only within the
+    // currently filtered/visible list, matching normal table select-all
+    // behavior when a search/stage filter is active.
+    const releasableIds = list.filter((r) => this.stageFor(r) === "Not Released").map((r) => r.enrollmentId);
+    const allSelected = releasableIds.length > 0 && releasableIds.every((id) => this.selectedEnrollmentIds.has(id));
 
     root.innerHTML = `
       <div class="st-panel st-panel-pad">
-        <button type="button" class="st-btn-text" data-back-to-catalog>
-          <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:-3px;">arrow_back</span>
-          Back to Modules
-        </button>
+        <div style="display:flex;justify-content:flex-end;">
+          <button type="button" class="st-btn-text" data-back-to-catalog>
+            <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:-3px;">arrow_back</span>
+            Back to Modules
+          </button>
+        </div>
 
         <div class="st-module-detail-header">
           <div>
@@ -507,6 +520,9 @@ class ModuleManagement {
           </div>
           <div class="st-table-actions">
             <button type="button" class="st-btn st-btn-outline st-btn-xs" data-edit-active-module>Edit Module</button>
+            <button type="button" class="st-btn st-btn-primary st-btn-xs" data-release-selected ${selectedCount ? "" : "disabled"}>
+              Release${selectedCount ? ` (${selectedCount})` : ""}
+            </button>
             <button type="button" class="st-btn-text" data-archive-active-module>Archive</button>
           </div>
         </div>
@@ -522,23 +538,27 @@ class ModuleManagement {
             <option value="Released" ${this.detailFilters.stage === "Released" ? "selected" : ""}>Released</option>
             <option value="Returned" ${this.detailFilters.stage === "Returned" ? "selected" : ""}>Returned</option>
           </select>
+          <select data-detail-modality-filter>
+            <option value="all" ${this.detailFilters.modality === "all" ? "selected" : ""}>All Modalities</option>
+            <option value="Face-to-Face" ${this.detailFilters.modality === "Face-to-Face" ? "selected" : ""}>Face-to-Face</option>
+            <option value="Modular" ${this.detailFilters.modality === "Modular" ? "selected" : ""}>Modular</option>
+            <option value="Blended" ${this.detailFilters.modality === "Blended" ? "selected" : ""}>Blended</option>
+          </select>
         </div>
-
-        ${
-          selectedCount
-            ? `<div class="st-module-bulk-bar">
-                <span>${selectedCount} learner${selectedCount === 1 ? "" : "s"} selected</span>
-                <button type="button" class="st-btn st-btn-primary st-btn-xs" data-bulk-release>Release to Selected</button>
-              </div>`
-            : ""
-        }
 
         <div class="st-table-scroll">
           <table class="st-data-table">
             <thead>
               <tr>
-                <th style="width:32px;"></th>
+                <th style="width:32px;">
+                  ${
+                    releasableIds.length
+                      ? `<input type="checkbox" data-select-all-learners title="Select all students" ${allSelected ? "checked" : ""}>`
+                      : ""
+                  }
+                </th>
                 <th>Learner</th>
+                <th>Modality</th>
                 <th>Stage</th>
                 <th>Release Date</th>
                 <th>Return Date</th>
@@ -549,7 +569,7 @@ class ModuleManagement {
               ${
                 list.length
                   ? list.map((r) => this.renderDetailRow(r)).join("")
-                  : `<tr><td colspan="6">
+                  : `<tr><td colspan="7">
                       <div class="st-empty" style="border:none;background:transparent;">
                         <span class="material-symbols-outlined">group_off</span>
                         <p class="st-empty-title">No learners match your filters</p>
@@ -578,6 +598,16 @@ class ModuleManagement {
       this.detailFilters.stage = e.target.value;
       this.renderDetailView();
     });
+    root.querySelector("[data-detail-modality-filter]")?.addEventListener("change", (e) => {
+      this.detailFilters.modality = e.target.value;
+      this.renderDetailView();
+    });
+
+    root.querySelector("[data-select-all-learners]")?.addEventListener("change", (e) => {
+      if (e.target.checked) releasableIds.forEach((id) => this.selectedEnrollmentIds.add(id));
+      else releasableIds.forEach((id) => this.selectedEnrollmentIds.delete(id));
+      this.renderDetailView();
+    });
 
     root.querySelectorAll("[data-select-learner]").forEach((cb) => {
       cb.addEventListener("change", () => {
@@ -588,7 +618,7 @@ class ModuleManagement {
       });
     });
 
-    root.querySelector("[data-bulk-release]")?.addEventListener("click", () => {
+    root.querySelector("[data-release-selected]")?.addEventListener("click", () => {
       this.openReleaseModal([...this.selectedEnrollmentIds]);
     });
 
@@ -600,6 +630,13 @@ class ModuleManagement {
       btn.addEventListener("click", () => {
         const r = this.roster.find((row) => row.enrollmentId === Number(btn.dataset.returnOne));
         if (r) this.openReturnModal(r);
+      });
+    });
+
+    root.querySelectorAll("[data-edit-release-date]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const r = this.roster.find((row) => row.enrollmentId === Number(btn.dataset.editReleaseDate));
+        if (r) this.openEditReleaseDateModal(r);
       });
     });
 
@@ -625,16 +662,31 @@ class ModuleManagement {
       actionHtml = `<button type="button" class="st-btn-text" data-undo-return="${r.enrollmentId}">Undo</button>`;
     }
 
+    const releaseDateHtml = r.releaseDate
+      ? `${r.releaseDate} <button type="button" class="st-icon-btn" data-edit-release-date="${r.enrollmentId}" title="Edit release date" style="vertical-align:middle;border:none;background:none;cursor:pointer;color:var(--st-on-surface-variant);">
+          <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:-3px;">edit</span>
+        </button>`
+      : "—";
+
     return `
       <tr>
         <td>${stage === "Not Released" ? `<input type="checkbox" data-select-learner="${r.enrollmentId}" ${checked}>` : ""}</td>
         <td>${r.name}</td>
+        <td>${this.modalityPill(r.modality)}</td>
         <td><span class="st-badge st-badge-${badgeClass}">${stage}</span></td>
-        <td>${r.releaseDate || "—"}</td>
+        <td>${releaseDateHtml}</td>
         <td>${r.returnDate || "—"}</td>
         <td>${actionHtml}</td>
       </tr>
     `;
+  }
+
+  // Same pill styling as the teacher dashboard's learner registry
+  // (dashboard.js modalityPill), so a learner's modality reads the same way
+  // across pages.
+  static modalityPill(modality) {
+    const teal = modality === "Modular" ? " st-pill--teal" : "";
+    return `<span class="st-pill${teal}">${modality || "—"}</span>`;
   }
 
   static openReleaseModal(enrollmentIds) {
@@ -642,17 +694,47 @@ class ModuleManagement {
 
     const today = new Date().toISOString().slice(0, 10);
     const plannedReturn = this.addDays(today, this.defaultDurationDays);
-    const names = enrollmentIds
-      .map((id) => this.roster.find((r) => r.enrollmentId === id)?.name)
+    const candidates = enrollmentIds
+      .map((id) => this.roster.find((r) => r.enrollmentId === id))
       .filter(Boolean);
 
+    // For a single learner (the per-row "Release" button) a plain name is
+    // enough. For a batch (the header "Release" button / bulk select) show
+    // an actual checklist -- defaulting every row to checked, matching
+    // "select all" being the default -- so a teacher can still deselect a
+    // specific student right before confirming, without leaving the modal.
+    const recipientsHtml =
+      candidates.length > 1
+        ? `
+          <div class="st-schedule-modal-field">
+            <label>Students Receiving This Module</label>
+            <div class="st-roster-checklist" id="rmChecklist">
+              <div class="st-roster-checklist-row" style="font-weight:600;">
+                <input type="checkbox" id="rmSelectAll" checked>
+                <label for="rmSelectAll" style="cursor:pointer;margin:0;font-weight:600;">Select All (${candidates.length})</label>
+              </div>
+              ${candidates
+                .map(
+                  (r) => `
+                <div class="st-roster-checklist-row">
+                  <input type="checkbox" id="rmStudent${r.enrollmentId}" data-rm-student="${r.enrollmentId}" checked>
+                  <label for="rmStudent${r.enrollmentId}" style="cursor:pointer;margin:0;">${r.name}</label>
+                </div>
+              `,
+                )
+                .join("")}
+            </div>
+          </div>
+        `
+        : `<p style="color:var(--st-on-surface-variant);font-size:0.875rem;">${candidates[0]?.name || ""}</p>`;
+
     Modal.show({
-      title: enrollmentIds.length === 1 ? "Release Module" : `Release Module to ${enrollmentIds.length} Learners`,
+      title: candidates.length === 1 ? "Release Module" : `Release Module to ${candidates.length} Learners`,
       size: "sm",
       confirmLabel: "Confirm Release",
       asyncConfirm: true,
       message: `
-        <p style="color:var(--st-on-surface-variant);font-size:0.875rem;">${names.join(", ")}</p>
+        ${recipientsHtml}
         <div class="st-schedule-modal-field">
           <label for="rmReleaseDate">Release Date</label>
           <input type="date" id="rmReleaseDate" value="${today}" max="${today}">
@@ -672,11 +754,19 @@ class ModuleManagement {
       onConfirm: async () => {
         const releaseDate = document.getElementById("rmReleaseDate")?.value;
         const plannedReturnDate = document.getElementById("rmPlannedReturn")?.value;
+        const studentCheckboxes = document.querySelectorAll("[data-rm-student]");
+        const targetIds = studentCheckboxes.length
+          ? [...studentCheckboxes].filter((cb) => cb.checked).map((cb) => Number(cb.dataset.rmStudent))
+          : enrollmentIds;
+        if (!targetIds.length) {
+          Toast?.error("Select at least one student to release to.");
+          throw new Error("validation");
+        }
         try {
           const response = await API.releaseClassModule(this.classId, this.activeModuleId, {
             releaseDate,
             plannedReturnDate,
-            learnerIds: enrollmentIds,
+            learnerIds: targetIds,
           });
           Toast?.success(response?.message || "Module released.");
           this.selectedEnrollmentIds.clear();
@@ -684,6 +774,59 @@ class ModuleManagement {
         } catch (error) {
           console.error("[ModuleManagement] Release failed", error);
           Toast?.error(error?.data?.message || "Unable to release this module.");
+          throw error;
+        }
+      },
+    });
+
+    document.getElementById("rmSelectAll")?.addEventListener("change", (e) => {
+      document.querySelectorAll("[data-rm-student]").forEach((cb) => {
+        cb.checked = e.target.checked;
+      });
+    });
+    document.getElementById("rmChecklist")?.addEventListener("change", (e) => {
+      if (!e.target.matches("[data-rm-student]")) return;
+      const all = [...document.querySelectorAll("[data-rm-student]")];
+      const selectAll = document.getElementById("rmSelectAll");
+      if (selectAll) selectAll.checked = all.every((cb) => cb.checked);
+    });
+  }
+
+  static openEditReleaseDateModal(rosterRow) {
+    if (!window.Modal) return;
+    const today = new Date().toISOString().slice(0, 10);
+    const current = this.parseLongDate(rosterRow.releaseDate) || today;
+
+    Modal.show({
+      title: "Edit Release Date",
+      size: "sm",
+      confirmLabel: "Save Changes",
+      asyncConfirm: true,
+      message: `
+        <p style="color:var(--st-on-surface-variant);font-size:0.875rem;">${rosterRow.name}</p>
+        <div class="st-schedule-modal-field">
+          <label for="erdReleaseDate">Release Date</label>
+          <input type="date" id="erdReleaseDate" value="${current}" max="${today}">
+        </div>
+        <p class="st-mrf-subtitle" style="margin-top:4px;">
+          This corrects the recorded release date -- it will also update the
+          return date's minimum bound for any modules released together in
+          the same batch.
+        </p>
+      `,
+      onConfirm: async () => {
+        const releaseDate = document.getElementById("erdReleaseDate")?.value;
+        if (!releaseDate) {
+          Toast?.error("Please choose a release date.");
+          throw new Error("validation");
+        }
+        try {
+          await API.editModuleBatch(rosterRow.learnerId, rosterRow.releaseBatchId, { releaseDate });
+          Toast?.success("Release date updated.");
+          await this.loadRoster();
+        } catch (error) {
+          console.error("[ModuleManagement] Edit release date failed", error);
+          Toast?.error(error?.data?.message || "Unable to update the release date.");
           throw error;
         }
       },

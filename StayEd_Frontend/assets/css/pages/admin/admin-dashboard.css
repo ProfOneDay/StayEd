@@ -126,6 +126,22 @@ h1,h2,h3,.profile-name{font-family:var(--st-font-heading)}
 .dashboard-section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}
 .dashboard-section-head h3{margin:0;font-size:var(--st-font-size-body-lg)}
 .dashboard-section-head p{margin:3px 0 0;font-size:var(--st-font-size-caption);color:var(--muted);line-height:1.35}
+
+.chart-type-toggle{display:flex;flex-shrink:0;border:1px solid var(--line);border-radius:99px;padding:2px;background:var(--surface)}
+.chart-type-btn{border:none;background:transparent;padding:5px 12px;font-size:var(--st-font-size-caption);font-weight:600;color:var(--muted);border-radius:99px;cursor:pointer;white-space:nowrap}
+.chart-type-btn.is-active{background:var(--navy);color:#fff}
+.chart-type-btn:hover:not(.is-active){background:var(--st-info-light)}
+/* A fixed-height box with a Chart.js canvas that's told to fill 100% of it
+   left no room for the caption <p> below -- it doesn't get clipped (the box
+   has no overflow:hidden), it just spills out and visually overlaps
+   whatever sits below the card. Laying this out as a column with the canvas
+   as the only flexible child reserves real space for the caption instead. */
+.chart-canvas-wrap{position:relative;height:280px;margin-top:10px;min-height:0}
+.chart-canvas-wrap:not([hidden]){display:flex;flex-direction:column}
+.chart-canvas-wrap canvas{flex:1;min-height:0;max-width:100%}
+.chart-canvas-note{flex-shrink:0;margin:8px 0 0;font-size:var(--st-font-size-caption);color:var(--muted);text-align:center}
+.gender-risk-callout{display:flex;align-items:center;gap:8px;background:var(--st-info-light);border-radius:var(--st-radius-lg);padding:10px 12px;margin-bottom:12px;font-size:var(--st-font-size-label);font-weight:600;color:var(--ink)}
+.gender-risk-callout .material-symbols-outlined{font-size:1.1rem;color:var(--navy)}
 .dashboard-summary-card .barrow{grid-template-columns:130px 1fr 44px;margin:12px 0}
 .bar-label{display:flex;flex-direction:column;gap:1px}
 .bar-label>span{font-size:var(--st-font-size-label);font-weight:700;color:var(--ink)}

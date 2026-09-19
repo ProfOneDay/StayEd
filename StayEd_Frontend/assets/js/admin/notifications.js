@@ -111,6 +111,7 @@ class AdminNotificationsPage {
       intervention: "support_agent",
       info: "how_to_reg",
       system: "domain",
+      report: "forward_to_inbox",
     };
 
     const metaBadgeClass = (n) => {
