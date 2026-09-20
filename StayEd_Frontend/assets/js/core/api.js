@@ -851,6 +851,14 @@ class API {
     return this.get(`/learners/${id}/profile`);
   }
 
+  static getPortalShare(id) {
+    return this.get(`/learners/${id}/portal-share`);
+  }
+
+  static updatePortalShare(id, enabled) {
+    return this.put(`/learners/${id}/portal-share`, { enabled });
+  }
+
   static runPrediction(learnerId) {
     return this.post("/predictions/run", { learner_id: learnerId });
   }

@@ -11,6 +11,76 @@
     margin-bottom:24px;
 }
 
+.st-portal-share-card{
+    background:#fff;
+    border:1px solid rgba(195,198,207,.30);
+    border-radius:var(--st-radius-lg);
+    box-shadow:var(--st-shadow-sm);
+    padding:20px 24px;
+    margin-bottom:24px;
+}
+
+.st-portal-share-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+}
+
+.st-portal-share-head-text{
+    min-width:0;
+    flex:1 1 260px;
+}
+
+.st-portal-share-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-family:var(--st-font-heading);
+    font-size: var(--st-font-size-body);
+    font-weight:700;
+    color:var(--st-primary);
+}
+
+.st-portal-share-title .material-symbols-outlined{
+    font-size:1.25rem;
+}
+
+.st-portal-share-sub{
+    margin-top:4px;
+    font-size: var(--st-font-size-caption);
+    color:var(--st-on-surface-variant);
+    line-height:1.5;
+}
+
+/* :not([hidden]) so the UA's [hidden]{display:none} default isn't beaten
+   by this rule's own display:flex -- author display rules otherwise always
+   win over it regardless of specificity, which would keep the row visible
+   even with the hidden attribute set. */
+.st-portal-share-link-row:not([hidden]){
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-top:16px;
+    padding-top:16px;
+    border-top:1px solid rgba(195,198,207,.20);
+    flex-wrap:wrap;
+}
+
+.st-portal-share-link-row input{
+    flex:1 1 240px;
+    min-width:0;
+    height:44px;
+    padding:0 14px;
+    border:1px solid var(--st-outline-variant);
+    border-radius:var(--st-radius-lg);
+    background:var(--st-surface-container-low);
+    font-family:var(--st-font-body);
+    font-size: var(--st-font-size-caption);
+    color:var(--st-on-surface-variant);
+}
+
 @media (min-width:900px){
     .st-profile-hero{
         grid-template-columns:5fr 4fr 3fr;

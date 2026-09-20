@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import secrets
 import threading
 from datetime import date, datetime, timedelta
 from io import BytesIO
@@ -2388,3 +2389,104 @@ def import_summary():
         (current_user_id(),),
     )
     return row["summary"] if row else {"total": 0, "imported": 0, "duplicates": 0, "invalid": 0, "learners": []}
+
+
+# ---------------------------------------------------------------------------
+# Student portal link sharing (Google-Drive-style "anyone with the link").
+# No student accounts, no login -- the token in the URL is the only access
+# control, gated by this per-learner toggle plus the teacher's own global
+# kill-switch in Settings (users.preferences["student-portal-enabled"]).
+# ---------------------------------------------------------------------------
+
+@bp.get("/learners/<int:learner_id>/portal-share")
+@role_required("teacher")
+def get_portal_share(learner_id: int):
+    base = _profile_base(learner_id)
+    if not base:
+        return error("Learner not found.", 404)
+    row = fetch_one(
+        "SELECT portal_share_token, portal_share_enabled FROM learner WHERE learner_id = %s",
+        (learner_id,),
+    )
+    return {
+        "enabled": bool(row["portal_share_enabled"]),
+        "token": row["portal_share_token"],
+    }
+
+
+@bp.put("/learners/<int:learner_id>/portal-share")
+@role_required("teacher")
+def update_portal_share(learner_id: int):
+    base = _profile_base(learner_id)
+    if not base:
+        return error("Learner not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    enabled = bool(data.get("enabled"))
+
+    row = fetch_one(
+        "SELECT portal_share_token FROM learner WHERE learner_id = %s",
+        (learner_id,),
+    )
+    token = row["portal_share_token"]
+    if enabled and not token:
+        token = secrets.token_urlsafe(24)
+
+    execute(
+        "UPDATE learner SET portal_share_token = %s, portal_share_enabled = %s WHERE learner_id = %s",
+        (token, enabled, learner_id),
+    )
+
+    return {"enabled": enabled, "token": token}
+
+
+@bp.get("/public/student-view/<token>")
+def public_student_view(token: str):
+    unavailable = ("This link isn't available. Ask your teacher for an updated link.", 404)
+
+    gate = fetch_one(
+        "SELECT learner_id FROM learner WHERE portal_share_token = %s AND portal_share_enabled = TRUE",
+        (token,),
+    )
+    if not gate:
+        return error(*unavailable)
+
+    row = fetch_one(
+        _learner_query("WHERE l.learner_id = %s") + " LIMIT 1",
+        (gate["learner_id"],),
+    )
+    if not row:
+        return error(*unavailable)
+
+    teacher_user = fetch_one(
+        "SELECT user_id FROM teacher WHERE teacher_id = %s",
+        (row["teacher_id"],),
+    )
+    prefs_row = (
+        fetch_one("SELECT preferences FROM users WHERE user_id = %s", (teacher_user["user_id"],))
+        if teacher_user
+        else None
+    )
+    prefs = (prefs_row or {}).get("preferences") or {}
+    if prefs.get("student-portal-enabled") is False:
+        return error(*unavailable)
+
+    shaped = _shape_learner(row)
+    risk_label = shaped["risk"]
+    risk_summary = (
+        f"StayEd currently classifies you as {risk_label} Risk based on the latest available monitoring data."
+        if risk_label != "Not Yet Assessed"
+        else "Your risk level hasn't been assessed yet. Check back after your teacher releases your modules and records your progress."
+    )
+
+    return {
+        "profile": {
+            "name": shaped["name"],
+            "lrn": shaped["lrn"],
+            "clc": shaped["clc"],
+            "level": shaped["level"],
+            "modality": shaped["modality"],
+        },
+        "risk": {"label": risk_label, "summary": risk_summary},
+        **_logbook(row["enrollment_id"], _learner_activity_info(row)),
+    }

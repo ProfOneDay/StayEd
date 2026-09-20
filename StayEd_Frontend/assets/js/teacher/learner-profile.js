@@ -8,9 +8,91 @@ class LearnerProfilePage {
 
     this.bindHistoryFilters();
 
+    this.bindPortalShare();
+
     await this.load();
 
+    await this.loadPortalShare();
+
     this.openRequestedTab();
+  }
+
+  static bindPortalShare() {
+    const toggle = document.querySelector("[data-portal-share-toggle]");
+    const copyBtn = document.querySelector("[data-portal-share-copy-btn]");
+
+    toggle?.addEventListener("change", async () => {
+      const id = this.getLearnerId();
+      const enabled = toggle.checked;
+
+      toggle.disabled = true;
+
+      try {
+        const result = await API.updatePortalShare(id, enabled);
+
+        this.renderPortalShare(result);
+
+        Toast?.success(
+          enabled ? "Student view link is now on." : "Student view link is now off.",
+        );
+      } catch (error) {
+        console.error("[LearnerProfile] Unable to update portal share", error);
+
+        toggle.checked = !enabled;
+
+        Toast?.error("Unable to update the student view link.");
+      } finally {
+        toggle.disabled = false;
+      }
+    });
+
+    copyBtn?.addEventListener("click", async () => {
+      const input = document.querySelector("[data-portal-share-link-input]");
+      if (!input?.value) return;
+
+      try {
+        await navigator.clipboard.writeText(input.value);
+
+        Toast?.success("Link copied.");
+      } catch (error) {
+        console.error("[LearnerProfile] Unable to copy link", error);
+
+        input.select();
+
+        Toast?.error("Couldn't copy automatically -- link is selected, copy it manually.");
+      }
+    });
+  }
+
+  static async loadPortalShare() {
+    try {
+      const id = this.getLearnerId();
+      const result = await API.getPortalShare(id);
+
+      this.renderPortalShare(result);
+    } catch (error) {
+      console.error("[LearnerProfile] Unable to load portal share state", error);
+    }
+  }
+
+  static renderPortalShare({ enabled, token }) {
+    const toggle = document.querySelector("[data-portal-share-toggle]");
+    const linkRow = document.querySelector("[data-portal-share-link-row]");
+    const linkInput = document.querySelector("[data-portal-share-link-input]");
+
+    if (toggle) toggle.checked = Boolean(enabled);
+
+    if (enabled && token) {
+      const shareUrl = new URL(
+        `../student/view.html?token=${token}`,
+        window.location.href,
+      ).href;
+
+      if (linkInput) linkInput.value = shareUrl;
+      if (linkRow) linkRow.hidden = false;
+    } else if (linkRow) {
+      linkRow.hidden = true;
+    }
   }
 
   static openRequestedTab() {

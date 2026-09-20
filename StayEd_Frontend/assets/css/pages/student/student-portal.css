@@ -1,0 +1,219 @@
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--st-background);
+  color: var(--st-text-primary);
+  font-family: var(--st-font-body);
+  font-size: var(--st-font-size-body);
+  line-height: var(--st-line-height-body);
+  min-height: 100vh;
+}
+
+.st-student-portal {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.st-student-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 20px 16px;
+}
+
+.st-student-header img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.st-student-header h1 {
+  font-family: var(--st-font-heading);
+  font-size: var(--st-font-size-heading);
+  font-weight: 700;
+  color: var(--st-primary);
+}
+
+.st-student-body {
+  flex: 1;
+  padding: 0 20px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.st-student-card {
+  background: #fff;
+  border: 1px solid rgba(195, 198, 207, 0.3);
+  border-radius: var(--st-radius-lg);
+  box-shadow: var(--st-shadow-sm);
+  padding: 20px;
+  min-width: 0;
+}
+
+.st-student-profile-name {
+  font-family: var(--st-font-heading);
+  font-size: var(--st-font-size-heading);
+  font-weight: 700;
+  color: var(--st-on-surface);
+}
+
+.st-student-profile-meta {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 16px;
+}
+
+.st-student-profile-meta p {
+  font-size: var(--st-font-size-caption);
+  color: var(--st-on-surface-variant);
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.st-student-profile-meta p span {
+  color: var(--st-on-surface);
+  font-weight: 600;
+}
+
+.st-student-risk-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.st-student-risk-label {
+  font-size: var(--st-font-size-micro);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--st-on-surface-variant);
+}
+
+.st-student-risk-summary {
+  font-size: var(--st-font-size-caption);
+  color: var(--st-on-surface-variant);
+  line-height: 1.5;
+}
+
+.st-student-section-title {
+  font-family: var(--st-font-heading);
+  font-size: var(--st-font-size-body);
+  font-weight: 700;
+  color: var(--st-primary);
+  margin-bottom: 4px;
+}
+
+.st-student-batch {
+  padding-bottom: 4px;
+}
+
+.st-student-batch-date {
+  font-size: var(--st-font-size-caption);
+  font-weight: 700;
+  color: var(--st-on-surface-variant);
+  margin-bottom: 8px;
+}
+
+.st-student-module-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid rgba(195, 198, 207, 0.2);
+}
+
+.st-student-module-row:first-of-type {
+  border-top: none;
+}
+
+.st-student-module-name {
+  font-size: var(--st-font-size-caption);
+  color: var(--st-on-surface);
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.st-student-module-strand {
+  font-size: var(--st-font-size-micro);
+  color: var(--st-on-surface-variant);
+}
+
+.st-student-status-pill {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: var(--st-font-size-micro);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.st-student-status-pill--returned {
+  background: var(--st-risk-low-soft);
+  color: var(--st-risk-low);
+}
+
+.st-student-status-pill--overdue {
+  background: var(--st-risk-high-soft);
+  color: var(--st-risk-high);
+}
+
+.st-student-status-pill--due {
+  background: var(--st-risk-moderate-soft);
+  color: var(--st-risk-moderate);
+}
+
+.st-student-status-pill--pending {
+  background: var(--st-surface-container-low);
+  color: var(--st-on-surface-variant);
+}
+
+.st-student-empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--st-on-surface-variant);
+  font-size: var(--st-font-size-caption);
+}
+
+.st-student-loading {
+  text-align: center;
+  padding: 60px 16px;
+  color: var(--st-on-surface-variant);
+  font-size: var(--st-font-size-caption);
+}
+
+.st-student-unavailable {
+  text-align: center;
+  padding: 60px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.st-student-unavailable .material-symbols-outlined {
+  font-size: 2.5rem;
+  color: var(--st-outline);
+}
+
+.st-student-unavailable p {
+  font-size: var(--st-font-size-caption);
+  color: var(--st-on-surface-variant);
+  max-width: 320px;
+}
