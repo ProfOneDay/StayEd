@@ -1,5 +1,3 @@
-
-
 .st-profile-hero{
     background:#fff;
     border:1px solid rgba(195,198,207,.30);
@@ -793,3 +791,31 @@
 .st-risk-trend-zone--moderate{ top:30%; height:40%; background:var(--st-risk-moderate-soft); }
 .st-risk-trend-zone--low{ top:70%; height:30%; background:var(--st-risk-low-soft); }
 
+/* Learner profile header */
+@media (min-width:900px){
+    .st-profile-hero{
+        grid-template-columns:minmax(0,1fr) 180px 280px;
+        gap:32px;
+    }
+}
+
+.st-profile-hero-meta{
+    gap:8px 32px;
+}
+
+.st-profile-hero-meta p{
+    line-height:1.5;
+}
+
+.st-profile-hero-risk{
+    padding:0 20px;
+}
+
+.st-profile-hero-identity > div:last-child{
+    flex:1;
+    min-width:0;
+}
+
+[data-profile-modality-since]{
+    display:block;
+}

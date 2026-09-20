@@ -943,11 +943,11 @@ def learner_profile(learner_id: int):
 
     interventions = fetch_all(
         """
-        SELECT i.*, ra.risk_level, fu.notes AS follow_up_notes, fu.outcome AS follow_up_outcome
+        SELECT i.*, ra.risk_level, fu.notes AS follow_up_notes, fu.outcome AS follow_up_outcome, fu.ai_next_step AS follow_up_next_step
         FROM intervention i
         JOIN risk_assessment ra ON ra.risk_assessment_id=i.risk_assessment_id
         LEFT JOIN LATERAL (
-            SELECT notes, outcome FROM follow_up WHERE intervention_id=i.intervention_id
+            SELECT notes, outcome, ai_next_step FROM follow_up WHERE intervention_id=i.intervention_id
             ORDER BY follow_up_date DESC LIMIT 1
         ) fu ON TRUE
         WHERE ra.enrollment_id=%s
@@ -955,14 +955,15 @@ def learner_profile(learner_id: int):
         """,
         (enrollment_id,),
     )
-    active = next(
-        (
+    active_rows = sorted(
+        [
             i for i in interventions
             if i["status"] in {"PLANNED", "ONGOING"}
             or (i["status"] in {"COMPLETED", "CANCELLED"} and not i.get("moved_to_history"))
-        ),
-        None,
+        ],
+        key=lambda i: (i["date_assigned"], i["intervention_id"]),
     )
+    active = active_rows[0] if active_rows else None
 
     factors = []
     if base.get("risk_assessment_id"):
@@ -1238,6 +1239,24 @@ def learner_profile(learner_id: int):
                 "hasOutcome": bool(active.get("follow_up_outcome") or active.get("follow_up_notes")),
                 "canSaveToHistory": active["status"] in {"COMPLETED", "CANCELLED"},
             } if active else None,
+            "activeList": [
+                {
+                "id": i["intervention_id"],
+                "title": i["intervention_type"],
+                "priority": "High Priority" if current_risk == "High" else "Medium Priority",
+                "assigned": i["date_assigned"].strftime("%B %d, %Y"),
+                "followUp": i["target_date"].strftime("%B %d, %Y") if i.get("target_date") else "—",
+                "status": title_enum(i["status"]),
+                "assignedBy": base.get("assigned_teacher") or "—",
+                "aiReason": i.get("ai_reason"),
+                "aiRecommendedAction": i.get("ai_recommended_action"),
+                "aiNextStep": i.get("follow_up_next_step"),
+                "hasOutcome": bool(i.get("follow_up_outcome") or i.get("follow_up_notes")),
+                "canSaveToHistory": i["status"] in {"COMPLETED", "CANCELLED"},
+                "dueStatus": "" if i["status"] not in {"PLANNED", "ONGOING"} or not i.get("target_date") else "overdue" if i["target_date"] < date.today() else "due" if i["target_date"] == date.today() else "soon" if (i["target_date"] - date.today()).days <= 3 else "",
+             }
+            for i in active_rows
+            ],
             "history": [
                 {
                     "id": i["intervention_id"],
@@ -1322,11 +1341,12 @@ def create_intervention(learner_id: int):
     if not description:
         return error("A short description is required.", 422)
     target_date = None
-    if data.get("targetDate"):
-        try:
-            target_date = date.fromisoformat(str(data["targetDate"]))
-        except ValueError:
-            return error("Target date must use YYYY-MM-DD.", 422)
+    if not data.get("targetDate"):
+        return error("Target follow-up date is required.", 422)
+    try:
+        target_date = date.fromisoformat(str(data["targetDate"]))
+    except ValueError:
+        return error("Target date must use YYYY-MM-DD.", 422)
 
     try:
         risk_assessment_id = _ensure_risk_assessment_id(base["enrollment_id"])

@@ -1,0 +1,4 @@
+BEGIN;
+ALTER TABLE follow_up
+    ADD COLUMN IF NOT EXISTS ai_next_step TEXT;
+COMMIT;

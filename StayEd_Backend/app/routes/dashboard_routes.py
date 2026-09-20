@@ -100,6 +100,22 @@ def dashboard():
 
     dist = {"high": high, "moderate": moderate, "low": low, "scale_max": max(high, moderate, low, 1)}
 
+    reminder = fetch_one(
+        """
+        SELECT COUNT(*) FILTER (WHERE i.target_date < CURRENT_DATE) AS overdue,
+               COUNT(*) FILTER (WHERE i.target_date = CURRENT_DATE) AS due_today,
+               COUNT(*) FILTER (WHERE i.target_date > CURRENT_DATE) AS due_soon
+        FROM intervention i
+        WHERE i.assigned_to_teacher_id = %s
+          AND i.status IN ('PLANNED', 'ONGOING')
+          AND i.target_date IS NOT NULL
+          AND i.target_date <= CURRENT_DATE + 3
+        """,
+        (teacher["teacher_id"],),
+    )
+    overdue = int(reminder["overdue"] or 0)
+    due_today = int(reminder["due_today"] or 0)
+    due_soon = int(reminder["due_soon"] or 0)
     # Last 6 months of this teacher's own prediction runs, for the dashboard's
     # Risk Distribution "Trend" chart view -- mirrors the admin dashboard's
     # division-wide riskTrend (admin_routes.admin_dashboard), scoped here to
@@ -144,6 +160,12 @@ def dashboard():
             "low": low,
         },
         "riskDistribution": dist,
+        "interventionReminder": {
+            "total": overdue + due_today + due_soon,
+            "overdue": overdue,
+            "dueToday": due_today,
+            "dueSoon": due_soon,
+        },
         "riskTrend": risk_trend,
         "predictionSummary": {
             "date": latest_date.strftime("%B %d, %Y") if latest_date else "No prediction yet",

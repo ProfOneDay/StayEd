@@ -8,6 +8,7 @@ from ..authz import current_user_id, role_required, teacher_for_user
 from ..db import execute, fetch_all, fetch_one
 from ..helpers import error
 from ..services.prediction_service import trigger_prediction
+from ..services.ai_intervention_service import generate_next_step
 
 bp = Blueprint("interventions", __name__)
 
@@ -157,7 +158,7 @@ def delete_intervention(intervention_id: int):
 def add_intervention_follow_up(intervention_id: int):
     teacher = teacher_for_user()
     row = fetch_one(
-        "SELECT intervention_id FROM intervention WHERE intervention_id=%s AND assigned_to_teacher_id=%s",
+        "SELECT intervention_id, intervention_type, description FROM intervention WHERE intervention_id=%s AND assigned_to_teacher_id=%s",
         (intervention_id, teacher["teacher_id"]),
     )
     if not row:
@@ -169,15 +170,22 @@ def add_intervention_follow_up(intervention_id: int):
     if not notes:
         return error("Follow-up notes are required.", 422)
 
+    next_step = None
+    if outcome:
+        try:
+            next_step = generate_next_step(dict(row), outcome, notes)
+        except Exception:
+            next_step = None
+
     execute(
         """
-        INSERT INTO follow_up (intervention_id, follow_up_date, notes, outcome, created_by_user_id)
-        VALUES (%s, %s, %s, %s, %s)
+        INSERT INTO follow_up (intervention_id, follow_up_date, notes, outcome, ai_next_step, created_by_user_id)
+        VALUES (%s, %s, %s, %s, %s, %s)
         """,
-        (intervention_id, date.today(), notes, outcome, current_user_id()),
+        (intervention_id, date.today(), notes, outcome, next_step, current_user_id()),
     )
 
-    return {"message": "Follow-up recorded."}, 201
+    return {"message": "Follow-up recorded.", "next_step": next_step}, 201
 @bp.post("/interventions/<int:intervention_id>/move-to-history")
 @role_required("teacher")
 def move_intervention_to_history(intervention_id: int):

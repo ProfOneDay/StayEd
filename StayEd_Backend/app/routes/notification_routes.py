@@ -89,7 +89,7 @@ def _generate_alerts(teacher_id: int, user_id: int) -> None:
                     f"inactivity:{row['enrollment_id']}:{learner['activity_status']}",
                 )
 
-    due_interventions = fetch_all(
+        due_interventions = fetch_all(
         """
         SELECT i.intervention_id, i.intervention_type, i.target_date, i.assigned_to_teacher_id,
                ce.learner_id, CONCAT_WS(' ', l.first_name, l.last_name) AS learner_name
@@ -100,22 +100,28 @@ def _generate_alerts(teacher_id: int, user_id: int) -> None:
         WHERE i.assigned_to_teacher_id = %s
           AND i.status IN ('PLANNED', 'ONGOING')
           AND i.target_date IS NOT NULL
-          AND i.target_date <= CURRENT_DATE
+          AND i.target_date <= CURRENT_DATE + 3
         """,
         (teacher_id,),
     )
     for row in due_interventions:
-        overdue = row["target_date"] < date.today()
-        link = f"learner-profile.html?id={row['learner_id']}&tab=interventions"
+        days_left = (row["target_date"] - date.today()).days
+        if days_left < 0:
+            stage, title, label = "overdue", "Intervention Follow-up Overdue", "Overdue"
+        elif days_left == 0:
+            stage, title, label = "due", "Intervention Follow-up Due", "Due Today"
+        else:
+            stage, title, label = "reminder", "Intervention Follow-up Reminder", "Due Soon"
+        verb = "was due" if days_left < 0 else "is due"
         _insert_alert(
             user_id,
             "INTERVENTION",
-            "Intervention Follow-up Overdue" if overdue else "Intervention Follow-up Due",
+            title,
             f"The {row['intervention_type']} intervention for {row['learner_name']} "
-            f"was due on {row['target_date'].strftime('%B %d, %Y')}.",
-            link,
-            "Overdue" if overdue else "Due Today",
-            f"intervention_due:{row['intervention_id']}:{row['target_date'].isoformat()}",
+            f"{verb} on {row['target_date'].strftime('%B %d, %Y')}. Please update its status.",
+            f"learner-profile.html?id={row['learner_id']}&tab=interventions",
+            label,
+            f"intervention_due:{row['intervention_id']}:{stage}:{row['target_date'].isoformat()}",
         )
 
 

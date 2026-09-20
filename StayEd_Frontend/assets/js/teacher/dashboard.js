@@ -33,6 +33,8 @@ class TeacherDashboard {
 
       this.renderStatistics(data.statistics);
 
+      this.renderInterventionReminder(data.interventionReminder);
+
       this.state.riskTrend = data.riskTrend || [];
 
       this.renderRiskChart(data.riskDistribution, data.predictionSummary);
@@ -182,7 +184,20 @@ class TeacherDashboard {
     const values = Array.from(select.options).map((o) => o.value);
     select.value = values.includes(current) ? current : "All School Years";
   }
+  static renderInterventionReminder(reminder) {
+    const box = document.querySelector("[data-intervention-reminder]");
+    if (box) box.innerHTML = "";
 
+    const parts = [];
+    if (reminder?.overdue) parts.push(`${reminder.overdue} overdue`);
+    if (reminder?.dueToday) parts.push(`${reminder.dueToday} due today`);
+    if (reminder?.dueSoon) parts.push(`${reminder.dueSoon} due within 3 days`);
+
+    const list = document.querySelector("[data-stat-intervention-detail]");
+    if (list) {
+      list.innerHTML = parts.map((p) => `<li>${p}</li>`).join("");
+    }
+  }
   static renderStatistics(stats = {}) {
     this.setText("[data-stat-total]", stats.registered);
     this.setText("[data-stat-high]", stats.high);

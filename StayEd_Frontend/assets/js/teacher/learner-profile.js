@@ -677,6 +677,7 @@ class LearnerProfilePage {
                       <div style="margin-top:12px;padding:10px 12px;background:#F5F3FF;border-left:3px solid #7C3AED;border-radius:6px;">
                           <p style="font-size:0.6875rem;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:4px;">AI Insight</p>
                           <p style="font-size:0.8125rem;color:#374151;margin-bottom:6px;">${r.aiInsight.reason}</p>
+                          <p style="font-size:0.8125rem;color:#6B7280;font-style:italic;margin-top:6px;">AI is not always correct.</p>
                       </div>
                       ` : ""}
                       <div class="st-intervention-card-footer">
@@ -701,7 +702,9 @@ class LearnerProfilePage {
     const active = document.querySelector("[data-active-intervention]");
 
     if (active) {
-      if (!iv.active) {
+      const list = iv.activeList || [];
+
+      if (!list.length) {
         active.innerHTML = `
           <div class="st-empty" style="border:none;background:transparent;">
             <span class="material-symbols-outlined">assignment_turned_in</span>
@@ -710,56 +713,64 @@ class LearnerProfilePage {
           </div>
         `;
       } else {
-        active.innerHTML = `
-                <div class="st-active-intervention">
-                    <div>
-                        <div style="display:flex;align-items:center;gap:8px;">
-                            <p style="font-weight:700;font-size:0.875rem;">${iv.active.title}</p>
-                            <span style="font-size:0.625rem;font-weight:700;color:var(--st-risk-high);text-transform:uppercase;">${iv.active.priority}</span>
-                        </div>
-                        <div class="st-active-intervention-meta">
-                            <span>Assigned: ${iv.active.assigned}</span>
-                        </div>
-                        <div style="margin-top:10px;">
-                            <span class="st-pill st-pill--teal">${iv.active.status}</span>
-                        </div>
-                        ${iv.active.aiReason ? `
-                        <div style="margin-top:12px;padding:10px 12px;background:#F5F3FF;border-left:3px solid #7C3AED;border-radius:6px;">
-                            <p style="font-size:0.6875rem;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:4px;">AI Insight</p>
-                            <p style="font-size:0.8125rem;color:#374151;margin-bottom:6px;">${iv.active.aiReason}</p>
-                            ${iv.active.hasOutcome && iv.active.aiRecommendedAction ? `<p style="font-size:0.75rem;color:#4B5563;"><strong>Suggested next step:</strong> ${iv.active.aiRecommendedAction}</p>` : ""}                        </div>
-                        ` : ""}
-                    </div>
-                    <div style="display:flex;gap:8px;flex-shrink:0;">
-                        <button type="button" class="st-btn st-btn-outline st-btn-xs" data-update-status>Update Status</button>
-                        ${["ONGOING", "COMPLETED"].includes(iv.active.status?.toUpperCase()) ? `<button type="button" class="st-btn st-btn-primary st-btn-xs" data-add-outcome>Add Outcome</button>` : ""}
-                        ${iv.active.canSaveToHistory ? `<button type="button" class="st-btn st-btn-outline st-btn-xs" data-save-to-history>Save to History</button>` : ""}
-                    </div>
-                </div>
-            `;
+        active.innerHTML = list.map((a) => `
+          <div class="st-active-intervention" data-iv-id="${a.id}" style="margin-bottom:12px;">
+            <div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <p style="font-weight:700;font-size:0.875rem;">${a.title}</p>
+                <span style="font-size:0.625rem;font-weight:700;color:var(--st-risk-high);text-transform:uppercase;">${a.priority}</span>
+              </div>
+              <div class="st-active-intervention-meta">
+                <span>Assigned: ${a.assigned}</span>
+                ${a.followUp && a.followUp !== "—" ? `<span>Due: ${a.followUp}</span>` : ""}
+              </div>
+              ${a.dueStatus ? `
+              <p style="margin-top:8px;font-size:0.75rem;font-weight:700;color:${a.dueStatus === "overdue" ? "#B91C1C" : "#B45309"};">
+                ⚠️ ${a.dueStatus === "overdue" ? "Overdue" : a.dueStatus === "due" ? "Due Today" : "Due Soon"} - Update Required
+              </p>
+              ` : ""}
+              <div style="margin-top:10px;">
+                <span class="st-pill st-pill--teal">${a.status}</span>
+              </div>
+              ${a.aiReason || a.aiNextStep ? `
+              <div style="margin-top:12px;padding:10px 12px;background:#F5F3FF;border-left:3px solid #7C3AED;border-radius:6px;">
+                <p style="font-size:0.6875rem;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:4px;">AI Insight</p>
+                ${a.aiReason ? `<p style="font-size:0.8125rem;color:#374151;margin-bottom:6px;">${a.aiReason}</p>` : ""}
+                ${a.aiNextStep ? `<p style="font-size:0.75rem;color:#4B5563;"><strong>Suggested next step:</strong> ${a.aiNextStep}</p>` : ""}
+                <p style="font-size:0.8125rem;color:#6B7280;font-style:italic;margin-top:8px;">AI is not always correct.</p>
+              </div>
+              ` : ""}
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0;">
+              <button type="button" class="st-btn st-btn-outline st-btn-xs" data-update-status>Update Status</button>
+              ${["ONGOING", "COMPLETED"].includes(a.status?.toUpperCase()) ? `<button type="button" class="st-btn st-btn-primary st-btn-xs" data-add-outcome>Add Outcome</button>` : ""}
+              ${a.canSaveToHistory ? `<button type="button" class="st-btn st-btn-outline st-btn-xs" data-save-to-history>Save to History</button>` : ""}
+            </div>
+          </div>
+        `).join("");
 
-        active
-          .querySelector("[data-update-status]")
-          ?.addEventListener("click", () => this.openUpdateStatusModal(iv.active.id));
+        active.querySelectorAll("[data-iv-id]").forEach((card) => {
+          const id = Number(card.dataset.ivId);
 
-        active
-          .querySelector("[data-add-outcome]")
-          ?.addEventListener("click", () => this.openAddOutcomeModal(iv.active.id));
+          card.querySelector("[data-update-status]")
+            ?.addEventListener("click", () => this.openUpdateStatusModal(id));
 
-          
-        active
-          .querySelector("[data-save-to-history]")
-          ?.addEventListener("click", async () => {
-            try {
-              await API.moveInterventionToHistory(iv.active.id);
-              Toast?.success("Intervention saved to history.");
-              await this.load();
-              document.querySelector('[data-profile-tab="interventions"]')?.click();
-            } catch (error) {
-              console.error("[LearnerProfile] Save to history failed", error);
-              Toast?.error(error?.data?.message || "Unable to save to history.");
-            }
-          });
+          card.querySelector("[data-add-outcome]")
+            ?.addEventListener("click", () => this.openAddOutcomeModal(id));
+
+          card.querySelector("[data-save-to-history]")
+            ?.addEventListener("click", async () => {
+              try {
+                await API.moveInterventionToHistory(id);
+                Toast?.success("Intervention saved to history.");
+                await this.load();
+                document.querySelector('[data-profile-tab="interventions"]')?.click();
+              } catch (error) {
+                console.error("[LearnerProfile] Save to history failed", error);
+                Toast?.error(error?.data?.message || "Unable to save to history.");
+              }
+            });
+        });
       }
     }
 
@@ -862,7 +873,7 @@ class LearnerProfilePage {
           <textarea id="ivDescription" rows="3" placeholder="What will this intervention involve?">${prefillDescription}</textarea>
         </div>
         <div class="st-schedule-modal-field">
-          <label for="ivTargetDate">Target Follow-up Date (optional)</label>
+          <label for="ivTargetDate">Target Follow-up Date (required)</label>
           <input type="date" id="ivTargetDate">
         </div>
       `,
@@ -875,10 +886,14 @@ class LearnerProfilePage {
           Toast?.error("Please describe the intervention.");
           return;
         }
+                if (!targetDate) {
+          Toast?.error("Please set a target follow-up date.");
+          return;
+        }
 
         try {
           await API.createIntervention(this.getLearnerId(), {
-            type, description, targetDate: targetDate || undefined,
+            type, description, targetDate,
           });
           Toast?.success("Intervention assigned.");
           await this.load();

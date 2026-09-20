@@ -153,3 +153,27 @@ def generate_ai_recommendation(
         }
 
     return parsed
+
+    
+
+def generate_next_step(intervention: dict[str, Any], outcome: str, notes: str) -> str:
+    """Generate a next step from the outcome the teacher recorded."""
+    prompt = f"""You are an academic support advisor for an Alternative Learning
+System (ALS) program. A teacher recorded a follow-up on an intervention.
+Suggest the next step. Stay within the same intervention type; do not
+invent a different intervention.
+
+Intervention type: {intervention.get('intervention_type')}
+Intervention description: {intervention.get('description')}
+Outcome: {outcome}
+Teacher notes: {notes}
+
+Reply in 2-3 plain sentences (no markdown, no JSON): what the teacher
+should do next and when to follow up."""
+
+    response = _client.chat.completions.create(
+        model=_MODEL,
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.4,
+    )
+    return response.choices[0].message.content.strip()
