@@ -13,6 +13,23 @@
   margin-top: 6px;
 }
 
+.st-report-toolbar > [data-notify-teachers-btn].st-btn-primary {
+  background: var(--st-primary);
+  color: #fff;
+}
+
+.st-report-toolbar > [data-notify-teachers-btn].st-btn-primary:hover {
+  background: var(--st-primary-dark);
+}
+
+body[data-page="Reports"] .st-content:has([data-submitted-reports-panel]) .st-report-master-panel {
+  order: 1;
+}
+
+body[data-page="Reports"] .st-content:has([data-submitted-reports-panel]) .st-report-submitted-panel {
+  order: 2;
+}
+
 .st-report-listing-actions {
   display: flex;
   align-items: flex-end;
