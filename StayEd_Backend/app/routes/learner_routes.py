@@ -837,25 +837,77 @@ def _generate_recommended_ai_insight(r: dict, contributor_rows: list) -> dict | 
 # Keyed on model feature names (models/features.py), so a new predictor
 # added there without an entry here still renders (falls back to a plain
 # value line) rather than crashing.
-_FACTOR_REASONS = {
-    "age": "Age can affect available study time and competing responsibilities outside school.",
-    "distance_km": "Learners farther from their CLC tend to find it harder to attend sessions and return modules on time.",
-    "monthly_income": "Lower household income is associated with competing economic needs that can interrupt schooling.",
-    "occupation": "Household economic stability -- the learner's own job, or a parent's/guardian's -- is linked to dropout risk.",
-    "sex": "Included as a demographic factor the model weighs alongside the others.",
-    "learning_level": "Different ALS levels carry different pacing and completion demands.",
-    "modality": "Modality affects how much in-person structure and support a learner has day to day.",
-    "is_re_enrollee": "Learners who previously dropped out and re-enrolled carry a historically higher risk of dropping out again.",
+# Simple, teacher-friendly label + explanation per factor. Kept in plain,
+# everyday language (per Sir Arnie's feedback) instead of technical/stats
+# wording like "importance score" or "% contribution".
+_FACTOR_INFO = {
+    "attendance_risk": {
+        "label": "Current attendance",
+        "format": "percent",
+        "reason": "The learner's attendance may affect their likelihood of completing the program.",
+    },
+    "age": {
+        "label": "Age",
+        "format": "age",
+        "reason": "Age can affect how much time and freedom a learner has for schooling.",
+    },
+    "distance_km": {
+        "label": "Distance to CLC",
+        "format": "km",
+        "reason": "Learners who live farther from their CLC often find it harder to attend sessions and return modules on time.",
+    },
+    "monthly_income": {
+        "label": "Monthly household income",
+        "format": "currency",
+        "reason": "Families with less income may find it harder to support the learner's schooling.",
+    },
+    "occupation": {
+        "label": "Occupation",
+        "reason": "The learner's job, or a parent's or guardian's job, can affect how much time and money is available for school.",
+    },
+    "sex": {
+        "label": "Sex",
+        "reason": "This is one of the background details the model looks at along with the others.",
+    },
+    "learning_level": {
+        "label": "Learning level",
+        "reason": "Different ALS levels have different pacing and requirements to finish.",
+    },
+    "modality": {
+        "label": "Learning modality",
+        "reason": "How the learner attends class (face-to-face, modular, or blended) affects how much in-person support they get.",
+    },
+    "is_re_enrollee": {
+        "label": "Re-enrolled learner",
+        "reason": "Learners who dropped out before and re-enrolled have a higher chance of dropping out again.",
+    },
 }
 
 
+def _format_factor_value(fmt: str | None, display_value) -> str:
+    if display_value is None:
+        return "not recorded"
+    try:
+        if fmt == "percent":
+            return f"{round(float(display_value))}%"
+        if fmt == "km":
+            return f"{float(display_value):.1f} km"
+        if fmt == "currency":
+            return f"₱{float(display_value):,.0f}"
+        if fmt == "age":
+            return f"{round(float(display_value))} years old"
+    except (TypeError, ValueError):
+        pass
+    return str(display_value)
+
+
 def _factor_reason(factor_key: str, display_value, importance: float) -> str:
+    info = _FACTOR_INFO.get(factor_key)
+    if info:
+        value_text = _format_factor_value(info.get("format"), display_value)
+        return f"{info['label']}: {value_text}. {info['reason']}"
     value_text = str(display_value) if display_value is not None else "not recorded"
-    reason = _FACTOR_REASONS.get(factor_key)
-    contribution = f"Contributed about {round(importance * 100)}% of this prediction."
-    if reason:
-        return f"Current value: {value_text}. {reason} {contribution}"
-    return f"Current value: {value_text}. {contribution}"
+    return f"Current value: {value_text}."
 
 
 @bp.get("/learners/<int:learner_id>/profile")
@@ -944,11 +996,11 @@ def learner_profile(learner_id: int):
 
     interventions = fetch_all(
         """
-        SELECT i.*, ra.risk_level, fu.notes AS follow_up_notes, fu.outcome AS follow_up_outcome, fu.ai_next_step AS follow_up_next_step
+        SELECT i.*, ra.risk_level, fu.follow_up_id, fu.notes AS follow_up_notes, fu.outcome AS follow_up_outcome, fu.ai_next_step AS follow_up_next_step
         FROM intervention i
         JOIN risk_assessment ra ON ra.risk_assessment_id=i.risk_assessment_id
         LEFT JOIN LATERAL (
-            SELECT notes, outcome, ai_next_step FROM follow_up WHERE intervention_id=i.intervention_id
+            SELECT follow_up_id, notes, outcome, ai_next_step FROM follow_up WHERE intervention_id=i.intervention_id
             ORDER BY follow_up_date DESC LIMIT 1
         ) fu ON TRUE
         WHERE ra.enrollment_id=%s
@@ -956,6 +1008,23 @@ def learner_profile(learner_id: int):
         """,
         (enrollment_id,),
     )
+
+    follow_up_ids = [i["follow_up_id"] for i in interventions if i.get("follow_up_id")]
+    photos_by_follow_up = {}
+    if follow_up_ids:
+        photo_rows = fetch_all(
+            f"""
+            SELECT follow_up_id, photo_id, file_name, image_data
+            FROM follow_up_photo
+            WHERE follow_up_id IN ({','.join(['%s'] * len(follow_up_ids))})
+            ORDER BY created_at ASC
+            """,
+            tuple(follow_up_ids),
+        )
+        for p in photo_rows:
+            photos_by_follow_up.setdefault(p["follow_up_id"], []).append(
+                {"id": p["photo_id"], "fileName": p["file_name"], "imageData": p["image_data"]}
+     )
     active_rows = sorted(
         [
             i for i in interventions
@@ -963,7 +1032,7 @@ def learner_profile(learner_id: int):
             or (i["status"] in {"COMPLETED", "CANCELLED"} and not i.get("moved_to_history"))
         ],
         key=lambda i: (i["date_assigned"], i["intervention_id"]),
-    )
+       )
     active = active_rows[0] if active_rows else None
 
     factors = []
@@ -1252,6 +1321,8 @@ def learner_profile(learner_id: int):
                 "aiReason": i.get("ai_reason"),
                 "aiRecommendedAction": i.get("ai_recommended_action"),
                 "aiNextStep": i.get("follow_up_next_step"),
+                "outcome": i.get("follow_up_outcome") or "",
+                "outcomeNotes": i.get("follow_up_notes") or "",
                 "hasOutcome": bool(i.get("follow_up_outcome") or i.get("follow_up_notes")),
                 "canSaveToHistory": i["status"] in {"COMPLETED", "CANCELLED"},
                 "dueStatus": "" if i["status"] not in {"PLANNED", "ONGOING"} or not i.get("target_date") else "overdue" if i["target_date"] < date.today() else "due" if i["target_date"] == date.today() else "soon" if (i["target_date"] - date.today()).days <= 3 else "",
@@ -1271,6 +1342,7 @@ def learner_profile(learner_id: int):
                     "aiRecommendedAction": i.get("ai_recommended_action") or "",
                     "outcome": i.get("follow_up_outcome") or "",
                     "outcomeNotes": i.get("follow_up_notes") or "",
+                    "photos": photos_by_follow_up.get(i.get("follow_up_id"), []),
                     } for i in interventions if i["status"] in {"COMPLETED", "CANCELLED"} and i.get("moved_to_history")
             ],
             "recommended": [

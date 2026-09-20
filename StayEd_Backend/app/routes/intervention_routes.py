@@ -167,8 +167,12 @@ def add_intervention_follow_up(intervention_id: int):
     data = request.get_json(silent=True) or {}
     notes = str(data.get("notes") or "").strip()
     outcome = str(data.get("outcome") or "").strip() or None
+    photos = data.get("photos") or []
     if not notes:
         return error("Follow-up notes are required.", 422)
+    if not isinstance(photos, list):
+        photos = []
+    photos = photos[:5]
 
     next_step = None
     if outcome:
@@ -177,13 +181,30 @@ def add_intervention_follow_up(intervention_id: int):
         except Exception:
             next_step = None
 
-    execute(
+    result = execute(
         """
         INSERT INTO follow_up (intervention_id, follow_up_date, notes, outcome, ai_next_step, created_by_user_id)
         VALUES (%s, %s, %s, %s, %s, %s)
+        RETURNING follow_up_id
         """,
         (intervention_id, date.today(), notes, outcome, next_step, current_user_id()),
+        returning=True,
     )
+    follow_up_id = result["follow_up_id"] if result else None
+
+    if follow_up_id and photos:
+        for photo in photos:
+            file_name = str((photo or {}).get("file_name") or "")[:255]
+            image_data = (photo or {}).get("image_data")
+            if not image_data:
+                continue
+            execute(
+                """
+                INSERT INTO follow_up_photo (follow_up_id, file_name, image_data)
+                VALUES (%s, %s, %s)
+                """,
+                (follow_up_id, file_name, image_data),
+            )
 
     return {"message": "Follow-up recorded.", "next_step": next_step}, 201
 @bp.post("/interventions/<int:intervention_id>/move-to-history")

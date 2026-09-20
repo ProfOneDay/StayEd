@@ -759,12 +759,12 @@ class LearnerProfilePage {
                       <div style="margin-top:12px;padding:10px 12px;background:#F5F3FF;border-left:3px solid #7C3AED;border-radius:6px;">
                           <p style="font-size:0.6875rem;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:4px;">AI Insight</p>
                           <p style="font-size:0.8125rem;color:#374151;margin-bottom:6px;">${r.aiInsight.reason}</p>
-                          <p style="font-size:0.8125rem;color:#6B7280;font-style:italic;margin-top:6px;">AI is not always correct.</p>
+                          <p style="font-size:0.8125rem;color:#6B7280;font-style:italic;margin-top:6px;">Disclaimer: AI generated suggestions may not always be accurate or appropriate. Please review and use professional judgment before applying any intervention.</p>
                       </div>
                       ` : ""}
                       <div class="st-intervention-card-footer">
                           <span class="st-intervention-action-hint">Action: ${r.action}</span>
-                          <button type="button" class="st-btn st-btn-primary st-btn-xs" data-assign-recommendation="${r.rank}">Assign</button>
+                          <button type="button" class="st-btn st-btn-primary st-btn-xs" data-assign-recommendation="${r.rank}">Select</button>
                     </div>
                 </div>
             `,
@@ -811,21 +811,19 @@ class LearnerProfilePage {
                 ⚠️ ${a.dueStatus === "overdue" ? "Overdue" : a.dueStatus === "due" ? "Due Today" : "Due Soon"} - Update Required
               </p>
               ` : ""}
-              <div style="margin-top:10px;">
-                <span class="st-pill st-pill--teal">${a.status}</span>
-              </div>
+              ${["COMPLETED", "CANCELLED"].includes(a.status?.toUpperCase()) ? `<div style="margin-top:10px;"><span class="st-pill st-pill--teal">${a.status}</span></div>` : ""}
               ${a.aiReason || a.aiNextStep ? `
               <div style="margin-top:12px;padding:10px 12px;background:#F5F3FF;border-left:3px solid #7C3AED;border-radius:6px;">
                 <p style="font-size:0.6875rem;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:4px;">AI Insight</p>
                 ${a.aiReason ? `<p style="font-size:0.8125rem;color:#374151;margin-bottom:6px;">${a.aiReason}</p>` : ""}
                 ${a.aiNextStep ? `<p style="font-size:0.75rem;color:#4B5563;"><strong>Suggested next step:</strong> ${a.aiNextStep}</p>` : ""}
-                <p style="font-size:0.8125rem;color:#6B7280;font-style:italic;margin-top:8px;">AI is not always correct.</p>
+                <p style="font-size:0.8125rem;color:#6B7280;font-style:italic;margin-top:8px;">Disclaimer: AI generated suggestions may not always be accurate or appropriate. Please review and use professional judgment before applying any intervention.</p>
               </div>
               ` : ""}
             </div>
             <div style="display:flex;gap:8px;flex-shrink:0;">
               <button type="button" class="st-btn st-btn-outline st-btn-xs" data-update-status>Update Status</button>
-              ${["ONGOING", "COMPLETED"].includes(a.status?.toUpperCase()) ? `<button type="button" class="st-btn st-btn-primary st-btn-xs" data-add-outcome>Add Outcome</button>` : ""}
+              <button type="button" class="st-btn st-btn-primary st-btn-xs" data-add-outcome>Add Outcome</button>
               ${a.canSaveToHistory ? `<button type="button" class="st-btn st-btn-outline st-btn-xs" data-save-to-history>Save to History</button>` : ""}
             </div>
           </div>
@@ -919,7 +917,7 @@ class LearnerProfilePage {
                 <div class="st-risk-factor-item">
                     <span class="st-risk-factor-dot" style="background:${toneMap[c.tone] || "var(--st-outline)"};"></span>
                     <div>
-                        <p style="font-weight:600;font-size:0.8125rem;">${c.level} Impact: ${c.title}</p>
+                        <p style="font-weight:600;font-size:0.8125rem;">Important Factor: ${c.title}</p>
                         <p style="font-size:0.6875rem;color:var(--st-on-surface-variant);">${c.text}</p>
                     </div>
                 </div>
@@ -944,7 +942,7 @@ class LearnerProfilePage {
     Modal.show({
       title: "Assign Intervention",
       size: "sm",
-      confirmLabel: "Assign Intervention",
+      confirmLabel: "Select Intervention",
       message: `
         <div class="st-schedule-modal-field">
           <label for="ivType">Intervention Type</label>
@@ -990,13 +988,13 @@ class LearnerProfilePage {
 
   static openUpdateStatusModal(interventionId) {
     if (!window.Modal || !interventionId) return;
-    const statuses = ["PLANNED", "ONGOING", "COMPLETED", "CANCELLED"];
+      const statuses = ["COMPLETED", "CANCELLED"];
 
     Modal.show({
       title: "Update Intervention Status",
       size: "sm",
       confirmLabel: "Update Status",
-      message: `
+        message: `
         <div class="st-schedule-modal-field">
           <label for="ivStatus">Status</label>
           <select id="ivStatus">${statuses.map((s) => `<option value="${s}">${this.capitalize(s.toLowerCase())}</option>`).join("")}</select>
@@ -1020,33 +1018,41 @@ class LearnerProfilePage {
   static openAddOutcomeModal(interventionId) {
     if (!window.Modal || !interventionId) return;
 
+    this._outcomePhotos = [];
+
     Modal.show({
       title: "Add Outcome",
-      size: "sm",
+      size: "xl",
       confirmLabel: "Save Outcome",
-              message: `
-          <div class="st-schedule-modal-field">
-            <label for="ivOutcome">Outcome</label>
-              <select id="ivOutcome" onchange="document.getElementById('ivOutcomeOtherField').style.display = this.value === 'Others' ? '' : 'none';">
-              <option value="Successful">Successful</option>
-              <option value="Failed">Failed</option>
-              <option value="Others">Others</option>
-            </select>
-          </div>
-          <div class="st-schedule-modal-field" id="ivOutcomeOtherField" style="display:none;">
-            <label for="ivOutcomeOther">Please specify</label>
-            <input id="ivOutcomeOther" type="text" placeholder="Describe the outcome...">
-          </div>
-          <div class="st-schedule-modal-field">
-            <label for="ivNotes">Notes</label>
-            <textarea id="ivNotes" rows="3" placeholder="Details from the follow-up..."></textarea>
-          </div>
-        `,
-                onConfirm: async () => {
-          const outcomeSelect = document.getElementById("ivOutcome")?.value;
-          const outcomeOther = document.getElementById("ivOutcomeOther")?.value.trim();
-          const outcome = outcomeSelect === "Others" ? outcomeOther : outcomeSelect;
-          const notes = document.getElementById("ivNotes")?.value.trim();
+      message: `
+        <p style="font-size:13px;color:#6B7280;margin-bottom:16px;">Document what happened after the intervention and record the learner's response or outcome.</p>
+        <div class="st-schedule-modal-field">
+          <label for="ivOutcome">Outcome</label>
+            <select id="ivOutcome" onchange="document.getElementById('ivOutcomeOtherField').style.display = this.value === 'Others' ? '' : 'none';">
+            <option value="Successful">Successful</option>
+            <option value="Failed">Failed</option>
+            <option value="Others">Others</option>
+          </select>
+        </div>
+        <div class="st-schedule-modal-field" id="ivOutcomeOtherField" style="display:none;">
+          <label for="ivOutcomeOther">Please specify</label>
+          <input id="ivOutcomeOther" type="text" placeholder="Describe the outcome...">
+        </div>
+        <div class="st-schedule-modal-field">
+          <label for="ivNotes">Notes</label>
+          <textarea id="ivNotes" rows="3" placeholder="Details from the follow-up..."></textarea>
+        </div>
+        <div class="st-schedule-modal-field">
+          <label for="ivPhotoInput">Photos (optional, up to 5)</label>
+          <input id="ivPhotoInput" type="file" accept="image/*" multiple>
+          <div id="ivPhotoPreview" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
+        </div>
+      `,
+      onConfirm: async () => {
+        const outcomeSelect = document.getElementById("ivOutcome")?.value;
+        const outcomeOther = document.getElementById("ivOutcomeOther")?.value.trim();
+        const outcome = outcomeSelect === "Others" ? outcomeOther : outcomeSelect;
+        const notes = document.getElementById("ivNotes")?.value.trim();
         if (outcomeSelect === "Others" && !outcomeOther) {
           Toast?.error("Please specify the outcome.");
           return;
@@ -1057,8 +1063,13 @@ class LearnerProfilePage {
         }
 
         try {
-          await API.addInterventionFollowUp(interventionId, { outcome, notes });
+          await API.addInterventionFollowUp(interventionId, {
+            outcome,
+            notes,
+            photos: this._outcomePhotos,
+          });
           Toast?.success("Outcome recorded.");
+          this._outcomePhotos = [];
           await this.load();
           document.querySelector('[data-profile-tab="interventions"]')?.click();
         } catch (error) {
@@ -1067,9 +1078,101 @@ class LearnerProfilePage {
         }
       },
     });
-    }
+
+    setTimeout(() => this.bindOutcomePhotoInput(), 0);
+  }
+
+  static bindOutcomePhotoInput() {
+    const input = document.getElementById("ivPhotoInput");
+    const preview = document.getElementById("ivPhotoPreview");
+    if (!input || !preview) return;
+
+    input.addEventListener("change", async (e) => {
+      const files = Array.from(e.target.files || []);
+      for (const file of files) {
+        if (this._outcomePhotos.length >= 5) {
+          Toast?.error("Maximum of 5 photos per outcome.");
+          break;
+        }
+        const resized = await this.resizeImageFile(file);
+        this._outcomePhotos.push({ file_name: file.name, image_data: resized });
+        this.renderOutcomePhotoPreview();
+      }
+      input.value = "";
+    });
+  }
+
+  static renderOutcomePhotoPreview() {
+    const preview = document.getElementById("ivPhotoPreview");
+    if (!preview) return;
+    preview.innerHTML = this._outcomePhotos
+      .map(
+        (p, i) => `
+        <div style="position:relative;width:72px;height:72px;">
+          <img src="${p.image_data}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;border:1px solid #E5E7EB;">
+          <button type="button" data-remove-outcome-photo="${i}" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#DC2626;color:#fff;border:none;font-size:12px;cursor:pointer;line-height:1;">×</button>
+        </div>
+      `
+      )
+      .join("");
+
+    preview.querySelectorAll("[data-remove-outcome-photo]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const idx = Number(btn.dataset.removeOutcomePhoto);
+        this._outcomePhotos.splice(idx, 1);
+        this.renderOutcomePhotoPreview();
+      });
+    });
+  }
+
+  static resizeImageFile(file, maxDim = 900, quality = 0.7) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL("image/jpeg", quality));
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+    static openPhotoLightbox(imageData) {
+    const existing = document.getElementById("stPhotoLightbox");
+    if (existing) existing.remove();
+
+    const overlay = document.createElement("div");
+    overlay.id = "stPhotoLightbox";
+    overlay.style.cssText =
+      "position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;cursor:zoom-out;";
+    overlay.innerHTML = `
+      <img src="${imageData}" style="max-width:100%;max-height:100%;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,0.4);">
+      <button type="button" style="position:absolute;top:16px;right:24px;background:none;border:none;color:#fff;font-size:32px;cursor:pointer;line-height:1;">×</button>
+    `;
+    overlay.addEventListener("click", () => overlay.remove());
+    document.body.appendChild(overlay);
+  }
     static openViewHistoryModal(h) {
     if (!window.Modal || !h) return;
+    const photos = h.photos || [];
     Modal.show({
       title: h.intervention,
       size: "md",
@@ -1085,6 +1188,12 @@ class LearnerProfilePage {
         ` : ""}
                   ${h.outcome ? `<p style="font-size:13px;"><strong>Outcome:</strong> ${h.outcome}</p>` : ""}
           ${h.outcomeNotes ? `<p style="font-size:13px;"><strong>Outcome Notes:</strong> ${h.outcomeNotes}</p>` : ""}
+          ${photos.length ? `
+          <p style="font-size:13px;font-weight:700;margin-top:12px;margin-bottom:6px;">Photos</p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          ${photos.map((p, i) => `<img src="${p.imageData}" alt="${p.fileName || "Outcome photo"}" style="width:90px;height:90px;object-fit:cover;border-radius:6px;border:1px solid #E5E7EB;cursor:pointer;" onclick="LearnerProfilePage.openPhotoLightbox('${p.imageData.replace(/'/g, "\\'")}')">`).join("")}
+          </div>
+          ` : ""}
       `,
       onConfirm: async () => {},
     });
