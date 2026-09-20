@@ -54,6 +54,45 @@
   margin-top: auto;
 }
 
+.st-report-scope-selects {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.st-report-scope-selects label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--st-text-secondary);
+  font-size: var(--st-font-size-micro);
+  font-weight: 700;
+}
+
+.st-report-scope-selects select {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--st-outline-variant);
+  border-radius: var(--st-button-radius);
+  background: #fff;
+  color: var(--st-text-primary);
+  font: inherit;
+  font-size: var(--st-font-size-caption);
+}
+
+.st-report-scope-selects select:focus {
+  outline: none;
+  border-color: var(--st-secondary);
+  box-shadow: var(--st-focus-ring);
+}
+
+.st-report-scope-selects select:disabled {
+  background: var(--st-surface-container-low);
+  color: var(--st-text-secondary);
+  cursor: not-allowed;
+}
+
 .st-report-btn-group {
   display: flex;
   gap: 8px;

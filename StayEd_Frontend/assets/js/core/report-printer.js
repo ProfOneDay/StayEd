@@ -113,7 +113,7 @@ class ReportPrinter {
     URL.revokeObjectURL(url);
   }
 
-  static open({ title, subtitle, meta = [], sections = [] }) {
+  static open({ title, subtitle, meta = [], sections = [], sendToAdmin = null }) {
     const win = window.open("", "_blank");
 
     if (!win) {
@@ -122,17 +122,17 @@ class ReportPrinter {
     }
 
     win.document.open();
-    win.document.write(this.render({ title, subtitle, meta, sections }));
+    win.document.write(this.render({ title, subtitle, meta, sections, sendToAdmin }));
     win.document.close();
   }
 
-  static render({ title, subtitle, meta, sections }) {
+  static render({ title, subtitle, meta, sections, sendToAdmin = null }) {
     const generated = new Date().toLocaleString("en-PH", {
       dateStyle: "long",
       timeStyle: "short",
     });
 
-    const reportJson = JSON.stringify({ title, subtitle, meta, sections });
+    const reportJson = JSON.stringify({ title, subtitle, meta, sections, sendToAdmin });
 
     return `<!doctype html>
 <html>
@@ -249,6 +249,10 @@ class ReportPrinter {
     opacity: 1;
   }
   .print-toolbar button:hover { opacity: .9; }
+  .print-toolbar button.btn-admin {
+    background: #12355b;
+    border-color: #12355b;
+  }
   @media print {
     .print-toolbar { display: none; }
     body { padding: 0 8px; }
@@ -265,6 +269,10 @@ class ReportPrinter {
       <svg style="width:15px;height:15px;fill:currentColor;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
       Export as CSV
     </button>
+    ${sendToAdmin ? `<button type="button" class="btn-admin" onclick="sendReportToAdmin()">
+      <svg style="width:15px;height:15px;fill:currentColor;" viewBox="0 0 24 24"><path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      Send to Admin
+    </button>` : ""}
     <button type="button" class="btn-print" onclick="window.print()">
       <svg style="width:15px;height:15px;fill:currentColor;" viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
       Print / Save as PDF
@@ -343,6 +351,14 @@ class ReportPrinter {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+    }
+
+    function sendReportToAdmin() {
+      if (!REPORT_DATA.sendToAdmin || !window.opener || window.opener.closed) {
+        window.alert("Return to the teacher reports page and try again.");
+        return;
+      }
+      window.opener.TeacherReports.sendToAdmin(REPORT_DATA.sendToAdmin.reportType, REPORT_DATA);
     }
   </script>
 </body>

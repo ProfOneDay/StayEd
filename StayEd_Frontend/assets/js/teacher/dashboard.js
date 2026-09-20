@@ -316,12 +316,12 @@ class TeacherDashboard {
     if (this.chartType.risk === "pie") {
       note.textContent = "Current risk distribution for your filtered learners.";
       this.chartInstances.risk = new Chart(canvas.getContext("2d"), {
-        type: "pie",
+        type: "doughnut",
         data: {
           labels: ["High Risk", "Moderate Risk", "Low Risk"],
           datasets: [{ data: [high, moderate, low], backgroundColor: ["#ba1a1a", "#f39422", "#6bbf59"], borderColor: "#fff", borderWidth: 2 }],
         },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } },
+        options: { responsive: true, maintainAspectRatio: false, cutout: "62%", plugins: { legend: { position: "bottom" }, tooltip: { enabled: true } } },
       });
       return;
     }
@@ -376,7 +376,7 @@ class TeacherDashboard {
   }
 
   // Shared renderer for the Learning Level / Modality panels -- both only
-  // ever toggle between Bar and Pie (no custom CSS bar view to preserve like
+  // ever toggle between Bar and Doughnut (no custom CSS bar view to preserve like
   // Risk Distribution has), so a single Chart.js bar/pie is swapped in place.
   static renderDistributionChart({ key, canvasId, noteId, labels, values, colors, noteText }) {
     const note = document.getElementById(noteId);
@@ -386,7 +386,7 @@ class TeacherDashboard {
     if (!canvas || !this.chartJsReady(note)) return;
 
     note.textContent = noteText;
-    const type = this.chartType[key] === "pie" ? "pie" : "bar";
+    const type = this.chartType[key] === "pie" ? "doughnut" : "bar";
     this.chartInstances[key] = new Chart(canvas.getContext("2d"), {
       type,
       data: {
@@ -400,8 +400,9 @@ class TeacherDashboard {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { position: "bottom", display: type === "pie" } },
-        scales: type === "pie" ? {} : { y: { beginAtZero: true, ticks: { precision: 0 } } },
+        plugins: { legend: { position: "bottom", display: type === "doughnut" }, tooltip: { enabled: true } },
+        cutout: type === "doughnut" ? "62%" : undefined,
+        scales: type === "doughnut" ? {} : { y: { beginAtZero: true, ticks: { precision: 0 } } },
       },
     });
   }
