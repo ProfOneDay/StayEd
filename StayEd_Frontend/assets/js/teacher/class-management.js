@@ -3,6 +3,8 @@ class ClassManagement {
 
   static clcName = "";
 
+  static lastClcStorageKey = "stayed_last_teacher_clc";
+
   static municipality = "";
 
   static async init() {
@@ -28,12 +30,20 @@ class ClassManagement {
 
     if (clcParam) {
       this.clcName = clcParam;
+      localStorage.setItem(this.lastClcStorageKey, this.clcName);
+      return;
+    }
+
+    const lastSelectedClc = localStorage.getItem(this.lastClcStorageKey) || "";
+    if (lastSelectedClc) {
+      this.clcName = lastSelectedClc;
       return;
     }
 
     try {
       const current = await API.getCurrentClc();
       this.clcName = current?.name || "";
+      if (this.clcName) localStorage.setItem(this.lastClcStorageKey, this.clcName);
     } catch (error) {
       this.clcName = "";
     }

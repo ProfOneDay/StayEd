@@ -284,10 +284,13 @@ class TeacherCalendar {
         const rel = this._parseLongDate(m.lastReleaseDate)
           || this._parseDate(m.releaseDate || m.release_date);
         if (rel) {
+          const strand = m.strandName || m.strandCode || "Learning Strand";
+          const moduleName = m.title || m.moduleName || m.module_name || "Module";
+          const eventDetails = `Class: ${className} · Learning Strand: ${strand}`;
           this._addEvent(rel, {
             type: "module",
-            label: `Module Released — ${className}`,
-            meta: m.title || m.moduleName || m.module_name || "Module",
+            label: moduleName,
+            meta: eventDetails,
             classId,
             className,
             moduleId: m.id,
@@ -301,8 +304,8 @@ class TeacherCalendar {
           const ret = this._fmt(relD);
           this._addEvent(ret, {
             type: "return",
-            label: `Return Due — ${className}`,
-            meta: m.title || m.moduleName || m.module_name || "Module",
+            label: moduleName,
+            meta: `${eventDetails} · Return Due`,
             classId,
             className,
             moduleId: m.id,
@@ -1165,9 +1168,12 @@ class TeacherCalendar {
 
     const moduleOptions = modules.length
       ? modules.map((m) =>
-          `<option value="${m.id}">${this._esc(m.title || m.module_name || `Module ${m.id}`)}</option>`
+          `<label class="st-roster-checklist-row">
+            <input type="checkbox" data-cal-module="${m.id}" value="${m.id}">
+            <span>${this._esc(m.title || m.module_name || `Module ${m.id}`)}</span>
+          </label>`
         ).join("")
-      : `<option value="" disabled>No modules set up for this class yet</option>`;
+      : `<p style="margin:0;color:var(--st-on-surface-variant);">No modules set up for this class yet.</p>`;
 
     const formHtml = `
       <div class="st-cal-modal-body">
@@ -1179,11 +1185,10 @@ class TeacherCalendar {
           </div>
         </div>
         <div class="st-schedule-modal-field">
-          <label for="calModModule">Module <span style="color:#ba1a1a;">*</span></label>
-          <select id="calModModule">
-            <option value="">— Select a module —</option>
+          <label>Modules <span style="color:#ba1a1a;">*</span></label>
+          <div class="st-roster-checklist" id="calModuleChecklist">
             ${moduleOptions}
-          </select>
+          </div>
         </div>
         <div class="st-schedule-modal-row">
           <div class="st-schedule-modal-field">
@@ -1205,12 +1210,12 @@ class TeacherCalendar {
       size: "md",
       asyncConfirm: true,
       onConfirm: async () => {
-        const moduleId    = document.getElementById("calModModule")?.value;
+        const moduleIds   = [...document.querySelectorAll("[data-cal-module]:checked")].map((input) => input.value);
         const releaseDate = document.getElementById("calModRelease")?.value;
         const returnDate  = document.getElementById("calModReturn")?.value;
 
-        if (!moduleId) {
-          Toast?.error("Please select a module to release.");
+        if (!moduleIds.length) {
+          Toast?.error("Please select at least one module to release.");
           throw new Error("validation");
         }
         if (!releaseDate) {
@@ -1219,10 +1224,14 @@ class TeacherCalendar {
         }
 
         try {
-          await API.releaseClassModule(cls.id, moduleId, {
-            releaseDate,
-            plannedReturnDate: returnDate || null,
-          });
+          const results = await Promise.all(
+            moduleIds.map((moduleId) => API.releaseClassModule(cls.id, moduleId, {
+              releaseDate,
+              plannedReturnDate: returnDate || null,
+            })),
+          );
+          const releasedCount = results.reduce((sum, result) => sum + Number(result?.releasedCount || 0), 0);
+          if (!releasedCount) throw new Error("No selected modules were released.");
         } catch (err) {
           const msg = err?.message || err?.data?.message || "Unable to save the module release. Please try again.";
           Toast?.error(msg);
@@ -1245,14 +1254,26 @@ class TeacherCalendar {
   static async openEditModuleReleaseDateDialog(classId, moduleId, oldDate) {
     if (!Modal) return;
 
+    let module = null;
+    try {
+      const response = await API.getClassModules(classId);
+      module = (response?.data || []).find((item) => String(item.id) === String(moduleId));
+    } catch (err) {
+      console.warn("[TeacherCalendar] Could not load module details", err);
+    }
+
     Modal.show({
-      title: "Move Release Date",
-      size: "sm",
+      title: "Edit Module",
+      size: "md",
       confirmLabel: "Save Changes",
       cancelLabel: "Cancel",
       asyncConfirm: true,
       message: `
         <div class="st-cal-modal-body">
+          <div class="st-schedule-modal-field">
+            <label for="calModTitle">Module Name</label>
+            <input type="text" id="calModTitle" value="${this._esc(module?.title || "")}" placeholder="Module name">
+          </div>
           <div class="st-schedule-modal-field">
             <label for="calModNewDate">New Release Date</label>
             <input type="date" id="calModNewDate" value="${oldDate}">
@@ -1260,15 +1281,29 @@ class TeacherCalendar {
           <p class="st-mrf-subtitle" style="margin-top:4px;">
             Only applies to learners who haven't returned this module yet.
           </p>
+          <div style="display:flex;justify-content:flex-end;margin-top:14px;">
+            <button type="button" class="st-btn-text" data-calendar-remove-module>
+              <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:-3px;">delete</span>
+              Remove Module from Catalog
+            </button>
+          </div>
         </div>
       `,
       onConfirm: async () => {
+        const title = document.getElementById("calModTitle")?.value.trim();
         const newDate = document.getElementById("calModNewDate")?.value;
+        if (module && !title) {
+          Toast?.error("Module name cannot be blank.");
+          throw new Error("validation");
+        }
         if (!newDate) {
           Toast?.error("Please choose a date.");
           throw new Error("validation");
         }
         try {
+          if (module && title !== module.title) {
+            await API.updateClassModule(classId, moduleId, { title });
+          }
           const response = await API.moveClassModuleReleaseDate(classId, moduleId, {
             oldDate,
             newDate,
@@ -1280,6 +1315,35 @@ class TeacherCalendar {
           this.openDayPanel(newDate);
         } catch (err) {
           Toast?.error(err?.message || err?.data?.message || "Unable to move this release date.");
+          throw err;
+        }
+      },
+    });
+
+    document.querySelector("[data-calendar-remove-module]")?.addEventListener("click", () => {
+      Modal.hide();
+      setTimeout(() => this.confirmRemoveModuleFromCatalog(classId, moduleId, module?.title), 80);
+    });
+  }
+
+  static confirmRemoveModuleFromCatalog(classId, moduleId, moduleTitle = "this module") {
+    Modal.show({
+      title: "Remove Module from Catalog",
+      size: "sm",
+      confirmLabel: "Remove Module",
+      cancelLabel: "Cancel",
+      asyncConfirm: true,
+      message: `Remove <strong>${this._esc(moduleTitle || "this module")}</strong> from the active catalog? Existing learner release and return history will be kept.`,
+      onConfirm: async () => {
+        try {
+          await API.archiveClassModule(classId, moduleId);
+          Toast?.success("Module removed from the catalog.");
+          await this.loadEvents();
+          this.render();
+          this.renderUpcoming();
+          this.closeDayPanel();
+        } catch (err) {
+          Toast?.error(err?.message || err?.data?.message || "Unable to remove this module.");
           throw err;
         }
       },

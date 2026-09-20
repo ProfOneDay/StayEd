@@ -324,7 +324,6 @@
     color:var(--st-on-surface-variant);
 }
 
-.setup-field select,
 .setup-field input{
     width:100%;
     height:48px;
@@ -335,6 +334,20 @@
     font-family:var(--st-font-body);
     font-size: var(--st-font-size-small);
     color:var(--st-on-surface);
+    transition:var(--st-transition);
+}
+
+.setup-field select{
+    width:100%;
+    height:44px;
+    padding:0 12px;
+    border:1px solid var(--st-outline-variant);
+    border-radius:var(--st-button-radius);
+    background:#fff;
+    font-family:var(--st-font-body);
+    font-size: var(--st-font-size-label);
+    color:var(--st-on-surface);
+    cursor:pointer;
     transition:var(--st-transition);
 }
 
