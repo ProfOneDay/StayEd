@@ -995,15 +995,17 @@ body[data-page="Teacher Dashboard"] #riskChartView.chart-canvas-wrap{
     height:40px;
     padding:0 12px;
     border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-radius-lg);
-    background:var(--st-surface-container-low);
+    border-radius:var(--st-button-radius);
+    background:#fff;
     font-family:var(--st-font-body);
-    font-size: var(--st-font-size-caption);
+    font-size: var(--st-font-size-label);
     color:var(--st-on-surface);
+    cursor:pointer;
 }
 
 .st-ewa-filter-bar select:focus{
     outline:none;
+    border-color:var(--st-secondary);
     box-shadow:var(--st-focus-ring);
 }
 

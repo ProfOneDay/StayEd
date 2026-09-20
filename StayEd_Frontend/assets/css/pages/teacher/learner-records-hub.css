@@ -678,12 +678,21 @@
 }
 
 .st-mrf-strand-block select{
-    height:42px;
+    height:40px;
     padding:0 12px;
     border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-radius-sm);
+    border-radius:var(--st-button-radius);
+    font-family:var(--st-font-body);
     font-size: var(--st-font-size-label);
+    color:var(--st-on-surface);
     background:#fff;
+    cursor:pointer;
+}
+
+.st-mrf-strand-block select:focus{
+    outline:none;
+    border-color:var(--st-secondary);
+    box-shadow:var(--st-focus-ring);
 }
 
 .st-mrf-modules-box{
@@ -988,7 +997,6 @@
 }
 
 .st-schedule-modal-field input,
-.st-schedule-modal-field select,
 .st-schedule-modal-field textarea{
     height:44px;
     padding:0 14px;
@@ -998,6 +1006,18 @@
     font-size: var(--st-font-size-label);
     color:var(--st-on-surface);
     background:#fff;
+}
+
+.st-schedule-modal-field select{
+    height:44px;
+    padding:0 12px;
+    border:1px solid var(--st-outline-variant);
+    border-radius:var(--st-button-radius);
+    font-family:var(--st-font-body);
+    font-size: var(--st-font-size-label);
+    color:var(--st-on-surface);
+    background:#fff;
+    cursor:pointer;
 }
 
 .st-schedule-modal-field textarea{

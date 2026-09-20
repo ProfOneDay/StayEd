@@ -250,7 +250,6 @@
 }
 
 .st-clc-field input,
-.st-clc-field select,
 .st-clc-field textarea{
     height:44px;
     padding:0 16px;
@@ -260,6 +259,19 @@
     font-family:var(--st-font-body);
     font-size: var(--st-font-size-label);
     color:var(--st-on-surface);
+    transition:var(--st-transition);
+}
+
+.st-clc-field select{
+    height:44px;
+    padding:0 12px;
+    border:1px solid var(--st-outline-variant);
+    border-radius:var(--st-button-radius);
+    background:#fff;
+    font-family:var(--st-font-body);
+    font-size: var(--st-font-size-label);
+    color:var(--st-on-surface);
+    cursor:pointer;
     transition:var(--st-transition);
 }
 

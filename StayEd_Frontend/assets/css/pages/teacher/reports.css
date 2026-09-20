@@ -76,9 +76,10 @@
   border: 1px solid var(--st-outline-variant);
   border-radius: var(--st-button-radius);
   background: #fff;
-  color: var(--st-text-primary);
-  font: inherit;
-  font-size: var(--st-font-size-caption);
+  color: var(--st-on-surface);
+  font-family: var(--st-font-body);
+  font-size: var(--st-font-size-label);
+  cursor: pointer;
 }
 
 .st-report-scope-selects select:focus {

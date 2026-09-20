@@ -1,7 +1,7 @@
 /* Manage Modules page (class-level module catalog + bulk release). Reuses
-   .st-panel/.st-data-table/.st-schedule-modal-field/.st-empty/.st-badge-*/
-   .st-search from the shared component styles -- only the pieces with no
-   existing equivalent are defined here. */
+  .st-panel/.st-data-table/.st-schedule-modal-field/.st-empty/.st-badge-*
+  .st-search from the shared component styles -- only the pieces with no
+  existing equivalent are defined here. */
 
 /* Deliberate no-op placeholder rule. Confirmed by direct testing: the
    literal first rule of this file was being silently dropped by the
@@ -73,12 +73,21 @@
 }
 
 .st-module-toolbar select {
-  padding: 9px 12px;
+  height: 40px;
+  padding: 0 12px;
   border: 1px solid var(--st-outline-variant);
   border-radius: var(--st-button-radius);
-  font: inherit;
+  font-family: var(--st-font-body);
+  font-size: var(--st-font-size-label);
   color: var(--st-on-surface);
   background: #fff;
+  cursor: pointer;
+}
+
+.st-module-toolbar select:focus {
+  outline: none;
+  border-color: var(--st-secondary);
+  box-shadow: var(--st-focus-ring);
 }
 
 .st-module-topic {

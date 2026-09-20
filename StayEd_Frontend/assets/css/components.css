@@ -633,6 +633,12 @@
 
   background: #fff;
 
+  font-family: var(--st-font-body);
+
+  font-size: var(--st-font-size-label);
+
+  color: var(--st-on-surface);
+
   outline: none;
 
   transition: var(--st-transition-default);
@@ -656,6 +662,32 @@
   color: var(--st-outline);
 
   font-size:1.25rem;
+}
+
+select {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--st-outline-variant);
+  border-radius: var(--st-button-radius);
+  background-color: #fff;
+  font-family: var(--st-font-body);
+  font-size: var(--st-font-size-label);
+  color: var(--st-on-surface);
+  line-height: 1.4;
+  cursor: pointer;
+  transition: var(--st-transition-default);
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--st-secondary);
+  box-shadow: var(--st-focus-ring);
+}
+
+select:disabled {
+  background-color: var(--st-surface-container-low);
+  color: var(--st-text-secondary);
+  cursor: not-allowed;
 }
 
 .st-table-wrapper {
