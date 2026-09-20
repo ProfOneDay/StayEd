@@ -773,6 +773,197 @@ def records_detail(learner_id: int):
     }
 
 
+def _exam_passing_chance(
+    enrollment_id: int,
+    modality: str | None,
+    *,
+    modules_released: int,
+    modules_returned: int,
+    overdue_modules: int,
+) -> dict:
+    """Estimate current A&E exam readiness from *performance* records only.
+
+    This is deliberately separate from StayEd's dropout/non-completion model.
+    There is no labelled historical A&E pass/fail training set in this project,
+    so presenting the dropout model's probability as an exam-pass probability
+    would be misleading. Instead, this predictor uses an explicit weighted
+    readiness score built from the learner's recorded assessment performance,
+    module completion, and (where applicable) attendance.
+
+    The output is HIGH/LOW passing chance rather than an official pass/fail
+    result. A score of 70 is an internal readiness threshold, not the official
+    A&E passing mark.
+    """
+    score_row = fetch_one(
+        """
+        SELECT
+            COUNT(*) FILTER (
+                WHERE pretest_score IS NOT NULL AND pretest_total IS NOT NULL
+                  AND pretest_total > 0
+            )::INT AS pretest_count,
+            COUNT(*) FILTER (
+                WHERE posttest_score IS NOT NULL AND posttest_total IS NOT NULL
+                  AND posttest_total > 0
+            )::INT AS posttest_count,
+            COUNT(*) FILTER (
+                WHERE pretest_score IS NOT NULL AND pretest_total IS NOT NULL
+                  AND pretest_total > 0
+                  AND posttest_score IS NOT NULL AND posttest_total IS NOT NULL
+                  AND posttest_total > 0
+            )::INT AS paired_count,
+            AVG(100.0 * pretest_score / NULLIF(pretest_total, 0)) FILTER (
+                WHERE pretest_score IS NOT NULL AND pretest_total IS NOT NULL
+                  AND pretest_total > 0
+            ) AS pretest_avg,
+            AVG(100.0 * posttest_score / NULLIF(posttest_total, 0)) FILTER (
+                WHERE posttest_score IS NOT NULL AND posttest_total IS NOT NULL
+                  AND posttest_total > 0
+            ) AS posttest_avg,
+            AVG(
+                (100.0 * posttest_score / NULLIF(posttest_total, 0))
+                - (100.0 * pretest_score / NULLIF(pretest_total, 0))
+            ) FILTER (
+                WHERE pretest_score IS NOT NULL AND pretest_total IS NOT NULL
+                  AND pretest_total > 0
+                  AND posttest_score IS NOT NULL AND posttest_total IS NOT NULL
+                  AND posttest_total > 0
+            ) AS avg_improvement
+        FROM module_record
+        WHERE enrollment_id = %s
+        """,
+        (enrollment_id,),
+    ) or {}
+
+    attendance = fetch_one(
+        """
+        SELECT total_scheduled_sessions, session_attendance_rate_percent
+        FROM vw_session_attendance_summary
+        WHERE enrollment_id = %s
+        """,
+        (enrollment_id,),
+    ) or {}
+
+    pre_count = int(score_row.get("pretest_count") or 0)
+    post_count = int(score_row.get("posttest_count") or 0)
+    paired_count = int(score_row.get("paired_count") or 0)
+    pre_avg = float(score_row["pretest_avg"]) if score_row.get("pretest_avg") is not None else None
+    post_avg = float(score_row["posttest_avg"]) if score_row.get("posttest_avg") is not None else None
+    avg_improvement = (
+        float(score_row["avg_improvement"])
+        if score_row.get("avg_improvement") is not None
+        else None
+    )
+
+    # Require at least one actual assessment score. Module-return/attendance
+    # behaviour alone is not enough evidence to call exam passing chance high
+    # or low.
+    if post_count == 0 and pre_count == 0:
+        return {
+            "status": "INSUFFICIENT",
+            "label": "Not enough data",
+            "score": None,
+            "confidence": "Waiting for assessment scores",
+            "summary": (
+                "Record at least one module pre-test or post-test score to estimate "
+                "this learner's A&E exam passing chance."
+            ),
+            "factors": [],
+            "threshold": 70,
+            "disclaimer": (
+                "Performance-based readiness estimate only; this is not an official "
+                "A&E result or passing mark."
+            ),
+        }
+
+    components: list[tuple[str, float, float, str]] = []
+
+    # Post-tests are the strongest direct performance signal. Before a
+    # post-test exists, a pre-test can still provide a preliminary estimate.
+    if post_avg is not None:
+        components.append(("Post-test average", post_avg, 0.50, f"{round(post_avg)}% across {post_count} scored module(s)"))
+    elif pre_avg is not None:
+        components.append(("Pre-test average", pre_avg, 0.50, f"{round(pre_avg)}% across {pre_count} scored module(s)"))
+
+    module_rate = (
+        100.0 * modules_returned / modules_released
+        if modules_released
+        else None
+    )
+    if module_rate is not None:
+        components.append(("Module return rate", module_rate, 0.25, f"{modules_returned} of {modules_released} modules returned"))
+
+    modality_key = str(modality or "").upper().replace("-", "_").replace(" ", "_")
+    sessions = int(attendance.get("total_scheduled_sessions") or 0)
+    attendance_rate = (
+        float(attendance["session_attendance_rate_percent"])
+        if attendance.get("session_attendance_rate_percent") is not None
+        else None
+    )
+    if modality_key != "MODULAR" and sessions > 0 and attendance_rate is not None:
+        components.append(("Attendance rate", attendance_rate, 0.15, f"{round(attendance_rate)}% across {sessions} scheduled session(s)"))
+
+    # Improvement is converted to a 0-100 readiness component: no change = 50,
+    # +25 percentage points = 100, -25 points = 0. This rewards real progress
+    # without allowing improvement alone to dominate the estimate.
+    if paired_count and avg_improvement is not None:
+        improvement_component = max(0.0, min(100.0, 50.0 + (avg_improvement * 2.0)))
+        sign = "+" if avg_improvement >= 0 else ""
+        components.append(("Pre/Post improvement", improvement_component, 0.10, f"{sign}{avg_improvement:.1f} percentage points across {paired_count} paired module(s)"))
+
+    total_weight = sum(weight for _, _, weight, _ in components)
+    readiness = (
+        sum(value * weight for _, value, weight, _ in components) / total_weight
+        if total_weight
+        else 0.0
+    )
+
+    # Overdue work is a small readiness penalty, capped so it cannot erase
+    # strong test performance by itself.
+    overdue_penalty = min(max(int(overdue_modules or 0), 0) * 2, 10)
+    readiness = max(0.0, min(100.0, readiness - overdue_penalty))
+    readiness_score = round(readiness)
+    status = "HIGH" if readiness_score >= 70 else "LOW"
+
+    factors = [
+        {
+            "name": name,
+            "value": round(value, 1),
+            "detail": detail,
+        }
+        for name, value, _, detail in components
+    ]
+    if overdue_penalty:
+        factors.append({
+            "name": "Overdue modules",
+            "value": -overdue_penalty,
+            "detail": f"{overdue_modules} overdue module(s), -{overdue_penalty} readiness points",
+        })
+
+    if post_count >= 3 and modules_released >= 3:
+        confidence = "Stronger estimate"
+    elif post_count > 0:
+        confidence = "Developing estimate"
+    else:
+        confidence = "Preliminary estimate"
+
+    return {
+        "status": status,
+        "label": f"{status.title()} chance of passing",
+        "score": readiness_score,
+        "confidence": confidence,
+        "summary": (
+            f"Current performance gives this learner a {status.lower()} chance of passing "
+            "the A&E exam based on the records available in StayEd."
+        ),
+        "factors": factors,
+        "threshold": 70,
+        "disclaimer": (
+            "Performance-based readiness estimate only. The 70-point cutoff is an "
+            "internal StayEd readiness threshold, not the official A&E passing mark."
+        ),
+    }
+
+
 def _engagement_score(enrollment_id: int) -> int:
     row = fetch_one(
         """
@@ -960,6 +1151,89 @@ def learner_profile(learner_id: int):
     last_activity = shaped["activity_text"]
     module_rate = round(100 * modules_returned / modules_released) if modules_released else None
 
+    # Task 3: attendance rate uses only sessions with a recorded attendance
+    # status. Future/unrecorded sessions do not lower the learner's rate.
+    attendance_summary = fetch_one(
+        """
+        SELECT
+            COUNT(sa.attendance_id)::INT AS recorded_sessions,
+            COUNT(sa.attendance_id) FILTER (
+                WHERE sa.attendance_status='PRESENT'
+            )::INT AS attended_sessions
+        FROM session_attendance sa
+        JOIN class_session cs ON cs.session_id=sa.session_id
+        WHERE sa.enrollment_id=%s AND cs.session_status <> 'CANCELLED'
+        """,
+        (enrollment_id,),
+    ) or {}
+    recorded_sessions = int(attendance_summary.get("recorded_sessions") or 0)
+    attended_sessions = int(attendance_summary.get("attended_sessions") or 0)
+    if base.get("learning_modality") == "MODULAR":
+        attendance_rate = None
+        attendance_rate_label = "N/A"
+        attendance_rate_text = "Attendance is not used for Modular learners."
+    elif recorded_sessions:
+        attendance_rate = round(100 * attended_sessions / recorded_sessions)
+        attendance_rate_label = None
+        attendance_rate_text = (
+            f"{attended_sessions} of {recorded_sessions} recorded sessions attended"
+        )
+    else:
+        attendance_rate = None
+        attendance_rate_label = "Not Yet Available"
+        attendance_rate_text = "No attendance has been recorded yet."
+
+    # Task 1: per-student performance progress is based on real module activity
+    # already stored in StayEd. Each point is the cumulative module return rate
+    # on a date when a module was released or returned; no grades are invented.
+    performance_rows = fetch_all(
+        """
+        SELECT date_released, date_returned
+        FROM module_record
+        WHERE enrollment_id=%s
+        ORDER BY date_released, module_record_id
+        """,
+        (enrollment_id,),
+    )
+    performance_dates = sorted({
+        d
+        for row in performance_rows
+        for d in (row.get("date_released"), row.get("date_returned"))
+        if d is not None and d <= date.today()
+    })
+    performance_progress = []
+    for progress_date in performance_dates:
+        released_to_date = sum(
+            1
+            for row in performance_rows
+            if row.get("date_released") and row["date_released"] <= progress_date
+        )
+        returned_to_date = sum(
+            1
+            for row in performance_rows
+            if row.get("date_returned") and row["date_returned"] <= progress_date
+        )
+        rate = (
+            round(100 * returned_to_date / released_to_date)
+            if released_to_date
+            else 0
+        )
+        performance_progress.append({
+            "date": progress_date.strftime("%b %d, %Y"),
+            "rate": rate,
+            "released": released_to_date,
+            "returned": returned_to_date,
+        })
+
+    # Keep long histories readable while preserving the first and latest points.
+    if len(performance_progress) > 12:
+        last_index = len(performance_progress) - 1
+        sample_indexes = sorted({
+            round(i * last_index / 11)
+            for i in range(12)
+        })
+        performance_progress = [performance_progress[i] for i in sample_indexes]
+
     overdue_modules = fetch_one(
         """
         SELECT COUNT(*)::INT AS n FROM module_record
@@ -968,6 +1242,14 @@ def learner_profile(learner_id: int):
         """,
         (enrollment_id,),
     )["n"]
+
+    exam_passing_chance = _exam_passing_chance(
+        enrollment_id,
+        base.get("learning_modality"),
+        modules_released=modules_released,
+        modules_returned=modules_returned,
+        overdue_modules=overdue_modules,
+    )
 
     last_contact_event = fetch_one(
         """
@@ -1222,6 +1504,8 @@ def learner_profile(learner_id: int):
             "modalitySince": modality_since or "—",
         },
         "riskTrend": risk_trend,
+        "performanceProgress": performance_progress,
+        "examPassingChance": exam_passing_chance,
         "metrics": {
             "engagementScore": engagement_score,
             "engagementScoreMax": 4,
@@ -1233,6 +1517,9 @@ def learner_profile(learner_id: int):
             ),
             "activeModules": active_modules,
             "overdueModules": overdue_modules,
+            "attendanceRate": attendance_rate,
+            "attendanceRateLabel": attendance_rate_label,
+            "attendanceRateText": attendance_rate_text,
             "lastActivity": last_activity,
             "daysSinceLastReturn": days_since_last_return,
         },
@@ -1585,6 +1872,7 @@ def _logbook(enrollment_id: int, learner_activity: dict) -> dict:
         """
         SELECT mr.module_record_id, mr.module_name, mr.date_released, mr.date_returned,
                mr.module_status, mr.remarks, mr.release_batch_id, mr.planned_return_date,
+               mr.pretest_score, mr.pretest_total, mr.posttest_score, mr.posttest_total,
                ls.strand_code, ls.strand_name,
                mrb.release_date AS batch_release_date
         FROM module_record mr
@@ -1624,6 +1912,11 @@ def _logbook(enrollment_id: int, learner_activity: dict) -> dict:
                 "returnedRaw": r["date_returned"],
                 "remarks": r.get("remarks") or "",
                 "strandCode": strand_code,
+                "releaseBatchId": batch_id,
+                "pretestScore": float(r["pretest_score"]) if r.get("pretest_score") is not None else None,
+                "pretestTotal": float(r["pretest_total"]) if r.get("pretest_total") is not None else None,
+                "posttestScore": float(r["posttest_score"]) if r.get("posttest_score") is not None else None,
+                "posttestTotal": float(r["posttest_total"]) if r.get("posttest_total") is not None else None,
                 **_module_overdue_info(r["date_returned"], r.get("planned_return_date")),
             }
         )
@@ -1886,6 +2179,83 @@ def update_module_planned_return(learner_id: int, batch_id: int, module_record_i
             "level": base["learning_level"],
             **learner_activity,
         },
+        **_logbook(base["enrollment_id"], learner_activity),
+    }
+
+
+def _parse_score(value, field_name: str):
+    if value is None or value == "":
+        return None
+    try:
+        score = float(value)
+    except (TypeError, ValueError):
+        raise ValueError(f"{field_name} must be a number.")
+    if score < 0:
+        raise ValueError(f"{field_name} cannot be negative.")
+    return score
+
+
+@bp.patch("/learners/<int:learner_id>/module-batches/<int:batch_id>/modules/<int:module_record_id>/scores")
+@role_required("teacher")
+def update_module_scores(learner_id: int, batch_id: int, module_record_id: int):
+    base = _profile_base(learner_id)
+    if not base:
+        return error("Learner not found.", 404)
+
+    module = fetch_one(
+        """
+        SELECT mr.module_record_id FROM module_record mr
+        JOIN module_release_batch mrb ON mrb.release_batch_id = mr.release_batch_id
+        WHERE mr.module_record_id=%s AND mr.release_batch_id=%s AND mrb.enrollment_id=%s
+        """,
+        (module_record_id, batch_id, base["enrollment_id"]),
+    )
+    if not module:
+        return error("Module not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+
+    # Partial update: a teacher may record the Pre-Test before the module is
+    # even returned, and the Post-Test only later -- only touch whichever
+    # fields are actually present in the request, so submitting one side
+    # never wipes out an already-saved value on the other.
+    field_map = {
+        "pretestScore": ("pretest_score", "Pre-Test score"),
+        "pretestTotal": ("pretest_total", "Pre-Test total"),
+        "posttestScore": ("posttest_score", "Post-Test score"),
+        "posttestTotal": ("posttest_total", "Post-Test total"),
+    }
+    updates: dict = {}
+    try:
+        for body_key, (column, label) in field_map.items():
+            if body_key in data:
+                updates[column] = _parse_score(data.get(body_key), label)
+    except ValueError as exc:
+        return error(str(exc), 422)
+
+    if not updates:
+        return error("No score fields were provided.", 422)
+
+    existing = fetch_one(
+        "SELECT pretest_score, pretest_total, posttest_score, posttest_total FROM module_record WHERE module_record_id=%s",
+        (module_record_id,),
+    )
+    merged = {**existing, **updates}
+    if merged["pretest_score"] is not None and merged["pretest_total"] is not None and merged["pretest_score"] > merged["pretest_total"]:
+        return error("Pre-Test score cannot exceed the total.", 422)
+    if merged["posttest_score"] is not None and merged["posttest_total"] is not None and merged["posttest_score"] > merged["posttest_total"]:
+        return error("Post-Test score cannot exceed the total.", 422)
+
+    set_clause = ", ".join(f"{col}=%s" for col in updates)
+    execute(
+        f"UPDATE module_record SET {set_clause} WHERE module_record_id=%s",
+        (*updates.values(), module_record_id),
+    )
+
+    base = _profile_base(learner_id)
+    learner_activity = _learner_activity_info(base)
+    return {
+        "message": "Scores updated.",
         **_logbook(base["enrollment_id"], learner_activity),
     }
 
@@ -2562,3 +2932,153 @@ def public_student_view(token: str):
         "risk": {"label": risk_label, "summary": risk_summary},
         **_logbook(row["enrollment_id"], _learner_activity_info(row)),
     }
+
+
+# ---------------------------------------------------------------------------
+# ALS Accreditation & Equivalency (A&E) assessment records -- a distinct,
+# learner-level exam result (Elementary/Secondary), independent of any one
+# module. A learner can have more than one row (retakes across cycles).
+# ---------------------------------------------------------------------------
+
+def _shape_assessment(row: dict) -> dict:
+    return {
+        "id": row["als_assessment_id"],
+        "level": row["level"],
+        "testDate": row["test_date"].isoformat() if row.get("test_date") else None,
+        "testDateText": row["test_date"].strftime("%B %d, %Y") if row.get("test_date") else None,
+        "score": float(row["score"]) if row.get("score") is not None else None,
+        "totalScore": float(row["total_score"]) if row.get("total_score") is not None else None,
+        "result": row["result"],
+        "remarks": row.get("remarks") or "",
+    }
+
+
+def _parse_assessment_body(data: dict, *, require_all: bool) -> dict:
+    fields: dict = {}
+
+    if "level" in data or require_all:
+        level = str(data.get("level") or "").upper()
+        if level not in ("ELEMENTARY", "SECONDARY"):
+            raise ValueError("Level must be Elementary or Secondary.")
+        fields["level"] = level
+
+    if "testDate" in data or require_all:
+        try:
+            fields["test_date"] = date.fromisoformat(str(data.get("testDate")))
+        except (TypeError, ValueError):
+            raise ValueError("Test date must use YYYY-MM-DD.")
+
+    if "result" in data or require_all:
+        result = str(data.get("result") or "PENDING").upper()
+        if result not in ("PASSED", "FAILED", "PENDING"):
+            raise ValueError("Result must be Passed, Failed, or Pending.")
+        fields["result"] = result
+
+    if "score" in data:
+        fields["score"] = _parse_score(data.get("score"), "Score")
+    if "totalScore" in data:
+        fields["total_score"] = _parse_score(data.get("totalScore"), "Total score")
+    if fields.get("score") is not None and fields.get("total_score") is not None and fields["score"] > fields["total_score"]:
+        raise ValueError("Score cannot exceed the total.")
+
+    if "remarks" in data:
+        fields["remarks"] = (data.get("remarks") or "").strip() or None
+
+    return fields
+
+
+@bp.get("/learners/<int:learner_id>/assessments")
+@role_required("teacher")
+def list_assessments(learner_id: int):
+    base = _profile_base(learner_id)
+    if not base:
+        return error("Learner not found.", 404)
+
+    rows = fetch_all(
+        """
+        SELECT * FROM als_assessment
+        WHERE enrollment_id = %s
+        ORDER BY test_date DESC, als_assessment_id DESC
+        """,
+        (base["enrollment_id"],),
+    )
+    return {"data": [_shape_assessment(r) for r in rows]}
+
+
+@bp.post("/learners/<int:learner_id>/assessments")
+@role_required("teacher")
+def create_assessment(learner_id: int):
+    base = _profile_base(learner_id)
+    if not base:
+        return error("Learner not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    try:
+        fields = _parse_assessment_body(data, require_all=True)
+    except ValueError as exc:
+        return error(str(exc), 422)
+
+    row = execute(
+        """
+        INSERT INTO als_assessment
+            (enrollment_id, level, test_date, score, total_score, result, remarks, recorded_by_teacher_id)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        RETURNING *
+        """,
+        (
+            base["enrollment_id"], fields["level"], fields["test_date"],
+            fields.get("score"), fields.get("total_score"), fields["result"],
+            fields.get("remarks"), teacher_for_user()["teacher_id"],
+        ),
+        returning=True,
+    )
+    return {"message": "Assessment recorded.", "assessment": _shape_assessment(row)}, 201
+
+
+@bp.patch("/learners/<int:learner_id>/assessments/<int:assessment_id>")
+@role_required("teacher")
+def update_assessment(learner_id: int, assessment_id: int):
+    base = _profile_base(learner_id)
+    if not base:
+        return error("Learner not found.", 404)
+
+    existing = fetch_one(
+        "SELECT als_assessment_id FROM als_assessment WHERE als_assessment_id=%s AND enrollment_id=%s",
+        (assessment_id, base["enrollment_id"]),
+    )
+    if not existing:
+        return error("Assessment not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    try:
+        fields = _parse_assessment_body(data, require_all=False)
+    except ValueError as exc:
+        return error(str(exc), 422)
+    if not fields:
+        return error("No changes were provided.", 422)
+
+    set_clause = ", ".join(f"{col}=%s" for col in fields)
+    row = execute(
+        f"UPDATE als_assessment SET {set_clause}, updated_at=now() WHERE als_assessment_id=%s RETURNING *",
+        (*fields.values(), assessment_id),
+        returning=True,
+    )
+    return {"message": "Assessment updated.", "assessment": _shape_assessment(row)}
+
+
+@bp.delete("/learners/<int:learner_id>/assessments/<int:assessment_id>")
+@role_required("teacher")
+def delete_assessment(learner_id: int, assessment_id: int):
+    base = _profile_base(learner_id)
+    if not base:
+        return error("Learner not found.", 404)
+
+    existing = fetch_one(
+        "SELECT als_assessment_id FROM als_assessment WHERE als_assessment_id=%s AND enrollment_id=%s",
+        (assessment_id, base["enrollment_id"]),
+    )
+    if not existing:
+        return error("Assessment not found.", 404)
+
+    execute("DELETE FROM als_assessment WHERE als_assessment_id=%s", (assessment_id,))
+    return {"message": "Assessment removed."}

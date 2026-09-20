@@ -1,0 +1,73 @@
+/* Deliberate no-op placeholder rule -- see module-management.css for why:
+   the literal first rule of a file loaded through main.css's @import chain
+   can be silently dropped by the browser's CSS parser. Keeping a throwaway
+   first rule here avoids losing whatever rule would otherwise be first. */
+.st-record-scores-root {
+  display: block;
+}
+
+.st-record-scores-head {
+  margin-bottom: 16px;
+}
+
+.st-record-scores-table th {
+  text-align: center;
+}
+
+.st-record-scores-table th:first-child,
+.st-record-scores-table th:nth-child(2) {
+  text-align: left;
+}
+
+.st-record-scores-table td:first-child {
+  white-space: nowrap;
+}
+
+.st-record-scores-subhead th {
+  font-size: var(--st-font-size-micro);
+  font-weight: 600;
+  color: var(--st-on-surface-variant);
+  padding-top: 4px;
+  padding-bottom: 8px;
+}
+
+.st-record-scores-unreleased {
+  text-align: center;
+  color: var(--st-on-surface-variant);
+  font-size: var(--st-font-size-caption);
+  font-style: italic;
+}
+
+.st-score-cell {
+  width: 72px;
+  height: 36px;
+  padding: 0 8px;
+  border: 1px solid var(--st-outline-variant);
+  border-radius: var(--st-radius-md);
+  font-family: var(--st-font-body);
+  font-size: var(--st-font-size-label);
+  color: var(--st-on-surface);
+  text-align: center;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.st-score-cell:focus {
+  outline: none;
+  border-color: var(--st-secondary);
+  box-shadow: var(--st-focus-ring);
+}
+
+.st-score-cell.is-score-saving {
+  border-color: var(--st-outline);
+  background: var(--st-surface-container-low);
+}
+
+.st-score-cell.is-score-saved {
+  border-color: var(--st-risk-low);
+  background: var(--st-risk-low-soft);
+}
+
+.st-score-cell.is-score-error {
+  border-color: var(--st-risk-high);
+  background: var(--st-risk-high-soft);
+}

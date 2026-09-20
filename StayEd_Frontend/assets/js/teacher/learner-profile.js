@@ -1,6 +1,8 @@
 class LearnerProfilePage {
   static profile = null;
 
+  static assessments = [];
+
   static async init() {
     if (window.Guards) Guards.teacher();
 
@@ -10,11 +12,192 @@ class LearnerProfilePage {
 
     this.bindPortalShare();
 
+    this.bindAssessments();
+
     await this.load();
 
     await this.loadPortalShare();
 
+    await this.loadAssessments();
+
     this.openRequestedTab();
+  }
+
+  static bindAssessments() {
+    document
+      .querySelector("[data-add-assessment-btn]")
+      ?.addEventListener("click", () => this.openAssessmentModal());
+  }
+
+  static async loadAssessments() {
+    try {
+      const id = this.getLearnerId();
+      const result = await API.getAssessments(id);
+
+      this.assessments = result.data || [];
+
+      this.renderAssessments();
+    } catch (error) {
+      console.error("[LearnerProfile] Unable to load assessments", error);
+    }
+  }
+
+  static renderAssessments() {
+    const list = document.querySelector("[data-assessment-list]");
+    if (!list) return;
+
+    if (!this.assessments.length) {
+      list.innerHTML = `<p class="st-assessment-empty">No assessments recorded yet.</p>`;
+      return;
+    }
+
+    const resultClass = { PASSED: "low", FAILED: "high", PENDING: "neutral" };
+
+    list.innerHTML = this.assessments
+      .map((a) => {
+        const scoreText =
+          a.score != null && a.totalScore != null ? `${a.score}/${a.totalScore}` : "No score yet";
+        const cls = resultClass[a.result] || "neutral";
+        const label = a.result.charAt(0) + a.result.slice(1).toLowerCase();
+
+        return `
+          <div class="st-assessment-row">
+            <div class="st-assessment-row-main">
+              <span class="st-assessment-row-level">${this.capitalize((a.level || "").toLowerCase())}</span>
+              <span class="st-assessment-row-meta">${a.testDateText || "—"} &middot; ${scoreText}</span>
+              <span class="st-risk-badge st-risk-badge--${cls}"><span class="st-risk-dot"></span>${label}</span>
+            </div>
+            <div class="st-assessment-row-actions">
+              <button type="button" class="st-icon-btn" data-edit-assessment="${a.id}" title="Edit">
+                <span class="material-symbols-outlined" style="font-size:1.125rem;">edit</span>
+              </button>
+              <button type="button" class="st-icon-btn" data-delete-assessment="${a.id}" title="Delete">
+                <span class="material-symbols-outlined" style="font-size:1.125rem;">delete</span>
+              </button>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+
+    list.querySelectorAll("[data-edit-assessment]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const a = this.assessments.find((x) => x.id === Number(btn.dataset.editAssessment));
+        if (a) this.openAssessmentModal(a);
+      });
+    });
+
+    list.querySelectorAll("[data-delete-assessment]").forEach((btn) => {
+      btn.addEventListener("click", () => this.confirmDeleteAssessment(Number(btn.dataset.deleteAssessment)));
+    });
+  }
+
+  static openAssessmentModal(existing) {
+    if (!window.Modal) return;
+
+    const val = (v) => (v == null ? "" : v);
+    const isEdit = Boolean(existing);
+
+    Modal.show({
+      title: isEdit ? "Edit Assessment" : "Record Assessment",
+      size: "sm",
+      confirmLabel: isEdit ? "Save Changes" : "Record Assessment",
+      asyncConfirm: true,
+      message: `
+        <div class="st-schedule-modal-field">
+          <label for="asLevel">Level</label>
+          <select id="asLevel">
+            <option value="ELEMENTARY" ${existing?.level === "ELEMENTARY" ? "selected" : ""}>Elementary</option>
+            <option value="SECONDARY" ${existing?.level === "SECONDARY" ? "selected" : ""}>Secondary</option>
+          </select>
+        </div>
+        <div class="st-schedule-modal-field">
+          <label for="asTestDate">Test Date</label>
+          <input type="date" id="asTestDate" value="${val(existing?.testDate)}">
+        </div>
+        <div class="st-schedule-modal-field">
+          <label>Score</label>
+          <div class="st-score-input-row">
+            <input type="number" min="0" step="0.5" id="asScore" placeholder="Score" value="${val(existing?.score)}">
+            <span>/</span>
+            <input type="number" min="0" step="0.5" id="asTotalScore" placeholder="Total" value="${val(existing?.totalScore)}">
+          </div>
+        </div>
+        <div class="st-schedule-modal-field">
+          <label for="asResult">Result</label>
+          <select id="asResult">
+            <option value="PENDING" ${!existing || existing?.result === "PENDING" ? "selected" : ""}>Pending</option>
+            <option value="PASSED" ${existing?.result === "PASSED" ? "selected" : ""}>Passed</option>
+            <option value="FAILED" ${existing?.result === "FAILED" ? "selected" : ""}>Failed</option>
+          </select>
+        </div>
+        <div class="st-schedule-modal-field">
+          <label for="asRemarks">Remarks (optional)</label>
+          <textarea id="asRemarks" rows="2">${existing?.remarks || ""}</textarea>
+        </div>
+      `,
+      onConfirm: async () => {
+        const level = document.getElementById("asLevel")?.value;
+        const testDate = document.getElementById("asTestDate")?.value;
+        const scoreRaw = document.getElementById("asScore")?.value;
+        const totalRaw = document.getElementById("asTotalScore")?.value;
+        const result = document.getElementById("asResult")?.value;
+        const remarks = document.getElementById("asRemarks")?.value.trim();
+
+        if (!testDate) {
+          Toast?.error("Please set a test date.");
+          throw new Error("validation");
+        }
+
+        const payload = {
+          level,
+          testDate,
+          result,
+          remarks,
+          score: scoreRaw === "" ? null : Number(scoreRaw),
+          totalScore: totalRaw === "" ? null : Number(totalRaw),
+        };
+
+        try {
+          const id = this.getLearnerId();
+          if (isEdit) {
+            await API.updateAssessment(id, existing.id, payload);
+            Toast?.success("Assessment updated.");
+          } else {
+            await API.createAssessment(id, payload);
+            Toast?.success("Assessment recorded.");
+          }
+          await this.loadAssessments();
+        } catch (error) {
+          console.error("[LearnerProfile] Unable to save assessment", error);
+          Toast?.error(error?.data?.message || "Unable to save this assessment.");
+          throw error;
+        }
+      },
+    });
+  }
+
+  static confirmDeleteAssessment(assessmentId) {
+    if (!window.Modal) return;
+
+    Modal.show({
+      title: "Remove Assessment?",
+      size: "sm",
+      confirmLabel: "Remove",
+      asyncConfirm: true,
+      message: `<p style="color:var(--st-on-surface-variant);font-size:0.875rem;">This will permanently remove this assessment record.</p>`,
+      onConfirm: async () => {
+        try {
+          await API.deleteAssessment(this.getLearnerId(), assessmentId);
+          Toast?.success("Assessment removed.");
+          await this.loadAssessments();
+        } catch (error) {
+          console.error("[LearnerProfile] Unable to remove assessment", error);
+          Toast?.error(error?.data?.message || "Unable to remove this assessment.");
+          throw error;
+        }
+      },
+    });
   }
 
   static bindPortalShare() {
@@ -224,36 +407,6 @@ class LearnerProfilePage {
       .querySelector("[data-profile-edit-btn]")
       ?.addEventListener("click", () => this.openEditLearnerModal());
 
-    document
-      .querySelector("[data-profile-run-prediction-btn]")
-      ?.addEventListener("click", (e) => this.runPrediction(e.currentTarget));
-  }
-
-  // Manual trigger for the same prediction call that already fires
-  // automatically off module-release/return/modality-change events (see
-  // trigger_prediction() call sites backend-side) -- this exists purely so
-  // a teacher can force a fresh score without waiting for one of those
-  // events, e.g. right after a consultation that didn't touch modules.
-  static async runPrediction(button) {
-    if (!button || button.disabled) return;
-
-    const originalHtml = button.innerHTML;
-    button.disabled = true;
-    button.innerHTML = `<span class="material-symbols-outlined">progress_activity</span> Running…`;
-
-    try {
-      const result = await API.runPrediction(this.getLearnerId());
-      Toast?.success(
-        `Prediction updated: ${result.risk_level} risk (${Math.round(result.risk_probability * 100)}%).`,
-      );
-      await this.load();
-    } catch (error) {
-      console.error("[LearnerProfile] runPrediction", error);
-      Toast?.error(error?.message || "Unable to run a prediction for this learner.");
-    } finally {
-      button.disabled = false;
-      button.innerHTML = originalHtml;
-    }
   }
 
   static formatModalityDate(iso) {
@@ -434,6 +587,29 @@ class LearnerProfilePage {
     );
     this.set("[data-metric-overdue]", m.overdueModules ?? 0);
 
+    // Modular learners do not use session attendance, so hide the attendance card
+    // instead of showing an N/A metric. Face-to-Face/Blended learners still see it.
+    const attendanceCard = document.querySelector(".st-metric-card--attendance");
+    const attendanceNotApplicable = m.attendanceRateLabel === "N/A";
+    if (attendanceCard) {
+      attendanceCard.style.display = attendanceNotApplicable ? "none" : "";
+    }
+    if (!attendanceNotApplicable) {
+      this.set(
+        "[data-metric-attendance-rate]",
+        m.attendanceRate == null
+          ? (m.attendanceRateLabel || "Not Yet Available")
+          : `${m.attendanceRate}%`,
+      );
+      this.set(
+        "[data-metric-attendance-rate-text]",
+        m.attendanceRateText || "",
+      );
+    }
+
+    this.renderPerformanceProgress(p.performanceProgress || []);
+    this.renderExamPassingChance(p.examPassingChance || {});
+
     this.renderRiskTrendChart(p.riskTrend || []);
 
     this.renderMonitoringSummaryTable();
@@ -443,6 +619,153 @@ class LearnerProfilePage {
       p.recentActivity || [],
       "No recent activity yet.",
     );
+  }
+
+  static renderPerformanceProgress(progress) {
+    const chart = document.querySelector("[data-performance-progress-chart]");
+    const current = document.querySelector("[data-performance-progress-current]");
+
+    if (!chart) return;
+
+    if (!progress.length) {
+      if (current) current.textContent = "Not Yet Available";
+      chart.innerHTML = `
+        <div class="st-performance-progress-empty">
+          Performance progress will appear after modules are released and returned.
+        </div>
+      `;
+      return;
+    }
+
+    const latest = progress[progress.length - 1];
+    if (current) current.textContent = `${latest.rate}%`;
+
+    const leftPad = 7;
+    const rightPad = 3;
+    const topPad = 8;
+    const bottomPad = 10;
+    const usableWidth = 100 - leftPad - rightPad;
+    const usableHeight = 100 - topPad - bottomPad;
+
+    const coords = progress.map((pt, i) => ({
+      x:
+        progress.length === 1
+          ? leftPad + usableWidth / 2
+          : leftPad + (i / (progress.length - 1)) * usableWidth,
+      y:
+        topPad +
+        (1 - Math.max(0, Math.min(100, Number(pt.rate) || 0)) / 100) *
+          usableHeight,
+      pt,
+    }));
+
+    const line = coords.map((c) => `${c.x},${c.y}`).join(" ");
+    const area = [
+      `${coords[0].x},${topPad + usableHeight}`,
+      ...coords.map((c) => `${c.x},${c.y}`),
+      `${coords[coords.length - 1].x},${topPad + usableHeight}`,
+    ].join(" ");
+
+    const dots = coords
+      .map(
+        ({ x, y, pt }) => `
+          <span
+            class="st-performance-progress-point"
+            style="left:${x}%;top:${y}%;"
+            title="${pt.date}: ${pt.rate}% (${pt.returned} of ${pt.released} modules returned)"
+          ></span>
+        `,
+      )
+      .join("");
+
+    const labelIndexes = new Set([0, progress.length - 1]);
+    if (progress.length > 2) {
+      labelIndexes.add(Math.floor((progress.length - 1) / 2));
+    }
+    if (progress.length > 6) {
+      labelIndexes.add(Math.floor((progress.length - 1) / 3));
+      labelIndexes.add(Math.floor(((progress.length - 1) * 2) / 3));
+    }
+
+    const labels = coords
+      .map(({ x, pt }, i) =>
+        labelIndexes.has(i)
+          ? `<span class="st-performance-progress-x-label" style="left:${x}%;">${pt.date}</span>`
+          : "",
+      )
+      .join("");
+
+    chart.innerHTML = `
+      <div class="st-performance-progress-plot">
+        ${[100, 75, 50, 25, 0]
+          .map(
+            (value) => `
+              <div class="st-performance-progress-grid-line" style="top:${topPad + ((100 - value) / 100) * usableHeight}%;">
+                <span>${value}%</span>
+              </div>
+            `,
+          )
+          .join("")}
+        <svg class="st-performance-progress-line" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <polygon points="${area}" class="st-performance-progress-area"></polygon>
+          <polyline points="${line}" class="st-performance-progress-path"></polyline>
+        </svg>
+        ${dots}
+        ${labels}
+      </div>
+    `;
+  }
+
+  static renderExamPassingChance(readiness) {
+    const badge = document.querySelector("[data-exam-readiness-badge]");
+    const scoreEl = document.querySelector("[data-exam-readiness-score]");
+    const confidenceEl = document.querySelector("[data-exam-readiness-confidence]");
+    const bar = document.querySelector("[data-exam-readiness-bar]");
+    const summary = document.querySelector("[data-exam-readiness-summary]");
+    const factors = document.querySelector("[data-exam-readiness-factors]");
+    const note = document.querySelector("[data-exam-readiness-note]");
+
+    if (!badge || !scoreEl || !confidenceEl || !bar || !summary || !factors) return;
+
+    const status = String(readiness.status || "INSUFFICIENT").toUpperCase();
+    const className =
+      status === "HIGH" ? "high" : status === "LOW" ? "low" : "neutral";
+
+    badge.className = `st-exam-readiness-badge st-exam-readiness-badge--${className}`;
+    badge.textContent = readiness.label || "Not enough data";
+
+    const score = Number.isFinite(Number(readiness.score)) && readiness.score != null
+      ? Math.max(0, Math.min(100, Number(readiness.score)))
+      : null;
+
+    scoreEl.textContent = score == null ? "—" : `${Math.round(score)}/100`;
+    confidenceEl.textContent = readiness.confidence || "Waiting for assessment scores";
+    bar.style.width = score == null ? "0%" : `${score}%`;
+    bar.className = `st-exam-readiness-progress-fill st-exam-readiness-progress-fill--${className}`;
+
+    summary.textContent =
+      readiness.summary ||
+      "Record at least one module pre-test or post-test score to estimate this learner's A&E exam passing chance.";
+
+    const rows = Array.isArray(readiness.factors) ? readiness.factors : [];
+    factors.innerHTML = rows.length
+      ? rows
+          .map(
+            (factor) => `
+              <div class="st-exam-readiness-factor">
+                <span class="st-exam-readiness-factor-name">${factor.name || "Performance factor"}</span>
+                <span class="st-exam-readiness-factor-detail">${factor.detail || "—"}</span>
+              </div>
+            `,
+          )
+          .join("")
+      : `<p class="st-assessment-empty">No performance factors available yet.</p>`;
+
+    if (note) {
+      note.textContent =
+        readiness.disclaimer ||
+        "Performance-based readiness estimate only; this is not an official A&E result or passing mark.";
+    }
   }
 
   static renderRiskTrendChart(trend) {
