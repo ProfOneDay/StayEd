@@ -264,12 +264,12 @@ function renderRiskChart(){
   if(riskChartType==='pie'){
     note.textContent='Current risk distribution for the selected area.';
     riskChartInstance=new Chart(canvas.getContext('2d'),{
-      type:'pie',
+      type:'doughnut',
       data:{
         labels:['High Risk','Moderate Risk','Low Risk'],
         datasets:[{data:[currentRiskCounts.high,currentRiskCounts.moderate,currentRiskCounts.low],backgroundColor:['#D64545','#F39422','#6BBF59'],borderColor:'#fff',borderWidth:2}],
       },
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom'},tooltip:{enabled:true}}},
     });
     return;
   }
@@ -313,12 +313,12 @@ function renderLevelChart(){
 
   note.textContent='Learner count per ALS learning level for the selected area.';
   levelChartInstance=new Chart(canvas.getContext('2d'),{
-    type:'pie',
+    type:'doughnut',
     data:{
       labels:levelKeys.map(k=>levelLabels[k]),
       datasets:[{data:levelKeys.map(k=>currentLevelCounts[k]||0),backgroundColor:['#3B7DDD','#6BBF59','#F39422','#8E5BD6'],borderColor:'#fff',borderWidth:2}],
     },
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom'},tooltip:{enabled:true}}},
   });
 }
 
@@ -362,18 +362,19 @@ function renderGenderChart(){
   if(genderChartType==='pie'){
     note.textContent='Share of all currently High-Risk learners, by gender.';
     genderChartInstance=new Chart(canvas.getContext('2d'),{
-      type:'pie',
+      type:'doughnut',
       data:{
         labels:['Male (High Risk)','Female (High Risk)'],
         datasets:[{data:[male.high,female.high],backgroundColor:['#3B7DDD','#D6459A'],borderColor:'#fff',borderWidth:2}],
       },
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom'},tooltip:{enabled:true}}},
     });
   }
 }
 
 function bindChartToggle(toggleId,onChange){
   document.querySelectorAll(`#${toggleId} .chart-type-btn`).forEach(btn=>{
+    if(btn.dataset.chartType==='pie')btn.textContent='Donut';
     btn.addEventListener('click',()=>{
       document.querySelectorAll(`#${toggleId} .chart-type-btn`).forEach(b=>b.classList.toggle('is-active',b===btn));
       onChange(btn.dataset.chartType);

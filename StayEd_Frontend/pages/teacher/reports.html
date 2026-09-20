@@ -67,6 +67,20 @@
               </div>
             </div>
             <div class="st-report-card-controls">
+              <div class="st-report-scope-selects">
+                <label>
+                  <span>From which CLC</span>
+                  <select data-report-learner-clc aria-label="Select learning center">
+                    <option value="">Select a CLC first</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Class</span>
+                  <select data-report-learner-class aria-label="Select class" disabled>
+                    <option value="">Select a CLC first</option>
+                  </select>
+                </label>
+              </div>
               <div class="st-report-search-wrap">
                 <div class="st-search st-report-search">
                   <span class="material-symbols-outlined">search</span>
@@ -96,17 +110,10 @@
                 type="button"
                 class="st-btn st-btn-primary"
                 data-export-csv-progress
+                disabled
               >
                 <span class="material-symbols-outlined">preview</span>
                 Preview &amp; Export
-              </button>
-              <button
-                type="button"
-                class="st-btn st-btn-outline"
-                data-send-admin-progress
-              >
-                <span class="material-symbols-outlined">forward_to_inbox</span>
-                Send to Admin
               </button>
             </div>
           </div>
@@ -158,14 +165,6 @@
                 <span class="material-symbols-outlined">preview</span>
                 Preview &amp; Export
               </button>
-              <button
-                type="button"
-                class="st-btn st-btn-outline"
-                data-send-admin-classlist
-              >
-                <span class="material-symbols-outlined">forward_to_inbox</span>
-                Send to Admin
-              </button>
             </div>
           </div>
 
@@ -216,14 +215,6 @@
                 <span class="material-symbols-outlined">preview</span>
                 Preview &amp; Export
               </button>
-              <button
-                type="button"
-                class="st-btn st-btn-outline"
-                data-send-admin-attendance
-              >
-                <span class="material-symbols-outlined">forward_to_inbox</span>
-                Send to Admin
-              </button>
             </div>
           </div>
 
@@ -273,14 +264,6 @@
               >
                 <span class="material-symbols-outlined">preview</span>
                 Preview &amp; Export
-              </button>
-              <button
-                type="button"
-                class="st-btn st-btn-outline"
-                data-send-admin-atrisk
-              >
-                <span class="material-symbols-outlined">forward_to_inbox</span>
-                Send to Admin
               </button>
             </div>
           </div>
@@ -334,14 +317,6 @@
               >
                 <span class="material-symbols-outlined">preview</span>
                 Preview &amp; Export
-              </button>
-              <button
-                type="button"
-                class="st-btn st-btn-outline"
-                data-send-admin-intervention
-              >
-                <span class="material-symbols-outlined">forward_to_inbox</span>
-                Send to Admin
               </button>
             </div>
           </div>

@@ -3,12 +3,15 @@ class TeacherReports {
     learners: [],
     classes: [],
     selectedLearnerId: null,
+    selectedLearnerClc: "",
+    selectedLearnerClassId: "",
   };
 
   static async init() {
     if (window.Guards) Guards.teacher();
 
     this.bindControls();
+    this.setupLearnerScopeSelectors();
     this.setupLearnerSearch();
     this.setupClassListSearch();
     this.setupAttendanceSearch();
@@ -27,6 +30,7 @@ class TeacherReports {
 
       this.state.learners = learnersRes.data || [];
       this.state.classes = classesRes.data || classesRes || [];
+      this.populateLearnerClcSelector();
     } catch (error) {
       console.error("[TeacherReports]", error);
       Toast?.error("Unable to load report filters.");
@@ -37,6 +41,77 @@ class TeacherReports {
   // 1. Learner Autocomplete Search (Individual Progress)
   // ---------------------------------------------------------------------------
 
+  static classClc(classItem) {
+    return classItem?.clcName || classItem?.clc_name || classItem?.clc || classItem?.communityLearningCenter || "";
+  }
+
+  static classLabel(classItem) {
+    return classItem?.className || classItem?.class_name || classItem?.level || classItem?.learningLevel || `Class ${classItem?.id || ""}`;
+  }
+
+  static learnerClassId(learner) {
+    return learner?.classId || learner?.class_id || learner?.currentClassId || "";
+  }
+
+  static learnerClc(learner) {
+    return learner?.clc || learner?.clcName || learner?.clc_name || "";
+  }
+
+  static setupLearnerScopeSelectors() {
+    const clcSelect = document.querySelector("[data-report-learner-clc]");
+    const classSelect = document.querySelector("[data-report-learner-class]");
+    if (!clcSelect || !classSelect) return;
+
+    clcSelect.addEventListener("change", () => {
+      this.state.selectedLearnerClc = clcSelect.value;
+      this.state.selectedLearnerClassId = "";
+      this.clearLearnerSelection();
+      this.populateLearnerClassSelector();
+    });
+
+    classSelect.addEventListener("change", () => {
+      this.state.selectedLearnerClassId = classSelect.value;
+      this.clearLearnerSelection();
+    });
+  }
+
+  static populateLearnerClcSelector() {
+    const select = document.querySelector("[data-report-learner-clc]");
+    if (!select) return;
+
+    const clcs = [...new Set(this.state.classes.map((c) => this.classClc(c)).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    select.innerHTML = '<option value="">Select a CLC first</option>';
+    clcs.forEach((clc) => select.insertAdjacentHTML("beforeend", `<option value="${clc}">${clc}</option>`));
+    this.populateLearnerClassSelector();
+  }
+
+  static populateLearnerClassSelector() {
+    const select = document.querySelector("[data-report-learner-class]");
+    if (!select) return;
+
+    const classes = this.state.classes
+      .filter((c) => this.classClc(c) === this.state.selectedLearnerClc)
+      .sort((a, b) => this.classLabel(a).localeCompare(this.classLabel(b)));
+    select.innerHTML = this.state.selectedLearnerClc
+      ? '<option value="">Select a class</option>'
+      : '<option value="">Select a CLC first</option>';
+    select.disabled = !this.state.selectedLearnerClc;
+    classes.forEach((classItem) => {
+      select.insertAdjacentHTML("beforeend", `<option value="${classItem.id}">${this.classLabel(classItem)}</option>`);
+    });
+  }
+
+  static selectedLearners() {
+    const classId = String(this.state.selectedLearnerClassId || "");
+    return this.state.learners.filter((learner) => {
+      const sameClc = this.learnerClc(learner) === this.state.selectedLearnerClc;
+      const learnerClassId = String(this.learnerClassId(learner));
+      const classItem = this.state.classes.find((c) => String(c.id) === classId);
+      const sameClass = learnerClassId === classId || (classItem && (learner.className === this.classLabel(classItem) || learner.section === this.classLabel(classItem)));
+      return sameClc && sameClass;
+    });
+  }
+
   static setupLearnerSearch() {
     const searchInput = document.querySelector("[data-report-learner-search]");
     const dropdown = document.querySelector("[data-report-learner-results]");
@@ -46,8 +121,13 @@ class TeacherReports {
     if (!searchInput || !dropdown) return;
 
     const renderResults = (query = "") => {
+      if (!this.state.selectedLearnerClc || !this.state.selectedLearnerClassId) {
+        dropdown.innerHTML = '<div class="st-report-search-empty">Select a CLC and class first.</div>';
+        dropdown.classList.remove("st-hidden");
+        return;
+      }
       const term = query.trim().toLowerCase();
-      let matched = this.state.learners;
+      let matched = this.selectedLearners();
 
       if (term) {
         matched = matched.filter(
@@ -137,6 +217,7 @@ class TeacherReports {
     if (hiddenId) hiddenId.value = learner.id;
     if (clearBtn) clearBtn.classList.remove("st-hidden");
     if (dropdown) dropdown.classList.add("st-hidden");
+    this.setProgressActionState(true);
   }
 
   static clearLearnerSelection() {
@@ -151,6 +232,14 @@ class TeacherReports {
     if (hiddenId) hiddenId.value = "";
     if (clearBtn) clearBtn.classList.add("st-hidden");
     if (dropdown) dropdown.classList.add("st-hidden");
+    this.setProgressActionState(false);
+  }
+
+  static setProgressActionState(enabled) {
+    ["[data-export-csv-progress]", "[data-send-admin-progress]"].forEach((selector) => {
+      const button = document.querySelector(selector);
+      if (button) button.disabled = !enabled;
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -616,25 +705,6 @@ class TeacherReports {
       .querySelector("[data-export-csv-intervention]")
       ?.addEventListener("click", () => this.exportInterventionCsv());
 
-    document
-      .querySelector("[data-send-admin-progress]")
-      ?.addEventListener("click", () => this.sendProgressReportToAdmin());
-
-    document
-      .querySelector("[data-send-admin-classlist]")
-      ?.addEventListener("click", () => this.sendClassListReportToAdmin());
-
-    document
-      .querySelector("[data-send-admin-attendance]")
-      ?.addEventListener("click", () => this.sendAttendanceReportToAdmin());
-
-    document
-      .querySelector("[data-send-admin-atrisk]")
-      ?.addEventListener("click", () => this.sendAtRiskReportToAdmin());
-
-    document
-      .querySelector("[data-send-admin-intervention]")
-      ?.addEventListener("click", () => this.sendInterventionReportToAdmin());
   }
 
   // ---------------------------------------------------------------------------
@@ -739,7 +809,7 @@ class TeacherReports {
 
   static async exportProgressCsv() {
     const reportModel = await this.buildProgressReportModel();
-    if (reportModel) ReportPrinter.open(reportModel);
+    if (reportModel) ReportPrinter.open({ ...reportModel, sendToAdmin: { reportType: "LEARNER_PROGRESS" } });
   }
 
   static async sendProgressReportToAdmin() {
@@ -834,7 +904,7 @@ class TeacherReports {
 
   static async exportClassListCsv() {
     const reportModel = await this.buildClassListReportModel();
-    if (reportModel) ReportPrinter.open(reportModel);
+    if (reportModel) ReportPrinter.open({ ...reportModel, sendToAdmin: { reportType: "CLASS_LIST" } });
   }
 
   static async sendClassListReportToAdmin() {
@@ -923,7 +993,7 @@ class TeacherReports {
 
   static async exportAttendanceCsv() {
     const reportModel = await this.buildAttendanceReportModel();
-    if (reportModel) ReportPrinter.open(reportModel);
+    if (reportModel) ReportPrinter.open({ ...reportModel, sendToAdmin: { reportType: "ATTENDANCE" } });
   }
 
   static async sendAttendanceReportToAdmin() {
@@ -1002,7 +1072,7 @@ class TeacherReports {
 
   static async exportAtRiskCsv() {
     const reportModel = await this.buildAtRiskReportModel();
-    if (reportModel) ReportPrinter.open(reportModel);
+    if (reportModel) ReportPrinter.open({ ...reportModel, sendToAdmin: { reportType: "AT_RISK" } });
   }
 
   static async sendAtRiskReportToAdmin() {
@@ -1095,7 +1165,7 @@ class TeacherReports {
 
   static async exportInterventionCsv() {
     const reportModel = await this.buildInterventionReportModel();
-    if (reportModel) ReportPrinter.open(reportModel);
+    if (reportModel) ReportPrinter.open({ ...reportModel, sendToAdmin: { reportType: "INTERVENTION" } });
   }
 
   static async sendInterventionReportToAdmin() {

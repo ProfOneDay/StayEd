@@ -147,6 +147,7 @@ def _shape_learner(row):
         "is_4ps_beneficiary": bool(row.get("is_4ps_beneficiary")),
         "level": title_enum(row.get("learning_level")),
         "section": row.get("class_name") or "A",
+        "class_id": row.get("class_id"),
         "modality": title_enum(row.get("learning_modality")),
         "clc": row.get("clc_name") or "",
         "status": title_enum(row.get("enrollment_status")),
