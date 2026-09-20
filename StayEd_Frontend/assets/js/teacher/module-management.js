@@ -166,11 +166,11 @@ class ModuleManagement {
         </div>
         <div class="st-module-summary-stat">
           <span class="st-module-summary-value">${s.activeTransactions ?? 0}</span>
-          <span class="st-module-summary-label">Active Transactions</span>
+          <span class="st-module-summary-label">Modules With Learners</span>
         </div>
         <div class="st-module-summary-stat">
           <span class="st-module-summary-value">${s.returnedTransactions ?? 0}</span>
-          <span class="st-module-summary-label">Returned Transactions</span>
+          <span class="st-module-summary-label">Returned Modules</span>
         </div>
       </div>
 
@@ -343,6 +343,12 @@ class ModuleManagement {
           <label for="emDescription">Description (optional)</label>
           <textarea id="emDescription" rows="3">${module.description || ""}</textarea>
         </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+          <button type="button" class="st-btn-text" data-remove-edit-module>
+            <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:-3px;">delete</span>
+            Remove from Catalog
+          </button>
+        </div>
       `,
       onConfirm: async () => {
         const strandCode = document.getElementById("emStrand")?.value;
@@ -368,6 +374,11 @@ class ModuleManagement {
         }
       },
     });
+
+    document.querySelector("[data-remove-edit-module]")?.addEventListener("click", () => {
+      Modal.hide();
+      setTimeout(() => this.confirmArchiveModule(module.id), 80);
+    });
   }
 
   static confirmArchiveModule(classModuleId) {
@@ -375,15 +386,15 @@ class ModuleManagement {
     const module = this.modules.find((m) => m.id === classModuleId);
 
     Modal.show({
-      title: "Archive Module",
+      title: "Remove Module from Catalog",
       size: "sm",
-      confirmLabel: "Archive Module",
+      confirmLabel: "Remove Module",
       asyncConfirm: true,
-      message: `Archive <strong>${module?.title || "this module"}</strong>? It will be hidden from the active catalog, but every learner's release/return history for it is kept exactly as it is.`,
+      message: `Remove <strong>${module?.title || "this module"}</strong> from the active catalog? Every learner's release and return history for it will be kept.`,
       onConfirm: async () => {
         try {
           await API.archiveClassModule(this.classId, classModuleId);
-          Toast?.success("Module archived.");
+          Toast?.success("Module removed from the catalog.");
           await this.loadCatalog();
         } catch (error) {
           console.error("[ModuleManagement] Archive failed", error);
