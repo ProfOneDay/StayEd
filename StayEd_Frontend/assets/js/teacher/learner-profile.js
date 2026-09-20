@@ -407,36 +407,6 @@ class LearnerProfilePage {
       .querySelector("[data-profile-edit-btn]")
       ?.addEventListener("click", () => this.openEditLearnerModal());
 
-    document
-      .querySelector("[data-profile-run-prediction-btn]")
-      ?.addEventListener("click", (e) => this.runPrediction(e.currentTarget));
-  }
-
-  // Manual trigger for the same prediction call that already fires
-  // automatically off module-release/return/modality-change events (see
-  // trigger_prediction() call sites backend-side) -- this exists purely so
-  // a teacher can force a fresh score without waiting for one of those
-  // events, e.g. right after a consultation that didn't touch modules.
-  static async runPrediction(button) {
-    if (!button || button.disabled) return;
-
-    const originalHtml = button.innerHTML;
-    button.disabled = true;
-    button.innerHTML = `<span class="material-symbols-outlined">progress_activity</span> Running…`;
-
-    try {
-      const result = await API.runPrediction(this.getLearnerId());
-      Toast?.success(
-        `Prediction updated: ${result.risk_level} risk (${Math.round(result.risk_probability * 100)}%).`,
-      );
-      await this.load();
-    } catch (error) {
-      console.error("[LearnerProfile] runPrediction", error);
-      Toast?.error(error?.message || "Unable to run a prediction for this learner.");
-    } finally {
-      button.disabled = false;
-      button.innerHTML = originalHtml;
-    }
   }
 
   static formatModalityDate(iso) {
@@ -617,6 +587,29 @@ class LearnerProfilePage {
     );
     this.set("[data-metric-overdue]", m.overdueModules ?? 0);
 
+    // Modular learners do not use session attendance, so hide the attendance card
+    // instead of showing an N/A metric. Face-to-Face/Blended learners still see it.
+    const attendanceCard = document.querySelector(".st-metric-card--attendance");
+    const attendanceNotApplicable = m.attendanceRateLabel === "N/A";
+    if (attendanceCard) {
+      attendanceCard.style.display = attendanceNotApplicable ? "none" : "";
+    }
+    if (!attendanceNotApplicable) {
+      this.set(
+        "[data-metric-attendance-rate]",
+        m.attendanceRate == null
+          ? (m.attendanceRateLabel || "Not Yet Available")
+          : `${m.attendanceRate}%`,
+      );
+      this.set(
+        "[data-metric-attendance-rate-text]",
+        m.attendanceRateText || "",
+      );
+    }
+
+    this.renderPerformanceProgress(p.performanceProgress || []);
+    this.renderExamPassingChance(p.examPassingChance || {});
+
     this.renderRiskTrendChart(p.riskTrend || []);
 
     this.renderMonitoringSummaryTable();
@@ -626,6 +619,153 @@ class LearnerProfilePage {
       p.recentActivity || [],
       "No recent activity yet.",
     );
+  }
+
+  static renderPerformanceProgress(progress) {
+    const chart = document.querySelector("[data-performance-progress-chart]");
+    const current = document.querySelector("[data-performance-progress-current]");
+
+    if (!chart) return;
+
+    if (!progress.length) {
+      if (current) current.textContent = "Not Yet Available";
+      chart.innerHTML = `
+        <div class="st-performance-progress-empty">
+          Performance progress will appear after modules are released and returned.
+        </div>
+      `;
+      return;
+    }
+
+    const latest = progress[progress.length - 1];
+    if (current) current.textContent = `${latest.rate}%`;
+
+    const leftPad = 7;
+    const rightPad = 3;
+    const topPad = 8;
+    const bottomPad = 10;
+    const usableWidth = 100 - leftPad - rightPad;
+    const usableHeight = 100 - topPad - bottomPad;
+
+    const coords = progress.map((pt, i) => ({
+      x:
+        progress.length === 1
+          ? leftPad + usableWidth / 2
+          : leftPad + (i / (progress.length - 1)) * usableWidth,
+      y:
+        topPad +
+        (1 - Math.max(0, Math.min(100, Number(pt.rate) || 0)) / 100) *
+          usableHeight,
+      pt,
+    }));
+
+    const line = coords.map((c) => `${c.x},${c.y}`).join(" ");
+    const area = [
+      `${coords[0].x},${topPad + usableHeight}`,
+      ...coords.map((c) => `${c.x},${c.y}`),
+      `${coords[coords.length - 1].x},${topPad + usableHeight}`,
+    ].join(" ");
+
+    const dots = coords
+      .map(
+        ({ x, y, pt }) => `
+          <span
+            class="st-performance-progress-point"
+            style="left:${x}%;top:${y}%;"
+            title="${pt.date}: ${pt.rate}% (${pt.returned} of ${pt.released} modules returned)"
+          ></span>
+        `,
+      )
+      .join("");
+
+    const labelIndexes = new Set([0, progress.length - 1]);
+    if (progress.length > 2) {
+      labelIndexes.add(Math.floor((progress.length - 1) / 2));
+    }
+    if (progress.length > 6) {
+      labelIndexes.add(Math.floor((progress.length - 1) / 3));
+      labelIndexes.add(Math.floor(((progress.length - 1) * 2) / 3));
+    }
+
+    const labels = coords
+      .map(({ x, pt }, i) =>
+        labelIndexes.has(i)
+          ? `<span class="st-performance-progress-x-label" style="left:${x}%;">${pt.date}</span>`
+          : "",
+      )
+      .join("");
+
+    chart.innerHTML = `
+      <div class="st-performance-progress-plot">
+        ${[100, 75, 50, 25, 0]
+          .map(
+            (value) => `
+              <div class="st-performance-progress-grid-line" style="top:${topPad + ((100 - value) / 100) * usableHeight}%;">
+                <span>${value}%</span>
+              </div>
+            `,
+          )
+          .join("")}
+        <svg class="st-performance-progress-line" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <polygon points="${area}" class="st-performance-progress-area"></polygon>
+          <polyline points="${line}" class="st-performance-progress-path"></polyline>
+        </svg>
+        ${dots}
+        ${labels}
+      </div>
+    `;
+  }
+
+  static renderExamPassingChance(readiness) {
+    const badge = document.querySelector("[data-exam-readiness-badge]");
+    const scoreEl = document.querySelector("[data-exam-readiness-score]");
+    const confidenceEl = document.querySelector("[data-exam-readiness-confidence]");
+    const bar = document.querySelector("[data-exam-readiness-bar]");
+    const summary = document.querySelector("[data-exam-readiness-summary]");
+    const factors = document.querySelector("[data-exam-readiness-factors]");
+    const note = document.querySelector("[data-exam-readiness-note]");
+
+    if (!badge || !scoreEl || !confidenceEl || !bar || !summary || !factors) return;
+
+    const status = String(readiness.status || "INSUFFICIENT").toUpperCase();
+    const className =
+      status === "HIGH" ? "high" : status === "LOW" ? "low" : "neutral";
+
+    badge.className = `st-exam-readiness-badge st-exam-readiness-badge--${className}`;
+    badge.textContent = readiness.label || "Not enough data";
+
+    const score = Number.isFinite(Number(readiness.score)) && readiness.score != null
+      ? Math.max(0, Math.min(100, Number(readiness.score)))
+      : null;
+
+    scoreEl.textContent = score == null ? "—" : `${Math.round(score)}/100`;
+    confidenceEl.textContent = readiness.confidence || "Waiting for assessment scores";
+    bar.style.width = score == null ? "0%" : `${score}%`;
+    bar.className = `st-exam-readiness-progress-fill st-exam-readiness-progress-fill--${className}`;
+
+    summary.textContent =
+      readiness.summary ||
+      "Record at least one module pre-test or post-test score to estimate this learner's A&E exam passing chance.";
+
+    const rows = Array.isArray(readiness.factors) ? readiness.factors : [];
+    factors.innerHTML = rows.length
+      ? rows
+          .map(
+            (factor) => `
+              <div class="st-exam-readiness-factor">
+                <span class="st-exam-readiness-factor-name">${factor.name || "Performance factor"}</span>
+                <span class="st-exam-readiness-factor-detail">${factor.detail || "—"}</span>
+              </div>
+            `,
+          )
+          .join("")
+      : `<p class="st-assessment-empty">No performance factors available yet.</p>`;
+
+    if (note) {
+      note.textContent =
+        readiness.disclaimer ||
+        "Performance-based readiness estimate only; this is not an official A&E result or passing mark.";
+    }
   }
 
   static renderRiskTrendChart(trend) {
