@@ -392,7 +392,14 @@ class Layout {
       if (!isLast && item.href) {
         node = document.createElement("a");
 
-        node.href = item.href;
+        // Some breadcrumb targets (e.g. Learner Records) render differently
+        // depending on a ?class= param -- carry the current page's query
+        // string forward so following the trail back doesn't silently drop
+        // that context and land on the unscoped "all classes" view instead.
+        node.href =
+          item.preserveQuery && window.location.search
+            ? `${item.href}${window.location.search}`
+            : item.href;
 
         node.className = "st-breadcrumb-link";
       } else {

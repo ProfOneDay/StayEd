@@ -1018,7 +1018,8 @@ def class_module_roster(class_id: int, class_module_id: int):
     rows = fetch_all(
         """
         SELECT ce.enrollment_id, l.learner_id, l.first_name, l.last_name, ce.learning_modality,
-               mr.module_record_id, mr.release_batch_id, mr.date_released, mr.date_returned
+               mr.module_record_id, mr.release_batch_id, mr.date_released, mr.date_returned,
+               mr.pretest_score, mr.pretest_total, mr.posttest_score, mr.posttest_total
         FROM class_enrollment ce
         JOIN learner l ON l.learner_id = ce.learner_id
         LEFT JOIN module_record mr
@@ -1046,6 +1047,10 @@ def class_module_roster(class_id: int, class_module_id: int):
                 "releaseDate": r["date_released"].strftime("%B %d, %Y") if r["date_released"] else None,
                 "returned": r["date_returned"] is not None,
                 "returnDate": r["date_returned"].strftime("%B %d, %Y") if r["date_returned"] else None,
+                "pretestScore": float(r["pretest_score"]) if r.get("pretest_score") is not None else None,
+                "pretestTotal": float(r["pretest_total"]) if r.get("pretest_total") is not None else None,
+                "posttestScore": float(r["posttest_score"]) if r.get("posttest_score") is not None else None,
+                "posttestTotal": float(r["posttest_total"]) if r.get("posttest_total") is not None else None,
             }
             for r in rows
         ]
