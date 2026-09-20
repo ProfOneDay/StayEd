@@ -84,12 +84,18 @@ def build_pipeline(scale_pos_weight: float = 1.0) -> Pipeline:
 def _balance_training_split(X_train: pd.DataFrame, y_train: pd.Series) -> tuple[pd.DataFrame, pd.Series]:
     """Balance the training split's two classes via SMOTENC (synthetic
     minority over-sampling, categorical-aware) so the model trains on an
-    even Completed/NotCompleted split rather than the raw ~60/40 mix.
+    even Completed/NotCompleted split.
+
+    X_train coming in is already close to balanced -- the source CSV has
+    its own SMOTENC-generated rows for this (build_modeling_dataset.py) --
+    but carving out a real-only test split (see train() below) shifts the
+    remaining training ratio a bit off 50/50 again, so this step is still
+    needed to finish the job exactly, whichever class ends up short.
 
     Only ever applied to the training split -- X_test/y_test stay exactly
-    as sampled from the real data, so the reported evaluation metrics are
-    still measuring performance on the true, unbalanced population the
-    model will actually see in production, not on synthetic data.
+    as sampled from the real, non-synthetic data, so the reported
+    evaluation metrics are still measuring performance on the true,
+    unbalanced population the model will actually see in production.
 
     SMOTENC needs a fully imputed input (it computes nearest-neighbor
     distances, which NaN breaks), so missing values are filled here first
@@ -112,12 +118,23 @@ def _balance_training_split(X_train: pd.DataFrame, y_train: pd.Series) -> tuple[
 
 def train() -> dict:
     df = pd.read_csv(DATA_PATH)
-    X = df[FEATURE_COLUMNS]
-    y = df[TARGET_COLUMN]
 
+    # stayed_modeling_dataset_demo.csv is itself pre-balanced with SMOTENC
+    # rows tagged is_synthetic=True (see build_modeling_dataset.py) so the
+    # file reads as balanced end to end -- but those synthetic rows must
+    # never reach the test split, or the reported metrics below would be
+    # partly measuring the model against fabricated data instead of the
+    # true, unbalanced population it'll actually see in production. Split
+    # real rows only, then add the synthetic ones to the training side.
+    is_synthetic = df.get("is_synthetic", pd.Series(False, index=df.index)).astype(bool)
+    real, synthetic = df[~is_synthetic], df[is_synthetic]
+
+    X_real, y_real = real[FEATURE_COLUMNS], real[TARGET_COLUMN]
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.30, stratify=y, random_state=RANDOM_STATE
+        X_real, y_real, test_size=0.30, stratify=y_real, random_state=RANDOM_STATE
     )
+    X_train = pd.concat([X_train, synthetic[FEATURE_COLUMNS]], ignore_index=True)
+    y_train = pd.concat([y_train, synthetic[TARGET_COLUMN]], ignore_index=True)
 
     X_train_balanced, y_train_balanced = _balance_training_split(X_train, y_train)
 

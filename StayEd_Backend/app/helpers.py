@@ -11,6 +11,18 @@ from flask import jsonify
 LRN_RE = re.compile(r"^\d{12}$")
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
+# Official DepEd email domains (or subdomains of them, e.g. region1.deped.gov.ph).
+# Registration only requires the name to match the ALS teacher roster -- it does
+# NOT require a DepEd email -- so a matched name can still show up here with a
+# personal address. The admin review UI uses this to flag that case honestly
+# instead of always claiming "DepEd Verified".
+_DEPED_EMAIL_DOMAINS = ("deped.gov.ph", "deped.edu.ph")
+
+
+def is_deped_email(email: str) -> bool:
+    domain = str(email or "").strip().lower().rsplit("@", 1)[-1]
+    return any(domain == d or domain.endswith("." + d) for d in _DEPED_EMAIL_DOMAINS)
+
 
 def json_ready(value: Any):
     if isinstance(value, dict):
