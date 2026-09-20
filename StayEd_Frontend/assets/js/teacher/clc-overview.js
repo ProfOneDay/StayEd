@@ -109,6 +109,7 @@ class ClcOverview {
 
     grid.querySelectorAll("[data-clc-view]").forEach((btn) => {
       btn.addEventListener("click", () => {
+        localStorage.setItem("stayed_last_teacher_clc", btn.dataset.clcName || "");
         window.location.href = `class-management.html?clc=${encodeURIComponent(btn.dataset.clcName)}`;
       });
     });

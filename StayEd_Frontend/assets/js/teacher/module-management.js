@@ -166,7 +166,7 @@ class ModuleManagement {
         </div>
         <div class="st-module-summary-stat">
           <span class="st-module-summary-value">${s.activeTransactions ?? 0}</span>
-          <span class="st-module-summary-label">Modules With Learners</span>
+          <span class="st-module-summary-label">Active Modules</span>
         </div>
         <div class="st-module-summary-stat">
           <span class="st-module-summary-value">${s.returnedTransactions ?? 0}</span>

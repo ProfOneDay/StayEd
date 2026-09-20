@@ -284,10 +284,13 @@ class TeacherCalendar {
         const rel = this._parseLongDate(m.lastReleaseDate)
           || this._parseDate(m.releaseDate || m.release_date);
         if (rel) {
+          const strand = m.strandName || m.strandCode || "Learning Strand";
+          const moduleName = m.title || m.moduleName || m.module_name || "Module";
+          const eventDetails = `Class: ${className} · Learning Strand: ${strand}`;
           this._addEvent(rel, {
             type: "module",
-            label: `Module Released — ${className}`,
-            meta: m.title || m.moduleName || m.module_name || "Module",
+            label: moduleName,
+            meta: eventDetails,
             classId,
             className,
             moduleId: m.id,
@@ -301,8 +304,8 @@ class TeacherCalendar {
           const ret = this._fmt(relD);
           this._addEvent(ret, {
             type: "return",
-            label: `Return Due — ${className}`,
-            meta: m.title || m.moduleName || m.module_name || "Module",
+            label: moduleName,
+            meta: `${eventDetails} · Return Due`,
             classId,
             className,
             moduleId: m.id,
