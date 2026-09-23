@@ -42,6 +42,9 @@ class LearnerRecordsHub {
     document
       .querySelector("[data-enroll-link]")
       ?.setAttribute("href", `learner-enroll.html${search}`);
+    document
+      .querySelector("[data-assessment-scores-link]")
+      ?.setAttribute("href", `assessment-scores.html${search}`);
 
     // Module Management is class-scoped (a per-class module catalog), so it
     // only makes sense -- and is only shown -- once a specific class is

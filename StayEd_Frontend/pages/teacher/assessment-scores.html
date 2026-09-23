@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script data-stayed-font-scale-bootstrap>
+      (function () {
+        try {
+          var v = localStorage.getItem("stayed_font_scale");
+          if (v) document.documentElement.setAttribute("data-font-scale", v);
+        } catch (e) {}
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StayEd | Assessment Scores</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/css/main.css" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="../../assets/img/brand/favicon.ico"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="../../assets/img/brand/apple-touch-icon.png"
+    />
+  </head>
+  <body class="st-app" data-page="Assessment Scores">
+    <div data-component="layout/sidebar"></div>
+
+    <div class="st-main">
+      <div data-component="layout/navbar"></div>
+
+      <main class="st-content">
+        <div class="st-page-header">
+          <div>
+            <h1 class="st-page-header-title">Assessment Scores</h1>
+            <p class="st-page-header-subtitle">
+              View, compute, and encode learner assessment scores (DepEd
+              ALS AF5).
+            </p>
+          </div>
+        </div>
+
+        <div class="st-assessment-scores-layout">
+          <aside class="st-assessment-learner-panel">
+            <div class="st-assessment-learner-panel-head">
+              <p class="st-assessment-learner-count">
+                Learners <span data-learner-count>0</span>
+              </p>
+              <span class="st-pill" data-learner-level-badge>—</span>
+            </div>
+            <div class="st-search st-assessment-search">
+              <span class="material-symbols-outlined">search</span>
+              <input
+                type="text"
+                placeholder="Search student name or LRN..."
+                data-learner-search
+                aria-label="Search learners"
+              />
+            </div>
+            <div data-learner-list class="st-assessment-learner-list">
+              <p class="st-assessment-empty">Loading learners…</p>
+            </div>
+          </aside>
+
+          <section class="st-assessment-detail-panel" data-detail-panel hidden>
+            <div class="st-assessment-learner-header">
+              <div class="st-assessment-learner-header-identity">
+                <div class="st-assessment-avatar" data-detail-avatar>?</div>
+                <div>
+                  <div class="st-assessment-learner-header-name-row">
+                    <h2 data-detail-name>—</h2>
+                    <span
+                      class="st-badge"
+                      data-detail-assessed-badge
+                      >Not Assessed</span
+                    >
+                  </div>
+                  <p class="st-assessment-learner-header-meta" data-detail-meta>
+                    —
+                  </p>
+                </div>
+              </div>
+              <button type="button" class="st-btn st-btn-primary" data-save-scores-btn>
+                <span class="material-symbols-outlined">save</span>
+                Save Scores
+              </button>
+            </div>
+
+            <div data-assessment-form></div>
+          </section>
+
+          <section class="st-assessment-detail-panel" data-no-learner-panel>
+            <p class="st-assessment-empty">
+              Select a learner from the list to view or encode their
+              assessment scores.
+            </p>
+          </section>
+        </div>
+      </main>
+
+      <div data-component="layout/footer"></div>
+    </div>
+
+    <div data-component="layout/toast"></div>
+    <div data-component="layout/modal"></div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/core/utils.js"></script>
+    <script src="../../assets/js/core/router.js"></script>
+    <script src="../../assets/js/core/api.js"></script>
+    <script src="../../assets/js/core/auth.js"></script>
+    <script src="../../assets/js/core/guards.js"></script>
+    <script src="../../assets/js/core/layout.js"></script>
+    <script src="../../assets/js/core/skeletons.js"></script>
+    <script src="../../assets/js/core/app.js"></script>
+    <script src="../../assets/js/components/component-loader.js"></script>
+    <script src="../../assets/js/components/toast.js"></script>
+    <script src="../../assets/js/components/modal.js"></script>
+    <script src="../../assets/js/teacher/assessment-scores.js"></script>
+  </body>
+</html>

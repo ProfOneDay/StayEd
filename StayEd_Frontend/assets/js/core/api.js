@@ -859,27 +859,12 @@ class API {
     return this.put(`/learners/${id}/portal-share`, { enabled });
   }
 
-  static updateModuleScores(learnerId, batchId, moduleRecordId, scores) {
-    return this.patch(
-      `/learners/${learnerId}/module-batches/${batchId}/modules/${moduleRecordId}/scores`,
-      scores,
-    );
+  static getAssessmentScores(learnerId) {
+    return this.get(`/learners/${learnerId}/assessment-scores`);
   }
 
-  static getAssessments(learnerId) {
-    return this.get(`/learners/${learnerId}/assessments`);
-  }
-
-  static createAssessment(learnerId, data) {
-    return this.post(`/learners/${learnerId}/assessments`, data);
-  }
-
-  static updateAssessment(learnerId, assessmentId, data) {
-    return this.patch(`/learners/${learnerId}/assessments/${assessmentId}`, data);
-  }
-
-  static deleteAssessment(learnerId, assessmentId) {
-    return this.delete(`/learners/${learnerId}/assessments/${assessmentId}`);
+  static updateAssessmentScores(learnerId, data) {
+    return this.put(`/learners/${learnerId}/assessment-scores`, data);
   }
 
   static runPrediction(learnerId) {

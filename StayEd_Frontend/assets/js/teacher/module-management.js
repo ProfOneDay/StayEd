@@ -530,13 +530,6 @@ class ModuleManagement {
             ${module?.topic ? `<p class="st-panel-subtitle">Topic: ${module.topic}</p>` : ""}
           </div>
           <div class="st-table-actions">
-            <a
-              href="record-scores.html?class=${this.classId}&module=${this.activeModuleId}"
-              class="st-btn st-btn-outline st-btn-xs"
-            >
-              <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:-3px;">edit_note</span>
-              Record Scores
-            </a>
             <button type="button" class="st-btn st-btn-outline st-btn-xs" data-edit-active-module>Edit Module</button>
             <button type="button" class="st-btn st-btn-primary st-btn-xs" data-release-selected ${selectedCount ? "" : "disabled"}>
               Release${selectedCount ? ` (${selectedCount})` : ""}
@@ -664,13 +657,6 @@ class ModuleManagement {
         if (r) this.confirmUndoReturn(r);
       });
     });
-
-    root.querySelectorAll("[data-record-scores]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const r = this.roster.find((row) => row.enrollmentId === Number(btn.dataset.recordScores));
-        if (r) this.openScoresModal(r);
-      });
-    });
   }
 
   static renderDetailRow(r) {
@@ -687,26 +673,6 @@ class ModuleManagement {
       actionHtml = `<button type="button" class="st-btn-text" data-undo-return="${r.enrollmentId}">Undo</button>`;
     }
 
-    // Pre-Test/Post-Test can be recorded any time after release, independent
-    // of return stage -- a Pre-Test is often given before the module is even
-    // worked on.
-    let scoresHtml = "";
-    if (r.released) {
-      const hasScores = r.pretestScore != null || r.posttestScore != null;
-      const summary = hasScores
-        ? `<div class="st-module-score-summary">${
-            r.pretestScore != null ? `Pre ${r.pretestScore}/${r.pretestTotal}` : "Pre —"
-          } &middot; ${r.posttestScore != null ? `Post ${r.posttestScore}/${r.posttestTotal}` : "Post —"}</div>`
-        : "";
-      scoresHtml = `
-        <button type="button" class="st-btn-text" data-record-scores="${r.enrollmentId}">
-          <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:-2px;">edit_note</span>
-          Scores
-        </button>
-        ${summary}
-      `;
-    }
-
     const releaseDateHtml = r.releaseDate
       ? `${r.releaseDate} <button type="button" class="st-icon-btn" data-edit-release-date="${r.enrollmentId}" title="Edit release date" style="vertical-align:middle;border:none;background:none;cursor:pointer;color:var(--st-on-surface-variant);">
           <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:-3px;">edit</span>
@@ -721,7 +687,7 @@ class ModuleManagement {
         <td><span class="st-badge st-badge-${badgeClass}">${stage}</span></td>
         <td>${releaseDateHtml}</td>
         <td>${r.returnDate || "—"}</td>
-        <td>${actionHtml}${scoresHtml}</td>
+        <td>${actionHtml}</td>
       </tr>
     `;
   }
@@ -906,73 +872,6 @@ class ModuleManagement {
         } catch (error) {
           console.error("[ModuleManagement] Return failed", error);
           Toast?.error(error?.data?.message || "Unable to record this return.");
-          throw error;
-        }
-      },
-    });
-  }
-
-  static openScoresModal(rosterRow) {
-    if (!window.Modal) return;
-
-    const val = (v) => (v == null ? "" : v);
-
-    Modal.show({
-      title: "Record Scores",
-      size: "sm",
-      confirmLabel: "Save Scores",
-      asyncConfirm: true,
-      message: `
-        <p style="color:var(--st-on-surface-variant);font-size:0.875rem;">${rosterRow.name}</p>
-        <div class="st-schedule-modal-field">
-          <label>Pre-Test</label>
-          <div class="st-score-input-row">
-            <input type="number" min="0" step="0.5" id="scPretestScore" placeholder="Score" value="${val(rosterRow.pretestScore)}">
-            <span>/</span>
-            <input type="number" min="0" step="0.5" id="scPretestTotal" placeholder="Total" value="${val(rosterRow.pretestTotal)}">
-          </div>
-        </div>
-        <div class="st-schedule-modal-field">
-          <label>Post-Test</label>
-          <div class="st-score-input-row">
-            <input type="number" min="0" step="0.5" id="scPosttestScore" placeholder="Score" value="${val(rosterRow.posttestScore)}">
-            <span>/</span>
-            <input type="number" min="0" step="0.5" id="scPosttestTotal" placeholder="Total" value="${val(rosterRow.posttestTotal)}">
-          </div>
-        </div>
-      `,
-      onConfirm: async () => {
-        const read = (id) => {
-          const raw = document.getElementById(id)?.value;
-          return raw === "" || raw == null ? null : Number(raw);
-        };
-
-        const pretestScore = read("scPretestScore");
-        const pretestTotal = read("scPretestTotal");
-        const posttestScore = read("scPosttestScore");
-        const posttestTotal = read("scPosttestTotal");
-
-        if ((pretestScore != null) !== (pretestTotal != null)) {
-          Toast?.error("Enter both a Pre-Test score and total, or leave both blank.");
-          throw new Error("validation");
-        }
-        if ((posttestScore != null) !== (posttestTotal != null)) {
-          Toast?.error("Enter both a Post-Test score and total, or leave both blank.");
-          throw new Error("validation");
-        }
-
-        try {
-          await API.updateModuleScores(rosterRow.learnerId, rosterRow.releaseBatchId, rosterRow.moduleRecordId, {
-            pretestScore,
-            pretestTotal,
-            posttestScore,
-            posttestTotal,
-          });
-          Toast?.success("Scores saved.");
-          await this.loadRoster();
-        } catch (error) {
-          console.error("[ModuleManagement] Unable to save scores", error);
-          Toast?.error(error?.data?.message || "Unable to save these scores.");
           throw error;
         }
       },

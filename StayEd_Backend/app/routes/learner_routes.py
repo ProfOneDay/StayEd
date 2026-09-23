@@ -1513,7 +1513,6 @@ def _logbook(enrollment_id: int, learner_activity: dict) -> dict:
         """
         SELECT mr.module_record_id, mr.module_name, mr.date_released, mr.date_returned,
                mr.module_status, mr.remarks, mr.release_batch_id, mr.planned_return_date,
-               mr.pretest_score, mr.pretest_total, mr.posttest_score, mr.posttest_total,
                ls.strand_code, ls.strand_name,
                mrb.release_date AS batch_release_date
         FROM module_record mr
@@ -1553,11 +1552,6 @@ def _logbook(enrollment_id: int, learner_activity: dict) -> dict:
                 "returnedRaw": r["date_returned"],
                 "remarks": r.get("remarks") or "",
                 "strandCode": strand_code,
-                "releaseBatchId": batch_id,
-                "pretestScore": float(r["pretest_score"]) if r.get("pretest_score") is not None else None,
-                "pretestTotal": float(r["pretest_total"]) if r.get("pretest_total") is not None else None,
-                "posttestScore": float(r["posttest_score"]) if r.get("posttest_score") is not None else None,
-                "posttestTotal": float(r["posttest_total"]) if r.get("posttest_total") is not None else None,
                 **_module_overdue_info(r["date_returned"], r.get("planned_return_date")),
             }
         )
@@ -1820,83 +1814,6 @@ def update_module_planned_return(learner_id: int, batch_id: int, module_record_i
             "level": base["learning_level"],
             **learner_activity,
         },
-        **_logbook(base["enrollment_id"], learner_activity),
-    }
-
-
-def _parse_score(value, field_name: str):
-    if value is None or value == "":
-        return None
-    try:
-        score = float(value)
-    except (TypeError, ValueError):
-        raise ValueError(f"{field_name} must be a number.")
-    if score < 0:
-        raise ValueError(f"{field_name} cannot be negative.")
-    return score
-
-
-@bp.patch("/learners/<int:learner_id>/module-batches/<int:batch_id>/modules/<int:module_record_id>/scores")
-@role_required("teacher")
-def update_module_scores(learner_id: int, batch_id: int, module_record_id: int):
-    base = _profile_base(learner_id)
-    if not base:
-        return error("Learner not found.", 404)
-
-    module = fetch_one(
-        """
-        SELECT mr.module_record_id FROM module_record mr
-        JOIN module_release_batch mrb ON mrb.release_batch_id = mr.release_batch_id
-        WHERE mr.module_record_id=%s AND mr.release_batch_id=%s AND mrb.enrollment_id=%s
-        """,
-        (module_record_id, batch_id, base["enrollment_id"]),
-    )
-    if not module:
-        return error("Module not found.", 404)
-
-    data = request.get_json(silent=True) or {}
-
-    # Partial update: a teacher may record the Pre-Test before the module is
-    # even returned, and the Post-Test only later -- only touch whichever
-    # fields are actually present in the request, so submitting one side
-    # never wipes out an already-saved value on the other.
-    field_map = {
-        "pretestScore": ("pretest_score", "Pre-Test score"),
-        "pretestTotal": ("pretest_total", "Pre-Test total"),
-        "posttestScore": ("posttest_score", "Post-Test score"),
-        "posttestTotal": ("posttest_total", "Post-Test total"),
-    }
-    updates: dict = {}
-    try:
-        for body_key, (column, label) in field_map.items():
-            if body_key in data:
-                updates[column] = _parse_score(data.get(body_key), label)
-    except ValueError as exc:
-        return error(str(exc), 422)
-
-    if not updates:
-        return error("No score fields were provided.", 422)
-
-    existing = fetch_one(
-        "SELECT pretest_score, pretest_total, posttest_score, posttest_total FROM module_record WHERE module_record_id=%s",
-        (module_record_id,),
-    )
-    merged = {**existing, **updates}
-    if merged["pretest_score"] is not None and merged["pretest_total"] is not None and merged["pretest_score"] > merged["pretest_total"]:
-        return error("Pre-Test score cannot exceed the total.", 422)
-    if merged["posttest_score"] is not None and merged["posttest_total"] is not None and merged["posttest_score"] > merged["posttest_total"]:
-        return error("Post-Test score cannot exceed the total.", 422)
-
-    set_clause = ", ".join(f"{col}=%s" for col in updates)
-    execute(
-        f"UPDATE module_record SET {set_clause} WHERE module_record_id=%s",
-        (*updates.values(), module_record_id),
-    )
-
-    base = _profile_base(learner_id)
-    learner_activity = _learner_activity_info(base)
-    return {
-        "message": "Scores updated.",
         **_logbook(base["enrollment_id"], learner_activity),
     }
 
@@ -2576,150 +2493,164 @@ def public_student_view(token: str):
 
 
 # ---------------------------------------------------------------------------
-# ALS Accreditation & Equivalency (A&E) assessment records -- a distinct,
-# learner-level exam result (Elementary/Secondary), independent of any one
-# module. A learner can have more than one row (retakes across cycles).
+# Assessment Scores -- DepEd ALS Form 5 (AF5: Assessment Results & Portfolio).
+# One editable record per learner (per enrollment), not a history log. Raw
+# scores plus the likelihood/grade/rating fields are all teacher-entered --
+# the real DepEd paper form shows no visible max-score-per-item or formula
+# for those, so StayEd doesn't invent one. Only the two totals that ARE
+# plainly visible sums on the form (AF5 Overall Score, Portfolio TOTAL
+# SCORE) are computed here, from whatever the teacher has entered so far.
 # ---------------------------------------------------------------------------
 
-def _shape_assessment(row: dict) -> dict:
+ASSESSMENT_SCORE_ROW_IDS = (
+    "pis", "abl_neo", "abl_post",
+    "flt_ls1_en_mc", "flt_ls1_en_writing", "flt_ls1_en_listening",
+    "flt_ls1_fil_mc", "flt_ls1_fil_writing", "flt_ls1_fil_listening",
+    "flt_ls2", "flt_ls3", "flt_ls4", "flt_ls5", "flt_ls6",
+)
+# The "Overall Score" row on the form sums only the Functional Literacy
+# Assessment (FLT) rows -- PIS Score sits in its own section above ABL and
+# is deliberately excluded (confirmed against the reference form: FLT-only
+# sum of 76/79 matches the form exactly; including PIS gives 86/89, which
+# does not).
+ASSESSMENT_FLT_ROW_IDS = (
+    "flt_ls1_en_mc", "flt_ls1_en_writing", "flt_ls1_en_listening",
+    "flt_ls1_fil_mc", "flt_ls1_fil_writing", "flt_ls1_fil_listening",
+    "flt_ls2", "flt_ls3", "flt_ls4", "flt_ls5", "flt_ls6",
+)
+ASSESSMENT_PORTFOLIO_FIELD_IDS = (
+    "ls1_en", "ls1_fil", "ls2", "ls3", "ls4", "ls5", "ls6",
+    "revalida_oral_reading", "revalida_writing", "revalida_interview",
+)
+# TOTAL SCORE on the form only sums the 7 work-sample rows -- Revalida is a
+# separate section below it, not folded into that total.
+ASSESSMENT_PORTFOLIO_TOTAL_FIELD_IDS = (
+    "ls1_en", "ls1_fil", "ls2", "ls3", "ls4", "ls5", "ls6",
+)
+
+
+def _coerce_number(value):
+    if value is None or value == "":
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _sanitize_score_rows(data) -> dict:
+    if not isinstance(data, dict):
+        return {}
+    clean = {}
+    for row_id in ASSESSMENT_SCORE_ROW_IDS:
+        row = data.get(row_id)
+        if not isinstance(row, dict):
+            continue
+        clean[row_id] = {
+            "pre": _coerce_number(row.get("pre")),
+            "post": _coerce_number(row.get("post")),
+            "likelihood": (str(row.get("likelihood")).strip() or None) if row.get("likelihood") is not None else None,
+            "status": (str(row.get("status")).strip() or None) if row.get("status") is not None else None,
+        }
+    overall_likelihood = data.get("overall_likelihood")
+    clean["overall_likelihood"] = (str(overall_likelihood).strip() or None) if overall_likelihood is not None else None
+    return clean
+
+
+def _sanitize_portfolio(data) -> dict:
+    if not isinstance(data, dict):
+        return {}
     return {
-        "id": row["als_assessment_id"],
-        "level": row["level"],
-        "testDate": row["test_date"].isoformat() if row.get("test_date") else None,
-        "testDateText": row["test_date"].strftime("%B %d, %Y") if row.get("test_date") else None,
-        "score": float(row["score"]) if row.get("score") is not None else None,
-        "totalScore": float(row["total_score"]) if row.get("total_score") is not None else None,
-        "result": row["result"],
-        "remarks": row.get("remarks") or "",
+        field_id: _coerce_number(data.get(field_id))
+        for field_id in ASSESSMENT_PORTFOLIO_FIELD_IDS
     }
 
 
-def _parse_assessment_body(data: dict, *, require_all: bool) -> dict:
-    fields: dict = {}
+def _shape_assessment_scores(row: dict | None) -> dict:
+    scores = (row or {}).get("scores") or {}
+    portfolio = (row or {}).get("portfolio") or {}
 
-    if "level" in data or require_all:
-        level = str(data.get("level") or "").upper()
-        if level not in ("ELEMENTARY", "SECONDARY"):
-            raise ValueError("Level must be Elementary or Secondary.")
-        fields["level"] = level
+    overall_pre = sum(
+        (scores.get(r) or {}).get("pre") or 0 for r in ASSESSMENT_FLT_ROW_IDS
+    )
+    overall_post = sum(
+        (scores.get(r) or {}).get("post") or 0 for r in ASSESSMENT_FLT_ROW_IDS
+    )
+    portfolio_total = sum(
+        portfolio.get(f) or 0 for f in ASSESSMENT_PORTFOLIO_TOTAL_FIELD_IDS
+    )
 
-    if "testDate" in data or require_all:
-        try:
-            fields["test_date"] = date.fromisoformat(str(data.get("testDate")))
-        except (TypeError, ValueError):
-            raise ValueError("Test date must use YYYY-MM-DD.")
-
-    if "result" in data or require_all:
-        result = str(data.get("result") or "PENDING").upper()
-        if result not in ("PASSED", "FAILED", "PENDING"):
-            raise ValueError("Result must be Passed, Failed, or Pending.")
-        fields["result"] = result
-
-    if "score" in data:
-        fields["score"] = _parse_score(data.get("score"), "Score")
-    if "totalScore" in data:
-        fields["total_score"] = _parse_score(data.get("totalScore"), "Total score")
-    if fields.get("score") is not None and fields.get("total_score") is not None and fields["score"] > fields["total_score"]:
-        raise ValueError("Score cannot exceed the total.")
-
-    if "remarks" in data:
-        fields["remarks"] = (data.get("remarks") or "").strip() or None
-
-    return fields
+    return {
+        "assessed": row is not None,
+        "dateOfAssessment": row["date_of_assessment"].isoformat() if row and row.get("date_of_assessment") else None,
+        "scores": scores,
+        "portfolio": portfolio,
+        "overallScorePre": overall_pre,
+        "overallScorePost": overall_post,
+        "portfolioTotalScore": portfolio_total,
+        "finalScorePercentageGrade": float(row["final_score_percentage_grade"]) if row and row.get("final_score_percentage_grade") is not None else None,
+        "overallFinalAssessmentRating": float(row["overall_final_assessment_rating"]) if row and row.get("overall_final_assessment_rating") is not None else None,
+    }
 
 
-@bp.get("/learners/<int:learner_id>/assessments")
+@bp.get("/learners/<int:learner_id>/assessment-scores")
 @role_required("teacher")
-def list_assessments(learner_id: int):
+def get_assessment_scores(learner_id: int):
     base = _profile_base(learner_id)
     if not base:
         return error("Learner not found.", 404)
 
-    rows = fetch_all(
-        """
-        SELECT * FROM als_assessment
-        WHERE enrollment_id = %s
-        ORDER BY test_date DESC, als_assessment_id DESC
-        """,
+    row = fetch_one(
+        "SELECT * FROM als_assessment_scores WHERE enrollment_id = %s",
         (base["enrollment_id"],),
     )
-    return {"data": [_shape_assessment(r) for r in rows]}
+    return _shape_assessment_scores(row)
 
 
-@bp.post("/learners/<int:learner_id>/assessments")
+@bp.put("/learners/<int:learner_id>/assessment-scores")
 @role_required("teacher")
-def create_assessment(learner_id: int):
+def update_assessment_scores(learner_id: int):
     base = _profile_base(learner_id)
     if not base:
         return error("Learner not found.", 404)
 
     data = request.get_json(silent=True) or {}
-    try:
-        fields = _parse_assessment_body(data, require_all=True)
-    except ValueError as exc:
-        return error(str(exc), 422)
+
+    date_of_assessment = None
+    if data.get("dateOfAssessment"):
+        try:
+            date_of_assessment = date.fromisoformat(str(data.get("dateOfAssessment")))
+        except ValueError:
+            return error("Date of assessment must use YYYY-MM-DD.", 422)
+
+    scores = _sanitize_score_rows(data.get("scores"))
+    portfolio = _sanitize_portfolio(data.get("portfolio"))
+    final_grade = _coerce_number(data.get("finalScorePercentageGrade"))
+    overall_rating = _coerce_number(data.get("overallFinalAssessmentRating"))
 
     row = execute(
         """
-        INSERT INTO als_assessment
-            (enrollment_id, level, test_date, score, total_score, result, remarks, recorded_by_teacher_id)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO als_assessment_scores
+            (enrollment_id, date_of_assessment, scores, portfolio,
+             final_score_percentage_grade, overall_final_assessment_rating,
+             updated_by_teacher_id, updated_at)
+        VALUES (%s, %s, %s::jsonb, %s::jsonb, %s, %s, %s, now())
+        ON CONFLICT (enrollment_id) DO UPDATE SET
+            date_of_assessment = EXCLUDED.date_of_assessment,
+            scores = EXCLUDED.scores,
+            portfolio = EXCLUDED.portfolio,
+            final_score_percentage_grade = EXCLUDED.final_score_percentage_grade,
+            overall_final_assessment_rating = EXCLUDED.overall_final_assessment_rating,
+            updated_by_teacher_id = EXCLUDED.updated_by_teacher_id,
+            updated_at = now()
         RETURNING *
         """,
         (
-            base["enrollment_id"], fields["level"], fields["test_date"],
-            fields.get("score"), fields.get("total_score"), fields["result"],
-            fields.get("remarks"), teacher_for_user()["teacher_id"],
+            base["enrollment_id"], date_of_assessment,
+            json.dumps(scores), json.dumps(portfolio),
+            final_grade, overall_rating, teacher_for_user()["teacher_id"],
         ),
         returning=True,
     )
-    return {"message": "Assessment recorded.", "assessment": _shape_assessment(row)}, 201
 
-
-@bp.patch("/learners/<int:learner_id>/assessments/<int:assessment_id>")
-@role_required("teacher")
-def update_assessment(learner_id: int, assessment_id: int):
-    base = _profile_base(learner_id)
-    if not base:
-        return error("Learner not found.", 404)
-
-    existing = fetch_one(
-        "SELECT als_assessment_id FROM als_assessment WHERE als_assessment_id=%s AND enrollment_id=%s",
-        (assessment_id, base["enrollment_id"]),
-    )
-    if not existing:
-        return error("Assessment not found.", 404)
-
-    data = request.get_json(silent=True) or {}
-    try:
-        fields = _parse_assessment_body(data, require_all=False)
-    except ValueError as exc:
-        return error(str(exc), 422)
-    if not fields:
-        return error("No changes were provided.", 422)
-
-    set_clause = ", ".join(f"{col}=%s" for col in fields)
-    row = execute(
-        f"UPDATE als_assessment SET {set_clause}, updated_at=now() WHERE als_assessment_id=%s RETURNING *",
-        (*fields.values(), assessment_id),
-        returning=True,
-    )
-    return {"message": "Assessment updated.", "assessment": _shape_assessment(row)}
-
-
-@bp.delete("/learners/<int:learner_id>/assessments/<int:assessment_id>")
-@role_required("teacher")
-def delete_assessment(learner_id: int, assessment_id: int):
-    base = _profile_base(learner_id)
-    if not base:
-        return error("Learner not found.", 404)
-
-    existing = fetch_one(
-        "SELECT als_assessment_id FROM als_assessment WHERE als_assessment_id=%s AND enrollment_id=%s",
-        (assessment_id, base["enrollment_id"]),
-    )
-    if not existing:
-        return error("Assessment not found.", 404)
-
-    execute("DELETE FROM als_assessment WHERE als_assessment_id=%s", (assessment_id,))
-    return {"message": "Assessment removed."}
+    return {"message": "Scores saved.", **_shape_assessment_scores(row)}

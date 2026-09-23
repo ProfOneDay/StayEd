@@ -65,13 +65,12 @@ class Router {
       { label: "Learner Records", href: "learner-records.html", preserveQuery: true },
       { label: "Manage Modules" },
     ],
-    "record-scores.html": [
+    "assessment-scores.html": [
       { label: "Dashboard", href: "dashboard.html" },
       { label: "Learner" },
       { label: "Class Management", href: "class-management.html" },
       { label: "Learner Records", href: "learner-records.html", preserveQuery: true },
-      { label: "Manage Modules", href: "module-management.html", preserveQuery: true },
-      { label: "Record Scores" },
+      { label: "Assessment Scores" },
     ],
     "student-registry.html": [
       { label: "Dashboard", href: "dashboard.html" },

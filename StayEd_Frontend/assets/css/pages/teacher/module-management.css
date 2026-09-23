@@ -183,33 +183,3 @@
   color: var(--st-error);
   margin-left: 2px;
 }
-
-.st-module-score-summary {
-  margin-top: 2px;
-  font-size: var(--st-font-size-micro);
-  color: var(--st-on-surface-variant);
-  white-space: nowrap;
-}
-
-.st-score-input-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.st-score-input-row input {
-  flex: 1 1 0;
-  min-width: 0;
-  height: 40px;
-  padding: 0 10px;
-  border: 1px solid var(--st-outline-variant);
-  border-radius: var(--st-radius-lg);
-  font-family: var(--st-font-body);
-  font-size: var(--st-font-size-label);
-  color: var(--st-on-surface);
-}
-
-.st-score-input-row span {
-  flex-shrink: 0;
-  color: var(--st-on-surface-variant);
-}

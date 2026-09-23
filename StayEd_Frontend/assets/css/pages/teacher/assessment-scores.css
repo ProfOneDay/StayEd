@@ -1,0 +1,309 @@
+/* Deliberate no-op placeholder rule -- see module-management.css for why:
+   the literal first rule of a file loaded through main.css's @import chain
+   can be silently dropped by the browser's CSS parser. Keeping a throwaway
+   first rule here avoids losing whatever rule would otherwise be first. */
+.st-assessment-scores-root {
+  display: block;
+}
+
+.st-assessment-scores-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .st-assessment-scores-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Left panel -- learner list */
+
+.st-assessment-learner-panel {
+  background: #fff;
+  border: 1px solid rgba(195, 198, 207, 0.3);
+  border-radius: var(--st-radius-lg);
+  box-shadow: var(--st-shadow-sm);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 80vh;
+  overflow: hidden;
+}
+
+.st-assessment-learner-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.st-assessment-learner-count {
+  font-size: var(--st-font-size-body);
+  font-weight: 700;
+  color: var(--st-on-surface);
+}
+
+.st-assessment-learner-count span {
+  color: var(--st-primary);
+}
+
+.st-assessment-search input {
+  height: 40px;
+}
+
+.st-assessment-learner-list {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.st-assessment-learner-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px;
+  border: none;
+  background: transparent;
+  border-radius: var(--st-radius-md);
+  cursor: pointer;
+  text-align: left;
+  transition: var(--st-transition);
+}
+
+.st-assessment-learner-row:hover {
+  background: var(--st-surface-container-low);
+}
+
+.st-assessment-learner-row.is-active {
+  background: var(--st-primary-fixed);
+}
+
+.st-assessment-learner-row-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.st-assessment-learner-row-name {
+  font-size: var(--st-font-size-label);
+  font-weight: 600;
+  color: var(--st-on-surface);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.st-assessment-learner-row-lrn {
+  font-size: var(--st-font-size-micro);
+  color: var(--st-on-surface-variant);
+}
+
+.st-assessment-avatar {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--st-primary-fixed);
+  color: var(--st-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: var(--st-font-size-label);
+}
+
+.st-assessment-avatar--sm {
+  width: 32px;
+  height: 32px;
+  font-size: var(--st-font-size-caption);
+}
+
+.st-assessment-empty {
+  font-size: var(--st-font-size-caption);
+  color: var(--st-on-surface-variant);
+  padding: 12px 4px;
+}
+
+/* Right panel -- learner header + tables */
+
+.st-assessment-detail-panel {
+  background: transparent;
+  min-width: 0;
+}
+
+.st-assessment-detail-panel[data-no-learner-panel] {
+  background: #fff;
+  border: 1px solid rgba(195, 198, 207, 0.3);
+  border-radius: var(--st-radius-lg);
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.st-assessment-learner-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: #fff;
+  border: 1px solid rgba(195, 198, 207, 0.3);
+  border-radius: var(--st-radius-lg);
+  box-shadow: var(--st-shadow-sm);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.st-assessment-learner-header-identity {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.st-assessment-learner-header-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.st-assessment-learner-header-name-row h2 {
+  font-family: var(--st-font-heading);
+  font-size: var(--st-font-size-heading);
+  font-weight: 700;
+  color: var(--st-on-surface);
+}
+
+.st-assessment-learner-header-meta {
+  margin-top: 4px;
+  font-size: var(--st-font-size-caption);
+  color: var(--st-on-surface-variant);
+}
+
+/* Tables */
+
+.st-assessment-table-card {
+  background: #fff;
+  border: 1px solid rgba(195, 198, 207, 0.3);
+  border-radius: var(--st-radius-lg);
+  box-shadow: var(--st-shadow-sm);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.st-assessment-table-head {
+  background: #fdf6d8;
+  padding: 10px 16px;
+}
+
+.st-assessment-table-head h3 {
+  font-size: var(--st-font-size-label);
+  font-weight: 700;
+  color: var(--st-on-surface);
+  letter-spacing: 0.02em;
+}
+
+.st-assessment-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.st-assessment-table th,
+.st-assessment-table td {
+  padding: 8px 12px;
+  text-align: center;
+  font-size: var(--st-font-size-caption);
+  border-bottom: 1px solid rgba(195, 198, 207, 0.2);
+}
+
+.st-assessment-table thead th {
+  font-size: var(--st-font-size-micro);
+  color: var(--st-on-surface-variant);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.st-assessment-table th:first-child,
+.st-assessment-table td:first-child {
+  text-align: left;
+}
+
+.st-assessment-subhead th {
+  padding-top: 0;
+  padding-bottom: 6px;
+}
+
+.st-assessment-section-row td {
+  background: #fdf6d8;
+  font-weight: 700;
+  text-align: left;
+}
+
+.st-assessment-subsection-row td {
+  background: var(--st-surface-container-low);
+  font-weight: 600;
+  text-align: left;
+}
+
+.st-assessment-indent {
+  padding-left: 28px !important;
+  font-weight: 400;
+}
+
+.st-assessment-total-row td {
+  background: #fdf6d8;
+  font-weight: 700;
+}
+
+.st-assessment-input {
+  width: 60px;
+  height: 32px;
+  padding: 0 6px;
+  border: 1px solid var(--st-outline-variant);
+  border-radius: var(--st-radius-sm);
+  font-family: var(--st-font-body);
+  font-size: var(--st-font-size-caption);
+  text-align: center;
+  color: var(--st-on-surface);
+}
+
+.st-assessment-input:read-only {
+  background: var(--st-surface-container-low);
+  color: var(--st-on-surface-variant);
+}
+
+.st-assessment-input--wide {
+  width: 100%;
+  min-width: 140px;
+  text-align: left;
+}
+
+.st-assessment-rating-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--st-primary);
+  color: #fff;
+  padding: 14px 16px;
+  font-weight: 700;
+  font-size: var(--st-font-size-label);
+}
+
+.st-assessment-rating-input {
+  width: 120px;
+  height: 36px;
+  padding: 0 10px;
+  border: none;
+  border-radius: var(--st-radius-md);
+  text-align: center;
+  font-weight: 700;
+  color: var(--st-risk-low);
+  background: #fff;
+}
