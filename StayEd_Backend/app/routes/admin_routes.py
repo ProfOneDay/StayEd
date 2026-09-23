@@ -8,7 +8,7 @@ from werkzeug.security import generate_password_hash
 
 from ..authz import current_user_id, role_required
 from ..db import execute, fetch_all, fetch_one, get_db
-from ..helpers import error, split_name
+from ..helpers import error, is_deped_email, split_name
 from ..services.mailer import send_email
 from ..services.settings_service import (
     get_active_school_year,
@@ -44,13 +44,15 @@ def _admin_teacher_row(row):
         str(part) for part in (row.get("first_name"), row.get("middle_name"), row.get("last_name")) if part
     )
     clcs = row.get("clcs") or []
+    email = row.get("email") or ""
     return {
         "id": row["id"],
         "firstName": row.get("first_name") or "",
         "middleName": row.get("middle_name") or "",
         "lastName": row.get("last_name") or "",
         "name": full_name,
-        "email": row.get("email") or "",
+        "email": email,
+        "isDepedVerified": is_deped_email(email),
         "phone": row.get("contact_number") or "",
         "employeeId": row.get("employee_id") or "",
         "clc": clcs[0] if clcs else "",

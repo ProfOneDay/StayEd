@@ -154,6 +154,13 @@ function openReview(id){
   document.getElementById('rv-avatar').textContent=initials(t.name);
   document.getElementById('rv-name').textContent=t.name;
   document.getElementById('rv-email').textContent=t.email;
+  const verifiedBadge=document.getElementById('rv-verified-badge');
+  const checkSvg='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>';
+  const warnSvg='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a1 1 0 0 0 .86 1.5h18.64a1 1 0 0 0 .86-1.5L13.71 3.86a1 1 0 0 0-1.72 0Z"/></svg>';
+  verifiedBadge.classList.toggle('not-verified',!t.isDepedVerified);
+  verifiedBadge.innerHTML=t.isDepedVerified
+    ? checkSvg+'DepEd Verified Account'
+    : warnSvg+'Not a DepEd Email — verify manually';
   document.getElementById('rv-empid').textContent=t.employeeId;
   document.getElementById('rv-phone').textContent=t.phone;
   document.getElementById('rv-date').textContent=t.date;

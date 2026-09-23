@@ -773,6 +773,197 @@ def records_detail(learner_id: int):
     }
 
 
+def _exam_passing_chance(
+    enrollment_id: int,
+    modality: str | None,
+    *,
+    modules_released: int,
+    modules_returned: int,
+    overdue_modules: int,
+) -> dict:
+    """Estimate current A&E exam readiness from *performance* records only.
+
+    This is deliberately separate from StayEd's dropout/non-completion model.
+    There is no labelled historical A&E pass/fail training set in this project,
+    so presenting the dropout model's probability as an exam-pass probability
+    would be misleading. Instead, this predictor uses an explicit weighted
+    readiness score built from the learner's recorded assessment performance,
+    module completion, and (where applicable) attendance.
+
+    The output is HIGH/LOW passing chance rather than an official pass/fail
+    result. A score of 70 is an internal readiness threshold, not the official
+    A&E passing mark.
+    """
+    score_row = fetch_one(
+        """
+        SELECT
+            COUNT(*) FILTER (
+                WHERE pretest_score IS NOT NULL AND pretest_total IS NOT NULL
+                  AND pretest_total > 0
+            )::INT AS pretest_count,
+            COUNT(*) FILTER (
+                WHERE posttest_score IS NOT NULL AND posttest_total IS NOT NULL
+                  AND posttest_total > 0
+            )::INT AS posttest_count,
+            COUNT(*) FILTER (
+                WHERE pretest_score IS NOT NULL AND pretest_total IS NOT NULL
+                  AND pretest_total > 0
+                  AND posttest_score IS NOT NULL AND posttest_total IS NOT NULL
+                  AND posttest_total > 0
+            )::INT AS paired_count,
+            AVG(100.0 * pretest_score / NULLIF(pretest_total, 0)) FILTER (
+                WHERE pretest_score IS NOT NULL AND pretest_total IS NOT NULL
+                  AND pretest_total > 0
+            ) AS pretest_avg,
+            AVG(100.0 * posttest_score / NULLIF(posttest_total, 0)) FILTER (
+                WHERE posttest_score IS NOT NULL AND posttest_total IS NOT NULL
+                  AND posttest_total > 0
+            ) AS posttest_avg,
+            AVG(
+                (100.0 * posttest_score / NULLIF(posttest_total, 0))
+                - (100.0 * pretest_score / NULLIF(pretest_total, 0))
+            ) FILTER (
+                WHERE pretest_score IS NOT NULL AND pretest_total IS NOT NULL
+                  AND pretest_total > 0
+                  AND posttest_score IS NOT NULL AND posttest_total IS NOT NULL
+                  AND posttest_total > 0
+            ) AS avg_improvement
+        FROM module_record
+        WHERE enrollment_id = %s
+        """,
+        (enrollment_id,),
+    ) or {}
+
+    attendance = fetch_one(
+        """
+        SELECT total_scheduled_sessions, session_attendance_rate_percent
+        FROM vw_session_attendance_summary
+        WHERE enrollment_id = %s
+        """,
+        (enrollment_id,),
+    ) or {}
+
+    pre_count = int(score_row.get("pretest_count") or 0)
+    post_count = int(score_row.get("posttest_count") or 0)
+    paired_count = int(score_row.get("paired_count") or 0)
+    pre_avg = float(score_row["pretest_avg"]) if score_row.get("pretest_avg") is not None else None
+    post_avg = float(score_row["posttest_avg"]) if score_row.get("posttest_avg") is not None else None
+    avg_improvement = (
+        float(score_row["avg_improvement"])
+        if score_row.get("avg_improvement") is not None
+        else None
+    )
+
+    # Require at least one actual assessment score. Module-return/attendance
+    # behaviour alone is not enough evidence to call exam passing chance high
+    # or low.
+    if post_count == 0 and pre_count == 0:
+        return {
+            "status": "INSUFFICIENT",
+            "label": "Not enough data",
+            "score": None,
+            "confidence": "Waiting for assessment scores",
+            "summary": (
+                "Record at least one module pre-test or post-test score to estimate "
+                "this learner's A&E exam passing chance."
+            ),
+            "factors": [],
+            "threshold": 70,
+            "disclaimer": (
+                "Performance-based readiness estimate only; this is not an official "
+                "A&E result or passing mark."
+            ),
+        }
+
+    components: list[tuple[str, float, float, str]] = []
+
+    # Post-tests are the strongest direct performance signal. Before a
+    # post-test exists, a pre-test can still provide a preliminary estimate.
+    if post_avg is not None:
+        components.append(("Post-test average", post_avg, 0.50, f"{round(post_avg)}% across {post_count} scored module(s)"))
+    elif pre_avg is not None:
+        components.append(("Pre-test average", pre_avg, 0.50, f"{round(pre_avg)}% across {pre_count} scored module(s)"))
+
+    module_rate = (
+        100.0 * modules_returned / modules_released
+        if modules_released
+        else None
+    )
+    if module_rate is not None:
+        components.append(("Module return rate", module_rate, 0.25, f"{modules_returned} of {modules_released} modules returned"))
+
+    modality_key = str(modality or "").upper().replace("-", "_").replace(" ", "_")
+    sessions = int(attendance.get("total_scheduled_sessions") or 0)
+    attendance_rate = (
+        float(attendance["session_attendance_rate_percent"])
+        if attendance.get("session_attendance_rate_percent") is not None
+        else None
+    )
+    if modality_key != "MODULAR" and sessions > 0 and attendance_rate is not None:
+        components.append(("Attendance rate", attendance_rate, 0.15, f"{round(attendance_rate)}% across {sessions} scheduled session(s)"))
+
+    # Improvement is converted to a 0-100 readiness component: no change = 50,
+    # +25 percentage points = 100, -25 points = 0. This rewards real progress
+    # without allowing improvement alone to dominate the estimate.
+    if paired_count and avg_improvement is not None:
+        improvement_component = max(0.0, min(100.0, 50.0 + (avg_improvement * 2.0)))
+        sign = "+" if avg_improvement >= 0 else ""
+        components.append(("Pre/Post improvement", improvement_component, 0.10, f"{sign}{avg_improvement:.1f} percentage points across {paired_count} paired module(s)"))
+
+    total_weight = sum(weight for _, _, weight, _ in components)
+    readiness = (
+        sum(value * weight for _, value, weight, _ in components) / total_weight
+        if total_weight
+        else 0.0
+    )
+
+    # Overdue work is a small readiness penalty, capped so it cannot erase
+    # strong test performance by itself.
+    overdue_penalty = min(max(int(overdue_modules or 0), 0) * 2, 10)
+    readiness = max(0.0, min(100.0, readiness - overdue_penalty))
+    readiness_score = round(readiness)
+    status = "HIGH" if readiness_score >= 70 else "LOW"
+
+    factors = [
+        {
+            "name": name,
+            "value": round(value, 1),
+            "detail": detail,
+        }
+        for name, value, _, detail in components
+    ]
+    if overdue_penalty:
+        factors.append({
+            "name": "Overdue modules",
+            "value": -overdue_penalty,
+            "detail": f"{overdue_modules} overdue module(s), -{overdue_penalty} readiness points",
+        })
+
+    if post_count >= 3 and modules_released >= 3:
+        confidence = "Stronger estimate"
+    elif post_count > 0:
+        confidence = "Developing estimate"
+    else:
+        confidence = "Preliminary estimate"
+
+    return {
+        "status": status,
+        "label": f"{status.title()} chance of passing",
+        "score": readiness_score,
+        "confidence": confidence,
+        "summary": (
+            f"Current performance gives this learner a {status.lower()} chance of passing "
+            "the A&E exam based on the records available in StayEd."
+        ),
+        "factors": factors,
+        "threshold": 70,
+        "disclaimer": (
+            "Performance-based readiness estimate only. The 70-point cutoff is an "
+            "internal StayEd readiness threshold, not the official A&E passing mark."
+        ),
+    }
+
+
 def _engagement_score(enrollment_id: int) -> int:
     row = fetch_one(
         """
@@ -837,25 +1028,77 @@ def _generate_recommended_ai_insight(r: dict, contributor_rows: list) -> dict | 
 # Keyed on model feature names (models/features.py), so a new predictor
 # added there without an entry here still renders (falls back to a plain
 # value line) rather than crashing.
-_FACTOR_REASONS = {
-    "age": "Age can affect available study time and competing responsibilities outside school.",
-    "distance_km": "Learners farther from their CLC tend to find it harder to attend sessions and return modules on time.",
-    "monthly_income": "Lower household income is associated with competing economic needs that can interrupt schooling.",
-    "occupation": "Household economic stability -- the learner's own job, or a parent's/guardian's -- is linked to dropout risk.",
-    "sex": "Included as a demographic factor the model weighs alongside the others.",
-    "learning_level": "Different ALS levels carry different pacing and completion demands.",
-    "modality": "Modality affects how much in-person structure and support a learner has day to day.",
-    "is_re_enrollee": "Learners who previously dropped out and re-enrolled carry a historically higher risk of dropping out again.",
+# Simple, teacher-friendly label + explanation per factor. Kept in plain,
+# everyday language (per Sir Arnie's feedback) instead of technical/stats
+# wording like "importance score" or "% contribution".
+_FACTOR_INFO = {
+    "attendance_risk": {
+        "label": "Current attendance",
+        "format": "percent",
+        "reason": "The learner's attendance may affect their likelihood of completing the program.",
+    },
+    "age": {
+        "label": "Age",
+        "format": "age",
+        "reason": "Age can affect how much time and freedom a learner has for schooling.",
+    },
+    "distance_km": {
+        "label": "Distance to CLC",
+        "format": "km",
+        "reason": "Learners who live farther from their CLC often find it harder to attend sessions and return modules on time.",
+    },
+    "monthly_income": {
+        "label": "Monthly household income",
+        "format": "currency",
+        "reason": "Families with less income may find it harder to support the learner's schooling.",
+    },
+    "occupation": {
+        "label": "Occupation",
+        "reason": "The learner's job, or a parent's or guardian's job, can affect how much time and money is available for school.",
+    },
+    "sex": {
+        "label": "Sex",
+        "reason": "This is one of the background details the model looks at along with the others.",
+    },
+    "learning_level": {
+        "label": "Learning level",
+        "reason": "Different ALS levels have different pacing and requirements to finish.",
+    },
+    "modality": {
+        "label": "Learning modality",
+        "reason": "How the learner attends class (face-to-face, modular, or blended) affects how much in-person support they get.",
+    },
+    "is_re_enrollee": {
+        "label": "Re-enrolled learner",
+        "reason": "Learners who dropped out before and re-enrolled have a higher chance of dropping out again.",
+    },
 }
 
 
+def _format_factor_value(fmt: str | None, display_value) -> str:
+    if display_value is None:
+        return "not recorded"
+    try:
+        if fmt == "percent":
+            return f"{round(float(display_value))}%"
+        if fmt == "km":
+            return f"{float(display_value):.1f} km"
+        if fmt == "currency":
+            return f"₱{float(display_value):,.0f}"
+        if fmt == "age":
+            return f"{round(float(display_value))} years old"
+    except (TypeError, ValueError):
+        pass
+    return str(display_value)
+
+
 def _factor_reason(factor_key: str, display_value, importance: float) -> str:
+    info = _FACTOR_INFO.get(factor_key)
+    if info:
+        value_text = _format_factor_value(info.get("format"), display_value)
+        return f"{info['label']}: {value_text}. {info['reason']}"
     value_text = str(display_value) if display_value is not None else "not recorded"
-    reason = _FACTOR_REASONS.get(factor_key)
-    contribution = f"Contributed about {round(importance * 100)}% of this prediction."
-    if reason:
-        return f"Current value: {value_text}. {reason} {contribution}"
-    return f"Current value: {value_text}. {contribution}"
+    return f"Current value: {value_text}."
 
 
 @bp.get("/learners/<int:learner_id>/profile")
@@ -908,6 +1151,89 @@ def learner_profile(learner_id: int):
     last_activity = shaped["activity_text"]
     module_rate = round(100 * modules_returned / modules_released) if modules_released else None
 
+    # Task 3: attendance rate uses only sessions with a recorded attendance
+    # status. Future/unrecorded sessions do not lower the learner's rate.
+    attendance_summary = fetch_one(
+        """
+        SELECT
+            COUNT(sa.attendance_id)::INT AS recorded_sessions,
+            COUNT(sa.attendance_id) FILTER (
+                WHERE sa.attendance_status='PRESENT'
+            )::INT AS attended_sessions
+        FROM session_attendance sa
+        JOIN class_session cs ON cs.session_id=sa.session_id
+        WHERE sa.enrollment_id=%s AND cs.session_status <> 'CANCELLED'
+        """,
+        (enrollment_id,),
+    ) or {}
+    recorded_sessions = int(attendance_summary.get("recorded_sessions") or 0)
+    attended_sessions = int(attendance_summary.get("attended_sessions") or 0)
+    if base.get("learning_modality") == "MODULAR":
+        attendance_rate = None
+        attendance_rate_label = "N/A"
+        attendance_rate_text = "Attendance is not used for Modular learners."
+    elif recorded_sessions:
+        attendance_rate = round(100 * attended_sessions / recorded_sessions)
+        attendance_rate_label = None
+        attendance_rate_text = (
+            f"{attended_sessions} of {recorded_sessions} recorded sessions attended"
+        )
+    else:
+        attendance_rate = None
+        attendance_rate_label = "Not Yet Available"
+        attendance_rate_text = "No attendance has been recorded yet."
+
+    # Task 1: per-student performance progress is based on real module activity
+    # already stored in StayEd. Each point is the cumulative module return rate
+    # on a date when a module was released or returned; no grades are invented.
+    performance_rows = fetch_all(
+        """
+        SELECT date_released, date_returned
+        FROM module_record
+        WHERE enrollment_id=%s
+        ORDER BY date_released, module_record_id
+        """,
+        (enrollment_id,),
+    )
+    performance_dates = sorted({
+        d
+        for row in performance_rows
+        for d in (row.get("date_released"), row.get("date_returned"))
+        if d is not None and d <= date.today()
+    })
+    performance_progress = []
+    for progress_date in performance_dates:
+        released_to_date = sum(
+            1
+            for row in performance_rows
+            if row.get("date_released") and row["date_released"] <= progress_date
+        )
+        returned_to_date = sum(
+            1
+            for row in performance_rows
+            if row.get("date_returned") and row["date_returned"] <= progress_date
+        )
+        rate = (
+            round(100 * returned_to_date / released_to_date)
+            if released_to_date
+            else 0
+        )
+        performance_progress.append({
+            "date": progress_date.strftime("%b %d, %Y"),
+            "rate": rate,
+            "released": released_to_date,
+            "returned": returned_to_date,
+        })
+
+    # Keep long histories readable while preserving the first and latest points.
+    if len(performance_progress) > 12:
+        last_index = len(performance_progress) - 1
+        sample_indexes = sorted({
+            round(i * last_index / 11)
+            for i in range(12)
+        })
+        performance_progress = [performance_progress[i] for i in sample_indexes]
+
     overdue_modules = fetch_one(
         """
         SELECT COUNT(*)::INT AS n FROM module_record
@@ -916,6 +1242,14 @@ def learner_profile(learner_id: int):
         """,
         (enrollment_id,),
     )["n"]
+
+    exam_passing_chance = _exam_passing_chance(
+        enrollment_id,
+        base.get("learning_modality"),
+        modules_released=modules_released,
+        modules_returned=modules_returned,
+        overdue_modules=overdue_modules,
+    )
 
     last_contact_event = fetch_one(
         """
@@ -944,11 +1278,11 @@ def learner_profile(learner_id: int):
 
     interventions = fetch_all(
         """
-        SELECT i.*, ra.risk_level, fu.notes AS follow_up_notes, fu.outcome AS follow_up_outcome, fu.ai_next_step AS follow_up_next_step
+        SELECT i.*, ra.risk_level, fu.follow_up_id, fu.notes AS follow_up_notes, fu.outcome AS follow_up_outcome, fu.ai_next_step AS follow_up_next_step
         FROM intervention i
         JOIN risk_assessment ra ON ra.risk_assessment_id=i.risk_assessment_id
         LEFT JOIN LATERAL (
-            SELECT notes, outcome, ai_next_step FROM follow_up WHERE intervention_id=i.intervention_id
+            SELECT follow_up_id, notes, outcome, ai_next_step FROM follow_up WHERE intervention_id=i.intervention_id
             ORDER BY follow_up_date DESC LIMIT 1
         ) fu ON TRUE
         WHERE ra.enrollment_id=%s
@@ -956,6 +1290,23 @@ def learner_profile(learner_id: int):
         """,
         (enrollment_id,),
     )
+
+    follow_up_ids = [i["follow_up_id"] for i in interventions if i.get("follow_up_id")]
+    photos_by_follow_up = {}
+    if follow_up_ids:
+        photo_rows = fetch_all(
+            f"""
+            SELECT follow_up_id, photo_id, file_name, image_data
+            FROM follow_up_photo
+            WHERE follow_up_id IN ({','.join(['%s'] * len(follow_up_ids))})
+            ORDER BY created_at ASC
+            """,
+            tuple(follow_up_ids),
+        )
+        for p in photo_rows:
+            photos_by_follow_up.setdefault(p["follow_up_id"], []).append(
+                {"id": p["photo_id"], "fileName": p["file_name"], "imageData": p["image_data"]}
+     )
     active_rows = sorted(
         [
             i for i in interventions
@@ -963,7 +1314,7 @@ def learner_profile(learner_id: int):
             or (i["status"] in {"COMPLETED", "CANCELLED"} and not i.get("moved_to_history"))
         ],
         key=lambda i: (i["date_assigned"], i["intervention_id"]),
-    )
+       )
     active = active_rows[0] if active_rows else None
 
     factors = []
@@ -1153,6 +1504,8 @@ def learner_profile(learner_id: int):
             "modalitySince": modality_since or "—",
         },
         "riskTrend": risk_trend,
+        "performanceProgress": performance_progress,
+        "examPassingChance": exam_passing_chance,
         "metrics": {
             "engagementScore": engagement_score,
             "engagementScoreMax": 4,
@@ -1164,6 +1517,9 @@ def learner_profile(learner_id: int):
             ),
             "activeModules": active_modules,
             "overdueModules": overdue_modules,
+            "attendanceRate": attendance_rate,
+            "attendanceRateLabel": attendance_rate_label,
+            "attendanceRateText": attendance_rate_text,
             "lastActivity": last_activity,
             "daysSinceLastReturn": days_since_last_return,
         },
@@ -1252,6 +1608,8 @@ def learner_profile(learner_id: int):
                 "aiReason": i.get("ai_reason"),
                 "aiRecommendedAction": i.get("ai_recommended_action"),
                 "aiNextStep": i.get("follow_up_next_step"),
+                "outcome": i.get("follow_up_outcome") or "",
+                "outcomeNotes": i.get("follow_up_notes") or "",
                 "hasOutcome": bool(i.get("follow_up_outcome") or i.get("follow_up_notes")),
                 "canSaveToHistory": i["status"] in {"COMPLETED", "CANCELLED"},
                 "dueStatus": "" if i["status"] not in {"PLANNED", "ONGOING"} or not i.get("target_date") else "overdue" if i["target_date"] < date.today() else "due" if i["target_date"] == date.today() else "soon" if (i["target_date"] - date.today()).days <= 3 else "",
@@ -1271,6 +1629,7 @@ def learner_profile(learner_id: int):
                     "aiRecommendedAction": i.get("ai_recommended_action") or "",
                     "outcome": i.get("follow_up_outcome") or "",
                     "outcomeNotes": i.get("follow_up_notes") or "",
+                    "photos": photos_by_follow_up.get(i.get("follow_up_id"), []),
                     } for i in interventions if i["status"] in {"COMPLETED", "CANCELLED"} and i.get("moved_to_history")
             ],
             "recommended": [

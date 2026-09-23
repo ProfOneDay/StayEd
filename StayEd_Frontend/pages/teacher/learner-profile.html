@@ -83,14 +83,6 @@
               <span class="material-symbols-outlined">person_add</span>
               Assign Intervention
             </button>
-            <button
-              type="button"
-              class="st-btn st-btn-outline"
-              data-profile-run-prediction-btn
-            >
-              <span class="material-symbols-outlined">bolt</span>
-              Run Prediction
-            </button>
             <a
               href="#"
               class="st-btn st-btn-outline"
@@ -231,6 +223,108 @@
             <div class="st-metric-card">
               <p class="st-metric-card-label">Overdue Modules</p>
               <span class="st-metric-card-value" data-metric-overdue>—</span>
+            </div>
+            <div class="st-metric-card st-metric-card--attendance">
+              <p class="st-metric-card-label">Attendance Rate</p>
+              <span class="st-metric-card-value" data-metric-attendance-rate>—</span>
+              <p class="st-metric-card-subtext" data-metric-attendance-rate-text></p>
+            </div>
+          </div>
+
+          <!-- Task 1: learner performance progress using cumulative module return rate. -->
+          <div class="st-performance-progress-card">
+            <div class="st-performance-progress-head">
+              <div>
+                <h4 class="st-panel-title" style="font-size:1.125rem">
+                  Student Performance Progress
+                </h4>
+                <p class="st-panel-subtitle">
+                  Cumulative module return rate over time for this learner.
+                </p>
+              </div>
+              <div class="st-performance-progress-current">
+                <span>Current Progress</span>
+                <strong data-performance-progress-current>—</strong>
+              </div>
+            </div>
+            <div
+              class="st-performance-progress-chart"
+              data-performance-progress-chart
+              role="img"
+              aria-label="Student performance progress line graph"
+            ></div>
+          </div>
+
+          <!-- Task 2: separate A&E passing-chance predictor. This is based
+               on recorded learner performance and is intentionally not the
+               dropout/non-completion risk model shown elsewhere. -->
+          <div class="st-exam-readiness-card" data-exam-readiness-card>
+            <div class="st-exam-readiness-head">
+              <div class="st-exam-readiness-title-wrap">
+                <span class="material-symbols-outlined st-exam-readiness-icon">school</span>
+                <div>
+                  <h4 class="st-panel-title" style="font-size:1.125rem;margin:0;">
+                    A&amp;E Exam Passing Chance
+                  </h4>
+                  <p class="st-panel-subtitle">
+                    Performance-based estimate of whether the learner is currently on track to pass the ALS A&amp;E exam.
+                  </p>
+                </div>
+              </div>
+              <span class="st-exam-readiness-badge st-exam-readiness-badge--neutral" data-exam-readiness-badge>
+                Not enough data
+              </span>
+            </div>
+
+            <div class="st-exam-readiness-body">
+              <div class="st-exam-readiness-score-block">
+                <p class="st-exam-readiness-score-label">Readiness Score</p>
+                <div class="st-exam-readiness-score-line">
+                  <strong data-exam-readiness-score>—</strong>
+                  <span data-exam-readiness-confidence>Waiting for assessment scores</span>
+                </div>
+                <div class="st-exam-readiness-progress" aria-hidden="true">
+                  <span data-exam-readiness-bar></span>
+                </div>
+                <p class="st-exam-readiness-summary" data-exam-readiness-summary>
+                  Record at least one module pre-test or post-test score to estimate the learner's passing chance.
+                </p>
+              </div>
+
+              <div class="st-exam-readiness-factors" data-exam-readiness-factors>
+                <p class="st-assessment-empty">No performance factors available yet.</p>
+              </div>
+            </div>
+
+            <p class="st-exam-readiness-note" data-exam-readiness-note>
+              Performance-based readiness estimate only; this is not an official A&amp;E result or passing mark.
+            </p>
+          </div>
+
+          <!-- ALS Accreditation & Equivalency assessment history -- a
+               separate, learner-level exam record independent of any one
+               module (a learner can retake it across cycles). -->
+          <div class="st-assessment-card">
+            <div class="st-assessment-card-head">
+              <div>
+                <p class="st-panel-title" style="font-size:1.125rem;margin:0;">
+                  ALS Assessment
+                </p>
+                <p class="st-panel-subtitle">
+                  Accreditation &amp; Equivalency (A&amp;E) test results for this learner.
+                </p>
+              </div>
+              <button
+                type="button"
+                class="st-btn st-btn-outline st-btn-xs"
+                data-add-assessment-btn
+              >
+                <span class="material-symbols-outlined">add</span>
+                Record Assessment
+              </button>
+            </div>
+            <div data-assessment-list>
+              <p class="st-assessment-empty">No assessments recorded yet.</p>
             </div>
           </div>
 
