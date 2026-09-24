@@ -43,13 +43,15 @@
           <span class="st-landing-brand-name">StayEd</span>
         </a>
 
-        <nav class="st-landing-links" data-landing-links>
-          <a href="#about">About</a>
-          <a href="#how-it-works">How it works</a>
-          <a href="#risk-levels">Risk levels</a>
-        </nav>
-
         <div class="st-landing-nav-actions">
+          <div class="st-landing-nav-links">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Contact Us</a>
+          </div>
+          <button type="button" class="st-btn st-btn-outline" data-open-signup>
+            Sign up
+          </button>
           <button type="button" class="st-btn st-btn-primary" data-open-login>
             Log in
           </button>
@@ -67,23 +69,35 @@
 
       <!-- Mobile menu panel -->
       <div class="st-landing-mobile-panel" data-mobile-panel>
-        <a href="#about">About</a>
-        <a href="#how-it-works">How it works</a>
-        <a href="#risk-levels">Risk levels</a>
+        <button type="button" class="st-btn st-btn-outline st-btn-block" data-open-signup>
+          Sign up
+        </button>
         <button type="button" class="st-btn st-btn-primary st-btn-block" data-open-login>
           Log in
         </button>
+        <div class="st-landing-nav-links st-landing-nav-links--mobile">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">Contact Us</a>
+        </div>
       </div>
     </header>
 
-    <main id="top">
-      <!-- Hero -->
-      <section class="st-landing-hero">
-        <div class="st-landing-hero-bg"></div>
-        <div class="st-landing-hero-blur"></div>
-        <span class="st-landing-hero-disclaimer">Image is AI-generated</span>
-        <div class="st-landing-hero-inner">
-          <div class="st-landing-hero-stage" data-hero-stage>
+    <!-- Shared photo backdrop -- spans the hero AND the footer, so the
+         footer's translucent panel has actual photo behind it to reveal
+         (a flat tint over a flat page background just reads as a solid
+         color; the nav's glassy look works for the same reason: it sits
+         over this same photo). -->
+    <div class="st-landing-body">
+      <div class="st-landing-hero-bg"></div>
+      <div class="st-landing-hero-blur"></div>
+
+      <main id="top">
+        <!-- Hero -->
+        <section class="st-landing-hero">
+          <span class="st-landing-hero-disclaimer">Image is AI-generated</span>
+          <div class="st-landing-hero-inner">
+          <div class="st-landing-hero-stage" data-hero-stage data-stage="intro">
             <!-- Intro content -->
             <div class="st-landing-hero-intro" data-hero-intro>
               <span class="st-pill st-landing-hero-badge">
@@ -105,9 +119,9 @@
                 <button type="button" class="st-btn st-btn-white" data-open-login>
                   Log in to StayEd
                 </button>
-                <a href="#how-it-works" class="st-btn st-btn-outline st-btn-onphoto">
-                  See how it works
-                </a>
+                <button type="button" class="st-btn st-btn-outline st-btn-onphoto" data-open-signup>
+                  Create account
+                </button>
               </div>
 
               <div class="st-landing-hero-risk-group">
@@ -129,14 +143,10 @@
               </div>
             </div>
 
-            <!-- Login form, swaps in over the same hero photo -->
-            <div class="st-landing-hero-login" data-hero-login>
+            <!-- Login panel -->
+            <div class="st-landing-hero-login" data-hero-panel>
               <div class="st-landing-login-panel">
-                <button
-                  type="button"
-                  class="st-landing-login-back"
-                  data-close-login
-                >
+                <button type="button" class="st-landing-login-back" data-close-panel>
                   <span class="material-symbols-outlined">arrow_back</span>
                   Back to StayEd
                 </button>
@@ -188,7 +198,9 @@
                       <input type="checkbox" id="remember" />
                       Keep me logged in
                     </label>
-                    <a href="pages/auth/forgot-password.html">Forgot Password</a>
+                    <button type="button" class="st-landing-link-btn" data-open-forgot>
+                      Forgot Password
+                    </button>
                   </div>
 
                   <button type="submit" class="st-btn st-btn-primary st-btn-block">
@@ -198,7 +210,7 @@
 
                 <div class="auth-register">
                   Don't have a teacher account?
-                  <a href="pages/auth/register.html" id="createAccountLink">Create Account</a>
+                  <a href="pages/auth/register.html" id="createAccountLink" data-open-signup>Create Account</a>
                 </div>
 
                 <div class="auth-notice">
@@ -218,145 +230,209 @@
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      <!-- Built for teachers -->
-      <section class="st-landing-section" id="about">
-        <div class="st-landing-section-inner st-landing-about-grid">
-          <div class="st-landing-about-copy">
-            <span class="st-landing-eyebrow">Built for ALS teachers</span>
-            <h2>Built for teachers who work across learning centers</h2>
-            <p>
-              StayEd was designed around the day-to-day reality of ALS
-              instruction — multiple learning centers, mixed learning levels,
-              and limited time to review every learner's standing by hand.
-            </p>
-          </div>
+            <!-- Signup panel -->
+            <div class="st-landing-hero-signup" data-hero-panel>
+              <div class="st-landing-login-panel">
+                <button type="button" class="st-landing-login-back" data-close-panel>
+                  <span class="material-symbols-outlined">arrow_back</span>
+                  Back to StayEd
+                </button>
 
-          <div class="st-landing-feature-list">
-            <div class="st-landing-feature">
-              <span class="material-symbols-outlined">insights</span>
-              <div>
-                <h3>Predictive risk scoring</h3>
-                <p>
-                  Learners are automatically flagged Low, Moderate, or High
-                  risk based on attendance, scores, and engagement trends.
-                </p>
+                <div class="auth-header">
+                  <h2>Create Teacher Account</h2>
+                  <p>
+                    Register using your official DepEd email address. Your
+                    account will be reviewed and approved by a Division
+                    Administrator.
+                  </p>
+                </div>
+
+                <form id="signupForm" class="auth-form" novalidate>
+                  <div class="form-group">
+                    <label for="signupFullName">Full Name</label>
+                    <input
+                      id="signupFullName"
+                      name="full_name"
+                      type="text"
+                      placeholder="e.g. Maria Clara Santos"
+                      autocomplete="name"
+                      required
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="signupEmail">Official DepEd Email Address</label>
+                    <input
+                      id="signupEmail"
+                      name="email"
+                      type="email"
+                      placeholder="name.surname@deped.gov.ph"
+                      autocomplete="email"
+                      required
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="signupPassword">Password</label>
+                    <div class="password-wrapper">
+                      <input
+                        id="signupPassword"
+                        name="password"
+                        type="password"
+                        placeholder="••••••••"
+                        autocomplete="new-password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        class="password-toggle"
+                        data-toggle="signupPassword"
+                        aria-label="Show password"
+                      >
+                        <span class="material-symbols-outlined">visibility</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="signupConfirmPassword">Confirm Password</label>
+                    <div class="password-wrapper">
+                      <input
+                        id="signupConfirmPassword"
+                        name="confirm_password"
+                        type="password"
+                        placeholder="••••••••"
+                        autocomplete="new-password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        class="password-toggle"
+                        data-toggle="signupConfirmPassword"
+                        aria-label="Show password"
+                      >
+                        <span class="material-symbols-outlined">visibility</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="auth-password-rules" data-signup-password-rules>
+                    <p class="auth-password-rules-title">Password requirements:</p>
+                    <ul>
+                      <li data-rule="length">
+                        <span class="material-symbols-outlined">circle</span>
+                        8+ characters
+                      </li>
+                      <li data-rule="upper">
+                        <span class="material-symbols-outlined">circle</span>
+                        Uppercase
+                      </li>
+                      <li data-rule="lower">
+                        <span class="material-symbols-outlined">circle</span>
+                        Lowercase
+                      </li>
+                      <li data-rule="number">
+                        <span class="material-symbols-outlined">circle</span>
+                        Number
+                      </li>
+                    </ul>
+                  </div>
+
+                  <label class="auth-terms">
+                    <input type="checkbox" name="agree" required />
+                    <span>
+                      I confirm that I am an authorized ALS teacher and agree
+                      to the <a href="#">Privacy Policy</a> and
+                      <a href="#">Terms of Use</a>.
+                    </span>
+                  </label>
+
+                  <button type="submit" class="st-btn st-btn-primary st-btn-block">
+                    Create Account
+                  </button>
+                </form>
+
+                <div class="auth-register">
+                  Already have an account?
+                  <button type="button" class="st-landing-link-btn" data-open-login>Log In</button>
+                </div>
+
+                <div class="auth-notice auth-notice--teal">
+                  <span class="material-symbols-outlined auth-notice-icon">info</span>
+                  <p>
+                    Your registration request will be reviewed by a Division
+                    Administrator. You will receive an email once your
+                    account has been approved.
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div class="st-landing-feature">
-              <span class="material-symbols-outlined">groups</span>
-              <div>
-                <h3>Centralized learner records</h3>
-                <p>
-                  Enrollment, module progress, and assessment scores stay in
-                  one place across every class you handle.
-                </p>
+            <!-- Forgot password panel -->
+            <div class="st-landing-hero-forgot" data-hero-panel>
+              <div class="st-landing-login-panel">
+                <button type="button" class="st-landing-login-back" data-close-panel>
+                  <span class="material-symbols-outlined">arrow_back</span>
+                  Back to StayEd
+                </button>
+
+                <div class="auth-header">
+                  <h2>Reset Your Password</h2>
+                  <p>
+                    Enter the DepEd email associated with your account and
+                    we'll send you a secure link to reset your password.
+                  </p>
+                </div>
+
+                <form id="forgotPasswordForm" class="auth-form" novalidate>
+                  <div class="form-group">
+                    <label for="forgotEmail">DepEd Email Address</label>
+                    <input
+                      id="forgotEmail"
+                      name="email"
+                      type="email"
+                      placeholder="name.surname@deped.gov.ph"
+                      autocomplete="email"
+                      required
+                    />
+                  </div>
+
+                  <button type="submit" class="st-btn st-btn-primary st-btn-block">
+                    Send Reset Link
+                  </button>
+                </form>
+
+                <div class="auth-register">
+                  Remembered your password?
+                  <button type="button" class="st-landing-link-btn" data-open-login>Log In</button>
+                </div>
+
+                <div class="auth-notice">
+                  <span class="material-symbols-outlined auth-notice-icon">schedule</span>
+                  <p>
+                    Reset links expire after 30 minutes for your security. If
+                    you don't receive an email, check your spam folder or
+                    contact your Division Administrator.
+                  </p>
+                </div>
               </div>
             </div>
-
-            <div class="st-landing-feature">
-              <span class="material-symbols-outlined">notifications_active</span>
-              <div>
-                <h3>Early warning alerts</h3>
-                <p>
-                  Get notified the moment a learner's risk level changes, so
-                  interventions happen while they still matter.
-                </p>
-              </div>
-            </div>
           </div>
-        </div>
-      </section>
-
-      <!-- How it works -->
-      <section class="st-landing-section st-landing-section--alt" id="how-it-works">
-        <div class="st-landing-section-inner">
-          <span class="st-landing-eyebrow">How it works</span>
-          <h2>From roster to intervention, in four steps</h2>
-
-          <div class="st-landing-steps">
-            <div class="st-landing-step">
-              <span class="st-landing-step-num">1</span>
-              <h3>Enroll your learners</h3>
-              <p>Import or add learners to your class roster in minutes.</p>
-            </div>
-            <div class="st-landing-step">
-              <span class="st-landing-step-num">2</span>
-              <h3>Record scores &amp; attendance</h3>
-              <p>Log module and assessment results as your class progresses.</p>
-            </div>
-            <div class="st-landing-step">
-              <span class="st-landing-step-num">3</span>
-              <h3>Review risk levels</h3>
-              <p>StayEd surfaces each learner's dropout risk automatically.</p>
-            </div>
-            <div class="st-landing-step">
-              <span class="st-landing-step-num">4</span>
-              <h3>Act on early warnings</h3>
-              <p>Plan and track interventions before a learner falls behind.</p>
-            </div>
           </div>
+        </section>
+      </main>
+
+      <!-- Footer -->
+      <footer class="st-footer st-landing-footer">
+        <div class="st-footer-left">
+          <span>© 2026 Department of Education - Alternative Learning System</span>
         </div>
-      </section>
-
-      <!-- Risk levels -->
-      <section class="st-landing-section" id="risk-levels">
-        <div class="st-landing-section-inner">
-          <span class="st-landing-eyebrow">What the risk levels mean</span>
-          <h2>A shared standard for every learning center</h2>
-
-          <div class="st-landing-risk-cards">
-            <div class="st-landing-risk-card st-landing-risk-card--low">
-              <span class="st-risk-badge st-risk-badge--low">
-                <span class="st-risk-dot"></span> Low risk
-              </span>
-              <p class="st-landing-risk-threshold">Below 0.40</p>
-              <p>
-                Learner is on track. Continue regular monitoring — no action
-                needed yet.
-              </p>
-            </div>
-            <div class="st-landing-risk-card st-landing-risk-card--moderate">
-              <span class="st-risk-badge st-risk-badge--moderate">
-                <span class="st-risk-dot"></span> Moderate risk
-              </span>
-              <p class="st-landing-risk-threshold">0.40 to 0.69</p>
-              <p>
-                Warning signs are emerging. A light-touch check-in can keep
-                the learner on track.
-              </p>
-            </div>
-            <div class="st-landing-risk-card st-landing-risk-card--high">
-              <span class="st-risk-badge st-risk-badge--high">
-                <span class="st-risk-dot"></span> High risk
-              </span>
-              <p class="st-landing-risk-threshold">0.70 and above</p>
-              <p>
-                Learner is likely to drop out without intervention. Prioritize
-                outreach now.
-              </p>
-            </div>
-          </div>
+        <div class="st-footer-right">
+          <span class="st-footer-version">Version 1.0</span>
         </div>
-      </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="st-footer st-landing-footer">
-      <div class="st-footer-left">
-        <span>© 2026 Department of Education - Alternative Learning System</span>
-        <span class="st-footer-version">Version 1.0</span>
-      </div>
-      <div class="st-footer-right">
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms of Service</a>
-        <a href="#">Contact Us</a>
-      </div>
-    </footer>
+      </footer>
+    </div>
 
     <!-- Shared Components -->
     <div id="st-toast-container" class="st-toast-container"></div>

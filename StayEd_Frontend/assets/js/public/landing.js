@@ -9,115 +9,161 @@ const Landing = {
     this.mobilePanel = document.querySelector("[data-mobile-panel]");
     this.menuToggle = document.querySelector("[data-menu-toggle]");
     this.nav = document.querySelector("[data-landing-nav]");
-    this.introEl = document.querySelector("[data-hero-intro]");
-    this.loginPanel = document.querySelector(".st-landing-login-panel");
 
-    this.bindLoginStage();
+    this.bindStageTriggers();
     this.bindMobileMenu();
     this.bindNavScrollLinks();
-    this.bindNavShadow();
-    this.syncLoginPanelHeight();
-    window.addEventListener("resize", () => this.syncLoginPanelHeight());
-
-    // Web fonts finish loading after first paint and reflow the intro
-    // text (different metrics than the fallback font), which changes its
-    // height -- resync once that settles so the panel isn't sized off a
-    // stale measurement.
-    document.fonts?.ready?.then(() => this.syncLoginPanelHeight());
+    this.bindSignupForm();
+    this.bindForgotForm();
   },
 
-  // The login panel should sit centered in the hero with equal top/bottom
-  // margins, matching how far the hero's own padding already pushes the
-  // intro text down from the nav -- not sized off the intro text itself
-  // (the hero's height is fixed independently of either one, so pegging
-  // the panel to intro's height just made it look small and lopsided).
-  // CSS percentage heights on a grid item in an auto-sized row can't
-  // express this reliably (the row can't resolve a % height without
-  // first knowing its own size -- a circular dependency), so this reads
-  // the hero's real height/padding and sets the panel's height inline.
-  syncLoginPanelHeight() {
-    if (!this.introEl || !this.loginPanel) return;
-    const hero = this.introEl.closest(".st-landing-hero");
-    if (!hero) return;
-    const heroHeight = hero.getBoundingClientRect().height;
-    const margin = parseFloat(getComputedStyle(hero).paddingTop) || 0;
-    // The nav overlays the hero's own top edge (it's sticky, the hero
-    // renders full-bleed behind it), so the space that's actually
-    // *visible* above the panel is padding-top minus the nav's height --
-    // add that back so the visible gap below matches the visible gap
-    // above, not just the two CSS-box margins in the abstract. Measuring
-    // .st-landing-nav-inner specifically (not the whole <header>, which
-    // also contains the mobile hamburger panel) matters here: this runs
-    // right after closing that panel, and its 300ms collapse transition
-    // hasn't settled yet, so the header's own rect briefly still
-    // includes its expanded height. The inner bar is a fixed 72px
-    // regardless, so it sidesteps that race entirely.
-    const navHeight =
-      document.querySelector(".st-landing-nav-inner")?.getBoundingClientRect()
-        .height || 0;
-    // Extra breathing room on top of the bare minimum -- otherwise the
-    // visible gap (padding-top minus the nav's overlay height) comes out
-    // to ~12px, which reads as "no space" rather than an intentional
-    // margin. Mobile uses a bigger value so the panel's top lands at the
-    // same visible depth as the mobile hero-intro's text -- keep this in
-    // sync with .st-landing-hero-login's own mobile margin-top override.
-    const extraBreathingRoom = window.innerWidth >= 768 ? 30 : 93;
-    // Desktop only: trims 20px off the bottom without moving the top --
-    // a flat subtraction here (rather than adding it into
-    // extraBreathingRoom, which affects both margins symmetrically)
-    // shortens the panel while leaving its top position untouched.
-    const desktopBottomTrim = window.innerWidth >= 768 ? 20 : 0;
-    const panelHeight =
-      heroHeight - (margin + extraBreathingRoom) * 2 + navHeight - desktopBottomTrim;
-    if (panelHeight > 0) {
-      this.loginPanel.style.height = `${Math.max(panelHeight, 200)}px`;
-    }
-  },
-
-  bindLoginStage() {
+  bindStageTriggers() {
     if (!this.heroStage) return;
 
     document.querySelectorAll("[data-open-login]").forEach((btn) => {
-      btn.addEventListener("click", () => this.openLogin());
+      btn.addEventListener("click", (event) => {
+        event.preventDefault();
+        this.setStage("login");
+      });
     });
 
-    document.querySelectorAll("[data-close-login]").forEach((el) => {
-      el.addEventListener("click", () => this.closeLogin());
+    document.querySelectorAll("[data-open-signup]").forEach((btn) => {
+      btn.addEventListener("click", (event) => {
+        event.preventDefault();
+        this.setStage("signup");
+      });
+    });
+
+    document.querySelectorAll("[data-open-forgot]").forEach((btn) => {
+      btn.addEventListener("click", (event) => {
+        event.preventDefault();
+        this.setStage("forgot");
+      });
+    });
+
+    document.querySelectorAll("[data-close-panel]").forEach((btn) => {
+      btn.addEventListener("click", () => this.setStage("intro"));
     });
 
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && this.heroStage.classList.contains("is-login")) {
-        this.closeLogin();
+      if (
+        event.key === "Escape" &&
+        this.heroStage.dataset.stage !== "intro"
+      ) {
+        this.setStage("intro");
       }
     });
   },
 
-  openLogin() {
-    const wasMobileMenuOpen = this.mobilePanel?.classList.contains("is-open");
+  setStage(stage) {
     this.closeMobileMenu();
-    this.heroStage.classList.add("is-login");
-    // Re-measure right before showing the panel -- the load-time syncs
-    // can catch the hero mid-reflow (e.g. text still wrapping in a
-    // fallback font before web fonts finish loading), so this guarantees
-    // a fresh, correct measurement at the moment it's actually needed.
-    this.syncLoginPanelHeight();
+    this.heroStage.dataset.stage = stage;
 
-    // Scrolling has to wait until the mobile menu's 300ms collapse
-    // transition has settled -- it keeps shifting layout each frame, so
-    // scrolling too early computes the target against a layout that's
-    // still moving and overshoots.
-    const hero = this.heroStage.closest(".st-landing-hero");
-    const scrollDelay = wasMobileMenuOpen ? 320 : 0;
-    setTimeout(() => {
-      if (hero) hero.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, scrollDelay);
+    if (stage === "intro") return;
 
-    const email = this.heroStage.querySelector("#email");
-    if (email) setTimeout(() => email.focus(), 350);
+    const emailId =
+      stage === "login" ? "email" : stage === "signup" ? "signupEmail" : "forgotEmail";
+    const emailInput = document.getElementById(emailId);
+    if (emailInput) setTimeout(() => emailInput.focus(), 350);
   },
 
-  closeLogin() {
-    this.heroStage.classList.remove("is-login");
+  bindSignupForm() {
+    const form = document.getElementById("signupForm");
+    if (!form) return;
+
+    const rules = {
+      length: (v) => v.length >= 8,
+      upper: (v) => /[A-Z]/.test(v),
+      lower: (v) => /[a-z]/.test(v),
+      number: (v) => /[0-9]/.test(v),
+    };
+    const rulesList = document.querySelector("[data-signup-password-rules]");
+    const passwordInput = document.getElementById("signupPassword");
+
+    if (rulesList && passwordInput) {
+      passwordInput.addEventListener("input", () => {
+        const value = passwordInput.value;
+        Object.keys(rules).forEach((key) => {
+          const item = rulesList.querySelector(`[data-rule="${key}"]`);
+          if (!item) return;
+          const valid = rules[key](value);
+          item.classList.toggle("is-valid", valid);
+          const icon = item.querySelector(".material-symbols-outlined");
+          if (icon) icon.textContent = valid ? "check_circle" : "circle";
+        });
+      });
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const data = Utils.serialize(form);
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      if (data.password !== data.confirm_password) {
+        Toast.error("Passwords do not match.");
+        return;
+      }
+
+      const submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.disabled = true;
+
+      try {
+        const response = await Auth.register({
+          full_name: data.full_name.trim(),
+          email: data.email.trim(),
+          password: data.password,
+        });
+
+        Toast.success(
+          response?.message || "Registration submitted successfully.",
+        );
+
+        setTimeout(() => {
+          window.location.href = "pages/auth/pending.html";
+        }, 1200);
+      } catch (error) {
+        console.error("Registration error:", error);
+        Toast.error(
+          error?.data?.message || error?.message || "Registration failed.",
+        );
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+      }
+    });
+  },
+
+  bindForgotForm() {
+    const form = document.getElementById("forgotPasswordForm");
+    if (!form) return;
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const email = document.getElementById("forgotEmail").value.trim();
+
+      if (!email) {
+        Toast.warning("Please enter your email.");
+        return;
+      }
+
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        Toast.warning("Enter a valid email address.");
+        return;
+      }
+
+      try {
+        await Auth.forgotPassword(email);
+        Toast.success("Password reset instructions have been sent.");
+        setTimeout(() => this.setStage("login"), 1200);
+      } catch (error) {
+        Toast.error(error.message || "Unable to send reset email.");
+      }
+    });
   },
 
   bindMobileMenu() {
@@ -155,17 +201,6 @@ const Landing = {
         target.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     });
-  },
-
-  bindNavShadow() {
-    if (!this.nav) return;
-
-    const toggle = () => {
-      this.nav.classList.toggle("is-scrolled", window.scrollY > 8);
-    };
-
-    toggle();
-    window.addEventListener("scroll", toggle, { passive: true });
   },
 };
 

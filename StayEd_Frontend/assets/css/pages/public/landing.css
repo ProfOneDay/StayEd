@@ -6,29 +6,45 @@
   display: block;
 }
 
+/* The whole page fits in one viewport, no scrolling -- nav and footer take
+   their natural height, the hero flexes to fill whatever's left. */
 .st-landing {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   font-family: var(--st-font-body);
   color: var(--st-on-surface);
   background: var(--st-surface);
 }
 
+/* Wraps the hero AND the footer -- owns the photo layers so both the
+   hero content and the footer sit on top of the same continuous photo. */
+.st-landing-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#top {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 /* ---------- Nav ---------- */
 
 .st-landing-nav {
-  position: sticky;
-  top: 0;
-  z-index: var(--st-z-navbar);
+  flex-shrink: 0;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid transparent;
-  transition: var(--st-transition);
+  border-bottom: 1px solid var(--st-outline-variant);
   padding: 0 var(--st-margin-mobile);
-}
-
-.st-landing-nav.is-scrolled {
-  border-bottom-color: var(--st-outline-variant);
-  box-shadow: var(--st-shadow-xs);
 }
 
 @media (min-width: 768px) {
@@ -81,34 +97,57 @@
   letter-spacing: -0.01em;
 }
 
-.st-landing-links {
-  display: none;
-  align-items: center;
-  gap: 32px;
-}
-
-.st-landing-links a {
-  font-size: var(--st-font-size-label);
-  font-weight: 600;
-  color: var(--st-on-surface-variant);
-  text-decoration: none;
-  transition: var(--st-transition-color);
-}
-
-.st-landing-links a:hover {
-  color: var(--st-primary);
-}
-
-@media (min-width: 900px) {
-  .st-landing-links {
-    display: flex;
-  }
-}
-
 .st-landing-nav-actions {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.st-landing-nav-links {
+  display: none;
+  align-items: center;
+  gap: 20px;
+  padding-right: 12px;
+  margin-right: 4px;
+  border-right: 1px solid var(--st-outline-variant);
+}
+
+.st-landing-nav-links a {
+  font-size: var(--st-font-size-label);
+  font-weight: 600;
+  color: var(--st-on-surface-variant);
+  text-decoration: none;
+}
+
+.st-landing-nav-links a:hover {
+  color: var(--st-primary);
+  text-decoration: underline;
+}
+
+/* Only shown alongside the desktop Sign up/Log in buttons -- on narrower
+   viewports these move into the mobile menu panel instead so the nav
+   doesn't get crowded. */
+@media (min-width: 900px) {
+  .st-landing-nav-links {
+    display: flex;
+  }
+}
+
+.st-landing-nav-links--mobile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0 0;
+  margin: 4px 0 0;
+  border-right: none;
+  border-top: 1px solid var(--st-outline-variant);
+}
+
+@media (min-width: 900px) {
+  .st-landing-nav-links--mobile {
+    display: none;
+  }
 }
 
 .st-landing-menu-btn {
@@ -124,16 +163,26 @@
   cursor: pointer;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 560px) {
   .st-landing-menu-btn {
     display: none;
+  }
+}
+
+.st-landing-nav-actions .st-btn {
+  display: none;
+}
+
+@media (min-width: 560px) {
+  .st-landing-nav-actions .st-btn {
+    display: inline-flex;
   }
 }
 
 .st-landing-mobile-panel {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
   max-height: 0;
   overflow: hidden;
   padding: 0 var(--st-margin-mobile);
@@ -145,26 +194,14 @@
 }
 
 .st-landing-mobile-panel.is-open {
-  max-height: 320px;
+  max-height: 200px;
   padding: 12px var(--st-margin-mobile) 20px;
   border-bottom-color: var(--st-outline-variant);
 }
 
-.st-landing-mobile-panel a {
-  padding: 10px 4px;
-  font-size: var(--st-font-size-body);
-  font-weight: 600;
-  color: var(--st-on-surface);
-  text-decoration: none;
-  border-bottom: 1px solid var(--st-surface-container-low);
-}
-
-.st-landing-mobile-panel .st-btn {
-  margin-top: 8px;
-}
-
-@media (min-width: 900px) {
-  .st-landing-mobile-panel {
+@media (min-width: 560px) {
+  .st-landing-mobile-panel,
+  .st-landing-menu-btn {
     display: none;
   }
 }
@@ -188,25 +225,40 @@
   background: var(--st-surface-container-low);
 }
 
+/* A plain button styled to read as an inline text link -- used for the
+   in-panel "Forgot Password" / "Log In" / etc. triggers, which have to be
+   real <button>s (not <a href>s) now that they switch hero stages instead
+   of navigating. */
+.st-landing-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: var(--st-font-size-label);
+  font-weight: 600;
+  color: var(--st-primary);
+  cursor: pointer;
+}
+
+.st-landing-link-btn:hover {
+  text-decoration: underline;
+}
+
 /* ---------- Hero ---------- */
 
 .st-landing-hero {
   position: relative;
   overflow: hidden;
-  /* Mobile's content (badge/heading/subtitle wrap a lot at this width)
-     already exceeds min-height, so min-height isn't actually what's
-     governing the rendered height here -- padding-bottom is what
-     reliably adds height regardless of which one is binding. */
-  padding: 80px var(--st-margin-mobile) 40px;
+  flex: 1;
+  min-height: 0;
   display: flex;
-  align-items: flex-start;
-  min-height: 585px;
+  align-items: center;
+  padding: 24px var(--st-margin-mobile);
 }
 
 @media (min-width: 768px) {
   .st-landing-hero {
-    padding: 85px var(--st-margin-desktop) 0;
-    min-height: 808px;
+    padding: 24px var(--st-margin-desktop);
   }
 }
 
@@ -245,6 +297,16 @@
   width: 100%;
   max-width: var(--st-container-max);
   margin: 0 auto;
+  /* align-self:stretch forces this to hero's *actual* full height (a
+     definite value from the flex layout), not just a percentage that has
+     nothing concrete to resolve against -- max-height alone left the grid
+     stage free to size itself from content and silently overflow past
+     the hero's edge instead of respecting the available space. */
+  align-self: stretch;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
 }
 
 .st-landing-hero-disclaimer {
@@ -264,20 +326,24 @@
   }
 }
 
-/* Both children of the stage sit in the same grid cell so the intro
-   content and the login form can cross-fade in place instead of one
-   pushing the other around. Both use align-self:start (not stretch) --
-   stretching against an auto-sized row that also contains a
-   percentage-heighted item creates a circular sizing dependency (the row
-   can't resolve a % height without first knowing its own height), which
-   silently inflates whichever item doesn't have a fixed size. landing.js
-   measures the intro's real height and sets the login panel's height
-   explicitly instead, which is what actually determines their sizes now.
-   The hero has a fixed min-height regardless of which one is showing, so
-   opening the login form never resizes the page. */
+/* All panels share the same grid cell and cross-fade between each other.
+   The hero now flexes to fill whatever space is left between the nav and
+   footer (no fixed pixel height to protect a specific photo crop for, now
+   that there's nothing below it to scroll to), so each panel is simply
+   centered within it -- no JS height calculation needed. */
 .st-landing-hero-stage {
   position: relative;
   display: grid;
+  /* Grid rows default to a content-based minimum (min-height:auto) that
+     refuses to shrink below their tallest item, no matter what max-height
+     says -- minmax(0, ...) overrides that so the row (and everything
+     inside it) actually respects the available space, letting each
+     panel's own overflow-y:auto do the scrolling instead of the whole
+     stage silently overflowing past the hero's clipped edge. */
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  max-height: 100%;
+  overflow: hidden;
 }
 
 .st-landing-hero-stage > * {
@@ -285,78 +351,57 @@
 }
 
 .st-landing-hero-intro,
-.st-landing-hero-login {
+.st-landing-hero-login,
+.st-landing-hero-signup,
+.st-landing-hero-forgot {
+  opacity: 0;
+  pointer-events: none;
   transition:
     opacity 0.35s ease,
     transform 0.35s ease;
+  transform: translateY(14px);
+}
+
+.st-landing-hero-stage[data-stage="intro"] .st-landing-hero-intro,
+.st-landing-hero-stage[data-stage="login"] .st-landing-hero-login,
+.st-landing-hero-stage[data-stage="signup"] .st-landing-hero-signup,
+.st-landing-hero-stage[data-stage="forgot"] .st-landing-hero-forgot {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 
 .st-landing-hero-intro {
   max-width: 580px;
-  align-self: start;
-  /* Pulls the intro up so its visible gap under the nav matches the
-     login panel's -- the two aren't measured in the same scroll context
-     (intro is seen on a fresh, unscrolled load; the panel is only seen
-     after opening it, which auto-scrolls the hero flush against the
-     sticky nav), so hero's padding-top (85px, already more than the
-     panel's ~42px visible gap on its own) needs pulling back rather than
-     pushing further down to land on the same visible offset. */
-  margin-top: -13px;
-  /* Matches the login panel's own top padding, so the first visible
-     line (badge vs. "Back to StayEd") starts at the same depth as the
-     panel's content does inside its card, not just the same outer
-     bounding-box position. */
-  padding-top: 32px;
+  align-self: center;
+  /* Same reasoning as the auth panels: on a short viewport the full
+     badge/heading/subtitle/CTA/risk-legend stack can be taller than the
+     hero's available flex space, and centering an oversized item just
+     gets both ends clipped by overflow:hidden instead of scrolling.
+     This keeps the CTA buttons reachable via internal scroll instead of
+     silently invisible. */
+  max-height: 100%;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 24px;
+  gap: 20px;
   text-align: left;
 }
 
-.st-landing-hero-login {
-  /* Out of grid flow on purpose: align-self doesn't exempt a grid item
-     from contributing its own natural size to the row's auto-sizing --
-     only from where it's positioned within the resolved track. The login
-     form's unconstrained natural height (especially at narrow mobile
-     widths, where it wraps a lot) was inflating the row before
-     landing.js ever got to apply its computed height, which is exactly
-     the circular-sizing bug the intro/login split hit earlier. Absolute
-     positioning removes it from sizing entirely, so only the intro
-     content determines the hero's height. */
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  max-width: 580px;
-  /* Keep in sync with the extraBreathingRoom value landing.js subtracts
-     from the panel's height -- this is what pushes the top gap open to
-     match the bottom gap. */
-  margin-top: 30px;
+.st-landing-hero-login,
+.st-landing-hero-signup,
+.st-landing-hero-forgot {
+  max-width: 460px;
+  /* Capped to the row's own height, not just centered -- otherwise a
+     panel taller than the available space (signup, mainly) gets its top
+     and bottom both clipped by the hero's overflow:hidden instead of
+     scrolling, since centering an oversized item pushes half of it out
+     each side. The panel inside still handles the actual scrolling via
+     its own max-height/overflow-y. */
+  max-height: 100%;
+  align-self: center;
   display: flex;
-  opacity: 0;
-  transform: translateY(14px);
-  pointer-events: none;
-}
-
-@media (max-width: 767px) {
-  .st-landing-hero-login {
-    /* Matches the mobile hero-intro's visible top gap -- keep in sync
-       with the mobile branch of extraBreathingRoom in landing.js. */
-    margin-top: 93px;
-  }
-}
-
-.st-landing-hero-stage.is-login .st-landing-hero-intro {
-  opacity: 0;
-  transform: translateY(-14px);
-  pointer-events: none;
-}
-
-.st-landing-hero-stage.is-login .st-landing-hero-login {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
 }
 
 .st-landing-hero-badge {
@@ -378,10 +423,6 @@
 @media (min-width: 768px) {
   .st-landing-hero-title {
     font-size: 2.75rem;
-  }
-
-  .st-landing-hero-intro {
-    padding-top: 44px;
   }
 }
 
@@ -448,7 +489,7 @@
 .st-landing-hero-risk-group {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   width: 100%;
 }
 
@@ -495,7 +536,7 @@
   }
 }
 
-/* ---------- In-hero login panel (replaces the intro on the left) ---------- */
+/* ---------- In-hero auth panels (login / signup / forgot password) ---------- */
 
 .st-landing-login-back {
   display: inline-flex;
@@ -521,16 +562,15 @@
 
 .st-landing-login-panel {
   width: 100%;
-  max-width: 580px;
+  max-width: 460px;
   background: rgba(255, 255, 255, 0.55);
   backdrop-filter: var(--st-glass-blur);
   -webkit-backdrop-filter: var(--st-glass-blur);
   border: var(--st-glass-border);
   border-radius: var(--st-radius-xl);
   box-shadow: var(--st-glass-shadow);
-  padding: 32px 24px;
-  /* Height is set inline by landing.js, measured off the intro block --
-     see the .st-landing-hero-stage comment above for why. */
+  padding: 24px;
+  max-height: 100%;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(18, 53, 91, 0.28) transparent;
@@ -558,226 +598,57 @@
 
 @media (min-width: 768px) {
   .st-landing-login-panel {
-    padding: 44px 40px;
+    padding: 32px;
   }
-}
-
-/* ---------- Generic section shell ---------- */
-
-.st-landing-section {
-  padding: 56px var(--st-margin-mobile);
-}
-
-@media (min-width: 768px) {
-  .st-landing-section {
-    padding: 80px var(--st-margin-desktop);
-  }
-}
-
-.st-landing-section--alt {
-  background: var(--st-surface-container-low);
-}
-
-.st-landing-section-inner {
-  max-width: var(--st-container-max);
-  margin: 0 auto;
-}
-
-.st-landing-eyebrow {
-  display: inline-block;
-  font-size: var(--st-font-size-caption);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--st-secondary);
-  margin-bottom: 8px;
-}
-
-.st-landing-section-inner > h2 {
-  font-family: var(--st-font-heading);
-  font-size: var(--st-font-size-title);
-  font-weight: 800;
-  color: var(--st-on-surface);
-  margin-bottom: var(--st-stack-lg);
-  max-width: 640px;
-}
-
-/* ---------- About / feature grid ---------- */
-
-.st-landing-about-grid {
-  display: grid;
-  gap: 40px;
-}
-
-@media (min-width: 900px) {
-  .st-landing-about-grid {
-    grid-template-columns: 1fr 1fr;
-    align-items: start;
-  }
-}
-
-.st-landing-about-copy h2 {
-  font-family: var(--st-font-heading);
-  font-size: var(--st-font-size-title);
-  font-weight: 800;
-  margin: 8px 0 12px;
-}
-
-.st-landing-about-copy p {
-  font-size: var(--st-font-size-body);
-  line-height: 1.6;
-  color: var(--st-on-surface-variant);
-}
-
-.st-landing-feature-list {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.st-landing-feature {
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-}
-
-.st-landing-feature .material-symbols-outlined {
-  flex-shrink: 0;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--st-radius-lg);
-  background: var(--st-primary-fixed);
-  color: var(--st-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--st-icon-lg);
-}
-
-.st-landing-feature h3 {
-  font-size: var(--st-font-size-body);
-  font-weight: 700;
-  color: var(--st-on-surface);
-  margin-bottom: 4px;
-}
-
-.st-landing-feature p {
-  font-size: var(--st-font-size-label);
-  line-height: 1.5;
-  color: var(--st-on-surface-variant);
-}
-
-/* ---------- How it works ---------- */
-
-.st-landing-steps {
-  display: grid;
-  gap: 24px;
-}
-
-@media (min-width: 700px) {
-  .st-landing-steps {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1100px) {
-  .st-landing-steps {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-.st-landing-step {
-  background: #fff;
-  border: 1px solid rgba(195, 198, 207, 0.35);
-  border-radius: var(--st-card-radius);
-  box-shadow: var(--st-shadow-xs);
-  padding: var(--st-card-padding);
-}
-
-.st-landing-step-num {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--st-primary);
-  color: #fff;
-  font-weight: 700;
-  font-size: var(--st-font-size-label);
-  margin-bottom: 12px;
-}
-
-.st-landing-step h3 {
-  font-size: var(--st-font-size-body);
-  font-weight: 700;
-  color: var(--st-on-surface);
-  margin-bottom: 4px;
-}
-
-.st-landing-step p {
-  font-size: var(--st-font-size-label);
-  line-height: 1.5;
-  color: var(--st-on-surface-variant);
-}
-
-/* ---------- Risk cards ---------- */
-
-.st-landing-risk-cards {
-  display: grid;
-  gap: 20px;
-}
-
-@media (min-width: 800px) {
-  .st-landing-risk-cards {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.st-landing-risk-card {
-  background: #fff;
-  border-radius: var(--st-card-radius);
-  box-shadow: var(--st-shadow-xs);
-  padding: var(--st-card-padding);
-  border-top: 4px solid var(--st-risk-neutral);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.st-landing-risk-card--low {
-  border-top-color: var(--st-risk-low);
-}
-
-.st-landing-risk-card--moderate {
-  border-top-color: var(--st-risk-moderate);
-}
-
-.st-landing-risk-card--high {
-  border-top-color: var(--st-risk-high);
-}
-
-.st-landing-risk-threshold {
-  font-family: var(--st-font-heading);
-  font-size: var(--st-font-size-heading);
-  font-weight: 800;
-  color: var(--st-on-surface);
-}
-
-.st-landing-risk-card p:last-child {
-  font-size: var(--st-font-size-label);
-  line-height: 1.5;
-  color: var(--st-on-surface-variant);
 }
 
 /* ---------- Footer ---------- */
 
 .st-landing-footer {
-  padding: 20px var(--st-margin-mobile);
+  position: relative;
+  flex-shrink: 0;
+  padding: 10px var(--st-margin-mobile);
+  min-height: 0;
+  /* A real frosted-glass panel, not just a flat tint -- it sits on the
+     same photo the hero uses (now living in the shared .st-landing-body
+     wrapper behind it), so the blur+translucency actually has something
+     to reveal instead of just reading as a solid painted color. */
+  background: rgba(18, 53, 91, 0.58);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.st-landing-footer .st-footer-left span,
+.st-landing-footer .st-footer-version,
+.st-landing-footer .st-footer-right a {
+  color: #d5dae2;
+}
+
+.st-landing-footer .st-footer-right a:hover {
+  color: #fff;
 }
 
 @media (min-width: 768px) {
   .st-landing-footer {
-    padding: 20px var(--st-margin-desktop);
+    padding: 10px var(--st-margin-desktop);
+  }
+}
+
+/* ---------- Desktop: wider hero content + auth panels ---------- */
+
+@media (min-width: 768px) {
+  .st-landing-hero-intro,
+  .st-landing-hero-login,
+  .st-landing-hero-signup,
+  .st-landing-hero-forgot {
+    max-width: min(40vw, 720px);
+  }
+
+  .st-landing-hero-subtitle {
+    max-width: min(40vw, 720px);
+  }
+
+  .st-landing-login-panel {
+    max-width: min(40vw, 720px);
   }
 }
