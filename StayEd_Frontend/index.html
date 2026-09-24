@@ -1,10 +1,383 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
-    <meta http-equiv="refresh" content="0; url=pages/auth/login.html" />
+    <script data-stayed-font-scale-bootstrap>
+      (function () {
+        try {
+          var v = localStorage.getItem("stayed_font_scale");
+          if (v) document.documentElement.setAttribute("data-font-scale", v);
+        } catch (e) {}
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StayEd | Early Dropout Risk Decision Support</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/main.css" />
+
     <link rel="icon" type="image/x-icon" href="assets/img/brand/favicon.ico" />
+    <link rel="apple-touch-icon" href="assets/img/brand/apple-touch-icon.png" />
   </head>
-  <body>
-    Redirecting...
+
+  <body class="st-landing">
+    <!-- Nav -->
+    <header class="st-landing-nav" data-landing-nav>
+      <div class="st-landing-nav-inner">
+        <a href="#top" class="st-landing-brand">
+          <span class="st-landing-brand-mark">
+            <img src="assets/img/brand/logo-dark.png" alt="" />
+          </span>
+          <span class="st-landing-brand-name">StayEd</span>
+        </a>
+
+        <nav class="st-landing-links" data-landing-links>
+          <a href="#about">About</a>
+          <a href="#how-it-works">How it works</a>
+          <a href="#risk-levels">Risk levels</a>
+        </nav>
+
+        <div class="st-landing-nav-actions">
+          <button type="button" class="st-btn st-btn-primary" data-open-login>
+            Log in
+          </button>
+          <button
+            type="button"
+            class="st-landing-menu-btn"
+            data-menu-toggle
+            aria-label="Open menu"
+            aria-expanded="false"
+          >
+            <span class="material-symbols-outlined">menu</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile menu panel -->
+      <div class="st-landing-mobile-panel" data-mobile-panel>
+        <a href="#about">About</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="#risk-levels">Risk levels</a>
+        <button type="button" class="st-btn st-btn-primary st-btn-block" data-open-login>
+          Log in
+        </button>
+      </div>
+    </header>
+
+    <main id="top">
+      <!-- Hero -->
+      <section class="st-landing-hero">
+        <div class="st-landing-hero-bg"></div>
+        <div class="st-landing-hero-blur"></div>
+        <span class="st-landing-hero-disclaimer">Image is AI-generated</span>
+        <div class="st-landing-hero-inner">
+          <div class="st-landing-hero-stage" data-hero-stage>
+            <!-- Intro content -->
+            <div class="st-landing-hero-intro" data-hero-intro>
+              <span class="st-pill st-landing-hero-badge">
+                For ALS teachers of Pangasinan Division II
+              </span>
+
+              <h1 class="st-landing-hero-title">
+                Early dropout risk decision support system
+              </h1>
+
+              <p class="st-landing-hero-subtitle">
+                StayEd helps Alternative Learning System teachers spot
+                learners at risk of dropping out early, with real-time
+                analytics and intervention tools built for how Community
+                Learning Centers actually work.
+              </p>
+
+              <div class="st-landing-hero-cta">
+                <button type="button" class="st-btn st-btn-white" data-open-login>
+                  Log in to StayEd
+                </button>
+                <a href="#how-it-works" class="st-btn st-btn-outline st-btn-onphoto">
+                  See how it works
+                </a>
+              </div>
+
+              <div class="st-landing-hero-risk-group">
+                <hr class="st-landing-hero-divider" />
+                <p class="st-landing-hero-risk-caption">
+                  Every learner is classified into three risk levels.
+                </p>
+                <div class="st-landing-risk-legend">
+                  <span class="st-risk-badge st-risk-badge--low">
+                    <span class="st-risk-dot"></span> Low
+                  </span>
+                  <span class="st-risk-badge st-risk-badge--moderate">
+                    <span class="st-risk-dot"></span> Moderate
+                  </span>
+                  <span class="st-risk-badge st-risk-badge--high">
+                    <span class="st-risk-dot"></span> High
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Login form, swaps in over the same hero photo -->
+            <div class="st-landing-hero-login" data-hero-login>
+              <div class="st-landing-login-panel">
+                <button
+                  type="button"
+                  class="st-landing-login-back"
+                  data-close-login
+                >
+                  <span class="material-symbols-outlined">arrow_back</span>
+                  Back to StayEd
+                </button>
+
+                <div class="auth-header">
+                  <h2>Welcome Back</h2>
+                  <p>
+                    Sign in using your registered DepEd email address to
+                    securely access learner records, predictive analytics,
+                    and intervention tools.
+                  </p>
+                </div>
+
+                <form id="loginForm" class="auth-form" novalidate>
+                  <div class="form-group">
+                    <label for="email">DepEd Email Address</label>
+                    <input
+                      id="email"
+                      type="email"
+                      placeholder="name.surname@deped.gov.ph"
+                      autocomplete="email"
+                      required
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="password-wrapper">
+                      <input
+                        id="password"
+                        type="password"
+                        placeholder="••••••••"
+                        autocomplete="current-password"
+                        required
+                      />
+                      <button
+                        id="togglePassword"
+                        type="button"
+                        class="password-toggle"
+                        aria-label="Show password"
+                      >
+                        <span class="material-symbols-outlined">visibility</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="auth-options">
+                    <label>
+                      <input type="checkbox" id="remember" />
+                      Keep me logged in
+                    </label>
+                    <a href="pages/auth/forgot-password.html">Forgot Password</a>
+                  </div>
+
+                  <button type="submit" class="st-btn st-btn-primary st-btn-block">
+                    Log In
+                  </button>
+                </form>
+
+                <div class="auth-register">
+                  Don't have a teacher account?
+                  <a href="pages/auth/register.html" id="createAccountLink">Create Account</a>
+                </div>
+
+                <div class="auth-notice">
+                  <span class="material-symbols-outlined auth-notice-icon">info</span>
+                  <p>
+                    New accounts are reviewed by an administrator before
+                    learner records become visible.
+                  </p>
+                </div>
+
+                <div class="auth-status">
+                  <span class="auth-status-indicator">
+                    <span class="auth-status-ping"></span>
+                    <span class="auth-status-dot"></span>
+                  </span>
+                  <span class="auth-status-label">All systems operational</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Built for teachers -->
+      <section class="st-landing-section" id="about">
+        <div class="st-landing-section-inner st-landing-about-grid">
+          <div class="st-landing-about-copy">
+            <span class="st-landing-eyebrow">Built for ALS teachers</span>
+            <h2>Built for teachers who work across learning centers</h2>
+            <p>
+              StayEd was designed around the day-to-day reality of ALS
+              instruction — multiple learning centers, mixed learning levels,
+              and limited time to review every learner's standing by hand.
+            </p>
+          </div>
+
+          <div class="st-landing-feature-list">
+            <div class="st-landing-feature">
+              <span class="material-symbols-outlined">insights</span>
+              <div>
+                <h3>Predictive risk scoring</h3>
+                <p>
+                  Learners are automatically flagged Low, Moderate, or High
+                  risk based on attendance, scores, and engagement trends.
+                </p>
+              </div>
+            </div>
+
+            <div class="st-landing-feature">
+              <span class="material-symbols-outlined">groups</span>
+              <div>
+                <h3>Centralized learner records</h3>
+                <p>
+                  Enrollment, module progress, and assessment scores stay in
+                  one place across every class you handle.
+                </p>
+              </div>
+            </div>
+
+            <div class="st-landing-feature">
+              <span class="material-symbols-outlined">notifications_active</span>
+              <div>
+                <h3>Early warning alerts</h3>
+                <p>
+                  Get notified the moment a learner's risk level changes, so
+                  interventions happen while they still matter.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- How it works -->
+      <section class="st-landing-section st-landing-section--alt" id="how-it-works">
+        <div class="st-landing-section-inner">
+          <span class="st-landing-eyebrow">How it works</span>
+          <h2>From roster to intervention, in four steps</h2>
+
+          <div class="st-landing-steps">
+            <div class="st-landing-step">
+              <span class="st-landing-step-num">1</span>
+              <h3>Enroll your learners</h3>
+              <p>Import or add learners to your class roster in minutes.</p>
+            </div>
+            <div class="st-landing-step">
+              <span class="st-landing-step-num">2</span>
+              <h3>Record scores &amp; attendance</h3>
+              <p>Log module and assessment results as your class progresses.</p>
+            </div>
+            <div class="st-landing-step">
+              <span class="st-landing-step-num">3</span>
+              <h3>Review risk levels</h3>
+              <p>StayEd surfaces each learner's dropout risk automatically.</p>
+            </div>
+            <div class="st-landing-step">
+              <span class="st-landing-step-num">4</span>
+              <h3>Act on early warnings</h3>
+              <p>Plan and track interventions before a learner falls behind.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Risk levels -->
+      <section class="st-landing-section" id="risk-levels">
+        <div class="st-landing-section-inner">
+          <span class="st-landing-eyebrow">What the risk levels mean</span>
+          <h2>A shared standard for every learning center</h2>
+
+          <div class="st-landing-risk-cards">
+            <div class="st-landing-risk-card st-landing-risk-card--low">
+              <span class="st-risk-badge st-risk-badge--low">
+                <span class="st-risk-dot"></span> Low risk
+              </span>
+              <p class="st-landing-risk-threshold">Below 0.40</p>
+              <p>
+                Learner is on track. Continue regular monitoring — no action
+                needed yet.
+              </p>
+            </div>
+            <div class="st-landing-risk-card st-landing-risk-card--moderate">
+              <span class="st-risk-badge st-risk-badge--moderate">
+                <span class="st-risk-dot"></span> Moderate risk
+              </span>
+              <p class="st-landing-risk-threshold">0.40 to 0.69</p>
+              <p>
+                Warning signs are emerging. A light-touch check-in can keep
+                the learner on track.
+              </p>
+            </div>
+            <div class="st-landing-risk-card st-landing-risk-card--high">
+              <span class="st-risk-badge st-risk-badge--high">
+                <span class="st-risk-dot"></span> High risk
+              </span>
+              <p class="st-landing-risk-threshold">0.70 and above</p>
+              <p>
+                Learner is likely to drop out without intervention. Prioritize
+                outreach now.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="st-footer st-landing-footer">
+      <div class="st-footer-left">
+        <span>© 2026 Department of Education - Alternative Learning System</span>
+        <span class="st-footer-version">Version 1.0</span>
+      </div>
+      <div class="st-footer-right">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Contact Us</a>
+      </div>
+    </footer>
+
+    <!-- Shared Components -->
+    <div id="st-toast-container" class="st-toast-container"></div>
+
+    <!-- Mock (development backend) -->
+    <script src="assets/js/config.js"></script>
+
+    <!-- Demo registration (isolated, see DEMO MODE) -->
+    <script src="assets/js/demo/demo-auth-service.js"></script>
+
+    <!-- Core -->
+    <script src="assets/js/core/utils.js"></script>
+    <script src="assets/js/core/api.js"></script>
+    <script src="assets/js/core/auth.js"></script>
+
+    <!-- Components -->
+    <script src="assets/js/components/toast.js"></script>
+
+    <!-- Page -->
+    <script src="assets/js/auth/auth-page.js"></script>
+    <script src="assets/js/auth/login.js"></script>
+    <script src="assets/js/public/landing.js"></script>
   </body>
 </html>

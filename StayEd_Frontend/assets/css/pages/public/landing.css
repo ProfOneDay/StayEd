@@ -1,0 +1,791 @@
+/* Deliberate no-op placeholder rule -- see module-management.css for why:
+   the literal first rule of a file loaded through main.css's @import chain
+   can be silently dropped by the browser's CSS parser. Keeping a throwaway
+   first rule here avoids losing whatever rule would otherwise be first. */
+.st-landing-root-guard {
+  display: block;
+}
+
+.st-landing {
+  font-family: var(--st-font-body);
+  color: var(--st-on-surface);
+  background: var(--st-surface);
+}
+
+/* ---------- Nav ---------- */
+
+.st-landing-nav {
+  position: sticky;
+  top: 0;
+  z-index: var(--st-z-navbar);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid transparent;
+  transition: var(--st-transition);
+  padding: 0 var(--st-margin-mobile);
+}
+
+.st-landing-nav.is-scrolled {
+  border-bottom-color: var(--st-outline-variant);
+  box-shadow: var(--st-shadow-xs);
+}
+
+@media (min-width: 768px) {
+  .st-landing-nav {
+    padding: 0 var(--st-margin-desktop);
+  }
+}
+
+.st-landing-nav-inner {
+  max-width: var(--st-container-max);
+  margin: 0 auto;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.st-landing-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.st-landing-brand-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--st-radius-lg);
+  background: #fff;
+  box-shadow: var(--st-shadow-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.st-landing-brand-mark img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.st-landing-brand-name {
+  font-family: var(--st-font-heading);
+  font-size: var(--st-font-size-heading);
+  font-weight: 800;
+  color: var(--st-primary);
+  letter-spacing: -0.01em;
+}
+
+.st-landing-links {
+  display: none;
+  align-items: center;
+  gap: 32px;
+}
+
+.st-landing-links a {
+  font-size: var(--st-font-size-label);
+  font-weight: 600;
+  color: var(--st-on-surface-variant);
+  text-decoration: none;
+  transition: var(--st-transition-color);
+}
+
+.st-landing-links a:hover {
+  color: var(--st-primary);
+}
+
+@media (min-width: 900px) {
+  .st-landing-links {
+    display: flex;
+  }
+}
+
+.st-landing-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.st-landing-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--st-outline-variant);
+  border-radius: var(--st-button-radius);
+  background: #fff;
+  color: var(--st-primary);
+  cursor: pointer;
+}
+
+@media (min-width: 900px) {
+  .st-landing-menu-btn {
+    display: none;
+  }
+}
+
+.st-landing-mobile-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 0;
+  overflow: hidden;
+  padding: 0 var(--st-margin-mobile);
+  background: #fff;
+  border-bottom: 1px solid transparent;
+  transition:
+    max-height 0.3s ease,
+    padding 0.3s ease;
+}
+
+.st-landing-mobile-panel.is-open {
+  max-height: 320px;
+  padding: 12px var(--st-margin-mobile) 20px;
+  border-bottom-color: var(--st-outline-variant);
+}
+
+.st-landing-mobile-panel a {
+  padding: 10px 4px;
+  font-size: var(--st-font-size-body);
+  font-weight: 600;
+  color: var(--st-on-surface);
+  text-decoration: none;
+  border-bottom: 1px solid var(--st-surface-container-low);
+}
+
+.st-landing-mobile-panel .st-btn {
+  margin-top: 8px;
+}
+
+@media (min-width: 900px) {
+  .st-landing-mobile-panel {
+    display: none;
+  }
+}
+
+.st-btn-onphoto {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff;
+}
+
+.st-btn-onphoto:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.st-btn-white {
+  background: #fff;
+  color: var(--st-primary);
+}
+
+.st-btn-white:hover {
+  background: var(--st-surface-container-low);
+}
+
+/* ---------- Hero ---------- */
+
+.st-landing-hero {
+  position: relative;
+  overflow: hidden;
+  /* Mobile's content (badge/heading/subtitle wrap a lot at this width)
+     already exceeds min-height, so min-height isn't actually what's
+     governing the rendered height here -- padding-bottom is what
+     reliably adds height regardless of which one is binding. */
+  padding: 80px var(--st-margin-mobile) 40px;
+  display: flex;
+  align-items: flex-start;
+  min-height: 585px;
+}
+
+@media (min-width: 768px) {
+  .st-landing-hero {
+    padding: 85px var(--st-margin-desktop) 0;
+    min-height: 808px;
+  }
+}
+
+.st-landing-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-image: url("../../../img/login-hero.jpg");
+  background-size: cover;
+  background-position: center;
+  /* Zoomed in ~20% -- overflow:hidden on .st-landing-hero clips the
+     excess, and transform-origin defaults to center so it stays
+     centered on the same focal point. */
+  transform: scale(1.2);
+}
+
+/* A frosted, blue-tinted glass panel over the left portion of the photo
+   (where the text/login form sit), fading out towards the right so the
+   photo itself stays crisp and visible there -- matches the reference. */
+.st-landing-hero-blur {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    100deg,
+    rgba(9, 33, 62, 0.6) 0%,
+    rgba(13, 40, 70, 0.46) 28%,
+    rgba(13, 40, 70, 0.2) 52%,
+    transparent 76%
+  );
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  -webkit-mask-image: linear-gradient(
+    100deg,
+    #000 0%,
+    #000 36%,
+    transparent 72%
+  );
+  mask-image: linear-gradient(100deg, #000 0%, #000 36%, transparent 72%);
+}
+
+.st-landing-hero-inner {
+  position: relative;
+  width: 100%;
+  max-width: var(--st-container-max);
+  margin: 0 auto;
+}
+
+.st-landing-hero-disclaimer {
+  position: absolute;
+  right: var(--st-margin-mobile);
+  bottom: 10px;
+  z-index: 1;
+  font-size: var(--st-font-size-micro);
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+@media (min-width: 768px) {
+  .st-landing-hero-disclaimer {
+    right: var(--st-margin-desktop);
+  }
+}
+
+/* Both children of the stage sit in the same grid cell so the intro
+   content and the login form can cross-fade in place instead of one
+   pushing the other around. Both use align-self:start (not stretch) --
+   stretching against an auto-sized row that also contains a
+   percentage-heighted item creates a circular sizing dependency (the row
+   can't resolve a % height without first knowing its own height), which
+   silently inflates whichever item doesn't have a fixed size. landing.js
+   measures the intro's real height and sets the login panel's height
+   explicitly instead, which is what actually determines their sizes now.
+   The hero has a fixed min-height regardless of which one is showing, so
+   opening the login form never resizes the page. */
+.st-landing-hero-stage {
+  position: relative;
+  display: grid;
+}
+
+.st-landing-hero-stage > * {
+  grid-area: 1 / 1;
+}
+
+.st-landing-hero-intro,
+.st-landing-hero-login {
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
+}
+
+.st-landing-hero-intro {
+  max-width: 580px;
+  align-self: start;
+  /* Pulls the intro up so its visible gap under the nav matches the
+     login panel's -- the two aren't measured in the same scroll context
+     (intro is seen on a fresh, unscrolled load; the panel is only seen
+     after opening it, which auto-scrolls the hero flush against the
+     sticky nav), so hero's padding-top (85px, already more than the
+     panel's ~42px visible gap on its own) needs pulling back rather than
+     pushing further down to land on the same visible offset. */
+  margin-top: -13px;
+  /* Matches the login panel's own top padding, so the first visible
+     line (badge vs. "Back to StayEd") starts at the same depth as the
+     panel's content does inside its card, not just the same outer
+     bounding-box position. */
+  padding-top: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  text-align: left;
+}
+
+.st-landing-hero-login {
+  /* Out of grid flow on purpose: align-self doesn't exempt a grid item
+     from contributing its own natural size to the row's auto-sizing --
+     only from where it's positioned within the resolved track. The login
+     form's unconstrained natural height (especially at narrow mobile
+     widths, where it wraps a lot) was inflating the row before
+     landing.js ever got to apply its computed height, which is exactly
+     the circular-sizing bug the intro/login split hit earlier. Absolute
+     positioning removes it from sizing entirely, so only the intro
+     content determines the hero's height. */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  max-width: 580px;
+  /* Keep in sync with the extraBreathingRoom value landing.js subtracts
+     from the panel's height -- this is what pushes the top gap open to
+     match the bottom gap. */
+  margin-top: 30px;
+  display: flex;
+  opacity: 0;
+  transform: translateY(14px);
+  pointer-events: none;
+}
+
+@media (max-width: 767px) {
+  .st-landing-hero-login {
+    /* Matches the mobile hero-intro's visible top gap -- keep in sync
+       with the mobile branch of extraBreathingRoom in landing.js. */
+    margin-top: 93px;
+  }
+}
+
+.st-landing-hero-stage.is-login .st-landing-hero-intro {
+  opacity: 0;
+  transform: translateY(-14px);
+  pointer-events: none;
+}
+
+.st-landing-hero-stage.is-login .st-landing-hero-login {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.st-landing-hero-badge {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-size: var(--st-font-size-label);
+  font-weight: 600;
+  padding: 6px 16px;
+}
+
+.st-landing-hero-title {
+  font-family: var(--st-font-heading);
+  font-size: var(--st-font-size-display);
+  font-weight: 800;
+  line-height: 1.15;
+  color: #fff;
+}
+
+@media (min-width: 768px) {
+  .st-landing-hero-title {
+    font-size: 2.75rem;
+  }
+
+  .st-landing-hero-intro {
+    padding-top: 44px;
+  }
+}
+
+.st-landing-hero-subtitle {
+  font-size: var(--st-font-size-body);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.88);
+  max-width: 560px;
+}
+
+.st-landing-hero-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 340px;
+}
+
+@media (min-width: 560px) {
+  .st-landing-hero-cta {
+    flex-direction: row;
+    max-width: none;
+  }
+}
+
+.st-landing-hero-cta .st-btn {
+  width: 100%;
+}
+
+@media (min-width: 560px) {
+  .st-landing-hero-cta .st-btn {
+    width: auto;
+  }
+}
+
+.st-landing-risk-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* The shared .st-risk-badge soft backgrounds are tuned for white cards
+   elsewhere in the app -- nearly invisible on a dark photo. Give the hero
+   legend its own opaque pastel fills so it stays legible here. */
+.st-landing-risk-legend .st-risk-badge {
+  border-color: transparent;
+}
+
+.st-landing-risk-legend .st-risk-badge--low {
+  background: #e3f6dd;
+  color: #1e6b1e;
+}
+
+.st-landing-risk-legend .st-risk-badge--moderate {
+  background: #fdecd2;
+  color: #a35c00;
+}
+
+.st-landing-risk-legend .st-risk-badge--high {
+  background: #fbdcdc;
+  color: #a3151c;
+}
+
+.st-landing-hero-risk-group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+
+.st-landing-hero-divider {
+  width: 100%;
+  max-width: 340px;
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  margin: 0;
+}
+
+.st-landing-hero-risk-caption {
+  font-size: var(--st-font-size-caption);
+  color: rgba(255, 255, 255, 0.72);
+}
+
+@media (max-width: 767px) {
+  .st-landing-hero-intro {
+    align-items: center;
+    text-align: center;
+  }
+
+  .st-landing-hero-subtitle {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .st-landing-hero-cta {
+    align-items: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .st-landing-hero-risk-group {
+    align-items: center;
+  }
+
+  .st-landing-hero-divider {
+    margin: 0 auto;
+  }
+
+  .st-landing-risk-legend {
+    justify-content: center;
+  }
+}
+
+/* ---------- In-hero login panel (replaces the intro on the left) ---------- */
+
+.st-landing-login-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: 16px;
+  font-size: var(--st-font-size-label);
+  font-weight: 600;
+  color: var(--st-on-surface-variant);
+  cursor: pointer;
+}
+
+.st-landing-login-back:hover {
+  color: var(--st-primary);
+}
+
+.st-landing-login-back .material-symbols-outlined {
+  font-size: var(--st-icon-sm);
+}
+
+.st-landing-login-panel {
+  width: 100%;
+  max-width: 580px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: var(--st-glass-blur);
+  -webkit-backdrop-filter: var(--st-glass-blur);
+  border: var(--st-glass-border);
+  border-radius: var(--st-radius-xl);
+  box-shadow: var(--st-glass-shadow);
+  padding: 32px 24px;
+  /* Height is set inline by landing.js, measured off the intro block --
+     see the .st-landing-hero-stage comment above for why. */
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(18, 53, 91, 0.28) transparent;
+}
+
+/* The page-wide scrollbar theme uses an opaque track, which reads as a
+   flat gray block cutting through this panel's rounded, translucent
+   corners. Give it its own transparent-track, subtle-thumb treatment. */
+.st-landing-login-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.st-landing-login-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.st-landing-login-panel::-webkit-scrollbar-thumb {
+  background: rgba(18, 53, 91, 0.28);
+  border-radius: 999px;
+}
+
+.st-landing-login-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(18, 53, 91, 0.45);
+}
+
+@media (min-width: 768px) {
+  .st-landing-login-panel {
+    padding: 44px 40px;
+  }
+}
+
+/* ---------- Generic section shell ---------- */
+
+.st-landing-section {
+  padding: 56px var(--st-margin-mobile);
+}
+
+@media (min-width: 768px) {
+  .st-landing-section {
+    padding: 80px var(--st-margin-desktop);
+  }
+}
+
+.st-landing-section--alt {
+  background: var(--st-surface-container-low);
+}
+
+.st-landing-section-inner {
+  max-width: var(--st-container-max);
+  margin: 0 auto;
+}
+
+.st-landing-eyebrow {
+  display: inline-block;
+  font-size: var(--st-font-size-caption);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--st-secondary);
+  margin-bottom: 8px;
+}
+
+.st-landing-section-inner > h2 {
+  font-family: var(--st-font-heading);
+  font-size: var(--st-font-size-title);
+  font-weight: 800;
+  color: var(--st-on-surface);
+  margin-bottom: var(--st-stack-lg);
+  max-width: 640px;
+}
+
+/* ---------- About / feature grid ---------- */
+
+.st-landing-about-grid {
+  display: grid;
+  gap: 40px;
+}
+
+@media (min-width: 900px) {
+  .st-landing-about-grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.st-landing-about-copy h2 {
+  font-family: var(--st-font-heading);
+  font-size: var(--st-font-size-title);
+  font-weight: 800;
+  margin: 8px 0 12px;
+}
+
+.st-landing-about-copy p {
+  font-size: var(--st-font-size-body);
+  line-height: 1.6;
+  color: var(--st-on-surface-variant);
+}
+
+.st-landing-feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.st-landing-feature {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.st-landing-feature .material-symbols-outlined {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--st-radius-lg);
+  background: var(--st-primary-fixed);
+  color: var(--st-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--st-icon-lg);
+}
+
+.st-landing-feature h3 {
+  font-size: var(--st-font-size-body);
+  font-weight: 700;
+  color: var(--st-on-surface);
+  margin-bottom: 4px;
+}
+
+.st-landing-feature p {
+  font-size: var(--st-font-size-label);
+  line-height: 1.5;
+  color: var(--st-on-surface-variant);
+}
+
+/* ---------- How it works ---------- */
+
+.st-landing-steps {
+  display: grid;
+  gap: 24px;
+}
+
+@media (min-width: 700px) {
+  .st-landing-steps {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1100px) {
+  .st-landing-steps {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.st-landing-step {
+  background: #fff;
+  border: 1px solid rgba(195, 198, 207, 0.35);
+  border-radius: var(--st-card-radius);
+  box-shadow: var(--st-shadow-xs);
+  padding: var(--st-card-padding);
+}
+
+.st-landing-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--st-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: var(--st-font-size-label);
+  margin-bottom: 12px;
+}
+
+.st-landing-step h3 {
+  font-size: var(--st-font-size-body);
+  font-weight: 700;
+  color: var(--st-on-surface);
+  margin-bottom: 4px;
+}
+
+.st-landing-step p {
+  font-size: var(--st-font-size-label);
+  line-height: 1.5;
+  color: var(--st-on-surface-variant);
+}
+
+/* ---------- Risk cards ---------- */
+
+.st-landing-risk-cards {
+  display: grid;
+  gap: 20px;
+}
+
+@media (min-width: 800px) {
+  .st-landing-risk-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.st-landing-risk-card {
+  background: #fff;
+  border-radius: var(--st-card-radius);
+  box-shadow: var(--st-shadow-xs);
+  padding: var(--st-card-padding);
+  border-top: 4px solid var(--st-risk-neutral);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.st-landing-risk-card--low {
+  border-top-color: var(--st-risk-low);
+}
+
+.st-landing-risk-card--moderate {
+  border-top-color: var(--st-risk-moderate);
+}
+
+.st-landing-risk-card--high {
+  border-top-color: var(--st-risk-high);
+}
+
+.st-landing-risk-threshold {
+  font-family: var(--st-font-heading);
+  font-size: var(--st-font-size-heading);
+  font-weight: 800;
+  color: var(--st-on-surface);
+}
+
+.st-landing-risk-card p:last-child {
+  font-size: var(--st-font-size-label);
+  line-height: 1.5;
+  color: var(--st-on-surface-variant);
+}
+
+/* ---------- Footer ---------- */
+
+.st-landing-footer {
+  padding: 20px var(--st-margin-mobile);
+}
+
+@media (min-width: 768px) {
+  .st-landing-footer {
+    padding: 20px var(--st-margin-desktop);
+  }
+}

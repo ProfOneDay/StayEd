@@ -1,6 +1,7 @@
 class Router {
   static ROUTES = {
-    "/login": "auth/login.html",
+    // "/login" is handled separately in resolve() -- it now points at the
+    // root landing page's in-hero login panel, not this standalone page.
     "/register": "auth/register.html",
     "/forgot-password": "auth/forgot-password.html",
     "/reset-password": "auth/reset-password.html",
@@ -165,6 +166,10 @@ class Router {
   }
 
   static resolve(route) {
+    if (route === "/login") {
+      return "/index.html";
+    }
+
     const currentRole = window.Auth?.role ? Auth.role() : "teacher";
 
     if (route === "/notifications" && currentRole === "admin") {

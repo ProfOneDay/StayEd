@@ -121,7 +121,7 @@ class Auth {
 
     this.clearSession();
 
-    window.location.href = "../auth/login.html";
+    window.location.href = "/index.html";
   }
 
   static restore() {
@@ -167,29 +167,29 @@ class Auth {
 
     switch (role) {
       case "admin":
-        window.location.href = "../admin/dashboard.html";
+        window.location.href = "/pages/admin/dashboard.html";
 
         break;
 
       case "teacher":
-        window.location.href = "../teacher/dashboard.html";
+        window.location.href = "/pages/teacher/dashboard.html";
 
         break;
 
       default:
-        window.location.href = "../auth/login.html";
+        window.location.href = "/index.html";
     }
   }
 
   static requireAuth() {
     if (!this.authenticated()) {
-      window.location.href = "../auth/login.html";
+      window.location.href = "/index.html";
     }
   }
 
   static requireRole(...roles) {
     if (!roles.includes(this.role())) {
-      window.location.href = "../auth/login.html";
+      window.location.href = "/index.html";
     }
   }
 

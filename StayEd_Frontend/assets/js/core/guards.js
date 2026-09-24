@@ -1,7 +1,7 @@
 class Guards {
   static auth() {
     if (!Auth.validateSession()) {
-      window.location.href = "../auth/login.html";
+      window.location.href = "/index.html";
     }
   }
 

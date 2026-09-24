@@ -458,7 +458,7 @@ class Layout {
 
             Utils.storage.remove("stayed_user");
 
-            window.location.href = "../auth/login.html";
+            window.location.href = "/index.html";
           },
         );
       });
