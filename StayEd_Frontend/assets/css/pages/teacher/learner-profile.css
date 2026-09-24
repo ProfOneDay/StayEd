@@ -280,9 +280,6 @@
     margin-top:4px;
 }
 
-.st-metric-card--attendance{
-    background:linear-gradient(135deg,#fff 0%,var(--st-primary-fixed) 160%);
-}
 
 .st-performance-progress-card{
     background:#fff;
@@ -384,6 +381,64 @@
     background:var(--st-primary);
     border:2px solid #fff;
     box-shadow:0 0 0 2px rgba(31,78,121,.12),var(--st-shadow-xs);
+    cursor:pointer;
+    z-index:3;
+    transition:transform .14s ease, box-shadow .14s ease;
+}
+
+.st-performance-progress-point:hover,
+.st-performance-progress-point:focus-visible{
+    transform:translate(-50%,-50%) scale(1.22);
+    box-shadow:0 0 0 4px rgba(31,78,121,.14),var(--st-shadow-sm);
+    outline:none;
+}
+
+.st-performance-progress-point::after{
+    content:attr(data-tooltip);
+    position:absolute;
+    left:50%;
+    bottom:calc(100% + 10px);
+    transform:translateX(-50%) translateY(4px);
+    width:max-content;
+    max-width:280px;
+    padding:7px 10px;
+    border-radius:4px;
+    background:#202124;
+    color:#fff;
+    font-size:.75rem;
+    font-weight:500;
+    line-height:1.25;
+    white-space:nowrap;
+    box-shadow:0 3px 10px rgba(0,0,0,.22);
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition:opacity .12s ease, transform .12s ease, visibility .12s ease;
+    z-index:20;
+}
+
+.st-performance-progress-point::before{
+    content:"";
+    position:absolute;
+    left:50%;
+    bottom:calc(100% + 5px);
+    transform:translateX(-50%) translateY(4px);
+    border:5px solid transparent;
+    border-top-color:#202124;
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition:opacity .12s ease, transform .12s ease, visibility .12s ease;
+    z-index:19;
+}
+
+.st-performance-progress-point:hover::after,
+.st-performance-progress-point:hover::before,
+.st-performance-progress-point:focus-visible::after,
+.st-performance-progress-point:focus-visible::before{
+    opacity:1;
+    visibility:visible;
+    transform:translateX(-50%) translateY(0);
 }
 
 .st-performance-progress-x-label{
@@ -1206,4 +1261,101 @@
     font-size:var(--st-font-size-micro);
     color:var(--st-on-surface-variant);
     line-height:1.5;
+}
+
+/* Make the single recorded risk point unmistakable even before a trend line exists. */
+.st-risk-trend-point--single {
+    width:16px;
+    height:16px;
+    box-shadow:0 0 0 5px rgba(18,53,91,.10), var(--st-shadow-xs);
+}
+
+.st-risk-trend-date-label {
+    position:absolute;
+    bottom:6px;
+    transform:translateX(-50%);
+    padding:2px 6px;
+    border-radius:999px;
+    background:rgba(255,255,255,.88);
+    font-size:var(--st-font-size-micro);
+    color:var(--st-on-surface-variant);
+    white-space:nowrap;
+}
+
+@media (max-width:600px){
+    .st-risk-trend-date-label{
+        max-width:82%;
+        overflow:hidden;
+        text-overflow:ellipsis;
+    }
+}
+
+/* 2026-09-24 — Learner Profile compact spacing pass.
+   The global app layout uses both flex gap and section margins; on this page
+   those values stacked and made the header/profile/share/tabs feel too far
+   apart. Keep comfortable breathing room without the oversized vertical gaps. */
+body[data-page="Learner Profile"] .st-content{
+    gap:20px;
+}
+
+body[data-page="Learner Profile"] .st-page-header{
+    margin-bottom:0;
+}
+
+body[data-page="Learner Profile"] .st-profile-hero{
+    margin-bottom:0;
+    padding:20px 22px;
+    gap:24px;
+}
+
+body[data-page="Learner Profile"] .st-profile-hero-identity{
+    gap:16px;
+}
+
+body[data-page="Learner Profile"] .st-profile-hero-meta{
+    gap:5px 24px;
+}
+
+body[data-page="Learner Profile"] .st-profile-hero-meta p{
+    line-height:1.4;
+}
+
+body[data-page="Learner Profile"] .st-profile-hero-actions{
+    gap:8px;
+}
+
+body[data-page="Learner Profile"] .st-portal-share-card{
+    margin-bottom:0;
+    padding:16px 20px;
+}
+
+body[data-page="Learner Profile"] .st-profile-tabs{
+    margin-bottom:0;
+    gap:28px;
+}
+
+body[data-page="Learner Profile"] .st-profile-tab{
+    padding-bottom:11px;
+}
+
+@media (min-width:900px){
+    body[data-page="Learner Profile"] .st-profile-hero{
+        grid-template-columns:minmax(0,1fr) 160px 260px;
+        gap:24px;
+    }
+}
+
+@media (max-width:899px){
+    body[data-page="Learner Profile"] .st-content{
+        gap:16px;
+    }
+
+    body[data-page="Learner Profile"] .st-profile-hero{
+        padding:18px;
+        gap:18px;
+    }
+
+    body[data-page="Learner Profile"] .st-portal-share-card{
+        padding:16px 18px;
+    }
 }

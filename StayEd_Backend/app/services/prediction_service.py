@@ -135,11 +135,6 @@ def trigger_prediction(
                 model_id, enrollment_id, monitoring_start_date, monitoring_end_date,
                 data_sufficiency_status, risk_probability, generated_by_user_id
             ) VALUES (%s,%s,%s,%s,'PREDICTION_GENERATED',%s,%s)
-            ON CONFLICT (model_id, enrollment_id, monitoring_start_date, monitoring_end_date)
-            DO UPDATE SET data_sufficiency_status='PREDICTION_GENERATED',
-                          risk_probability=EXCLUDED.risk_probability,
-                          generated_by_user_id=EXCLUDED.generated_by_user_id,
-                          assessment_date=CURRENT_TIMESTAMP
             RETURNING risk_assessment_id, risk_probability, risk_level, assessment_date
             """,
             (model["model_id"], enrollment_id, monitoring_start, monitoring_end, probability, user_id),

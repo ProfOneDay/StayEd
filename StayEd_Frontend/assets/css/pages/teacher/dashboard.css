@@ -107,22 +107,21 @@
 }
 
 .st-filter-row{
-    display:flex;
-    flex-wrap:wrap;
-    align-items:flex-end;
+    display:grid;
+    grid-template-columns:minmax(0, 1.55fr) minmax(0, 2.45fr);
+    align-items:end;
     gap:16px;
+    width:100%;
 }
 
 .st-filter-group{
-    flex:1;
-    min-width:150px;
+    min-width:0;
     display:flex;
     flex-direction:column;
     gap:8px;
 }
 
 .st-filter-group--level{
-    flex:0 0 auto;
     min-width:0;
 }
 
@@ -167,10 +166,11 @@
 }
 
 .st-filter-controls{
-    flex:2;
+    min-width:0;
     display:grid;
-    grid-template-columns:repeat(4,1fr);
+    grid-template-columns:repeat(3, minmax(0, 1fr)) minmax(170px, .95fr);
     gap:8px;
+    align-items:end;
 }
 
 .st-filter-controls select{
@@ -193,7 +193,14 @@
 }
 
 .st-filter-apply{
+    min-width:0;
     align-self:flex-end;
+}
+
+.st-filter-apply .st-btn{
+    width:100%;
+    min-height:44px;
+    justify-content:center;
 }
 
 .st-dash-grid{
@@ -826,6 +833,7 @@ body[data-page="Teacher Dashboard"] #riskChartView.chart-canvas-wrap{
     .col-8{ grid-column:span 12; }
     .col-4{ grid-column:span 12; }
     .st-riskchart-side{ width:40%; }
+    .st-filter-row{ grid-template-columns:1fr; }
 }
 
 @media (max-width:992px){
@@ -1060,4 +1068,123 @@ body[data-page="Teacher Dashboard"] #riskChartView.chart-canvas-wrap{
 
 @media (max-width: 700px) {
   .st-stat-row { grid-template-columns: 1fr; }
+}
+/* Review revision: replace redundant Quick Actions with an attention list. */
+.st-attention-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.st-attention-panel-head {
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.st-attention-kicker {
+  margin: 0 0 3px;
+  font-size: var(--st-font-size-micro);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--st-risk-high);
+}
+
+.st-attention-alert-icon {
+  color: var(--st-risk-high);
+  font-size: 1.25rem;
+}
+
+.st-attention-list {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 10px;
+}
+
+.st-attention-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 38px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 11px;
+  border: 1px solid rgba(195, 198, 207, .34);
+  border-radius: var(--st-radius-lg);
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition: var(--st-transition);
+}
+
+.st-attention-row:hover {
+  transform: translateY(-1px);
+  border-color: rgba(186, 26, 26, .22);
+  box-shadow: var(--st-shadow-xs);
+}
+
+.st-attention-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--st-risk-high-soft);
+  color: var(--st-risk-high);
+  font-size: var(--st-font-size-micro);
+  font-weight: 800;
+}
+
+.st-attention-person {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.st-attention-person strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--st-font-size-caption);
+  color: var(--st-on-surface);
+}
+
+.st-attention-person small {
+  margin-top: 2px;
+  font-size: var(--st-font-size-micro);
+  color: var(--st-on-surface-variant);
+}
+
+.st-attention-risk {
+  font-size: var(--st-font-size-body-lg);
+  font-weight: 800;
+}
+
+.st-attention-risk--high { color: var(--st-risk-high); }
+.st-attention-risk--moderate { color: var(--st-risk-moderate); }
+
+.st-attention-view-all {
+  margin-top: 14px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px solid rgba(195, 198, 207, .45);
+  border-radius: var(--st-radius-lg);
+  color: var(--st-primary);
+  text-decoration: none;
+  font-size: var(--st-font-size-caption);
+  font-weight: 700;
+}
+
+.st-attention-view-all .material-symbols-outlined { font-size: 1rem; }
+
+.st-attention-empty {
+  margin: auto 0;
+  padding: 22px 10px;
+  text-align: center;
+  color: var(--st-on-surface-variant);
+  font-size: var(--st-font-size-caption);
 }

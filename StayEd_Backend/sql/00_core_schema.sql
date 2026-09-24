@@ -541,14 +541,6 @@ CREATE TABLE risk_assessment (
         ON UPDATE CASCADE
         ON DELETE SET NULL,
 
-    CONSTRAINT uq_risk_assessment_period
-        UNIQUE (
-            model_id,
-            enrollment_id,
-            monitoring_start_date,
-            monitoring_end_date
-        ),
-
     CONSTRAINT ck_risk_monitoring_dates
         CHECK (monitoring_end_date >= monitoring_start_date),
 

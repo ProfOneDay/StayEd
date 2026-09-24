@@ -7,9 +7,10 @@ class AssessmentScores {
   static search = "";
 
   // Drives both the AF5 Assessment Results table and what gets read/written
-  // to the "scores" JSON blob. Every "score" row has pre/post + a
-  // teacher-typed likelihood string (matching the real paper form, which
-  // shows no visible max-per-item or formula to compute it from).
+  // to the "scores" JSON blob. Per-component rows keep only the recorded
+  // pre/post values. The overall passing-likelihood label is computed from
+  // Final Score Percentage Grade using StayEd's documented internal threshold,
+  // instead of asking the teacher to type a subjective likelihood.
   static AF5_ROWS = [
     { type: "score", id: "pis", label: "PIS Score" },
     { type: "section", label: "Assessment for Basic Literacy (ABL)" },
@@ -200,7 +201,7 @@ class AssessmentScores {
             <tr>
               <th>Assessment Component / Learning Area</th>
               <th colspan="2">Score</th>
-              <th>Likelihood of Passing A&amp;E Exam</th>
+              <th>Status / Note</th>
             </tr>
             <tr class="st-assessment-subhead">
               <th></th><th>Pre</th><th>Post</th><th></th>
@@ -212,15 +213,7 @@ class AssessmentScores {
               <td>Overall Score</td>
               <td><input type="text" class="st-assessment-input" readonly value="${f.overallScorePre ?? 0}"></td>
               <td><input type="text" class="st-assessment-input" readonly value="${f.overallScorePost ?? 0}"></td>
-              <td>
-                <input
-                  type="text"
-                  class="st-assessment-input st-assessment-input--wide"
-                  placeholder="e.g. 84% HIGH LIKELIHOOD (PASS)"
-                  data-overall-likelihood
-                  value="${this.escAttr(scores.overall_likelihood)}"
-                >
-              </td>
+              <td class="st-assessment-computed-note">Likelihood is computed from Final Score Percentage Grade below.</td>
             </tr>
           </tbody>
         </table>
@@ -266,7 +259,7 @@ class AssessmentScores {
             ).join("")}
             <tr class="st-assessment-total-row">
               <td>FINAL SCORE PERCENTAGE GRADE</td>
-              <td><input type="text" class="st-assessment-input" placeholder="e.g. 68%" data-final-grade value="${this.escAttr(f.finalScorePercentageGrade)}"></td>
+              <td><input type="number" min="0" max="100" step="0.01" class="st-assessment-input" placeholder="e.g. 68" data-final-grade value="${this.escAttr(f.finalScorePercentageGrade)}"></td>
             </tr>
           </tbody>
         </table>
@@ -274,8 +267,21 @@ class AssessmentScores {
           <span>OVERALL FINAL ASSESSMENT RATING</span>
           <input type="text" class="st-assessment-rating-input" placeholder="e.g. 98.55" data-overall-rating value="${this.escAttr(f.overallFinalAssessmentRating)}">
         </div>
+
+        <div class="st-assessment-likelihood-summary">
+          <div>
+            <span class="material-symbols-outlined">analytics</span>
+            <div>
+              <p class="st-assessment-likelihood-kicker">Likelihood of Passing A&amp;E Exam</p>
+              <strong data-overall-likelihood-preview>${this.esc(scores.overall_likelihood || this.likelihoodLabel(f.finalScorePercentageGrade))}</strong>
+            </div>
+          </div>
+          <p>StayEd internal threshold: <strong>High likelihood = 70% or above</strong>; <strong>Low likelihood = below 70%</strong>. This is a project readiness rule, not an official DepEd A&amp;E passing mark.</p>
+        </div>
       </div>
     `;
+
+    this.bindLikelihoodPreview();
   }
 
   static renderAf5Row(row, scores) {
@@ -305,9 +311,31 @@ class AssessmentScores {
         <td class="${labelClass}">${this.esc(row.label)}</td>
         <td><input type="number" step="0.5" class="st-assessment-input" data-score-field="${row.id}" data-score-part="pre" value="${r.pre ?? ""}"></td>
         <td><input type="number" step="0.5" class="st-assessment-input" data-score-field="${row.id}" data-score-part="post" value="${r.post ?? ""}"></td>
-        <td><input type="text" class="st-assessment-input st-assessment-input--wide" placeholder="e.g. 82% (Likely)" data-score-field="${row.id}" data-score-part="likelihood" value="${this.escAttr(r.likelihood)}"></td>
+        <td class="st-assessment-computed-note">Included in overall readiness</td>
       </tr>
     `;
+  }
+
+  static likelihoodLabel(value) {
+    if (value == null || String(value).trim() === "") {
+      return "Waiting for final percentage grade";
+    }
+    const score = Number(value);
+    if (!Number.isFinite(score)) return "Waiting for final percentage grade";
+    return score >= 70 ? "HIGH LIKELIHOOD" : "LOW LIKELIHOOD";
+  }
+
+  static bindLikelihoodPreview() {
+    const grade = document.querySelector("[data-final-grade]");
+    const preview = document.querySelector("[data-overall-likelihood-preview]");
+    if (!grade || !preview) return;
+
+    const update = () => {
+      preview.textContent = this.likelihoodLabel(grade.value);
+      preview.dataset.level = Number(grade.value) >= 70 ? "high" : grade.value === "" ? "neutral" : "low";
+    };
+    grade.addEventListener("input", update);
+    update();
   }
 
   static bindSave() {
@@ -322,11 +350,13 @@ class AssessmentScores {
       scores[row.id] = {
         pre: this.readNumber(`[data-score-field="${row.id}"][data-score-part="pre"]`),
         post: this.readNumber(`[data-score-field="${row.id}"][data-score-part="post"]`),
-        likelihood: this.readText(`[data-score-field="${row.id}"][data-score-part="likelihood"]`),
-        status: this.readText(`[data-score-field="${row.id}"][data-score-part="status"]`),
+        likelihood: this.currentForm?.scores?.[row.id]?.likelihood ?? null,
+        status: this.readText(`[data-score-field="${row.id}"][data-score-part="status"]`)
+          ?? this.currentForm?.scores?.[row.id]?.status
+          ?? null,
       };
     });
-    scores.overall_likelihood = this.readText("[data-overall-likelihood]");
+    scores.overall_likelihood = this.likelihoodLabel(this.readNumber("[data-final-grade]"));
 
     const portfolio = {};
     [...this.PORTFOLIO_WORK_SAMPLE_ROWS, ...this.PORTFOLIO_REVALIDA_ROWS].forEach((row) => {

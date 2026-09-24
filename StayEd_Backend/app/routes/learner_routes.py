@@ -870,8 +870,9 @@ def _exam_passing_chance(
             "factors": [],
             "threshold": 70,
             "disclaimer": (
-                "Performance-based readiness estimate only; this is not an official "
-                "A&E result or passing mark."
+                "Performance-based readiness estimate only. StayEd uses an internal "
+                "70/100 cutoff: High likelihood is 70 or above; Low likelihood is below 70. "
+                "This is not an official A&E result or passing mark."
             ),
         }
 
@@ -958,8 +959,9 @@ def _exam_passing_chance(
         "factors": factors,
         "threshold": 70,
         "disclaimer": (
-            "Performance-based readiness estimate only. The 70-point cutoff is an "
-            "internal StayEd readiness threshold, not the official A&E passing mark."
+            "Performance-based readiness estimate only. StayEd uses an internal 70/100 "
+            "cutoff: High likelihood is 70 or above; Low likelihood is below 70. "
+            "This is not the official A&E passing mark."
         ),
     }
 
@@ -1119,16 +1121,16 @@ def learner_profile(learner_id: int):
     # imported/seeded data that bypassed that guard.
     risk_history = fetch_all(
         """
-        SELECT assessment_date, risk_probability, risk_level
+        SELECT risk_assessment_id, assessment_date, risk_probability, risk_level
         FROM risk_assessment
         WHERE enrollment_id=%s AND data_sufficiency_status='PREDICTION_GENERATED'
-        ORDER BY assessment_date
+        ORDER BY assessment_date, risk_assessment_id
         """,
         (enrollment_id,),
     ) if monitoring_started else []
     risk_trend = [
         {
-            "date": r["assessment_date"].strftime("%b %d, %Y"),
+            "date": r["assessment_date"].strftime("%b %d, %Y • %I:%M %p").replace(" 0", " "),
             "level": title_enum(r["risk_level"]),
             "probability": round(float(r["risk_probability"]) * 100) if r.get("risk_probability") is not None else None,
         }
@@ -1151,8 +1153,11 @@ def learner_profile(learner_id: int):
     last_activity = shaped["activity_text"]
     module_rate = round(100 * modules_returned / modules_released) if modules_released else None
 
-    # Task 3: attendance rate uses only sessions with a recorded attendance
-    # status. Future/unrecorded sessions do not lower the learner's rate.
+    # Task 3: keep the Attendance Rate metric available for every learner.
+    # Only attendance rows that were actually recorded count toward the rate,
+    # so future/unrecorded class sessions never lower a learner's percentage.
+    # When there is no attendance history yet, return 0% instead of N/A / a
+    # missing value so the Overview card is consistent for all modalities.
     attendance_summary = fetch_one(
         """
         SELECT
@@ -1168,20 +1173,15 @@ def learner_profile(learner_id: int):
     ) or {}
     recorded_sessions = int(attendance_summary.get("recorded_sessions") or 0)
     attended_sessions = int(attendance_summary.get("attended_sessions") or 0)
-    if base.get("learning_modality") == "MODULAR":
-        attendance_rate = None
-        attendance_rate_label = "N/A"
-        attendance_rate_text = "Attendance is not used for Modular learners."
-    elif recorded_sessions:
+    if recorded_sessions:
         attendance_rate = round(100 * attended_sessions / recorded_sessions)
-        attendance_rate_label = None
         attendance_rate_text = (
             f"{attended_sessions} of {recorded_sessions} recorded sessions attended"
         )
     else:
-        attendance_rate = None
-        attendance_rate_label = "Not Yet Available"
+        attendance_rate = 0
         attendance_rate_text = "No attendance has been recorded yet."
+    attendance_rate_label = None
 
     # Task 1: per-student performance progress is based on real module activity
     # already stored in StayEd. Each point is the cumulative module return rate
@@ -2799,6 +2799,51 @@ def update_portal_share(learner_id: int):
     return {"enabled": enabled, "token": token}
 
 
+def _student_performance_progress(enrollment_id: int) -> list[dict]:
+    """Public-safe cumulative module return progress for the learner portal.
+
+    Each point uses only real release/return dates already stored in StayEd;
+    no grades or synthetic values are invented.
+    """
+    rows = fetch_all(
+        """
+        SELECT date_released, date_returned
+        FROM module_record
+        WHERE enrollment_id=%s
+        ORDER BY date_released, module_record_id
+        """,
+        (enrollment_id,),
+    )
+    dates = sorted({
+        d
+        for row in rows
+        for d in (row.get("date_released"), row.get("date_returned"))
+        if d is not None and d <= date.today()
+    })
+    progress = []
+    for progress_date in dates:
+        released = sum(
+            1 for row in rows
+            if row.get("date_released") and row["date_released"] <= progress_date
+        )
+        returned = sum(
+            1 for row in rows
+            if row.get("date_returned") and row["date_returned"] <= progress_date
+        )
+        progress.append({
+            "date": progress_date.strftime("%b %d, %Y"),
+            "rate": round(100 * returned / released) if released else 0,
+            "released": released,
+            "returned": returned,
+        })
+
+    if len(progress) > 12:
+        last_index = len(progress) - 1
+        indexes = sorted({round(i * last_index / 11) for i in range(12)})
+        progress = [progress[i] for i in indexes]
+    return progress
+
+
 @bp.get("/public/student-view/<token>")
 def public_student_view(token: str):
     unavailable = ("This link isn't available. Ask your teacher for an updated link.", 404)
@@ -2847,6 +2892,7 @@ def public_student_view(token: str):
             "modality": shaped["modality"],
         },
         "risk": {"label": risk_label, "summary": risk_summary},
+        "performanceProgress": _student_performance_progress(row["enrollment_id"]),
         **_logbook(row["enrollment_id"], _learner_activity_info(row)),
     }
 
@@ -2854,11 +2900,13 @@ def public_student_view(token: str):
 # ---------------------------------------------------------------------------
 # Assessment Scores -- DepEd ALS Form 5 (AF5: Assessment Results & Portfolio).
 # One editable record per learner (per enrollment), not a history log. Raw
-# scores plus the likelihood/grade/rating fields are all teacher-entered --
-# the real DepEd paper form shows no visible max-score-per-item or formula
-# for those, so StayEd doesn't invent one. Only the two totals that ARE
-# plainly visible sums on the form (AF5 Overall Score, Portfolio TOTAL
-# SCORE) are computed here, from whatever the teacher has entered so far.
+# pre/post scores, status fields, portfolio values, grade and rating are
+# teacher-entered. Per-component A&E passing likelihood is not fabricated
+# because the paper form provides no max-score/threshold formula for each
+# component. StayEd derives only the overall High/Low likelihood from the
+# entered Final Score Percentage Grade using its documented internal cutoff.
+# The two visible sums (AF5 Overall Score and Portfolio TOTAL SCORE) are also
+# computed from the recorded values.
 # ---------------------------------------------------------------------------
 
 ASSESSMENT_SCORE_ROW_IDS = (
@@ -2886,6 +2934,22 @@ ASSESSMENT_PORTFOLIO_FIELD_IDS = (
 ASSESSMENT_PORTFOLIO_TOTAL_FIELD_IDS = (
     "ls1_en", "ls1_fil", "ls2", "ls3", "ls4", "ls5", "ls6",
 )
+
+# Internal project threshold used for the assessment-score likelihood display.
+# It is deliberately labelled as a StayEd threshold rather than an official
+# DepEd A&E passing mark.
+ASSESSMENT_PASSING_LIKELIHOOD_THRESHOLD = 70.0
+
+
+def _assessment_likelihood_from_percentage(value):
+    percentage = _coerce_number(value)
+    if percentage is None:
+        return None
+    return (
+        "HIGH LIKELIHOOD"
+        if percentage >= ASSESSMENT_PASSING_LIKELIHOOD_THRESHOLD
+        else "LOW LIKELIHOOD"
+    )
 
 
 def _coerce_number(value):
@@ -2926,8 +2990,13 @@ def _sanitize_portfolio(data) -> dict:
 
 
 def _shape_assessment_scores(row: dict | None) -> dict:
-    scores = (row or {}).get("scores") or {}
+    scores = dict((row or {}).get("scores") or {})
     portfolio = (row or {}).get("portfolio") or {}
+
+    final_grade_value = (row or {}).get("final_score_percentage_grade")
+    computed_likelihood = _assessment_likelihood_from_percentage(final_grade_value)
+    if computed_likelihood:
+        scores["overall_likelihood"] = computed_likelihood
 
     overall_pre = sum(
         (scores.get(r) or {}).get("pre") or 0 for r in ASSESSMENT_FLT_ROW_IDS
@@ -2986,6 +3055,11 @@ def update_assessment_scores(learner_id: int):
     portfolio = _sanitize_portfolio(data.get("portfolio"))
     final_grade = _coerce_number(data.get("finalScorePercentageGrade"))
     overall_rating = _coerce_number(data.get("overallFinalAssessmentRating"))
+
+    # Do not ask the teacher to type a subjective likelihood. Derive the
+    # overall High/Low label from the entered Final Score Percentage Grade
+    # using StayEd's documented internal threshold.
+    scores["overall_likelihood"] = _assessment_likelihood_from_percentage(final_grade)
 
     row = execute(
         """

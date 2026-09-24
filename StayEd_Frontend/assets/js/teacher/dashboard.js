@@ -42,6 +42,7 @@ class TeacherDashboard {
       this.renderInterventionTip(data.interventions);
 
       this.state.learners = data.learners || [];
+      this.renderAttentionList(this.state.learners);
 
       this.populateClcFilter();
 
@@ -404,6 +405,60 @@ class TeacherDashboard {
         cutout: type === "doughnut" ? "62%" : undefined,
         scales: type === "doughnut" ? {} : { y: { beginAtZero: true, ticks: { precision: 0 } } },
       },
+    });
+  }
+
+  static renderAttentionList(learners = []) {
+    const root = document.querySelector("[data-dashboard-attention-list]");
+    if (!root) return;
+
+    const priority = { High: 0, Moderate: 1 };
+    const rows = learners
+      .filter((learner) => learner.risk === "High" || learner.risk === "Moderate")
+      .sort((a, b) => {
+        const byLevel = (priority[a.risk] ?? 9) - (priority[b.risk] ?? 9);
+        if (byLevel) return byLevel;
+        return Number(b.risk_probability || 0) - Number(a.risk_probability || 0);
+      })
+      .slice(0, 4);
+
+    if (!rows.length) {
+      root.innerHTML = `<p class="st-attention-empty">No High or Moderate risk learners right now.</p>`;
+      return;
+    }
+
+    const esc = (value) => String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+
+    root.innerHTML = rows.map((learner) => {
+      const pct = Math.round(Number(learner.risk_probability || 0) * 100);
+      const initials = String(learner.name || "?")
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase())
+        .join("") || "?";
+      const levelClass = learner.risk === "High" ? "high" : "moderate";
+      return `
+        <button type="button" class="st-attention-row" data-attention-learner="${learner.id}">
+          <span class="st-attention-avatar">${initials}</span>
+          <span class="st-attention-person">
+            <strong>${esc(learner.name || "Learner")}</strong>
+            <small>${esc(learner.lrn || "No LRN")}</small>
+          </span>
+          <span class="st-attention-risk st-attention-risk--${levelClass}">${pct}%</span>
+        </button>
+      `;
+    }).join("");
+
+    root.querySelectorAll("[data-attention-learner]").forEach((button) => {
+      button.addEventListener("click", () => {
+        window.location.href = `learner-profile.html?id=${encodeURIComponent(button.dataset.attentionLearner)}`;
+      });
     });
   }
 
