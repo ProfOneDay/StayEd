@@ -404,25 +404,20 @@ class LearnerProfilePage {
     );
     this.set("[data-metric-overdue]", m.overdueModules ?? 0);
 
-    // Modular learners do not use session attendance, so hide the attendance card
-    // instead of showing an N/A metric. Face-to-Face/Blended learners still see it.
+    // Attendance Rate is shown for every learner. The backend returns 0% when
+    // no attendance has been recorded yet, so the metric never falls back to
+    // N/A / Not Yet Available or disappears for a modality.
     const attendanceCard = document.querySelector(".st-metric-card--attendance");
-    const attendanceNotApplicable = m.attendanceRateLabel === "N/A";
-    if (attendanceCard) {
-      attendanceCard.style.display = attendanceNotApplicable ? "none" : "";
-    }
-    if (!attendanceNotApplicable) {
-      this.set(
-        "[data-metric-attendance-rate]",
-        m.attendanceRate == null
-          ? (m.attendanceRateLabel || "Not Yet Available")
-          : `${m.attendanceRate}%`,
-      );
-      this.set(
-        "[data-metric-attendance-rate-text]",
-        m.attendanceRateText || "",
-      );
-    }
+    if (attendanceCard) attendanceCard.style.display = "";
+    const attendanceRate = Number(m.attendanceRate);
+    this.set(
+      "[data-metric-attendance-rate]",
+      Number.isFinite(attendanceRate) ? `${Math.round(attendanceRate)}%` : "0%",
+    );
+    this.set(
+      "[data-metric-attendance-rate-text]",
+      m.attendanceRateText || "No attendance has been recorded yet.",
+    );
 
     this.renderPerformanceProgress(p.performanceProgress || []);
     this.renderExamPassingChance(p.examPassingChance || {});
@@ -484,15 +479,24 @@ class LearnerProfilePage {
     ].join(" ");
 
     const dots = coords
-      .map(
-        ({ x, y, pt }) => `
+      .map(({ x, y, pt }) => {
+        const tooltip = `${pt.date}: ${pt.rate}% (${pt.returned} of ${pt.released} modules returned)`;
+        const safeTooltip = String(tooltip)
+          .replace(/&/g, "&amp;")
+          .replace(/"/g, "&quot;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+
+        return `
           <span
             class="st-performance-progress-point"
             style="left:${x}%;top:${y}%;"
-            title="${pt.date}: ${pt.rate}% (${pt.returned} of ${pt.released} modules returned)"
+            data-tooltip="${safeTooltip}"
+            aria-label="${safeTooltip}"
+            tabindex="0"
           ></span>
-        `,
-      )
+        `;
+      })
       .join("");
 
     const labelIndexes = new Set([0, progress.length - 1]);
@@ -608,13 +612,16 @@ class LearnerProfilePage {
     if (trend.length === 1) {
       const pt = trend[0];
       const y = yForPoint(pt);
-      points.innerHTML = `<span class="st-risk-trend-point st-risk-trend-point--${pt.level.toLowerCase()}" style="left:50%;top:${y}%;" title="${pt.date}: ${pt.level} Risk${pt.probability != null ? ` (${pt.probability}%)` : ""}"></span>`;
+      points.innerHTML = `
+        <span class="st-risk-trend-point st-risk-trend-point--${pt.level.toLowerCase()} st-risk-trend-point--single" style="left:50%;top:${y}%;" title="${pt.date}: ${pt.level} Risk${pt.probability != null ? ` (${pt.probability}%)` : ""}"></span>
+        <span class="st-risk-trend-date-label" style="left:50%;">${pt.date}</span>
+      `;
       list.innerHTML = `
         <div class="st-risk-trend-list-row">
           <span>${pt.date}</span>
-          <span class="st-risk-badge st-risk-badge--${pt.level.toLowerCase()}"><span class="st-risk-dot"></span>${pt.level}</span>
+          <span class="st-risk-badge st-risk-badge--${pt.level.toLowerCase()}"><span class="st-risk-dot"></span>${pt.level}${pt.probability != null ? ` (${pt.probability}%)` : ""}</span>
         </div>
-        <p class="st-risk-trend-empty">Only one assessment is available. Additional assessments are required to display a risk trend.</p>
+        <p class="st-risk-trend-empty">One prediction run is recorded. A trend line needs at least two saved prediction runs; the next prediction will add a second point and the line will appear automatically.</p>
       `;
       return;
     }

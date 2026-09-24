@@ -46,6 +46,7 @@ class StudentPortal {
     body.innerHTML = `
       ${this.renderProfileCard(data.profile)}
       ${this.renderRiskCard(data.risk)}
+      ${this.renderPerformanceProgress(data.performanceProgress || [])}
       ${this.renderModulesSection(data.batches || [])}
     `;
   }
@@ -80,6 +81,81 @@ class StudentPortal {
           <span class="st-risk-dot"></span>${this.esc(risk.label)}
         </span>
         <p class="st-student-risk-summary">${this.esc(risk.summary)}</p>
+      </div>
+    `;
+  }
+
+  static renderPerformanceProgress(progress) {
+    const rows = Array.isArray(progress) ? progress : [];
+    const current = rows.length ? rows[rows.length - 1].rate : null;
+
+    if (!rows.length) {
+      return `
+        <div>
+          <p class="st-student-section-title">Student Performance Progress</p>
+          <div class="st-student-card">
+            <p class="st-student-empty">Progress will appear after modules are released or returned.</p>
+          </div>
+        </div>
+      `;
+    }
+
+    const width = 100;
+    const height = 100;
+    const leftPad = 5;
+    const rightPad = 5;
+    const topPad = 9;
+    const bottomPad = 18;
+    const usableWidth = width - leftPad - rightPad;
+    const usableHeight = height - topPad - bottomPad;
+    const coords = rows.map((pt, index) => ({
+      x: rows.length === 1
+        ? leftPad + usableWidth / 2
+        : leftPad + (index / (rows.length - 1)) * usableWidth,
+      y: topPad + ((100 - Math.max(0, Math.min(100, Number(pt.rate) || 0))) / 100) * usableHeight,
+      pt,
+    }));
+    const line = coords.map((c) => `${c.x},${c.y}`).join(" ");
+    const area = `${leftPad},${topPad + usableHeight} ${line} ${leftPad + usableWidth},${topPad + usableHeight}`;
+    const labelIndexes = new Set([0, Math.floor((rows.length - 1) / 2), rows.length - 1]);
+
+    return `
+      <div>
+        <div class="st-student-progress-heading">
+          <div>
+            <p class="st-student-section-title">Student Performance Progress</p>
+            <p class="st-student-progress-subtitle">Cumulative module return rate over time.</p>
+          </div>
+          <div class="st-student-progress-current">
+            <span>Current Progress</span>
+            <strong>${current == null ? "—" : `${Math.round(current)}%`}</strong>
+          </div>
+        </div>
+        <div class="st-student-card st-student-progress-card">
+          <div class="st-student-progress-chart" role="img" aria-label="Student performance progress line graph">
+            ${[100, 75, 50, 25, 0].map((value) => {
+              const y = topPad + ((100 - value) / 100) * usableHeight;
+              return `<div class="st-student-progress-grid" style="top:${y}%"><span>${value}%</span></div>`;
+            }).join("")}
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <polygon points="${area}" class="st-student-progress-area"></polygon>
+              <polyline points="${line}" class="st-student-progress-line"></polyline>
+            </svg>
+            ${coords.map(({ x, y, pt }, index) => {
+              const tooltip = `${pt.date}: ${Math.round(pt.rate)}% progress`;
+              const safeTooltip = String(tooltip)
+                .replace(/&/g, "&amp;")
+                .replace(/"/g, "&quot;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+
+              return `
+                <span class="st-student-progress-point" style="left:${x}%;top:${y}%;" data-tooltip="${safeTooltip}" aria-label="${safeTooltip}" tabindex="0"></span>
+                ${labelIndexes.has(index) ? `<span class="st-student-progress-date" style="left:${x}%">${this.esc(pt.date)}</span>` : ""}
+              `;
+            }).join("")}
+          </div>
+        </div>
       </div>
     `;
   }

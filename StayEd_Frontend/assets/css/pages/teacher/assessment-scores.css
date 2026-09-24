@@ -307,3 +307,59 @@
   color: var(--st-risk-low);
   background: #fff;
 }
+
+/* Computed A&E passing-likelihood summary. */
+.st-assessment-likelihood-summary {
+  margin-top: 16px;
+  padding: 16px 18px;
+  border: 1px solid rgba(18, 53, 91, .14);
+  border-radius: var(--st-radius-lg);
+  background: rgba(211, 227, 255, .24);
+}
+
+.st-assessment-likelihood-summary > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.st-assessment-likelihood-summary .material-symbols-outlined {
+  color: var(--st-primary);
+}
+
+.st-assessment-likelihood-kicker {
+  margin: 0;
+  font-size: var(--st-font-size-micro);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  color: var(--st-on-surface-variant);
+}
+
+.st-assessment-likelihood-summary strong[data-overall-likelihood-preview] {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--st-font-size-body-lg);
+  color: var(--st-primary);
+}
+
+.st-assessment-likelihood-summary strong[data-overall-likelihood-preview][data-level="high"] {
+  color: var(--st-risk-low);
+}
+
+.st-assessment-likelihood-summary strong[data-overall-likelihood-preview][data-level="low"] {
+  color: var(--st-risk-high);
+}
+
+.st-assessment-likelihood-summary > p {
+  margin-top: 10px;
+  font-size: var(--st-font-size-micro);
+  line-height: 1.45;
+  color: var(--st-on-surface-variant);
+}
+
+.st-assessment-computed-note {
+  font-size: var(--st-font-size-micro);
+  color: var(--st-on-surface-variant);
+  line-height: 1.35;
+}

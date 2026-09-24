@@ -1,43 +1,19 @@
-<div class="st-panel st-panel-pad col-4" style="min-height: 400px">
-  <div
-    class="st-panel-head"
-    style="flex-direction: column; align-items: flex-start; gap: 2px"
-  >
-    <h3 class="st-panel-title">Quick Actions</h3>
-    <p class="st-panel-subtitle">Frequently used teacher actions.</p>
+<div class="st-panel st-panel-pad col-4 st-attention-panel" style="min-height: 400px">
+  <div class="st-panel-head st-attention-panel-head">
+    <div>
+      <p class="st-attention-kicker">Attention</p>
+      <h3 class="st-panel-title">Recent High-Risk</h3>
+      <p class="st-panel-subtitle">Learners who may need follow-up first.</p>
+    </div>
+    <span class="material-symbols-outlined st-attention-alert-icon">warning</span>
   </div>
 
-  <div class="st-quick-list">
-    <a class="st-quick-item" href="class-management.html">
-      <span class="material-symbols-outlined st-quick-item-icon">school</span>
-      <span class="st-quick-item-label">Class Management</span>
-    </a>
-
-    <a class="st-quick-item" href="student-registry.html">
-      <span class="material-symbols-outlined st-quick-item-icon">groups</span>
-      <span class="st-quick-item-label">Student Registry</span>
-    </a>
-
-    <a class="st-quick-item" href="clc-overview.html">
-      <span class="material-symbols-outlined st-quick-item-icon"
-        >corporate_fare</span
-      >
-      <span class="st-quick-item-label">CLC Overview</span>
-    </a>
-
-    <a class="st-quick-item" href="early-warning.html">
-      <span class="material-symbols-outlined st-quick-item-icon"
-        >notifications_active</span
-      >
-      <span class="st-quick-item-label">Early Warning Alerts</span>
-    </a>
+  <div class="st-attention-list" data-dashboard-attention-list>
+    <p class="st-attention-empty">Loading learners…</p>
   </div>
 
-  <div class="st-quick-tip">
-    <span class="material-symbols-outlined">lightbulb</span>
-    <p>
-      <strong data-quick-intervention-count>3 learners</strong>
-      require immediate intervention. Review the Early Warning Alerts page.
-    </p>
-  </div>
+  <a class="st-attention-view-all" href="early-warning.html">
+    View all screened learners
+    <span class="material-symbols-outlined">north_east</span>
+  </a>
 </div>

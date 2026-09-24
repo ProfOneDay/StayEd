@@ -217,3 +217,171 @@ body {
   color: var(--st-on-surface-variant);
   max-width: 320px;
 }
+
+/* Mobile Student Performance Progress graph (shared public learner view). */
+.st-student-progress-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.st-student-progress-heading .st-student-section-title { margin-bottom: 0; }
+
+.st-student-progress-subtitle {
+  margin-top: 2px;
+  font-size: var(--st-font-size-micro);
+  color: var(--st-on-surface-variant);
+}
+
+.st-student-progress-current {
+  flex-shrink: 0;
+  text-align: right;
+  padding: 7px 10px;
+  border-radius: var(--st-radius-sm);
+  background: var(--st-primary-fixed);
+}
+
+.st-student-progress-current span {
+  display: block;
+  font-size: .625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--st-on-primary-fixed-variant, var(--st-primary));
+}
+
+.st-student-progress-current strong {
+  display: block;
+  margin-top: 1px;
+  color: var(--st-primary);
+  font-size: 1.1rem;
+}
+
+.st-student-progress-card { padding: 14px 12px 10px; }
+
+.st-student-progress-chart {
+  position: relative;
+  height: 190px;
+  overflow: hidden;
+}
+
+.st-student-progress-chart svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.st-student-progress-grid {
+  position: absolute;
+  left: 30px;
+  right: 0;
+  border-top: 1px solid rgba(195, 198, 207, .28);
+}
+
+.st-student-progress-grid span {
+  position: absolute;
+  left: -30px;
+  top: -7px;
+  width: 25px;
+  text-align: right;
+  font-size: .58rem;
+  color: var(--st-outline);
+}
+
+.st-student-progress-area { fill: rgba(59, 125, 221, .10); }
+
+.st-student-progress-line {
+  fill: none;
+  stroke: var(--st-primary);
+  stroke-width: 1.6;
+  vector-effect: non-scaling-stroke;
+}
+
+.st-student-progress-point {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--st-primary);
+  border: 2px solid #fff;
+  box-shadow: var(--st-shadow-xs);
+  cursor: pointer;
+  z-index: 3;
+  transition: transform .14s ease, box-shadow .14s ease;
+}
+
+.st-student-progress-point:hover,
+.st-student-progress-point:focus-visible {
+  transform: translate(-50%, -50%) scale(1.22);
+  box-shadow: 0 0 0 4px rgba(31, 78, 121, .14), var(--st-shadow-xs);
+  outline: none;
+}
+
+.st-student-progress-point::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 9px);
+  transform: translateX(-50%) translateY(4px);
+  width: max-content;
+  max-width: 240px;
+  padding: 6px 9px;
+  border-radius: 4px;
+  background: #202124;
+  color: #fff;
+  font-size: .6875rem;
+  font-weight: 500;
+  line-height: 1.25;
+  white-space: nowrap;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .22);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .12s ease, transform .12s ease, visibility .12s ease;
+  z-index: 20;
+}
+
+.st-student-progress-point::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 4px);
+  transform: translateX(-50%) translateY(4px);
+  border: 5px solid transparent;
+  border-top-color: #202124;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .12s ease, transform .12s ease, visibility .12s ease;
+  z-index: 19;
+}
+
+.st-student-progress-point:hover::after,
+.st-student-progress-point:hover::before,
+.st-student-progress-point:focus-visible::after,
+.st-student-progress-point:focus-visible::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.st-student-progress-date {
+  position: absolute;
+  bottom: 0;
+  transform: translateX(-50%);
+  max-width: 78px;
+  font-size: .55rem;
+  line-height: 1.15;
+  text-align: center;
+  color: var(--st-on-surface-variant);
+}
+
+@media (max-width: 380px) {
+  .st-student-progress-heading { align-items: flex-start; }
+  .st-student-progress-current { padding: 6px 8px; }
+  .st-student-progress-chart { height: 175px; }
+}
