@@ -271,8 +271,11 @@
   background-position: center;
   /* Zoomed in ~20% -- overflow:hidden on .st-landing-hero clips the
      excess, and transform-origin defaults to center so it stays
-     centered on the same focal point. */
-  transform: scale(1.2);
+     centered on the same focal point. background-position-x has no
+     effect here since "cover" is width-constrained (zero horizontal
+     slack) -- the pan has to happen via the transform instead, using
+     the slack the 1.2x zoom already creates. */
+  transform: scale(1.2) translateX(6%);
 }
 
 /* A soft blue glow (the brand's primary color) washing over the left
@@ -333,6 +336,12 @@
    centered within it -- no JS height calculation needed. */
 .st-landing-hero-stage {
   position: relative;
+  /* Without an explicit width, a flex item (this stage, inside
+     .st-landing-hero-inner) shrinks to fit its widest child instead of
+     filling the row -- which silently shrank the "50%" auth-panel width
+     below down to 50% of that shrunk box instead of 50% of the actual
+     available hero width. */
+  width: 100%;
   display: grid;
   /* Grid rows default to a content-based minimum (min-height:auto) that
      refuses to shrink below their tallest item, no matter what max-height
@@ -347,6 +356,31 @@
 }
 
 .st-landing-hero-stage > * {
+  grid-area: 1 / 1;
+}
+
+/* On mobile this just wraps login/signup/forgot so they keep overlapping
+   in the same cell as .st-landing-hero-intro, unchanged from before. On
+   desktop the stage switches to a two-column layout (see below) and this
+   wrapper becomes the right-hand column, with its own internal overlap
+   stack for login/signup/forgot to keep cross-fading between each other. */
+.st-landing-hero-panels {
+  position: relative;
+  width: 100%;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  max-height: 100%;
+  overflow: hidden;
+  /* This wrapper has no visible content of its own on mobile (where it
+     shares intro's grid cell) -- without this, its invisible box still
+     intercepts clicks meant for the intro buttons underneath it. Its
+     active child (login/signup/forgot) sets pointer-events:auto on
+     itself when shown, which correctly overrides this. */
+  pointer-events: none;
+}
+
+.st-landing-hero-panels > * {
   grid-area: 1 / 1;
 }
 
@@ -536,16 +570,53 @@
   }
 }
 
+/* Short viewports (small phones, or a shallow browser window) don't have
+   room for the intro's full type scale -- the "Create account" CTA (the
+   2nd, lower button) ended up mostly past the intro's own overflow-y:auto
+   clip line, tappable only after scrolling the card, which isn't obvious
+   and reads as "the button doesn't work". Compacting the whole stack
+   keeps both CTAs on-screen without scrolling on common device heights. */
+@media (max-height: 700px) {
+  .st-landing-hero {
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+
+  .st-landing-hero-intro {
+    gap: 12px;
+  }
+
+  .st-landing-hero-title {
+    font-size: 1.65rem;
+  }
+
+  .st-landing-hero-subtitle {
+    font-size: var(--st-font-size-label);
+    line-height: 1.45;
+  }
+
+  .st-landing-hero-cta {
+    gap: 8px;
+  }
+}
+
 /* ---------- In-hero auth panels (login / signup / forgot password) ---------- */
 
+/* Same "Close X" on every breakpoint -- mobile used to say "Back to
+   StayEd" with a back-arrow, desktop said "Close" with an X; standardized
+   on the X since these panels never had a "previous screen" to go back
+   to, just an open/closed state. */
 .st-landing-login-back {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   background: none;
   border: none;
   padding: 0;
-  margin-bottom: 16px;
   font-size: var(--st-font-size-label);
   font-weight: 600;
   color: var(--st-on-surface-variant);
@@ -561,6 +632,7 @@
 }
 
 .st-landing-login-panel {
+  position: relative;
   width: 100%;
   max-width: 460px;
   background: rgba(255, 255, 255, 0.55);
@@ -570,6 +642,9 @@
   border-radius: var(--st-radius-xl);
   box-shadow: var(--st-glass-shadow);
   padding: 24px;
+  /* Extra clearance so the "Close X" (absolutely positioned into this
+     corner) doesn't sit on top of the panel's own heading. */
+  padding-top: 56px;
   max-height: 100%;
   overflow-y: auto;
   scrollbar-width: thin;
@@ -637,18 +712,61 @@
 /* ---------- Desktop: wider hero content + auth panels ---------- */
 
 @media (min-width: 768px) {
-  .st-landing-hero-intro,
-  .st-landing-hero-login,
-  .st-landing-hero-signup,
-  .st-landing-hero-forgot {
-    max-width: min(40vw, 720px);
+  /* Two real side-by-side columns instead of one overlapping grid cell --
+     the intro copy and the auth panel now sit beside each other instead
+     of cross-fading over the same spot. grid-area:1/1 on the stage's
+     children becomes a no-op once display switches to flex, which is
+     exactly what turns the mobile overlap into a desktop row. */
+  .st-landing-hero-stage {
+    display: flex;
+    align-items: center;
+    gap: var(--st-margin-desktop);
+  }
+
+  .st-landing-hero-intro {
+    flex: 0 1 min(38vw, 680px);
+    min-width: 0;
+    max-width: min(38vw, 680px);
+    /* Always visible on desktop -- login/signup/forgot open beside it in
+       .st-landing-hero-panels instead of covering it, so fading it out
+       based on data-stage would just leave an empty gap next to the
+       panel. Equal specificity to the opacity:0 default above, but later
+       in source order, so this wins without needing !important. */
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
   }
 
   .st-landing-hero-subtitle {
-    max-width: min(40vw, 720px);
+    max-width: 100%;
+  }
+
+  /* Widened from a plain 50%-of-stage split, and pulled closer to the
+     intro copy via the shared gap above rather than an open-ended half
+     of the row -- shrinks gracefully (flex-shrink) if the two columns
+     don't both fit at their preferred width, and grows (flex-grow:1) to
+     fill whatever's left on the right instead of stopping short of it. */
+  .st-landing-hero-panels {
+    flex: 1 1 560px;
+    min-width: 0;
+    /* Stretch to the stage's full height -- without this, a flex item
+       with the stage's default align-items:center sizes to its own
+       content instead, leaving max-height:100% below with no definite
+       parent height to resolve against. That silently broke the panel's
+       own scroll/clip chain, letting signup's taller content render at
+       full natural height and get clipped by the hero's overflow:hidden
+       instead of scrolling within its own bounds. */
+    align-self: stretch;
+  }
+
+  .st-landing-hero-login,
+  .st-landing-hero-signup,
+  .st-landing-hero-forgot {
+    width: 100%;
+    max-width: 100%;
   }
 
   .st-landing-login-panel {
-    max-width: min(40vw, 720px);
+    max-width: 100%;
   }
 }

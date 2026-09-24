@@ -143,12 +143,16 @@
               </div>
             </div>
 
+            <!-- Auth panels -- grouped so the hero intro can stay visible
+                 beside them on desktop instead of being hidden while one
+                 of these is open. -->
+            <div class="st-landing-hero-panels">
             <!-- Login panel -->
             <div class="st-landing-hero-login" data-hero-panel>
               <div class="st-landing-login-panel">
                 <button type="button" class="st-landing-login-back" data-close-panel>
-                  <span class="material-symbols-outlined">arrow_back</span>
-                  Back to StayEd
+                  Close
+                  <span class="material-symbols-outlined">close</span>
                 </button>
 
                 <div class="auth-header">
@@ -210,7 +214,7 @@
 
                 <div class="auth-register">
                   Don't have a teacher account?
-                  <a href="pages/auth/register.html" id="createAccountLink" data-open-signup>Create Account</a>
+                  <button type="button" class="st-landing-link-btn" id="createAccountLink" data-open-signup>Create Account</button>
                 </div>
 
                 <div class="auth-notice">
@@ -235,8 +239,8 @@
             <div class="st-landing-hero-signup" data-hero-panel>
               <div class="st-landing-login-panel">
                 <button type="button" class="st-landing-login-back" data-close-panel>
-                  <span class="material-symbols-outlined">arrow_back</span>
-                  Back to StayEd
+                  Close
+                  <span class="material-symbols-outlined">close</span>
                 </button>
 
                 <div class="auth-header">
@@ -373,8 +377,8 @@
             <div class="st-landing-hero-forgot" data-hero-panel>
               <div class="st-landing-login-panel">
                 <button type="button" class="st-landing-login-back" data-close-panel>
-                  <span class="material-symbols-outlined">arrow_back</span>
-                  Back to StayEd
+                  Close
+                  <span class="material-symbols-outlined">close</span>
                 </button>
 
                 <div class="auth-header">
@@ -417,6 +421,7 @@
                   </p>
                 </div>
               </div>
+            </div>
             </div>
           </div>
           </div>

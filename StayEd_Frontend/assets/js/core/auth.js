@@ -162,8 +162,18 @@ class Auth {
     return updated;
   }
 
-  static redirectAfterLogin() {
+  static async redirectAfterLogin() {
     const role = this.role();
+
+    // A teacher with no active CLC assignment yet hasn't been through the
+    // setup wizard (class creation + learner import) -- send them there
+    // instead of an empty dashboard. GET /clcs/current is the backend's
+    // own signal for this: 404 means "no CLC yet", nothing else to add.
+    if (role === "teacher" && !(await this.hasCompletedOnboarding())) {
+      window.location.href = "/pages/setup/setup-wizard-1.html";
+
+      return;
+    }
 
     switch (role) {
       case "admin":
@@ -178,6 +188,23 @@ class Auth {
 
       default:
         window.location.href = "/index.html";
+    }
+  }
+
+  static async hasCompletedOnboarding() {
+    try {
+      await API.get("/clcs/current");
+
+      return true;
+    } catch (error) {
+      if (error?.status === 404) {
+        return false;
+      }
+
+      // Any other failure (network blip, 500, etc.) fails open -- a
+      // transient error shouldn't strand an already-onboarded teacher on
+      // the setup wizard instead of their actual dashboard.
+      return true;
     }
   }
 

@@ -14,13 +14,9 @@ class LoginPage {
 
     this.submitButton = this.form.querySelector("button[type='submit']");
 
-    this.toggleButton = document.getElementById("togglePassword");
-
     this.createAccountLink = document.getElementById("createAccountLink");
 
     this.restoreRememberedEmail();
-
-    this.initializePasswordToggle();
 
     this.initializeCreateAccountDemo();
 
@@ -74,25 +70,11 @@ class LoginPage {
     );
   }
 
-  static initializePasswordToggle() {
-    if (!this.toggleButton) {
-      return;
-    }
-
-    this.toggleButton.addEventListener(
-      "click",
-
-      () => {
-        const hidden = this.password.type === "password";
-
-        this.password.type = hidden ? "text" : "password";
-
-        this.toggleButton.querySelector("span").textContent = hidden
-          ? "visibility_off"
-          : "visibility";
-      },
-    );
-  }
+  // Password visibility toggle for #togglePassword is handled by
+  // AuthPage.bindPasswordToggles() (auth-page.js), which already binds
+  // any .password-toggle button generically -- this used to duplicate
+  // that binding, stacking a second listener on the same click and
+  // silently cancelling the toggle out every other click.
 
   static async submit(event) {
     event.preventDefault();

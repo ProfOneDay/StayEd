@@ -94,8 +94,6 @@ const AuthPage = {
 
 document.addEventListener("DOMContentLoaded", () => {
   AuthPage.init();
-
-  setTimeout(() => AuthPage.init(), 250);
 });
 
 window.AuthPage = AuthPage;
