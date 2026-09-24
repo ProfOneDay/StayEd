@@ -2656,7 +2656,14 @@ def _insert_import_rows(rows, teacher, class_id=None):
                         _parse_import_distance(row.get("distance_from_clc_km")),
                     ),
                 )
-                imported.append({"lrn": row["lrn"], "name": name, "level": row.get("level") or "Basic Literacy"})
+                imported.append({
+                    "lrn": row["lrn"],
+                    "name": name,
+                    "first_name": first,
+                    "last_name": last,
+                    "sex": sex,
+                    "level": row.get("level") or "Basic Literacy",
+                })
 
             # Duplicates (LRN already exists) are bypassed, not skipped: the
             # matching existing learner is attached to this class rather than

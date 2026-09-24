@@ -400,7 +400,7 @@ class SetupWizard {
 
       selectedFile = file;
 
-      uploadPreview.classList.remove("hidden");
+      uploadPreview.classList.remove("st-hidden");
 
       fileName.textContent = file.name;
 
@@ -524,18 +524,12 @@ class SetupWizard {
 
       learnerTable.innerHTML = "";
 
-      (result.learners || []).forEach((learner, index) => {
+      (result.learners || []).forEach((learner) => {
         learnerTable.insertAdjacentHTML(
           "beforeend",
 
           `
 <tr>
-
-<td class="px-4 py-3">
-
-${index + 1}
-
-</td>
 
 <td class="px-4 py-3">
 
@@ -545,7 +539,19 @@ ${learner.lrn}
 
 <td class="px-4 py-3">
 
-${learner.name}
+${learner.last_name || ""}
+
+</td>
+
+<td class="px-4 py-3">
+
+${learner.first_name || ""}
+
+</td>
+
+<td class="px-4 py-3">
+
+${learner.sex || ""}
 
 </td>
 

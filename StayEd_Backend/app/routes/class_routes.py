@@ -31,6 +31,7 @@ def _shape(row):
     return {
         "id": row["class_id"],
         "communityLearningCenter": row["clc_name"],
+        "municipality": row.get("municipality") or "",
         "schoolYear": row["school_year"],
         "semester": SEM_LABELS.get(row["semester"], row["semester"]),
         "learningLevel": LEVEL_LABELS.get(row["learning_level"], row["learning_level"]),
@@ -105,7 +106,7 @@ def list_classes():
         return {"total": 0, "data": []}
     rows = fetch_all(
         """
-        SELECT lc.*, c.clc_name
+        SELECT lc.*, c.clc_name, c.municipality
         FROM learning_class lc
         JOIN clc c ON c.clc_id = lc.clc_id
         WHERE lc.teacher_id = %s
@@ -124,7 +125,7 @@ def current_class():
         return error("Teacher profile not found.", 404)
     row = fetch_one(
         """
-        SELECT lc.*, c.clc_name
+        SELECT lc.*, c.clc_name, c.municipality
         FROM learning_class lc
         JOIN clc c ON c.clc_id = lc.clc_id
         WHERE lc.teacher_id = %s AND lc.status = 'ACTIVE'
@@ -227,7 +228,7 @@ def create_class():
         raise
 
     row = fetch_one(
-        "SELECT lc.*, c.clc_name FROM learning_class lc JOIN clc c ON c.clc_id=lc.clc_id WHERE lc.class_id=%s",
+        "SELECT lc.*, c.clc_name, c.municipality FROM learning_class lc JOIN clc c ON c.clc_id=lc.clc_id WHERE lc.class_id=%s",
         (class_id,),
     )
     message = "Class created successfully." if was_created else "Class already exists; no duplicate was created."
