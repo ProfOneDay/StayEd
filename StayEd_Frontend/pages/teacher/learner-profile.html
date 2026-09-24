@@ -52,59 +52,86 @@
 
         <!-- Profile Hero -->
         <div class="st-profile-hero" data-profile-hero>
-          <div class="st-profile-hero-identity">
+          <!-- Learner identity -->
+          <section class="st-profile-hero-left">
             <div class="st-profile-hero-avatar" data-profile-avatar>?</div>
-            <div>
+            <div class="st-profile-hero-heading">
               <h2 class="st-profile-hero-name" data-profile-name>Loading…</h2>
-              <div class="st-profile-hero-meta">
-                <p>LRN: <span data-profile-lrn>—</span></p>
-                <p>CLC: <span data-profile-clc>—</span></p>
-                <p>Level: <span data-profile-level>—</span></p>
-                <p>Modality: <span data-profile-modality>—</span> <span style="font-size:0.6875rem;color:var(--st-on-surface-variant);" data-profile-modality-since></span></p>
-                <p>School Year: <span data-profile-school-year>—</span></p>
-                <p>Enrolled: <span data-profile-date-enrolled>—</span></p>
-                <p>Teacher: <span data-profile-assigned-teacher>—</span></p>
-                <p>Class: <span data-profile-current-class>—</span></p>
+              <p class="st-profile-hero-lrn">LRN: <span data-profile-lrn>—</span></p>
+              <div class="st-profile-chip-row">
+                <span class="st-profile-level-chip" data-profile-level>—</span>
               </div>
             </div>
-          </div>
+          </section>
 
-          <div class="st-profile-hero-risk">
-            <p class="st-profile-hero-risk-label">Current Risk</p>
-            <div data-profile-risk-badge></div>
-          </div>
+          <!-- Learner details -->
+          <section class="st-profile-hero-middle">
+            <div class="st-profile-meta-row">
+              <span class="material-symbols-outlined">account_balance</span>
+              <div>
+                <p class="st-profile-meta-label">CLC</p>
+                <p class="st-profile-meta-value"><span data-profile-clc>—</span></p>
+              </div>
+            </div>
+            <div class="st-profile-meta-row">
+              <span class="material-symbols-outlined">menu_book</span>
+              <div>
+                <p class="st-profile-meta-label">Modality</p>
+                <p class="st-profile-meta-value"><span data-profile-modality>—</span></p>
+                <p class="st-profile-meta-note" data-profile-modality-since></p>
+              </div>
+            </div>
+            <div class="st-profile-meta-row">
+              <span class="material-symbols-outlined">event_available</span>
+              <div>
+                <p class="st-profile-meta-label">Enrolled</p>
+                <p class="st-profile-meta-value"><span data-profile-date-enrolled>—</span></p>
+              </div>
+            </div>
+            <div class="st-profile-meta-row">
+              <span class="material-symbols-outlined">groups</span>
+              <div>
+                <p class="st-profile-meta-label">Class</p>
+                <p class="st-profile-meta-value"><span data-profile-current-class>—</span></p>
+              </div>
+            </div>
+          </section>
 
-          <div class="st-profile-hero-actions">
-            <button
-              type="button"
-              class="st-btn st-btn-primary"
-              data-profile-assign-btn
-            >
-              <span class="material-symbols-outlined">person_add</span>
-              Assign Intervention
-            </button>
-            <a
-              href="#"
-              class="st-btn st-btn-outline"
-              data-profile-class-btn
-              hidden
-            >
-              <span class="material-symbols-outlined">school</span>
-              View Class
-            </a>
-            <a href="student-registry.html" class="st-btn st-btn-outline">
-              <span class="material-symbols-outlined">visibility</span>
-              View Student Registry
-            </a>
-            <button
-              type="button"
-              class="st-btn st-btn-outline"
-              data-profile-edit-btn
-            >
-              <span class="material-symbols-outlined">edit</span>
-              Edit Learner
-            </button>
-          </div>
+          <!-- Current risk -->
+          <section class="st-profile-hero-risk-panel" aria-label="Current learner risk">
+            <p class="st-profile-risk-panel-label">Current Risk</p>
+            <div class="st-profile-risk-panel-icon" aria-hidden="true">
+              <span class="material-symbols-outlined">warning</span>
+            </div>
+            <div class="st-profile-risk-panel-badge" data-profile-risk-badge></div>
+            <p class="st-profile-risk-panel-helper" data-profile-risk-helper></p>
+          </section>
+
+          <!-- Actions -->
+          <section class="st-profile-hero-side">
+            <div class="st-profile-hero-actions">
+              <button type="button" class="st-btn st-btn-primary" data-profile-assign-btn>
+                <span class="material-symbols-outlined">person_add</span>
+                <span>Assign Intervention</span>
+                <span class="material-symbols-outlined st-btn-tail">chevron_right</span>
+              </button>
+              <a href="#" class="st-btn st-btn-outline" data-profile-class-btn hidden>
+                <span class="material-symbols-outlined">school</span>
+                <span>View Class</span>
+                <span class="material-symbols-outlined st-btn-tail">chevron_right</span>
+              </a>
+              <a href="student-registry.html" class="st-btn st-btn-outline">
+                <span class="material-symbols-outlined">visibility</span>
+                <span>View Student Registry</span>
+                <span class="material-symbols-outlined st-btn-tail">chevron_right</span>
+              </a>
+              <button type="button" class="st-btn st-btn-outline" data-profile-edit-btn>
+                <span class="material-symbols-outlined">edit</span>
+                <span>Edit Learner</span>
+                <span class="material-symbols-outlined st-btn-tail">chevron_right</span>
+              </button>
+            </div>
+          </section>
         </div>
 
         <!-- Student View Link (Google-Drive-style link sharing -- no

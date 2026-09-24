@@ -5,12 +5,14 @@ class AssessmentScores {
   static selectedLearnerId = null;
   static currentForm = null;
   static search = "";
+  static requestedLearnerId = null;
+  static returnUrl = "";
 
   // Drives both the AF5 Assessment Results table and what gets read/written
   // to the "scores" JSON blob. Per-component rows keep only the recorded
   // pre/post values. The overall passing-likelihood label is computed from
-  // Final Score Percentage Grade using StayEd's documented internal threshold,
-  // instead of asking the teacher to type a subjective likelihood.
+  // the FLT post-test total compared with the same component scales used by
+  // the percentage column, instead of from the separate portfolio final grade.
   static AF5_ROWS = [
     { type: "score", id: "pis", label: "PIS Score" },
     { type: "section", label: "Assessment for Basic Literacy (ABL)" },
@@ -48,17 +50,52 @@ class AssessmentScores {
     { id: "revalida_interview", label: "Interview" },
   ];
 
+  // Internal display scales used to show the per-row percentage badges that
+  // appear in the AF5 table. These are UI-only helper scales so teachers can
+  // see a percentage-based snapshot beside each encoded post score.
+  static COMPONENT_MAX_SCORES = {
+    pis: 10,
+    flt_ls1_en_mc: 8.5,
+    flt_ls1_en_writing: 4,
+    flt_ls1_en_listening: 2.5,
+    flt_ls1_fil_mc: 7.5,
+    flt_ls1_fil_writing: 2.6,
+    flt_ls1_fil_listening: 2.5,
+    flt_ls2: 14,
+    flt_ls3: 17,
+    flt_ls4: 11.8,
+    flt_ls5: 11.5,
+    flt_ls6: 11.8,
+  };
+
+  static get FLT_TOTAL_MAX_SCORE() {
+    return Object.entries(this.COMPONENT_MAX_SCORES)
+      .filter(([rowId]) => rowId !== "pis")
+      .reduce((sum, [, maxScore]) => sum + maxScore, 0);
+  }
+
   static async init() {
     if (window.Guards) Guards.teacher();
 
     const params = new URLSearchParams(window.location.search);
     this.classId = params.get("class") || "";
+    this.requestedLearnerId = params.get("learner") ? Number(params.get("learner")) : null;
+    this.returnUrl = params.get("return") || "";
 
     this.bindSearch();
     this.bindSave();
 
     await this.loadClassContext();
     await this.loadLearners();
+
+    if (this.requestedLearnerId) {
+      const exists = this.learners.some((l) => String(l.id) === String(this.requestedLearnerId));
+      if (exists) {
+        await this.selectLearner(this.requestedLearnerId);
+      } else {
+        Toast?.error("Requested learner was not found in this assessment list.");
+      }
+    }
   }
 
   // Same pattern as module-management.js's loadClassContext().
@@ -201,7 +238,7 @@ class AssessmentScores {
             <tr>
               <th>Assessment Component / Learning Area</th>
               <th colspan="2">Score</th>
-              <th>Status / Note</th>
+              <th>Likelihood / Competency</th>
             </tr>
             <tr class="st-assessment-subhead">
               <th></th><th>Pre</th><th>Post</th><th></th>
@@ -211,9 +248,9 @@ class AssessmentScores {
             ${this.AF5_ROWS.map((row) => this.renderAf5Row(row, scores)).join("")}
             <tr class="st-assessment-total-row">
               <td>Overall Score</td>
-              <td><input type="text" class="st-assessment-input" readonly value="${f.overallScorePre ?? 0}"></td>
-              <td><input type="text" class="st-assessment-input" readonly value="${f.overallScorePost ?? 0}"></td>
-              <td class="st-assessment-computed-note">Likelihood is computed from Final Score Percentage Grade below.</td>
+              <td><input type="text" class="st-assessment-input" data-overall-pre readonly value="${f.overallScorePre ?? 0}"></td>
+              <td><input type="text" class="st-assessment-input" data-overall-post readonly value="${f.overallScorePost ?? 0}"></td>
+              <td class="st-assessment-result-cell" data-overall-grade-cell>${this.renderOverallLikelihoodCell(f.overallScorePost)}</td>
             </tr>
           </tbody>
         </table>
@@ -246,7 +283,7 @@ class AssessmentScores {
             ).join("")}
             <tr class="st-assessment-total-row">
               <td>TOTAL SCORE</td>
-              <td><input type="text" class="st-assessment-input" readonly value="${f.portfolioTotalScore ?? 0}"></td>
+              <td><input type="text" class="st-assessment-input" data-portfolio-total readonly value="${f.portfolioTotalScore ?? 0}"></td>
             </tr>
             <tr class="st-assessment-section-row"><td colspan="2">Inter-District Revalida</td></tr>
             ${this.PORTFOLIO_REVALIDA_ROWS.map(
@@ -273,15 +310,15 @@ class AssessmentScores {
             <span class="material-symbols-outlined">analytics</span>
             <div>
               <p class="st-assessment-likelihood-kicker">Likelihood of Passing A&amp;E Exam</p>
-              <strong data-overall-likelihood-preview>${this.esc(scores.overall_likelihood || this.likelihoodLabel(f.finalScorePercentageGrade))}</strong>
+              <strong data-overall-likelihood-preview>${this.esc(scores.overall_likelihood || (f.overallScorePercentage == null ? "Waiting for post-test scores" : this.likelihoodLabel(f.overallScorePercentage)))}</strong>
             </div>
           </div>
-          <p>StayEd internal threshold: <strong>High likelihood = 70% or above</strong>; <strong>Low likelihood = below 70%</strong>. This is a project readiness rule, not an official DepEd A&amp;E passing mark.</p>
+          <p>Calculated from the learner's <strong>FLT post-test total</strong>. StayEd internal threshold: <strong>High likelihood = 70% or above</strong>; <strong>Low likelihood = below 70%</strong>. This is a project readiness rule, not an official DepEd A&amp;E passing mark.</p>
         </div>
       </div>
     `;
 
-    this.bindLikelihoodPreview();
+    this.bindLivePreview();
   }
 
   static renderAf5Row(row, scores) {
@@ -311,9 +348,84 @@ class AssessmentScores {
         <td class="${labelClass}">${this.esc(row.label)}</td>
         <td><input type="number" step="0.5" class="st-assessment-input" data-score-field="${row.id}" data-score-part="pre" value="${r.pre ?? ""}"></td>
         <td><input type="number" step="0.5" class="st-assessment-input" data-score-field="${row.id}" data-score-part="post" value="${r.post ?? ""}"></td>
-        <td class="st-assessment-computed-note">Included in overall readiness</td>
+        <td class="st-assessment-result-cell" data-computed-cell="${row.id}">${this.renderComputedRowResult(row.id, r)}</td>
       </tr>
     `;
+  }
+
+  static renderComputedRowResult(rowId, rowData = {}) {
+    const percentage = this.rowPercentage(rowId, rowData);
+    if (percentage == null) {
+      return `<span class="st-assessment-computed-empty">—</span>`;
+    }
+
+    if (rowId === "pis") {
+      const competency = this.competencyLabel(percentage);
+      return `
+        <div class="st-assessment-result">
+          <span class="st-assessment-result-pill is-competency">${percentage}%</span>
+          <span class="st-assessment-result-note">${this.esc(competency)}</span>
+        </div>
+      `;
+    }
+
+    const { label, tone } = this.componentLikelihoodMeta(percentage);
+    return `
+      <div class="st-assessment-result">
+        <span class="st-assessment-result-pill is-${tone}">${percentage}%</span>
+        <span class="st-assessment-result-note">(${this.esc(label)})</span>
+      </div>
+    `;
+  }
+
+  static renderOverallLikelihoodCell(overallPostScore) {
+    const percentage = this.overallLikelihoodPercentage(overallPostScore);
+    if (percentage == null) {
+      return `<span class="st-assessment-computed-empty">Waiting for post-test scores</span>`;
+    }
+    const passed = percentage >= 70;
+    return `
+      <div class="st-assessment-result st-assessment-result--overall">
+        <span class="st-assessment-result-pill ${passed ? "is-high" : "is-low"}">${percentage}%</span>
+        <span class="st-assessment-result-note">${passed ? "HIGH LIKELIHOOD (PASS)" : "LOW LIKELIHOOD"}</span>
+      </div>
+    `;
+  }
+
+  static overallLikelihoodPercentage(overallPostScore) {
+    if (overallPostScore == null || overallPostScore === "") return null;
+    const score = Number(overallPostScore);
+    if (!Number.isFinite(score)) return null;
+    return this.roundPercent((score / this.FLT_TOTAL_MAX_SCORE) * 100);
+  }
+
+  static rowPercentage(rowId, rowData = {}) {
+    const value = rowData.post ?? rowData.pre;
+    const maxScore = this.COMPONENT_MAX_SCORES[rowId];
+    if (value == null || value === "" || !maxScore) return null;
+    const numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) return null;
+    return this.roundPercent((numericValue / maxScore) * 100);
+  }
+
+  static roundPercent(value) {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) return null;
+    return Math.max(0, Math.min(100, Math.round(numeric)));
+  }
+
+  static competencyLabel(percentage) {
+    if (percentage >= 90) return "Proficient";
+    if (percentage >= 75) return "Approaching Proficiency";
+    if (percentage >= 60) return "Developing";
+    return "Beginning";
+  }
+
+  static componentLikelihoodMeta(percentage) {
+    if (percentage >= 85) return { label: "High", tone: "high" };
+    if (percentage >= 80) return { label: "Likely", tone: "likely" };
+    if (percentage >= 75) return { label: "Moderate", tone: "moderate" };
+    return { label: "Low", tone: "low" };
   }
 
   static likelihoodLabel(value) {
@@ -325,17 +437,81 @@ class AssessmentScores {
     return score >= 70 ? "HIGH LIKELIHOOD" : "LOW LIKELIHOOD";
   }
 
-  static bindLikelihoodPreview() {
+  static bindLivePreview() {
     const grade = document.querySelector("[data-final-grade]");
     const preview = document.querySelector("[data-overall-likelihood-preview]");
-    if (!grade || !preview) return;
+    const overallGradeCell = document.querySelector("[data-overall-grade-cell]");
 
-    const update = () => {
-      preview.textContent = this.likelihoodLabel(grade.value);
-      preview.dataset.level = Number(grade.value) >= 70 ? "high" : grade.value === "" ? "neutral" : "low";
+    const updateLikelihoodPreview = () => {
+      const overallPost = this.sumRowScores("post");
+      const percentage = this.overallLikelihoodPercentage(overallPost);
+      if (preview) {
+        preview.textContent = percentage == null ? "Waiting for post-test scores" : this.likelihoodLabel(percentage);
+        preview.dataset.level = percentage == null ? "neutral" : percentage >= 70 ? "high" : "low";
+      }
+      if (overallGradeCell) {
+        overallGradeCell.innerHTML = this.renderOverallLikelihoodCell(overallPost);
+      }
     };
-    grade.addEventListener("input", update);
-    update();
+
+    const updateRowPreview = (rowId) => {
+      const target = document.querySelector(`[data-computed-cell="${rowId}"]`);
+      if (!target) return;
+      target.innerHTML = this.renderComputedRowResult(rowId, this.readScoreRowFromDom(rowId));
+    };
+
+    const updateOverallScores = () => {
+      const preEl = document.querySelector("[data-overall-pre]");
+      const postEl = document.querySelector("[data-overall-post]");
+      if (preEl) {
+        preEl.value = this.sumRowScores("pre");
+      }
+      if (postEl) {
+        postEl.value = this.sumRowScores("post");
+      }
+    };
+
+    const updatePortfolioTotal = () => {
+      const totalEl = document.querySelector("[data-portfolio-total]");
+      if (!totalEl) return;
+      let total = 0;
+      this.PORTFOLIO_WORK_SAMPLE_ROWS.forEach((row) => {
+        const value = this.readNumber(`[data-portfolio-field="${row.id}"]`);
+        total += value || 0;
+      });
+      totalEl.value = total;
+    };
+
+    document.querySelectorAll("[data-score-field][data-score-part='pre'], [data-score-field][data-score-part='post']").forEach((input) => {
+      input.addEventListener("input", () => {
+        const rowId = input.dataset.scoreField;
+        updateRowPreview(rowId);
+        updateOverallScores();
+        updateLikelihoodPreview();
+      });
+    });
+
+    document.querySelectorAll("[data-portfolio-field]").forEach((input) => {
+      input.addEventListener("input", updatePortfolioTotal);
+    });
+
+    this.AF5_ROWS.filter((row) => row.id && row.type === "score").forEach((row) => updateRowPreview(row.id));
+    updateOverallScores();
+    updatePortfolioTotal();
+    updateLikelihoodPreview();
+  }
+
+  static readScoreRowFromDom(rowId) {
+    return {
+      pre: this.readNumber(`[data-score-field="${rowId}"][data-score-part="pre"]`),
+      post: this.readNumber(`[data-score-field="${rowId}"][data-score-part="post"]`),
+    };
+  }
+
+  static sumRowScores(part) {
+    const rows = this.AF5_ROWS.filter((row) => row.id && row.type === "score" && row.id !== "pis");
+    const total = rows.reduce((sum, row) => sum + (this.readNumber(`[data-score-field="${row.id}"][data-score-part="${part}"]`) || 0), 0);
+    return Number.isInteger(total) ? total : Number(total.toFixed(2));
   }
 
   static bindSave() {
@@ -356,7 +532,9 @@ class AssessmentScores {
           ?? null,
       };
     });
-    scores.overall_likelihood = this.likelihoodLabel(this.readNumber("[data-final-grade]"));
+    const overallPostForLikelihood = this.sumRowScores("post");
+    const overallPercentage = this.overallLikelihoodPercentage(overallPostForLikelihood);
+    scores.overall_likelihood = overallPercentage == null ? null : this.likelihoodLabel(overallPercentage);
 
     const portfolio = {};
     [...this.PORTFOLIO_WORK_SAMPLE_ROWS, ...this.PORTFOLIO_REVALIDA_ROWS].forEach((row) => {

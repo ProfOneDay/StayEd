@@ -358,8 +358,227 @@
   color: var(--st-on-surface-variant);
 }
 
-.st-assessment-computed-note {
-  font-size: var(--st-font-size-micro);
-  color: var(--st-on-surface-variant);
+.st-assessment-result-cell {
+  text-align: center;
+}
+
+.st-assessment-result {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.st-assessment-result--overall {
+  max-width: 100%;
+}
+
+.st-assessment-result-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 72px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: var(--st-font-size-caption);
+  font-weight: 700;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.st-assessment-result-pill.is-competency {
+  background: rgba(39, 174, 96, 0.16);
+  border-color: rgba(39, 174, 96, 0.28);
+  color: #1f8a59;
+}
+
+.st-assessment-result-pill.is-high {
+  background: rgba(39, 174, 96, 0.16);
+  border-color: rgba(39, 174, 96, 0.28);
+  color: #1f8a59;
+}
+
+.st-assessment-result-pill.is-likely {
+  background: rgba(64, 123, 255, 0.12);
+  border-color: rgba(64, 123, 255, 0.2);
+  color: #315db7;
+}
+
+.st-assessment-result-pill.is-moderate {
+  background: rgba(243, 148, 34, 0.14);
+  border-color: rgba(243, 148, 34, 0.26);
+  color: #cf7f12;
+}
+
+.st-assessment-result-pill.is-low {
+  background: rgba(214, 69, 69, 0.12);
+  border-color: rgba(214, 69, 69, 0.24);
+  color: #bd3939;
+}
+
+.st-assessment-result-note {
+  font-size: var(--st-font-size-caption);
+  font-weight: 600;
   line-height: 1.35;
+  color: var(--st-on-surface-variant);
+}
+
+.st-assessment-computed-empty {
+  font-size: var(--st-font-size-caption);
+  color: var(--st-on-surface-variant);
+}
+
+
+/* UI polish: assessment recording */
+[data-page="Assessment Scores"] .st-page-header {
+  margin-bottom: 16px;
+}
+
+.st-assessment-scores-layout {
+  grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+  gap: 20px;
+}
+
+.st-assessment-learner-panel {
+  padding: 18px;
+  gap: 14px;
+  max-height: calc(100vh - 176px);
+  position: sticky;
+  top: calc(var(--st-navbar-height, 72px) + 24px);
+}
+
+.st-assessment-learner-panel-head {
+  align-items: flex-start;
+}
+
+.st-assessment-learner-count {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.st-assessment-learner-count span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgba(27, 74, 128, 0.1);
+  color: var(--st-primary);
+  font-size: var(--st-font-size-micro);
+  font-weight: 700;
+}
+
+.st-assessment-search input { height: 42px; }
+.st-assessment-learner-list { gap: 8px; padding-right: 2px; }
+
+.st-assessment-learner-row {
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid rgba(195, 198, 207, 0.28);
+  background: #fff;
+}
+
+.st-assessment-learner-row:hover {
+  background: rgba(27, 74, 128, 0.04);
+  border-color: rgba(27, 74, 128, 0.18);
+}
+
+.st-assessment-learner-row.is-active {
+  background: rgba(27, 74, 128, 0.08);
+  border-color: rgba(27, 74, 128, 0.22);
+  box-shadow: inset 3px 0 0 var(--st-secondary);
+}
+
+.st-assessment-learner-row-name { line-height: 1.35; }
+.st-assessment-avatar { background: rgba(27, 74, 128, 0.08); }
+.st-assessment-detail-panel { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+
+.st-assessment-learner-header {
+  padding: 18px 20px;
+  margin-bottom: 0;
+}
+
+.st-assessment-learner-header-identity { gap: 16px; }
+.st-assessment-learner-header-name-row h2 { margin: 0; line-height: 1.15; }
+.st-assessment-learner-header-meta { margin-top: 6px; line-height: 1.5; }
+
+.st-assessment-learner-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.st-assessment-table-card { margin-bottom: 0; overflow-x: auto; }
+
+.st-assessment-table-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.st-assessment-table-head h3 { margin: 0; }
+
+.st-assessment-table {
+  min-width: 880px;
+  table-layout: fixed;
+}
+
+.st-assessment-table thead th {
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.st-assessment-table th,
+.st-assessment-table td {
+  padding: 10px 14px;
+  vertical-align: middle;
+}
+
+.st-assessment-table th:first-child,
+.st-assessment-table td:first-child { width: 46%; }
+.st-assessment-subhead th { padding-top: 4px; }
+.st-assessment-input { width: 72px; height: 34px; padding: 0 8px; }
+.st-assessment-input--wide { min-width: 180px; }
+.st-assessment-rating-banner { flex-wrap: wrap; row-gap: 10px; }
+
+@media (max-width: 1100px) {
+  .st-assessment-scores-layout { grid-template-columns: 1fr; }
+  .st-assessment-learner-panel { position: static; max-height: none; }
+}
+
+@media (max-width: 768px) {
+  .st-assessment-learner-header { padding: 16px; }
+  .st-assessment-learner-header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .st-assessment-table-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .st-assessment-table { min-width: 760px; }
+}
+
+/* 2026-09-24: remove browser number spinners from assessment score fields */
+.st-assessment-input[type="number"]{
+  appearance:textfield;
+  -moz-appearance:textfield;
+}
+
+.st-assessment-input[type="number"]::-webkit-outer-spin-button,
+.st-assessment-input[type="number"]::-webkit-inner-spin-button{
+  -webkit-appearance:none;
+  margin:0;
 }

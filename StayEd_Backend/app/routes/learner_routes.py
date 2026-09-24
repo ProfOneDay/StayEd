@@ -1035,9 +1035,9 @@ def _generate_recommended_ai_insight(r: dict, contributor_rows: list) -> dict | 
 # wording like "importance score" or "% contribution".
 _FACTOR_INFO = {
     "attendance_risk": {
-        "label": "Current attendance",
+        "label": "Attendance at prediction time",
         "format": "percent",
-        "reason": "The learner's attendance may affect their likelihood of completing the program.",
+        "reason": "This is the attendance value saved with that prediction run, not a live attendance KPI.",
     },
     "age": {
         "label": "Age",
@@ -1342,10 +1342,28 @@ def learner_profile(learner_id: int):
         level = "High" if importance >= .6 else "Moderate" if importance >= .3 else "Low"
         tone = "error" if level == "High" else "moderate" if level == "Moderate" else "low"
         display_value = f.get("factor_value_text") or f.get("factor_value")
+        factor_text = _factor_reason(factor_key, display_value, importance)
+        factor_title = name
+        if factor_key == "attendance_risk":
+            # Risk factors belong to the saved prediction run. Attendance may
+            # change later, so distinguish the prediction-time value from the
+            # live Attendance Rate KPI instead of showing contradictory values.
+            factor_title = "Attendance at Prediction Time"
+            if recorded_sessions:
+                factor_text += (
+                    f" Current attendance is {attendance_rate}% "
+                    f"({attended_sessions} of {recorded_sessions} recorded sessions attended)."
+                )
+            else:
+                factor_text += " Current attendance is 0% because no attendance has been recorded yet."
+            factor_text += (
+                " If attendance changed after this prediction, run a new prediction "
+                "to refresh the learner's current risk and contributing factors."
+            )
         contributor_rows.append({
             "icon": "analytics", "tone": tone,
-            "title": name, "level": level,
-            "text": _factor_reason(factor_key, display_value, importance),
+            "title": factor_title, "level": level,
+            "text": factor_text,
         })
     if not contributor_rows:
         if days_since_last_return is None:
@@ -2910,8 +2928,8 @@ def public_student_view(token: str):
 # pre/post scores, status fields, portfolio values, grade and rating are
 # teacher-entered. Per-component A&E passing likelihood is not fabricated
 # because the paper form provides no max-score/threshold formula for each
-# component. StayEd derives only the overall High/Low likelihood from the
-# entered Final Score Percentage Grade using its documented internal cutoff.
+# component. StayEd derives the overall High/Low likelihood from the FLT
+# post-test total using the same internal component scales shown in the UI.
 # The two visible sums (AF5 Overall Score and Portfolio TOTAL SCORE) are also
 # computed from the recorded values.
 # ---------------------------------------------------------------------------
@@ -2946,6 +2964,9 @@ ASSESSMENT_PORTFOLIO_TOTAL_FIELD_IDS = (
 # It is deliberately labelled as a StayEd threshold rather than an official
 # DepEd A&E passing mark.
 ASSESSMENT_PASSING_LIKELIHOOD_THRESHOLD = 70.0
+# Sum of the internal FLT component display scales used by the Assessment
+# Scores page. PIS is excluded because it is not part of the FLT Overall Score.
+ASSESSMENT_FLT_TOTAL_MAX_SCORE = 93.7
 
 
 def _assessment_likelihood_from_percentage(value):
@@ -2957,6 +2978,17 @@ def _assessment_likelihood_from_percentage(value):
         if percentage >= ASSESSMENT_PASSING_LIKELIHOOD_THRESHOLD
         else "LOW LIKELIHOOD"
     )
+
+
+def _assessment_overall_percentage(scores: dict) -> float | None:
+    recorded = [
+        _coerce_number((scores.get(row_id) or {}).get("post"))
+        for row_id in ASSESSMENT_FLT_ROW_IDS
+    ]
+    if not any(value is not None for value in recorded):
+        return None
+    total_post = sum(value or 0 for value in recorded)
+    return round((total_post / ASSESSMENT_FLT_TOTAL_MAX_SCORE) * 100, 2)
 
 
 def _coerce_number(value):
@@ -3000,17 +3032,16 @@ def _shape_assessment_scores(row: dict | None) -> dict:
     scores = dict((row or {}).get("scores") or {})
     portfolio = (row or {}).get("portfolio") or {}
 
-    final_grade_value = (row or {}).get("final_score_percentage_grade")
-    computed_likelihood = _assessment_likelihood_from_percentage(final_grade_value)
-    if computed_likelihood:
-        scores["overall_likelihood"] = computed_likelihood
-
     overall_pre = sum(
         (scores.get(r) or {}).get("pre") or 0 for r in ASSESSMENT_FLT_ROW_IDS
     )
     overall_post = sum(
         (scores.get(r) or {}).get("post") or 0 for r in ASSESSMENT_FLT_ROW_IDS
     )
+    overall_percentage = _assessment_overall_percentage(scores)
+    computed_likelihood = _assessment_likelihood_from_percentage(overall_percentage)
+    if computed_likelihood:
+        scores["overall_likelihood"] = computed_likelihood
     portfolio_total = sum(
         portfolio.get(f) or 0 for f in ASSESSMENT_PORTFOLIO_TOTAL_FIELD_IDS
     )
@@ -3022,6 +3053,7 @@ def _shape_assessment_scores(row: dict | None) -> dict:
         "portfolio": portfolio,
         "overallScorePre": overall_pre,
         "overallScorePost": overall_post,
+        "overallScorePercentage": overall_percentage,
         "portfolioTotalScore": portfolio_total,
         "finalScorePercentageGrade": float(row["final_score_percentage_grade"]) if row and row.get("final_score_percentage_grade") is not None else None,
         "overallFinalAssessmentRating": float(row["overall_final_assessment_rating"]) if row and row.get("overall_final_assessment_rating") is not None else None,
@@ -3064,9 +3096,11 @@ def update_assessment_scores(learner_id: int):
     overall_rating = _coerce_number(data.get("overallFinalAssessmentRating"))
 
     # Do not ask the teacher to type a subjective likelihood. Derive the
-    # overall High/Low label from the entered Final Score Percentage Grade
-    # using StayEd's documented internal threshold.
-    scores["overall_likelihood"] = _assessment_likelihood_from_percentage(final_grade)
+    # overall High/Low label from the FLT post-test total so the headline
+    # result always agrees with the row-level percentages and Overall Score.
+    scores["overall_likelihood"] = _assessment_likelihood_from_percentage(
+        _assessment_overall_percentage(scores)
+    )
 
     row = execute(
         """

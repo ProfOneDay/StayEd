@@ -9,6 +9,7 @@ class LearnerProfilePage {
     this.bindHistoryFilters();
 
     this.bindPortalShare();
+    this.bindAssessmentButton();
 
     await this.load();
 
@@ -95,6 +96,104 @@ class LearnerProfilePage {
     }
   }
 
+  static buildAssessmentScoresUrl() {
+    const id = this.getLearnerId();
+    const classId = this.profile?.header?.classId;
+    const params = new URLSearchParams();
+
+    params.set("learner", id);
+    if (classId) params.set("class", classId);
+    params.set("return", `learner-profile.html?id=${encodeURIComponent(id)}`);
+
+    return `assessment-scores.html?${params.toString()}`;
+  }
+
+  static bindAssessmentButton() {
+    document.addEventListener("click", (event) => {
+      const btn = event.target.closest("[data-add-assessment-btn]");
+      if (!btn) return;
+
+      event.preventDefault();
+      window.location.href = this.buildAssessmentScoresUrl();
+    });
+  }
+
+  static async loadAssessmentSummary() {
+    const list = document.querySelector("[data-assessment-list]");
+    if (!list) return;
+
+    list.innerHTML = `<p class="st-assessment-empty">Loading assessment details…</p>`;
+
+    try {
+      const data = await API.getAssessmentScores(this.getLearnerId());
+      this.renderAssessmentSummary(data);
+    } catch (error) {
+      console.error("[LearnerProfile] Unable to load assessment summary", error);
+      list.innerHTML = `<p class="st-assessment-empty">Unable to load assessment details.</p>`;
+    }
+  }
+
+  static renderAssessmentSummary(assessment) {
+    const list = document.querySelector("[data-assessment-list]");
+    if (!list) return;
+
+    if (!assessment?.assessed) {
+      list.innerHTML = `
+        <div class="st-assessment-summary-empty">
+          <p class="st-assessment-empty">No assessments recorded yet.</p>
+          <p class="st-assessment-empty-sub">Use <strong>Record Assessment</strong> to open the learner's A&E assessment form.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const finalGrade = Number.isFinite(Number(assessment.finalScorePercentageGrade))
+      ? Math.round(Number(assessment.finalScorePercentageGrade))
+      : null;
+    const overallRating = Number.isFinite(Number(assessment.overallFinalAssessmentRating))
+      ? Math.round(Number(assessment.overallFinalAssessmentRating))
+      : null;
+    const overallPost = Number.isFinite(Number(assessment.overallScorePost))
+      ? Math.round(Number(assessment.overallScorePost))
+      : null;
+
+    const likelihoodRaw = String(assessment.scores?.overall_likelihood || "").toUpperCase();
+    const likelihoodClass = likelihoodRaw.includes("HIGH") ? "high" : likelihoodRaw.includes("LOW") ? "low" : "neutral";
+    const likelihoodText = likelihoodRaw ? likelihoodRaw.replace(/_/g, " ") : "Assessment recorded";
+    const assessedDate = assessment.dateOfAssessment
+      ? new Date(`${assessment.dateOfAssessment}T00:00:00`).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+      : "Date not set";
+
+    list.innerHTML = `
+      <div class="st-assessment-summary">
+        <div class="st-assessment-summary-top">
+          <div>
+            <p class="st-assessment-summary-title">Latest A&E assessment</p>
+            <p class="st-assessment-summary-date">${assessedDate}</p>
+          </div>
+          <span class="st-exam-readiness-badge st-exam-readiness-badge--${likelihoodClass}">${likelihoodText}</span>
+        </div>
+        <div class="st-assessment-summary-grid">
+          <div class="st-assessment-summary-item">
+            <span class="st-assessment-summary-label">Final Score Percentage Grade</span>
+            <strong class="st-assessment-summary-value">${finalGrade == null ? "—" : `${finalGrade}%`}</strong>
+          </div>
+          <div class="st-assessment-summary-item">
+            <span class="st-assessment-summary-label">Overall Final Assessment Rating</span>
+            <strong class="st-assessment-summary-value">${overallRating == null ? "—" : `${overallRating}%`}</strong>
+          </div>
+          <div class="st-assessment-summary-item">
+            <span class="st-assessment-summary-label">Overall Post Score</span>
+            <strong class="st-assessment-summary-value">${overallPost == null ? "—" : overallPost}</strong>
+          </div>
+        </div>
+        <div class="st-assessment-summary-actions">
+          <a class="st-btn st-btn-outline st-btn-xs" href="${this.buildAssessmentScoresUrl()}">Open full assessment record</a>
+        </div>
+      </div>
+    `;
+  }
+
   static openRequestedTab() {
     const tab = new URLSearchParams(window.location.search).get("tab");
     if (!tab) return;
@@ -121,6 +220,7 @@ class LearnerProfilePage {
       this.renderHero();
 
       this.renderOverview();
+      await this.loadAssessmentSummary();
 
       this.renderMonitoringHistory();
 
@@ -191,7 +291,7 @@ class LearnerProfilePage {
     this.set("[data-profile-modality]", p.modality);
     this.set(
       "[data-profile-modality-since]",
-      h.modalitySince && h.modalitySince !== "—" ? `(Since ${h.modalitySince})` : "",
+      h.modalitySince && h.modalitySince !== "—" ? `Since ${h.modalitySince}` : "",
     );
     this.set("[data-profile-school-year]", h.schoolYear);
     this.set("[data-profile-date-enrolled]", h.dateEnrolled);
@@ -212,6 +312,18 @@ class LearnerProfilePage {
     const badge = document.querySelector("[data-profile-risk-badge]");
 
     if (badge) badge.innerHTML = this.riskPill(p.risk);
+
+    const riskHelper = document.querySelector("[data-profile-risk-helper]");
+    if (riskHelper) {
+      riskHelper.textContent =
+        p.risk === "High"
+          ? "Prioritize follow-up and intervention."
+          : p.risk === "Moderate"
+            ? "Needs regular monitoring."
+            : p.risk === "Low"
+              ? "Continue regular monitoring."
+              : "Risk will appear after a prediction is generated.";
+    }
 
     document
       .querySelector("[data-profile-assign-btn]")

@@ -1359,3 +1359,427 @@ body[data-page="Learner Profile"] .st-profile-tab{
         padding:16px 18px;
     }
 }
+
+
+/* === MERGED LOCAL LEARNER PROFILE UPDATES === */
+body[data-page="Learner Profile"] .st-assessment-card-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:14px;
+    flex-wrap:wrap;
+}
+
+body[data-page="Learner Profile"] .st-assessment-summary{
+    border:1px solid rgba(195,198,207,.28);
+    border-radius:14px;
+    background:var(--st-surface-container-lowest, #fff);
+    padding:14px 16px;
+}
+
+body[data-page="Learner Profile"] .st-assessment-summary-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:12px;
+}
+
+body[data-page="Learner Profile"] .st-assessment-summary-title{
+    margin:0;
+    font-weight:700;
+    color:var(--st-on-surface);
+}
+
+body[data-page="Learner Profile"] .st-assessment-summary-date,
+body[data-page="Learner Profile"] .st-assessment-empty-sub{
+    margin:4px 0 0;
+    color:var(--st-on-surface-variant);
+    font-size:var(--st-font-size-caption);
+}
+
+body[data-page="Learner Profile"] .st-assessment-summary-grid{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:12px;
+}
+
+body[data-page="Learner Profile"] .st-assessment-summary-item{
+    background:var(--st-surface-container-low);
+    border:1px solid rgba(195,198,207,.2);
+    border-radius:12px;
+    padding:12px 13px;
+}
+
+body[data-page="Learner Profile"] .st-assessment-summary-label{
+    display:block;
+    font-size:var(--st-font-size-micro);
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color:var(--st-on-surface-variant);
+    margin-bottom:6px;
+}
+
+body[data-page="Learner Profile"] .st-assessment-summary-value{
+    font-size:1.05rem;
+    color:var(--st-on-surface);
+}
+
+body[data-page="Learner Profile"] .st-assessment-summary-actions{
+    margin-top:12px;
+    display:flex;
+    justify-content:flex-end;
+}
+
+body[data-page="Learner Profile"] .st-assessment-summary-empty{
+    border:1px dashed rgba(195,198,207,.42);
+    border-radius:14px;
+    padding:16px;
+    background:var(--st-surface-container-low);
+}
+
+body[data-page="Learner Profile"] .st-assessment-summary-empty .st-assessment-empty{
+    margin:0;
+}
+
+@media (max-width: 899px){
+    body[data-page="Learner Profile"] .st-assessment-summary-grid{
+        grid-template-columns:1fr;
+    }
+
+    body[data-page="Learner Profile"] .st-assessment-summary-actions{
+        justify-content:stretch;
+    }
+
+    body[data-page="Learner Profile"] .st-assessment-summary-actions .st-btn{
+        width:100%;
+    }
+}
+
+/* 2026-09-25 — approved four-column learner profile layout */
+body[data-page="Learner Profile"] .st-profile-hero{
+    display:grid;
+    grid-template-columns:minmax(280px,.95fr) minmax(340px,1.15fr) minmax(220px,.62fr) minmax(300px,.9fr);
+    align-items:stretch;
+    gap:0;
+    padding:20px 22px;
+    min-height:0;
+    border-radius:20px;
+}
+
+body[data-page="Learner Profile"] .st-profile-hero-left,
+body[data-page="Learner Profile"] .st-profile-hero-middle,
+body[data-page="Learner Profile"] .st-profile-hero-risk-panel,
+body[data-page="Learner Profile"] .st-profile-hero-side{
+    min-width:0;
+}
+
+/* Left: profile picture + identity */
+body[data-page="Learner Profile"] .st-profile-hero-left{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    gap:12px;
+    padding:6px 28px 6px 12px;
+    border-right:1px solid rgba(195,198,207,.45);
+}
+
+body[data-page="Learner Profile"] .st-profile-hero-avatar{
+    width:96px;
+    height:96px;
+    border-width:5px;
+    font-size:1.85rem;
+    background:linear-gradient(180deg,#dceaff 0%,#d4e5fd 100%);
+    box-shadow:none;
+}
+
+body[data-page="Learner Profile"] .st-profile-hero-heading{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:7px;
+    width:100%;
+}
+
+body[data-page="Learner Profile"] .st-profile-hero-name{
+    margin:0;
+    font-size:clamp(1.8rem,2.2vw,2.35rem);
+    line-height:1.05;
+    letter-spacing:-.025em;
+    text-align:center;
+}
+
+body[data-page="Learner Profile"] .st-profile-hero-lrn{
+    margin:0;
+    font-size:.95rem;
+    line-height:1.3;
+    color:var(--st-on-surface-variant);
+}
+
+body[data-page="Learner Profile"] .st-profile-hero-lrn span{
+    color:var(--st-on-surface);
+    font-weight:700;
+}
+
+body[data-page="Learner Profile"] .st-profile-chip-row{
+    display:flex;
+    justify-content:center;
+    margin-top:2px;
+}
+
+body[data-page="Learner Profile"] .st-profile-level-chip{
+    padding:6px 13px;
+    font-size:.78rem;
+    border-radius:999px;
+    min-height:0;
+}
+
+/* Middle: CLC / modality / enrolled / class */
+body[data-page="Learner Profile"] .st-profile-hero-middle{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:12px;
+    padding:4px 34px;
+    border-right:1px solid rgba(195,198,207,.45);
+}
+
+body[data-page="Learner Profile"] .st-profile-meta-row{
+    display:grid;
+    grid-template-columns:50px minmax(0,1fr);
+    align-items:center;
+    gap:14px;
+    min-height:48px;
+}
+
+body[data-page="Learner Profile"] .st-profile-meta-row > .material-symbols-outlined{
+    width:46px;
+    height:46px;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(180deg,#f4f7fc 0%,#edf2f8 100%);
+    color:#315b94;
+    font-size:1.35rem;
+}
+
+body[data-page="Learner Profile"] .st-profile-meta-label{
+    margin:0 0 2px;
+    font-size:.82rem;
+    line-height:1.15;
+    color:var(--st-on-surface-variant);
+    font-weight:500;
+}
+
+body[data-page="Learner Profile"] .st-profile-meta-value{
+    margin:0;
+    font-size:1rem;
+    line-height:1.2;
+    font-weight:700;
+    color:var(--st-on-surface);
+}
+
+body[data-page="Learner Profile"] .st-profile-meta-note{
+    margin:2px 0 0;
+    font-size:.76rem;
+    line-height:1.2;
+    color:var(--st-on-surface-variant);
+}
+
+/* Dedicated square risk card beside learner details */
+body[data-page="Learner Profile"] .st-profile-hero-risk-panel{
+    align-self:center;
+    justify-self:center;
+    width:min(100%, 230px);
+    min-height:210px;
+    margin:0 28px;
+    padding:18px 16px;
+    border:1px solid rgba(244,160,55,.35);
+    border-radius:18px;
+    background:linear-gradient(180deg,rgba(255,250,244,.98),rgba(255,246,235,.96));
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    gap:12px;
+}
+
+body[data-page="Learner Profile"] .st-profile-risk-panel-label{
+    margin:0;
+    font-size:.78rem;
+    font-weight:800;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:#68758b;
+}
+
+body[data-page="Learner Profile"] .st-profile-risk-panel-icon{
+    width:62px;
+    height:62px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(255,170,62,.16);
+    color:#ec8a05;
+}
+
+body[data-page="Learner Profile"] .st-profile-risk-panel-icon .material-symbols-outlined{
+    font-size:2rem;
+    font-variation-settings:'FILL' 1;
+}
+
+body[data-page="Learner Profile"] .st-profile-risk-panel-badge .st-risk-badge{
+    padding:7px 13px !important;
+    font-size:.8rem !important;
+    border-radius:999px !important;
+}
+
+body[data-page="Learner Profile"] .st-profile-risk-panel-helper{
+    margin:0;
+    max-width:170px;
+    font-size:.84rem;
+    line-height:1.35;
+    color:var(--st-on-surface-variant);
+}
+
+/* Right: actions */
+body[data-page="Learner Profile"] .st-profile-hero-side{
+    display:flex;
+    align-items:center;
+    padding:4px 0 4px 28px;
+    border-left:1px solid rgba(195,198,207,.45);
+}
+
+body[data-page="Learner Profile"] .st-profile-hero-actions{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+body[data-page="Learner Profile"] .st-profile-hero-actions .st-btn{
+    width:100%;
+    height:46px;
+    min-height:46px;
+    padding:0 16px;
+    border-radius:13px;
+    font-size:.92rem;
+    font-weight:700;
+    gap:12px;
+}
+
+body[data-page="Learner Profile"] .st-profile-hero-actions .st-btn > span:nth-child(2){
+    flex:1 1 auto;
+    text-align:left;
+}
+
+body[data-page="Learner Profile"] .st-profile-hero-actions .st-btn .material-symbols-outlined,
+body[data-page="Learner Profile"] .st-btn-tail{
+    font-size:1.25rem;
+}
+
+body[data-page="Learner Profile"] .st-btn-tail{
+    margin-left:auto;
+}
+
+@media (max-width: 1320px){
+    body[data-page="Learner Profile"] .st-profile-hero{
+        grid-template-columns:minmax(250px,.9fr) minmax(320px,1.15fr) minmax(205px,.65fr) minmax(270px,.85fr);
+    }
+
+    body[data-page="Learner Profile"] .st-profile-hero-middle{
+        padding-inline:24px;
+    }
+
+    body[data-page="Learner Profile"] .st-profile-hero-risk-panel{
+        margin-inline:20px;
+    }
+
+    body[data-page="Learner Profile"] .st-profile-hero-side{
+        padding-left:20px;
+    }
+}
+
+@media (max-width: 1120px){
+    body[data-page="Learner Profile"] .st-profile-hero{
+        grid-template-columns:1fr 1fr;
+        gap:0;
+    }
+
+    body[data-page="Learner Profile"] .st-profile-hero-left,
+    body[data-page="Learner Profile"] .st-profile-hero-middle{
+        min-height:230px;
+    }
+
+    body[data-page="Learner Profile"] .st-profile-hero-middle{
+        border-right:0;
+    }
+
+    body[data-page="Learner Profile"] .st-profile-hero-risk-panel{
+        width:auto;
+        min-height:0;
+        margin:20px 20px 0 0;
+        align-self:stretch;
+    }
+
+    body[data-page="Learner Profile"] .st-profile-hero-side{
+        margin-top:20px;
+        border-left:1px solid rgba(195,198,207,.45);
+        padding-left:20px;
+    }
+}
+
+@media (max-width: 760px){
+    body[data-page="Learner Profile"] .st-profile-hero{
+        grid-template-columns:1fr;
+        padding:18px;
+    }
+
+    body[data-page="Learner Profile"] .st-profile-hero-left,
+    body[data-page="Learner Profile"] .st-profile-hero-middle,
+    body[data-page="Learner Profile"] .st-profile-hero-side{
+        min-height:0;
+        border-right:0;
+        border-left:0;
+    }
+
+    body[data-page="Learner Profile"] .st-profile-hero-left{
+        padding:4px 0 18px;
+        border-bottom:1px solid rgba(195,198,207,.45);
+    }
+
+    body[data-page="Learner Profile"] .st-profile-hero-middle{
+        padding:18px 0;
+        border-bottom:1px solid rgba(195,198,207,.45);
+    }
+
+    body[data-page="Learner Profile"] .st-profile-hero-risk-panel{
+        width:100%;
+        margin:18px 0 0;
+        min-height:170px;
+    }
+
+    body[data-page="Learner Profile"] .st-profile-hero-side{
+        margin-top:18px;
+        padding:18px 0 0;
+        border-top:1px solid rgba(195,198,207,.45);
+    }
+}
+
+/* Merged 2026-09-25: assessment + risk-trend spacing */
+body[data-page="Learner Profile"] .st-assessment-card{
+    background:#fff;
+    border:1px solid rgba(195,198,207,.30);
+    border-radius:var(--st-radius-lg);
+    box-shadow:var(--st-shadow-sm);
+    padding:18px 18px 14px;
+    margin-bottom:12px;
+}
+body[data-page="Learner Profile"] .st-assessment-card [data-assessment-list]{ margin-top:10px; }
+body[data-page="Learner Profile"] .st-risk-trend-card{ margin-top:0; }

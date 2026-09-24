@@ -1024,3 +1024,31 @@ body {
     gap: 16px;
   }
 }
+
+
+/* UI polish: mobile navbar/sidebar compactness */
+@media (max-width: 992px) {
+  .st-sidebar {
+    width: min(86vw, 320px);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.24);
+  }
+  .st-sidebar-brand { padding: 20px 20px 16px; }
+  .st-sidebar-nav { padding: 14px 12px; }
+  .st-sidebar-footer { padding: 14px 12px 16px; }
+  .st-breadcrumb { margin-bottom: 0; }
+}
+
+@media (max-width: 768px) {
+  .st-navbar-left { width: 100%; gap: 10px; }
+  .st-breadcrumb { font-size: var(--st-font-size-micro); min-width: 0; }
+  .st-breadcrumb > span:not(.active),
+  .st-breadcrumb > .st-breadcrumb-icon { display: none; }
+  .st-breadcrumb .active {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .st-navbar-right { width: 100%; justify-content: flex-end; }
+}

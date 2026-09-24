@@ -1188,3 +1188,21 @@ body[data-page="Teacher Dashboard"] #riskChartView.chart-canvas-wrap{
   color: var(--st-on-surface-variant);
   font-size: var(--st-font-size-caption);
 }
+
+
+/* UI polish: dashboard spacing */
+[data-page="Teacher Dashboard"] .st-content { gap: 24px; }
+.st-welcome { align-items: flex-start; gap: 20px; }
+.st-welcome-title { margin: 0; line-height: 1.1; }
+.st-term-card { gap: 20px; padding: 14px 18px; }
+.st-filter-bar { padding: 18px; }
+.st-filter-row { gap: 18px; }
+.st-filter-controls { gap: 10px; }
+.st-dash-grid { gap: 18px; }
+.st-stat-card { padding: 18px; }
+
+@media (max-width: 768px) {
+  [data-page="Teacher Dashboard"] .st-content { gap: 18px; }
+  .st-welcome { gap: 14px; }
+  .st-term-card, .st-filter-bar, .st-stat-card { padding: 14px; }
+}
