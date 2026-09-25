@@ -267,8 +267,15 @@ class StudentRegistry {
     this.renderPagination();
   }
 
-  static formatDisplayName(name) {
-    const value = (name || "").trim();
+  static formatDisplayName(learner) {
+    // Prefer the backend's own first_name/last_name -- naively splitting
+    // the combined `name` string and treating the last token as surname
+    // mangles any multi-word surname (e.g. "Dela Cruz", "Santos Reyes").
+    const first = (learner?.first_name || "").trim();
+    const last = (learner?.last_name || "").trim();
+    if (first && last) return `${last}, ${first}`;
+
+    const value = (learner?.name || "").trim();
     if (!value) return "";
 
     const parts = value.split(/\s+/).filter(Boolean);
@@ -306,7 +313,7 @@ class StudentRegistry {
                 <td>
                     <div style="display:flex;align-items:center;gap:12px;">
                         <div>
-                            <div class="st-learner-name">${this.formatDisplayName(l.name)}</div>
+                            <div class="st-learner-name">${this.formatDisplayName(l)}</div>
                             <p class="st-learner-id">${l.sex || ""}${l.age ? ", " + l.age + " yrs" : ""}</p>
                         </div>
                     </div>

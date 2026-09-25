@@ -203,6 +203,18 @@ class LearnerEnrollWizard {
     document.querySelector("[data-enroll-gate]")?.classList.remove("st-hidden");
   }
 
+  // The class this enrollment should attach the learner to, carried over
+  // from learner-records-hub.js via ?class=<id> on the "Enroll Student"
+  // link into this page -- mirrors learner-import.js's getClassId(). A
+  // teacher with more than one active class in the same CLC otherwise had
+  // no way to target the specific class they opened this wizard from; the
+  // backend fell back to "whichever active class in that CLC was created
+  // most recently", silently enrolling into the wrong one.
+  static getClassId() {
+    const params = new URLSearchParams(window.location.search || "");
+    return params.get("class") || params.get("class_id") || null;
+  }
+
   static async loadClassContext() {
     try {
       this.currentClc = await API.getCurrentClc();
@@ -536,6 +548,7 @@ class LearnerEnrollWizard {
       monthly_income: document.getElementById("wMonthlyIncome")?.value || null,
       last_grade_completed: document.getElementById("wLastGrade")?.value.trim() || null,
       distance_km: distanceKmByCategory[distanceCategory] ?? null,
+      class_id: this.getClassId(),
     };
 
     try {

@@ -292,8 +292,17 @@ class LearnerRecordsHub {
   // Shared cell markup for LRN / Learner / Modules / Latest Activity / Risk
   // Level \u2014 kept identical across all three modality tables so only the
   // underlying data (and each tab's "Latest ..." column header) differs.
-  static formatDisplayName(name) {
-    const value = (name || "").trim();
+  static formatDisplayName(learner) {
+    // Prefer the backend's own first_name/last_name -- they're the source
+    // of truth and can't be mis-split, unlike re-deriving from the
+    // combined `name` string by guessing "last whitespace token = surname"
+    // (which mangles any multi-word surname, e.g. "Dela Cruz", "Santos
+    // Reyes" -- common in Filipino names).
+    const first = (learner?.first_name || "").trim();
+    const last = (learner?.last_name || "").trim();
+    if (first && last) return `${last}, ${first}`;
+
+    const value = (learner?.name || "").trim();
     if (!value) return "";
 
     const parts = value.split(/\s+/).filter(Boolean);
@@ -307,7 +316,7 @@ class LearnerRecordsHub {
   static recordCells(l) {
     return `
             <td style="font-family:monospace;font-size:0.75rem;color:var(--st-on-surface-variant);">${l.lrn}</td>
-            <td style="font-weight:600;color:var(--st-on-surface);">${this.formatDisplayName(l.name)}</td>
+            <td style="font-weight:600;color:var(--st-on-surface);">${this.formatDisplayName(l)}</td>
             <td>${this.modulesCell(l)}</td>
             <td>${this.activityCell(l)}</td>
             <td>${this.riskBadge(l.risk)}</td>

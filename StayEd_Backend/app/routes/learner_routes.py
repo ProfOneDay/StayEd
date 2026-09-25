@@ -237,7 +237,25 @@ def create_learner():
     except ValueError as exc:
         return error(str(exc), 422)
 
-    class_row = _active_class(teacher["teacher_id"], data.get("clc")) or _active_class(teacher["teacher_id"])
+    # Prefer an explicit class_id (carried over from the "Enroll Student"
+    # link on a specific class in learner-records-hub.js) over the CLC-name
+    # lookup below, which just grabs whichever active class in that CLC was
+    # created most recently -- wrong when a teacher has 2+ active classes
+    # in the same CLC.
+    class_row = None
+    class_id = data.get("class_id") or data.get("classId")
+    if class_id and str(class_id).strip().isdigit():
+        class_row = fetch_one(
+            """
+            SELECT lc.*, c.clc_name
+            FROM learning_class lc
+            JOIN clc c ON c.clc_id = lc.clc_id
+            WHERE lc.class_id = %s AND lc.teacher_id = %s AND lc.status = 'ACTIVE'
+            """,
+            (int(class_id), teacher["teacher_id"]),
+        )
+
+    class_row = class_row or _active_class(teacher["teacher_id"], data.get("clc")) or _active_class(teacher["teacher_id"])
     if not class_row:
         return error("Create an active class before enrolling learners.", 422)
 
@@ -794,45 +812,29 @@ def _exam_passing_chance(
     result. A score of 70 is an internal readiness threshold, not the official
     A&E passing mark.
     """
-    score_row = fetch_one(
-        """
-        SELECT
-            COUNT(*) FILTER (
-                WHERE pretest_score IS NOT NULL AND pretest_total IS NOT NULL
-                  AND pretest_total > 0
-            )::INT AS pretest_count,
-            COUNT(*) FILTER (
-                WHERE posttest_score IS NOT NULL AND posttest_total IS NOT NULL
-                  AND posttest_total > 0
-            )::INT AS posttest_count,
-            COUNT(*) FILTER (
-                WHERE pretest_score IS NOT NULL AND pretest_total IS NOT NULL
-                  AND pretest_total > 0
-                  AND posttest_score IS NOT NULL AND posttest_total IS NOT NULL
-                  AND posttest_total > 0
-            )::INT AS paired_count,
-            AVG(100.0 * pretest_score / NULLIF(pretest_total, 0)) FILTER (
-                WHERE pretest_score IS NOT NULL AND pretest_total IS NOT NULL
-                  AND pretest_total > 0
-            ) AS pretest_avg,
-            AVG(100.0 * posttest_score / NULLIF(posttest_total, 0)) FILTER (
-                WHERE posttest_score IS NOT NULL AND posttest_total IS NOT NULL
-                  AND posttest_total > 0
-            ) AS posttest_avg,
-            AVG(
-                (100.0 * posttest_score / NULLIF(posttest_total, 0))
-                - (100.0 * pretest_score / NULLIF(pretest_total, 0))
-            ) FILTER (
-                WHERE pretest_score IS NOT NULL AND pretest_total IS NOT NULL
-                  AND pretest_total > 0
-                  AND posttest_score IS NOT NULL AND posttest_total IS NOT NULL
-                  AND posttest_total > 0
-            ) AS avg_improvement
-        FROM module_record
-        WHERE enrollment_id = %s
-        """,
+    # Performance data actually lives in als_assessment_scores.scores (one
+    # JSONB row per enrollment, keyed by FLT component id -> {"pre","post"}),
+    # not per-module pretest/posttest columns on module_record -- those
+    # never existed on this schema. _assessment_overall_percentage() already
+    # implements the correct FLT-total-based percentage for the Assessment
+    # Scores page; reused here for both the "pre" and "post" keys.
+    assessment_row = fetch_one(
+        "SELECT scores FROM als_assessment_scores WHERE enrollment_id = %s",
         (enrollment_id,),
-    ) or {}
+    )
+    scores = (assessment_row or {}).get("scores") or {}
+    post_pct = _assessment_overall_percentage(scores, key="post")
+    pre_pct = _assessment_overall_percentage(scores, key="pre")
+    score_row = {
+        "pretest_count": 1 if pre_pct is not None else 0,
+        "posttest_count": 1 if post_pct is not None else 0,
+        "paired_count": 1 if (pre_pct is not None and post_pct is not None) else 0,
+        "pretest_avg": pre_pct,
+        "posttest_avg": post_pct,
+        "avg_improvement": (
+            post_pct - pre_pct if (pre_pct is not None and post_pct is not None) else None
+        ),
+    }
 
     attendance = fetch_one(
         """
@@ -864,8 +866,8 @@ def _exam_passing_chance(
             "score": None,
             "confidence": "Waiting for assessment scores",
             "summary": (
-                "Record at least one module pre-test or post-test score to estimate "
-                "this learner's A&E exam passing chance."
+                "Record this learner's FLT pre-test or post-test scores in Assessment "
+                "Scores to estimate their A&E exam passing chance."
             ),
             "factors": [],
             "threshold": 70,
@@ -881,9 +883,9 @@ def _exam_passing_chance(
     # Post-tests are the strongest direct performance signal. Before a
     # post-test exists, a pre-test can still provide a preliminary estimate.
     if post_avg is not None:
-        components.append(("Post-test average", post_avg, 0.50, f"{round(post_avg)}% across {post_count} scored module(s)"))
+        components.append(("Post-test average", post_avg, 0.50, f"{round(post_avg)}% FLT post-test score"))
     elif pre_avg is not None:
-        components.append(("Pre-test average", pre_avg, 0.50, f"{round(pre_avg)}% across {pre_count} scored module(s)"))
+        components.append(("Pre-test average", pre_avg, 0.50, f"{round(pre_avg)}% FLT pre-test score"))
 
     module_rate = (
         100.0 * modules_returned / modules_released
@@ -909,7 +911,7 @@ def _exam_passing_chance(
     if paired_count and avg_improvement is not None:
         improvement_component = max(0.0, min(100.0, 50.0 + (avg_improvement * 2.0)))
         sign = "+" if avg_improvement >= 0 else ""
-        components.append(("Pre/Post improvement", improvement_component, 0.10, f"{sign}{avg_improvement:.1f} percentage points across {paired_count} paired module(s)"))
+        components.append(("Pre/Post improvement", improvement_component, 0.10, f"{sign}{avg_improvement:.1f} percentage points from pre-test to post-test"))
 
     total_weight = sum(weight for _, _, weight, _ in components)
     readiness = (
@@ -940,7 +942,7 @@ def _exam_passing_chance(
             "detail": f"{overdue_modules} overdue module(s), -{overdue_penalty} readiness points",
         })
 
-    if post_count >= 3 and modules_released >= 3:
+    if paired_count and modules_released >= 3:
         confidence = "Stronger estimate"
     elif post_count > 0:
         confidence = "Developing estimate"
@@ -2149,6 +2151,65 @@ def return_module_batch(learner_id: int, batch_id: int):
     }
 
 
+@bp.post("/learners/<int:learner_id>/module-batches/<int:batch_id>/undo-return")
+@role_required("teacher")
+def undo_return_module_batch(learner_id: int, batch_id: int):
+    """Reverses return_module_batch() above for a mistaken return -- puts
+    the selected modules back to RELEASED and clears their return date."""
+    base = _profile_base(learner_id)
+    if not base:
+        return error("Learner not found.", 404)
+
+    batch = fetch_one(
+        "SELECT release_batch_id FROM module_release_batch WHERE release_batch_id=%s AND enrollment_id=%s",
+        (batch_id, base["enrollment_id"]),
+    )
+    if not batch:
+        return error("Release batch not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    module_ids = [int(m) for m in (data.get("moduleIds") or []) if str(m).strip().lstrip("-").isdigit()]
+    if not module_ids:
+        return error("Select at least one module to undo.", 422)
+
+    owned = fetch_all(
+        "SELECT module_record_id, module_status FROM module_record WHERE release_batch_id=%s AND module_record_id = ANY(%s)",
+        (batch_id, module_ids),
+    )
+    if len(owned) != len(set(module_ids)):
+        return error("One or more selected modules do not belong to this batch.", 422)
+    if any(r["module_status"] != "RETURNED" for r in owned):
+        return error("One or more selected modules have not been returned yet.", 422)
+
+    execute(
+        """
+        UPDATE module_record
+        SET date_returned=NULL, module_status='RELEASED', remarks=NULL
+        WHERE release_batch_id=%s AND module_record_id = ANY(%s)
+        """,
+        (batch_id, module_ids),
+    )
+
+    try:
+        trigger_prediction(base["enrollment_id"], current_user_id())
+    except Exception:
+        pass
+
+    base = _profile_base(learner_id)
+    learner_activity = _learner_activity_info(base)
+    return {
+        "message": "Module return undone.",
+        "learner": {
+            "name": f"{base['first_name']} {base['last_name']}",
+            "lrn": base["lrn"],
+            "clc": base["clc_name"],
+            "level": base["learning_level"],
+            **learner_activity,
+        },
+        **_logbook(base["enrollment_id"], learner_activity),
+    }
+
+
 @bp.patch("/learners/<int:learner_id>/module-batches/<int:batch_id>/modules/<int:module_record_id>")
 @role_required("teacher")
 def update_module_planned_return(learner_id: int, batch_id: int, module_record_id: int):
@@ -2980,15 +3041,15 @@ def _assessment_likelihood_from_percentage(value):
     )
 
 
-def _assessment_overall_percentage(scores: dict) -> float | None:
+def _assessment_overall_percentage(scores: dict, key: str = "post") -> float | None:
     recorded = [
-        _coerce_number((scores.get(row_id) or {}).get("post"))
+        _coerce_number((scores.get(row_id) or {}).get(key))
         for row_id in ASSESSMENT_FLT_ROW_IDS
     ]
     if not any(value is not None for value in recorded):
         return None
-    total_post = sum(value or 0 for value in recorded)
-    return round((total_post / ASSESSMENT_FLT_TOTAL_MAX_SCORE) * 100, 2)
+    total = sum(value or 0 for value in recorded)
+    return round((total / ASSESSMENT_FLT_TOTAL_MAX_SCORE) * 100, 2)
 
 
 def _coerce_number(value):

@@ -89,7 +89,9 @@ def _generate_alerts(teacher_id: int, user_id: int) -> None:
                     f"inactivity:{row['enrollment_id']}:{learner['activity_status']}",
                 )
 
-        due_interventions = fetch_all(
+    # Intervention-due reminders are a separate category from risk alerts --
+    # they run regardless of the "Risk Alert Notifications" toggle above.
+    due_interventions = fetch_all(
         """
         SELECT i.intervention_id, i.intervention_type, i.target_date, i.assigned_to_teacher_id,
                ce.learner_id, CONCAT_WS(' ', l.first_name, l.last_name) AS learner_name

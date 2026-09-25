@@ -330,7 +330,7 @@ class SetupWizard {
 
           e.stopPropagation();
 
-          dropZone.classList.add("drop-zone-active");
+          dropZone.classList.add("is-dragover");
         },
       );
     });
@@ -344,7 +344,7 @@ class SetupWizard {
 
           e.stopPropagation();
 
-          dropZone.classList.remove("drop-zone-active");
+          dropZone.classList.remove("is-dragover");
         },
       );
     });
@@ -695,11 +695,9 @@ Imported
       },
     );
 
-    const successIcon = document.getElementById("successIcon");
-
-    if (successIcon) {
-      successIcon.classList.add("animate-bounce");
-    }
+    // The success icon (#successIcon / .setup-complete-icon) already gets
+    // a pop-in entrance via its own CSS "animation: setup-pop ..." rule
+    // (setup.css) -- no JS-triggered class needed here.
   }
 }
 

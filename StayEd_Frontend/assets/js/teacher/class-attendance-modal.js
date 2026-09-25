@@ -236,8 +236,15 @@ class ClassAttendanceModal {
     }
   }
 
-  static formatDisplayName(name) {
-    const value = (name || "").trim();
+  static formatDisplayName(learner) {
+    // Prefer the backend's own firstName/lastName -- naively splitting the
+    // combined `name` string and treating the last token as surname
+    // mangles any multi-word surname (e.g. "Dela Cruz", "Santos Reyes").
+    const first = (learner?.firstName || "").trim();
+    const last = (learner?.lastName || "").trim();
+    if (first && last) return `${last}, ${first}`;
+
+    const value = (learner?.name || "").trim();
     if (!value) return "";
 
     const parts = value.split(/\s+/).filter(Boolean);
@@ -295,7 +302,7 @@ class ClassAttendanceModal {
               (l) => `
               <label class="st-return-module-row">
                 <input type="checkbox" data-attendance-learner="${l.enrollmentId}" ${list.checked.has(l.enrollmentId) ? "checked" : ""}>
-                <span>${this.formatDisplayName(l.name)} <em>(${l.modality}${l.noLongerEnrolled ? " — no longer enrolled" : ""})</em></span>
+                <span>${this.formatDisplayName(l)} <em>(${l.modality}${l.noLongerEnrolled ? " — no longer enrolled" : ""})</em></span>
               </label>
             `,
             )

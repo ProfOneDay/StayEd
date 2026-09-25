@@ -22,32 +22,11 @@ class RegisterPage {
       },
     );
 
-    this.bindPasswordToggles();
-  }
-
-  static bindPasswordToggles() {
-    document.querySelectorAll(".password-toggle").forEach((toggle) => {
-      toggle.addEventListener("click", () => {
-        const targetId = toggle.dataset.toggle;
-        const input = targetId
-          ? document.getElementById(targetId)
-          : toggle.closest(".password-wrapper")?.querySelector("input");
-
-        if (!input) return;
-
-        const icon = toggle.querySelector(".material-symbols-outlined");
-
-        if (input.type === "password") {
-          input.type = "text";
-          if (icon) icon.textContent = "visibility_off";
-          toggle.setAttribute("aria-label", "Hide password");
-        } else {
-          input.type = "password";
-          if (icon) icon.textContent = "visibility";
-          toggle.setAttribute("aria-label", "Show password");
-        }
-      });
-    });
+    // Password visibility toggles for .password-toggle buttons are bound
+    // generically by AuthPage.bindPasswordToggles() (auth-page.js, loaded
+    // on this page). This used to duplicate that binding, stacking a
+    // second listener on the same click and silently cancelling the
+    // toggle out every other click -- same bug already fixed on login.js.
   }
 
   static async submit() {

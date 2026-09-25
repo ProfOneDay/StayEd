@@ -6,12 +6,12 @@ class App {
       "color:#12355B;font-weight:bold;",
     );
 
-    this.restoreUser();
-
-    this.initializePage();
-
-    this.initializeLogout();
-
+    // restoreUser(), page-title-setting, and logout binding used to live
+    // here too, duplicating Layout.restoreUser()/updatePageTitle()/
+    // initializeLogout() (layout.js) on every page that loads both
+    // scripts -- stacking two logout click listeners (two API calls, two
+    // redirects per click) and doing the user-info restore work twice.
+    // reconcileFontScale() is the only job actually unique to App.
     this.reconcileFontScale();
   }
 
@@ -44,111 +44,6 @@ class App {
     } catch (error) {
       console.warn("[App] Unable to reconcile font size preference", error);
     }
-  }
-
-  static restoreUser() {
-    if (!window.Auth) {
-      return;
-    }
-
-    const user = Auth.user();
-
-    if (!user) {
-      return;
-    }
-
-    document
-
-      .querySelectorAll("[data-st-user-name]")
-
-      .forEach((element) => {
-        element.textContent =
-          user.full_name ||
-          [user.first_name, user.last_name]
-
-            .filter(Boolean)
-
-            .join(" ");
-      });
-
-    const rawRole = String(user.role || "teacher").trim().toLowerCase();
-    const roleLabel = rawRole === "teacher" ? "ALS Teacher" : rawRole === "admin" ? "Administrator" : (user.role || "");
-
-    document
-
-      .querySelectorAll("[data-st-user-role]")
-
-      .forEach((element) => {
-        element.textContent = roleLabel;
-      });
-
-    document
-
-      .querySelectorAll("[data-st-user-email]")
-
-      .forEach((element) => {
-        element.textContent = user.email || "";
-      });
-
-    const fullName =
-      user.full_name ||
-      [user.first_name, user.last_name].filter(Boolean).join(" ") ||
-      "Teacher";
-    const initials =
-      fullName
-        .split(" ")
-        .filter(Boolean)
-        .map((part) => part[0])
-        .slice(0, 2)
-        .join("")
-        .toUpperCase() || "T";
-
-    document.querySelectorAll("[data-st-user-initials]").forEach((element) => {
-      element.textContent = initials;
-      element.hidden = Boolean(user.avatar);
-    });
-
-    document
-
-      .querySelectorAll("[data-st-user-avatar]")
-
-      .forEach((image) => {
-        if (user.avatar) {
-          image.src = user.avatar;
-          image.hidden = false;
-        } else {
-          image.removeAttribute("src");
-          image.hidden = true;
-        }
-      });
-  }
-
-  static initializePage() {
-    const body = document.body;
-
-    const title = body.dataset.page;
-
-    if (title && window.Layout) {
-      Layout.updatePageTitle();
-    }
-  }
-
-  static initializeLogout() {
-    document
-
-      .querySelectorAll("[data-st-logout]")
-
-      .forEach((button) => {
-        button.addEventListener(
-          "click",
-
-          async (event) => {
-            event.preventDefault();
-
-            await Auth.logout();
-          },
-        );
-      });
   }
 
   static ready(callback) {

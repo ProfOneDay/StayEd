@@ -31,6 +31,8 @@ def _safe_user(row):
         "school": row.get("clc_name") or "",
         "municipality": row.get("municipality") or "",
         "avatar": row.get("avatar") or "",
+        "employee_id": row.get("employee_id") or "",
+        "join_date": row["created_at"].date().isoformat() if row.get("created_at") else "",
     }
 
 
@@ -39,7 +41,7 @@ def _user_by_email(email: str):
         """
         SELECT
             u.user_id, u.username, u.password_hash, u.email, u.role, u.account_status, u.avatar,
-            t.teacher_id, t.middle_name, t.municipality,
+            t.teacher_id, t.middle_name, t.municipality, t.employee_id, t.created_at,
             COALESCE(t.first_name, u.first_name) AS first_name,
             COALESCE(t.last_name, u.last_name) AS last_name,
             COALESCE(t.contact_number, u.contact_number) AS contact_number,
@@ -97,7 +99,7 @@ def me():
         """
         SELECT
             u.user_id, u.username, u.email, u.role, u.account_status, u.avatar,
-            t.middle_name, t.municipality,
+            t.middle_name, t.municipality, t.employee_id, t.created_at,
             COALESCE(t.first_name, u.first_name) AS first_name,
             COALESCE(t.last_name, u.last_name) AS last_name,
             COALESCE(t.contact_number, u.contact_number) AS contact_number,

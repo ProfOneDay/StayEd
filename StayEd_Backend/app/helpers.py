@@ -42,7 +42,22 @@ def error(message: str, status: int = 400, **extra):
 
 
 def split_name(full_name: str) -> tuple[str, str]:
-    parts = [p for p in str(full_name or "").strip().split() if p]
+    raw = str(full_name or "").strip()
+    if not raw:
+        return "", ""
+    # DepEd forms conventionally ask for "Surname, First Name M.I." -- a
+    # comma is an unambiguous signal for that order (plain "First Last"
+    # input never contains one), so honor it before falling back to the
+    # whitespace-based First-Name-First split every other caller relies on.
+    if "," in raw:
+        last, _, rest = raw.partition(",")
+        last = last.strip()
+        first = rest.strip()
+        if last and first:
+            return first, last
+        if last:
+            return last, "."
+    parts = [p for p in raw.split() if p]
     if not parts:
         return "", ""
     if len(parts) == 1:

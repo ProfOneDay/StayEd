@@ -59,6 +59,7 @@ def update_profile():
         "last_name": last_name,
         "full_name": f"{first_name} {last_name}".strip(),
         "municipality": municipality,
+        "phone": contact_number or "",
         "status": "approved" if teacher["account_status"] == "ACTIVE" else teacher["account_status"].lower(),
     }
 

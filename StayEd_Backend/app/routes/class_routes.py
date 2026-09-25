@@ -432,6 +432,8 @@ def get_session_attendance(class_id: int, session_id: int):
         {
             "enrollmentId": l["enrollment_id"],
             "name": f"{l['first_name']} {l['last_name']}".strip(),
+            "firstName": l["first_name"],
+            "lastName": l["last_name"],
             "modality": title_enum(l["learning_modality"]),
             "present": existing.get(l["enrollment_id"]) == "PRESENT",
         }
@@ -457,6 +459,8 @@ def get_session_attendance(class_id: int, session_id: int):
             {
                 "enrollmentId": h["enrollment_id"],
                 "name": f"{h['first_name']} {h['last_name']}".strip(),
+                "firstName": h["first_name"],
+                "lastName": h["last_name"],
                 "modality": title_enum(h["learning_modality"]),
                 "present": existing.get(h["enrollment_id"]) == "PRESENT",
                 "noLongerEnrolled": True,

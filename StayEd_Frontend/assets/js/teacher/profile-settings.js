@@ -41,11 +41,27 @@ class ProfileSettingsPage {
     const first = document.getElementById("settingsFirstName");
     const last = document.getElementById("settingsLastName");
     const email = document.getElementById("settingsEmail");
+    const mobile = document.getElementById("settingsMobile");
+    const clcInput = document.getElementById("settingsClcAssign");
 
     if (first && user.first_name) first.value = user.first_name;
     if (last && user.last_name) last.value = user.last_name;
     if (email && user.email) email.value = user.email;
+    if (mobile) mobile.value = user.phone || "";
+    if (clcInput) clcInput.value = user.school || "";
 
+    this.set("[data-settings-employee-id]", user.employee_id || "—");
+    this.set("[data-settings-clc]", user.school || "—");
+    this.set(
+      "[data-settings-join-date]",
+      user.join_date
+        ? new Date(user.join_date).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })
+        : "—",
+    );
   }
 
   static renderAvatar(avatar, initials = "T") {
@@ -225,6 +241,7 @@ class ProfileSettingsPage {
           first_name: document.getElementById("settingsFirstName")?.value.trim(),
           last_name: document.getElementById("settingsLastName")?.value.trim(),
           email,
+          phone: document.getElementById("settingsMobile")?.value.trim(),
         });
 
         window.UnsavedChanges?.clear(profileForm);
