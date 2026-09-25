@@ -343,8 +343,8 @@ def update_user(user_id: int):
                 clc_ids = []
                 for name in clc_names:
                     cur.execute(
-                        "SELECT clc_id FROM clc WHERE LOWER(clc_name) = LOWER(%s) LIMIT 1",
-                        (name,),
+                        "SELECT clc_id FROM clc WHERE LOWER(clc_name) = LOWER(%s) AND LOWER(municipality) = LOWER(%s) LIMIT 1",
+                        (name, municipality),
                     )
                     found = cur.fetchone()
                     if found:
@@ -457,8 +457,8 @@ def create_user():
                     return error("Municipality and CLC assignment are required for teacher accounts.", 422)
 
                 if not fetch_one(
-                    "SELECT clc_id FROM clc WHERE LOWER(clc_name)=LOWER(%s) AND status='ACTIVE'",
-                    (clc_name,),
+                    "SELECT clc_id FROM clc WHERE LOWER(clc_name)=LOWER(%s) AND LOWER(municipality)=LOWER(%s) AND status='ACTIVE'",
+                    (clc_name, municipality),
                 ):
                     return error("The selected CLC is not available for assignment.", 422)
 
@@ -488,8 +488,8 @@ def create_user():
 
                 if clc_name:
                     cur.execute(
-                        "SELECT clc_id FROM clc WHERE LOWER(clc_name) = LOWER(%s) LIMIT 1",
-                        (clc_name,),
+                        "SELECT clc_id FROM clc WHERE LOWER(clc_name) = LOWER(%s) AND LOWER(municipality) = LOWER(%s) LIMIT 1",
+                        (clc_name, municipality),
                     )
                     clc_row = cur.fetchone()
                     if clc_row:
@@ -672,6 +672,7 @@ def admin_dashboard():
             "low": 0,
             "levels": {"BLP": 0, "Elementary": 0, "JHS": 0, "SHS": 0},
             "clcs": 0,
+            "genderRisk": {"MALE": _empty_gender_bucket(), "FEMALE": _empty_gender_bucket()},
         }
 
     result = {}
@@ -706,8 +707,36 @@ def admin_dashboard():
             elif row["risk_level"] == "LOW":
                 gender_bucket["low"] += 1
 
+            municipality_gender_bucket = bucket["genderRisk"][row["sex"]]
+            municipality_gender_bucket["total"] += 1
+            if row["risk_level"] == "HIGH":
+                municipality_gender_bucket["high"] += 1
+            elif row["risk_level"] == "MODERATE":
+                municipality_gender_bucket["moderate"] += 1
+            elif row["risk_level"] == "LOW":
+                municipality_gender_bucket["low"] += 1
+
     for bucket in gender_risk.values():
         bucket["highRiskRate"] = round((bucket["high"] / bucket["total"]) * 100, 1) if bucket["total"] else 0.0
+
+    for municipality in result.values():
+        for bucket in municipality["genderRisk"].values():
+            bucket["highRiskRate"] = round((bucket["high"] / bucket["total"]) * 100, 1) if bucket["total"] else 0.0
+        male_bucket = municipality["genderRisk"]["MALE"]
+        female_bucket = municipality["genderRisk"]["FEMALE"]
+        if not male_bucket["total"] and not female_bucket["total"]:
+            municipality["genderRisk"]["higherRiskGender"] = None
+        elif male_bucket["highRiskRate"] > female_bucket["highRiskRate"]:
+            municipality["genderRisk"]["higherRiskGender"] = "male"
+        elif female_bucket["highRiskRate"] > male_bucket["highRiskRate"]:
+            municipality["genderRisk"]["higherRiskGender"] = "female"
+        else:
+            municipality["genderRisk"]["higherRiskGender"] = "tie"
+        municipality["genderRisk"] = {
+            "male": municipality["genderRisk"]["MALE"],
+            "female": municipality["genderRisk"]["FEMALE"],
+            "higherRiskGender": municipality["genderRisk"]["higherRiskGender"],
+        }
 
     male, female = gender_risk["MALE"], gender_risk["FEMALE"]
     if not male["total"] and not female["total"]:

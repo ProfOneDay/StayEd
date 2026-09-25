@@ -6,10 +6,12 @@ Guards.admin();
 // scoped to Division II only -- the rest of the province is shown on the map
 // for geographic context but stays non-interactive (see .outside-division in
 // admin-dashboard.css).
-function emptyBucket(name){return {name,total:0,high:0,moderate:0,low:0,levels:{BLP:0,Elementary:0,JHS:0,SHS:0},clcs:0}}
+function emptyGenderBucket(){return {total:0,high:0,moderate:0,low:0,highRiskRate:0}}
+function emptyBucket(name){return {name,total:0,high:0,moderate:0,low:0,levels:{BLP:0,Elementary:0,JHS:0,SHS:0},clcs:0,genderRisk:{male:emptyGenderBucket(),female:emptyGenderBucket(),higherRiskGender:null}}}
 
 let municipalityData={};
 let clcsByMunicipality={};
+let divisionGenderRiskData=null;
 let levelAverages={BLP:0,Elementary:0,JHS:0,SHS:0};
 let genderRiskData=null;
 let riskTrendData=[];
@@ -178,6 +180,8 @@ function selectMunicipality(id){const d=municipalityData[id]||emptyBucket(id);ma
   renderClcList(id);
   currentRiskCounts={high:d.high,moderate:d.moderate,low:d.low};
   currentLevelCounts={...d.levels};
+  genderRiskData=d.genderRisk||null;
+  renderGenderRisk();
   renderRiskChart();
   renderLevelChart();
 }
@@ -207,6 +211,8 @@ function selectAllMunicipalities(){
   document.getElementById('levels').innerHTML=levelKeys.map(label=>{const val=lv[label];return `<div class="levelbar"><span class="levelbar-label"><strong>${levelLabels[label]}</strong><small>${val} learner${val===1?'':'s'}</small></span><div class="track level-track"><div class="fill" style="width:${val/max*100}%"></div></div><b>${val}</b></div>`}).join('');
   currentRiskCounts={high:t.high,moderate:t.moderate,low:t.low};
   currentLevelCounts={...lv};
+  genderRiskData=divisionGenderRiskData;
+  renderGenderRisk();
   renderRiskChart();
   renderLevelChart();
 }
@@ -429,7 +435,8 @@ async function loadDashboard(){
     Object.entries(dashboardData?.municipalities||{}).forEach(([id,d])=>{
       if(DIVISION_II_IDS.has(id)) municipalityData[id]=d;
     });
-    genderRiskData=dashboardData?.genderRisk||null;
+    divisionGenderRiskData=dashboardData?.genderRisk||null;
+    genderRiskData=divisionGenderRiskData;
     riskTrendData=dashboardData?.riskTrend||[];
     clcsByMunicipality={};
     (clcResponse?.data||[]).forEach(clc=>{

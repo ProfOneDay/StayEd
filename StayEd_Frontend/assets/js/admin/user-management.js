@@ -5,7 +5,8 @@ let allClcs=[];
 async function loadClcOptions(){
   try{
     const response=await API.getAdminClcs();
-    const list=response.data||[];
+    const allowedMunicipalities=new Set(DIVISION_II_MUNICIPALITIES.map(m=>m.name.toLowerCase()));
+    const list=(response.data||[]).filter(c=>allowedMunicipalities.has(String(c.municipality||'').toLowerCase()));
     const grouped={};
     allClcs=list.map(c=>({name:c.name,municipality:c.municipality,status:c.status}));
     allClcs.forEach(c=>{
@@ -221,7 +222,9 @@ document.getElementById('rj-confirm-btn').addEventListener('click',async()=>{
 let editClcDraft=[];
 function availableClcOptions(includeAssigned=false){
   const assigned=new Set(editClcDraft);
+  const muni=document.getElementById('edit-muni').value;
   return allClcs
+    .filter(c=>c.municipality===muni)
     .filter(c=>c.status==='active'||(includeAssigned&&assigned.has(c.name)))
     .sort((a,b)=>a.name.localeCompare(b.name));
 }
@@ -251,7 +254,10 @@ function openEdit(id){
   document.getElementById('edit-first').value=t.firstName;
   document.getElementById('edit-middle').value=t.middleName;
   document.getElementById('edit-last').value=t.lastName;
-  document.getElementById('edit-empid').value=t.employeeId;
+  const empidInput=document.getElementById('edit-empid');
+  const isPendingEmpId=/^pending-\d+$/i.test(t.employeeId||'');
+  empidInput.value=isPendingEmpId?'':t.employeeId;
+  empidInput.placeholder=isPendingEmpId?'Not yet assigned — enter Employee ID':'e.g. 1234567';
   document.getElementById('edit-phone').value=t.phone;
   document.getElementById('edit-email').value=t.email;
   const muniSel=document.getElementById('edit-muni');
@@ -386,7 +392,7 @@ function populateCreateMuniOptions(){
   createMuniSelect.innerHTML='<option value="" disabled selected hidden>Select Municipality…</option>'+DIVISION_II_MUNICIPALITIES.map(m=>`<option>${m.name}</option>`).join('');
 }
 function populateCreateClc(muni){
-  const list=allClcs.filter(c=>c.status==='active').sort((a,b)=>a.name.localeCompare(b.name));
+  const list=allClcs.filter(c=>c.status==='active'&&c.municipality===muni).sort((a,b)=>a.name.localeCompare(b.name));
   createClcSelect.innerHTML='<option value="" disabled selected hidden>Select CLC…</option>'+list.map(c=>`<option value="${c.name}">${c.name} — ${c.municipality}</option>`).join('');
 }
 createMuniSelect.addEventListener('change',()=>populateCreateClc(createMuniSelect.value));

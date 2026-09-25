@@ -1,5 +1,12 @@
 -- StayEd reference Community Learning Centers used by the updated setup wizard.
--- Run this inside stayed_db after the core schema. It is safe to run more than once.
+-- Run this inside stayed_db after the core schema. It only ever seeds a
+-- completely empty `clc` table (a fresh dev database) -- once any CLC exists
+-- (whether from this seed or from real data, e.g. an admin-imported roster),
+-- it is a permanent no-op. It must NOT re-check by name/municipality: this
+-- file re-runs on every backend start (see db_bootstrap.py), and a real CLC
+-- list will rename or remove these reference rows, which previously made the
+-- per-row "WHERE NOT EXISTS (... name/municipality match)" guard think they
+-- were missing and silently re-insert duplicates on every restart.
 
 BEGIN;
 
@@ -19,11 +26,6 @@ WITH reference_clcs(clc_name, municipality, barangay, address) AS (
 INSERT INTO clc (clc_name, municipality, barangay, address, status)
 SELECT r.clc_name, r.municipality, r.barangay, r.address, 'ACTIVE'
 FROM reference_clcs r
-WHERE NOT EXISTS (
-    SELECT 1
-    FROM clc c
-    WHERE LOWER(c.clc_name) = LOWER(r.clc_name)
-      AND LOWER(c.municipality) = LOWER(r.municipality)
-);
+WHERE NOT EXISTS (SELECT 1 FROM clc);
 
 COMMIT;

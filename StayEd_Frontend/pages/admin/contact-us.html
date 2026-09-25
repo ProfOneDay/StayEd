@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script data-stayed-font-scale-bootstrap>
+      (function () {
+        try {
+          var v = localStorage.getItem("stayed_font_scale");
+          if (v) document.documentElement.setAttribute("data-font-scale", v);
+        } catch (e) {}
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StayEd | Contact Us</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/css/main.css" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="../../assets/img/brand/favicon.ico"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="../../assets/img/brand/apple-touch-icon.png"
+    />
+  </head>
+  <body class="st-app" data-page="Contact Us">
+    <div data-component="layout/sidebar-admin"></div>
+
+    <div class="st-main">
+      <div data-component="layout/navbar"></div>
+
+      <main class="st-content">
+        <div class="st-page-header">
+          <div>
+            <h1 class="st-page-header-title">Contact Us</h1>
+            <p class="st-page-header-subtitle">
+              Get in touch with the StayEd support team
+            </p>
+          </div>
+        </div>
+
+        <div class="st-panel st-panel-pad col-12">
+          <p class="st-about-text st-mb-md">
+            Need help with your account, a bug report, or have feedback
+            about StayEd? Reach out through any of the channels below. This
+            is placeholder contact information and should be replaced with
+            the Division's actual support details.
+          </p>
+
+          <div class="info-card" style="grid-template-columns:1fr 1fr">
+            <div>
+              <small>Support Email</small>
+              <b>stayed.support@deped.gov.ph</b>
+            </div>
+            <div>
+              <small>Support Hotline</small>
+              <b>(075) 123-4567</b>
+            </div>
+            <div>
+              <small>Office Hours</small>
+              <b>Monday&ndash;Friday, 8:00 AM&ndash;5:00 PM</b>
+            </div>
+            <div>
+              <small>Office Address</small>
+              <b>DepEd Division Office, Pangasinan II, Philippines</b>
+            </div>
+          </div>
+
+          <p class="st-about-text" style="margin-top:16px">
+            For urgent account access issues, please coordinate with your
+            Division ICT Coordinator in addition to emailing support.
+          </p>
+        </div>
+      </main>
+
+      <div data-component="layout/footer"></div>
+    </div>
+
+    <div data-component="layout/toast"></div>
+    <div data-component="layout/modal"></div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/core/utils.js"></script>
+    <script src="../../assets/js/core/router.js"></script>
+    <script src="../../assets/js/core/api.js"></script>
+    <script src="../../assets/js/core/auth.js"></script>
+    <script src="../../assets/js/core/guards.js"></script>
+    <script src="../../assets/js/core/layout.js"></script>
+    <script src="../../assets/js/core/app.js"></script>
+    <script src="../../assets/js/components/component-loader.js"></script>
+    <script src="../../assets/js/components/toast.js"></script>
+    <script src="../../assets/js/components/modal.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => Guards?.admin?.());
+    </script>
+  </body>
+</html>

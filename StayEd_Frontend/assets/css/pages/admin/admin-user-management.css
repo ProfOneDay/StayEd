@@ -68,6 +68,21 @@ tbody tr:last-child td{border-bottom:none}
 .overlay.show{display:flex}
 .modal{background:#fff;border-radius:var(--st-radius-2xl);width:39.6vw;min-width:456px;max-width:768px;padding:26px;box-shadow:var(--st-shadow-lg);max-height:88vh;overflow-y:auto}
 .modal.wide{width:45.6vw;min-width:504px;max-width:840px}
+.edit-account-modal{width:min(76vw,1100px)!important;max-width:1100px!important}
+.edit-employment-grid,.edit-contact-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 22px}
+.edit-employment-grid .field,.edit-contact-grid .field{margin-bottom:0}
+.edit-account-modal input,.edit-account-modal select{box-sizing:border-box;height:42px;padding:10px 12px;line-height:20px;max-width:none}
+.edit-account-modal .select-wrap{position:relative;width:100%;height:42px;min-width:0}
+.edit-account-modal .select-wrap select{display:block;height:42px;padding:10px 42px 10px 12px;line-height:20px;appearance:none!important;-webkit-appearance:none!important;-moz-appearance:none!important;background-image:none!important}
+.edit-account-modal .select-wrap select::-ms-expand{display:none}
+.edit-account-modal .select-wrap::after{right:12px;top:50%;z-index:2;transform:translateY(-50%)}
+.edit-account-modal .select-wrap--chevron::after{content:"";width:13px;height:13px}
+.edit-account-modal .edit-municipality-select-wrap::after{display:none}
+.edit-account-modal #edit-muni{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2.6'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important;background-position:right 12px center;background-size:13px 13px;background-repeat:no-repeat}
+.edit-account-modal .edit-clc-select-wrap{flex:1 1 auto}
+.edit-employment-grid input,.edit-employment-grid select,.edit-contact-grid input,.edit-contact-grid select{height:52px;padding:14px 12px;line-height:24px}
+.edit-employment-grid .select-wrap,.edit-contact-grid .select-wrap{height:52px}
+.edit-employment-grid .select-wrap select,.edit-contact-grid .select-wrap select{height:52px;padding:14px 42px 14px 12px;line-height:24px}
 .modal h2{margin:0 0 4px;font-size:var(--st-font-size-heading);font-weight:600}
 .modal .modal-sub{color:var(--muted);margin-bottom:18px;font-size:var(--st-font-size-small)}
 .modal .field{margin-bottom:14px}
@@ -132,6 +147,8 @@ tbody tr:last-child td{border-bottom:none}
   table,thead,tbody,tr,td{display:block} thead{display:none}
   tbody tr{border-bottom:1px solid var(--line);padding:10px 0}
   tbody td{border-bottom:none;padding:6px 0}
+  .edit-account-modal{width:min(94vw,720px)!important;min-width:0}
+  .edit-employment-grid,.edit-contact-grid{grid-template-columns:1fr}
 }
 
 /* Create Account: Teacher / Admin role toggle */

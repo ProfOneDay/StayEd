@@ -62,7 +62,7 @@
 
 <!-- Review Teacher Registration Modal -->
 <div class="overlay" id="modal-review">
-  <div class="modal wide">
+  <div class="modal wide edit-account-modal">
     <h2>Review Teacher Registration</h2>
     <div class="modal-sub">Carefully verify all details before granting access to the StayEd portal.</div>
     <div class="review-header">
@@ -110,7 +110,7 @@
 
 <!-- Reject Teacher Registration Modal -->
 <div class="overlay" id="modal-reject">
-  <div class="modal wide">
+  <div class="modal wide edit-account-modal">
     <h2>Reject Teacher Registration?</h2>
     <div class="modal-sub">Review the details before proceeding with rejection.</div>
     <div class="info-card" style="grid-template-columns:1fr">
@@ -134,7 +134,7 @@
 
 <!-- Edit Teacher Account Modal -->
 <div class="overlay" id="modal-edit">
-  <div class="modal wide">
+  <div class="modal wide edit-account-modal">
     <h2>Edit Teacher Account</h2>
     <div class="modal-sub">Update credentials and view administrative metadata.</div>
     <label style="display:block;font-size:0.90625rem;font-weight:700;margin-bottom:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Personal Information</label>
@@ -144,18 +144,20 @@
       <div><label for="edit-last">Last Name</label><input id="edit-last" type="text"/></div>
     </div>
     <label style="display:block;font-size:0.90625rem;font-weight:700;margin:2px 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Employment &amp; Contact</label>
-    <div class="field" style="display:grid;grid-template-columns:1fr 1fr;gap:14px 16px">
+    <div class="field edit-employment-grid">
       <div><label for="edit-empid">Employee ID</label><input id="edit-empid" type="text"/></div>
       <div><label for="edit-phone">Contact Number</label><input id="edit-phone" type="text"/></div>
     </div>
-    <div class="field"><label for="edit-email">DepEd Email</label><input id="edit-email" type="email"/></div>
-    <div class="field"><label for="edit-muni">Municipality</label>
-      <div class="select-wrap select-wrap--chevron"><select id="edit-muni"></select></div>
+    <div class="edit-contact-grid">
+      <div class="field"><label for="edit-email">DepEd Email</label><input id="edit-email" type="email"/></div>
+      <div class="field"><label for="edit-muni">Municipality</label>
+        <div class="select-wrap select-wrap--chevron edit-municipality-select-wrap"><select id="edit-muni"></select></div>
+      </div>
     </div>
     <div class="field">
       <label>Assign CLC</label>
       <div style="display:flex;gap:10px">
-        <div class="select-wrap select-wrap--chevron" style="flex:1"><select id="edit-clc-select"><option value="" disabled selected hidden>Select CLC…</option></select></div>
+        <div class="select-wrap select-wrap--chevron edit-clc-select-wrap"><select id="edit-clc-select"><option value="" disabled selected hidden>Select CLC…</option></select></div>
         <button class="btn" type="button" id="edit-clc-add-btn" style="white-space:nowrap">Add CLC</button>
       </div>
       <div class="assign-current" id="edit-clc-list" style="margin-top:10px"></div>
@@ -289,6 +291,6 @@
 <script src="../../assets/js/components/toast.js"></script>
 <script src="../../assets/js/components/modal.js"></script>
 <script src="../../assets/js/admin/division-ii-municipalities.js?v=2"></script>
-<script src="../../assets/js/admin/user-management.js"></script>
+<script src="../../assets/js/admin/user-management.js?v=4"></script>
 </body>
 </html>
