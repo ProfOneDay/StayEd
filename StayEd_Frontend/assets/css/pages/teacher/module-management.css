@@ -103,12 +103,12 @@
 .st-panel[data-catalog-panel] .st-data-table th,
 .st-panel[data-catalog-panel] .st-data-table td {
   padding: 12px 16px;
-  font-size: var(--st-font-size-small);
+  font-size: 0.875rem; /* 14px */
   line-height: 1.4;
 }
 
 .st-panel[data-catalog-panel] .st-data-table th {
-  font-size: var(--st-font-size-label);
+  font-size: 0.781rem; /* 12.5px */
 }
 
 .st-module-detail-header {

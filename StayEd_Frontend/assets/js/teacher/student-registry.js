@@ -328,7 +328,7 @@ class StudentRegistry {
                 <td>${this.statusPill(l.status)}</td>
                 <td>
                     <div class="st-row-actions">
-                        <button class="st-btn st-btn-primary st-btn-xs" data-view-learner="${l.id}">View Profile</button>
+                        <button class="st-btn st-btn-outline st-btn-xs" data-view-learner="${l.id}">View Profile</button>
                         <button class="st-icon-btn-sm" data-run-prediction="${l.id}"
                             aria-label="Run prediction"
                             title="Run Prediction"

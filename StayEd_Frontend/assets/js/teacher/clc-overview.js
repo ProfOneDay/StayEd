@@ -1,3 +1,5 @@
+const CLC_OVERVIEW_REDUCE_MOTION = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 class ClcOverview {
   static state = {
     all: [],
@@ -59,11 +61,11 @@ class ClcOverview {
   static renderStats() {
     const all = this.state.all;
 
-    this.set("[data-clc-count]", all.length);
+    this.countTo(document.querySelector("[data-clc-count]"), all.length);
 
-    this.set(
-      "[data-clc-learners]",
-      this.state.totalLearners.toLocaleString(),
+    this.countTo(
+      document.querySelector("[data-clc-learners]"),
+      this.state.totalLearners,
     );
   }
 
@@ -95,88 +97,96 @@ class ClcOverview {
 
     if (!rows.length) {
       grid.innerHTML = `
-                <div class="st-empty col-12" style="grid-column:1/-1;">
+                <div class="st-empty">
                     <span class="material-symbols-outlined">search_off</span>
                     <p class="st-empty-title">No Community Learning Centers found</p>
                     <p class="st-empty-text">Try adjusting your search or filter.</p>
                 </div>
             `;
+    } else {
+      grid.innerHTML = rows.map((clc, i) => this.card(clc, i)).join("");
 
-      return;
+      grid.querySelectorAll("[data-clc-view]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          localStorage.setItem("stayed_last_teacher_clc", btn.dataset.clcName || "");
+          window.location.href = `class-management.html?clc=${encodeURIComponent(btn.dataset.clcName)}`;
+        });
+      });
     }
 
-    grid.innerHTML = rows.map((clc) => this.card(clc)).join("");
+    grid.classList.remove("is-inview");
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => grid.classList.add("is-inview")),
+    );
 
-    grid.querySelectorAll("[data-clc-view]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        localStorage.setItem("stayed_last_teacher_clc", btn.dataset.clcName || "");
-        window.location.href = `class-management.html?clc=${encodeURIComponent(btn.dataset.clcName)}`;
-      });
-    });
+    grid.querySelectorAll("[data-countup]").forEach((el) => this.countTo(el));
   }
 
-  static card(clc) {
-    const initials = ["AR", "MC", "JD", "LP"];
-
-    const avatarCount = Math.min(clc.teachers || 0, 3);
-
-    const avatars = Array.from(
-      { length: avatarCount },
-      (_, i) => `<div>${initials[i % initials.length]}</div>`,
-    ).join("");
-
-    const extra = (clc.teachers || 0) - avatarCount;
-
-    const extraChip = extra > 0 ? `<div>+${extra}</div>` : "";
+  static card(clc, i) {
+    const learners = Number(clc.totalLearners) || 0;
+    const isEmpty = learners === 0;
+    const isActive = String(clc.status || "").toLowerCase() === "active";
+    const teachers = Number(clc.teachers) || 0;
+    const hasSchoolYear = clc.schoolYear && clc.schoolYear !== "—";
+    const schoolYear = hasSchoolYear ? String(clc.schoolYear).replace("-", "–") : "";
 
     return `
-            <div class="st-clc-card">
+            <article class="st-clc-card${isEmpty ? " is-empty" : ""}" style="--i:${i}">
 
-                <div class="st-clc-card-head">
-                    <div class="st-clc-card-icon">
-                        <span class="material-symbols-outlined">${clc.icon || "account_balance"}</span>
+                <div class="st-clc-card-top">
+                    <div class="st-clc-card-titlerow">
+                        <h3 class="st-clc-card-name">${clc.name}</h3>
+                        <span class="st-clc-card-status${isActive ? "" : " st-clc-card-status--neutral"}">${clc.status}</span>
                     </div>
-                    <span class="st-clc-card-status">${clc.status}</span>
-                </div>
-
-                <div class="st-clc-card-body">
-                    <h3 class="st-clc-card-name">${clc.name}</h3>
                     <p class="st-clc-card-location">
                         <span class="material-symbols-outlined">location_on</span>
                         ${clc.location}
                     </p>
                 </div>
 
-                <div class="st-clc-card-stats">
-
-                    <div class="st-clc-card-stat-row">
-                        <span>Total Learners</span>
-                        <span>${clc.totalLearners} Learners</span>
+                <div class="st-clc-card-figure">
+                    <div class="st-clc-card-count">
+                        <b class="num" data-countup>${learners}</b>
+                        <span>${learners === 1 ? "learner" : "learners"}</span>
                     </div>
-
-                    <div class="st-clc-card-stat-row">
-                        <span>School Year</span>
-                        <span>${clc.schoolYear}</span>
+                    <div class="st-clc-card-meta">
+                        <small>School year</small>
+                        ${schoolYear ? `<strong class="num">${schoolYear}</strong>` : `<strong class="is-missing">Not set</strong>`}
                     </div>
-
-                    <div>
-                        <span class="st-clc-card-teachers-label">Assigned Teachers</span>
-                        <div class="st-clc-avatar-stack">
-                            ${avatars}${extraChip}
-                        </div>
-                    </div>
-
                 </div>
 
+                ${teachers > 0 ? `<p class="st-clc-card-teachers"><span class="material-symbols-outlined">person</span>${teachers} assigned teacher${teachers === 1 ? "" : "s"}</p>` : ""}
+
                 <div class="st-clc-card-footer">
-                    <button type="button" class="st-btn st-btn-primary" data-clc-view="${clc.id}" data-clc-name="${clc.name}">
-                        View Classes
+                    <button type="button" class="st-clc-card-go" data-clc-view="${clc.id}" data-clc-name="${clc.name}">
+                        View classes
                         <span class="material-symbols-outlined">arrow_forward</span>
                     </button>
                 </div>
 
-            </div>
+            </article>
         `;
+  }
+
+  // Counts a [data-countup] element up from 0 to its target over ~800ms
+  // (ease-out-cubic). Writes the value immediately if motion is reduced.
+  static countTo(el, value) {
+    if (!el) return;
+    const end = Number(value ?? el.dataset.final ?? el.textContent);
+    el.dataset.final = Number.isFinite(end) ? end : (value ?? "");
+    if (CLC_OVERVIEW_REDUCE_MOTION || !Number.isFinite(end)) {
+      el.textContent = value ?? el.dataset.final;
+      return;
+    }
+    const t0 = performance.now();
+    const dur = 800;
+    const tick = (t) => {
+      const k = Math.min(1, (t - t0) / dur);
+      const eased = 1 - Math.pow(1 - k, 3);
+      el.textContent = Math.round(end * eased);
+      if (k < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
   }
 
   static showSkeleton() {

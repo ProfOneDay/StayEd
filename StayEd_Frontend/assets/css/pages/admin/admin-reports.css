@@ -192,8 +192,8 @@ body[data-page="Reports"] .st-content:has([data-submitted-reports-panel]) .st-re
   line-height:1.35;
 }
 
-.st-report-table-wrap .st-data-table th{ font-size: var(--st-font-size-label); }
-.st-report-table-wrap .st-data-table td{ font-size: var(--st-font-size-small); }
+.st-report-table-wrap .st-data-table th{ font-size: 0.781rem; /* 12.5px */ }
+.st-report-table-wrap .st-data-table td{ font-size: 0.875rem; /* 14px */ }
 
 .st-report-table-wrap .st-data-table th{
   white-space:nowrap;

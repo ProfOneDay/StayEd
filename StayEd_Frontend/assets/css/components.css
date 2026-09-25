@@ -89,11 +89,11 @@
 .st-card {
   background: #fff;
 
-  border: 1px solid rgba(195, 198, 207, 0.35);
+  border: 1px solid var(--st-line, rgba(195, 198, 207, 0.35));
 
-  border-radius: var(--st-card-radius);
+  border-radius: var(--st-radius-card, var(--st-card-radius));
 
-  box-shadow: var(--st-shadow-sm);
+  box-shadow: var(--st-shadow-card, var(--st-shadow-sm));
 
   padding: 24px;
 }

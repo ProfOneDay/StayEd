@@ -280,7 +280,7 @@ class EarlyWarningPage {
                 <td style="font-size:0.75rem;">${l.assignedTeacher}</td>
                 <td class="is-center">
                     <div class="st-row-actions" style="justify-content:center;">
-                        <button type="button" class="st-btn st-btn-primary st-btn-xs" data-open-profile="${l.id}">
+                        <button type="button" class="st-btn st-btn-outline st-btn-xs" data-open-profile="${l.id}">
                             View Profile
                         </button>
                         <button class="st-icon-btn-sm" data-run-prediction="${l.id}"

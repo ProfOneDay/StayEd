@@ -9,13 +9,6 @@
    dashboard-exclusive. Left untouched by the dashboard UI revision.
    ============================================================ */
 
-/* .st-content is a shared shell class (every logged-in page); the prototype's
-   tighter 20px stack gap is scoped here rather than changed in layout.css so
-   other pages keep their current spacing. */
-body[data-page="Teacher Dashboard"] .st-content {
-  gap: 20px;
-}
-
 /* ---------- Notification banner ---------- */
 
 .st-notif-banner {
@@ -1021,27 +1014,27 @@ body[data-page="Teacher Dashboard"] .st-tool-btn .material-symbols-outlined {
   overflow-x: auto;
 }
 
-/* Several other pages' CSS files (loaded later in main.css's @import chain,
-   e.g. learner-records.css) define their own rules for .st-data-table td/th,
-   .st-learner-name-link, .st-pagination*, etc. at their own (larger) type
-   scale. Equal-specificity + later source order let those win over the
-   plain versions of these selectors, which is what caused the dashboard's
-   table text to inconsistently render at other pages' sizes. Everything
-   below is scoped under body[data-page="Teacher Dashboard"] both to fix
-   that (higher specificity always wins, regardless of load order) and to
-   keep this dashboard-specific sizing from leaking onto those other pages. */
-body[data-page="Teacher Dashboard"] .st-data-table {
+/* .st-data-table, .st-learner-cell/-name/-id, .st-row-actions, .st-btn-xs,
+   .st-icon-btn-sm and .st-pagination*/.st-page-btn are shared components
+   used by tables across the whole app (Learner Records, Student Registry,
+   Early Warning, Learner Import, admin Reports, etc.), not just the
+   dashboard's own registry -- deliberately UNSCOPED so every table in the
+   system gets this same look. Several of those other pages' own CSS files
+   also declare th/td font-size etc. for .st-data-table at their own (older,
+   larger) scale; those need reconciling in each page's file so they don't
+   fight these values via equal-specificity + later source order. */
+.st-data-table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
   font-size: 0.875rem; /* 14px */
 }
 
-body[data-page="Teacher Dashboard"] .st-data-table thead tr {
+.st-data-table thead tr {
   background: #f8f9fb;
 }
 
-body[data-page="Teacher Dashboard"] .st-data-table th {
+.st-data-table th {
   padding: 10px 22px;
   font-size: 0.781rem; /* 12.5px */
   font-weight: 600;
@@ -1053,22 +1046,22 @@ body[data-page="Teacher Dashboard"] .st-data-table th {
   white-space: nowrap;
 }
 
-body[data-page="Teacher Dashboard"] .st-data-table th.is-center {
+.st-data-table th.is-center {
   text-align: center;
 }
 
-body[data-page="Teacher Dashboard"] .st-data-table tbody tr {
+.st-data-table tbody tr {
   border-top: 0;
   border-bottom: 1px solid var(--st-line, var(--st-outline-variant));
   transition: background-color var(--st-t-hover, 150ms) ease;
   cursor: pointer;
 }
 
-body[data-page="Teacher Dashboard"] .st-data-table tbody tr:hover {
+.st-data-table tbody tr:hover {
   background: #f8fafd;
 }
 
-body[data-page="Teacher Dashboard"] .st-data-table td {
+.st-data-table td {
   padding: 12px 22px;
   color: var(--st-ink-muted, var(--st-on-surface-variant));
   vertical-align: middle;
@@ -1083,17 +1076,17 @@ body[data-page="Teacher Dashboard"] .st-registry-loading {
   font-style: italic;
 }
 
-body[data-page="Teacher Dashboard"] .st-learner-cell {
+.st-learner-cell {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-/* .st-avatar-initials/.st-pill/.st-risk-badge are shared components (used on
-   other pages too) with a smaller-scaled base size -- scoped here to the
-   registry table only so they can match the prototype's larger pill/avatar
-   sizing without changing those other pages. */
-body[data-page="Teacher Dashboard"] .st-learner-cell .st-avatar-initials {
+/* .st-avatar-initials/.st-pill/.st-risk-badge have a smaller-scaled base
+   size (components.css) for places like the sidebar/attention list --
+   scoped to inside a table's learner cell so they match the table's pill
+   sizing without changing those other, non-table usages. */
+.st-learner-cell .st-avatar-initials {
   width: 36px;
   height: 36px;
   flex: none;
@@ -1101,7 +1094,7 @@ body[data-page="Teacher Dashboard"] .st-learner-cell .st-avatar-initials {
   font-weight: 700;
 }
 
-body[data-page="Teacher Dashboard"] .st-data-table .st-pill {
+.st-data-table .st-pill {
   padding: 3px 10px;
   font-size: 0.781rem; /* 12.5px */
   font-weight: 600;
@@ -1110,13 +1103,13 @@ body[data-page="Teacher Dashboard"] .st-data-table .st-pill {
   border: 1px solid var(--st-line, var(--st-outline-variant));
 }
 
-body[data-page="Teacher Dashboard"] .st-data-table .st-risk-badge {
+.st-data-table .st-risk-badge {
   padding: 3px 10px;
   font-size: 0.781rem; /* 12.5px */
   font-weight: 600;
 }
 
-body[data-page="Teacher Dashboard"] .st-learner-name {
+.st-learner-name {
   display: block;
   border: 0;
   background: none;
@@ -1130,25 +1123,25 @@ body[data-page="Teacher Dashboard"] .st-learner-name {
   transition: color var(--st-t-hover, 150ms) ease;
 }
 
-body[data-page="Teacher Dashboard"] .st-learner-name:hover {
+.st-learner-name:hover {
   color: var(--st-primary);
   text-decoration: underline;
 }
 
-body[data-page="Teacher Dashboard"] .st-learner-id {
+.st-learner-id {
   margin: 1px 0 0;
   font-size: 0.781rem; /* 12.5px */
   color: var(--st-ink-faint, var(--st-outline));
 }
 
-body[data-page="Teacher Dashboard"] .st-row-actions {
+.st-row-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 4px;
 }
 
-body[data-page="Teacher Dashboard"] .st-btn-xs {
+.st-btn-xs {
   height: 32px;
   padding: 0 12px;
   font-family: var(--st-font-body);
@@ -1157,7 +1150,7 @@ body[data-page="Teacher Dashboard"] .st-btn-xs {
   border-radius: var(--st-radius-control, 8px);
 }
 
-body[data-page="Teacher Dashboard"] .st-icon-btn-sm {
+.st-icon-btn-sm {
   width: 32px;
   height: 32px;
   padding: 0;
@@ -1172,15 +1165,15 @@ body[data-page="Teacher Dashboard"] .st-icon-btn-sm {
   justify-content: center;
 }
 
-body[data-page="Teacher Dashboard"] .st-icon-btn-sm:hover {
+.st-icon-btn-sm:hover {
   background: var(--st-background);
 }
 
-body[data-page="Teacher Dashboard"] .st-icon-btn-sm .material-symbols-outlined {
+.st-icon-btn-sm .material-symbols-outlined {
   font-size: 1.125rem;
 }
 
-body[data-page="Teacher Dashboard"] .st-pagination {
+.st-pagination {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1190,13 +1183,13 @@ body[data-page="Teacher Dashboard"] .st-pagination {
   border-top: none;
 }
 
-body[data-page="Teacher Dashboard"] .st-pagination-info {
+.st-pagination-info {
   font-size: 0.844rem; /* 13.5px */
   font-family: var(--st-font-body);
   color: var(--st-ink-muted, var(--st-on-surface-variant));
 }
 
-body[data-page="Teacher Dashboard"] .st-pagination-controls {
+.st-pagination-controls {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -1204,7 +1197,7 @@ body[data-page="Teacher Dashboard"] .st-pagination-controls {
   max-width: 100%;
 }
 
-body[data-page="Teacher Dashboard"] .st-page-btn {
+.st-page-btn {
   min-width: 34px;
   height: 34px;
   padding: 0 8px;
@@ -1221,17 +1214,17 @@ body[data-page="Teacher Dashboard"] .st-page-btn {
   justify-content: center;
 }
 
-body[data-page="Teacher Dashboard"] .st-page-btn:hover:not(:disabled) {
+.st-page-btn:hover:not(:disabled) {
   background: var(--st-background);
   color: var(--st-on-surface);
 }
 
-body[data-page="Teacher Dashboard"] .st-page-btn.is-active {
+.st-page-btn.is-active {
   background: var(--st-primary);
   color: #fff;
 }
 
-body[data-page="Teacher Dashboard"] .st-page-btn:disabled {
+.st-page-btn:disabled {
   opacity: 0.35;
   cursor: default;
 }
@@ -1249,7 +1242,6 @@ body[data-page="Teacher Dashboard"] .st-page-btn:disabled {
 }
 
 @media (max-width: 767px) {
-  body[data-page="Teacher Dashboard"] .st-content { padding: 16px 16px 32px; gap: 16px; }
   .st-dash-grid { gap: 16px; }
   .st-welcome-title { font-size: 1.5rem; /* 24px */ }
   .st-welcome-subtitle { font-size: 0.875rem; }

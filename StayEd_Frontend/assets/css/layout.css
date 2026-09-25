@@ -832,13 +832,13 @@ body {
 .st-content {
   flex: 1;
 
-  padding: 40px;
+  padding: 24px 32px 40px;
 
   display: flex;
 
   flex-direction: column;
 
-  gap: 32px;
+  gap: 20px;
 }
 
 .st-page-header {
@@ -846,35 +846,47 @@ body {
 
   justify-content: space-between;
 
-  align-items: center;
+  align-items: flex-end;
 
   gap: 24px;
 
   flex-wrap: wrap;
 
-  margin-bottom: 24px;
+  /* No margin-bottom: spacing after the header comes from .st-content's own
+     gap (matches the dashboard's .st-welcome block, which relies on the
+     same gap and has never had a margin-bottom of its own). A margin here
+     used to double up with that gap, pushing every .st-page-header page's
+     first section down further than the dashboard's. */
 }
 
-/* Canonical page h1 + subtitle -- previously only defined inside
-   learner-records.css and left unstyled (bare UA default) everywhere
-   else, so every other page's title silently didn't scale with the
-   rest of the type system. */
+/* Canonical page h1 + subtitle -- matches the teacher dashboard/calendar
+   prototype's title treatment (30px Libre Franklin 800, near-black ink),
+   applied site-wide so every page's header uses the same scale instead of
+   the old 26px navy default. */
 .st-page-header-title {
+  margin: 0;
+
   font-family: var(--st-font-heading);
 
-  font-size: var(--st-font-size-title);
+  font-size: 1.875rem; /* 30px */
 
-  font-weight: 700;
+  font-weight: 800;
 
-  color: var(--st-primary);
+  letter-spacing: -0.02em;
+
+  line-height: 1.15;
+
+  color: var(--st-on-surface);
 }
 
 .st-page-header-subtitle {
-  margin-top: 4px;
+  margin: 6px 0 0;
 
-  font-size: var(--st-font-size-body);
+  font-size: 0.9375rem; /* 15px */
 
-  color: var(--st-on-surface-variant);
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+
+  max-width: 640px;
 }
 
 .st-footer {
@@ -1092,9 +1104,17 @@ body {
   }
 
   .st-content {
-    padding: 16px;
+    padding: 16px 16px 32px;
 
-    gap: 24px;
+    gap: 16px;
+  }
+
+  .st-page-header-title {
+    font-size: 1.5rem; /* 24px */
+  }
+
+  .st-page-header-subtitle {
+    font-size: 0.875rem; /* 14px */
   }
 
   .st-footer {

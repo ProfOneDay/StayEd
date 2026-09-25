@@ -1,3 +1,5 @@
+const CLASS_MANAGEMENT_REDUCE_MOTION = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 class ClassManagement {
   static classes = [];
 
@@ -105,15 +107,20 @@ class ClassManagement {
     if (!grid) return;
 
     grid.innerHTML = `
-            <div class="st-empty" style="grid-column:1/-1;">
+            <div class="st-empty">
                 <span class="material-symbols-outlined">hub</span>
                 <p class="st-empty-title">No Community Learning Center selected</p>
                 <p class="st-empty-text">Choose a CLC from CLC Overview to view and manage its classes.</p>
-                <a href="clc-overview.html" class="st-btn st-btn-primary" style="margin-top:16px;">
+                <a href="clc-overview.html" class="st-btn st-btn-primary">
                     Go to CLC Overview
                 </a>
             </div>
         `;
+
+    grid.classList.remove("is-inview");
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => grid.classList.add("is-inview")),
+    );
   }
 
   static render() {
@@ -123,87 +130,109 @@ class ClassManagement {
 
     if (!this.classes.length) {
       grid.innerHTML = `
-                <div class="st-empty" style="grid-column:1/-1;">
+                <div class="st-empty">
                     <span class="material-symbols-outlined">school</span>
                     <p class="st-empty-title">No registered classes yet.</p>
                     <p class="st-empty-text">Create a class for this CLC to begin enrolling learners and managing records.</p>
                 </div>
             `;
+    } else {
+      grid.innerHTML = this.classes.map((c, i) => this.card(c, i)).join("");
 
-      return;
+      grid.querySelectorAll("[data-open-class]").forEach((el) => {
+        el.addEventListener("click", () => {
+          const classId = el.dataset.openClass;
+          window.location.href = `learner-records.html?class=${encodeURIComponent(classId)}`;
+        });
+      });
+
+      grid.querySelectorAll("[data-delete-class]").forEach((el) => {
+        el.addEventListener("click", () => {
+          const classId = el.dataset.deleteClass;
+          const cls = this.classes.find((x) => String(x.id) === String(classId));
+          this.confirmDelete(classId, cls?.level);
+        });
+      });
+
+      grid.querySelectorAll("[data-take-attendance]").forEach((el) => {
+        el.addEventListener("click", () => {
+          const classId = el.dataset.takeAttendance;
+          const cls = this.classes.find((x) => String(x.id) === String(classId));
+          if (cls && window.ClassAttendanceModal) {
+            ClassAttendanceModal.open(cls);
+          }
+        });
+      });
     }
 
-    grid.innerHTML = this.classes.map((c) => this.card(c)).join("");
+    grid.classList.remove("is-inview");
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => grid.classList.add("is-inview")),
+    );
 
-    grid.querySelectorAll("[data-open-class]").forEach((el) => {
-      el.addEventListener("click", () => {
-        const classId = el.dataset.openClass;
-        window.location.href = `learner-records.html?class=${encodeURIComponent(classId)}`;
-      });
-    });
-
-    grid.querySelectorAll("[data-delete-class]").forEach((el) => {
-      el.addEventListener("click", () => {
-        const classId = el.dataset.deleteClass;
-        const cls = this.classes.find((x) => String(x.id) === String(classId));
-        this.confirmDelete(classId, cls?.level);
-      });
-    });
-
-    grid.querySelectorAll("[data-take-attendance]").forEach((el) => {
-      el.addEventListener("click", () => {
-        const classId = el.dataset.takeAttendance;
-        const cls = this.classes.find((x) => String(x.id) === String(classId));
-        if (cls && window.ClassAttendanceModal) {
-          ClassAttendanceModal.open(cls);
-        }
-      });
-    });
+    grid.querySelectorAll("[data-countup]").forEach((el) => this.countTo(el));
   }
 
-  static card(c) {
+  static card(c, i) {
+    const learners = Number(c.learnerCount) || 0;
+    const schoolYear = c.schoolYear ? String(c.schoolYear).replace("-", "–") : "";
+
     return `
-            <div class="st-clc-card">
+            <article class="st-clc-card${learners ? "" : " is-empty"}" style="--i:${i}">
 
-                <div class="st-clc-card-head">
-                    <div class="st-clc-card-icon">
-                        <span class="material-symbols-outlined">${c.icon || "school"}</span>
+                <div class="st-clc-card-top">
+                    <div class="st-clc-card-titlerow">
+                        <h3 class="st-clc-card-name">${c.level}</h3>
+                        <span class="st-clc-card-status st-clc-card-status--neutral num">SY ${schoolYear}</span>
                     </div>
-                    <span class="st-clc-card-status">${c.schoolYear}</span>
                 </div>
 
-                <div class="st-clc-card-body">
-                    <h3 class="st-clc-card-name">${c.level}</h3>
-                    <p class="st-clc-card-location">
-                        <span class="material-symbols-outlined">location_on</span>
-                        ${c.clc}
-                    </p>
-                </div>
-
-                <div class="st-clc-card-stats">
-                    <div class="st-clc-card-stat-row">
-                        <span>Enrolled Learners</span>
-                        <span>${c.learnerCount}</span>
+                <div class="st-clc-card-figure">
+                    <div class="st-clc-card-count">
+                        <b class="num" data-countup>${learners}</b>
+                        <span>enrolled ${learners === 1 ? "learner" : "learners"}</span>
                     </div>
                 </div>
 
                 <div class="st-clc-card-footer st-clc-card-footer--split">
-                    <button type="button" class="st-btn st-btn-primary" data-open-class="${c.id}">
-                        Open Class
+                    <button type="button" class="st-clc-card-go st-clc-card-go--primary" data-open-class="${c.id}">
+                        Open class
                         <span class="material-symbols-outlined">arrow_forward</span>
                     </button>
                     ${c.hasF2FLearners ? `
-                    <button type="button" class="st-icon-btn-sm" data-take-attendance="${c.id}" aria-label="Take attendance" title="Take attendance">
+                    <button type="button" class="st-card-icon-btn" data-take-attendance="${c.id}" aria-label="Take attendance" title="Take attendance">
                         <span class="material-symbols-outlined">checklist</span>
+                        <span class="st-card-btn-label">Attendance</span>
                     </button>
                     ` : ""}
-                    <button type="button" class="st-icon-btn-sm st-icon-btn-sm--danger" data-delete-class="${c.id}" aria-label="Delete class" title="Delete class">
+                    <button type="button" class="st-card-icon-btn st-card-icon-btn--danger" data-delete-class="${c.id}" aria-label="Delete class" title="Delete class">
                         <span class="material-symbols-outlined">delete</span>
                     </button>
                 </div>
 
-            </div>
+            </article>
         `;
+  }
+
+  // Counts a [data-countup] element up from 0 to its target over ~800ms
+  // (ease-out-cubic). Writes the value immediately if motion is reduced.
+  static countTo(el, value) {
+    if (!el) return;
+    const end = Number(value ?? el.dataset.final ?? el.textContent);
+    el.dataset.final = Number.isFinite(end) ? end : (value ?? "");
+    if (CLASS_MANAGEMENT_REDUCE_MOTION || !Number.isFinite(end)) {
+      el.textContent = value ?? el.dataset.final;
+      return;
+    }
+    const t0 = performance.now();
+    const dur = 800;
+    const tick = (t) => {
+      const k = Math.min(1, (t - t0) / dur);
+      const eased = 1 - Math.pow(1 - k, 3);
+      el.textContent = Math.round(end * eased);
+      if (k < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
   }
 
   static confirmDelete(id, level) {
@@ -269,7 +298,7 @@ class ClassManagement {
             </div>
             <div class="st-schedule-modal-field">
               <label>School Year</label>
-              <p class="st-schedule-modal-learner">${activeSchoolYear} <span style="font-weight:400;font-size:0.75rem;color:var(--st-outline);">(set by your administrator)</span></p>
+              <p class="st-schedule-modal-learner">${activeSchoolYear} <span class="st-clc-modal-note">(set by your administrator)</span></p>
             </div>
           `,
           onConfirm: async () => {

@@ -44,12 +44,13 @@
           </div>
           <div class="st-page-header-actions">
               <div class="st-cal-class-search-wrap" id="calClassSearchWrap">
+                <label class="st-cal-class-search-label" for="calClassSearchInput">Class</label>
                 <div class="st-cal-class-search-field">
                   <span class="material-symbols-outlined">search</span>
                   <input
                     type="text"
                     id="calClassSearchInput"
-                    placeholder="Search CLC or class…"
+                    placeholder="All classes. Search CLC or class…"
                     autocomplete="off"
                     aria-label="Search CLC or class"
                     aria-expanded="false"
@@ -103,30 +104,9 @@
               <div class="st-cal-mini-days" id="miniDays"></div>
             </div>
 
-            <!-- Legend -->
-            <div class="st-cal-legend">
-              <p class="st-cal-legend-title">Legend</p>
-              <div class="st-cal-legend-item">
-                <span class="st-cal-dot st-cal-dot--attendance"></span>
-                Attendance Session
-              </div>
-              <div class="st-cal-legend-item">
-                <span class="st-cal-dot st-cal-dot--module"></span>
-                Module Release
-              </div>
-              <div class="st-cal-legend-item">
-                <span class="st-cal-dot st-cal-dot--return"></span>
-                Module Return Due
-              </div>
-              <div class="st-cal-legend-item">
-                <span class="st-cal-dot st-cal-dot--today"></span>
-                Today
-              </div>
-            </div>
-
             <!-- Upcoming events -->
             <div class="st-cal-upcoming">
-              <p class="st-cal-legend-title">Upcoming (7 days)</p>
+              <p class="st-cal-legend-title">Upcoming <small>next 7 days</small></p>
               <div class="st-cal-upcoming-list" id="upcomingList">
                 <p class="st-cal-upcoming-empty">Loading…</p>
               </div>
@@ -157,15 +137,22 @@
               </div>
             </div>
 
+            <!-- Legend -->
+            <div class="st-cal-legend" aria-label="Legend">
+              <span class="st-cal-legend-item"><span class="st-cal-dot st-cal-dot--attendance"></span>Attendance session</span>
+              <span class="st-cal-legend-item"><span class="st-cal-dot st-cal-dot--module"></span>Module release</span>
+              <span class="st-cal-legend-item"><span class="st-cal-dot st-cal-dot--return"></span>Module return due</span>
+            </div>
+
             <!-- Day-of-week header -->
             <div class="st-cal-dow-row">
-              <span>Sunday</span>
-              <span>Monday</span>
-              <span>Tuesday</span>
-              <span>Wednesday</span>
-              <span>Thursday</span>
-              <span>Friday</span>
-              <span>Saturday</span>
+              <span><span class="st-cal-dow-long">Sunday</span><span class="st-cal-dow-short">Sun</span></span>
+              <span><span class="st-cal-dow-long">Monday</span><span class="st-cal-dow-short">Mon</span></span>
+              <span><span class="st-cal-dow-long">Tuesday</span><span class="st-cal-dow-short">Tue</span></span>
+              <span><span class="st-cal-dow-long">Wednesday</span><span class="st-cal-dow-short">Wed</span></span>
+              <span><span class="st-cal-dow-long">Thursday</span><span class="st-cal-dow-short">Thu</span></span>
+              <span><span class="st-cal-dow-long">Friday</span><span class="st-cal-dow-short">Fri</span></span>
+              <span><span class="st-cal-dow-long">Saturday</span><span class="st-cal-dow-short">Sat</span></span>
             </div>
 
             <!-- Calendar grid (month view) -->
@@ -186,8 +173,10 @@
     <div class="st-cal-day-panel st-hidden" id="calDayPanel" role="dialog" aria-modal="true" aria-label="Day detail">
       <div class="st-cal-day-panel-backdrop" id="calDayPanelBackdrop"></div>
       <div class="st-cal-day-panel-card">
+        <div class="st-cal-day-panel-grab" aria-hidden="true"></div>
         <div class="st-cal-day-panel-header">
           <div>
+            <p class="st-cal-day-panel-kicker" id="panelWeekday"></p>
             <p class="st-cal-day-panel-date" id="panelDateLabel"></p>
             <p class="st-cal-day-panel-class" id="panelClassLabel"></p>
           </div>
@@ -207,16 +196,16 @@
           </div>
 
           <!-- Actions -->
-          <div class="st-cal-day-panel-section">
+          <div class="st-cal-day-panel-section st-cal-day-panel-section--actions">
             <p class="st-cal-day-panel-section-title">Actions</p>
             <div class="st-cal-day-panel-actions">
               <button type="button" class="st-btn st-btn-primary" id="panelRecordAttendance">
                 <span class="material-symbols-outlined">how_to_reg</span>
-                Record Attendance
+                Record attendance
               </button>
               <button type="button" class="st-btn st-btn-outline" id="panelSetModuleRelease">
                 <span class="material-symbols-outlined">inventory_2</span>
-                Set Module Release Date
+                Set module release date
               </button>
             </div>
           </div>

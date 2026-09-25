@@ -51,59 +51,55 @@
           </div>
         </div>
 
-        <!-- Compact statistics strip -->
-        <div class="st-records-stats st-records-stats--clc">
-          <div class="st-records-stat st-records-stat--total">
-            <div class="st-records-stat-icon">
-              <span class="material-symbols-outlined">hub</span>
-            </div>
-            <div>
-              <p class="st-records-stat-value" data-clc-count>--</p>
-              <p class="st-records-stat-label">Total CLCs</p>
-            </div>
-          </div>
-
-          <div class="st-records-stat st-records-stat--total">
-            <div class="st-records-stat-icon">
-              <span class="material-symbols-outlined">groups</span>
-            </div>
-            <div>
-              <p class="st-records-stat-value" data-clc-learners>--</p>
-              <p class="st-records-stat-label">Total Learners</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Assigned municipality (read-only — teachers are scoped to one
+        <!-- Summary strip: CLC count, total learners, and the teacher's
+             assigned municipality (read-only — teachers are scoped to one
              municipality at account setup; the Municipality filter itself
-             lives only in the Admin/ALS Division Supervisor module) -->
-        <p class="st-clc-municipality-label">
-          <span class="material-symbols-outlined">location_on</span>
-          Municipality: <strong data-clc-municipality-name>—</strong>
-        </p>
+             lives only in the Admin/ALS Division Supervisor module). -->
+        <section class="st-panel st-clc-summary" aria-label="Summary" data-animate>
+          <div class="st-clc-summary-item">
+            <span class="st-clc-summary-icon"><span class="material-symbols-outlined">hub</span></span>
+            <div>
+              <p class="st-clc-summary-value num" data-clc-count data-countup>0</p>
+              <p class="st-clc-summary-label"><span class="st-lbl-long">Community Learning Centers</span><span class="st-lbl-short">CLCs</span></p>
+            </div>
+          </div>
+          <div class="st-clc-summary-item">
+            <span class="st-clc-summary-icon"><span class="material-symbols-outlined">groups</span></span>
+            <div>
+              <p class="st-clc-summary-value num" data-clc-learners data-countup>0</p>
+              <p class="st-clc-summary-label">Total learners</p>
+            </div>
+          </div>
+          <div class="st-clc-summary-item st-clc-municipality-label">
+            <span class="st-clc-summary-icon"><span class="material-symbols-outlined">location_on</span></span>
+            <div>
+              <p class="st-clc-summary-value st-clc-summary-value--text" data-clc-municipality-name>—</p>
+              <p class="st-clc-summary-label">Your municipality</p>
+            </div>
+          </div>
+        </section>
 
         <!-- Search bar -->
         <div class="st-filter-bar">
           <div class="st-filter-row st-clc-filter-row">
-            <div class="st-search st-clc-search-wide">
+            <label class="st-search st-clc-search-wide">
               <span class="material-symbols-outlined">search</span>
               <input
                 type="text"
-                placeholder="Search CLC Name..."
+                placeholder="Search CLC name"
                 data-clc-search
                 aria-label="Search CLC name"
               />
-            </div>
+            </label>
 
             <div class="st-clc-showing-indicator">
-              <span class="material-symbols-outlined">analytics</span>
               <span data-clc-showing>Showing 0 Community Learning Centers</span>
             </div>
           </div>
         </div>
 
         <!-- CLC Grid -->
-        <div class="st-clc-grid" data-clc-grid>
+        <div class="st-clc-grid" data-clc-grid data-animate-cards>
           <div class="st-empty col-12">
             <span class="material-symbols-outlined">hourglass_empty</span>
             <p class="st-empty-title">Loading Community Learning Centers…</p>

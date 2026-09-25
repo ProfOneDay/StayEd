@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>StayEd | Calendar (prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+<style>
+/* ============================================================
+   StayEd teacher dashboard — prototype
+   Tokens map 1:1 onto variables.css (see Claude Code prompt).
+   ============================================================ */
+:root{
+  --navy:#12355b; --navy-deep:#0d2846; --navy-soft:#e8eef6;
+  --teal:#006a68; --teal-soft:#e3f4f3;
+  --bg:#f3f5f8; --card:#ffffff; --line:#e1e5ec; --line-strong:#cfd5de;
+  --ink:#111a36; --muted:#5a6275; --faint:#8a91a0;
+
+  --high:#ba1a1a; --high-ink:#a01414; --high-soft:#fdecea;
+  --mod:#f39422;  --mod-ink:#8f5200;  --mod-soft:#fef3e4;
+  --low:#6bbf59;  --low-ink:#2c7121;  --low-soft:#edf7ea;
+
+  /* Non-risk categories (level, modality) use a navy/teal ramp so they
+     never read as risk levels. */
+  --cat-1:#12355b; --cat-2:#4c6f95; --cat-3:#006a68; --cat-4:#9db5d3;
+
+  --font-head:"Libre Franklin",system-ui,sans-serif;
+  --font-body:"Inter",system-ui,sans-serif;
+  --r-card:12px; --r-ctl:8px;
+  --shadow:0 1px 2px rgba(17,26,54,.04),0 2px 8px rgba(17,26,54,.04);
+  --sidebar-w:256px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:var(--font-body);color:var(--ink);background:var(--bg);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+.material-symbols-outlined{font-size:20px;line-height:1;vertical-align:middle;font-variation-settings:"opsz" 20,"wght" 400}
+.num{font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+
+/* ---------- App shell ---------- */
+.st-app{display:flex;min-height:100vh}
+.st-sidebar{
+  position:fixed;inset:0 auto 0 0;width:var(--sidebar-w);background:var(--navy);color:#fff;
+  display:flex;flex-direction:column;z-index:40;transition:transform .25s ease;
+  padding-top:env(safe-area-inset-top,0px);
+}
+.st-sidebar-brand{display:flex;align-items:center;gap:10px;height:64px;padding:0 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+.st-sidebar-brand img{width:30px;height:30px}
+.st-sidebar-brand h2{margin:0;font-family:var(--font-head);font-weight:800;font-size:21px;letter-spacing:-.01em}
+.st-sidebar-nav{flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:2px}
+.st-sidebar-nav a,.st-submenu-trigger{
+  display:flex;align-items:center;gap:12px;width:100%;padding:9px 12px;border-radius:var(--r-ctl);
+  color:rgba(255,255,255,.78);text-decoration:none;font-size:14.5px;font-weight:500;background:none;border:0;cursor:pointer;text-align:left;
+}
+.st-sidebar-nav a:hover,.st-submenu-trigger:hover{background:rgba(255,255,255,.07);color:#fff}
+.st-sidebar-nav a.active{background:#fff;color:var(--navy);font-weight:600}
+.st-sidebar-nav a.active .material-symbols-outlined{font-variation-settings:"FILL" 1,"opsz" 20}
+.st-submenu-caret{margin-left:auto;transition:transform .2s}
+.st-submenu.is-expanded .st-submenu-caret{transform:rotate(180deg)}
+.st-submenu-list{margin:2px 0 4px 22px;padding-left:12px;border-left:1px solid rgba(255,255,255,.14)}
+.st-submenu-list a{padding:7px 10px;font-size:14px}
+.st-sidebar-divider{margin:18px 12px 6px;font-size:12px;font-weight:600;color:rgba(255,255,255,.5)}
+.st-sidebar-footer{padding:12px;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:2px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+.st-sidebar-footer a,.st-sidebar-footer button{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:var(--r-ctl);color:rgba(255,255,255,.72);font-size:14px;text-decoration:none;background:none;border:0;cursor:pointer;width:100%}
+.st-sidebar-footer a:hover,.st-sidebar-footer button:hover{background:rgba(255,255,255,.07);color:#fff}
+.st-sidebar-backdrop{display:none}
+
+.st-main{flex:1;margin-left:var(--sidebar-w);min-width:0;display:flex;flex-direction:column}
+
+/* ---------- Top bar ---------- */
+.st-navbar{
+  position:sticky;top:0;z-index:30;height:64px;background:rgba(255,255,255,.94);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 32px;
+}
+.st-navbar-left{display:flex;align-items:center;gap:10px;min-width:0}
+.st-icon-button{position:relative;width:40px;height:40px;border-radius:var(--r-ctl);border:0;background:none;display:grid;place-items:center;cursor:pointer;color:var(--muted)}
+.st-icon-button:hover{background:var(--bg);color:var(--ink)}
+.st-breadcrumb{font-family:var(--font-head);font-weight:700;font-size:18px;color:var(--ink);white-space:nowrap}
+.st-navbar-right{display:flex;align-items:center;gap:4px}
+.st-notification-dot{position:absolute;top:9px;right:10px;width:8px;height:8px;border-radius:50%;background:var(--high);box-shadow:0 0 0 2px #fff}
+.st-navbar-divider{width:1px;height:28px;background:var(--line);margin:0 10px}
+.st-user{display:flex;align-items:center;gap:10px}
+.st-user-details{text-align:right}
+.st-user-name{margin:0;font-weight:600;font-size:14px}
+.st-user-role{margin:0;font-size:12.5px;color:var(--muted)}
+.st-user-avatar{width:36px;height:36px;border-radius:50%;background:var(--navy-soft);color:var(--navy);font-weight:700;font-size:13px;display:grid;place-items:center}
+
+.st-crumb-link{color:var(--muted);text-decoration:none;font-weight:600}
+.st-crumb-link:hover{color:var(--navy);text-decoration:underline}
+.st-crumb-sep{font-size:18px;color:var(--faint);margin:0 2px}
+.st-breadcrumb{display:flex;align-items:center}
+
+/* ---------- Content & shared ---------- */
+.st-content{min-width:0;padding:24px 32px 40px;display:flex;flex-direction:column;gap:20px;max-width:1440px;width:100%}
+.st-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:38px;padding:0 16px;border-radius:var(--r-ctl);border:1px solid transparent;font-weight:600;font-size:14px;cursor:pointer;text-decoration:none;white-space:nowrap}
+.st-btn-primary{background:var(--navy);color:#fff}
+.st-btn-primary:hover{background:var(--navy-deep);box-shadow:0 4px 12px rgba(18,53,91,.22)}
+.st-btn-outline{background:#fff;border-color:var(--line-strong);color:var(--ink)}
+.st-btn-outline:hover{border-color:var(--navy);color:var(--navy);background:var(--navy-soft)}
+.st-btn-text{background:none;border:0;color:var(--muted);font-weight:600;cursor:pointer}
+.st-btn-xs{height:30px;padding:0 10px;font-size:13px}
+.st-panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--shadow);min-width:0}
+.st-footer{margin-top:auto;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:18px 32px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+.st-footer a{color:var(--muted);text-decoration:none;margin-left:18px}
+.st-footer a:hover{color:var(--navy);text-decoration:underline}
+.st-footer-version{margin-left:14px;color:var(--faint)}
+
+/* Event types. Return-due uses violet so orange stays reserved for
+   "moderate risk" everywhere else in StayEd. */
+:root{
+  --ev-att:#006a68;   --ev-att-soft:#e3f4f3;   --ev-att-ink:#00504e;
+  --ev-mod:#12355b;   --ev-mod-soft:#e8eef6;   --ev-mod-ink:#12355b;
+  --ev-ret:#6d4aa8;   --ev-ret-soft:#f1ecf9;   --ev-ret-ink:#4f2f86;
+}
+
+/* ---------- Page header ---------- */
+.st-page-header{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.st-page-header-title{margin:0;font-family:var(--font-head);font-weight:800;font-size:30px;letter-spacing:-.02em;line-height:1.15}
+.st-page-header-subtitle{margin:6px 0 0;color:var(--muted);font-size:15px;max-width:640px}
+.st-page-header-actions{flex:0 1 340px;min-width:0}
+
+/* Class picker (search) */
+.st-cal-class-search-wrap{position:relative}
+.st-cal-class-search-label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.st-cal-class-search-field{display:flex;align-items:center;gap:8px;height:40px;padding:0 6px 0 12px;background:#fff;border:1px solid var(--line-strong);border-radius:var(--r-ctl);color:var(--faint);transition:border-color var(--t-hover),box-shadow var(--t-hover)}
+.st-cal-class-search-field:hover{border-color:var(--navy)}
+.st-cal-class-search-field:focus-within{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,106,104,.12)}
+.st-cal-class-search-field input{flex:1;min-width:0;border:0;outline:0;background:none;font-size:14px;color:var(--ink)}
+.st-cal-class-search-clear{width:28px;height:28px;border:0;background:none;border-radius:6px;display:grid;place-items:center;color:var(--muted);cursor:pointer}
+.st-cal-class-search-clear:hover{background:var(--bg)}
+.st-cal-class-search-dropdown{position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:50;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 32px rgba(17,26,54,.14);padding:6px;max-height:340px;overflow:auto;animation:st-pop-in 160ms var(--ease-out)}
+@keyframes st-pop-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.st-cal-search-all-option,.st-cal-search-class-option{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:14px}
+.st-cal-search-all-option:hover,.st-cal-search-class-option:hover{background:var(--bg)}
+.st-cal-search-all-option.is-active,.st-cal-search-class-option.is-active{background:var(--navy-soft);color:var(--navy)}
+.st-cal-search-group-header{padding:10px 10px 4px;font-size:12px;font-weight:600;color:var(--faint)}
+.st-cal-search-class-option-info{display:flex;flex-direction:column;min-width:0}
+.st-cal-search-class-name{font-weight:600}
+.st-cal-search-class-meta{font-size:12.5px;color:var(--muted)}
+.st-hidden{display:none!important}
+
+/* ---------- Shell ---------- */
+.st-cal-shell{display:grid;grid-template-columns:256px minmax(0,1fr);gap:20px;align-items:start}
+.st-cal-sidebar{display:flex;flex-direction:column;gap:16px;position:sticky;top:84px}
+
+/* Mini month */
+.st-cal-mini{padding:14px 14px 10px}
+.st-cal-mini-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.st-cal-mini-title{font-weight:600;font-size:14.5px}
+.st-cal-mini-nav{width:30px;height:30px;border:0;background:none;border-radius:8px;display:grid;place-items:center;color:var(--muted);cursor:pointer;transition:background-color var(--t-hover),transform var(--t-press)}
+.st-cal-mini-nav:hover{background:var(--bg);color:var(--ink)}
+.st-cal-mini-nav:active{transform:scale(.94)}
+.st-cal-mini-grid,.st-cal-mini-days{display:grid;grid-template-columns:repeat(7,1fr);text-align:center}
+.st-cal-mini-dow{font-size:11.5px;font-weight:600;color:var(--faint);padding:4px 0}
+.st-cal-mini-day{position:relative;height:32px;border:0;background:none;border-radius:8px;font-size:13px;color:var(--ink);cursor:pointer;font-variant-numeric:tabular-nums;transition:background-color var(--t-hover),transform var(--t-press)}
+.st-cal-mini-day:hover{background:var(--bg)}
+.st-cal-mini-day:active{transform:scale(.92)}
+.st-cal-mini-day.is-other{color:#b8bdc7}
+.st-cal-mini-day.is-today{color:#fff;font-weight:700}
+.st-cal-mini-day.is-today::before{content:"";position:absolute;inset:3px 6px;border-radius:999px;background:var(--navy);z-index:-1}
+.st-cal-mini-day{z-index:0}
+.st-cal-mini-day.has-events::after{content:"";position:absolute;left:50%;bottom:3px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--teal)}
+.st-cal-mini-day.is-today.has-events::after{background:#fff}
+
+/* Upcoming */
+.st-cal-upcoming{padding:16px 14px 10px}
+.st-cal-legend-title{margin:0 4px 8px;font-size:14.5px;font-weight:600;color:var(--ink)}
+.st-cal-legend-title small{font-weight:500;color:var(--faint);font-size:12.5px;margin-left:4px}
+.st-cal-upcoming-list{display:flex;flex-direction:column;gap:2px}
+.st-cal-upcoming-item{appearance:none;border:0;background:none;font:inherit;color:inherit;display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;align-items:start;width:100%;padding:8px 4px;border-radius:10px;text-align:left;cursor:pointer;transition:background-color var(--t-hover),transform var(--t-press)}
+.st-cal-upcoming-item:hover{background:var(--bg)}
+.st-cal-upcoming-item:active{transform:scale(.99)}
+.st-cal-upcoming-date{display:flex;flex-direction:column;align-items:center;justify-content:center;height:44px;border-radius:8px;background:var(--bg);line-height:1}
+.st-cal-upcoming-date b{font-family:var(--font-head);font-size:17px;font-weight:800}
+.st-cal-upcoming-date small{font-size:10.5px;font-weight:600;color:var(--muted);margin-top:3px}
+.st-cal-upcoming-info{display:flex;flex-direction:column;min-width:0;padding-top:1px}
+.st-cal-upcoming-label{display:flex;align-items:center;gap:6px;font-weight:600;font-size:14px}
+.st-cal-upcoming-dot{width:8px;height:8px;border-radius:50%;flex:none}
+.st-cal-upcoming-meta{font-size:12.5px;color:var(--muted);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.st-cal-upcoming-empty{margin:4px;font-size:13.5px;color:var(--faint)}
+
+/* ---------- Main calendar card ---------- */
+.st-cal-main{overflow:hidden}
+.st-cal-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 16px}
+.st-cal-toolbar-left{display:flex;align-items:center;gap:6px;min-width:0}
+.st-cal-nav-btn{width:36px;height:36px;border:1px solid var(--line-strong);background:#fff;border-radius:var(--r-ctl);display:grid;place-items:center;color:var(--ink);cursor:pointer;transition:background-color var(--t-hover),border-color var(--t-hover),transform var(--t-press)}
+.st-cal-nav-btn:hover{border-color:var(--navy);background:var(--navy-soft)}
+.st-cal-nav-btn:active,.st-cal-today-btn:active,.st-cal-view-btn:active{transform:scale(.96)}
+.st-cal-today-btn{height:36px;margin-right:4px}
+.st-cal-month-label{margin:0 0 0 10px;font-family:var(--font-head);font-weight:700;font-size:20px;letter-spacing:-.01em;white-space:nowrap}
+.st-cal-view-toggle{display:inline-flex;gap:2px;padding:3px;background:var(--bg);border-radius:var(--r-ctl)}
+.st-cal-view-btn{border:0;background:none;height:30px;padding:0 14px;border-radius:6px;font-size:13.5px;font-weight:500;color:var(--muted);cursor:pointer;transition:background-color var(--t-hover),color var(--t-hover),box-shadow var(--t-hover),transform var(--t-press)}
+.st-cal-view-btn.is-active{background:#fff;color:var(--navy);font-weight:600;box-shadow:0 1px 2px rgba(17,26,54,.12)}
+.st-cal-legend{display:flex;align-items:center;gap:6px 18px;flex-wrap:wrap;padding:0 16px 12px;font-size:13px;color:var(--muted)}
+.st-cal-legend-item{display:inline-flex;align-items:center;gap:7px}
+.st-cal-dot{width:9px;height:9px;border-radius:3px;flex:none}
+.st-cal-dot--attendance{background:var(--ev-att)}.st-cal-dot--module{background:var(--ev-mod)}.st-cal-dot--return{background:var(--ev-ret)}
+
+/* Month grid */
+.st-cal-dow-row{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:#f8f9fb}
+.st-cal-dow-row span{padding:9px 10px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.st-cal-dow-short{display:none}
+.st-cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.st-cal-grid.is-entering{animation:st-grid-in 220ms var(--ease-out)}
+.st-cal-grid.is-entering.from-left{animation-name:st-grid-in-left}
+@keyframes st-grid-in{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
+@keyframes st-grid-in-left{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+.st-cal-cell{position:relative;min-height:116px;padding:8px 6px 10px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);cursor:pointer;display:flex;flex-direction:column;gap:6px;min-width:0;transition:background-color var(--t-hover)}
+.st-cal-cell:nth-child(7n){border-right:0}
+.st-cal-cell:hover{background:#f8fafd}
+.st-cal-cell::after{content:"add";font-family:"Material Symbols Outlined";font-size:18px;position:absolute;top:8px;right:8px;color:var(--faint);opacity:0;transition:opacity var(--t-hover)}
+.st-cal-cell:hover::after{opacity:1}
+.st-cal-cell.is-other-month{background:#fbfbfd}
+.st-cal-cell.is-other-month .st-cal-cell-num{color:#b3b8c2}
+.st-cal-cell.is-selected{box-shadow:inset 0 0 0 2px var(--teal);background:#f6fbfb}
+.st-cal-cell-num{width:28px;height:28px;display:grid;place-items:center;border-radius:50%;font-size:13.5px;font-weight:600;font-variant-numeric:tabular-nums;margin:-2px 0 0 -2px}
+.st-cal-cell.is-today .st-cal-cell-num{background:var(--navy);color:#fff}
+.st-cal-cell-events{display:flex;flex-direction:column;gap:4px;min-width:0}
+.st-cal-event{appearance:none;display:flex;align-items:center;gap:5px;width:100%;min-width:0;height:24px;padding:0 8px;border:0;border-left:3px solid;border-radius:5px;font:inherit;font-size:12.5px;font-weight:600;text-align:left;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:filter var(--t-hover),transform var(--t-press)}
+.st-cal-event .material-symbols-outlined{font-size:15px;flex:none}
+.st-cal-event:hover{filter:brightness(.95)}
+.st-cal-event:active{transform:scale(.97)}
+.st-cal-event--attendance{background:var(--ev-att-soft);border-color:var(--ev-att);color:var(--ev-att-ink)}
+.st-cal-event--module{background:var(--ev-mod-soft);border-color:var(--ev-mod);color:var(--ev-mod-ink)}
+.st-cal-event--return{background:var(--ev-ret-soft);border-color:var(--ev-ret);color:var(--ev-ret-ink)}
+.st-cal-event-text{overflow:hidden;text-overflow:ellipsis}
+.st-cal-more{align-self:flex-start;border:0;background:none;padding:2px 6px;border-radius:5px;font-size:12.5px;font-weight:600;color:var(--navy);cursor:pointer}
+.st-cal-more:hover{background:var(--navy-soft)}
+
+/* Week view */
+.st-cal-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--line)}
+.st-cal-week.is-entering{animation:st-grid-in 220ms var(--ease-out)}
+.st-cal-week-day{display:flex;flex-direction:column;border-right:1px solid var(--line);min-width:0;cursor:pointer;transition:background-color var(--t-hover)}
+.st-cal-week-day:last-child{border-right:0}
+.st-cal-week-day:hover{background:#f8fafd}
+.st-cal-week-day.is-selected{box-shadow:inset 0 0 0 2px var(--teal)}
+.st-cal-week-head-cell{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 6px;border-bottom:1px solid var(--line);background:#f8f9fb}
+.st-cal-week-head-dow{font-size:12.5px;font-weight:600;color:var(--muted)}
+.st-cal-week-head-num{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;font-family:var(--font-head);font-weight:700;font-size:17px}
+.st-cal-week-head-num.is-today{background:var(--navy);color:#fff}
+.st-cal-week-allday-cell{display:flex;flex-direction:column;gap:6px;padding:10px 8px;min-height:380px}
+.st-cal-week .st-cal-event{height:auto;min-height:24px;padding:5px 8px;white-space:normal;line-height:1.3}
+.st-cal-week-empty{font-size:12.5px;color:var(--faint);display:none}
+
+/* ---------- Day panel ---------- */
+.st-cal-day-panel{position:fixed;inset:0;z-index:80;display:flex;justify-content:flex-end}
+.st-cal-day-panel-backdrop{position:absolute;inset:0;background:rgba(13,40,70,.35);animation:st-fade 200ms ease}
+@keyframes st-fade{from{opacity:0}to{opacity:1}}
+.st-cal-day-panel-card{position:relative;width:400px;max-width:100vw;height:100%;background:#fff;display:flex;flex-direction:column;box-shadow:-12px 0 40px rgba(17,26,54,.16);animation:st-slide-in 260ms var(--ease-out)}
+@keyframes st-slide-in{from{transform:translateX(24px);opacity:.4}to{transform:none;opacity:1}}
+.st-cal-day-panel.is-leaving .st-cal-day-panel-card{animation:st-slide-out 180ms ease forwards}
+.st-cal-day-panel.is-leaving .st-cal-day-panel-backdrop{animation:st-fade 180ms ease reverse forwards}
+@keyframes st-slide-out{to{transform:translateX(24px);opacity:0}}
+.st-cal-day-panel-grab{display:none}
+.st-cal-day-panel-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px 20px 16px;border-bottom:1px solid var(--line)}
+.st-cal-day-panel-kicker{margin:0;font-size:12.5px;font-weight:600;color:var(--muted)}
+.st-cal-day-panel-date{margin:2px 0 0;font-family:var(--font-head);font-weight:800;font-size:22px;letter-spacing:-.01em;color:var(--ink)}
+.st-cal-day-panel-class{margin:2px 0 0;font-size:13.5px;color:var(--muted)}
+.st-cal-day-panel-close{width:36px;height:36px;border:0;background:none;border-radius:8px;display:grid;place-items:center;color:var(--muted);cursor:pointer;flex:none;transition:background-color var(--t-hover),transform var(--t-press)}
+.st-cal-day-panel-close:hover{background:var(--bg);color:var(--ink)}
+.st-cal-day-panel-close:active{transform:scale(.94)}
+.st-cal-day-panel-body{flex:1;overflow:auto;padding:18px 20px;display:flex;flex-direction:column;gap:22px}
+.st-cal-day-panel-section-title{margin:0 0 10px;font-size:13px;font-weight:600;color:var(--muted)}
+.st-cal-day-panel-events-list{display:flex;flex-direction:column;gap:8px}
+.st-cal-day-empty{margin:0;padding:18px;border:1px dashed var(--line-strong);border-radius:10px;text-align:center;font-size:13.5px;color:var(--faint)}
+.st-cal-panel-event{border:1px solid var(--line);border-radius:10px;overflow:hidden;border-left:4px solid var(--c)}
+.st-cal-panel-event-main{appearance:none;border:0;background:none;font:inherit;color:inherit;display:flex;gap:10px;align-items:flex-start;width:100%;padding:12px 12px 10px;text-align:left;cursor:pointer;transition:background-color var(--t-hover)}
+.st-cal-panel-event-main:hover{background:#f8fafd}
+.st-cal-panel-event-icon{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;flex:none;background:var(--cs);color:var(--c)}
+.st-cal-panel-event-icon .material-symbols-outlined{font-size:18px}
+.st-cal-panel-event-body{display:flex;flex-direction:column;min-width:0}
+.st-cal-panel-event-type{font-size:12px;font-weight:600;color:var(--c)}
+.st-cal-panel-event-title{font-weight:600;font-size:14.5px}
+.st-cal-panel-event-meta{font-size:12.5px;color:var(--muted);line-height:1.45}
+.st-cal-panel-event-actions{display:flex;gap:4px;padding:0 12px 10px 52px}
+.st-cal-panel-event-actions .st-btn-text{height:30px;padding:0 8px;border-radius:6px;font-size:13px}
+.st-cal-panel-event-actions .st-btn-text:hover{background:#fdecea;color:#a01414}
+.st-cal-day-panel-actions{display:flex;flex-direction:column;gap:8px}
+/* Keep the two main actions in reach while the event list scrolls */
+.st-cal-day-panel-section--actions{position:sticky;bottom:-18px;margin:0 -20px -18px;padding:14px 20px 18px;background:#fff;border-top:1px solid var(--line)}
+.st-cal-day-panel-actions .st-btn{height:42px;justify-content:flex-start}
+
+/* ---------- Event details modal ---------- */
+.st-modal-backdrop{position:fixed;inset:0;z-index:90;background:rgba(13,40,70,.4);display:grid;place-items:center;padding:16px;animation:st-fade 180ms ease}
+.st-modal{width:min(480px,100%);background:#fff;border-radius:14px;box-shadow:0 24px 60px rgba(17,26,54,.25);animation:st-pop-in 200ms var(--ease-out)}
+.st-modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
+.st-modal-head h3{margin:0;font-family:var(--font-head);font-size:18px}
+.st-modal-body{padding:18px}
+.st-cal-event-detail-header{display:flex;gap:12px;align-items:flex-start}
+.st-cal-event-detail-title-link{appearance:none;border:0;background:none;padding:0;font:inherit;font-weight:700;font-size:16px;color:var(--navy);cursor:pointer;display:inline-flex;align-items:center;gap:4px;text-align:left}
+.st-cal-event-detail-title-link:hover{text-decoration:underline}
+.st-cal-event-detail-title-link .material-symbols-outlined{font-size:18px;transition:transform var(--t-hover) var(--ease-out)}
+.st-cal-event-detail-title-link:hover .material-symbols-outlined{transform:translate(2px,-2px)}
+.st-cal-event-detail-meta{margin:2px 0 0;font-size:13.5px;color:var(--muted)}
+.st-cal-event-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.st-cal-event-detail-grid > div{background:var(--bg);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.st-cal-event-detail-label{font-size:12px;color:var(--muted)}
+.st-cal-event-detail-grid strong{font-size:14px;font-weight:600}
+
+/* ---- Sidebar ---- */
+.st-sidebar-nav a,.st-submenu-trigger,.st-sidebar-footer a,.st-sidebar-footer button{
+  transition:background-color var(--t-hover) ease,color var(--t-hover) ease,transform var(--t-press) ease}
+.st-sidebar-nav a .material-symbols-outlined:first-child,
+.st-submenu-trigger .material-symbols-outlined:first-child,
+.st-sidebar-footer .material-symbols-outlined{transition:transform var(--t-hover) var(--ease-out)}
+.st-sidebar-nav a:hover .material-symbols-outlined:first-child,
+.st-submenu-trigger:hover .material-symbols-outlined:first-child,
+.st-sidebar-footer a:hover .material-symbols-outlined,
+.st-sidebar-footer button:hover .material-symbols-outlined{transform:translateX(2px)}
+.st-sidebar-nav a:active,.st-submenu-trigger:active,.st-sidebar-footer a:active,.st-sidebar-footer button:active{transform:scale(.98)}
+.st-submenu-caret{transition:transform 200ms var(--ease-out)}
+.st-submenu.is-expanded .st-submenu-list{animation:st-submenu-in 180ms var(--ease-out)}
+@keyframes st-submenu-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.st-sidebar-backdrop{animation:st-fade-in 200ms ease}
+@keyframes st-fade-in{from{opacity:0}to{opacity:1}}
+
+/* ---- Buttons & controls: hover tint, press-down ---- */
+.st-btn,.st-tool-btn,.st-icon-button,.st-icon-btn-sm,.st-page-btn,.chart-type-btn,.st-segment button,
+.st-attention-view-all,.st-notif-banner-close,.st-avatar-initials{
+  transition:background-color var(--t-hover) ease,color var(--t-hover) ease,border-color var(--t-hover) ease,
+             box-shadow var(--t-hover) ease,transform var(--t-press) ease}
+.st-btn:active,.st-tool-btn:active,.st-icon-button:active,.st-icon-btn-sm:active,.st-page-btn:active:not(:disabled),
+.chart-type-btn:active,.st-segment button:active,.st-attention-view-all:active,.st-notif-banner-close:active{transform:scale(.96)}
+.st-btn-primary:hover{box-shadow:0 4px 12px rgba(18,53,91,.22)}
+.st-btn-ghost:hover{background:var(--navy-soft)}
+.st-tool-btn:hover{background:var(--bg)}
+.st-filter-bar select{transition:border-color var(--t-hover) ease,box-shadow var(--t-hover) ease}
+.st-filter-bar select:hover{border-color:var(--navy)}
+.st-filter-bar select:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,106,104,.12)}
+
+/* Links: arrow nudges toward where it goes */
+.st-panel-link .material-symbols-outlined{transition:transform var(--t-hover) var(--ease-out)}
+.st-panel-link:hover .material-symbols-outlined{transform:translateX(3px)}
+
+
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width:1279px){
+  .st-cal-shell{grid-template-columns:240px minmax(0,1fr)}
+  .st-cal-cell{min-height:104px}
+}
+@media (max-width:1023px){
+  .st-sidebar{transform:translateX(-100%);box-shadow:0 20px 40px rgba(0,0,0,.25)}
+  .st-sidebar.open{transform:none}
+  .st-sidebar.open + .st-sidebar-backdrop{display:block;position:fixed;inset:0;background:rgba(13,40,70,.45);z-index:35}
+  .st-main{margin-left:0}
+  .st-cal-shell{grid-template-columns:1fr}
+  .st-cal-main{order:-1}
+  .st-cal-sidebar{position:static;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}
+}
+@media (max-width:767px){
+  body{font-size:14.5px}
+  .st-navbar{padding:0 12px;height:56px}
+  .st-breadcrumb{font-size:17px}
+  .st-crumb-link,.st-crumb-sep{display:none}
+  .st-user-details,.st-navbar-divider,[data-st-settings]{display:none}
+  .st-content{padding:16px 16px 32px;gap:16px}
+  .st-page-header-title{font-size:24px}
+  .st-page-header-subtitle{font-size:14px}
+  .st-page-header-actions{flex:1 1 100%}
+  .st-cal-sidebar{grid-template-columns:1fr}
+  .st-cal-mini{display:none}              /* main grid already navigates months */
+  /* Row 1: month label + arrows. Row 2: Today + Month/Week */
+  .st-cal-toolbar{padding:12px;gap:10px 6px}
+  .st-cal-toolbar-left{display:contents}
+  .st-cal-month-label{order:1;flex:1 1 calc(100% - 90px);margin:0;font-size:19px}
+  #calPrev{order:2}#calNext{order:3}
+  .st-cal-today-btn{order:4;margin:0}
+  .st-cal-toolbar-right{order:5;flex:1}
+  .st-cal-view-toggle{width:100%}
+  .st-cal-view-btn{flex:1}
+  .st-cal-legend{padding:0 12px 12px;gap:6px 14px;font-size:12.5px}
+  .st-cal-dow-row span{padding:8px 0;text-align:center;font-size:12px}
+  .st-cal-dow-long{display:none}.st-cal-dow-short{display:inline}
+  /* Month: numbers + event dots; tapping a day opens the day sheet */
+  .st-cal-cell{min-height:58px;padding:6px 2px;align-items:center;gap:4px}
+  .st-cal-cell::after{display:none}
+  .st-cal-cell-num{margin:0;width:28px;height:28px;font-size:13px}
+  .st-cal-cell-events{flex-direction:row;justify-content:center;gap:3px;pointer-events:none}
+  .st-cal-grid .st-cal-event{width:6px;height:6px;padding:0;border:0;border-radius:50%;font-size:0;flex:none}
+  .st-cal-grid .st-cal-event-text{display:none}
+  .st-cal-grid .st-cal-event--attendance{background:var(--ev-att)}.st-cal-grid .st-cal-event--module{background:var(--ev-mod)}.st-cal-grid .st-cal-event--return{background:var(--ev-ret)}
+  .st-cal-week .st-cal-event{width:auto;align-self:flex-start;max-width:100%}
+  .st-cal-more{display:none}
+  .st-cal-cell.is-selected{box-shadow:none;background:none}
+  .st-cal-cell.is-selected:not(.is-today) .st-cal-cell-num{box-shadow:inset 0 0 0 2px var(--teal);color:var(--teal)}
+  /* Week: becomes a vertical day list */
+  .st-cal-week{grid-template-columns:1fr}
+  .st-cal-week-day{flex-direction:row;border-right:0;border-bottom:1px solid var(--line)}
+  .st-cal-week-day:last-child{border-bottom:0}
+  .st-cal-week-head-cell{flex-direction:column;justify-content:center;width:64px;flex:none;border-bottom:0;border-right:1px solid var(--line);padding:10px 4px}
+  .st-cal-week-allday-cell{flex:1;min-height:0;padding:10px 12px;justify-content:center}
+  .st-cal-week .st-cal-event{height:auto;min-height:24px;padding:5px 8px;white-space:normal;line-height:1.3}
+.st-cal-week-empty{display:block}
+  /* Day panel becomes a bottom sheet */
+  .st-cal-day-panel{align-items:flex-end}
+  .st-cal-day-panel-card{width:100%;height:auto;max-height:88vh;border-radius:16px 16px 0 0;animation-name:st-sheet-in;padding-bottom:env(safe-area-inset-bottom,0px)}
+  @keyframes st-sheet-in{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+  .st-cal-day-panel.is-leaving .st-cal-day-panel-card{animation-name:st-sheet-out}
+  @keyframes st-sheet-out{to{transform:translateY(40px);opacity:0}}
+  .st-cal-day-panel-grab{display:block;width:40px;height:4px;border-radius:999px;background:var(--line-strong);margin:8px auto 0}
+  .st-cal-day-panel-header{padding:12px 16px 14px}
+  .st-cal-day-panel-body{padding:16px}
+  .st-cal-day-panel-section--actions{bottom:-16px;margin:0 -16px -16px;padding:12px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+  .st-cal-event-detail-grid{grid-template-columns:1fr}
+  .st-footer{padding:16px;justify-content:center;text-align:center}
+  .st-footer a{margin:0 8px}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body class="st-app">
+<aside class="st-sidebar" id="sidebar">
+  <div class="st-sidebar-brand">
+    <h2>StayEd</h2>
+  </div>
+  <nav class="st-sidebar-nav">
+    <a href="#"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a>
+    <a href="#" class="active"><span class="material-symbols-outlined">calendar_month</span><span>Calendar</span></a>
+    <a href="#"><span class="material-symbols-outlined">hub</span><span>CLC Overview</span></a>
+    <div class="st-submenu is-expanded">
+      <button type="button" class="st-submenu-trigger"><span class="material-symbols-outlined">auto_stories</span><span>Learner</span><span class="material-symbols-outlined st-submenu-caret">expand_more</span></button>
+      <div class="st-submenu-list">
+        <a href="#"><span class="material-symbols-outlined">school</span><span>Class Management</span></a>
+        <a href="#"><span class="material-symbols-outlined">groups</span><span>Student Registry</span></a>
+      </div>
+    </div>
+    <a href="#"><span class="material-symbols-outlined">error</span><span>Early Warning Alert</span></a>
+    <a href="#"><span class="material-symbols-outlined">summarize</span><span>Reports</span></a>
+    <a href="#"><span class="material-symbols-outlined">notifications</span><span>Notifications</span></a>
+    <div class="st-sidebar-divider">Account</div>
+    <a href="#"><span class="material-symbols-outlined">manage_accounts</span><span>Profile Settings</span></a>
+    <a href="#"><span class="material-symbols-outlined">help_center</span><span>Help &amp; User Manual</span></a>
+  </nav>
+  <div class="st-sidebar-footer">
+    <a href="#"><span class="material-symbols-outlined">info</span><span>About StayEd</span></a>
+    <button type="button"><span class="material-symbols-outlined">logout</span><span>Logout</span></button>
+  </div>
+</aside>
+<div class="st-sidebar-backdrop" onclick="document.getElementById('sidebar').classList.remove('open')"></div>
+
+
+<div class="st-main">
+  <header class="st-navbar">
+    <div class="st-navbar-left">
+      <button type="button" class="st-icon-button" aria-label="Toggle menu" onclick="document.getElementById('sidebar').classList.toggle('open')"><span class="material-symbols-outlined">menu</span></button>
+      <nav class="st-breadcrumb"><a href="#" class="st-crumb-link">Dashboard</a><span class="material-symbols-outlined st-crumb-sep">chevron_right</span><span>Calendar</span></nav>
+    </div>
+    <div class="st-navbar-right">
+      <button type="button" class="st-icon-button" aria-label="Notifications"><span class="material-symbols-outlined">notifications</span><span class="st-notification-dot"></span></button>
+      <button type="button" class="st-icon-button" data-st-settings aria-label="Settings"><span class="material-symbols-outlined">settings</span></button>
+      <div class="st-navbar-divider"></div>
+      <div class="st-user">
+        <div class="st-user-details"><p class="st-user-name">Trisha Santos</p><p class="st-user-role">ALS Teacher</p></div>
+        <span class="st-user-avatar">TS</span>
+      </div>
+    </div>
+  </header>
+  <main class="st-content">
+    <div class="st-page-header">
+      <div>
+        <h1 class="st-page-header-title">Calendar</h1>
+        <p class="st-page-header-subtitle">View schedules, attendance sessions, and module release dates. Select any date to record attendance or set a module release.</p>
+      </div>
+      <div class="st-page-header-actions">
+        <div class="st-cal-class-search-wrap" id="calClassSearchWrap">
+          <label class="st-cal-class-search-label" for="calClassSearchInput">Class</label>
+          <div class="st-cal-class-search-field">
+            <span class="material-symbols-outlined">search</span>
+            <input type="text" id="calClassSearchInput" placeholder="All classes. Search CLC or class…" autocomplete="off" />
+            <button type="button" class="st-cal-class-search-clear st-hidden" id="calClassSearchClear" aria-label="Clear selection"><span class="material-symbols-outlined">close</span></button>
+          </div>
+          <div class="st-cal-class-search-dropdown st-hidden" id="calClassSearchDropdown" role="listbox">
+            <div class="st-cal-search-all-option is-active"><span class="material-symbols-outlined">apps</span>All classes</div>
+            <div class="st-cal-search-group-header">Urdaneta City CLC</div>
+            <div class="st-cal-search-class-option" data-pick="Basic Literacy"><span class="material-symbols-outlined">school</span><div class="st-cal-search-class-option-info"><span class="st-cal-search-class-name">Basic Literacy</span><span class="st-cal-search-class-meta">SY 2026–2027 · Face-to-Face</span></div></div>
+            <div class="st-cal-search-class-option" data-pick="Elementary"><span class="material-symbols-outlined">school</span><div class="st-cal-search-class-option-info"><span class="st-cal-search-class-name">Elementary</span><span class="st-cal-search-class-meta">SY 2026–2027 · Blended</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="st-cal-shell">
+      <aside class="st-cal-sidebar">
+        <div class="st-panel st-cal-mini">
+          <div class="st-cal-mini-header">
+            <button type="button" class="st-cal-mini-nav" id="miniPrev" aria-label="Previous month"><span class="material-symbols-outlined">chevron_left</span></button>
+            <span class="st-cal-mini-title" id="miniMonthLabel"></span>
+            <button type="button" class="st-cal-mini-nav" id="miniNext" aria-label="Next month"><span class="material-symbols-outlined">chevron_right</span></button>
+          </div>
+          <div class="st-cal-mini-grid"><span class="st-cal-mini-dow">Su</span><span class="st-cal-mini-dow">Mo</span><span class="st-cal-mini-dow">Tu</span><span class="st-cal-mini-dow">We</span><span class="st-cal-mini-dow">Th</span><span class="st-cal-mini-dow">Fr</span><span class="st-cal-mini-dow">Sa</span></div>
+          <div class="st-cal-mini-days" id="miniDays"></div>
+        </div>
+        <div class="st-panel st-cal-upcoming">
+          <p class="st-cal-legend-title">Upcoming <small>next 7 days</small></p>
+          <div class="st-cal-upcoming-list" id="upcomingList"></div>
+        </div>
+      </aside>
+
+      <section class="st-panel st-cal-main">
+        <div class="st-cal-toolbar">
+          <div class="st-cal-toolbar-left">
+            <button type="button" class="st-btn st-btn-outline st-cal-today-btn" id="calTodayBtn">Today</button>
+            <button type="button" class="st-cal-nav-btn" id="calPrev" aria-label="Previous"><span class="material-symbols-outlined">chevron_left</span></button>
+            <button type="button" class="st-cal-nav-btn" id="calNext" aria-label="Next"><span class="material-symbols-outlined">chevron_right</span></button>
+            <h2 class="st-cal-month-label" id="calMonthLabel"></h2>
+          </div>
+          <div class="st-cal-toolbar-right">
+            <div class="st-cal-view-toggle" role="group" aria-label="Calendar view">
+              <button type="button" class="st-cal-view-btn is-active" data-view="month">Month</button>
+              <button type="button" class="st-cal-view-btn" data-view="week">Week</button>
+            </div>
+          </div>
+        </div>
+        <div class="st-cal-legend" aria-label="Legend">
+          <span class="st-cal-legend-item"><span class="st-cal-dot st-cal-dot--attendance"></span>Attendance session</span>
+          <span class="st-cal-legend-item"><span class="st-cal-dot st-cal-dot--module"></span>Module release</span>
+          <span class="st-cal-legend-item"><span class="st-cal-dot st-cal-dot--return"></span>Module return due</span>
+        </div>
+        <div class="st-cal-dow-row">
+          <span><span class="st-cal-dow-long">Sunday</span><span class="st-cal-dow-short">Sun</span></span>
+          <span><span class="st-cal-dow-long">Monday</span><span class="st-cal-dow-short">Mon</span></span>
+          <span><span class="st-cal-dow-long">Tuesday</span><span class="st-cal-dow-short">Tue</span></span>
+          <span><span class="st-cal-dow-long">Wednesday</span><span class="st-cal-dow-short">Wed</span></span>
+          <span><span class="st-cal-dow-long">Thursday</span><span class="st-cal-dow-short">Thu</span></span>
+          <span><span class="st-cal-dow-long">Friday</span><span class="st-cal-dow-short">Fri</span></span>
+          <span><span class="st-cal-dow-long">Saturday</span><span class="st-cal-dow-short">Sat</span></span>
+        </div>
+        <div class="st-cal-grid" id="calGrid" role="grid" aria-label="Calendar"></div>
+        <div class="st-cal-week st-hidden" id="calWeek"></div>
+      </section>
+    </div>
+  </main>
+  <footer class="st-footer">
+    <div><span>© 2026 Department of Education - Alternative Learning System</span><span class="st-footer-version">Version 1.0</span></div>
+    <div><a href="#">Privacy Policy</a><a href="#">Terms of Service</a><a href="#">Contact Us</a></div>
+  </footer>
+</div>
+
+<!-- Day panel -->
+<div class="st-cal-day-panel st-hidden" id="calDayPanel" role="dialog" aria-modal="true" aria-label="Day detail">
+  <div class="st-cal-day-panel-backdrop" id="calDayPanelBackdrop"></div>
+  <div class="st-cal-day-panel-card">
+    <div class="st-cal-day-panel-grab" aria-hidden="true"></div>
+    <div class="st-cal-day-panel-header">
+      <div>
+        <p class="st-cal-day-panel-kicker" id="panelWeekday"></p>
+        <p class="st-cal-day-panel-date" id="panelDateLabel"></p>
+        <p class="st-cal-day-panel-class" id="panelClassLabel">All classes</p>
+      </div>
+      <button type="button" class="st-cal-day-panel-close" id="calDayPanelClose" aria-label="Close"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div class="st-cal-day-panel-body">
+      <div class="st-cal-day-panel-section">
+        <p class="st-cal-day-panel-section-title">Events on this day</p>
+        <div id="panelEventsList" class="st-cal-day-panel-events-list"></div>
+      </div>
+      <div class="st-cal-day-panel-section st-cal-day-panel-section--actions">
+        <p class="st-cal-day-panel-section-title">Actions</p>
+        <div class="st-cal-day-panel-actions">
+          <button type="button" class="st-btn st-btn-primary" id="panelRecordAttendance"><span class="material-symbols-outlined">how_to_reg</span>Record attendance</button>
+          <button type="button" class="st-btn st-btn-outline" id="panelSetModuleRelease"><span class="material-symbols-outlined">inventory_2</span>Set module release date</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- Sample data (prototype only) ---------- */
+const TODAY = new Date(2026, 8, 25);
+const META_MATH = "Class: Basic Literacy Program · Learning Strand: Mathematical and Problem-Solving Skills";
+const META_ENG  = "Class: Basic Literacy Program · Learning Strand: Communication Skills (English)";
+const META_ATT  = "Class: Basic Literacy Program · 35 learners";
+const E = {
+  "2026-09-02":[{type:"attendance",label:"Attendance session",meta:META_ATT}],
+  "2026-09-09":[{type:"attendance",label:"Attendance session",meta:META_ATT}],
+  "2026-09-11":[{type:"module",label:"Communication Skills",meta:META_ENG}],
+  "2026-09-16":[{type:"attendance",label:"Attendance session",meta:META_ATT},{type:"module",label:"Life Skills",meta:META_ENG},{type:"return",label:"Communication Skills",meta:META_ENG},{type:"module",label:"Scientific Literacy",meta:META_ENG}],
+  "2026-09-18":[{type:"return",label:"Life Skills",meta:META_ENG}],
+  "2026-09-23":[{type:"attendance",label:"Attendance session",meta:META_ATT}],
+  "2026-09-25":[{type:"module",label:"Mathematics",meta:META_MATH}],
+  "2026-09-27":[{type:"return",label:"Scientific Literacy",meta:META_ENG}],
+  "2026-09-30":[{type:"attendance",label:"Attendance session",meta:META_ATT}],
+  "2026-10-02":[{type:"return",label:"Mathematics",meta:META_MATH}],
+};
+const TYPE = {
+  attendance:{name:"Attendance session",icon:"how_to_reg",c:"var(--ev-att)",cs:"var(--ev-att-soft)"},
+  module:{name:"Module release",icon:"inventory_2",c:"var(--ev-mod)",cs:"var(--ev-mod-soft)"},
+  return:{name:"Module return due",icon:"assignment_return",c:"var(--ev-ret)",cs:"var(--ev-ret-soft)"},
+};
+const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let cursor = new Date(2026, 8, 1), mini = new Date(2026, 8, 1), view = "month", selected = null;
+
+function chip(date,e){
+  return `<button type="button" class="st-cal-event st-cal-event--${e.type}" title="${esc(e.label)} — ${esc(e.meta)}" data-cal-event-type="${e.type}" data-date="${date}" data-label="${esc(e.label)}">
+    <span class="st-cal-event-text">${esc(e.label)}</span></button>`;
+}
+function cell(d,date,other){
+  const ev=E[date]||[], vis=ev.slice(0,3), more=ev.length-3;
+  const cls=["st-cal-cell",other&&"is-other-month",date===fmt(TODAY)&&"is-today",date===selected&&"is-selected"].filter(Boolean).join(" ");
+  return `<div class="${cls}" data-cal-date="${date}" aria-label="${date}${ev.length?`, ${ev.length} events`:""}">
+    <div class="st-cal-cell-num">${d}</div>
+    <div class="st-cal-cell-events">${vis.map(e=>chip(date,e)).join("")}${more>0?`<button type="button" class="st-cal-more" data-cal-date="${date}">+${more} more</button>`:""}</div></div>`;
+}
+function renderMonth(dir){
+  const g=document.getElementById("calGrid"), y=cursor.getFullYear(), m=cursor.getMonth();
+  const first=new Date(y,m,1).getDay(), days=new Date(y,m+1,0).getDate(), prevDays=new Date(y,m,0).getDate();
+  let h=""; for(let i=first-1;i>=0;i--) h+=cell(prevDays-i,fmt(new Date(y,m-1,prevDays-i)),true);
+  for(let d=1;d<=days;d++) h+=cell(d,fmt(new Date(y,m,d)),false);
+  const total=Math.ceil((first+days)/7)*7; for(let i=first+days,n=1;i<total;i++,n++) h+=cell(n,fmt(new Date(y,m+1,n)),true);
+  g.innerHTML=h; document.getElementById("calMonthLabel").textContent=cursor.toLocaleDateString("en-PH",{month:"long",year:"numeric"});
+  enter(g,dir);
+}
+function renderWeek(dir){
+  const w=document.getElementById("calWeek"); const ref=new Date(cursor); const sun=new Date(ref); sun.setDate(ref.getDate()-ref.getDay());
+  const days=[...Array(7)].map((_,i)=>{const d=new Date(sun);d.setDate(sun.getDate()+i);return d;});
+  const DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  w.innerHTML=days.map((d,i)=>{const date=fmt(d),ev=E[date]||[];
+    return `<div class="st-cal-week-day${date===selected?" is-selected":""}" data-cal-date="${date}">
+      <div class="st-cal-week-head-cell"><span class="st-cal-week-head-dow">${DOW[i]}</span><span class="st-cal-week-head-num${date===fmt(TODAY)?" is-today":""}">${d.getDate()}</span></div>
+      <div class="st-cal-week-allday-cell">${ev.map(e=>chip(date,e)).join("")||'<span class="st-cal-week-empty">No events</span>'}</div></div>`;}).join("");
+  document.getElementById("calMonthLabel").textContent=`${days[0].toLocaleDateString("en-PH",{month:"short",day:"numeric"})} – ${days[6].toLocaleDateString("en-PH",{month:"short",day:"numeric",year:"numeric"})}`;
+  enter(w,dir);
+}
+function enter(el,dir){ if(!dir) return; el.classList.remove("is-entering","from-left"); void el.offsetWidth; el.classList.add("is-entering"); if(dir<0) el.classList.add("from-left"); }
+function renderMini(){
+  const y=mini.getFullYear(), m=mini.getMonth(), first=new Date(y,m,1).getDay(), days=new Date(y,m+1,0).getDate(), prev=new Date(y,m,0).getDate();
+  const b=(d,dt,o)=>`<button type="button" class="st-cal-mini-day${o?" is-other":""}${fmt(dt)===fmt(TODAY)?" is-today":""}${E[fmt(dt)]?" has-events":""}" data-mini="${fmt(dt)}">${d}</button>`;
+  let h=""; for(let i=first-1;i>=0;i--) h+=b(prev-i,new Date(y,m-1,prev-i),true);
+  for(let d=1;d<=days;d++) h+=b(d,new Date(y,m,d),false);
+  const t=Math.ceil((first+days)/7)*7; for(let i=first+days,n=1;i<t;i++,n++) h+=b(n,new Date(y,m+1,n),true);
+  document.getElementById("miniDays").innerHTML=h; document.getElementById("miniMonthLabel").textContent=mini.toLocaleDateString("en-PH",{month:"long",year:"numeric"});
+}
+function renderUpcoming(){
+  const items=[]; for(let i=0;i<=7;i++){const d=new Date(TODAY);d.setDate(TODAY.getDate()+i);(E[fmt(d)]||[]).forEach(e=>items.push({d,...e}));}
+  document.getElementById("upcomingList").innerHTML = items.length ? items.map(it=>`
+    <button type="button" class="st-cal-upcoming-item" data-cal-event-type="${it.type}" data-date="${fmt(it.d)}" data-label="${esc(it.label)}">
+      <span class="st-cal-upcoming-date"><b>${it.d.getDate()}</b><small>${it.d.toLocaleDateString("en-PH",{month:"short"})}</small></span>
+      <span class="st-cal-upcoming-info"><span class="st-cal-upcoming-label"><span class="st-cal-upcoming-dot" style="background:${TYPE[it.type].c}"></span>${esc(it.label)}</span>
+      <span class="st-cal-upcoming-meta">${TYPE[it.type].name} · ${esc(it.meta)}</span></span></button>`).join("")
+    : `<p class="st-cal-upcoming-empty">No upcoming events in the next 7 days.</p>`;
+}
+function render(dir){
+  document.querySelector(".st-cal-dow-row").classList.toggle("st-hidden",view==="week");
+  document.getElementById("calGrid").classList.toggle("st-hidden",view==="week");
+  document.getElementById("calWeek").classList.toggle("st-hidden",view!=="week");
+  view==="month"?renderMonth(dir):renderWeek(dir);
+}
+function openDay(date){
+  selected=date; render();
+  const d=new Date(date+"T00:00:00"), ev=E[date]||[];
+  document.getElementById("panelWeekday").textContent=d.toLocaleDateString("en-PH",{weekday:"long"});
+  document.getElementById("panelDateLabel").textContent=d.toLocaleDateString("en-PH",{month:"long",day:"numeric",year:"numeric"});
+  document.getElementById("panelEventsList").innerHTML = ev.length ? ev.map(e=>{const t=TYPE[e.type];return `
+    <div class="st-cal-panel-event" style="--c:${t.c};--cs:${t.cs}">
+      <button type="button" class="st-cal-panel-event-main">
+        <span class="st-cal-panel-event-icon"><span class="material-symbols-outlined">${t.icon}</span></span>
+        <span class="st-cal-panel-event-body"><span class="st-cal-panel-event-type">${t.name}</span><span class="st-cal-panel-event-title">${esc(e.label)}</span><span class="st-cal-panel-event-meta">${esc(e.meta)}</span></span>
+      </button>
+      ${e.type!=="return"?`<div class="st-cal-panel-event-actions"><button type="button" class="st-btn st-btn-xs st-btn-outline">Edit</button><button type="button" class="st-btn st-btn-xs st-btn-text">Remove</button></div>`:""}
+    </div>`;}).join("") : `<p class="st-cal-day-empty">No events recorded for this date.</p>`;
+  const p=document.getElementById("calDayPanel"); p.classList.remove("st-hidden","is-leaving");
+}
+function closeDay(){
+  const p=document.getElementById("calDayPanel");
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches){p.classList.add("st-hidden");return;}
+  p.classList.add("is-leaving"); p.querySelector(".st-cal-day-panel-card").addEventListener("animationend",()=>{p.classList.add("st-hidden");p.classList.remove("is-leaving");},{once:true});
+}
+function openDetail(date,type,label){
+  const t=TYPE[type], ev=(E[date]||[]).find(e=>e.type===type&&e.label===label)||{meta:""};
+  const d=new Date(date+"T00:00:00").toLocaleDateString("en-PH",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  const wrap=document.createElement("div"); wrap.className="st-modal-backdrop";
+  wrap.innerHTML=`<div class="st-modal" role="dialog" aria-modal="true"><div class="st-modal-head"><h3>Event details</h3><button type="button" class="st-cal-day-panel-close" aria-label="Close"><span class="material-symbols-outlined">close</span></button></div>
+   <div class="st-modal-body"><div class="st-cal-event-detail">
+    <div class="st-cal-event-detail-header"><span class="st-cal-panel-event-icon" style="--c:${t.c};--cs:${t.cs}"><span class="material-symbols-outlined">${t.icon}</span></span>
+      <div><span class="st-cal-panel-event-type" style="--c:${t.c}">${t.name}</span><br><button type="button" class="st-cal-event-detail-title-link">${esc(label)}<span class="material-symbols-outlined">arrow_outward</span></button><p class="st-cal-event-detail-meta">${esc(ev.meta)}</p></div></div>
+    <div class="st-cal-event-detail-grid"><div><span class="st-cal-event-detail-label">Class</span><strong>Basic Literacy</strong></div><div><span class="st-cal-event-detail-label">Date</span><strong>${d}</strong></div></div>
+   </div></div></div>`;
+  wrap.addEventListener("click",e=>{if(e.target===wrap||e.target.closest(".st-cal-day-panel-close")) wrap.remove();});
+  document.body.appendChild(wrap);
+}
+
+/* ---------- Wiring ---------- */
+document.addEventListener("click",e=>{
+  const ev=e.target.closest("[data-cal-event-type]");
+  if(ev){e.stopPropagation(); openDetail(ev.dataset.date,ev.dataset.calEventType,ev.dataset.label); return;}
+  const more=e.target.closest(".st-cal-more"); if(more){openDay(more.dataset.calDate);return;}
+  const c=e.target.closest("#calGrid [data-cal-date], #calWeek [data-cal-date]"); if(c){openDay(c.dataset.calDate);return;}
+  const mn=e.target.closest("[data-mini]"); if(mn){const d=new Date(mn.dataset.mini+"T00:00:00"); cursor=new Date(d.getFullYear(),d.getMonth(),view==="week"?d.getDate():1); openDay(mn.dataset.mini);}
+});
+calPrev.onclick=()=>{view==="month"?cursor.setMonth(cursor.getMonth()-1):cursor.setDate(cursor.getDate()-7); render(-1);};
+calNext.onclick=()=>{view==="month"?cursor.setMonth(cursor.getMonth()+1):cursor.setDate(cursor.getDate()+7); render(1);};
+calTodayBtn.onclick=()=>{cursor=view==="month"?new Date(TODAY.getFullYear(),TODAY.getMonth(),1):new Date(TODAY); render(1);};
+miniPrev.onclick=()=>{mini.setMonth(mini.getMonth()-1);renderMini();};
+miniNext.onclick=()=>{mini.setMonth(mini.getMonth()+1);renderMini();};
+document.querySelectorAll(".st-cal-view-btn").forEach(b=>b.onclick=()=>{
+  view=b.dataset.view; document.querySelectorAll(".st-cal-view-btn").forEach(x=>x.classList.toggle("is-active",x===b));
+  if(view==="week") cursor=new Date(TODAY); else cursor=new Date(cursor.getFullYear(),cursor.getMonth(),1); render(1);
+});
+calDayPanelClose.onclick=closeDay; calDayPanelBackdrop.onclick=closeDay;
+addEventListener("keydown",e=>{if(e.key==="Escape"){document.querySelector(".st-modal-backdrop")?.remove(); if(!calDayPanel.classList.contains("st-hidden")) closeDay();}});
+const inp=calClassSearchInput, dd=calClassSearchDropdown;
+inp.onfocus=()=>dd.classList.remove("st-hidden");
+document.addEventListener("click",e=>{if(!e.target.closest("#calClassSearchWrap")) dd.classList.add("st-hidden");});
+dd.addEventListener("click",e=>{const o=e.target.closest("[data-pick]"); const all=e.target.closest(".st-cal-search-all-option");
+  if(o){inp.value=o.dataset.pick; calClassSearchClear.classList.remove("st-hidden"); dd.querySelectorAll(".is-active").forEach(x=>x.classList.remove("is-active")); o.classList.add("is-active"); calClassSearchWrap.nextElementSibling; panelClassLabel.textContent=o.dataset.pick;}
+  if(all){inp.value=""; calClassSearchClear.classList.add("st-hidden"); panelClassLabel.textContent="All classes";}
+  dd.classList.add("st-hidden");});
+calClassSearchClear.onclick=()=>{inp.value="";calClassSearchClear.classList.add("st-hidden");panelClassLabel.textContent="All classes";};
+
+render(); renderMini(); renderUpcoming();
+const q=new URLSearchParams(location.search);
+if(q.get("view")==="week") document.querySelector('.st-cal-view-btn[data-view="week"]').click();
+if(q.get("day")) openDay(q.get("day"));
+if(q.get("detail")) openDetail("2026-09-25","module","Mathematics");
+if(q.get("search")) inp.focus();
+</script>
+</body>
+</html>

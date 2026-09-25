@@ -1,157 +1,752 @@
 
 
-.st-clc-grid{
+/* ============================================================
+   Shared card: CLC Overview + Class Management
+   Both pages render `.st-clc-card` inside `.st-clc-grid`. No other
+   page currently uses these classes, but every rule below is still
+   scoped to both page bodies per the revision brief.
+   ============================================================ */
+body[data-page="CLC Overview"] .num,
+body[data-page="Class Management"] .num{
+    font-variant-numeric:tabular-nums;
+}
+
+body[data-page="CLC Overview"] .st-clc-grid,
+body[data-page="Class Management"] .st-clc-grid{
     display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:24px;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:20px;
 }
 
-.st-records-stats--clc{
-    grid-template-columns:repeat(2,1fr);
-    max-width:520px;
+@media (max-width:1279px){
+    body[data-page="CLC Overview"] .st-clc-grid,
+    body[data-page="Class Management"] .st-clc-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
 }
 
-@media (max-width:520px){
-    .st-records-stats--clc{ grid-template-columns:1fr; max-width:none; }
+@media (max-width:767px){
+    body[data-page="CLC Overview"] .st-clc-grid,
+    body[data-page="Class Management"] .st-clc-grid{
+        grid-template-columns:1fr;
+        gap:12px;
+    }
 }
 
-@media (max-width:1200px){
-    .st-clc-grid{ grid-template-columns:repeat(2,1fr); }
-}
-
-@media (max-width:768px){
-    .st-clc-grid{ grid-template-columns:1fr; }
-}
-
-.st-clc-card{
-    background:#fff;
-    padding:24px;
-    border-radius:var(--st-card-radius);
-    border:1px solid rgba(195,198,207,.30);
-    box-shadow:var(--st-shadow-sm);
-    transition:box-shadow .25s ease, transform .25s ease;
+body[data-page="CLC Overview"] .st-clc-card,
+body[data-page="Class Management"] .st-clc-card{
     display:flex;
     flex-direction:column;
+    background:#fff;
+    border:1px solid var(--st-line, var(--st-outline-variant));
+    border-radius:var(--st-radius-card, var(--st-card-radius));
+    box-shadow:var(--st-shadow-card, var(--st-shadow-sm));
+    min-width:0;
+    overflow:hidden;
+    transition:border-color var(--st-t-hover, 150ms) ease,box-shadow var(--st-t-hover, 150ms) ease;
 }
 
-.st-clc-card:hover{
-    box-shadow:var(--st-shadow-md);
-    transform:translateY(-2px);
+body[data-page="CLC Overview"] .st-clc-card:hover,
+body[data-page="Class Management"] .st-clc-card:hover{
+    border-color:var(--st-line-strong, var(--st-outline-variant));
+    box-shadow:0 2px 4px rgba(17,26,54,.05),0 8px 20px rgba(17,26,54,.07);
 }
 
-.st-clc-card-head{
+body[data-page="CLC Overview"] .st-clc-card-top,
+body[data-page="Class Management"] .st-clc-card-top{
+    padding:18px 20px 0;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+}
+
+body[data-page="CLC Overview"] .st-clc-card-titlerow,
+body[data-page="Class Management"] .st-clc-card-titlerow{
     display:flex;
     align-items:flex-start;
     justify-content:space-between;
-    margin-bottom:16px;
+    gap:10px;
 }
 
-.st-clc-card-icon{
-    width:48px;
-    height:48px;
-    border-radius:var(--st-radius-lg);
-    background:var(--st-surface-container);
-    color:var(--st-primary-container);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size: var(--st-font-size-title);
-}
-
-.st-clc-card-status{
-    padding:2px 10px;
-    border-radius:999px;
-    font-size: var(--st-font-size-micro);
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:.04em;
-    background:rgba(0,110,109,.10);
-    color:var(--st-on-secondary-container, var(--st-secondary));
-}
-
-.st-clc-card-body{
-    margin-bottom:24px;
-}
-
-.st-clc-card-name{
+body[data-page="CLC Overview"] .st-clc-card-name,
+body[data-page="Class Management"] .st-clc-card-name{
+    margin:0;
     font-family:var(--st-font-heading);
-    font-size: var(--st-font-size-body);
-    font-weight:600;
-    color:var(--st-primary);
-    margin-bottom:4px;
+    font-weight:700;
+    font-size:1.125rem;
+    letter-spacing:-.01em;
+    line-height:1.3;
+    color:var(--st-on-surface);
 }
 
-.st-clc-card-location{
+body[data-page="CLC Overview"] .st-clc-card-status,
+body[data-page="Class Management"] .st-clc-card-status{
+    flex:none;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:3px 10px;
+    border-radius:999px;
+    font-size:0.781rem;
+    font-weight:600;
+    background:#e3f4f3;
+    color:#00504e;
+    white-space:nowrap;
+}
+
+body[data-page="CLC Overview"] .st-clc-card-status::before,
+body[data-page="Class Management"] .st-clc-card-status::before{
+    content:"";
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:currentColor;
+}
+
+body[data-page="CLC Overview"] .st-clc-card-status--neutral,
+body[data-page="Class Management"] .st-clc-card-status--neutral{
+    background:var(--st-background, #f3f5f8);
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    border:1px solid var(--st-line, var(--st-outline-variant));
+}
+
+body[data-page="CLC Overview"] .st-clc-card-status--neutral::before,
+body[data-page="Class Management"] .st-clc-card-status--neutral::before{
+    display:none;
+}
+
+body[data-page="CLC Overview"] .st-clc-card-location{
+    margin:0;
     display:flex;
     align-items:center;
     gap:4px;
-    font-size: var(--st-font-size-caption);
-    color:var(--st-on-surface-variant);
+    font-size:0.844rem;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
 }
 
-.st-clc-card-location .material-symbols-outlined{
-    font-size:1rem;
+body[data-page="CLC Overview"] .st-clc-card-location .material-symbols-outlined{
+    font-size:17px;
+    color:var(--st-ink-faint, var(--st-outline));
 }
 
-.st-clc-card-stats{
+body[data-page="CLC Overview"] .st-clc-card-figure,
+body[data-page="Class Management"] .st-clc-card-figure{
     display:flex;
-    flex-direction:column;
-    gap:12px;
-    flex:1;
-}
-
-.st-clc-card-stat-row{
-    display:flex;
-    align-items:center;
+    align-items:flex-end;
     justify-content:space-between;
-    font-size: var(--st-font-size-caption);
+    gap:12px;
+    padding:18px 20px 18px;
 }
 
-.st-clc-card-stat-row span:first-child{
-    color:var(--st-on-surface-variant);
+body[data-page="CLC Overview"] .st-clc-card-count,
+body[data-page="Class Management"] .st-clc-card-count{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
 }
 
-.st-clc-card-stat-row span:last-child{
-    font-weight:600;
+body[data-page="CLC Overview"] .st-clc-card-count b,
+body[data-page="Class Management"] .st-clc-card-count b{
+    font-family:var(--st-font-heading);
+    font-weight:800;
+    font-size:2.25rem;
+    line-height:1;
+    letter-spacing:-.02em;
     color:var(--st-primary);
 }
 
-.st-clc-card-teachers-label{
-    font-size: var(--st-font-size-micro);
-    color:var(--st-on-surface-variant);
-    margin-bottom:8px;
-    display:block;
+body[data-page="CLC Overview"] .st-clc-card-count span,
+body[data-page="Class Management"] .st-clc-card-count span{
+    font-size:0.875rem;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
 }
 
-.st-clc-avatar-stack{
+body[data-page="CLC Overview"] .st-clc-card.is-empty .st-clc-card-count b,
+body[data-page="Class Management"] .st-clc-card.is-empty .st-clc-card-count b{
+    color:#b3b8c2;
+}
+
+body[data-page="CLC Overview"] .st-clc-card-meta{
     display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:2px;
+    text-align:right;
 }
 
-.st-clc-avatar-stack > *{
-    width:32px;
-    height:32px;
-    border-radius:50%;
-    border:2px solid #fff;
-    margin-left:-8px;
+body[data-page="CLC Overview"] .st-clc-card-meta small{
+    font-size:0.75rem;
+    color:var(--st-ink-faint, var(--st-outline));
+}
+
+body[data-page="CLC Overview"] .st-clc-card-meta strong{
+    font-size:0.875rem;
+    font-weight:600;
+    color:var(--st-on-surface);
+}
+
+body[data-page="CLC Overview"] .st-clc-card-meta strong.is-missing{
+    color:var(--st-ink-faint, var(--st-outline));
+    font-weight:500;
+}
+
+body[data-page="CLC Overview"] .st-clc-card-teachers{
     display:flex;
     align-items:center;
+    gap:6px;
+    margin:-6px 20px 16px;
+    font-size:0.813rem;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+body[data-page="CLC Overview"] .st-clc-card-teachers .material-symbols-outlined{
+    font-size:17px;
+    color:var(--st-ink-faint, var(--st-outline));
+}
+
+body[data-page="CLC Overview"] .st-clc-card-footer,
+body[data-page="Class Management"] .st-clc-card-footer{
+    margin-top:auto;
+    border-top:1px solid var(--st-line, var(--st-outline-variant));
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:10px 12px;
+}
+
+/* "View classes" / "Open class" as a full-width row: the whole strip is the button */
+body[data-page="CLC Overview"] .st-clc-card-go,
+body[data-page="Class Management"] .st-clc-card-go{
+    appearance:none;
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    height:40px;
+    padding:0 10px;
+    border:0;
+    border-radius:8px;
+    background:none;
+    font:inherit;
+    font-weight:600;
+    font-size:0.875rem;
+    color:var(--st-primary);
+    cursor:pointer;
+    transition:background-color var(--st-t-hover, 150ms) ease,transform var(--st-t-press, 90ms) ease;
+}
+
+body[data-page="CLC Overview"] .st-clc-card-go .material-symbols-outlined,
+body[data-page="Class Management"] .st-clc-card-go .material-symbols-outlined{
+    font-size:20px;
+    transition:transform var(--st-t-hover, 150ms) var(--st-ease-out, ease);
+}
+
+body[data-page="CLC Overview"] .st-clc-card-go:hover,
+body[data-page="Class Management"] .st-clc-card-go:hover{
+    background:var(--st-navy-soft, var(--st-primary-fixed));
+}
+
+body[data-page="CLC Overview"] .st-clc-card-go:hover .material-symbols-outlined,
+body[data-page="Class Management"] .st-clc-card-go:hover .material-symbols-outlined{
+    transform:translateX(3px);
+}
+
+body[data-page="CLC Overview"] .st-clc-card-go:active,
+body[data-page="Class Management"] .st-clc-card-go:active{
+    transform:scale(.98);
+}
+
+body[data-page="Class Management"] .st-clc-card-go--primary{
+    background:var(--st-primary);
+    color:#fff;
     justify-content:center;
-    font-size:0.625rem;
-    font-weight:700;
-    background:var(--st-surface-container);
-    color:var(--st-on-surface-variant);
+    gap:6px;
 }
 
-.st-clc-avatar-stack > *:first-child{
-    margin-left:0;
+body[data-page="Class Management"] .st-clc-card-go--primary:hover{
+    background:var(--st-primary-dark);
+    box-shadow:0 4px 12px rgba(18,53,91,.22);
 }
 
-.st-clc-card-footer{
-    margin-top:24px;
+/* Attendance / Delete buttons on the class card footer -- deliberately a
+   new class, not the widely shared .st-icon-btn-sm used on many other pages. */
+body[data-page="Class Management"] .st-card-icon-btn{
+    appearance:none;
+    flex:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    height:40px;
+    min-width:40px;
+    padding:0 12px;
+    border:1px solid var(--st-line-strong, var(--st-outline-variant));
+    border-radius:8px;
+    background:#fff;
+    font:inherit;
+    font-size:0.844rem;
+    font-weight:600;
+    color:var(--st-on-surface);
+    cursor:pointer;
+    transition:background-color var(--st-t-hover, 150ms) ease,border-color var(--st-t-hover, 150ms) ease,color var(--st-t-hover, 150ms) ease,transform var(--st-t-press, 90ms) ease;
 }
 
-.st-clc-card-footer .st-btn{
-    width:100%;
+body[data-page="Class Management"] .st-card-icon-btn .material-symbols-outlined{
+    font-size:19px;
+}
+
+body[data-page="Class Management"] .st-card-icon-btn:hover{
+    border-color:var(--st-primary);
+    color:var(--st-primary);
+    background:var(--st-navy-soft, var(--st-primary-fixed));
+}
+
+body[data-page="Class Management"] .st-card-icon-btn:active{
+    transform:scale(.95);
+}
+
+body[data-page="Class Management"] .st-card-icon-btn--danger{
+    padding:0;
+    width:40px;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+body[data-page="Class Management"] .st-card-icon-btn--danger:hover{
+    border-color:#e7b4b4;
+    color:#a01414;
+    background:#fdecea;
+}
+
+/* Entrance: cards settle in once, slightly staggered (no looping) */
+body[data-page="CLC Overview"] [data-animate-cards] > *,
+body[data-page="Class Management"] [data-animate-cards] > *{
+    opacity:0;
+    transform:translateY(8px);
+}
+
+body[data-page="CLC Overview"] [data-animate-cards].is-inview > *,
+body[data-page="Class Management"] [data-animate-cards].is-inview > *{
+    opacity:1;
+    transform:none;
+    transition:opacity 400ms ease,transform 500ms var(--st-ease-out, ease);
+    transition-delay:calc(var(--i,0) * 50ms);
+}
+
+@media (prefers-reduced-motion:reduce){
+    body[data-page="CLC Overview"] [data-animate-cards] > *,
+    body[data-page="Class Management"] [data-animate-cards] > *{
+        opacity:1;
+        transform:none;
+    }
+}
+
+/* Restyled empty state (shared .st-empty from dashboard.css), scoped to
+   both pages -- other pages (notifications, early warning, etc.) keep the
+   default look. */
+body[data-page="CLC Overview"] .st-empty,
+body[data-page="Class Management"] .st-empty{
+    grid-column:1/-1;
+    flex:none;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    gap:6px;
+    padding:40px 24px;
+    border:1px dashed var(--st-line-strong, var(--st-outline-variant));
+    border-radius:var(--st-radius-card, var(--st-card-radius));
+    background:#fff;
+}
+
+body[data-page="CLC Overview"] .st-empty .material-symbols-outlined,
+body[data-page="Class Management"] .st-empty .material-symbols-outlined{
+    font-size:32px;
+    color:var(--st-ink-faint, var(--st-outline));
+    width:56px;
+    height:56px;
+    border-radius:50%;
+    background:var(--st-background, #f3f5f8);
+    display:grid;
+    place-items:center;
+    margin:0 0 6px;
+}
+
+body[data-page="CLC Overview"] .st-empty-title,
+body[data-page="Class Management"] .st-empty-title{
+    margin:0;
+    font-weight:600;
+    font-size:0.969rem;
+    color:var(--st-on-surface);
+}
+
+body[data-page="CLC Overview"] .st-empty-text,
+body[data-page="Class Management"] .st-empty-text{
+    margin:0;
+    font-size:0.875rem;
+    font-style:normal;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    max-width:420px;
+}
+
+body[data-page="Class Management"] .st-empty .st-btn{
+    margin-top:16px;
+}
+
+@media (max-width:767px){
+    body[data-page="CLC Overview"] .st-clc-card-top,
+    body[data-page="Class Management"] .st-clc-card-top{
+        padding:14px 16px 0;
+    }
+    body[data-page="CLC Overview"] .st-clc-card-figure,
+    body[data-page="Class Management"] .st-clc-card-figure{
+        padding:12px 16px 14px;
+    }
+    body[data-page="CLC Overview"] .st-clc-card-footer,
+    body[data-page="Class Management"] .st-clc-card-footer{
+        padding:6px 8px;
+    }
+    body[data-page="CLC Overview"] .st-clc-card-name,
+    body[data-page="Class Management"] .st-clc-card-name{
+        font-size:1.0625rem;
+    }
+    body[data-page="CLC Overview"] .st-clc-card-count b,
+    body[data-page="Class Management"] .st-clc-card-count b{
+        font-size:1.875rem;
+    }
+}
+
+/* ============================================================
+   CLC Overview: summary strip (replaces the old stat boxes + loose
+   municipality paragraph)
+   ============================================================ */
+body[data-page="CLC Overview"] .st-clc-summary{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+}
+
+body[data-page="CLC Overview"] .st-clc-summary-item{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:18px 22px;
+    min-width:0;
+}
+
+body[data-page="CLC Overview"] .st-clc-summary-item + .st-clc-summary-item{
+    border-left:1px solid var(--st-line, var(--st-outline-variant));
+}
+
+body[data-page="CLC Overview"] .st-clc-summary-icon{
+    width:44px;
+    height:44px;
+    flex:none;
+    border-radius:12px;
+    display:grid;
+    place-items:center;
+    background:var(--st-navy-soft, var(--st-primary-fixed));
+    color:var(--st-primary);
+}
+
+body[data-page="CLC Overview"] .st-clc-municipality-label .st-clc-summary-icon{
+    background:#e3f4f3;
+    color:var(--st-secondary);
+}
+
+body[data-page="CLC Overview"] .st-clc-summary-value{
+    margin:0;
+    font-family:var(--st-font-heading);
+    font-weight:800;
+    font-size:1.875rem;
+    line-height:1.05;
+    letter-spacing:-.02em;
+    color:var(--st-on-surface);
+}
+
+body[data-page="CLC Overview"] .st-clc-summary-value--text{
+    font-size:1.375rem;
+    line-height:1.2;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+body[data-page="CLC Overview"] .st-clc-summary-label{
+    margin:3px 0 0;
+    font-size:0.844rem;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+body[data-page="CLC Overview"] .st-lbl-short{
+    display:none;
+}
+
+@media (max-width:767px){
+    body[data-page="CLC Overview"] .st-clc-summary{
+        grid-template-columns:1fr 1fr;
+    }
+    body[data-page="CLC Overview"] .st-clc-summary-item{
+        padding:14px 16px;
+        gap:10px;
+    }
+    body[data-page="CLC Overview"] .st-clc-summary-item:nth-child(2){
+        border-left:1px solid var(--st-line, var(--st-outline-variant));
+    }
+    body[data-page="CLC Overview"] .st-clc-summary-item.st-clc-municipality-label{
+        grid-column:1/-1;
+        border-left:0;
+        border-top:1px solid var(--st-line, var(--st-outline-variant));
+        padding:12px 16px;
+        flex-direction:row;
+    }
+    body[data-page="CLC Overview"] .st-clc-summary-icon{
+        width:36px;
+        height:36px;
+        border-radius:10px;
+    }
+    body[data-page="CLC Overview"] .st-clc-summary-icon .material-symbols-outlined{
+        font-size:19px;
+    }
+    body[data-page="CLC Overview"] .st-clc-summary-value{
+        font-size:1.5rem;
+    }
+    body[data-page="CLC Overview"] .st-clc-summary-value--text{
+        font-size:1.0625rem;
+    }
+    body[data-page="CLC Overview"] .st-clc-summary-label{
+        font-size:0.781rem;
+    }
+    body[data-page="CLC Overview"] .st-lbl-long{
+        display:none;
+    }
+    body[data-page="CLC Overview"] .st-lbl-short{
+        display:inline;
+    }
+}
+
+/* Search row: no box, transparent + borderless on this page only */
+body[data-page="CLC Overview"] .st-filter-bar{
+    background:none;
+    border:0;
+    box-shadow:none;
+    padding:0;
+    border-radius:0;
+}
+
+body[data-page="CLC Overview"] .st-clc-filter-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+body[data-page="CLC Overview"] .st-clc-search-wide{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    width:360px;
+    max-width:100%;
+    height:40px;
+    padding:0 12px;
+    border:1px solid var(--st-line-strong, var(--st-outline-variant));
+    border-radius:var(--st-radius-control, var(--st-button-radius));
+    background:#fff;
+    color:var(--st-ink-faint, var(--st-outline));
+    transition:border-color var(--st-t-hover, 150ms),box-shadow var(--st-t-hover, 150ms);
+}
+
+body[data-page="CLC Overview"] .st-clc-search-wide:hover{
+    border-color:var(--st-primary);
+}
+
+body[data-page="CLC Overview"] .st-clc-search-wide:focus-within{
+    border-color:var(--st-secondary);
+    box-shadow:0 0 0 3px rgba(0,106,104,.12);
+}
+
+/* .st-clc-search-wide also carries the shared .st-search class (components.css),
+   which absolutely-positions its icon and sets the input's own height/padding
+   directly -- override both here so the icon sits inline in the flex row
+   instead, matching the prototype. */
+body[data-page="CLC Overview"] .st-clc-search-wide .material-symbols-outlined{
+    position:static;
+    top:auto;
+    left:auto;
+    transform:none;
+    flex:none;
+    color:inherit;
+}
+
+body[data-page="CLC Overview"] .st-clc-search-wide input{
+    height:100%;
+    border:0;
+    outline:0;
+    flex:1;
+    min-width:0;
+    padding:0;
+    font:inherit;
+    font-size:0.875rem;
+    background:none;
+    color:var(--st-on-surface);
+}
+
+body[data-page="CLC Overview"] .st-clc-search-wide input:focus{
+    outline:none;
+    box-shadow:none;
+}
+
+body[data-page="CLC Overview"] .st-clc-showing-indicator{
+    display:block;
+    font-size:0.844rem;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    border-left:0;
+    padding-left:0;
+    font-weight:400;
+    white-space:nowrap;
+}
+
+@media (max-width:640px){
+    body[data-page="CLC Overview"] .st-clc-filter-row{
+        grid-template-columns:1fr;
+    }
+    body[data-page="CLC Overview"] .st-clc-search-wide{
+        width:100%;
+    }
+    body[data-page="CLC Overview"] .st-clc-showing-indicator{
+        white-space:normal;
+    }
+}
+
+/* ============================================================
+   Class Management: CLC context banner (white bar, not a solid block)
+   Base rules for .st-class-context-banner* live in
+   learner-records-hub.css and are shared with Learner Records and
+   Module Management -- only this page's look is overridden here.
+   ============================================================ */
+body[data-page="Class Management"] .st-class-context-banner{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:14px 16px 14px 14px;
+    background:#fff;
+    border:1px solid var(--st-line, var(--st-outline-variant));
+    border-left:4px solid var(--st-primary);
+    border-radius:var(--st-radius-card, var(--st-card-radius));
+    box-shadow:var(--st-shadow-card, var(--st-shadow-sm));
+    margin-bottom:0;
+}
+
+body[data-page="Class Management"] .st-class-context-banner-icon{
+    width:44px;
+    height:44px;
+    flex:none;
+    border-radius:12px;
+    display:grid !important;
+    place-items:center;
+    background:var(--st-navy-soft, var(--st-primary-fixed));
+    color:var(--st-primary);
+    font-size:1.25rem;
+}
+
+body[data-page="Class Management"] .st-class-context-banner-text{
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+    flex:1;
+}
+
+body[data-page="Class Management"] .st-class-context-banner-kicker{
+    font-size:0.75rem;
+    font-weight:600;
+    color:var(--st-ink-faint, var(--st-outline));
+}
+
+body[data-page="Class Management"] .st-class-context-banner-name{
+    font-family:var(--st-font-heading);
+    font-weight:800;
+    font-size:1.25rem;
+    letter-spacing:-.01em;
+    line-height:1.2;
+    color:var(--st-on-surface);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+body[data-page="Class Management"] .st-class-context-banner-meta{
+    font-size:0.844rem;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    margin-top:2px;
+}
+
+body[data-page="Class Management"] .st-class-context-banner-switch{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    height:38px;
+    padding:0 14px;
+    border:1px solid var(--st-line-strong, var(--st-outline-variant));
+    border-radius:var(--st-radius-control, var(--st-button-radius));
+    font-weight:600;
+    font-size:0.875rem;
+    color:var(--st-on-surface);
+    text-decoration:none;
+    white-space:nowrap;
+    transition:background-color var(--st-t-hover, 150ms),border-color var(--st-t-hover, 150ms),color var(--st-t-hover, 150ms),transform var(--st-t-press, 90ms);
+}
+
+body[data-page="Class Management"] .st-class-context-banner-switch .material-symbols-outlined{
+    font-size:19px;
+    color:inherit;
+}
+
+body[data-page="Class Management"] .st-class-context-banner-switch:hover{
+    border-color:var(--st-primary);
+    color:var(--st-primary);
+    background:var(--st-navy-soft, var(--st-primary-fixed));
+    text-decoration:none;
+}
+
+body[data-page="Class Management"] .st-class-context-banner-switch:active{
+    transform:scale(.96);
+}
+
+@media (max-width:767px){
+    body[data-page="Class Management"] .st-page-header-actions{
+        width:100%;
+    }
+    body[data-page="Class Management"] .st-page-header-actions .st-btn{
+        width:100%;
+        height:44px;
+    }
+    body[data-page="Class Management"] .st-class-context-banner{
+        flex-wrap:wrap;
+        gap:12px;
+    }
+    body[data-page="Class Management"] .st-class-context-banner-icon{
+        width:40px;
+        height:40px;
+    }
+    body[data-page="Class Management"] .st-class-context-banner-switch{
+        flex:1 1 100%;
+        justify-content:center;
+    }
+    body[data-page="Class Management"] .st-card-icon-btn .st-card-btn-label{
+        display:none;
+    }
+    body[data-page="Class Management"] .st-card-icon-btn:not(.st-card-icon-btn--danger){
+        width:44px;
+        padding:0;
+    }
+}
+
+/* Add class modal: the "(set by your administrator)" note, moved out of
+   an inline style. .st-schedule-modal-* base rules are shared and untouched. */
+body[data-page="Class Management"] .st-clc-modal-note{
+    font-weight:400;
+    font-size:0.75rem;
+    color:var(--st-outline);
 }
 
 .st-clc-form-shell{
@@ -637,73 +1232,12 @@
     gap:16px;
 }
 
-.st-clc-filter-row{
-    align-items:center;
-}
-
-.st-clc-search-wide{
-    flex:2;
-    min-width:260px;
-}
-
-.st-clc-municipality-label{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    font-size: var(--st-font-size-label);
-    color:var(--st-on-surface-variant);
-    margin-bottom:16px;
-}
-
-.st-clc-municipality-label .material-symbols-outlined{
-    font-size:1.125rem;
-    color:var(--st-primary);
-}
-
-.st-clc-municipality-label strong{
-    color:var(--st-primary);
-    font-weight:700;
-}
-
-.st-clc-showing-indicator{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    color:var(--st-on-surface-variant);
-    font-size: var(--st-font-size-caption);
-    font-weight:600;
-    border-left:1px solid rgba(195,198,207,.40);
-    padding-left:16px;
-}
-
-.st-clc-showing-indicator .material-symbols-outlined{
-    font-size:1.25rem;
-}
-
 .st-clc-field--full{
     grid-column:1/-1;
 }
 
-.st-clc-card-footer--split{
+body[data-page="Class Management"] .st-clc-card-footer--split{
     display:flex;
     align-items:center;
     gap:8px;
-}
-
-.st-clc-card-footer--split .st-btn{
-    flex:1;
-    width:auto;
-}
-
-.st-icon-btn-sm--danger{
-    flex-shrink:0;
-    border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-radius-md);
-    padding:9px;
-}
-
-.st-icon-btn-sm--danger:hover{
-    background:var(--st-risk-high-soft);
-    border-color:var(--st-error);
-    color:var(--st-error);
 }

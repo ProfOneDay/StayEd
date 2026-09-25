@@ -12,6 +12,15 @@
  *  - "Set Module Release Date" → inline Modal.show() form
  *  - Class filter dropdown (All Classes or specific class)
  */
+// Single source of truth for the three event types -- previously duplicated
+// as an ad-hoc `colors` map in three separate render functions.
+const EVENT_TYPES = {
+  attendance: { name: "Attendance session", icon: "how_to_reg", color: "var(--st-ev-attendance)", soft: "var(--st-ev-attendance-soft)" },
+  module: { name: "Module release", icon: "inventory_2", color: "var(--st-ev-module)", soft: "var(--st-ev-module-soft)" },
+  return: { name: "Module return due", icon: "assignment_return", color: "var(--st-ev-return)", soft: "var(--st-ev-return-soft)" },
+};
+const ST_CAL_FALLBACK_TYPE = { name: "Event", icon: "event", color: "var(--st-ink-muted, #5a6275)", soft: "var(--st-background, #f3f5f8)" };
+
 class TeacherCalendar {
   // ── State ──────────────────────────────────────────────────────────────────
   static view = "month";          // "month" | "week"
@@ -364,17 +373,14 @@ class TeacherCalendar {
         })
       : "Date not specified";
 
-    const colors = {
-      attendance: "var(--st-secondary)",
-      module:     "var(--st-primary)",
-      return:     "#e67700",
-    };
+    const t = EVENT_TYPES[type] || ST_CAL_FALLBACK_TYPE;
 
     const body = `
       <div class="st-cal-event-detail">
         <div class="st-cal-event-detail-header">
-          <span class="st-cal-panel-event-dot" style="background:${colors[type] || "#888"};"></span>
+          <span class="st-cal-panel-event-icon" style="--c:${t.color};--cs:${t.soft}"><span class="material-symbols-outlined">${t.icon}</span></span>
           <div>
+            <span class="st-cal-panel-event-type" style="--c:${t.color}">${t.name}</span><br>
             <button
               type="button"
               class="st-cal-event-detail-title-link"
@@ -385,7 +391,7 @@ class TeacherCalendar {
               data-event-session-id="${this._esc(evt.sessionId ?? "") }"
               data-event-module-id="${this._esc(evt.moduleId ?? "") }"
             >
-              ${this._esc(eventLabel)}
+              ${this._esc(eventLabel)}<span class="material-symbols-outlined">arrow_outward</span>
             </button>
             <p class="st-cal-event-detail-meta">${this._esc(eventMeta)}</p>
           </div>
@@ -403,7 +409,7 @@ class TeacherCalendar {
       </div>`;
 
     Modal?.showCustom({
-      title: "Event Details",
+      title: "Event details",
       bodyHtml: body,
       size: "md",
       hideFooter: true,
@@ -443,13 +449,26 @@ class TeacherCalendar {
   }
 
   // ── Rendering ──────────────────────────────────────────────────────────────
-  static render() {
+  // `dir` (-1 back / 1 forward) plays the grid's fade+slide-in transition
+  // when navigating month/week/Today/view; omitted (undefined) it's a plain
+  // re-render (e.g. selecting a day to highlight it) and must not animate.
+  static render(dir) {
     this.renderMiniMonth();
     if (this.view === "month") {
-      this.renderMonthGrid();
+      this.renderMonthGrid(dir);
     } else {
-      this.renderWeekGrid();
+      this.renderWeekGrid(dir);
     }
+  }
+
+  // Replays #calGrid/#calWeek's entrance animation (forcing a reflow so it
+  // restarts even if the class is already present from a previous render).
+  static _enter(el, dir) {
+    if (!dir || !el) return;
+    el.classList.remove("is-entering", "from-left");
+    void el.offsetWidth;
+    el.classList.add("is-entering");
+    if (dir < 0) el.classList.add("from-left");
   }
 
   // ---- Mini-month (left sidebar) ------------------------------------------
@@ -520,11 +539,11 @@ class TeacherCalendar {
       hasEvents           ? "has-events"      : "",
     ].filter(Boolean).join(" ");
 
-    return `<span class="${cls}" data-mini-date="${date}">${d}</span>`;
+    return `<button type="button" class="${cls}" data-mini-date="${date}">${d}</button>`;
   }
 
   // ---- Month grid ----------------------------------------------------------
-  static renderMonthGrid() {
+  static renderMonthGrid(dir) {
     const grid = document.getElementById("calGrid");
     const week = document.getElementById("calWeek");
     if (!grid) return;
@@ -574,6 +593,7 @@ class TeacherCalendar {
     }
 
     grid.innerHTML = html;
+    this._enter(grid, dir);
     this._bindEventClicks(grid);
 
     grid.querySelectorAll("[data-cal-date]").forEach((cell) => {
@@ -623,11 +643,6 @@ class TeacherCalendar {
   }
 
   static _eventChipHtml(date, evt) {
-    const icons = {
-      attendance: "how_to_reg",
-      module:     "inventory_2",
-      return:     "assignment_return",
-    };
     return `
       <button
         type="button"
@@ -641,13 +656,12 @@ class TeacherCalendar {
         data-cal-event-label="${this._esc(evt.label)}"
         data-cal-event-meta="${this._esc(evt.meta)}"
       >
-        <span class="material-symbols-outlined">${icons[evt.type] || "event"}</span>
-        ${this._esc(evt.label)}
+        <span class="st-cal-event-text">${this._esc(evt.label)}</span>
       </button>`;
   }
 
   // ---- Week grid -----------------------------------------------------------
-  static renderWeekGrid() {
+  static renderWeekGrid(dir) {
     const grid = document.getElementById("calGrid");
     const week = document.getElementById("calWeek");
     if (!week) return;
@@ -681,40 +695,30 @@ class TeacherCalendar {
 
     const DOWS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-    // Header row
-    let html = `<div class="st-cal-week-head-gutter"></div>`;
-    days.forEach((d, i) => {
-      const date = this._fmt(d);
-      const isToday = date === todayStr;
-      html += `
-        <div class="st-cal-week-head-cell">
-          <span class="st-cal-week-head-dow">${DOWS[i]}</span>
-          <span class="st-cal-week-head-num${isToday ? " is-today" : ""}">${d.getDate()}</span>
-        </div>`;
-    });
-
-    // All-day events row
-    html += `<div class="st-cal-week-allday-gutter">all-day</div>`;
-    days.forEach((d) => {
+    // No timed events exist, so there are no time-grid gutters -- each day
+    // is a single column holding its own head cell + all-day cell, and
+    // data-cal-date/is-selected live on that column (the whole thing is
+    // the click target, same as a month cell).
+    const html = days.map((d, i) => {
       const date = this._fmt(d);
       const isToday = date === todayStr;
       const isSelected = date === this.selectedDate;
       const evts = this.events[date] || [];
-      const cls = [
-        "st-cal-week-allday-cell",
-        isToday    ? "is-today"    : "",
-        isSelected ? "is-selected" : "",
-      ].filter(Boolean).join(" ");
-
       const chips = evts.map((e) => this._eventChipHtml(date, e)).join("");
+      const cls = ["st-cal-week-day", isSelected ? "is-selected" : ""].filter(Boolean).join(" ");
 
-      html += `
+      return `
         <div class="${cls}" data-cal-date="${date}">
-          ${chips || ""}
+          <div class="st-cal-week-head-cell">
+            <span class="st-cal-week-head-dow">${DOWS[i]}</span>
+            <span class="st-cal-week-head-num${isToday ? " is-today" : ""}">${d.getDate()}</span>
+          </div>
+          <div class="st-cal-week-allday-cell">${chips || '<span class="st-cal-week-empty">No events</span>'}</div>
         </div>`;
-    });
+    }).join("");
 
     week.innerHTML = html;
+    this._enter(week, dir);
     this._bindEventClicks(week);
 
     week.querySelectorAll("[data-cal-date]").forEach((cell) => {
@@ -743,18 +747,10 @@ class TeacherCalendar {
       return;
     }
 
-    const colors = {
-      attendance: "var(--st-secondary)",
-      module:     "var(--st-primary)",
-      return:     "#e67700",
-    };
-
     container.innerHTML = items
       .map((item) => {
-        const dateLabel = new Date(item.date + "T00:00:00").toLocaleDateString(
-          "en-PH",
-          { month: "short", day: "numeric" },
-        );
+        const d = new Date(item.date + "T00:00:00");
+        const t = EVENT_TYPES[item.type] || ST_CAL_FALLBACK_TYPE;
         return `
           <button
             type="button"
@@ -767,11 +763,11 @@ class TeacherCalendar {
             data-cal-event-label="${this._esc(item.label)}"
             data-cal-event-meta="${this._esc(item.meta)}"
           >
-            <span class="st-cal-upcoming-dot" style="background:${colors[item.type] || "#888"}"></span>
-            <div class="st-cal-upcoming-info">
-              <span class="st-cal-upcoming-label">${this._esc(item.label)}</span>
-              <span class="st-cal-upcoming-meta">${dateLabel} · ${this._esc(item.meta)}</span>
-            </div>
+            <span class="st-cal-upcoming-date"><b>${d.getDate()}</b><small>${d.toLocaleDateString("en-PH", { month: "short" })}</small></span>
+            <span class="st-cal-upcoming-info">
+              <span class="st-cal-upcoming-label"><span class="st-cal-upcoming-dot" style="background:${t.color}"></span>${this._esc(item.label)}</span>
+              <span class="st-cal-upcoming-meta">${t.name} · ${this._esc(item.meta)}</span>
+            </span>
           </button>`;
       })
       .join("");
@@ -789,9 +785,13 @@ class TeacherCalendar {
 
     // Date label
     const d = new Date(date + "T00:00:00");
+    document.getElementById("panelWeekday").textContent = d.toLocaleDateString(
+      "en-PH",
+      { weekday: "long" },
+    );
     document.getElementById("panelDateLabel").textContent = d.toLocaleDateString(
       "en-PH",
-      { weekday: "long", year: "numeric", month: "long", day: "numeric" },
+      { month: "long", day: "numeric", year: "numeric" },
     );
 
     // Class context label
@@ -803,19 +803,16 @@ class TeacherCalendar {
     // Events list
     const evts = this.events[date] || [];
     const list  = document.getElementById("panelEventsList");
-    const colors = {
-      attendance: "var(--st-secondary)",
-      module:     "var(--st-primary)",
-      return:     "#e67700",
-    };
 
     if (!evts.length) {
       list.innerHTML = `<p class="st-cal-day-empty">No events recorded for this date.</p>`;
     } else {
       list.innerHTML = evts
         .map(
-          (e) => `
-          <div class="st-cal-panel-event">
+          (e) => {
+            const t = EVENT_TYPES[e.type] || ST_CAL_FALLBACK_TYPE;
+            return `
+          <div class="st-cal-panel-event" style="--c:${t.color};--cs:${t.soft}">
             <button
               type="button"
               class="st-cal-panel-event-main"
@@ -826,11 +823,12 @@ class TeacherCalendar {
               data-event-session-id="${this._esc(e.sessionId ?? "") }"
               data-event-module-id="${this._esc(e.moduleId ?? "") }"
             >
-              <span class="st-cal-panel-event-dot" style="background:${colors[e.type] || "#888"}"></span>
-              <div class="st-cal-panel-event-body">
+              <span class="st-cal-panel-event-icon"><span class="material-symbols-outlined">${t.icon}</span></span>
+              <span class="st-cal-panel-event-body">
+                <span class="st-cal-panel-event-type">${t.name}</span>
                 <span class="st-cal-panel-event-title">${this._esc(e.label)}</span>
                 <span class="st-cal-panel-event-meta">${this._esc(e.meta)}</span>
-              </div>
+              </span>
             </button>
             ${
               // "return" markers are a computed +14-day hint, not a real
@@ -842,7 +840,8 @@ class TeacherCalendar {
                   </div>`
                 : ""
             }
-          </div>`,
+          </div>`;
+          },
         )
         .join("");
     }
@@ -929,13 +928,28 @@ class TeacherCalendar {
     newBtnA.addEventListener("click", () => this.openAttendanceDialog(date));
     newBtnM.addEventListener("click", () => this.openModuleReleaseDialog(date));
 
-    panel.classList.remove("st-hidden");
+    panel.classList.remove("st-hidden", "is-leaving");
     this.renderMiniMonth(); // sync mini selection
   }
 
   static closeDayPanel() {
     const panel = document.getElementById("calDayPanel");
-    if (panel) panel.classList.add("st-hidden");
+    if (!panel) return;
+
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      panel.classList.add("st-hidden");
+      return;
+    }
+
+    panel.classList.add("is-leaving");
+    panel.querySelector(".st-cal-day-panel-card")?.addEventListener(
+      "animationend",
+      () => {
+        panel.classList.add("st-hidden");
+        panel.classList.remove("is-leaving");
+      },
+      { once: true },
+    );
   }
 
   // ── Attendance dialog ──────────────────────────────────────────────────────
@@ -984,7 +998,7 @@ class TeacherCalendar {
               <span class="st-cal-modal-class-name">${name}</span>
               <span class="st-cal-modal-class-meta">${[clc, level, sy ? `SY ${sy}` : ""].filter(Boolean).join(" · ")}</span>
             </div>
-            <span class="material-symbols-outlined" style="font-size:1.125rem;color:var(--st-outline);">chevron_right</span>
+            <span class="material-symbols-outlined st-cal-modal-class-chevron">chevron_right</span>
           </div>`;
       })
       .join("");
@@ -1093,7 +1107,7 @@ class TeacherCalendar {
     let classRowsHtml = "";
     Object.entries(groups).forEach(([clcName, classes]) => {
       classRowsHtml += `
-        <div class="st-cal-search-group-header" style="margin-top:8px;">
+        <div class="st-cal-search-group-header">
           <span class="material-symbols-outlined">hub</span>
           ${this._esc(clcName)}
         </div>`;
@@ -1108,7 +1122,7 @@ class TeacherCalendar {
               <span class="st-cal-modal-class-name">${this._esc(getName(c))}</span>
               <span class="st-cal-modal-class-meta">${this._esc(clcName)}${sy ? ` · SY ${this._esc(sy)}` : ""}</span>
             </div>
-            <span class="material-symbols-outlined" style="font-size:1.125rem;color:var(--st-outline);">chevron_right</span>
+            <span class="material-symbols-outlined st-cal-modal-class-chevron">chevron_right</span>
           </div>`;
       });
     });
@@ -1398,7 +1412,7 @@ class TeacherCalendar {
         this.today.getMonth(),
         1,
       );
-      this.render();
+      this.render(1);
     });
   }
 
@@ -1423,7 +1437,7 @@ class TeacherCalendar {
       1,
     );
     this.loadEvents().then(() => {
-      this.render();
+      this.render(dir);
       this.renderUpcoming();
     });
   }
@@ -1458,7 +1472,7 @@ class TeacherCalendar {
           b.classList.toggle("is-active", b.dataset.view === v),
         );
 
-        this.render();
+        this.render(1);
       });
     });
   }

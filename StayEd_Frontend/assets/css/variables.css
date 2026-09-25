@@ -347,6 +347,20 @@
   --st-t-hover: 150ms;
   --st-t-press: 90ms;
   --st-t-fill: 800ms;
+
+  /* Teacher calendar UI revision (design/teacher-calendar prototype) --
+     event-type colors. Module return due uses violet, not orange, because
+     orange means "moderate risk" everywhere else in StayEd and a return
+     date isn't a risk level. */
+  --st-ev-attendance: #006a68;
+  --st-ev-attendance-soft: #e3f4f3;
+  --st-ev-attendance-ink: #00504e;
+  --st-ev-module: #12355b;
+  --st-ev-module-soft: #e8eef6;
+  --st-ev-module-ink: #12355b;
+  --st-ev-return: #6d4aa8;
+  --st-ev-return-soft: #f1ecf9;
+  --st-ev-return-ink: #4f2f86;
 }
 
 /* Accessibility text-size preference (Settings -> Accessibility). One

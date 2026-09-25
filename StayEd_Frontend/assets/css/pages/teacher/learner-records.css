@@ -12,14 +12,11 @@
 .st-enroll-field textarea,
 .st-enroll-radio-row label,
 .st-enroll-segment button,
-.st-learner-name-link,
 .st-bulk-bar-count,
 .st-bulk-btn,
 .st-confidence-value,
 .st-confidence-label,
 .st-table-scroll--sticky .st-data-table thead th,
-.st-data-table th,
-.st-data-table td,
 .st-progress-cell-count,
 .st-progress-link,
 .st-row-menu-list button,
@@ -35,14 +32,6 @@
 .st-enroll-field textarea,
 .st-enroll-radio-row input,
 .st-enroll-radio-row label {
-    font-size: var(--st-font-size-small);
-}
-
-.st-data-table th {
-    font-size: var(--st-font-size-label);
-}
-
-.st-data-table td {
     font-size: var(--st-font-size-small);
 }
 
