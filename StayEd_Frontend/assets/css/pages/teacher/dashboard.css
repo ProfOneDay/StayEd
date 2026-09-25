@@ -1,338 +1,578 @@
+/* ============================================================
+   Teacher dashboard page CSS. Ordered: welcome, filters, overview,
+   risk distribution, attention, distributions, registry, responsive,
+   motion. Some rules below (.st-quick-list/-item/-tip, .st-empty,
+   .st-alert-card*, .st-ewa-*) are also used by other pages
+   (notifications, clc-overview, class-management, early-warning) --
+   this file is loaded globally via main.css's @import chain, same as
+   every other page CSS file, so they live here but are NOT
+   dashboard-exclusive. Left untouched by the dashboard UI revision.
+   ============================================================ */
 
-
-.st-notif-banner{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:16px;
-    padding:8px var(--st-margin-desktop);
-    background:rgba(0,106,104,.10);
-    border-bottom:1px solid rgba(0,106,104,.20);
+/* .st-content is a shared shell class (every logged-in page); the prototype's
+   tighter 20px stack gap is scoped here rather than changed in layout.css so
+   other pages keep their current spacing. */
+body[data-page="Teacher Dashboard"] .st-content {
+  gap: 20px;
 }
 
-.st-notif-banner-msg{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    font-size: var(--st-font-size-caption);
-    font-weight:600;
-    color:var(--st-primary);
+/* ---------- Notification banner ---------- */
+
+.st-notif-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 20px var(--st-margin-desktop) 0;
+  padding: 10px 12px 10px 16px;
+  border-radius: var(--st-radius-control, 8px);
+  background: #e3f4f3;
+  border: 1px solid #c4e7e5;
+  color: #004f4d;
+  font-size: 0.875rem; /* 14px */
+  font-weight: 500;
+  transition: opacity 200ms ease, transform 200ms ease;
 }
 
-.st-notif-banner-msg .material-symbols-outlined{
-    font-size:1.125rem;
-    color:var(--st-secondary);
+.st-notif-banner.is-leaving {
+  opacity: 0;
+  transform: translateY(-6px);
 }
 
-.st-notif-banner-close{
-    background:transparent;
-    border:none;
-    cursor:pointer;
-    color:var(--st-on-surface-variant);
-    display:flex;
-    transition:var(--st-transition-color);
+.st-notif-banner-msg {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.st-notif-banner-close:hover{
-    color:var(--st-primary);
+.st-notif-banner-msg .material-symbols-outlined {
+  font-size: 1.125rem;
+  color: #006a68;
 }
 
-.st-notif-banner-close .material-symbols-outlined{
-    font-size:1.125rem;
+.st-notif-banner-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.st-welcome{
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:space-between;
-    align-items:center;
-    gap:16px;
+.st-notif-banner-close:hover {
+  background: rgba(0, 106, 104, 0.1);
 }
 
-.st-welcome-title{
-    font-family:var(--st-font-heading);
-    font-size: var(--st-font-size-display);
-    font-weight:700;
-    line-height:1.2;
-    color:var(--st-primary);
+.st-notif-banner-close .material-symbols-outlined {
+  font-size: 1.125rem;
 }
 
-.st-welcome-subtitle{
-    margin-top:4px;
-    font-size: var(--st-font-size-small);
-    color:var(--st-on-surface-variant);
+/* ---------- Welcome ---------- */
+
+.st-welcome {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
 }
 
-.st-term-card{
-    display:flex;
-    gap:24px;
-    background:#fff;
-    padding:16px;
-    border-radius:var(--st-card-radius);
-    border:1px solid rgba(195,198,207,.30);
-    box-shadow:var(--st-shadow-sm);
+.st-welcome-title {
+  margin: 0;
+  font-family: var(--st-font-heading);
+  font-size: 1.875rem; /* 30px */
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--st-on-surface);
 }
 
-.st-term-item{
-    display:flex;
-    flex-direction:column;
-    gap:4px;
+.st-welcome-subtitle {
+  margin: 6px 0 0;
+  font-size: 0.9375rem; /* 15px */
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
 }
 
-.st-term-item-label{
-    font-size: var(--st-font-size-micro);
-    font-weight:700;
-    letter-spacing:.02em;
-    text-transform:uppercase;
-    color:var(--st-outline);
+.st-term-card {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: #fff;
+  border: 1px solid var(--st-line, var(--st-outline-variant));
+  border-radius: 999px;
+  padding: 4px;
+  box-shadow: var(--st-shadow-card, var(--st-shadow-sm));
 }
 
-.st-term-item-value{
-    font-size: var(--st-font-size-label);
-    font-weight:600;
-    color:var(--st-primary);
+.st-term-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 14px;
 }
 
-.st-term-divider{
-    width:1px;
-    background:rgba(195,198,207,.50);
+.st-term-item-label {
+  font-size: 0.781rem; /* 12.5px */
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
 }
 
-.st-filter-bar{
-    background:#fff;
-    padding:16px;
-    border-radius:var(--st-card-radius);
-    border:1px solid rgba(195,198,207,.20);
-    box-shadow:var(--st-shadow-sm);
+.st-term-item-value {
+  font-size: 0.875rem; /* 14px */
+  font-weight: 600;
+  color: var(--st-on-surface);
 }
 
-.st-filter-row{
-    display:grid;
-    grid-template-columns:minmax(0, 1.55fr) minmax(0, 2.45fr);
-    align-items:end;
-    gap:16px;
-    width:100%;
+.st-term-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--st-line, var(--st-outline-variant));
 }
 
-.st-filter-group{
-    min-width:0;
-    display:flex;
-    flex-direction:column;
-    gap:8px;
+/* ---------- Filters ---------- */
+
+.st-filter-bar {
+  background: #fff;
+  padding: 14px 16px;
+  border-radius: var(--st-radius-card, var(--st-card-radius));
+  border: 1px solid var(--st-line, var(--st-outline-variant));
+  box-shadow: var(--st-shadow-card, var(--st-shadow-sm));
+  min-width: 0;
 }
 
-.st-filter-group--level{
-    min-width:0;
+.st-filter-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
 }
 
-.st-filter-label{
-    font-size: var(--st-font-size-caption);
-    font-weight:600;
-    color:var(--st-on-surface-variant);
-    padding-left:4px;
+.st-filter-row > .st-filter-group--level {
+  grid-column: 1 / -1;
 }
 
-.st-segment{
-    display:flex;
-    gap:4px;
-    padding:4px;
-    background:var(--st-surface-container-low);
-    border-radius:var(--st-button-radius);
+@media (min-width: 1560px) {
+  .st-filter-row {
+    grid-template-columns: auto repeat(3, minmax(150px, 1fr)) auto;
+  }
+  .st-filter-row > .st-filter-group--level {
+    grid-column: auto;
+  }
 }
 
-.st-segment button{
-    flex:1;
-    padding:8px 12px;
-    border:none;
-    background:transparent;
-    border-radius:var(--st-button-radius);
-    font-size: var(--st-font-size-caption);
-    font-weight:600;
-    color:var(--st-on-surface-variant);
-    cursor:pointer;
-    transition:var(--st-transition);
-    white-space:nowrap;
+.st-filter-group {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.st-segment button:hover{
-    background:rgba(255,255,255,.5);
+.st-filter-label {
+  font-size: 0.781rem; /* 12.5px */
+  font-weight: 600;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  padding-left: 0;
 }
 
-.st-segment button.is-active{
-    background:#fff;
-    color:var(--st-primary);
-    font-weight:700;
-    box-shadow:var(--st-shadow-xs);
+.st-segment {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--st-background);
+  border-radius: var(--st-radius-control, 8px);
+  overflow-x: auto;
+  scrollbar-width: none;
+  max-width: 100%;
+  width: max-content;
 }
 
-.st-filter-controls{
-    min-width:0;
-    display:grid;
-    grid-template-columns:repeat(3, minmax(0, 1fr)) minmax(170px, .95fr);
-    gap:8px;
-    align-items:end;
+.st-segment::-webkit-scrollbar {
+  display: none;
 }
 
-.st-filter-controls select{
-    width:100%;
-    height:44px;
-    padding:0 12px;
-    border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-button-radius);
-    background:#fff;
-    font-family:var(--st-font-body);
-    font-size: var(--st-font-size-label);
-    color:var(--st-on-surface);
-    cursor:pointer;
+.st-segment button {
+  flex: 0 0 auto;
+  height: 32px;
+  padding: 0 12px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  font-family: var(--st-font-body);
+  font-size: 0.844rem; /* 13.5px */
+  font-weight: 500;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  cursor: pointer;
+  white-space: nowrap;
 }
 
-.st-filter-controls select:focus{
-    outline:none;
-    border-color:var(--st-secondary);
-    box-shadow:var(--st-focus-ring);
+.st-segment button:hover {
+  color: var(--st-on-surface);
 }
 
-.st-filter-apply{
-    min-width:0;
-    align-self:flex-end;
+.st-segment button.is-active {
+  background: #fff;
+  color: var(--st-primary);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(17, 26, 54, 0.12);
 }
 
-.st-filter-apply .st-btn{
-    width:100%;
-    min-height:44px;
-    justify-content:center;
+.st-filter-controls {
+  display: contents;
 }
 
-.st-dash-grid{
-    display:grid;
-    grid-template-columns:repeat(12,1fr);
-    gap:24px;
+.st-filter-controls select {
+  width: 100%;
+  height: 38px;
+  padding: 0 32px 0 12px;
+  border: 1px solid var(--st-line-strong, var(--st-outline-variant));
+  border-radius: var(--st-radius-control, 8px);
+  background: #fff;
+  font-family: var(--st-font-body);
+  font-size: 0.875rem; /* 14px */
+  color: var(--st-on-surface);
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%235a6275' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  transition: border-color var(--st-t-hover, 150ms) ease, box-shadow var(--st-t-hover, 150ms) ease;
 }
 
-.st-dash-grid > [data-component]{
-    display:contents;
+.st-filter-controls select:hover {
+  border-color: var(--st-primary);
 }
 
-.col-3{ grid-column:span 3; }
-.col-4{ grid-column:span 4; }
-.col-6{ grid-column:span 6; }
-.col-8{ grid-column:span 8; }
-.col-12{ grid-column:span 12; }
-
-.st-stat-card{
-    background:#fff;
-    border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-card-radius);
-    box-shadow:var(--st-shadow-sm);
-    padding:16px;
-    min-height:128px;
-    display:flex;
-    flex-direction:column;
+.st-filter-controls select:focus {
+  outline: none;
+  border-color: var(--st-secondary);
+  box-shadow: 0 0 0 3px rgba(0, 106, 104, 0.12);
 }
 
-.st-stat-card-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    margin-bottom:8px;
+.st-filter-apply {
+  min-width: 0;
+  align-self: flex-end;
 }
 
-.st-stat-card-label{
-    font-size: var(--st-font-size-caption);
-    font-weight:600;
-    color:var(--st-on-surface-variant);
+.st-filter-apply .st-btn {
+  width: 100%;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: var(--st-radius-control, 8px);
+  font-family: var(--st-font-body);
+  font-size: 0.875rem; /* 14px */
+  justify-content: center;
 }
 
-.st-stat-card-icon{
-    font-size: var(--st-font-size-body-lg);
+/* [data-intervention-reminder] is a legacy JS hook -- renderInterventionReminder()
+   still clears it, but its actual content now renders into the followup card's
+   [data-stat-intervention-detail] instead. Hidden (not removed, the hook must
+   survive) so it stops eating a flex gap as an always-empty .st-content child. */
+[data-intervention-reminder] {
+  display: none;
 }
 
-.st-stat-card-body{
-    margin-top:auto;
+/* ---------- Grid ---------- */
+
+.st-dash-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 20px;
 }
 
-.st-stat-card-value{
-    font-size: var(--st-font-size-title);
-    font-weight:700;
-    line-height:1.1;
+.st-dash-grid > [data-component] {
+  display: contents;
 }
 
-.st-stat-card--primary .st-stat-card-icon,
-.st-stat-card--primary .st-stat-card-value{ color:var(--st-primary); }
+.col-3 { grid-column: span 3; }
+.col-4 { grid-column: span 4; }
+.col-6 { grid-column: span 6; }
+.col-8 { grid-column: span 8; }
+.col-12 { grid-column: span 12; }
 
-.st-stat-card--high .st-stat-card-icon,
-.st-stat-card--high .st-stat-card-value{ color:var(--st-risk-high); }
+/* ---------- Panel shell ---------- */
 
-.st-stat-card--moderate .st-stat-card-icon,
-.st-stat-card--moderate .st-stat-card-value{ color:var(--st-risk-moderate); }
-
-.st-stat-card--low .st-stat-card-icon,
-.st-stat-card--low .st-stat-card-value{ color:var(--st-risk-low); }
-
-.st-panel{
-    background:#fff;
-    border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-card-radius);
-    box-shadow:var(--st-shadow-sm);
-    display:flex;
-    flex-direction:column;
+.st-panel {
+  background: #fff;
+  border: 1px solid var(--st-line, var(--st-outline-variant));
+  border-radius: var(--st-radius-card, var(--st-card-radius));
+  box-shadow: var(--st-shadow-card, var(--st-shadow-sm));
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
-.st-panel-pad{
-    padding:24px;
+.st-panel-pad {
+  padding: 20px 22px;
 }
 
-.st-panel-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    gap:16px;
-    padding-bottom:16px;
-    margin-bottom:16px;
-    border-bottom:1px solid rgba(195,198,207,.20);
+.st-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
-.st-panel-title{
-    font-family:var(--st-font-heading);
-    font-size: var(--st-font-size-body-lg);
-    font-weight:600;
-    color:var(--st-primary);
-    display:flex;
-    align-items:center;
-    gap:8px;
+.st-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
 }
 
-.st-panel-subtitle{
-    font-size: var(--st-font-size-caption);
-    color:var(--st-on-surface-variant);
-    margin-top:2px;
+.st-panel-title {
+  font-family: var(--st-font-heading);
+  font-size: 1.125rem; /* 18px */
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--st-on-surface);
+  display: block;
 }
 
-.st-panel-link{
-    display:inline-flex;
-    align-items:center;
-    gap:4px;
-    font-size: var(--st-font-size-label);
-    font-weight:600;
-    color:var(--st-secondary);
-    background:transparent;
-    border:none;
-    cursor:pointer;
-    text-decoration:none;
+.st-panel-subtitle {
+  font-size: 0.844rem; /* 13.5px */
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  margin-top: 4px;
 }
 
-.st-panel-link:hover{ text-decoration:underline; }
-
-.st-panel-link .material-symbols-outlined{ font-size:1rem; }
-
-.st-riskchart{
-    display:flex;
-    gap:24px;
-    flex:1;
+.st-panel-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.844rem; /* 13.5px */
+  font-weight: 600;
+  color: var(--st-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
 }
+
+.st-panel-link:hover {
+  text-decoration: underline;
+}
+
+.st-panel-link .material-symbols-outlined {
+  font-size: 1.125rem;
+}
+
+/* ---------- Overview (the one bold element) ---------- */
+
+.st-overview {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 28px;
+  align-items: center;
+}
+
+.st-overview-total {
+  padding-right: 28px;
+  border-right: 1px solid var(--st-line, var(--st-outline-variant));
+}
+
+.st-overview-total .value {
+  font-family: var(--st-font-heading);
+  font-weight: 800;
+  font-size: 3.25rem; /* 52px */
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--st-primary);
+}
+
+.st-overview-total .label {
+  margin-top: 6px;
+  font-size: 0.875rem; /* 14px */
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+.st-risk-strip {
+  display: flex;
+  height: 14px;
+  border-radius: 999px;
+  overflow: hidden;
+  gap: 3px;
+  background: var(--st-background);
+}
+
+.st-risk-strip span {
+  display: block;
+  min-width: 4px;
+}
+
+.st-risk-strip .high { background: var(--st-risk-high); flex-grow: 1; }
+.st-risk-strip .mod { background: var(--st-risk-moderate); flex-grow: 1; }
+.st-risk-strip .low { background: var(--st-risk-low); flex-grow: 1; }
+
+.st-risk-legend {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.st-risk-legend-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 12px;
+  border-left: 3px solid;
+}
+
+/* background:transparent below neutralizes a pre-existing, unscoped
+   ".high/.moderate/.low { background: ... }" rule in admin-dashboard.css
+   (bare class selectors with no namespace) -- main.css imports every
+   page's CSS on every page, so that rule otherwise leaks in here and
+   fills these items with a solid color instead of just the left border. */
+.st-risk-legend-item.high { border-color: var(--st-risk-high); background: transparent; }
+.st-risk-legend-item.mod { border-color: var(--st-risk-moderate); background: transparent; }
+.st-risk-legend-item.low { border-color: var(--st-risk-low); background: transparent; }
+
+.st-risk-legend-item .count {
+  font-family: var(--st-font-heading);
+  font-weight: 800;
+  font-size: 1.75rem; /* 28px */
+  line-height: 1.1;
+}
+
+.st-risk-legend-item.high .count { color: var(--st-risk-high-ink, var(--st-risk-high)); }
+.st-risk-legend-item.mod .count { color: var(--st-risk-moderate-ink, var(--st-risk-moderate)); }
+.st-risk-legend-item.low .count { color: var(--st-risk-low-ink, var(--st-risk-low)); }
+
+.st-risk-legend-item .name {
+  font-size: 0.844rem; /* 13.5px */
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+.st-risk-legend-item .pct {
+  font-size: 0.781rem; /* 12.5px */
+  color: var(--st-ink-faint, var(--st-outline));
+}
+
+.st-followup-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  background: #fef3e4;
+  border-color: #f6dcb8;
+}
+
+.st-followup-card .head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 0.906rem; /* 14.5px */
+  color: var(--st-risk-moderate-ink, #8f5200);
+}
+
+.st-followup-card ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.st-followup-card li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.875rem; /* 14px */
+  color: #6b3f00;
+}
+
+.st-followup-card li strong {
+  font-family: var(--st-font-heading);
+  font-size: 1.625rem; /* 26px */
+  font-weight: 800;
+  line-height: 1;
+  color: var(--st-risk-moderate-ink, #8f5200);
+}
+
+.st-followup-card .hint {
+  font-size: 0.781rem; /* 12.5px */
+  color: #8a6a3c;
+}
+
+/* ---------- Chart type toggle + canvas wrap (shared with admin dashboard
+   and admin reports -- see .chart-type-toggle usage there). ---------- */
+
+.chart-type-toggle {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--st-background);
+  border-radius: var(--st-radius-control, 8px);
+  border: none;
+}
+
+.chart-type-btn {
+  border: none;
+  background: transparent;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-family: var(--st-font-body);
+  font-size: 0.8125rem; /* 13px */
+  font-weight: 500;
+  color: var(--st-ink-muted, var(--st-outline));
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.chart-type-btn.is-active {
+  background: #fff;
+  color: var(--st-primary);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(17, 26, 54, 0.12);
+}
+
+.chart-type-btn:hover:not(.is-active) {
+  color: var(--st-on-surface);
+}
+
+.chart-canvas-wrap {
+  position: relative;
+  height: 260px;
+  margin-top: 10px;
+  min-height: 0;
+}
+
+.chart-canvas-wrap:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-canvas-wrap canvas {
+  flex: 1;
+  min-height: 0;
+  max-width: 100%;
+}
+
+.chart-canvas-note {
+  flex-shrink: 0;
+  margin: 10px 0 0;
+  font-size: 0.781rem; /* 12.5px */
+  color: var(--st-ink-faint, var(--st-outline));
+  text-align: center;
+}
+
+/* ---------- Risk distribution: horizontal bars ---------- */
 
 /* Author rules always beat the UA [hidden]{display:none} default regardless
-   of specificity/order, so .st-riskchart's own display:flex above would
+   of specificity/order, so .st-riskchart's own display:flex below would
    otherwise keep this visible even with the hidden attribute set (it's
    toggled via JS when switching the Risk Distribution chart type away from
    "Bar") -- this needs to explicitly out-specificity that rule.
@@ -340,196 +580,769 @@
    #riskChartView ids for its own (differently-styled) chart toggle, and
    main.css loads every page's CSS everywhere, so an unscoped rule here
    would otherwise leak into and resize/mis-hide admin's version. */
-body[data-page="Teacher Dashboard"] #riskBarView[hidden]{
-    display:none;
+body[data-page="Teacher Dashboard"] #riskBarView[hidden] {
+  display: none;
 }
 
-.st-riskchart-plot{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    position:relative;
-    padding-right:16px;
+body[data-page="Teacher Dashboard"] #riskChartView.chart-canvas-wrap {
+  height: 260px;
 }
 
-.st-riskchart-bars{
-    flex:1;
-    display:flex;
-    align-items:flex-end;
-    justify-content:space-around;
-    padding:16px 0 32px;
-    position:relative;
-    border-bottom:1px solid rgba(195,198,207,.30);
+.st-riskchart {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 24px;
+  align-items: stretch;
 }
 
-.st-riskchart-yaxis{
-    position:absolute;
-    left:-8px;
-    top:0;
-    height:100%;
-    width:32px;
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-    text-align:right;
-    padding-right:8px;
-    font-size: var(--st-font-size-micro);
-    color:rgba(115,119,127,.6);
-    pointer-events:none;
+.st-hbars {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
 }
 
-.st-riskchart-grid{
-    position:absolute;
-    inset:0;
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-    opacity:.1;
-    pointer-events:none;
+.st-hbar-row {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr) 56px;
+  align-items: center;
+  gap: 14px;
 }
 
-.st-riskchart-grid > div{
-    border-top:1px solid var(--st-outline);
+.st-hbar-label {
+  font-size: 0.875rem; /* 14px */
+  font-weight: 600;
+  color: var(--st-on-surface);
 }
 
-.st-riskchart-bar-wrap{
-    width:64px;
-    height:100%;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:flex-end;
-    position:relative;
-    z-index:1;
+.st-hbar-track {
+  position: relative;
+  height: 28px;
+  background: var(--st-background);
+  border-radius: 6px;
+  /* Not overflow:hidden -- the bar's own width is always clamped to <=100%
+     of the track so it can never visually spill past it, and this track is
+     the hover target for the composition tooltip below, which needs to
+     render above the track rather than being clipped by it. */
 }
 
-.st-riskchart-bar{
-    width:100%;
-    border-radius:4px 4px 0 0;
-    transition:height .6s cubic-bezier(.16,1,.3,1), filter .2s ease;
-    cursor:help;
-    min-height:0;
+.st-hbar {
+  height: 100%;
+  border-radius: 6px;
+  width: var(--w, 0%);
 }
 
-.st-riskchart-bar:hover{
-    filter:brightness(1.1);
+/* Composition tooltip on hover, matching the dark Chart.js tooltip styling
+   used elsewhere on this page -- the CSS-drawn bars here aren't Chart.js,
+   so they need their own hover affordance. */
+.st-hbar-track[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #111a36;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.75rem; /* 12px */
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--st-t-hover, 150ms) ease;
+  z-index: 5;
 }
 
-.st-riskchart-bar--high{
-    background:var(--st-risk-high);
+.st-hbar-track[data-tooltip]:hover::after {
+  opacity: 1;
 }
 
-.st-riskchart-bar--moderate{
-    background:var(--st-risk-moderate);
+.st-hbar--high { background: var(--st-risk-high); }
+.st-hbar--moderate { background: var(--st-risk-moderate); }
+.st-hbar--low { background: var(--st-risk-low); }
+
+.st-hbar-value {
+  text-align: left;
+  font-size: 0.875rem; /* 14px */
+  font-weight: 700;
+  color: var(--st-on-surface);
 }
 
-.st-riskchart-bar--low{
-    background:var(--st-risk-low);
+.st-hbar-value small {
+  display: block;
+  font-weight: 500;
+  font-size: 0.75rem; /* 12px */
+  color: var(--st-ink-faint, var(--st-outline));
 }
 
-.chart-type-toggle{ display:flex; flex-shrink:0; border:1px solid rgba(195,198,207,.35); border-radius:99px; padding:2px; background:#fff; }
-.chart-type-btn{ border:none; background:transparent; padding:5px 12px; font-size:var(--st-font-size-caption); font-weight:600; color:var(--st-outline); border-radius:99px; cursor:pointer; white-space:nowrap; }
-.chart-type-btn.is-active{ background:var(--st-primary); color:#fff; }
-.chart-type-btn:hover:not(.is-active){ background:var(--st-info-light); }
-/* A fixed-height box with a Chart.js canvas that's told to fill 100% of it
-   left no room for the caption <p> below -- it doesn't get clipped (the box
-   has no overflow:hidden), it just spills out and visually overlaps
-   whatever sits below the card. Laying this out as a column with the canvas
-   as the only flexible child reserves real space for the caption instead. */
-.chart-canvas-wrap{ position:relative; height:280px; margin-top:10px; min-height:0; }
-.chart-canvas-wrap:not([hidden]){ display:flex; flex-direction:column; }
-.chart-canvas-wrap canvas{ flex:1; min-height:0; max-width:100%; }
-.chart-canvas-note{ flex-shrink:0; margin:8px 0 0; font-size:var(--st-font-size-caption); color:var(--st-outline); text-align:center; }
-
-/* Risk Distribution's Pie/Trend view swaps in place of .st-riskchart. The
-   analytics card only has min-height:400px (not a fixed height), so an
-   earlier attempt to flex:1-fill it here had nothing concrete to grow
-   against and could render tiny while the card still showed a big empty
-   gap. A fixed, self-contained height (like every other chart-canvas-wrap)
-   is what actually fits reliably regardless of the card's own sizing. */
-body[data-page="Teacher Dashboard"] #riskChartView.chart-canvas-wrap{
-    height:320px;
+.st-hbar-scale {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr) 56px;
+  gap: 14px;
+  margin-top: -6px;
 }
 
-.st-riskchart-xaxis{
-    display:flex;
-    justify-content:space-around;
-    padding-top:8px;
+.st-hbar-scale div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.719rem; /* 11.5px */
+  color: var(--st-ink-faint, var(--st-outline));
 }
 
-.st-riskchart-xaxis span{
-    width:64px;
-    text-align:center;
-    font-size: var(--st-font-size-micro);
-    font-weight:700;
-    letter-spacing:.05em;
-    text-transform:uppercase;
-    color:var(--st-on-surface-variant);
+.st-riskchart-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.st-riskchart-side{
-    width:33%;
-    display:flex;
-    flex-direction:column;
-    gap:16px;
+.st-insights {
+  background: var(--st-background);
+  border-radius: 10px;
+  padding: 14px 16px;
+  border: none;
 }
 
-.st-insights{
-    background:var(--st-surface);
-    padding:12px;
-    border-radius:var(--st-radius-lg);
-    border:1px solid rgba(195,198,207,.20);
+.st-insights-title {
+  margin: 0 0 8px;
+  font-size: 0.8125rem; /* 13px */
+  font-weight: 700;
+  text-transform: none;
+  color: var(--st-on-surface);
 }
 
-.st-insights-title{
-    font-size: var(--st-font-size-micro);
-    font-weight:700;
-    text-transform:uppercase;
-    color:var(--st-outline);
-    margin-bottom:8px;
+.st-insights ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.st-insights ul{
-    list-style:none;
-    display:flex;
-    flex-direction:column;
-    gap:8px;
+.st-insights li {
+  display: flex;
+  gap: 8px;
+  font-size: 0.844rem; /* 13.5px */
+  line-height: 1.45;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
 }
 
-.st-insights li{
-    display:flex;
-    gap:8px;
-    font-size: var(--st-font-size-caption);
-    line-height:1.4;
-    color:var(--st-on-surface-variant);
+.st-bullet {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--st-primary);
+  flex: none;
+  margin-top: 7px;
+  font-size: 0;
 }
 
-.st-insights li .st-bullet{ color:var(--st-primary); font-weight:700; }
-.st-insights li .st-bullet--error{ color:var(--st-error); }
-
-.st-meta-grid{
-    margin-top:auto;
-    background:rgba(18,53,91,.05);
-    padding:8px;
-    border-radius:var(--st-radius-sm);
-    border:1px solid rgba(18,53,91,.10);
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:8px;
+.st-bullet--error {
+  background: var(--st-risk-high);
 }
 
-.st-meta-grid-item p:first-child{
-    font-size: var(--st-font-size-micro);
-    color:var(--st-outline);
+.st-meta-grid {
+  margin-top: auto;
+  background: #fff;
+  padding: 4px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--st-line, var(--st-outline-variant));
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
-.st-meta-grid-item p:last-child{
-    font-size: var(--st-font-size-micro);
-    font-weight:700;
-    color:var(--st-on-surface);
+.st-meta-grid-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 0;
 }
 
-.st-meta-grid-item .is-teal{ color:var(--st-secondary); }
+.st-meta-grid-item + .st-meta-grid-item {
+  border-top: 1px solid var(--st-line, var(--st-outline-variant));
+}
+
+.st-meta-grid-item p {
+  margin: 0;
+}
+
+.st-meta-grid-item p:first-child {
+  font-size: 0.8125rem; /* 13px */
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+.st-meta-grid-item p:last-child {
+  font-size: 0.844rem; /* 13.5px */
+  font-weight: 600;
+  color: var(--st-on-surface);
+  text-align: right;
+}
+
+.st-meta-grid-item .is-teal {
+  color: var(--st-secondary);
+}
+
+/* ---------- Recent high-risk (attention list) -- dynamically injected by
+   dashboard.js only, so these classes are dashboard-exclusive. ---------- */
+
+.st-attention-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.st-attention-list {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.st-attention-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 92px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px;
+  border: 0;
+  background: none;
+  border-radius: 10px;
+  font-family: var(--st-font-body);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--st-t-hover, 150ms) ease, transform var(--st-t-press, 90ms) ease;
+}
+
+.st-attention-row:hover {
+  background: var(--st-background);
+}
+
+.st-attention-row:active {
+  transform: scale(0.99);
+}
+
+.st-attention-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.781rem; /* 12.5px */
+  font-weight: 700;
+  background: var(--st-risk-high-soft-2, var(--st-risk-high-soft));
+  color: var(--st-risk-high-ink, var(--st-risk-high));
+  transition: transform var(--st-t-hover, 150ms) var(--st-ease-out, ease);
+}
+
+.st-attention-row:hover .st-attention-avatar {
+  transform: scale(1.08);
+}
+
+.st-attention-row.is-moderate .st-attention-avatar {
+  background: var(--st-risk-moderate-soft-2, var(--st-risk-moderate-soft));
+  color: var(--st-risk-moderate-ink, var(--st-risk-moderate));
+}
+
+.st-attention-person {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.st-attention-person strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.875rem; /* 14px */
+  font-weight: 600;
+  color: var(--st-on-surface);
+}
+
+.st-attention-person small {
+  margin-top: 1px;
+  font-size: 0.75rem; /* 12px */
+  color: var(--st-ink-faint, var(--st-outline));
+}
+
+.st-attention-risk {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  font-size: 0.8125rem; /* 13px */
+  font-weight: 700;
+  color: var(--st-risk-high-ink, var(--st-risk-high));
+}
+
+.st-attention-risk .meter {
+  width: 100%;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--st-risk-high-soft-2, var(--st-risk-high-soft));
+  overflow: hidden;
+}
+
+.st-attention-risk .meter i {
+  display: block;
+  height: 100%;
+  width: var(--w, 0%);
+  background: var(--st-risk-high);
+  border-radius: 999px;
+}
+
+.st-attention-row.is-moderate .st-attention-risk {
+  color: var(--st-risk-moderate-ink, var(--st-risk-moderate));
+}
+
+.st-attention-row.is-moderate .meter {
+  background: var(--st-risk-moderate-soft-2, var(--st-risk-moderate-soft));
+}
+
+.st-attention-row.is-moderate .meter i {
+  background: var(--st-risk-moderate);
+}
+
+.st-attention-view-all {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  border: 1px solid var(--st-line-strong, var(--st-outline-variant));
+  border-radius: var(--st-radius-control, 8px);
+  font-size: 0.875rem; /* 14px */
+  font-weight: 600;
+  color: var(--st-primary);
+  text-decoration: none;
+}
+
+.st-attention-view-all:hover {
+  border-color: var(--st-primary);
+  background: var(--st-navy-soft, var(--st-primary-fixed));
+}
+
+.st-attention-empty {
+  margin: auto 0;
+  padding: 22px 10px;
+  text-align: center;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  font-size: 0.844rem; /* 13.5px */
+}
+
+/* ---------- Registry ----------
+   .st-search is a shared component class (used on many other pages with
+   components.css's own 44px/absolute-icon layout) -- everything below is
+   scoped under body[data-page="Teacher Dashboard"] so this dashboard-style
+   38px flex layout can't leak into those other pages' search boxes. */
+
+body[data-page="Teacher Dashboard"] .st-registry-head {
+  padding: 20px 22px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+body[data-page="Teacher Dashboard"] .st-registry-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+body[data-page="Teacher Dashboard"] .st-search {
+  position: relative;
+  width: 260px;
+  flex: none;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid var(--st-line-strong, var(--st-outline-variant));
+  border-radius: var(--st-radius-control, 8px);
+  color: var(--st-ink-faint, var(--st-outline));
+}
+
+body[data-page="Teacher Dashboard"] .st-search:focus-within {
+  border-color: var(--st-secondary);
+  box-shadow: 0 0 0 3px rgba(0, 106, 104, 0.12);
+}
+
+body[data-page="Teacher Dashboard"] .st-search .material-symbols-outlined {
+  position: static;
+  transform: none;
+  font-size: 1.125rem;
+  color: inherit;
+  pointer-events: none;
+}
+
+body[data-page="Teacher Dashboard"] .st-search input {
+  border: 0;
+  outline: 0;
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  padding: 0;
+  font-size: 0.875rem; /* 14px */
+  font-family: var(--st-font-body);
+  background: none;
+  color: var(--st-on-surface);
+}
+
+body[data-page="Teacher Dashboard"] .st-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--st-line-strong, var(--st-outline-variant));
+  border-radius: var(--st-radius-control, 8px);
+  background: #fff;
+  color: var(--st-on-surface);
+  font-family: var(--st-font-body);
+  font-size: 0.844rem; /* 13.5px */
+  font-weight: 500;
+  cursor: pointer;
+}
+
+body[data-page="Teacher Dashboard"] .st-tool-btn:hover {
+  background: var(--st-background);
+}
+
+body[data-page="Teacher Dashboard"] .st-tool-btn .material-symbols-outlined {
+  font-size: 1.125rem;
+}
+
+.st-table-scroll {
+  overflow-x: auto;
+}
+
+/* Several other pages' CSS files (loaded later in main.css's @import chain,
+   e.g. learner-records.css) define their own rules for .st-data-table td/th,
+   .st-learner-name-link, .st-pagination*, etc. at their own (larger) type
+   scale. Equal-specificity + later source order let those win over the
+   plain versions of these selectors, which is what caused the dashboard's
+   table text to inconsistently render at other pages' sizes. Everything
+   below is scoped under body[data-page="Teacher Dashboard"] both to fix
+   that (higher specificity always wins, regardless of load order) and to
+   keep this dashboard-specific sizing from leaking onto those other pages. */
+body[data-page="Teacher Dashboard"] .st-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem; /* 14px */
+}
+
+body[data-page="Teacher Dashboard"] .st-data-table thead tr {
+  background: #f8f9fb;
+}
+
+body[data-page="Teacher Dashboard"] .st-data-table th {
+  padding: 10px 22px;
+  font-size: 0.781rem; /* 12.5px */
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  border-top: 1px solid var(--st-line, var(--st-outline-variant));
+  border-bottom: 1px solid var(--st-line, var(--st-outline-variant));
+  white-space: nowrap;
+}
+
+body[data-page="Teacher Dashboard"] .st-data-table th.is-center {
+  text-align: center;
+}
+
+body[data-page="Teacher Dashboard"] .st-data-table tbody tr {
+  border-top: 0;
+  border-bottom: 1px solid var(--st-line, var(--st-outline-variant));
+  transition: background-color var(--st-t-hover, 150ms) ease;
+  cursor: pointer;
+}
+
+body[data-page="Teacher Dashboard"] .st-data-table tbody tr:hover {
+  background: #f8fafd;
+}
+
+body[data-page="Teacher Dashboard"] .st-data-table td {
+  padding: 12px 22px;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  vertical-align: middle;
+  white-space: nowrap;
+  font-size: 0.875rem; /* 14px */
+}
+
+body[data-page="Teacher Dashboard"] .st-registry-loading {
+  text-align: center;
+  padding: 32px;
+  color: var(--st-ink-faint, var(--st-outline));
+  font-style: italic;
+}
+
+body[data-page="Teacher Dashboard"] .st-learner-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* .st-avatar-initials/.st-pill/.st-risk-badge are shared components (used on
+   other pages too) with a smaller-scaled base size -- scoped here to the
+   registry table only so they can match the prototype's larger pill/avatar
+   sizing without changing those other pages. */
+body[data-page="Teacher Dashboard"] .st-learner-cell .st-avatar-initials {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  font-size: 0.781rem; /* 12.5px */
+  font-weight: 700;
+}
+
+body[data-page="Teacher Dashboard"] .st-data-table .st-pill {
+  padding: 3px 10px;
+  font-size: 0.781rem; /* 12.5px */
+  font-weight: 600;
+  background: var(--st-background);
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  border: 1px solid var(--st-line, var(--st-outline-variant));
+}
+
+body[data-page="Teacher Dashboard"] .st-data-table .st-risk-badge {
+  padding: 3px 10px;
+  font-size: 0.781rem; /* 12.5px */
+  font-weight: 600;
+}
+
+body[data-page="Teacher Dashboard"] .st-learner-name {
+  display: block;
+  border: 0;
+  background: none;
+  padding: 0;
+  font-size: 0.906rem; /* 14.5px */
+  font-weight: 600;
+  font-family: var(--st-font-body);
+  color: var(--st-on-surface);
+  cursor: pointer;
+  text-align: left;
+  transition: color var(--st-t-hover, 150ms) ease;
+}
+
+body[data-page="Teacher Dashboard"] .st-learner-name:hover {
+  color: var(--st-primary);
+  text-decoration: underline;
+}
+
+body[data-page="Teacher Dashboard"] .st-learner-id {
+  margin: 1px 0 0;
+  font-size: 0.781rem; /* 12.5px */
+  color: var(--st-ink-faint, var(--st-outline));
+}
+
+body[data-page="Teacher Dashboard"] .st-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+body[data-page="Teacher Dashboard"] .st-btn-xs {
+  height: 32px;
+  padding: 0 12px;
+  font-family: var(--st-font-body);
+  font-size: 0.8125rem; /* 13px */
+  font-weight: 600;
+  border-radius: var(--st-radius-control, 8px);
+}
+
+body[data-page="Teacher Dashboard"] .st-icon-btn-sm {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  font-family: var(--st-font-body);
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body[data-page="Teacher Dashboard"] .st-icon-btn-sm:hover {
+  background: var(--st-background);
+}
+
+body[data-page="Teacher Dashboard"] .st-icon-btn-sm .material-symbols-outlined {
+  font-size: 1.125rem;
+}
+
+body[data-page="Teacher Dashboard"] .st-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 22px;
+  border-top: none;
+}
+
+body[data-page="Teacher Dashboard"] .st-pagination-info {
+  font-size: 0.844rem; /* 13.5px */
+  font-family: var(--st-font-body);
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+body[data-page="Teacher Dashboard"] .st-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+body[data-page="Teacher Dashboard"] .st-page-btn {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  background: none;
+  border-radius: var(--st-radius-control, 8px);
+  font-family: var(--st-font-body);
+  font-size: 0.844rem; /* 13.5px */
+  font-weight: 500;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body[data-page="Teacher Dashboard"] .st-page-btn:hover:not(:disabled) {
+  background: var(--st-background);
+  color: var(--st-on-surface);
+}
+
+body[data-page="Teacher Dashboard"] .st-page-btn.is-active {
+  background: var(--st-primary);
+  color: #fff;
+}
+
+body[data-page="Teacher Dashboard"] .st-page-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1279px) {
+  .col-8, .col-4 { grid-column: span 12; }
+  .st-attention-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 1023px) {
+  .col-6 { grid-column: span 12; }
+  .st-riskchart { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 767px) {
+  body[data-page="Teacher Dashboard"] .st-content { padding: 16px 16px 32px; gap: 16px; }
+  .st-dash-grid { gap: 16px; }
+  .st-welcome-title { font-size: 1.5rem; /* 24px */ }
+  .st-welcome-subtitle { font-size: 0.875rem; }
+  .st-term-card { width: 100%; border-radius: 10px; }
+  .st-term-item { flex: 1; flex-direction: column; gap: 0; padding: 6px 12px; }
+  .st-filter-bar { padding: 12px; }
+  .st-filter-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .st-filter-row > .st-filter-group--level { grid-column: 1 / -1; }
+  .st-filter-apply { grid-column: 1 / -1; }
+  .st-filter-apply .st-btn { width: 100%; height: 42px; }
+  .st-panel-pad { padding: 16px; }
+  .st-overview { grid-template-columns: 1fr; gap: 16px; }
+  .st-overview-total {
+    padding: 0 0 14px;
+    border-right: 0;
+    border-bottom: 1px solid var(--st-line, var(--st-outline-variant));
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .st-overview-total .value { font-size: 2.5rem; /* 40px */ }
+  .st-overview-total .label { margin: 0; }
+  .st-risk-legend { gap: 10px; }
+  .st-risk-legend-item .count { font-size: 1.375rem; /* 22px */ }
+  .pct-suffix { display: none; }
+  .st-attention-list { display: flex; }
+  .st-hbar-row { grid-template-columns: 74px minmax(0, 1fr) 64px; gap: 10px; }
+  .st-hbar-scale { grid-template-columns: 74px minmax(0, 1fr) 64px; gap: 10px; }
+  .st-hbar-label { font-size: 0.8125rem; }
+  .chart-canvas-wrap { height: 230px; }
+  body[data-page="Teacher Dashboard"] .st-registry-head { padding: 16px; }
+  body[data-page="Teacher Dashboard"] .st-registry-tools { width: 100%; }
+  body[data-page="Teacher Dashboard"] .st-search { width: 100%; }
+  body[data-page="Teacher Dashboard"] .st-registry-tools .st-tool-btn,
+  body[data-page="Teacher Dashboard"] .st-registry-tools .st-btn { flex: 1; }
+  /* Table becomes stacked cards */
+  body[data-page="Teacher Dashboard"] .st-data-table thead { display: none; }
+  body[data-page="Teacher Dashboard"] .st-data-table, body[data-page="Teacher Dashboard"] .st-data-table tbody { display: block; }
+  body[data-page="Teacher Dashboard"] .st-data-table tr { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 14px 16px; border-bottom: 1px solid var(--st-line, var(--st-outline-variant)); }
+  body[data-page="Teacher Dashboard"] .st-data-table td { display: block; padding: 0; border: 0; white-space: normal; }
+  body[data-page="Teacher Dashboard"] .st-data-table td[data-col="learner"] { flex-basis: 100%; }
+  body[data-page="Teacher Dashboard"] .st-data-table td[data-col="level"] { flex-basis: 100%; font-size: 0.8125rem; color: var(--st-ink-muted, var(--st-on-surface-variant)); padding-left: 48px; margin-top: -6px; }
+  body[data-page="Teacher Dashboard"] .st-data-table td[data-col="modality"] { padding-left: 48px; }
+  body[data-page="Teacher Dashboard"] .st-data-table td[data-col="activity"] { flex-basis: 100%; padding-left: 48px; font-size: 0.781rem; }
+  body[data-page="Teacher Dashboard"] .st-data-table td[data-col="actions"] { flex-basis: 100%; padding-left: 48px; }
+  body[data-page="Teacher Dashboard"] .st-data-table td[data-col="actions"] .st-row-actions { justify-content: flex-start; }
+  body[data-page="Teacher Dashboard"] .st-pagination { justify-content: center; padding: 14px 16px; }
+  body[data-page="Teacher Dashboard"] .st-pagination-info { width: 100%; text-align: center; }
+  body[data-page="Teacher Dashboard"] .st-page-btn.is-far { display: none; }
+}
+
+/* ============================================================
+   Motion: charts and figures fill in when a panel scrolls into
+   view, and again if scrolled back to -- see the IntersectionObserver
+   in dashboard.js that toggles .is-inview on [data-animate] panels.
+   ============================================================ */
+
+[data-animate] .st-hbar {
+  width: 0;
+  transition: width var(--st-t-fill, 800ms) var(--st-ease-out, ease);
+}
+[data-animate].is-inview .st-hbar { width: var(--w); }
+[data-animate] .st-hbar-row:nth-child(2) .st-hbar { transition-delay: 90ms; }
+[data-animate] .st-hbar-row:nth-child(3) .st-hbar { transition-delay: 180ms; }
+[data-animate] .st-hbar-value { opacity: 0; transition: opacity 300ms ease; }
+[data-animate].is-inview .st-hbar-value { opacity: 1; transition-delay: 450ms; }
+
+[data-animate] .st-risk-strip {
+  clip-path: inset(0 100% 0 0 round 999px);
+  transition: clip-path 900ms var(--st-ease-out, ease);
+}
+[data-animate].is-inview .st-risk-strip { clip-path: inset(0 0 0 0 round 999px); }
+
+[data-animate] .st-attention-risk .meter i {
+  width: 0;
+  transition: width var(--st-t-fill, 800ms) var(--st-ease-out, ease);
+}
+[data-animate].is-inview .st-attention-risk .meter i { width: var(--w); }
+[data-animate] .st-attention-row:nth-child(2) .meter i { transition-delay: 70ms; }
+[data-animate] .st-attention-row:nth-child(3) .meter i { transition-delay: 140ms; }
+[data-animate] .st-attention-row:nth-child(4) .meter i { transition-delay: 210ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-animate] .st-risk-strip { clip-path: none; }
+  [data-animate] .st-hbar { width: var(--w); }
+  [data-animate] .st-hbar-value { opacity: 1; }
+  [data-animate] .st-attention-risk .meter i { width: var(--w); }
+}
+
+/* ============================================================
+   Shared with other pages (notifications.html, clc-overview.html,
+   class-management.html) -- left as-is by the dashboard UI revision.
+   ============================================================ */
 
 .st-quick-list{
     flex:1;
@@ -599,204 +1412,6 @@ body[data-page="Teacher Dashboard"] #riskChartView.chart-canvas-wrap{
     color:var(--st-primary-container);
 }
 
-.st-registry-head{
-    padding:24px;
-    border-bottom:1px solid rgba(195,198,207,.10);
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:space-between;
-    align-items:center;
-    gap:16px;
-}
-
-.st-registry-tools{
-    display:flex;
-    flex-wrap:wrap;
-    align-items:center;
-    gap:8px;
-}
-
-.st-search{
-    position:relative;
-    min-width:240px;
-}
-
-.st-search .material-symbols-outlined{
-    position:absolute;
-    left:12px;
-    top:50%;
-    transform:translateY(-50%);
-    font-size:1.125rem;
-    color:var(--st-outline);
-    pointer-events:none;
-}
-
-.st-search input{
-    width:100%;
-    padding:8px 16px 8px 40px;
-    border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-button-radius);
-    font-size: var(--st-font-size-label);
-    font-family:var(--st-font-body);
-    transition:var(--st-transition);
-}
-
-.st-search input:focus{
-    outline:none;
-    border-color:var(--st-secondary);
-    box-shadow:var(--st-focus-ring);
-}
-
-.st-tool-btn{
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    padding:8px 12px;
-    border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-button-radius);
-    background:#fff;
-    color:var(--st-on-surface-variant);
-    font-size: var(--st-font-size-caption);
-    font-weight:500;
-    cursor:pointer;
-    transition:var(--st-transition);
-}
-
-.st-tool-btn:hover{ background:var(--st-surface); }
-
-.st-tool-btn .material-symbols-outlined{ font-size:1.125rem; }
-
-.st-table-scroll{
-    overflow-x:auto;
-}
-
-.st-data-table{
-    width:100%;
-    border-collapse:collapse;
-    text-align:left;
-}
-
-.st-data-table thead tr{
-    background:var(--st-surface-container-low);
-}
-
-.st-data-table th{
-    padding:16px 24px;
-    font-size: var(--st-font-size-label);
-    font-weight:700;
-    letter-spacing:.05em;
-    text-transform:uppercase;
-    color:var(--st-on-surface-variant);
-}
-
-.st-data-table th.is-center{ text-align:center; }
-
-.st-data-table tbody tr{
-    border-top:1px solid rgba(195,198,207,.10);
-    transition:var(--st-transition-color);
-    cursor:pointer;
-}
-
-.st-data-table tbody tr:hover{ background:var(--st-surface); }
-
-.st-data-table td{
-    padding:16px 24px;
-    font-size: var(--st-font-size-small);
-    color:var(--st-on-surface-variant);
-    vertical-align:middle;
-}
-
-.st-learner-name{
-    font-size: var(--st-font-size-body);
-    font-weight:600;
-    color:var(--st-primary);
-}
-
-.st-learner-id{
-    font-size: var(--st-font-size-caption);
-    color:var(--st-outline);
-}
-
-.st-row-actions{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-}
-
-.st-btn-xs{
-    padding:6px 12px;
-    font-size: var(--st-font-size-micro);
-    font-weight:700;
-    height:auto;
-    border-radius:var(--st-button-radius);
-}
-
-.st-icon-btn-sm{
-    padding:4px;
-    border:none;
-    background:transparent;
-    border-radius:var(--st-radius-sm);
-    color:var(--st-on-surface-variant);
-    cursor:pointer;
-    display:flex;
-    transition:var(--st-transition-color);
-}
-
-.st-icon-btn-sm:hover{ background:var(--st-surface-container); }
-
-.st-icon-btn-sm .material-symbols-outlined{ font-size:1.125rem; }
-
-.st-pagination{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    flex-wrap:wrap;
-    gap:16px;
-    padding:16px 24px;
-    border-top:1px solid rgba(195,198,207,.10);
-}
-
-.st-pagination-info{
-    font-size: var(--st-font-size-caption);
-    color:var(--st-on-surface-variant);
-}
-
-.st-pagination-controls{
-    display:flex;
-    align-items:center;
-    gap:4px;
-    flex-wrap:wrap;
-    max-width:100%;
-}
-
-.st-page-btn{
-    min-width:32px;
-    height:32px;
-    padding:0 8px;
-    border:1px solid var(--st-outline-variant);
-    background:#fff;
-    border-radius:var(--st-radius-sm);
-    font-size: var(--st-font-size-caption);
-    font-weight:600;
-    color:var(--st-on-surface-variant);
-    cursor:pointer;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    transition:var(--st-transition);
-}
-
-.st-page-btn:hover:not(:disabled){ background:var(--st-surface); }
-
-.st-page-btn.is-active{
-    background:var(--st-primary);
-    color:#fff;
-    border-color:var(--st-primary);
-}
-
-.st-page-btn:disabled{ opacity:.4; cursor:not-allowed; }
-
 .st-empty{
     flex:1;
     display:flex;
@@ -827,51 +1442,6 @@ body[data-page="Teacher Dashboard"] #riskChartView.chart-canvas-wrap{
     font-size: var(--st-font-size-label);
     font-style:italic;
     color:var(--st-outline);
-}
-
-@media (max-width:1200px){
-    .col-8{ grid-column:span 12; }
-    .col-4{ grid-column:span 12; }
-    .st-riskchart-side{ width:40%; }
-    .st-filter-row{ grid-template-columns:1fr; }
-}
-
-@media (max-width:992px){
-    .col-3{ grid-column:span 6; }
-    .col-6{ grid-column:span 12; }
-    .st-filter-controls{ grid-template-columns:1fr 1fr; }
-    .st-notif-banner,
-    .st-riskchart{ flex-wrap:wrap; }
-    .st-riskchart-side{ width:100%; }
-}
-
-@media (max-width:768px){
-    .st-welcome-title{ font-size: var(--st-font-size-title); }
-    .col-3{ grid-column:span 12; }
-    .st-term-card{ width:100%; overflow-x:auto; }
-    .st-notif-banner{ padding:8px 16px; }
-    /* Scoped to mobile only -- forcing these at desktop widths made the
-       4-column filter grid's equal `1fr` tracks fight over the widest
-       cell's content (the Apply Filters button), overflowing the row.
-       A single column here sidesteps that entirely. */
-    .st-filter-row{ width:100%; min-width:0; }
-    .st-filter-controls{ min-width:0; grid-template-columns:1fr; }
-    /* A wrapped row of flex:1 segment buttons still doesn't fit at
-       narrow widths (each keeps a text-driven minimum width) -- scroll
-       the strip horizontally within its own bounds instead, the same
-       pattern native segmented controls use on small screens. */
-    .st-filter-group--level{ flex:1 1 100%; min-width:0; }
-    .st-segment{
-        flex-wrap:nowrap;
-        overflow-x:auto;
-        -webkit-overflow-scrolling:touch;
-        scrollbar-width:none;
-    }
-    .st-segment::-webkit-scrollbar{ display:none; }
-    .st-segment button{ flex:0 0 auto; }
-    .st-registry-head{ padding:16px; }
-    .st-data-table th,
-    .st-data-table td{ padding:12px 16px; }
 }
 
 .st-alert-card{
@@ -1053,156 +1623,4 @@ body[data-page="Teacher Dashboard"] #riskChartView.chart-canvas-wrap{
     display:flex;
     align-items:center;
     gap:10px;
-}
-
-.st-stat-row {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 1.25rem;
-}
-
-@media (max-width: 1100px) {
-  .st-stat-row { grid-template-columns: repeat(3, 1fr); }
-}
-
-@media (max-width: 700px) {
-  .st-stat-row { grid-template-columns: 1fr; }
-}
-/* Review revision: replace redundant Quick Actions with an attention list. */
-.st-attention-panel {
-  display: flex;
-  flex-direction: column;
-}
-
-.st-attention-panel-head {
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.st-attention-kicker {
-  margin: 0 0 3px;
-  font-size: var(--st-font-size-micro);
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  color: var(--st-risk-high);
-}
-
-.st-attention-alert-icon {
-  color: var(--st-risk-high);
-  font-size: 1.25rem;
-}
-
-.st-attention-list {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 9px;
-  margin-top: 10px;
-}
-
-.st-attention-row {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 38px 1fr auto;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 11px;
-  border: 1px solid rgba(195, 198, 207, .34);
-  border-radius: var(--st-radius-lg);
-  background: #fff;
-  cursor: pointer;
-  text-align: left;
-  transition: var(--st-transition);
-}
-
-.st-attention-row:hover {
-  transform: translateY(-1px);
-  border-color: rgba(186, 26, 26, .22);
-  box-shadow: var(--st-shadow-xs);
-}
-
-.st-attention-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: var(--st-risk-high-soft);
-  color: var(--st-risk-high);
-  font-size: var(--st-font-size-micro);
-  font-weight: 800;
-}
-
-.st-attention-person {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.st-attention-person strong {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: var(--st-font-size-caption);
-  color: var(--st-on-surface);
-}
-
-.st-attention-person small {
-  margin-top: 2px;
-  font-size: var(--st-font-size-micro);
-  color: var(--st-on-surface-variant);
-}
-
-.st-attention-risk {
-  font-size: var(--st-font-size-body-lg);
-  font-weight: 800;
-}
-
-.st-attention-risk--high { color: var(--st-risk-high); }
-.st-attention-risk--moderate { color: var(--st-risk-moderate); }
-
-.st-attention-view-all {
-  margin-top: 14px;
-  min-height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  border: 1px solid rgba(195, 198, 207, .45);
-  border-radius: var(--st-radius-lg);
-  color: var(--st-primary);
-  text-decoration: none;
-  font-size: var(--st-font-size-caption);
-  font-weight: 700;
-}
-
-.st-attention-view-all .material-symbols-outlined { font-size: 1rem; }
-
-.st-attention-empty {
-  margin: auto 0;
-  padding: 22px 10px;
-  text-align: center;
-  color: var(--st-on-surface-variant);
-  font-size: var(--st-font-size-caption);
-}
-
-
-/* UI polish: dashboard spacing */
-[data-page="Teacher Dashboard"] .st-content { gap: 24px; }
-.st-welcome { align-items: flex-start; gap: 20px; }
-.st-welcome-title { margin: 0; line-height: 1.1; }
-.st-term-card { gap: 20px; padding: 14px 18px; }
-.st-filter-bar { padding: 18px; }
-.st-filter-row { gap: 18px; }
-.st-filter-controls { gap: 10px; }
-.st-dash-grid { gap: 18px; }
-.st-stat-card { padding: 18px; }
-
-@media (max-width: 768px) {
-  [data-page="Teacher Dashboard"] .st-content { gap: 18px; }
-  .st-welcome { gap: 14px; }
-  .st-term-card, .st-filter-bar, .st-stat-card { padding: 14px; }
 }

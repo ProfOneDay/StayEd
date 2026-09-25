@@ -1,3 +1,65 @@
+// Chart.js is loaded via CDN in dashboard.html. These are set once at
+// module load (not per-render) so every chart this page creates shares
+// the same look, and the reduced-motion check gates all of them. Every
+// chart instance below sets its own explicit `animation` option, so
+// Chart.defaults.animation is deliberately left alone here -- Chart.js
+// mutates animation config objects in place to cache a resolved easing
+// function, and pointing the global default at one shared object (as an
+// earlier version of this file did) corrupted that cache across chart
+// instances and silently broke the tooltip's own fade-in animation.
+const ST_REDUCE_MOTION = matchMedia("(prefers-reduced-motion: reduce)").matches;
+if (typeof Chart !== "undefined") {
+  Chart.defaults.font.family = "Inter, system-ui, sans-serif";
+  Chart.defaults.color = "#8a91a0";
+}
+const ST_CHART_STAGGER = (step) =>
+  ST_REDUCE_MOTION ? {} : { delay: (ctx) => (ctx.type === "data" && ctx.mode === "default" ? ctx.dataIndex * step : 0) };
+const ST_LEGEND_BOTTOM = {
+  position: "bottom",
+  labels: { usePointStyle: true, pointStyle: "circle", boxWidth: 8, boxHeight: 8, padding: 16, color: "#5a6275" },
+};
+const ST_TOOLTIP = { backgroundColor: "#111a36", padding: 10, cornerRadius: 8, displayColors: true, boxPadding: 4 };
+// Composition tooltip: "value (share%)" instead of Chart.js's plain "label:
+// value" default -- hovering any doughnut segment, bar, or line point shows
+// the same count + percentage breakdown the panel body already displays.
+// For a single-series chart (doughnut, bar) the share is of that series'
+// own total; for a multi-series chart (the risk trend line, one series per
+// risk level) it's each series' share of that month's total instead.
+function ST_COMPOSE_LABEL(ctx) {
+  const datasets = ctx.chart.data.datasets;
+  const raw = typeof ctx.parsed === "object" ? ctx.parsed.x ?? ctx.parsed.y : ctx.parsed;
+  const value = Number(raw) || 0;
+  const total =
+    datasets.length > 1
+      ? datasets.reduce((sum, d) => sum + (Number(d.data[ctx.dataIndex]) || 0), 0)
+      : datasets[ctx.datasetIndex].data.reduce((sum, v) => sum + (Number(v) || 0), 0);
+  const pct = total ? Math.round((value / total) * 100) : 0;
+  const label = datasets.length > 1 ? ctx.dataset.label : ctx.label;
+  return `${label}: ${value} (${pct}%)`;
+}
+const ST_TOOLTIP_COMPOSE = { ...ST_TOOLTIP, callbacks: { label: ST_COMPOSE_LABEL } };
+// Draws the series total in the middle of a doughnut -- registered once,
+// applied per-chart via `plugins: [ST_CENTER_TOTAL]`.
+const ST_CENTER_TOTAL = {
+  id: "centerTotal",
+  afterDraw(chart) {
+    if (chart.config.type !== "doughnut") return;
+    const { ctx, chartArea: a } = chart;
+    const sum = chart.data.datasets[0].data.reduce((x, y) => x + y, 0);
+    const cx = (a.left + a.right) / 2;
+    const cy = (a.top + a.bottom) / 2;
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#111a36";
+    ctx.font = "800 28px 'Libre Franklin', sans-serif";
+    ctx.fillText(sum, cx, cy + 4);
+    ctx.font = "500 12px Inter, sans-serif";
+    ctx.fillStyle = "#8a91a0";
+    ctx.fillText("learners", cx, cy + 22);
+    ctx.restore();
+  },
+};
+
 class TeacherDashboard {
   static state = {
     learners: [],
@@ -51,6 +113,8 @@ class TeacherDashboard {
       this.applyRegistry({ recomputeStats: false });
 
       this.renderLevelModalityCharts(this.state.filtered);
+
+      this.setupMotionObserver();
     } catch (error) {
       console.error("[Dashboard]", error);
 
@@ -66,7 +130,14 @@ class TeacherDashboard {
     const dismiss = document.querySelector("[data-notif-dismiss]");
 
     dismiss?.addEventListener("click", () => {
-      document.querySelector("[data-notif-banner]")?.remove();
+      const banner = document.querySelector("[data-notif-banner]");
+      if (!banner) return;
+      if (ST_REDUCE_MOTION) {
+        banner.remove();
+        return;
+      }
+      banner.classList.add("is-leaving");
+      banner.addEventListener("transitionend", () => banner.remove(), { once: true });
     });
 
     const seg = document.querySelector("[data-filter-level]");
@@ -190,38 +261,78 @@ class TeacherDashboard {
     if (box) box.innerHTML = "";
 
     const parts = [];
-    if (reminder?.overdue) parts.push(`${reminder.overdue} overdue`);
-    if (reminder?.dueToday) parts.push(`${reminder.dueToday} due today`);
-    if (reminder?.dueSoon) parts.push(`${reminder.dueSoon} due within 3 days`);
+    if (reminder?.overdue) parts.push([reminder.overdue, "overdue"]);
+    if (reminder?.dueToday) parts.push([reminder.dueToday, "due today"]);
+    if (reminder?.dueSoon) parts.push([reminder.dueSoon, "due within 3 days"]);
 
     const list = document.querySelector("[data-stat-intervention-detail]");
     if (list) {
-      list.innerHTML = parts.map((p) => `<li>${p}</li>`).join("");
+      list.innerHTML = parts.length
+        ? parts.map(([count, label]) => `<li><strong class="num" data-countup>${count}</strong>${label}</li>`).join("")
+        : `<li>Nothing to follow up on right now.</li>`;
+      list.querySelectorAll("[data-countup]").forEach((el) => this.countTo(el, Number(el.textContent)));
     }
   }
   static renderStatistics(stats = {}) {
-    this.setText("[data-stat-total]", stats.registered);
-    this.setText("[data-stat-high]", stats.high);
-    this.setText("[data-stat-moderate]", stats.moderate);
-    this.setText("[data-stat-low]", stats.low);
+    const total = Number(stats.registered) || 0;
+    const high = Number(stats.high) || 0;
+    const moderate = Number(stats.moderate) || 0;
+    const low = Number(stats.low) || 0;
+
+    this.countTo(document.querySelector("[data-stat-total]"), total);
+    this.countTo(document.querySelector("[data-stat-high]"), high);
+    this.countTo(document.querySelector("[data-stat-moderate]"), moderate);
+    this.countTo(document.querySelector("[data-stat-low]"), low);
+
+    // Proportional risk strip: each segment's flex-grow equals its own
+    // count, so the strip's visual split always matches the legend below
+    // it exactly (a plain percentage-of-100 grow could round differently
+    // per segment and drift out of sync with the displayed percentages).
+    const grow = (selector, value) => {
+      const el = document.querySelector(selector);
+      if (el) el.style.flexGrow = String(Math.max(value, 0.0001));
+    };
+    grow("[data-risk-strip-high]", high);
+    grow("[data-risk-strip-moderate]", moderate);
+    grow("[data-risk-strip-low]", low);
+
+    const strip = document.querySelector("[data-risk-strip]");
+    if (strip) strip.setAttribute("aria-label", `${high} high, ${moderate} moderate, ${low} low risk`);
+
+    const pct = (value) => (total > 0 ? Math.round((value / total) * 100) : 0);
+    // The percentage text node sits before the nested .pct-suffix span
+    // (" of learners"), so replacing just firstChild's text leaves that
+    // suffix span in place instead of needing to re-append it.
+    const setPct = (selector, value) => {
+      const el = document.querySelector(selector);
+      if (el && el.firstChild) el.firstChild.textContent = `${pct(value)}%`;
+    };
+    setPct("[data-stat-high-pct]", high);
+    setPct("[data-stat-moderate-pct]", moderate);
+    setPct("[data-stat-low-pct]", low);
   }
 
   static renderRiskChart(dist = {}, summary = {}) {
     const rawMax = dist.scale_max || 25;
     const max = Math.max(5, Math.ceil(rawMax / 5) * 5);
+    const total = (dist.high || 0) + (dist.moderate || 0) + (dist.low || 0);
 
     const setBar = (level, value) => {
       const bar = document.querySelector(`[data-bar="${level}"]`);
-
-      if (!bar) return;
-
+      const valueEl = document.querySelector(`[data-bar-value="${level}"]`);
+      const pctEl = document.querySelector(`[data-bar-pct="${level}"]`);
       const pct = Math.min(100, Math.round((value / max) * 100));
+      const shareOfTotal = total > 0 ? Math.round((value / total) * 100) : 0;
 
-      requestAnimationFrame(() => {
-        bar.style.height = `${pct}%`;
-      });
-
-      bar.setAttribute("title", `${this.capitalize(level)} Risk: ${value}`);
+      if (bar) {
+        bar.style.setProperty("--w", `${pct}%`);
+        const track = bar.closest(".st-hbar-track");
+        const tipText = `${this.capitalize(level)} risk: ${value} (${shareOfTotal}%)`;
+        if (track) track.setAttribute("data-tooltip", tipText);
+        bar.setAttribute("title", tipText);
+      }
+      if (valueEl) valueEl.firstChild.textContent = String(value);
+      if (pctEl) pctEl.textContent = `${shareOfTotal}%`;
     };
 
     setBar("high", dist.high || 0);
@@ -231,10 +342,12 @@ class TeacherDashboard {
     const yaxis = document.querySelector("[data-riskchart-yaxis]");
 
     if (yaxis) {
+      // Ascending (0 -> max) so the horizontal scale reads left to right
+      // under the bars, unlike the old vertical chart's top-to-bottom axis.
       const steps = 5;
       yaxis.innerHTML = Array.from(
         { length: steps + 1 },
-        (_, i) => `<span>${Math.round((max / steps) * (steps - i))}</span>`,
+        (_, i) => `<span>${Math.round((max / steps) * i)}</span>`,
       ).join("");
     }
 
@@ -251,7 +364,7 @@ class TeacherDashboard {
                 <li>
                     <span class="st-bullet ${
                       item.tone === "error" ? "st-bullet--error" : ""
-                    }">&bull;</span>
+                    }"></span>
                     ${item.text}
                 </li>
             `,
@@ -318,11 +431,18 @@ class TeacherDashboard {
       note.textContent = "Current risk distribution for your filtered learners.";
       this.chartInstances.risk = new Chart(canvas.getContext("2d"), {
         type: "doughnut",
+        plugins: [ST_CENTER_TOTAL],
         data: {
-          labels: ["High Risk", "Moderate Risk", "Low Risk"],
-          datasets: [{ data: [high, moderate, low], backgroundColor: ["#ba1a1a", "#f39422", "#6bbf59"], borderColor: "#fff", borderWidth: 2 }],
+          labels: ["High risk", "Moderate risk", "Low risk"],
+          datasets: [{ data: [high, moderate, low], backgroundColor: ["#ba1a1a", "#f39422", "#6bbf59"], borderColor: "#fff", borderWidth: 3, hoverOffset: 4 }],
         },
-        options: { responsive: true, maintainAspectRatio: false, cutout: "62%", plugins: { legend: { position: "bottom" }, tooltip: { enabled: true } } },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: "68%",
+          animation: ST_REDUCE_MOTION ? false : { animateRotate: true, animateScale: false, duration: 1000, easing: "easeOutQuart" },
+          plugins: { legend: ST_LEGEND_BOTTOM, tooltip: ST_TOOLTIP_COMPOSE },
+        },
       });
       return;
     }
@@ -339,12 +459,23 @@ class TeacherDashboard {
         data: {
           labels: trend.map((m) => m.month),
           datasets: [
-            { label: "High", data: trend.map((m) => m.high), borderColor: "#ba1a1a", backgroundColor: "#ba1a1a22", tension: 0.3 },
-            { label: "Moderate", data: trend.map((m) => m.moderate), borderColor: "#f39422", backgroundColor: "#f3942222", tension: 0.3 },
-            { label: "Low", data: trend.map((m) => m.low), borderColor: "#6bbf59", backgroundColor: "#6bbf5922", tension: 0.3 },
+            { label: "High", data: trend.map((m) => m.high), borderColor: "#ba1a1a", backgroundColor: "#ba1a1a", pointRadius: 3, pointHoverRadius: 5, borderWidth: 2.5, tension: 0.35 },
+            { label: "Moderate", data: trend.map((m) => m.moderate), borderColor: "#f39422", backgroundColor: "#f39422", pointRadius: 3, pointHoverRadius: 5, borderWidth: 2.5, tension: 0.35 },
+            { label: "Low", data: trend.map((m) => m.low), borderColor: "#6bbf59", backgroundColor: "#6bbf59", pointRadius: 3, pointHoverRadius: 5, borderWidth: 2.5, tension: 0.35 },
           ],
         },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: "index", intersect: false },
+          animation: ST_REDUCE_MOTION ? false : { duration: 700, easing: "easeOutQuart", ...ST_CHART_STAGGER(110) },
+          animations: ST_REDUCE_MOTION ? {} : { y: { from: (ctx) => (ctx.type === "data" ? ctx.chart.scales.y.getPixelForValue(0) : undefined) } },
+          plugins: { legend: ST_LEGEND_BOTTOM, tooltip: ST_TOOLTIP_COMPOSE },
+          scales: {
+            y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: "#eef1f5" }, border: { display: false } },
+            x: { grid: { display: false }, border: { display: false } },
+          },
+        },
       });
     }
   }
@@ -355,13 +486,18 @@ class TeacherDashboard {
 
     const countBy = (order, field) => order.map((key) => rows.filter((r) => r[field] === key).length);
 
+    // Non-risk categories deliberately never reuse the risk red/orange/green
+    // (--st-cat-1..4: navy, slate blue, teal, light blue) so these two
+    // charts can't be misread as risk levels.
+    const catColors = ["#12355b", "#4c6f95", "#006a68", "#9db5d3"];
+
     this.renderDistributionChart({
       key: "level",
       canvasId: "levelChartCanvas",
       noteId: "levelChartNote",
       labels: levelOrder,
       values: countBy(levelOrder, "level"),
-      colors: ["#3B7DDD", "#6bbf59", "#f39422", "#8E5BD6"],
+      colors: catColors,
       noteText: "Learner count per ALS learning level for your currently filtered learners.",
     });
 
@@ -371,7 +507,7 @@ class TeacherDashboard {
       noteId: "modalityChartNote",
       labels: modalityOrder,
       values: countBy(modalityOrder, "modality"),
-      colors: ["#3B7DDD", "#f39422", "#8E5BD6"],
+      colors: catColors.slice(0, 3),
       noteText: "Learner count per learning delivery mode for your currently filtered learners.",
     });
   }
@@ -390,20 +526,32 @@ class TeacherDashboard {
     const type = this.chartType[key] === "pie" ? "doughnut" : "bar";
     this.chartInstances[key] = new Chart(canvas.getContext("2d"), {
       type,
+      plugins: type === "doughnut" ? [ST_CENTER_TOTAL] : [],
       data: {
         labels,
         datasets: [
-          type === "pie"
-            ? { data: values, backgroundColor: colors, borderColor: "#fff", borderWidth: 2 }
-            : { label: "Learners", data: values, backgroundColor: colors },
+          type === "doughnut"
+            ? { data: values, backgroundColor: colors, borderColor: "#fff", borderWidth: 3, hoverOffset: 4 }
+            : { label: "Learners", data: values, backgroundColor: colors, borderRadius: 6, borderSkipped: false, barThickness: 22 },
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { position: "bottom", display: type === "doughnut" }, tooltip: { enabled: true } },
-        cutout: type === "doughnut" ? "62%" : undefined,
-        scales: type === "doughnut" ? {} : { y: { beginAtZero: true, ticks: { precision: 0 } } },
+        indexAxis: type === "bar" ? "y" : undefined,
+        animation:
+          type === "doughnut"
+            ? ST_REDUCE_MOTION ? false : { animateRotate: true, animateScale: false, duration: 1000, easing: "easeOutQuart" }
+            : ST_REDUCE_MOTION ? false : { duration: 900, easing: "easeOutQuart", ...ST_CHART_STAGGER(90) },
+        plugins: { legend: type === "doughnut" ? ST_LEGEND_BOTTOM : { display: false }, tooltip: ST_TOOLTIP_COMPOSE },
+        cutout: type === "doughnut" ? "68%" : undefined,
+        scales:
+          type === "doughnut"
+            ? {}
+            : {
+                x: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: "#eef1f5" }, border: { display: false } },
+                y: { grid: { display: false }, border: { display: false }, ticks: { color: "#43474e", font: { weight: "600" } } },
+              },
       },
     });
   }
@@ -442,15 +590,15 @@ class TeacherDashboard {
         .slice(0, 2)
         .map((part) => part[0]?.toUpperCase())
         .join("") || "?";
-      const levelClass = learner.risk === "High" ? "high" : "moderate";
+      const isModerate = learner.risk === "Moderate";
       return `
-        <button type="button" class="st-attention-row" data-attention-learner="${learner.id}">
+        <button type="button" class="st-attention-row${isModerate ? " is-moderate" : ""}" data-attention-learner="${learner.id}">
           <span class="st-attention-avatar">${initials}</span>
           <span class="st-attention-person">
             <strong>${esc(learner.name || "Learner")}</strong>
             <small>${esc(learner.lrn || "No LRN")}</small>
           </span>
-          <span class="st-attention-risk st-attention-risk--${levelClass}">${pct}%</span>
+          <span class="st-attention-risk" title="Predicted dropout probability">${pct}% risk<span class="meter"><i style="--w:${pct}%"></i></span></span>
         </button>
       `;
     }).join("");
@@ -603,7 +751,7 @@ class TeacherDashboard {
     if (!pageRows.length) {
       body.innerHTML = `
                 <tr>
-                    <td colspan="7" style="text-align:center;padding:32px;color:var(--st-outline);font-style:italic;">
+                    <td colspan="6" class="st-registry-loading">
                         No learners match your search.
                     </td>
                 </tr>
@@ -635,22 +783,24 @@ class TeacherDashboard {
 
     return `
             <tr tabindex="0">
-                <td>
-                    <button type="button" class="st-avatar-initials st-avatar-initials${initialsTheme} st-avatar-btn"
-                        data-view-learner="${l.id}" aria-label="View ${l.name}'s profile">${initials}</button>
+                <td data-col="learner">
+                    <div class="st-learner-cell">
+                        <button type="button" class="st-avatar-initials st-avatar-initials${initialsTheme} st-avatar-btn"
+                            data-view-learner="${l.id}" aria-label="View ${l.name}'s profile">${initials}</button>
+                        <div>
+                            <button type="button" class="st-learner-name st-learner-name-link" data-view-learner="${l.id}">${l.name}</button>
+                            <p class="st-learner-id">LRN ${l.lrn}</p>
+                        </div>
+                    </div>
                 </td>
-                <td>
-                    <button type="button" class="st-learner-name st-learner-name-link" data-view-learner="${l.id}">${l.name}</button>
-                    <p class="st-learner-id">ID: ${l.lrn}</p>
-                </td>
-                <td>${l.level}</td>
-                <td>${this.modalityPill(l.modality)}</td>
-                <td>${this.riskBadge(l.risk)}</td>
-                <td style="font-size:0.75rem;">${l.activity_text || "\u2014"}</td>
-                <td>
+                <td data-col="level">${l.level}</td>
+                <td data-col="modality">${this.modalityPill(l.modality)}</td>
+                <td data-col="risk">${this.riskBadge(l.risk)}</td>
+                <td data-col="activity" class="st-activity">${l.activity_text || "\u2014"}</td>
+                <td data-col="actions">
                     <div class="st-row-actions">
-                        <button class="st-btn st-btn-primary st-btn-xs"
-                            data-view-learner="${l.id}">View Profile</button>
+                        <button class="st-btn st-btn-outline st-btn-xs"
+                            data-view-learner="${l.id}">View profile</button>
                         <button class="st-icon-btn-sm" aria-label="More options">
                             <span class="material-symbols-outlined">more_vert</span>
                         </button>
@@ -744,9 +894,7 @@ class TeacherDashboard {
   }
 
   static modalityPill(modality) {
-    const teal = modality === "Modular" ? " st-pill--teal" : "";
-
-    return `<span class="st-pill${teal}">${modality || "\u2014"}</span>`;
+    return `<span class="st-pill">${modality || "\u2014"}</span>`;
   }
 
   static setText(selector, value) {
@@ -754,6 +902,66 @@ class TeacherDashboard {
     if (el && value !== undefined && value !== null) {
       el.textContent = value;
     }
+  }
+
+  // Counts a [data-countup] element up from 0 to `value` over ~800ms
+  // (ease-out-cubic), remembering the target on the element itself
+  // (dataset.final) so the motion observer's "replay on scroll back into
+  // view" can re-trigger the same count-up without needing the value
+  // passed in again. Writes the value immediately if it isn't a finite
+  // number (e.g. "--") or motion is reduced.
+  static countTo(el, value) {
+    if (!el) return;
+    const end = Number(value ?? el.dataset.final ?? el.textContent);
+    el.dataset.final = Number.isFinite(end) ? end : (value ?? "");
+    if (ST_REDUCE_MOTION || !Number.isFinite(end)) {
+      el.textContent = value ?? el.dataset.final;
+      return;
+    }
+    const t0 = performance.now();
+    const dur = 800;
+    const tick = (t) => {
+      const k = Math.min(1, (t - t0) / dur);
+      const eased = 1 - Math.pow(1 - k, 3);
+      el.textContent = Math.round(end * eased);
+      if (k < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  // One IntersectionObserver for every [data-animate] panel: fills bars,
+  // strips and meters in via CSS (.is-inview, see dashboard.css), counts
+  // up their numbers, and replays their Chart.js charts -- again each
+  // time the panel comes back into view (scroll away, then scroll back).
+  static setupMotionObserver() {
+    if (this._motionObserver) return;
+    const panels = document.querySelectorAll("[data-animate]");
+    if (!panels.length) return;
+
+    this._motionObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(({ target, isIntersecting, intersectionRatio }) => {
+          if (isIntersecting && intersectionRatio >= 0.3 && !target.classList.contains("is-inview")) {
+            target.classList.add("is-inview");
+            target.querySelectorAll("[data-countup]").forEach((el) => this.countTo(el));
+            if (!ST_REDUCE_MOTION) {
+              target.querySelectorAll("canvas").forEach((canvas) => {
+                const chart = typeof Chart !== "undefined" && Chart.getChart(canvas);
+                if (chart) {
+                  chart.reset();
+                  chart.update();
+                }
+              });
+            }
+          } else if (!isIntersecting) {
+            target.classList.remove("is-inview");
+          }
+        });
+      },
+      { threshold: [0, 0.3] },
+    );
+
+    panels.forEach((panel) => this._motionObserver.observe(panel));
   }
 
   static timeGreeting() {
@@ -771,7 +979,7 @@ class TeacherDashboard {
     const body = document.querySelector("[data-registry-body]");
 
     if (body && window.Skeletons) {
-      body.innerHTML = Skeletons.tableRows(5, 7);
+      body.innerHTML = Skeletons.tableRows(5, 6);
     }
   }
 }

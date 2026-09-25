@@ -1,66 +1,41 @@
-<div class="st-stat-row">
-  <div class="st-stat-card st-stat-card--primary">
-    <div class="st-stat-card-head">
-      <span class="st-stat-card-label">Registered Learners</span>
-      <span class="material-symbols-outlined st-stat-card-icon">groups</span>
+<div class="st-panel st-panel-pad col-8" aria-label="Learner overview" data-animate>
+  <div class="st-overview">
+    <div class="st-overview-total">
+      <div class="value num" data-stat-total data-countup>0</div>
+      <div class="label">registered learners</div>
     </div>
-    <div class="st-stat-card-body">
-      <p class="st-stat-card-value" data-stat-total>--</p>
+    <div>
+      <div class="st-risk-strip" data-risk-strip role="img" aria-label="Risk distribution">
+        <span class="high" data-risk-strip-high></span>
+        <span class="mod" data-risk-strip-moderate></span>
+        <span class="low" data-risk-strip-low></span>
+      </div>
+      <div class="st-risk-legend">
+        <div class="st-risk-legend-item high">
+          <span class="count num" data-stat-high data-countup>0</span>
+          <span class="name">High risk</span>
+          <span class="pct num" data-stat-high-pct>0%<span class="pct-suffix"> of learners</span></span>
+        </div>
+        <div class="st-risk-legend-item mod">
+          <span class="count num" data-stat-moderate data-countup>0</span>
+          <span class="name">Moderate risk</span>
+          <span class="pct num" data-stat-moderate-pct>0%<span class="pct-suffix"> of learners</span></span>
+        </div>
+        <div class="st-risk-legend-item low">
+          <span class="count num" data-stat-low data-countup>0</span>
+          <span class="name">Low risk</span>
+          <span class="pct num" data-stat-low-pct>0%<span class="pct-suffix"> of learners</span></span>
+        </div>
+      </div>
     </div>
   </div>
+</div>
 
-  <div class="st-stat-card st-stat-card--high">
-    <div class="st-stat-card-head">
-      <span class="st-stat-card-label">High Risk Learners</span>
-      <span class="material-symbols-outlined st-stat-card-icon">warning</span>
-    </div>
-    <div class="st-stat-card-body">
-      <p class="st-stat-card-value" data-stat-high>--</p>
-    </div>
+<div class="st-panel st-panel-pad col-4 st-followup-card" aria-label="Interventions to update" data-animate>
+  <div class="head">
+    <span class="material-symbols-outlined">assignment_late</span>
+    Interventions to update
   </div>
-
-  <div class="st-stat-card st-stat-card--moderate">
-    <div class="st-stat-card-head">
-      <span class="st-stat-card-label">Moderate Risk Learners</span>
-      <span class="material-symbols-outlined st-stat-card-icon"
-        >notification_important</span
-      >
-    </div>
-    <div class="st-stat-card-body">
-      <p class="st-stat-card-value" data-stat-moderate>--</p>
-    </div>
-  </div>
-
-  <div class="st-stat-card st-stat-card--low">
-    <div class="st-stat-card-head">
-      <span class="st-stat-card-label">Low Risk Learners</span>
-      <span class="material-symbols-outlined st-stat-card-icon"
-        >verified_user</span
-      >
-    </div>
-    <div class="st-stat-card-body">
-      <p class="st-stat-card-value" data-stat-low>--</p>
-    </div>
-  </div>
-
-    <div class="st-stat-card st-stat-card--moderate">
-    <div class="st-stat-card-head">
-      <span class="st-stat-card-label">Interventions to Update</span>
-      <span class="material-symbols-outlined st-stat-card-icon"
-        >assignment_late</span
-      >
-    </div>
-    <div class="st-stat-card-body">
-      <ul
-        data-stat-intervention-detail
-        style="
-          margin: 0;
-          padding-left: 18px;
-          font-size: 0.875rem;
-          font-weight: 600;
-          color: #92400e;
-          line-height: 1.5;
-        "
-      ></ul>
-    </div>
-  </div>
+  <ul data-stat-intervention-detail></ul>
+  <p class="hint">Update these in each learner's profile.</p>
+</div>

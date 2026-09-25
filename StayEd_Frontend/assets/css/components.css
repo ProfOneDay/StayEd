@@ -31,7 +31,7 @@
 }
 
 .st-btn:active {
-  transform: scale(0.98);
+  transform: scale(0.96);
 }
 
 .st-btn-primary {
@@ -42,6 +42,8 @@
 
 .st-btn-primary:hover {
   background: var(--st-primary-dark);
+
+  box-shadow: 0 4px 12px rgba(18, 53, 91, 0.22);
 }
 
 .st-btn-secondary {
@@ -57,13 +59,15 @@
 .st-btn-outline {
   background: #fff;
 
-  border: 1px solid var(--st-outline-variant);
+  border: 1px solid var(--st-line-strong, var(--st-outline-variant));
 
   color: var(--st-primary);
 }
 
 .st-btn-outline:hover {
-  background: var(--st-surface-container-low);
+  background: var(--st-navy-soft, var(--st-surface-container-low));
+
+  border-color: var(--st-primary);
 }
 
 .st-btn-danger {

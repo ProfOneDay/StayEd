@@ -3,7 +3,7 @@
     <div>
       <h3 class="st-panel-title">Student Registry Summary</h3>
       <p class="st-panel-subtitle">
-        A quick overview of learners belonging to the currently selected class.
+        Learners in the currently selected class.
       </p>
     </div>
 
@@ -12,7 +12,7 @@
         <span class="material-symbols-outlined">search</span>
         <input
           type="text"
-          placeholder="Search learner..."
+          placeholder="Search by name or LRN"
           data-registry-search
           aria-label="Search learner by name or LRN"
         />
@@ -25,15 +25,11 @@
 
       <button class="st-tool-btn" data-registry-sort>
         <span class="material-symbols-outlined">swap_vert</span>
-        Sort: Risk Level
+        Sort: Risk level
       </button>
 
-      <a
-        class="st-btn st-btn-outline st-btn-xs"
-        href="student-registry.html"
-        style="padding: 8px 16px; font-size: 14px"
-      >
-        View Full Registry
+      <a class="st-btn st-btn-outline st-btn-xs" href="student-registry.html">
+        View full registry
       </a>
     </div>
   </div>
@@ -42,28 +38,17 @@
     <table class="st-data-table">
       <thead>
         <tr>
-          <th>Profile</th>
-          <th>Learner Name</th>
-          <th>Learning Level</th>
+          <th>Learner</th>
+          <th>Learning level</th>
           <th>Modality</th>
-          <th>Risk Level</th>
-          <th>Latest Activity</th>
+          <th>Risk level</th>
+          <th>Latest activity</th>
           <th class="is-center">Actions</th>
         </tr>
       </thead>
       <tbody data-registry-body>
         <tr>
-          <td
-            colspan="7"
-            style="
-              text-align: center;
-              padding: 32px;
-              color: var(--st-outline);
-              font-style: italic;
-            "
-          >
-            Loading learners…
-          </td>
+          <td colspan="6" class="st-registry-loading">Loading learners…</td>
         </tr>
       </tbody>
     </table>

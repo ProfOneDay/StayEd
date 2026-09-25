@@ -1,0 +1,813 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>StayEd | Teacher Dashboard (prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+<style>
+/* ============================================================
+   StayEd teacher dashboard — prototype
+   Tokens map 1:1 onto variables.css (see Claude Code prompt).
+   ============================================================ */
+:root{
+  --navy:#12355b; --navy-deep:#0d2846; --navy-soft:#e8eef6;
+  --teal:#006a68; --teal-soft:#e3f4f3;
+  --bg:#f3f5f8; --card:#ffffff; --line:#e1e5ec; --line-strong:#cfd5de;
+  --ink:#111a36; --muted:#5a6275; --faint:#8a91a0;
+
+  --high:#ba1a1a; --high-ink:#a01414; --high-soft:#fdecea;
+  --mod:#f39422;  --mod-ink:#8f5200;  --mod-soft:#fef3e4;
+  --low:#6bbf59;  --low-ink:#2c7121;  --low-soft:#edf7ea;
+
+  /* Non-risk categories (level, modality) use a navy/teal ramp so they
+     never read as risk levels. */
+  --cat-1:#12355b; --cat-2:#4c6f95; --cat-3:#006a68; --cat-4:#9db5d3;
+
+  --font-head:"Libre Franklin",system-ui,sans-serif;
+  --font-body:"Inter",system-ui,sans-serif;
+  --r-card:12px; --r-ctl:8px;
+  --shadow:0 1px 2px rgba(17,26,54,.04),0 2px 8px rgba(17,26,54,.04);
+  --sidebar-w:256px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:var(--font-body);color:var(--ink);background:var(--bg);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+.material-symbols-outlined{font-size:20px;line-height:1;vertical-align:middle;font-variation-settings:"opsz" 20,"wght" 400}
+.num{font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+
+/* ---------- App shell ---------- */
+.st-app{display:flex;min-height:100vh}
+.st-sidebar{
+  position:fixed;inset:0 auto 0 0;width:var(--sidebar-w);background:var(--navy);color:#fff;
+  display:flex;flex-direction:column;z-index:40;transition:transform .25s ease;
+  padding-top:env(safe-area-inset-top,0px);
+}
+.st-sidebar-brand{display:flex;align-items:center;gap:10px;height:64px;padding:0 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+.st-sidebar-brand img{width:30px;height:30px}
+.st-sidebar-brand h2{margin:0;font-family:var(--font-head);font-weight:800;font-size:21px;letter-spacing:-.01em}
+.st-sidebar-nav{flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:2px}
+.st-sidebar-nav a,.st-submenu-trigger{
+  display:flex;align-items:center;gap:12px;width:100%;padding:9px 12px;border-radius:var(--r-ctl);
+  color:rgba(255,255,255,.78);text-decoration:none;font-size:14.5px;font-weight:500;background:none;border:0;cursor:pointer;text-align:left;
+}
+.st-sidebar-nav a:hover,.st-submenu-trigger:hover{background:rgba(255,255,255,.07);color:#fff}
+.st-sidebar-nav a.active{background:#fff;color:var(--navy);font-weight:600}
+.st-sidebar-nav a.active .material-symbols-outlined{font-variation-settings:"FILL" 1,"opsz" 20}
+.st-submenu-caret{margin-left:auto;transition:transform .2s}
+.st-submenu.is-expanded .st-submenu-caret{transform:rotate(180deg)}
+.st-submenu-list{margin:2px 0 4px 22px;padding-left:12px;border-left:1px solid rgba(255,255,255,.14)}
+.st-submenu-list a{padding:7px 10px;font-size:14px}
+.st-sidebar-divider{margin:18px 12px 6px;font-size:12px;font-weight:600;color:rgba(255,255,255,.5)}
+.st-sidebar-footer{padding:12px;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:2px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+.st-sidebar-footer a,.st-sidebar-footer button{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:var(--r-ctl);color:rgba(255,255,255,.72);font-size:14px;text-decoration:none;background:none;border:0;cursor:pointer;width:100%}
+.st-sidebar-footer a:hover,.st-sidebar-footer button:hover{background:rgba(255,255,255,.07);color:#fff}
+.st-sidebar-backdrop{display:none}
+
+.st-main{flex:1;margin-left:var(--sidebar-w);min-width:0;display:flex;flex-direction:column}
+
+/* ---------- Top bar ---------- */
+.st-navbar{
+  position:sticky;top:0;z-index:30;height:64px;background:rgba(255,255,255,.94);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 32px;
+}
+.st-navbar-left{display:flex;align-items:center;gap:10px;min-width:0}
+.st-icon-button{position:relative;width:40px;height:40px;border-radius:var(--r-ctl);border:0;background:none;display:grid;place-items:center;cursor:pointer;color:var(--muted)}
+.st-icon-button:hover{background:var(--bg);color:var(--ink)}
+.st-breadcrumb{font-family:var(--font-head);font-weight:700;font-size:18px;color:var(--ink);white-space:nowrap}
+.st-navbar-right{display:flex;align-items:center;gap:4px}
+.st-notification-dot{position:absolute;top:9px;right:10px;width:8px;height:8px;border-radius:50%;background:var(--high);box-shadow:0 0 0 2px #fff}
+.st-navbar-divider{width:1px;height:28px;background:var(--line);margin:0 10px}
+.st-user{display:flex;align-items:center;gap:10px}
+.st-user-details{text-align:right}
+.st-user-name{margin:0;font-weight:600;font-size:14px}
+.st-user-role{margin:0;font-size:12.5px;color:var(--muted)}
+.st-user-avatar{width:36px;height:36px;border-radius:50%;background:var(--navy-soft);color:var(--navy);font-weight:700;font-size:13px;display:grid;place-items:center}
+
+/* ---------- Banner ---------- */
+.st-notif-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:20px 32px 0;padding:10px 12px 10px 16px;border-radius:var(--r-ctl);background:var(--teal-soft);color:#004f4d;font-size:14px;font-weight:500;border:1px solid #c4e7e5}
+.st-notif-banner-msg{display:flex;align-items:center;gap:10px}
+.st-notif-banner-close{border:0;background:none;color:inherit;cursor:pointer;width:30px;height:30px;border-radius:6px;display:grid;place-items:center}
+.st-notif-banner-close:hover{background:rgba(0,106,104,.1)}
+
+/* ---------- Content ---------- */
+.st-content{min-width:0;padding:24px 32px 40px;display:flex;flex-direction:column;gap:20px;max-width:1440px;width:100%}
+.st-welcome{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.st-welcome-title{margin:0;font-family:var(--font-head);font-weight:800;font-size:30px;letter-spacing:-.02em;line-height:1.15}
+.st-welcome-subtitle{margin:6px 0 0;color:var(--muted);font-size:15px}
+.st-term-card{display:flex;align-items:center;gap:0;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px}
+.st-term-item{display:flex;align-items:baseline;gap:8px;padding:6px 14px}
+.st-term-item-label{font-size:12.5px;color:var(--muted)}
+.st-term-item-value{font-weight:600;font-size:14px}
+.st-term-divider{width:1px;height:20px;background:var(--line)}
+
+/* ---------- Filters ---------- */
+.st-filter-bar{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);padding:14px 16px;box-shadow:var(--shadow)}
+.st-filter-bar{min-width:0}
+/* Two rows by default (level on top, selects + apply below); one row on wide screens */
+.st-filter-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:12px 12px;align-items:end;min-width:0}
+.st-filter-row > .st-filter-group:first-child{grid-column:1 / -1}
+.st-filter-controls{display:contents}
+.st-filter-group{display:flex;flex-direction:column;gap:6px;min-width:0}
+.st-filter-label{font-size:12.5px;font-weight:600;color:var(--muted)}
+.st-segment{display:flex;gap:2px;padding:3px;background:var(--bg);border-radius:var(--r-ctl);overflow-x:auto;scrollbar-width:none;max-width:100%;width:max-content}
+.st-segment::-webkit-scrollbar{display:none}
+.st-segment button{border:0;background:none;height:32px;padding:0 12px;border-radius:6px;font-size:13.5px;font-weight:500;color:var(--muted);white-space:nowrap;cursor:pointer}
+.st-segment button:hover{color:var(--ink)}
+.st-segment button.is-active{background:#fff;color:var(--navy);font-weight:600;box-shadow:0 1px 2px rgba(17,26,54,.12)}
+@media (min-width:1560px){
+  .st-filter-row{grid-template-columns:auto repeat(3,minmax(150px,1fr)) auto}
+  .st-filter-row > .st-filter-group:first-child{grid-column:auto}
+}
+.st-filter-bar select{width:100%;height:38px;border:1px solid var(--line-strong);border-radius:var(--r-ctl);background:#fff;padding:0 32px 0 12px;font-size:14px;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%235a6275' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.st-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:38px;padding:0 16px;border-radius:var(--r-ctl);border:1px solid transparent;font-weight:600;font-size:14px;cursor:pointer;text-decoration:none;white-space:nowrap}
+.st-btn-primary{background:var(--navy);color:#fff}
+.st-btn-primary:hover{background:var(--navy-deep)}
+.st-btn-ghost{background:#fff;border-color:var(--line-strong);color:var(--ink)}
+.st-btn-ghost:hover{border-color:var(--navy);color:var(--navy)}
+
+/* ---------- Grid ---------- */
+.st-dash-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:20px}
+.col-4{grid-column:span 4}.col-6{grid-column:span 6}.col-8{grid-column:span 8}.col-12{grid-column:span 12}
+.st-panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--shadow);min-width:0}
+.st-panel-pad{padding:20px 22px}
+.st-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.st-panel-title{margin:0;font-family:var(--font-head);font-weight:700;font-size:18px;letter-spacing:-.01em}
+.st-panel-subtitle{margin:4px 0 0;font-size:13.5px;color:var(--muted)}
+.st-panel-link{display:inline-flex;align-items:center;gap:4px;font-size:13.5px;font-weight:600;color:var(--teal);text-decoration:none}
+.st-panel-link:hover{text-decoration:underline}
+
+/* ---------- Overview: the one bold element ---------- */
+.st-overview{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center}
+.st-overview-total{padding-right:28px;border-right:1px solid var(--line)}
+.st-overview-total .value{font-family:var(--font-head);font-weight:800;font-size:52px;line-height:1;letter-spacing:-.03em;color:var(--navy)}
+.st-overview-total .label{margin-top:6px;font-size:14px;color:var(--muted)}
+.st-risk-strip{display:flex;height:14px;border-radius:999px;overflow:hidden;gap:3px;background:var(--bg)}
+.st-risk-strip span{display:block;min-width:4px}
+.st-risk-strip .high{background:var(--high)}.st-risk-strip .mod{background:var(--mod)}.st-risk-strip .low{background:var(--low)}
+.st-risk-legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:16px}
+.st-risk-legend-item{display:flex;flex-direction:column;gap:2px;padding-left:12px;border-left:3px solid}
+.st-risk-legend-item.high{border-color:var(--high)}.st-risk-legend-item.mod{border-color:var(--mod)}.st-risk-legend-item.low{border-color:var(--low)}
+.st-risk-legend-item .count{font-family:var(--font-head);font-weight:800;font-size:28px;line-height:1.1}
+.st-risk-legend-item.high .count{color:var(--high-ink)}.st-risk-legend-item.mod .count{color:var(--mod-ink)}.st-risk-legend-item.low .count{color:var(--low-ink)}
+.st-risk-legend-item .name{font-size:13.5px;color:var(--muted)}
+.st-risk-legend-item .pct{font-size:12.5px;color:var(--faint)}
+
+.st-followup-card{display:flex;flex-direction:column;justify-content:space-between;gap:14px;background:var(--mod-soft);border-color:#f6dcb8}
+.st-followup-card .head{display:flex;align-items:center;gap:10px;font-weight:600;font-size:14.5px;color:var(--mod-ink)}
+.st-followup-card ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.st-followup-card li{display:flex;align-items:baseline;gap:8px;font-size:14px;color:#6b3f00}
+.st-followup-card li strong{font-family:var(--font-head);font-size:26px;font-weight:800;line-height:1;color:var(--mod-ink)}
+.st-followup-card .hint{font-size:12.5px;color:#8a6a3c}
+
+/* ---------- Toggles ---------- */
+.chart-type-toggle{display:inline-flex;gap:2px;padding:3px;background:var(--bg);border-radius:var(--r-ctl)}
+.chart-type-btn{border:0;background:none;padding:5px 12px;border-radius:6px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer}
+.chart-type-btn.is-active{background:#fff;color:var(--navy);font-weight:600;box-shadow:0 1px 2px rgba(17,26,54,.12)}
+.st-head-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+
+/* ---------- Risk distribution (bar view = labelled horizontal bars) ---------- */
+.st-riskchart{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:24px;align-items:stretch}
+.st-hbars{display:flex;flex-direction:column;justify-content:center;gap:18px}
+.st-hbar-row{display:grid;grid-template-columns:92px minmax(0,1fr) 56px;align-items:center;gap:14px}
+.st-hbar-label{font-size:14px;font-weight:600}
+.st-hbar-track{height:28px;background:var(--bg);border-radius:6px;overflow:hidden}
+.st-hbar{height:100%;border-radius:6px;width:var(--w,0%)}
+.st-hbar--high{background:var(--high)}.st-hbar--moderate{background:var(--mod)}.st-hbar--low{background:var(--low)}
+.st-hbar-value{text-align:left;font-size:14px;font-weight:700}
+.st-hbar-value small{display:block;font-weight:500;font-size:12px;color:var(--faint)}
+.st-hbar-scale{display:grid;grid-template-columns:92px minmax(0,1fr) 56px;gap:14px;margin-top:-6px}
+.st-hbar-scale div{display:flex;justify-content:space-between;font-size:11.5px;color:var(--faint)}
+.st-riskchart-side{display:flex;flex-direction:column;gap:12px}
+.st-insights{background:var(--bg);border-radius:10px;padding:14px 16px}
+.st-insights-title{margin:0 0 8px;font-size:13px;font-weight:700;color:var(--ink)}
+.st-insights ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.st-insights li{display:flex;gap:8px;font-size:13.5px;color:var(--muted);line-height:1.45}
+.st-bullet{width:6px;height:6px;border-radius:50%;background:var(--navy);flex:none;margin-top:7px;font-size:0}
+.st-bullet--error{background:var(--high)}
+.st-meta-grid{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;padding:4px 14px}
+.st-meta-grid-item{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:8px 0}
+.st-meta-grid-item + .st-meta-grid-item{border-top:1px solid var(--line)}
+.st-meta-grid-item p{margin:0}
+.st-meta-grid-item p:first-child{font-size:13px;color:var(--muted)}
+.st-meta-grid-item p:last-child{font-size:13.5px;font-weight:600;text-align:right}
+.is-teal{color:var(--teal)}
+.chart-canvas-wrap{position:relative;height:260px}
+.chart-canvas-note{margin:10px 0 0;font-size:12.5px;color:var(--faint);text-align:center}
+
+/* ---------- Needs follow-up list ---------- */
+.st-attention-panel{display:flex;flex-direction:column}
+.st-attention-list{display:flex;flex-direction:column;gap:2px;flex:1}
+.st-attention-row{display:grid;grid-template-columns:36px minmax(0,1fr) 92px;align-items:center;gap:12px;padding:10px 8px;border:0;background:none;border-radius:10px;text-align:left;cursor:pointer;width:100%}
+.st-attention-row:hover{background:var(--bg)}
+.st-attention-avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:12.5px;font-weight:700;background:var(--high-soft);color:var(--high-ink)}
+.st-attention-row.is-moderate .st-attention-avatar{background:var(--mod-soft);color:var(--mod-ink)}
+.st-attention-person{display:flex;flex-direction:column;min-width:0}
+.st-attention-person strong{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st-attention-person small{font-size:12px;color:var(--faint)}
+.st-attention-risk{display:flex;flex-direction:column;align-items:flex-end;gap:5px;font-size:13px;font-weight:700;color:var(--high-ink)}
+.st-attention-risk .meter{width:100%;height:5px;border-radius:999px;background:var(--high-soft);overflow:hidden}
+.st-attention-risk .meter i{display:block;height:100%;width:var(--w,0%);background:var(--high);border-radius:999px}
+.st-attention-row.is-moderate .st-attention-risk{color:var(--mod-ink)}
+.st-attention-row.is-moderate .meter{background:var(--mod-soft)}.st-attention-row.is-moderate .meter i{background:var(--mod)}
+.st-attention-view-all{margin-top:12px;display:flex;align-items:center;justify-content:center;gap:6px;height:40px;border:1px solid var(--line-strong);border-radius:var(--r-ctl);font-size:14px;font-weight:600;color:var(--navy);text-decoration:none}
+.st-attention-view-all:hover{border-color:var(--navy);background:var(--navy-soft)}
+
+/* ---------- Registry ---------- */
+.st-registry-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:20px 22px 16px}
+.st-registry-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.st-search{display:flex;align-items:center;gap:8px;height:38px;padding:0 12px;border:1px solid var(--line-strong);border-radius:var(--r-ctl);width:260px;color:var(--faint)}
+.st-search:focus-within{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,106,104,.12)}
+.st-search input{border:0;outline:0;flex:1;min-width:0;font-size:14px;background:none;color:var(--ink)}
+.st-tool-btn{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 12px;border:1px solid var(--line-strong);border-radius:var(--r-ctl);background:#fff;font-size:13.5px;font-weight:500;cursor:pointer;color:var(--ink)}
+.st-tool-btn:hover{border-color:var(--navy)}
+.st-data-table{width:100%;border-collapse:collapse;font-size:14px}
+.st-data-table th{text-align:left;font-size:12.5px;font-weight:600;color:var(--muted);padding:10px 22px;background:#f8f9fb;border-top:1px solid var(--line);border-bottom:1px solid var(--line);white-space:nowrap}
+.st-data-table td{padding:12px 22px;border-bottom:1px solid var(--line);vertical-align:middle}
+.st-data-table tbody tr:hover{background:#f8fafd}
+.st-learner-cell{display:flex;align-items:center;gap:12px}
+.st-avatar-initials{width:36px;height:36px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:12.5px;font-weight:700;background:var(--navy-soft);color:var(--navy);border:0;cursor:pointer}
+.st-learner-name{display:block;border:0;background:none;padding:0;font-weight:600;font-size:14.5px;color:var(--ink);cursor:pointer;text-align:left}
+.st-learner-name:hover{color:var(--navy);text-decoration:underline}
+.st-learner-id{margin:1px 0 0;font-size:12.5px;color:var(--faint)}
+.st-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.st-pill--modality{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.st-pill--risk::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.st-pill--high{background:var(--high-soft);color:var(--high-ink)}
+.st-pill--moderate{background:var(--mod-soft);color:var(--mod-ink)}
+.st-pill--low{background:var(--low-soft);color:var(--low-ink)}
+.st-activity{font-size:13px;color:var(--muted)}
+.st-row-actions{display:flex;align-items:center;justify-content:flex-end;gap:4px}
+.st-btn-xs{height:32px;padding:0 12px;font-size:13px}
+.st-icon-btn-sm{width:32px;height:32px;border:0;background:none;border-radius:6px;display:grid;place-items:center;color:var(--muted);cursor:pointer}
+.st-icon-btn-sm:hover{background:var(--bg)}
+.st-pagination{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 22px;flex-wrap:wrap}
+.st-pagination-info{font-size:13.5px;color:var(--muted)}
+.st-pagination-controls{display:flex;gap:4px}
+.st-page-btn{min-width:34px;height:34px;padding:0 8px;border:1px solid transparent;background:none;border-radius:var(--r-ctl);font-size:13.5px;font-weight:500;cursor:pointer;color:var(--muted);display:grid;place-items:center}
+.st-page-btn:hover:not(:disabled){background:var(--bg);color:var(--ink)}
+.st-page-btn.is-active{background:var(--navy);color:#fff}
+.st-page-btn:disabled{opacity:.35;cursor:default}
+
+.st-footer{margin-top:auto;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:18px 32px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+.st-footer a{color:var(--muted);text-decoration:none;margin-left:18px}
+.st-footer a:hover{color:var(--navy);text-decoration:underline}
+.st-footer-version{margin-left:14px;color:var(--faint)}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width:1279px){
+  .col-8,.col-4{grid-column:span 12}
+  .st-attention-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:1023px){
+  .st-sidebar{transform:translateX(-100%);box-shadow:0 20px 40px rgba(0,0,0,.25)}
+  .st-sidebar.open{transform:none}
+  .st-sidebar.open + .st-sidebar-backdrop{display:block;position:fixed;inset:0;background:rgba(13,40,70,.45);z-index:35}
+  .st-main{margin-left:0}
+  .col-6{grid-column:span 12}
+  .st-riskchart{grid-template-columns:1fr}
+}
+@media (max-width:767px){
+  body{font-size:14.5px}
+  .st-navbar{padding:0 12px;height:56px}
+  .st-breadcrumb{font-size:17px}
+  .st-user-details,.st-navbar-divider,[data-st-settings]{display:none}
+  .st-notif-banner{margin:12px 16px 0;font-size:13px}
+  .st-content{padding:16px 16px 32px;gap:16px}
+  .st-dash-grid{gap:16px}
+  .st-welcome-title{font-size:24px}
+  .st-welcome-subtitle{font-size:14px}
+  .st-term-card{width:100%;border-radius:10px}
+  .st-term-item{flex:1;flex-direction:column;gap:0;padding:6px 12px}
+  .st-filter-bar{padding:12px}
+  .st-filter-row{grid-template-columns:1fr 1fr;gap:10px}
+  .st-filter-controls > .st-filter-group:first-child{grid-column:1 / -1}
+  .st-filter-apply{grid-column:1 / -1}
+  .st-filter-apply .st-btn{width:100%;height:42px}
+  .st-panel-pad{padding:16px}
+  .st-overview{grid-template-columns:1fr;gap:16px}
+  .st-overview-total{padding:0 0 14px;border-right:0;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:10px}
+  .st-overview-total .value{font-size:40px}
+  .st-overview-total .label{margin:0}
+  .st-risk-legend{gap:10px}
+  .st-risk-legend-item .count{font-size:22px}
+  .pct-suffix{display:none}
+  .st-attention-list{display:flex}
+  .st-hbar-row{grid-template-columns:74px minmax(0,1fr) 64px;gap:10px}
+  .st-hbar-scale{grid-template-columns:74px minmax(0,1fr) 64px;gap:10px}
+  .st-hbar-label{font-size:13px}
+  .chart-canvas-wrap{height:230px}
+  .st-registry-head{padding:16px}
+  .st-registry-tools{width:100%}
+  .st-search{width:100%}
+  .st-registry-tools .st-tool-btn,.st-registry-tools .st-btn{flex:1}
+  /* Table becomes stacked cards */
+  .st-data-table thead{display:none}
+  .st-data-table,.st-data-table tbody{display:block}
+  .st-data-table tr{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line)}
+  .st-data-table td{display:block;padding:0;border:0}
+  .st-data-table td[data-col="learner"]{flex-basis:100%}
+  .st-data-table td[data-col="level"]{flex-basis:100%;font-size:13px;color:var(--muted);padding-left:48px;margin-top:-6px}
+  .st-data-table td[data-col="modality"]{padding-left:48px}
+  .st-data-table td[data-col="activity"]{flex-basis:100%;padding-left:48px;font-size:12.5px}
+  .st-data-table td[data-col="actions"]{flex-basis:100%;padding-left:48px}
+  .st-data-table td[data-col="actions"] .st-row-actions{justify-content:flex-start}
+  .st-pagination{justify-content:center;padding:14px 16px}
+  .st-pagination-info{width:100%;text-align:center}
+  .st-page-btn:not(.is-active):not([aria-label]){display:none}
+  .st-footer{padding:16px;justify-content:center;text-align:center}
+  .st-footer a{margin:0 8px}
+}
+
+
+/* ============================================================
+   Motion
+   One idea: charts and figures "fill in" to their final state
+   when they come into view (again on scroll-back). Controls
+   answer hover and press with quick, small changes. Nothing
+   loops, sways or moves on its own.
+   ============================================================ */
+:root{
+  --ease-out:cubic-bezier(.2,.7,.2,1);
+  --t-hover:150ms;      /* hover color/background changes */
+  --t-press:90ms;       /* press-down feedback */
+  --t-fill:800ms;       /* bars, strip, meters filling in */
+}
+
+/* ---- Fill-in on view (JS adds .is-inview to [data-animate]) ---- */
+[data-animate] .st-hbar{width:0;transition:width var(--t-fill) var(--ease-out)}
+[data-animate].is-inview .st-hbar{width:var(--w)}
+[data-animate] .st-hbar-row:nth-child(2) .st-hbar{transition-delay:90ms}
+[data-animate] .st-hbar-row:nth-child(3) .st-hbar{transition-delay:180ms}
+[data-animate] .st-hbar-value{opacity:0;transition:opacity 300ms ease}
+[data-animate].is-inview .st-hbar-value{opacity:1;transition-delay:450ms}
+
+[data-animate] .st-risk-strip{clip-path:inset(0 100% 0 0 round 999px);transition:clip-path 900ms var(--ease-out)}
+[data-animate].is-inview .st-risk-strip{clip-path:inset(0 0 0 0 round 999px)}
+
+[data-animate] .st-attention-risk .meter i{width:0;transition:width var(--t-fill) var(--ease-out)}
+[data-animate].is-inview .st-attention-risk .meter i{width:var(--w)}
+[data-animate] .st-attention-row:nth-child(2) .meter i{transition-delay:70ms}
+[data-animate] .st-attention-row:nth-child(3) .meter i{transition-delay:140ms}
+[data-animate] .st-attention-row:nth-child(4) .meter i{transition-delay:210ms}
+
+/* ---- Sidebar ---- */
+.st-sidebar-nav a,.st-submenu-trigger,.st-sidebar-footer a,.st-sidebar-footer button{
+  transition:background-color var(--t-hover) ease,color var(--t-hover) ease,transform var(--t-press) ease}
+.st-sidebar-nav a .material-symbols-outlined:first-child,
+.st-submenu-trigger .material-symbols-outlined:first-child,
+.st-sidebar-footer .material-symbols-outlined{transition:transform var(--t-hover) var(--ease-out)}
+.st-sidebar-nav a:hover .material-symbols-outlined:first-child,
+.st-submenu-trigger:hover .material-symbols-outlined:first-child,
+.st-sidebar-footer a:hover .material-symbols-outlined,
+.st-sidebar-footer button:hover .material-symbols-outlined{transform:translateX(2px)}
+.st-sidebar-nav a:active,.st-submenu-trigger:active,.st-sidebar-footer a:active,.st-sidebar-footer button:active{transform:scale(.98)}
+.st-submenu-caret{transition:transform 200ms var(--ease-out)}
+.st-submenu.is-expanded .st-submenu-list{animation:st-submenu-in 180ms var(--ease-out)}
+@keyframes st-submenu-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.st-sidebar-backdrop{animation:st-fade-in 200ms ease}
+@keyframes st-fade-in{from{opacity:0}to{opacity:1}}
+
+/* ---- Buttons & controls: hover tint, press-down ---- */
+.st-btn,.st-tool-btn,.st-icon-button,.st-icon-btn-sm,.st-page-btn,.chart-type-btn,.st-segment button,
+.st-attention-view-all,.st-notif-banner-close,.st-avatar-initials{
+  transition:background-color var(--t-hover) ease,color var(--t-hover) ease,border-color var(--t-hover) ease,
+             box-shadow var(--t-hover) ease,transform var(--t-press) ease}
+.st-btn:active,.st-tool-btn:active,.st-icon-button:active,.st-icon-btn-sm:active,.st-page-btn:active:not(:disabled),
+.chart-type-btn:active,.st-segment button:active,.st-attention-view-all:active,.st-notif-banner-close:active{transform:scale(.96)}
+.st-btn-primary:hover{box-shadow:0 4px 12px rgba(18,53,91,.22)}
+.st-btn-ghost:hover{background:var(--navy-soft)}
+.st-tool-btn:hover{background:var(--bg)}
+.st-filter-bar select{transition:border-color var(--t-hover) ease,box-shadow var(--t-hover) ease}
+.st-filter-bar select:hover{border-color:var(--navy)}
+.st-filter-bar select:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,106,104,.12)}
+
+/* Links: arrow nudges toward where it goes */
+.st-panel-link .material-symbols-outlined{transition:transform var(--t-hover) var(--ease-out)}
+.st-panel-link:hover .material-symbols-outlined{transform:translateX(3px)}
+
+/* ---- Lists & rows ---- */
+.st-attention-row{transition:background-color var(--t-hover) ease,transform var(--t-press) ease}
+.st-attention-avatar{transition:transform var(--t-hover) var(--ease-out)}
+.st-attention-row:hover .st-attention-avatar{transform:scale(1.08)}
+.st-attention-row:active{transform:scale(.99)}
+.st-data-table tbody tr{transition:background-color var(--t-hover) ease}
+.st-avatar-initials:hover{box-shadow:0 0 0 3px var(--navy-soft)}
+.st-learner-name{transition:color var(--t-hover) ease}
+
+/* ---- Banner dismiss: fades and folds away instead of vanishing ---- */
+.st-notif-banner{transition:opacity 200ms ease,transform 200ms ease}
+.st-notif-banner.is-leaving{opacity:0;transform:translateY(-6px)}
+
+/* ---- Chart legend items (Chart.js handles its own hover) ---- */
+canvas{transition:opacity 200ms ease}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none!important;animation:none!important}
+  [data-animate] .st-risk-strip{clip-path:none}
+  [data-animate] .st-hbar{width:var(--w)}
+  [data-animate] .st-hbar-value{opacity:1}
+  [data-animate] .st-attention-risk .meter i{width:var(--w)}
+}
+</style>
+</head>
+<body class="st-app">
+
+<aside class="st-sidebar" id="sidebar">
+  <div class="st-sidebar-brand">
+    <img src="../../StayEd_Frontend/assets/img/brand/logo-dark.png" alt="StayEd logo" />
+    <h2>StayEd</h2>
+  </div>
+  <nav class="st-sidebar-nav">
+    <a href="#" class="active"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a>
+    <a href="#"><span class="material-symbols-outlined">calendar_month</span><span>Calendar</span></a>
+    <a href="#"><span class="material-symbols-outlined">hub</span><span>CLC Overview</span></a>
+    <div class="st-submenu is-expanded">
+      <button type="button" class="st-submenu-trigger"><span class="material-symbols-outlined">auto_stories</span><span>Learner</span><span class="material-symbols-outlined st-submenu-caret">expand_more</span></button>
+      <div class="st-submenu-list">
+        <a href="#"><span class="material-symbols-outlined">school</span><span>Class Management</span></a>
+        <a href="#"><span class="material-symbols-outlined">groups</span><span>Student Registry</span></a>
+      </div>
+    </div>
+    <a href="#"><span class="material-symbols-outlined">error</span><span>Early Warning Alert</span></a>
+    <a href="#"><span class="material-symbols-outlined">summarize</span><span>Reports</span></a>
+    <a href="#"><span class="material-symbols-outlined">notifications</span><span>Notifications</span></a>
+    <div class="st-sidebar-divider">Account</div>
+    <a href="#"><span class="material-symbols-outlined">manage_accounts</span><span>Profile Settings</span></a>
+    <a href="#"><span class="material-symbols-outlined">help_center</span><span>Help &amp; User Manual</span></a>
+  </nav>
+  <div class="st-sidebar-footer">
+    <a href="#"><span class="material-symbols-outlined">info</span><span>About StayEd</span></a>
+    <button type="button"><span class="material-symbols-outlined">logout</span><span>Logout</span></button>
+  </div>
+</aside>
+<div class="st-sidebar-backdrop" onclick="document.getElementById('sidebar').classList.remove('open')"></div>
+
+<div class="st-main">
+  <header class="st-navbar">
+    <div class="st-navbar-left">
+      <button type="button" class="st-icon-button" aria-label="Toggle menu" onclick="document.getElementById('sidebar').classList.toggle('open')"><span class="material-symbols-outlined">menu</span></button>
+      <nav class="st-breadcrumb">Dashboard</nav>
+    </div>
+    <div class="st-navbar-right">
+      <button type="button" class="st-icon-button" aria-label="Notifications"><span class="material-symbols-outlined">notifications</span><span class="st-notification-dot"></span></button>
+      <button type="button" class="st-icon-button" data-st-settings aria-label="Settings"><span class="material-symbols-outlined">settings</span></button>
+      <div class="st-navbar-divider"></div>
+      <div class="st-user">
+        <div class="st-user-details"><p class="st-user-name">Trisha Santos</p><p class="st-user-role">ALS Teacher</p></div>
+        <span class="st-user-avatar">TS</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="st-notif-banner" data-notif-banner>
+    <div class="st-notif-banner-msg"><span class="material-symbols-outlined">check_circle</span><span>Predictions generated successfully for the current trimester.</span></div>
+    <button type="button" class="st-notif-banner-close" aria-label="Dismiss" onclick="dismissBanner(this.parentElement)"><span class="material-symbols-outlined">close</span></button>
+  </div>
+
+  <main class="st-content">
+    <section class="st-welcome">
+      <div>
+        <h1 class="st-welcome-title">Good afternoon, Trisha!</h1>
+        <p class="st-welcome-subtitle">Welcome back. Here's an overview of your learners and classes.</p>
+      </div>
+      <div class="st-term-card">
+        <div class="st-term-item"><span class="st-term-item-label">School year</span><span class="st-term-item-value">2026–2027</span></div>
+        <div class="st-term-divider"></div>
+        <div class="st-term-item"><span class="st-term-item-label">Trimester</span><span class="st-term-item-value">First Trimester</span></div>
+      </div>
+    </section>
+
+    <section class="st-filter-bar">
+      <div class="st-filter-row">
+        <div class="st-filter-group">
+          <label class="st-filter-label" id="lvl">Learning level</label>
+          <div class="st-segment" role="group" aria-labelledby="lvl" data-segment>
+            <button type="button" class="is-active">All</button><button type="button">Basic Literacy</button><button type="button">Elementary</button><button type="button">Junior High</button><button type="button">Senior High</button>
+          </div>
+        </div>
+        <div class="st-filter-controls">
+          <div class="st-filter-group"><label class="st-filter-label" for="f1">CLC location</label><select id="f1"><option>All CLCs</option></select></div>
+          <div class="st-filter-group"><label class="st-filter-label" for="f2">School year</label><select id="f2"><option>All School Years</option></select></div>
+          <div class="st-filter-group"><label class="st-filter-label" for="f3">Modality</label><select id="f3"><option>All Modalities</option></select></div>
+          <div class="st-filter-apply"><button type="button" class="st-btn st-btn-primary"><span class="material-symbols-outlined">filter_list</span>Apply filters</button></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="st-dash-grid">
+      <!-- Overview (replaces the four identical stat cards) -->
+      <section class="st-panel st-panel-pad col-8" aria-label="Learner overview" data-animate>
+        <div class="st-overview">
+          <div class="st-overview-total">
+            <div class="value num" data-stat-total data-countup>35</div>
+            <div class="label">registered learners</div>
+          </div>
+          <div>
+            <div class="st-risk-strip" data-risk-strip role="img" aria-label="10 high, 12 moderate, 13 low risk">
+              <span class="high" style="flex-grow:10"></span><span class="mod" style="flex-grow:12"></span><span class="low" style="flex-grow:13"></span>
+            </div>
+            <div class="st-risk-legend">
+              <div class="st-risk-legend-item high"><span class="count num" data-stat-high data-countup>10</span><span class="name">High risk</span><span class="pct num">29%<span class="pct-suffix"> of learners</span></span></div>
+              <div class="st-risk-legend-item mod"><span class="count num" data-stat-moderate data-countup>12</span><span class="name">Moderate risk</span><span class="pct num">34%<span class="pct-suffix"> of learners</span></span></div>
+              <div class="st-risk-legend-item low"><span class="count num" data-stat-low data-countup>13</span><span class="name">Low risk</span><span class="pct num">37%<span class="pct-suffix"> of learners</span></span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="st-panel st-panel-pad col-4 st-followup-card" aria-label="Interventions to update" data-animate>
+        <div class="head"><span class="material-symbols-outlined">assignment_late</span>Interventions to update</div>
+        <ul data-stat-intervention-detail><li><strong class="num" data-countup>2</strong>overdue</li></ul>
+        <p class="hint">Update these in each learner's profile.</p>
+      </section>
+
+      <!-- Risk distribution -->
+      <section class="st-panel st-panel-pad col-8" data-animate>
+        <div class="st-panel-head">
+          <div>
+            <h3 class="st-panel-title">Risk distribution</h3>
+            <p class="st-panel-subtitle">Learners by their latest prediction result.</p>
+          </div>
+          <div class="st-head-actions">
+            <div class="chart-type-toggle" role="group" aria-label="Choose chart type" id="riskChartToggle">
+              <button type="button" class="chart-type-btn is-active" data-chart-type="bar">Bar</button>
+              <button type="button" class="chart-type-btn" data-chart-type="pie">Donut</button>
+              <button type="button" class="chart-type-btn" data-chart-type="line">Trend</button>
+            </div>
+            <a class="st-panel-link" href="#">View details<span class="material-symbols-outlined" style="font-size:18px">chevron_right</span></a>
+          </div>
+        </div>
+
+        <div id="riskChartView" class="chart-canvas-wrap-outer" hidden>
+          <div class="chart-canvas-wrap"><canvas id="riskChartCanvas"></canvas></div>
+          <p class="chart-canvas-note" id="riskChartNote"></p>
+        </div>
+
+        <div class="st-riskchart" id="riskBarView">
+          <div class="st-hbars">
+            <div class="st-hbar-row"><span class="st-hbar-label">High</span><div class="st-hbar-track"><div class="st-hbar st-hbar--high" data-bar="high" data-v="10"></div></div><span class="st-hbar-value num">10<small>29%</small></span></div>
+            <div class="st-hbar-row"><span class="st-hbar-label">Moderate</span><div class="st-hbar-track"><div class="st-hbar st-hbar--moderate" data-bar="moderate" data-v="12"></div></div><span class="st-hbar-value num">12<small>34%</small></span></div>
+            <div class="st-hbar-row"><span class="st-hbar-label">Low</span><div class="st-hbar-track"><div class="st-hbar st-hbar--low" data-bar="low" data-v="13"></div></div><span class="st-hbar-value num">13<small>37%</small></span></div>
+            <div class="st-hbar-scale" aria-hidden="true"><span></span><div data-riskchart-yaxis><span>0</span><span>5</span><span>10</span><span>15</span></div><span></span></div>
+          </div>
+          <div class="st-riskchart-side">
+            <div class="st-insights">
+              <h4 class="st-insights-title">Risk insights</h4>
+              <ul data-risk-insights>
+                <li><span class="st-bullet st-bullet--error"></span>10 learners are currently classified as High Risk.</li>
+                <li><span class="st-bullet"></span>Prediction coverage is 63% of active learners.</li>
+              </ul>
+            </div>
+            <div class="st-meta-grid">
+              <div class="st-meta-grid-item"><p>Coverage</p><p>63%</p></div>
+              <div class="st-meta-grid-item"><p>Model</p><p>stayed-rf-v1</p></div>
+              <div class="st-meta-grid-item"><p>Confidence</p><p class="is-teal">Available</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Needs follow-up -->
+      <section class="st-panel st-panel-pad col-4 st-attention-panel" data-animate>
+        <div class="st-panel-head">
+          <div>
+            <h3 class="st-panel-title">Recent high-risk</h3>
+            <p class="st-panel-subtitle">Learners who may need follow-up first.</p>
+          </div>
+        </div>
+        <div class="st-attention-list" data-dashboard-attention-list></div>
+        <a class="st-attention-view-all" href="#">View all screened learners</a>
+      </section>
+
+      <!-- Level + Modality -->
+      <section class="st-panel st-panel-pad col-6" data-animate>
+        <div class="st-panel-head">
+          <div><h3 class="st-panel-title">Learning level</h3><p class="st-panel-subtitle">How filtered learners are spread across ALS levels.</p></div>
+          <div class="chart-type-toggle" id="levelChartToggle"><button type="button" class="chart-type-btn is-active" data-chart-type="bar">Bar</button><button type="button" class="chart-type-btn" data-chart-type="pie">Donut</button></div>
+        </div>
+        <div class="chart-canvas-wrap"><canvas id="levelChartCanvas"></canvas></div>
+      </section>
+      <section class="st-panel st-panel-pad col-6" data-animate>
+        <div class="st-panel-head">
+          <div><h3 class="st-panel-title">Modality</h3><p class="st-panel-subtitle">How filtered learners are split by delivery mode.</p></div>
+          <div class="chart-type-toggle" id="modalityChartToggle"><button type="button" class="chart-type-btn is-active" data-chart-type="pie">Donut</button><button type="button" class="chart-type-btn" data-chart-type="bar">Bar</button></div>
+        </div>
+        <div class="chart-canvas-wrap"><canvas id="modalityChartCanvas"></canvas></div>
+      </section>
+
+      <!-- Registry -->
+      <section class="st-panel col-12">
+        <div class="st-registry-head">
+          <div><h3 class="st-panel-title">Student registry summary</h3><p class="st-panel-subtitle">Learners in the currently selected class.</p></div>
+          <div class="st-registry-tools">
+            <label class="st-search"><span class="material-symbols-outlined">search</span><input type="text" placeholder="Search by name or LRN" /></label>
+            <button class="st-tool-btn"><span class="material-symbols-outlined">filter_alt</span>Filter</button>
+            <button class="st-tool-btn"><span class="material-symbols-outlined">swap_vert</span>Sort: Risk level</button>
+            <a class="st-btn st-btn-ghost" href="#">View full registry</a>
+          </div>
+        </div>
+        <table class="st-data-table">
+          <thead><tr><th>Learner</th><th>Learning level</th><th>Modality</th><th>Risk level</th><th>Latest activity</th><th style="text-align:right">Actions</th></tr></thead>
+          <tbody data-registry-body></tbody>
+        </table>
+        <div class="st-pagination">
+          <span class="st-pagination-info">Showing 1–5 of 35 learners</span>
+          <div class="st-pagination-controls">
+            <button class="st-page-btn" disabled aria-label="Previous"><span class="material-symbols-outlined">chevron_left</span></button>
+            <button class="st-page-btn is-active">1</button><button class="st-page-btn">2</button><button class="st-page-btn">3</button><button class="st-page-btn is-far">4</button><button class="st-page-btn is-far">5</button><button class="st-page-btn is-far">6</button><button class="st-page-btn">7</button>
+            <button class="st-page-btn" aria-label="Next"><span class="material-symbols-outlined">chevron_right</span></button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="st-footer">
+    <div><span>© 2026 Department of Education - Alternative Learning System</span><span class="st-footer-version">Version 1.0</span></div>
+    <div><a href="#">Privacy Policy</a><a href="#">Terms of Service</a><a href="#">Contact Us</a></div>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js"></script>
+<script>
+/* ---- Prototype data (matches the screenshots) ---- */
+const risk = {high:10, moderate:12, low:13};
+const total = risk.high + risk.moderate + risk.low;
+const attention = [
+  {name:"Joshua Castillo", lrn:"202600000010", p:1.00, risk:"High"},
+  {name:"Kevin Navarro",   lrn:"202600000008", p:1.00, risk:"High"},
+  {name:"Carlo Mendoza",   lrn:"202600000004", p:1.00, risk:"High"},
+  {name:"John Reyes",      lrn:"202600000002", p:0.99, risk:"High"},
+];
+const registry = [
+  ["Joshua Castillo","202600000010","Basic Literacy","Face-to-Face","High","Module released Sep 20, 2026"],
+  ["Anne Flores","202600000009","Basic Literacy","Blended","High","Module released Sep 20, 2026"],
+  ["Kevin Navarro","202600000008","Basic Literacy","Face-to-Face","High","Module released Sep 20, 2026"],
+  ["Rose Aquino","202600000007","Basic Literacy","Face-to-Face","High","Module returned today"],
+  ["Mark Torres","202600000006","Basic Literacy","Blended","High","Module released Sep 20, 2026"],
+];
+const initials = n => n.split(/\s+/).slice(0,2).map(w=>w[0]).join("").toUpperCase();
+
+/* Horizontal risk bars: width relative to the rounded-up axis max */
+const axisMax = Math.max(5, Math.ceil(Math.max(risk.high,risk.moderate,risk.low)/5)*5);
+document.querySelectorAll("[data-bar]").forEach(b=>b.style.setProperty("--w",(b.dataset.v/axisMax*100)+"%"));
+
+/* Attention list */
+document.querySelector("[data-dashboard-attention-list]").innerHTML = attention.map(l=>{
+  const pct=Math.round(l.p*100), mod=l.risk==="Moderate";
+  return `<button type="button" class="st-attention-row${mod?" is-moderate":""}">
+    <span class="st-attention-avatar">${initials(l.name)}</span>
+    <span class="st-attention-person"><strong>${l.name}</strong><small>LRN ${l.lrn}</small></span>
+    <span class="st-attention-risk" title="Predicted dropout probability">${pct}% risk<span class="meter"><i style="--w:${pct}%"></i></span></span>
+  </button>`;}).join("");
+
+/* Registry rows */
+document.querySelector("[data-registry-body]").innerHTML = registry.map(r=>`
+  <tr>
+    <td data-col="learner"><div class="st-learner-cell">
+      <button type="button" class="st-avatar-initials" aria-label="View ${r[0]}'s profile">${initials(r[0])}</button>
+      <div><button type="button" class="st-learner-name">${r[0]}</button><p class="st-learner-id">LRN ${r[1]}</p></div></div></td>
+    <td data-col="level">${r[2]}</td>
+    <td data-col="modality"><span class="st-pill st-pill--modality">${r[3]}</span></td>
+    <td data-col="risk"><span class="st-pill st-pill--risk st-pill--${r[4].toLowerCase()}">${r[4]}</span></td>
+    <td data-col="activity"><span class="st-activity">${r[5]}</span></td>
+    <td data-col="actions"><div class="st-row-actions">
+      <button class="st-btn st-btn-ghost st-btn-xs">View profile</button>
+      <button class="st-icon-btn-sm" aria-label="More options"><span class="material-symbols-outlined">more_vert</span></button></div></td>
+  </tr>`).join("");
+
+/* Segmented control */
+document.querySelectorAll("[data-segment] button").forEach(b=>b.addEventListener("click",()=>{
+  b.parentElement.querySelectorAll("button").forEach(x=>x.classList.toggle("is-active",x===b));
+}));
+
+/* ---- Charts ---- */
+const C = {high:"#ba1a1a", mod:"#f39422", low:"#6bbf59", grid:"#eef1f5", tick:"#8a91a0", ink:"#111a36",
+           cat:["#12355b","#4c6f95","#006a68","#9db5d3"]};
+Chart.defaults.font.family = "Inter, system-ui, sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = C.tick;
+const REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* Charts fill in once: doughnuts sweep closed, bars grow from the axis
+   (staggered), lines draw point by point from left to right. */
+Chart.defaults.animation = REDUCE ? false : {duration:900, easing:"easeOutQuart"};
+const stagger = (step) => REDUCE ? {} : {delay:(ctx)=> ctx.type==="data" && ctx.mode==="default" ? ctx.dataIndex*step : 0};
+
+/* Draws the total in the middle of a doughnut */
+const centerTotal = {id:"centerTotal", afterDraw(chart){
+  if (chart.config.type!=="doughnut") return;
+  const {ctx, chartArea:a} = chart; const sum = chart.data.datasets[0].data.reduce((x,y)=>x+y,0);
+  const cx=(a.left+a.right)/2, cy=(a.top+a.bottom)/2;
+  ctx.save(); ctx.textAlign="center"; ctx.fillStyle=C.ink;
+  ctx.font="800 28px 'Libre Franklin', sans-serif"; ctx.fillText(sum, cx, cy+4);
+  ctx.font="500 12px Inter, sans-serif"; ctx.fillStyle=C.tick; ctx.fillText("learners", cx, cy+22); ctx.restore();
+}};
+const legendBottom = {position:"bottom", labels:{usePointStyle:true, pointStyle:"circle", boxWidth:8, boxHeight:8, padding:16, color:"#5a6275"}};
+const tooltip = {backgroundColor:"#111a36", padding:10, cornerRadius:8, displayColors:true, boxPadding:4};
+
+const charts = {};
+function doughnut(canvas, labels, data, colors){
+  return new Chart(canvas, {type:"doughnut", plugins:[centerTotal],
+    data:{labels, datasets:[{data, backgroundColor:colors, borderColor:"#fff", borderWidth:3, hoverOffset:4}]},
+    options:{responsive:true, maintainAspectRatio:false, cutout:"68%",
+      animation: REDUCE ? false : {animateRotate:true, animateScale:false, duration:1000, easing:"easeOutQuart"},
+      plugins:{legend:legendBottom, tooltip}}});
+}
+function hbar(canvas, labels, data, colors){
+  return new Chart(canvas, {type:"bar",
+    data:{labels, datasets:[{label:"Learners", data, backgroundColor:colors, borderRadius:6, borderSkipped:false, barThickness:22}]},
+    options:{indexAxis:"y", responsive:true, maintainAspectRatio:false, animation: REDUCE ? false : {duration:900, easing:"easeOutQuart", ...stagger(90)},
+      plugins:{legend:{display:false}, tooltip},
+      scales:{x:{beginAtZero:true, ticks:{precision:0}, grid:{color:C.grid}, border:{display:false}},
+              y:{grid:{display:false}, border:{display:false}, ticks:{color:"#43474e", font:{weight:"600"}}}}}});
+}
+
+function riskView(type){
+  const barView=document.getElementById("riskBarView"), chartView=document.getElementById("riskChartView");
+  charts.risk?.destroy();
+  if(type==="bar"){barView.hidden=false;chartView.hidden=true;return;}
+  barView.hidden=true;chartView.hidden=false;
+  const cv=document.getElementById("riskChartCanvas"), note=document.getElementById("riskChartNote");
+  if(type==="pie"){
+    note.textContent="Current risk distribution for your filtered learners.";
+    charts.risk=doughnut(cv,["High risk","Moderate risk","Low risk"],[risk.high,risk.moderate,risk.low],[C.high,C.mod,C.low]);
+  } else {
+    note.textContent="Monthly trend of your learners' assessed risk levels (last 6 months).";
+    const months=["Apr","May","Jun","Jul","Aug","Sep"];
+    const ds=(label,color,data)=>({label,data,borderColor:color,backgroundColor:color,pointRadius:3,pointHoverRadius:5,borderWidth:2.5,tension:.35});
+    charts.risk=new Chart(cv,{type:"line",data:{labels:months,datasets:[ds("High",C.high,[4,6,7,9,11,10]),ds("Moderate",C.mod,[9,10,12,11,12,12]),ds("Low",C.low,[18,16,14,14,13,13])]},
+      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},
+        animation: REDUCE ? false : {duration:700, easing:"easeOutQuart", ...stagger(110)},
+        animations: REDUCE ? {} : {y:{from:(ctx)=> ctx.type==="data" ? ctx.chart.scales.y.getPixelForValue(0) : undefined}},
+        plugins:{legend:legendBottom,tooltip},
+        scales:{y:{beginAtZero:true,ticks:{precision:0},grid:{color:C.grid},border:{display:false}},x:{grid:{display:false},border:{display:false}}}}});
+  }
+}
+function levelView(type){
+  charts.level?.destroy();
+  const L=["Basic Literacy","Elementary","Junior High","Senior High"], V=[35,0,0,0];
+  charts.level = type==="pie" ? doughnut(levelChartCanvas,L,V,C.cat) : hbar(levelChartCanvas,L,V,C.cat);
+}
+function modalityView(type){
+  charts.modality?.destroy();
+  const L=["Face-to-Face","Modular","Blended"], V=[21,7,7];
+  charts.modality = type==="pie" ? doughnut(modalityChartCanvas,L,V,C.cat.slice(0,3)) : hbar(modalityChartCanvas,L,V,C.cat.slice(0,3));
+}
+function bindToggle(id, fn){
+  document.querySelectorAll(`#${id} .chart-type-btn`).forEach(btn=>btn.addEventListener("click",()=>{
+    document.querySelectorAll(`#${id} .chart-type-btn`).forEach(b=>b.classList.toggle("is-active",b===btn));
+    fn(btn.dataset.chartType);
+  }));
+}
+if (typeof Chart!=="undefined"){
+  bindToggle("riskChartToggle",riskView); bindToggle("levelChartToggle",levelView); bindToggle("modalityChartToggle",modalityView);
+  levelView("bar"); modalityView("pie");
+  const q=new URLSearchParams(location.search).get("risk"); if(q){document.querySelector(`#riskChartToggle [data-chart-type="${q}"]`)?.click();}
+}
+
+/* ---- Motion: fill-in on view, replay on scroll-back ---- */
+function countUp(el){
+  const end = Number(el.dataset.final ?? el.textContent);
+  el.dataset.final = end;
+  if (REDUCE || !Number.isFinite(end)) { el.textContent = end; return; }
+  const t0 = performance.now(), dur = 800;
+  const tick = (t)=>{ const k = Math.min(1,(t-t0)/dur), e = 1-Math.pow(1-k,3);
+    el.textContent = Math.round(end*e); if (k<1) requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+}
+function replayCharts(panel){
+  panel.querySelectorAll("canvas").forEach(cv=>{
+    const ch = Chart.getChart(cv); if (ch && !REDUCE){ ch.reset(); ch.update(); }
+  });
+}
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(({target, isIntersecting, intersectionRatio})=>{
+    if (isIntersecting && intersectionRatio >= 0.3 && !target.classList.contains("is-inview")){
+      target.classList.add("is-inview");
+      target.querySelectorAll("[data-countup]").forEach(countUp);
+      replayCharts(target);
+    } else if (!isIntersecting){
+      target.classList.remove("is-inview");   /* so it fills in again next time */
+    }
+  });
+},{threshold:[0,0.3]});
+document.querySelectorAll("[data-animate]").forEach(el=>io.observe(el));
+
+function dismissBanner(el){
+  if (REDUCE){ el.remove(); return; }
+  el.classList.add("is-leaving");
+  el.addEventListener("transitionend", ()=>el.remove(), {once:true});
+}
+</script>
+</body>
+</html>

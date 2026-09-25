@@ -60,7 +60,7 @@
   --st-glass-blur: blur(12px);
   --st-glass-shadow: 0 24px 48px -12px rgba(0, 31, 63, 0.35);
 
-  --st-background: #f4f6f8;
+  --st-background: #f3f5f8;
 
   --st-surface: #faf8ff;
   --st-surface-dim: #d0d9fd;
@@ -147,7 +147,7 @@
   --st-card-radius: 5px;
   --st-button-radius: 4px;
 
-  --st-sidebar-width: 280px;
+  --st-sidebar-width: 256px;
   --st-sidebar-width-collapsed: 80px;
 
   --st-sidebar-background: var(--st-primary);
@@ -160,7 +160,7 @@
 
   --st-sidebar-border: 4px solid var(--st-secondary-container);
 
-  --st-navbar-height: 80px;
+  --st-navbar-height: 64px;
 
   --st-navbar-background: #ffffff;
 
@@ -311,6 +311,42 @@
   --st-border-color: var(--st-outline-variant);
 
   --st-focus-ring: 0 0 0 3px rgba(0, 106, 104, 0.18);
+
+  /* Teacher dashboard UI revision (design/teacher-dashboard prototype) --
+     added rather than repointing every existing --st-* token so the
+     refresh can be adopted where it's used without a blanket sitewide
+     value change. */
+  --st-line: #e1e5ec;
+  --st-line-strong: #cfd5de;
+  --st-ink-muted: #5a6275;
+  --st-ink-faint: #8a91a0;
+  --st-navy-soft: #e8eef6;
+
+  --st-risk-high-ink: #a01414;
+  --st-risk-moderate-ink: #8f5200;
+  --st-risk-low-ink: #2c7121;
+
+  --st-risk-high-soft-2: #fdecea;
+  --st-risk-moderate-soft-2: #fef3e4;
+  --st-risk-low-soft-2: #edf7ea;
+
+  /* Non-risk categories (learning level, modality) -- deliberately never
+     reuse the risk red/orange/green, so these charts can't be misread as
+     risk levels. */
+  --st-cat-1: #12355b;
+  --st-cat-2: #4c6f95;
+  --st-cat-3: #006a68;
+  --st-cat-4: #9db5d3;
+
+  --st-radius-card: 12px;
+  --st-radius-control: 8px;
+  --st-shadow-card: 0 1px 2px rgba(17, 26, 54, 0.04), 0 2px 8px rgba(17, 26, 54, 0.04);
+
+  /* Motion timing tokens -- see Part C (fill-in-on-view + hover/press). */
+  --st-ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --st-t-hover: 150ms;
+  --st-t-press: 90ms;
+  --st-t-fill: 800ms;
 }
 
 /* Accessibility text-size preference (Settings -> Accessibility). One
