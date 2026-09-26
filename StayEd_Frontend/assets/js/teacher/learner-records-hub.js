@@ -1,3 +1,5 @@
+const LEARNER_RECORDS_REDUCE_MOTION = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 class LearnerRecordsHub {
   static state = {
     all: [],
@@ -244,13 +246,13 @@ class LearnerRecordsHub {
       infoSelector: "[data-modular-info]",
       pagesSelector: "[data-modular-pages]",
       pageKey: "modular",
-      colspan: 6,
-      rowRenderer: (l) => this.modularRow(l),
+      colspan: 5,
+      rowRenderer: (l, i) => this.modularRow(l, i),
     });
   }
 
-  static modularRow(l) {
-    return `<tr>${this.recordCells(l)}<td class="is-center">${this.rowActionsMenu(l)}</td></tr>`;
+  static modularRow(l, i) {
+    return `<tr style="--i:${i}">${this.recordCells(l)}<td class="is-right" data-col="menu">${this.rowActionsMenu(l)}</td></tr>`;
   }
 
   static renderF2F() {
@@ -262,13 +264,13 @@ class LearnerRecordsHub {
       infoSelector: "[data-f2f-info]",
       pagesSelector: "[data-f2f-pages]",
       pageKey: "face-to-face",
-      colspan: 6,
-      rowRenderer: (l) => this.f2fRow(l),
+      colspan: 5,
+      rowRenderer: (l, i) => this.f2fRow(l, i),
     });
   }
 
-  static f2fRow(l) {
-    return `<tr>${this.recordCells(l)}<td class="is-center">${this.rowActionsMenu(l)}</td></tr>`;
+  static f2fRow(l, i) {
+    return `<tr style="--i:${i}">${this.recordCells(l)}<td class="is-right" data-col="menu">${this.rowActionsMenu(l)}</td></tr>`;
   }
 
   static renderBlended() {
@@ -280,13 +282,13 @@ class LearnerRecordsHub {
       infoSelector: "[data-blended-info]",
       pagesSelector: "[data-blended-pages]",
       pageKey: "blended",
-      colspan: 6,
-      rowRenderer: (l) => this.blendedRow(l),
+      colspan: 5,
+      rowRenderer: (l, i) => this.blendedRow(l, i),
     });
   }
 
-  static blendedRow(l) {
-    return `<tr>${this.recordCells(l)}<td class="is-center">${this.rowActionsMenu(l)}</td></tr>`;
+  static blendedRow(l, i) {
+    return `<tr style="--i:${i}">${this.recordCells(l)}<td class="is-right" data-col="menu">${this.rowActionsMenu(l)}</td></tr>`;
   }
 
   // Shared cell markup for LRN / Learner / Modules / Latest Activity / Risk
@@ -314,12 +316,27 @@ class LearnerRecordsHub {
   }
 
   static recordCells(l) {
+    const initials = (l.name || "?")
+      .split(" ")
+      .map((w) => w[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
+    const avatarCls = { High: " st-avatar-initials--high", Moderate: " st-avatar-initials--moderate" }[l.risk] || "";
+
     return `
-            <td style="font-family:monospace;font-size:0.75rem;color:var(--st-on-surface-variant);">${l.lrn}</td>
-            <td style="font-weight:600;color:var(--st-on-surface);">${this.formatDisplayName(l)}</td>
-            <td>${this.modulesCell(l)}</td>
-            <td>${this.activityCell(l)}</td>
-            <td>${this.riskBadge(l.risk)}</td>
+            <td data-col="learner">
+                <div class="st-learner-cell">
+                    <span class="st-avatar-initials${avatarCls}">${initials}</span>
+                    <div style="min-width:0">
+                        <button type="button" class="st-learner-name" tabindex="-1">${this.formatDisplayName(l)}</button>
+                        <p class="st-learner-id">LRN <span class="num">${l.lrn}</span></p>
+                    </div>
+                </div>
+            </td>
+            <td data-col="modules">${this.modulesCell(l)}</td>
+            <td data-col="activity">${this.activityCell(l)}</td>
+            <td data-col="risk">${this.riskBadge(l.risk)}</td>
         `;
   }
 
@@ -330,13 +347,13 @@ class LearnerRecordsHub {
 
     return `
             <div class="st-progress-cell">
-                <span class="st-progress-cell-count">${m.completed} of ${m.total} Returned</span>
+                <div class="st-progress-cell-top"><span><b class="num">${m.completed} of ${m.total}</b> returned</span><span class="num">${m.total ? pct + "%" : ""}</span></div>
                 <div class="st-progress-track">
-                    <div class="st-progress-fill st-progress-fill--primary" style="width:${pct}%;"></div>
+                    <div class="st-progress-fill st-progress-fill--primary" style="--w:${pct}%;width:${pct}%;"></div>
                 </div>
                 <button type="button" class="st-progress-link" data-open-module-modal="${l.id}">
-                    View Logbook
-                    <span class="material-symbols-outlined" style="font-size:1rem;">arrow_forward</span>
+                    View logbook
+                    <span class="material-symbols-outlined">arrow_forward</span>
                 </button>
             </div>
         `;
@@ -353,9 +370,9 @@ class LearnerRecordsHub {
             : "st-consult-dot--ok";
 
     return `
-            <div style="display:flex;align-items:center;gap:6px;">
+            <div class="st-activity${l.activity_status === "none" ? " st-activity--none" : ""}">
                 <span class="st-consult-dot ${dotClass}"></span>
-                <span style="font-size:0.8125rem;">${l.activity_text || "\u2014"}</span>
+                <span>${l.activity_text || "\u2014"}</span>
             </div>
         `;
   }
@@ -398,6 +415,11 @@ class LearnerRecordsHub {
 
       this.bindRowInteractions(body);
     }
+
+    body.classList.remove("is-inview");
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => body.classList.add("is-inview")),
+    );
 
     const total = rows.length;
 
@@ -506,27 +528,27 @@ class LearnerRecordsHub {
                 <div class="st-row-menu-list">
                     <button type="button" data-view-learner="${id}">
                         <span class="material-symbols-outlined">visibility</span>
-                        View Learner Profile
+                        View learner profile
                     </button>
                     <button type="button" data-open-module-modal="${id}">
                         <span class="material-symbols-outlined">menu_book</span>
-                        Open Module Progress
+                        Open module progress
                     </button>
                     ${showSchedule ? `
                     <button type="button" data-open-schedule-modal="${id}">
                         <span class="material-symbols-outlined">event</span>
-                        Set Schedule
+                        Set schedule
                     </button>
                     ` : ""}
                     ${showConsultation ? `
                     <button type="button" data-open-consultation-modal="${id}">
                         <span class="material-symbols-outlined">support</span>
-                        Record Consultation
+                        Record consultation
                     </button>
                     ` : ""}
                     <button type="button" data-assign-intervention="${id}">
                         <span class="material-symbols-outlined">support_agent</span>
-                        Assign Intervention
+                        Assign intervention
                     </button>
                 </div>
             </div>
@@ -534,9 +556,9 @@ class LearnerRecordsHub {
   }
 
   static riskBadge(risk) {
-    const cls =
-      { High: "high", Moderate: "moderate", Low: "low" }[risk] || "neutral";
-    return `<span class="st-risk-badge st-risk-badge--${cls}"><span class="st-risk-dot"></span>${risk || "Not Yet Assessed"}</span>`;
+    const cls = { High: "high", Moderate: "moderate", Low: "low" }[risk];
+    const label = cls ? risk : "Not yet assessed";
+    return `<span class="st-risk-badge st-risk-badge--${cls || "neutral"}"><span class="st-risk-dot"></span>${label}</span>`;
   }
 
   static set(selector, value) {

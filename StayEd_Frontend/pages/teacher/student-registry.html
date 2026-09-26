@@ -60,178 +60,185 @@
           </div>
         </div>
 
-        <div class="st-records-stats">
-          <div class="st-records-stat st-records-stat--total">
-            <div class="st-records-stat-icon">
-              <span class="material-symbols-outlined">groups</span>
+        <section class="st-panel st-panel-pad st-overview" data-animate aria-label="Registry summary">
+          <div class="st-overview-total">
+            <div class="value num" data-mgmt-total data-countup>0</div>
+            <div class="label">registered learners</div>
+          </div>
+          <div>
+            <div class="st-risk-strip" data-risk-strip role="img" aria-label="High, moderate, low and not yet assessed learners">
+              <span class="high" data-risk-strip-high></span>
+              <span class="mod" data-risk-strip-moderate></span>
+              <span class="low" data-risk-strip-low></span>
+              <span class="none" data-risk-strip-unassessed></span>
             </div>
-            <div>
-              <p class="st-records-stat-value" data-mgmt-total>--</p>
-              <p class="st-records-stat-label">Registered Learners</p>
+            <div class="st-risk-legend st-risk-legend--4">
+              <div class="st-risk-legend-item high">
+                <span class="count num" data-mgmt-high data-countup>0</span>
+                <span class="name">High risk</span>
+              </div>
+              <div class="st-risk-legend-item mod">
+                <span class="count num" data-mgmt-moderate data-countup>0</span>
+                <span class="name">Moderate risk</span>
+              </div>
+              <div class="st-risk-legend-item low">
+                <span class="count num" data-mgmt-low data-countup>0</span>
+                <span class="name">Low risk</span>
+              </div>
+              <div class="st-risk-legend-item none">
+                <span class="count num" data-mgmt-unassessed data-countup>0</span>
+                <span class="name">Not yet assessed</span>
+              </div>
             </div>
           </div>
+        </section>
 
-          <div class="st-records-stat st-records-stat--high">
-            <div class="st-records-stat-icon">
-              <span class="material-symbols-outlined">warning</span>
-            </div>
-            <div>
-              <p class="st-records-stat-value" data-mgmt-high>--</p>
-              <p class="st-records-stat-label">High Risk</p>
-            </div>
+        <section class="st-panel st-table-card">
+          <div class="st-table-card-head">
+            <h2 class="st-table-card-title">All learners</h2>
+            <span class="st-table-card-count" data-mgmt-info-top>0 learners</span>
           </div>
 
-          <div class="st-records-stat st-records-stat--moderate">
-            <div class="st-records-stat-icon">
-              <span class="material-symbols-outlined"
-                >notification_important</span
+          <div class="st-toolbar">
+            <label class="st-search">
+              <span class="material-symbols-outlined">search</span>
+              <input
+                type="text"
+                placeholder="Search by name or LRN"
+                data-mgmt-search
+                aria-label="Search learners by name or LRN"
+              />
+            </label>
+
+            <select class="st-select" data-mgmt-filter-level aria-label="Filter by learning level">
+              <option value="">All levels</option>
+              <option value="Basic Literacy">Basic Literacy</option>
+              <option value="Elementary">Elementary</option>
+              <option value="Junior High">Junior High</option>
+              <option value="Senior High">Senior High</option>
+            </select>
+
+            <select class="st-select" data-mgmt-filter-risk aria-label="Filter by risk level">
+              <option value="">All risk levels</option>
+              <option value="High">High Risk</option>
+              <option value="Moderate">Moderate Risk</option>
+              <option value="Low">Low Risk</option>
+            </select>
+
+            <select class="st-select" data-mgmt-filter-status aria-label="Filter by status">
+              <option value="">All statuses</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+              <option value="Pending">Pending</option>
+              <option value="Archived">Archived</option>
+            </select>
+
+            <button type="button" class="st-text-btn st-mgmt-clear-btn" data-mgmt-clear>
+              <span class="material-symbols-outlined">filter_list_off</span>
+              Clear filters
+            </button>
+          </div>
+
+          <!-- Bulk actions bar (shown only when rows are selected) -->
+          <div class="st-bulk-bar st-hidden" data-mgmt-bulk-bar>
+            <span class="st-bulk-bar-count">
+              <span class="material-symbols-outlined">check_circle</span>
+              <span data-mgmt-bulk-count>0 selected</span>
+            </span>
+            <div class="st-bulk-bar-actions">
+              <button type="button" class="st-bulk-btn" data-mgmt-bulk-export>
+                <span class="material-symbols-outlined">download</span>
+                Export
+              </button>
+              <button
+                type="button"
+                class="st-bulk-btn"
+                data-mgmt-bulk-archive
               >
-            </div>
-            <div>
-              <p class="st-records-stat-value" data-mgmt-moderate>--</p>
-              <p class="st-records-stat-label">Moderate Risk</p>
-            </div>
-          </div>
-
-          <div class="st-records-stat st-records-stat--low">
-            <div class="st-records-stat-icon">
-              <span class="material-symbols-outlined">verified_user</span>
-            </div>
-            <div>
-              <p class="st-records-stat-value" data-mgmt-low>--</p>
-              <p class="st-records-stat-label">Low Risk</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="st-dash-grid">
-          <div class="st-panel col-12">
-            <!-- Toolbar -->
-            <div class="st-records-toolbar">
-              <div class="st-search st-search--wide">
-                <span class="material-symbols-outlined">search</span>
-                <input
-                  type="text"
-                  placeholder="Search learner by name or LRN..."
-                  data-mgmt-search
-                  aria-label="Search learners by name or LRN"
-                />
-              </div>
-
-              <div class="st-records-toolbar-filters">
-                <select
-                  data-mgmt-filter-level
-                  aria-label="Filter by learning level"
-                >
-                  <option value="">All Levels</option>
-                  <option value="Basic Literacy">Basic Literacy</option>
-                  <option value="Elementary">Elementary</option>
-                  <option value="Junior High">Junior High</option>
-                  <option value="Senior High">Senior High</option>
-                </select>
-
-                <select data-mgmt-filter-risk aria-label="Filter by risk level">
-                  <option value="">All Risk Levels</option>
-                  <option value="High">High Risk</option>
-                  <option value="Moderate">Moderate Risk</option>
-                  <option value="Low">Low Risk</option>
-                </select>
-
-                <select data-mgmt-filter-status aria-label="Filter by status">
-                  <option value="">All Status</option>
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Archived">Archived</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Bulk actions bar (shown only when rows are selected) -->
-            <div class="st-bulk-bar st-hidden" data-mgmt-bulk-bar>
-              <span class="st-bulk-bar-count" data-mgmt-bulk-count
-                >0 selected</span
+                <span class="material-symbols-outlined">archive</span>
+                Archive
+              </button>
+              <button
+                type="button"
+                class="st-bulk-btn st-bulk-btn--danger"
+                data-mgmt-bulk-delete
               >
-              <div class="st-bulk-bar-actions">
-                <button type="button" class="st-bulk-btn" data-mgmt-bulk-export>
-                  <span class="material-symbols-outlined">download</span>
-                  Export
-                </button>
-                <button
-                  type="button"
-                  class="st-bulk-btn"
-                  data-mgmt-bulk-archive
-                >
-                  <span class="material-symbols-outlined">archive</span>
-                  Archive
-                </button>
-                <button
-                  type="button"
-                  class="st-bulk-btn st-bulk-btn--danger"
-                  data-mgmt-bulk-delete
-                >
-                  <span class="material-symbols-outlined">delete</span>
-                  Delete
-                </button>
-              </div>
+                <span class="material-symbols-outlined">delete</span>
+                Delete
+              </button>
             </div>
+          </div>
 
-            <!-- Table -->
-            <div class="st-table-scroll st-table-scroll--sticky">
-              <table class="st-data-table">
-                <thead>
-                  <tr>
-                    <th class="checkbox-col">
-                      <input
-                        type="checkbox"
-                        data-mgmt-select-all
-                        aria-label="Select all learners"
-                      />
-                    </th>
-                    <th class="is-sortable" data-sort="lrn">
-                      LRN
-                      <span class="material-symbols-outlined st-sort-icon"
-                        >unfold_more</span
-                      >
-                    </th>
-                    <th class="is-sortable" data-sort="name">
+          <!-- Table -->
+          <div class="st-table-scroll">
+            <table class="st-data-table st-reg-table">
+              <thead>
+                <tr>
+                  <th class="checkbox-col">
+                    <input
+                      type="checkbox"
+                      data-mgmt-select-all
+                      aria-label="Select all learners"
+                    />
+                  </th>
+                  <th class="has-sort">
+                    <button type="button" class="st-sort-btn" data-sort="name">
                       Learner
-                      <span class="material-symbols-outlined st-sort-icon"
-                        >unfold_more</span
-                      >
-                    </th>
-                    <th>Level</th>
-                    <th>Modality</th>
-                    <th class="is-sortable" data-sort="risk">
-                      Risk Level
-                      <span class="material-symbols-outlined st-sort-icon"
-                        >unfold_more</span
-                      >
-                    </th>
-                    <th class="is-center">Risk Probability</th>
-                    <th>Status</th>
-                    <th class="is-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody data-mgmt-body>
-                  <tr>
-                    <td colspan="9" class="st-table-empty-cell">
-                      Loading learners…
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <!-- Pagination -->
-            <div class="st-pagination">
-              <span class="st-pagination-info" data-mgmt-info
-                >Showing 0 learners</span
-              >
-              <div class="st-pagination-controls" data-mgmt-pages></div>
-            </div>
+                      <span class="material-symbols-outlined st-sort-icon">unfold_more</span>
+                    </button>
+                    <span class="st-th-sep">/</span>
+                    <button type="button" class="st-sort-btn" data-sort="lrn">
+                      LRN
+                      <span class="material-symbols-outlined st-sort-icon">unfold_more</span>
+                    </button>
+                    <span
+                      class="material-symbols-outlined st-th-info"
+                      tabindex="0"
+                      role="img"
+                      aria-label="LRN: Learner Reference Number, a unique ID issued to each learner."
+                      data-tip="LRN: Learner Reference Number, a unique ID issued to each learner."
+                      >info</span
+                    >
+                  </th>
+                  <th>Learning level</th>
+                  <th>Modality</th>
+                  <th class="has-sort">
+                    <button type="button" class="st-sort-btn" data-sort="risk">
+                      Risk
+                      <span class="material-symbols-outlined st-sort-icon">unfold_more</span>
+                    </button>
+                    <span
+                      class="material-symbols-outlined st-th-info"
+                      tabindex="0"
+                      role="img"
+                      aria-label="Predicted likelihood of dropping out, based on the learner's latest risk assessment."
+                      data-tip="Predicted likelihood of dropping out, based on the learner's latest risk assessment."
+                      >info</span
+                    >
+                  </th>
+                  <th>Latest activity</th>
+                  <th>Status</th>
+                  <th class="is-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody data-mgmt-body data-animate-rows>
+                <tr>
+                  <td colspan="8" class="st-table-empty-cell">
+                    Loading learners…
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-        </div>
+
+          <!-- Pagination -->
+          <div class="st-pagination">
+            <span class="st-pagination-info" data-mgmt-info
+              >Showing 0 learners</span
+            >
+            <div class="st-pagination-controls" data-mgmt-pages></div>
+          </div>
+        </section>
       </main>
 
       <div data-component="layout/footer"></div>

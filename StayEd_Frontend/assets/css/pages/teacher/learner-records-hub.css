@@ -1,5 +1,318 @@
 
 
+/* ============================================================
+   Learner Records: tabs move into the table card's head row, the
+   context banner reuses Class Management's light-bar look, the row
+   menu becomes a floating card, and the progress/activity cells lose
+   their inline styles. Scoped to body[data-page="Learner Records"];
+   .st-progress-cell/.st-consult-dot are further scoped to .st-lr-table
+   only, since .st-progress-cell is also used inside the (unrelated)
+   Module Release modal that can open from other pages too.
+   ============================================================ */
+body[data-page="Learner Records"] .st-lr-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+    padding:14px 20px;
+}
+
+body[data-page="Learner Records"] .st-lr-head .st-modality-tabs{
+    margin-bottom:0;
+}
+
+body[data-page="Learner Records"] .st-lr-toolbar{
+    padding:0;
+    flex:1 1 420px;
+    justify-content:flex-end;
+}
+
+/* Context banner: same light bar as Class Management (learner-records-hub.css
+   also hosts the shared base .st-class-context-banner* rules used by
+   Module Management -- only this page's look is overridden here). */
+body[data-page="Learner Records"] .st-class-context-banner{
+    background:#fff;
+    border:1px solid var(--st-line, var(--st-outline-variant));
+    border-left:4px solid var(--st-primary);
+    border-radius:var(--st-radius-card, var(--st-card-radius));
+    box-shadow:var(--st-shadow-card, var(--st-shadow-sm));
+    padding:14px 16px 14px 14px;
+}
+
+body[data-page="Learner Records"] .st-class-context-banner-icon{
+    color:var(--st-primary);
+    background:var(--st-navy-soft, var(--st-primary-fixed));
+    width:44px;
+    height:44px;
+    flex:none;
+    border-radius:12px;
+    display:grid;
+    place-items:center;
+    font-size:1.25rem;
+}
+
+body[data-page="Learner Records"] .st-class-context-banner-clc{
+    color:var(--st-ink-faint, var(--st-outline));
+}
+
+body[data-page="Learner Records"] .st-class-context-banner-level{
+    color:var(--st-on-surface);
+}
+
+body[data-page="Learner Records"] .st-class-context-banner-meta{
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+body[data-page="Learner Records"] .st-class-context-banner-switch{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    height:38px;
+    padding:0 14px;
+    border:1px solid var(--st-line-strong, var(--st-outline-variant));
+    border-radius:var(--st-radius-control, var(--st-button-radius));
+    color:var(--st-on-surface);
+    text-decoration:none;
+    transition:background-color var(--st-t-hover, 150ms),border-color var(--st-t-hover, 150ms),color var(--st-t-hover, 150ms),transform var(--st-t-press, 90ms);
+}
+
+body[data-page="Learner Records"] .st-class-context-banner-switch:hover{
+    border-color:var(--st-primary);
+    color:var(--st-primary);
+    background:var(--st-navy-soft, var(--st-primary-fixed));
+    text-decoration:none;
+}
+
+body[data-page="Learner Records"] .st-class-context-banner-switch:active{
+    transform:scale(.96);
+}
+
+body[data-page="Learner Records"] .st-class-context-banner-switch .material-symbols-outlined{
+    color:inherit;
+    font-size:19px;
+}
+
+/* Header action links: Enroll student is primary, the rest stay outline */
+body[data-page="Learner Records"] .st-lr-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:flex-end;
+}
+
+@media (max-width:1023px){
+    body[data-page="Learner Records"] .st-lr-actions{ justify-content:flex-start; }
+}
+
+@media (max-width:767px){
+    body[data-page="Learner Records"] .st-lr-actions{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        width:100%;
+    }
+    body[data-page="Learner Records"] .st-lr-actions .st-btn{
+        height:42px;
+        padding:0 10px;
+        font-size:0.844rem;
+    }
+    body[data-page="Learner Records"] .st-lr-actions [data-enroll-link]{
+        order:-1;
+        grid-column:1/-1;
+    }
+    body[data-page="Learner Records"] .st-class-context-banner{
+        flex-wrap:wrap;
+        gap:12px;
+    }
+    body[data-page="Learner Records"] .st-class-context-banner-icon{
+        width:40px;
+        height:40px;
+    }
+    body[data-page="Learner Records"] .st-class-context-banner-switch{
+        flex:1 1 100%;
+        justify-content:center;
+    }
+    body[data-page="Learner Records"] .st-lr-head{
+        padding:12px 16px;
+        flex-direction:column;
+        align-items:stretch;
+    }
+    body[data-page="Learner Records"] .st-modality-tabs{
+        display:flex;
+        width:100%;
+        margin-bottom:0;
+    }
+    body[data-page="Learner Records"] .st-modality-tab{
+        flex:1;
+        justify-content:center;
+        padding:0 8px;
+    }
+    body[data-page="Learner Records"] .st-lr-toolbar{
+        flex:1 1 auto;
+    }
+    body[data-page="Learner Records"] .st-lr-table td[data-col="modules"]{ order:1; padding-left:48px!important; }
+    body[data-page="Learner Records"] .st-lr-table td[data-col="modules"] .st-progress-cell{ max-width:none; }
+    body[data-page="Learner Records"] .st-lr-table td[data-col="activity"]{ order:2; padding-left:48px!important; }
+    body[data-page="Learner Records"] .st-lr-table td[data-col="risk"]{ order:3; padding-left:48px!important; }
+}
+
+/* Row menu: floating card popup. Also used by Student Registry and the
+   Teacher Dashboard's Student Registry Summary widget, for the same
+   View profile + (Run prediction / Archive) menu pattern. */
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu-trigger{
+    appearance:none;
+    width:34px;
+    height:34px;
+    border:1px solid var(--st-line-strong, var(--st-outline-variant));
+    border-radius:8px;
+    background:#fff;
+    display:grid;
+    place-items:center;
+    color:var(--st-on-surface);
+    cursor:pointer;
+    padding:0;
+    transition:background-color var(--st-t-hover, 150ms),border-color var(--st-t-hover, 150ms),transform var(--st-t-press, 90ms);
+}
+
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu-trigger:hover,
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu.is-open .st-row-menu-trigger{
+    border-color:var(--st-primary);
+    background:var(--st-navy-soft, var(--st-primary-fixed));
+    color:var(--st-primary);
+}
+
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu-trigger:active{
+    transform:scale(.94);
+}
+
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu-list{
+    min-width:230px;
+    padding:6px;
+    border-radius:10px;
+    box-shadow:0 12px 32px rgba(17,26,54,.16);
+}
+
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu.is-open .st-row-menu-list{
+    animation:st-lr-menu-pop 160ms var(--st-ease-out, ease);
+}
+
+@keyframes st-lr-menu-pop{
+    from{ opacity:0; transform:translateY(-4px); }
+    to{ opacity:1; transform:none; }
+}
+
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu-list button{
+    padding:9px 10px;
+    border-radius:7px;
+    font-size:0.875rem;
+    color:var(--st-on-surface);
+    transition:background-color var(--st-t-hover, 150ms);
+}
+
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu-list button .material-symbols-outlined{
+    font-size:19px;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu-list button:hover{
+    background:var(--st-background);
+    color:var(--st-primary);
+}
+
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu-list button:hover .material-symbols-outlined{
+    color:var(--st-primary);
+}
+
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu-list button:disabled{
+    opacity:.5;
+    cursor:default;
+    background:none;
+    color:var(--st-on-surface);
+}
+
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu-list button:disabled .material-symbols-outlined{
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+/* Modules cell (progress bar) -- scoped to the records table only, not
+   the Module Release modal which also uses .st-progress-cell. */
+body[data-page="Learner Records"] .st-lr-table .st-progress-cell{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+    min-width:170px;
+    max-width:230px;
+}
+
+body[data-page="Learner Records"] .st-lr-table .st-progress-cell-top{
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+    font-size:0.781rem;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+body[data-page="Learner Records"] .st-lr-table .st-progress-cell-top b{
+    color:var(--st-on-surface);
+    font-weight:600;
+}
+
+body[data-page="Learner Records"] .st-lr-table .st-progress-track{
+    height:6px;
+}
+
+body[data-page="Learner Records"] .st-lr-table .st-progress-fill{
+    width:0;
+}
+
+body[data-page="Learner Records"] [data-animate-rows].is-inview .st-lr-table .st-progress-fill{
+    width:var(--w);
+}
+
+body[data-page="Learner Records"] .st-lr-table .st-progress-link{
+    align-self:flex-start;
+    display:inline-flex;
+    align-items:center;
+    gap:3px;
+    font-size:0.813rem;
+    font-weight:600;
+    color:var(--st-secondary);
+    width:fit-content;
+}
+
+body[data-page="Learner Records"] .st-lr-table .st-progress-link .material-symbols-outlined{
+    font-size:16px;
+    transition:transform var(--st-t-hover, 150ms) var(--st-ease-out, ease);
+}
+
+body[data-page="Learner Records"] .st-lr-table .st-progress-link:hover .material-symbols-outlined{
+    transform:translateX(3px);
+}
+
+/* Activity cell */
+body[data-page="Learner Records"] .st-lr-table .st-activity{
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+    font-size:0.844rem;
+    color:var(--st-on-surface);
+    max-width:260px;
+}
+
+body[data-page="Learner Records"] .st-lr-table .st-activity--none{
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
+    margin-top:6px;
+}
+
+@media (prefers-reduced-motion:reduce){
+    body[data-page="Learner Records"] .st-lr-table .st-progress-fill{
+        width:var(--w);
+    }
+}
+
 .st-modality-tabs{
     display:flex;
     gap:4px;
@@ -1132,7 +1445,9 @@
     border-radius:var(--st-radius-lg);
     box-shadow:var(--st-shadow-sm);
     padding:16px 24px;
-    margin-bottom:24px;
+    /* No margin-bottom: .st-content's gap:20px handles spacing between
+       top-level page sections now (this was a leftover from before that
+       existed, and doubled up to 44px on Learner Records/Module Management). */
 }
 
 .st-class-context-banner-icon{

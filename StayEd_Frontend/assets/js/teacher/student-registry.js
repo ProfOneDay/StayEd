@@ -1,3 +1,14 @@
+const ST_REGISTRY_REDUCE_MOTION = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// Same mapping used by the Dashboard's Student Registry Summary widget
+// (dashboard.js) so a learner's avatar color is consistent between the two.
+const LEVEL_AVATAR_THEMES = {
+  "Basic Literacy": "",
+  "Elementary": " st-avatar-initials--teal",
+  "Junior High": " st-avatar-initials--blue",
+  "Senior High": " st-avatar-initials--slate",
+};
+
 class StudentRegistry {
   static state = {
     all: [],
@@ -48,7 +59,7 @@ class StudentRegistry {
     const body = document.querySelector("[data-mgmt-body]");
 
     if (body && window.Skeletons) {
-      body.innerHTML = Skeletons.tableRows(6, 9);
+      body.innerHTML = Skeletons.tableRows(6, 8);
     }
   }
 
@@ -82,6 +93,25 @@ class StudentRegistry {
     on("[data-mgmt-filter-status]", "change", (e) => {
       this.state.status = e.target.value;
       this.state.page = 1;
+      this.apply();
+    });
+
+    on("[data-mgmt-clear]", "click", () => {
+      this.state.search = "";
+      this.state.level = "";
+      this.state.risk = "";
+      this.state.status = "";
+      this.state.page = 1;
+
+      const search = document.querySelector("[data-mgmt-search]");
+      if (search) search.value = "";
+      const level = document.querySelector("[data-mgmt-filter-level]");
+      if (level) level.value = "";
+      const risk = document.querySelector("[data-mgmt-filter-risk]");
+      if (risk) risk.value = "";
+      const status = document.querySelector("[data-mgmt-filter-status]");
+      if (status) status.value = "";
+
       this.apply();
     });
 
@@ -136,10 +166,69 @@ class StudentRegistry {
 
     const count = (level) => all.filter((l) => l.risk === level).length;
 
-    this.set("[data-mgmt-total]", all.length);
-    this.set("[data-mgmt-high]", count("High"));
-    this.set("[data-mgmt-moderate]", count("Moderate"));
-    this.set("[data-mgmt-low]", count("Low"));
+    const total = all.length;
+    const high = count("High");
+    const moderate = count("Moderate");
+    const low = count("Low");
+    const unassessed = Math.max(0, total - high - moderate - low);
+
+    this.countTo(document.querySelector("[data-mgmt-total]"), total);
+    this.countTo(document.querySelector("[data-mgmt-high]"), high);
+    this.countTo(document.querySelector("[data-mgmt-moderate]"), moderate);
+    this.countTo(document.querySelector("[data-mgmt-low]"), low);
+    this.countTo(document.querySelector("[data-mgmt-unassessed]"), unassessed);
+
+    // Proportional risk strip: each segment's flex-grow equals its own
+    // count, matching the dashboard's overview strip.
+    const grow = (selector, value) => {
+      const el = document.querySelector(selector);
+      if (el) el.style.flexGrow = String(Math.max(value, 0.0001));
+    };
+    grow("[data-risk-strip-high]", high);
+    grow("[data-risk-strip-moderate]", moderate);
+    grow("[data-risk-strip-low]", low);
+    grow("[data-risk-strip-unassessed]", unassessed);
+
+    const strip = document.querySelector("[data-risk-strip]");
+    if (strip) {
+      strip.setAttribute(
+        "aria-label",
+        `${high} high, ${moderate} moderate, ${low} low, ${unassessed} not yet assessed`,
+      );
+    }
+
+    // Reveals the risk strip (clip-path transition on [data-animate] .st-risk-strip,
+    // defined globally in dashboard.css) -- the dashboard triggers this via an
+    // IntersectionObserver for its several scrollable widgets, but this summary
+    // panel is always above the fold on load, so just add the class directly.
+    const panel = document.querySelector(".st-overview[data-animate]");
+    if (panel) {
+      panel.classList.remove("is-inview");
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => panel.classList.add("is-inview")),
+      );
+    }
+  }
+
+  // Counts a [data-countup] element up from 0 to `value` over ~800ms
+  // (ease-out-cubic). Writes the value immediately if motion is reduced.
+  static countTo(el, value) {
+    if (!el) return;
+    const end = Number(value ?? el.dataset.final ?? el.textContent);
+    el.dataset.final = Number.isFinite(end) ? end : (value ?? "");
+    if (ST_REGISTRY_REDUCE_MOTION || !Number.isFinite(end)) {
+      el.textContent = value ?? el.dataset.final;
+      return;
+    }
+    const t0 = performance.now();
+    const dur = 800;
+    const tick = (t) => {
+      const k = Math.min(1, (t - t0) / dur);
+      const eased = 1 - Math.pow(1 - k, 3);
+      el.textContent = Math.round(end * eased);
+      if (k < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
   }
 
   static apply() {
@@ -221,7 +310,7 @@ class StudentRegistry {
     if (!pageRows.length) {
       body.innerHTML = `
                 <tr>
-                    <td colspan="9">
+                    <td colspan="8">
                         <div class="st-empty" style="border:none;background:transparent;">
                             <span class="material-symbols-outlined">search_off</span>
                             <p class="st-empty-title">No learners found</p>
@@ -231,7 +320,7 @@ class StudentRegistry {
                 </tr>
             `;
     } else {
-      body.innerHTML = pageRows.map((l) => this.row(l)).join("");
+      body.innerHTML = pageRows.map((l, i) => this.row(l, i)).join("");
 
       body.querySelectorAll("[data-row-select]").forEach((cb) => {
         cb.addEventListener("change", (e) => {
@@ -260,6 +349,12 @@ class StudentRegistry {
       });
     }
 
+    body.classList.remove("is-inview");
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => body.classList.add("is-inview")),
+    );
+    body.querySelectorAll("[data-countup]").forEach((el) => this.countTo(el));
+
     this.syncSelectAllState();
 
     this.updateBulkBar();
@@ -286,9 +381,7 @@ class StudentRegistry {
     return `${lastName}, ${firstName}`;
   }
 
-  static row(l) {
-    const initialsTheme = ["", "--teal", "--blue"][(l.id || 0) % 3];
-
+  static row(l, i) {
     const initials = (l.name || "?")
       .split(" ")
       .map((w) => w[0])
@@ -296,53 +389,77 @@ class StudentRegistry {
       .join("")
       .toUpperCase();
 
-    const riskProbability = Math.round(
-      Math.min(1, Math.max(0, l.risk_probability ?? 0)) * 100,
-    );
-
     const isArchived = l.status === "Archived";
 
     return `
-            <tr class="${this.state.selected.has(l.id) ? "is-selected" : ""}">
-                <td class="checkbox-col">
+            <tr class="${this.state.selected.has(l.id) ? "is-selected" : ""}" style="--i:${i}">
+                <td class="checkbox-col" data-col="select">
                     <input type="checkbox" data-row-select="${l.id}"
                         ${this.state.selected.has(l.id) ? "checked" : ""}
                         aria-label="Select ${l.name}">
                 </td>
-                <td style="font-family:monospace;font-size:0.75rem;font-weight:600;color:var(--st-on-surface);">${l.lrn}</td>
-                <td>
-                    <div style="display:flex;align-items:center;gap:12px;">
-                        <div>
-                            <div class="st-learner-name">${this.formatDisplayName(l)}</div>
-                            <p class="st-learner-id">${l.sex || ""}${l.age ? ", " + l.age + " yrs" : ""}</p>
+                <td data-col="learner">
+                    <div class="st-learner-cell">
+                        ${this.avatar(l, initials)}
+                        <div style="min-width:0">
+                            <button type="button" class="st-learner-name" data-view-learner="${l.id}">${this.formatDisplayName(l)}</button>
+                            <p class="st-learner-id"><span class="num">${l.lrn}</span>${l.sex || l.age ? ` · ${l.sex || ""}${l.sex && l.age ? ", " : ""}${l.age || ""}` : ""}</p>
                         </div>
                     </div>
                 </td>
-                <td>${this.levelPill(l.level)}</td>
-                <td>${this.modalityPill(l.modality)}</td>
-                <td>${this.riskBadge(l.risk)}</td>
-                <td class="is-center">
-                    <p class="st-confidence-value">${l.risk && l.risk !== "Not Yet Assessed" ? `${riskProbability}%` : "—"}</p>
-                    <p class="st-confidence-label">${l.risk && l.risk !== "Not Yet Assessed" ? `${l.risk} Risk` : "Not Yet Assessed"}</p>
-                </td>
-                <td>${this.statusPill(l.status)}</td>
-                <td>
+                <td data-col="level">${l.level || "—"}</td>
+                <td data-col="modality">${this.modalityPill(l.modality)}</td>
+                <td data-col="risk">${this.riskCell(l)}</td>
+                <td data-col="activity" class="st-activity" ${l.activity_text ? `data-tip="${l.activity_text.replace(/"/g, "&quot;")}"` : ""}><span class="st-activity-text">${l.activity_text || "—"}</span></td>
+                <td data-col="status">${this.statusPill(l.status)}</td>
+                <td class="is-right" data-col="actions">
                     <div class="st-row-actions">
-                        <button class="st-btn st-btn-outline st-btn-xs" data-view-learner="${l.id}">View Profile</button>
-                        <button class="st-icon-btn-sm" data-run-prediction="${l.id}"
-                            aria-label="Run prediction"
-                            title="Run Prediction"
-                            ${this.state.predicting.has(String(l.id)) ? "disabled" : ""}>
-                            <span class="material-symbols-outlined">${this.state.predicting.has(String(l.id)) ? "progress_activity" : "bolt"}</span>
-                        </button>
-                        <button class="st-icon-btn-sm" data-archive-learner="${l.id}"
-                            aria-label="${isArchived ? "Restore" : "Archive"} learner"
-                            title="${isArchived ? "Restore" : "Archive"}">
-                            <span class="material-symbols-outlined">${isArchived ? "unarchive" : "archive"}</span>
-                        </button>
+                        <button class="st-btn st-btn-outline st-btn-xs" data-view-learner="${l.id}">View profile</button>
+                        <div class="st-row-menu" data-row-menu>
+                            <button type="button" class="st-row-menu-trigger" data-row-menu-trigger aria-label="More actions">
+                                <span class="material-symbols-outlined">more_vert</span>
+                            </button>
+                            <div class="st-row-menu-list">
+                                <button type="button" data-run-prediction="${l.id}"
+                                    ${this.state.predicting.has(String(l.id)) ? "disabled" : ""}>
+                                    <span class="material-symbols-outlined">${this.state.predicting.has(String(l.id)) ? "progress_activity" : "bolt"}</span>
+                                    Run prediction
+                                </button>
+                                <button type="button" data-archive-learner="${l.id}">
+                                    <span class="material-symbols-outlined">${isArchived ? "unarchive" : "archive"}</span>
+                                    ${isArchived ? "Restore" : "Archive"}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </td>
             </tr>
+        `;
+  }
+
+  // Colored by Learning Level (not risk) so a learner's avatar reads the
+  // same way here and in the Dashboard's Student Registry Summary widget.
+  static avatar(l, initials) {
+    const cls = LEVEL_AVATAR_THEMES[l.level] || "";
+    return `<span class="st-avatar-initials${cls}">${initials}</span>`;
+  }
+
+  static modalityPill(modality) {
+    const cls = { "Face-to-Face": " st-modality-pill--f2f", Modular: " st-modality-pill--modular", Blended: " st-modality-pill--blended" }[modality] || "";
+    return `<span class="st-pill st-modality-pill${cls}">${modality || "—"}</span>`;
+  }
+
+  static riskCell(l) {
+    const cls = { High: "high", Moderate: "moderate", Low: "low" }[l.risk];
+    if (!cls) {
+      return `<div class="st-risk-cell"><div class="st-risk-cell-top">${this.riskBadge(l.risk)}</div></div>`;
+    }
+    const pct = Math.round(Math.min(1, Math.max(0, l.risk_probability ?? 0)) * 100);
+    return `
+            <div class="st-risk-cell st-risk-cell--${cls}" title="Predicted dropout probability">
+                <div class="st-risk-cell-top">${this.riskBadge(l.risk)}<span class="st-risk-pct num">${pct}%</span></div>
+                <div class="st-risk-meter"><i style="--w:${pct}%"></i></div>
+            </div>
         `;
   }
 
@@ -371,7 +488,7 @@ class StudentRegistry {
     bar.classList.toggle("st-hidden", n === 0);
 
     if (count) {
-      count.textContent = `${n} learner${n === 1 ? "" : "s"} selected`;
+      count.textContent = `${n} selected`;
     }
   }
 
@@ -387,6 +504,8 @@ class StudentRegistry {
       "[data-mgmt-info]",
       `Showing ${start}\u2013${end} of ${total} learners`,
     );
+
+    this.set("[data-mgmt-info-top]", `${total} learner${total === 1 ? "" : "s"}`);
 
     const container = document.querySelector("[data-mgmt-pages]");
 
@@ -569,22 +688,14 @@ class StudentRegistry {
   }
 
   static riskBadge(risk) {
-    const cls =
-      { High: "high", Moderate: "moderate", Low: "low" }[risk] || "neutral";
-    return `<span class="st-risk-badge st-risk-badge--${cls}"><span class="st-risk-dot"></span>${risk || "Not Yet Assessed"}</span>`;
-  }
-
-  static levelPill(level) {
-    return `<span class="st-pill st-pill--teal">${level || "\u2014"}</span>`;
-  }
-
-  static modalityPill(m) {
-    const teal = m === "Modular" ? " st-pill--teal" : "";
-    return `<span class="st-pill${teal}">${m || "\u2014"}</span>`;
+    const cls = { High: "high", Moderate: "moderate", Low: "low" }[risk];
+    const label = cls ? risk : "Not yet assessed";
+    return `<span class="st-risk-badge st-risk-badge--${cls || "neutral"}"><span class="st-risk-dot"></span>${label}</span>`;
   }
 
   static statusPill(status) {
-    return `<span class="st-pill">${status || "\u2014"}</span>`;
+    const cls = (status || "").toLowerCase();
+    return `<span class="st-pill st-pill--${cls}">${status || "\u2014"}</span>`;
   }
 
   static set(selector, value) {
@@ -594,6 +705,44 @@ class StudentRegistry {
     }
   }
 }
+
+// Row menu (Run prediction / Archive) open/close + fixed positioning, same
+// pattern as Learner Records' row menu. data-view-learner is handled by its
+// own per-row binding in renderPage(), not here, so it isn't duplicated.
+function closeOpenRegistryRowMenus() {
+  document.querySelectorAll(".st-row-menu.is-open").forEach((menu) => {
+    menu.classList.remove("is-open");
+  });
+}
+
+document.addEventListener("click", (event) => {
+  const trigger = event.target.closest("[data-row-menu-trigger]");
+
+  document.querySelectorAll(".st-row-menu.is-open").forEach((menu) => {
+    if (!trigger || menu !== trigger.closest(".st-row-menu")) {
+      menu.classList.remove("is-open");
+    }
+  });
+
+  if (trigger) {
+    const menu = trigger.closest(".st-row-menu");
+    const opening = !menu?.classList.contains("is-open");
+
+    menu?.classList.toggle("is-open");
+
+    if (opening && menu) {
+      const list = menu.querySelector(".st-row-menu-list");
+      const rect = trigger.getBoundingClientRect();
+
+      if (list) {
+        list.style.top = `${rect.bottom + 4}px`;
+        list.style.right = `${window.innerWidth - rect.right}px`;
+      }
+    }
+  }
+});
+
+window.addEventListener("scroll", closeOpenRegistryRowMenus, true);
 
 (function bootManagement() {
   let started = false;

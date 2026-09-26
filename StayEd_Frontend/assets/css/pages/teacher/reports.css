@@ -2,7 +2,6 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--st-card-gap);
-  margin-top: var(--st-section-gap);
 }
 
 .st-report-card {

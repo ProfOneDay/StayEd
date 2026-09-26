@@ -431,11 +431,6 @@
 }
 
 
-/* UI polish: assessment recording */
-[data-page="Assessment Scores"] .st-page-header {
-  margin-bottom: 16px;
-}
-
 .st-assessment-scores-layout {
   grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
   gap: 20px;

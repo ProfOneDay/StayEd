@@ -7,7 +7,7 @@ h1,h2,h3,.profile-name{font-family:var(--st-font-heading)}
 .card .card-sub{color:var(--muted);font-size: var(--st-font-size-small);margin-bottom:18px;margin-left:44px}
 .section-icon{width:32px;height:32px;border-radius:var(--st-radius-xl);background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
 .danger-zone .section-icon{background:var(--st-danger-light);color:var(--st-error)}
-.settings-tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.settings-tabs{display:flex;gap:8px;flex-wrap:wrap}
 .settings-tabs button{border:1px solid transparent;background:none;padding:8px 14px;border-radius:99px;font:inherit;color:var(--muted);cursor:pointer}
 .settings-tabs button:hover{background:#eef2f8}
 .settings-tabs button.active{background:#e7eef7;border-color:#c7d6ea;color:var(--ink);font-weight:700}

@@ -7,15 +7,15 @@
 
   gap: 8px;
 
-  height: 44px;
+  height: 38px;
 
-  padding: 0 20px;
+  padding: 0 16px;
 
   border: none;
 
-  border-radius: var(--st-button-radius);
+  border-radius: var(--st-radius-control, var(--st-button-radius));
 
-  font-size: var(--st-font-size-small);
+  font-size: 0.875rem; /* 14px */
 
   font-weight: 600;
 
@@ -24,6 +24,10 @@
   transition: var(--st-transition-default);
 
   text-decoration: none;
+}
+
+.st-btn .material-symbols-outlined {
+  font-size: 19px;
 }
 
 .st-btn:hover {
@@ -446,6 +450,14 @@
   color: #2563eb;
 
   border-color: #bfdbfe;
+}
+
+.st-avatar-initials--slate {
+  background: rgba(157, 181, 211, 0.25);
+
+  color: var(--st-cat-2, #4c6f95);
+
+  border-color: rgba(157, 181, 211, 0.35);
 }
 
 .st-chip {

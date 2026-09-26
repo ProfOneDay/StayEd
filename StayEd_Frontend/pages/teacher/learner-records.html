@@ -48,14 +48,14 @@
               teacher remarks across all ALS learning modalities.
             </p>
           </div>
-          <div class="st-page-header-actions">
+          <div class="st-page-header-actions st-lr-actions">
             <a
               href="module-management.html"
               class="st-btn st-btn-outline st-hidden"
               data-manage-modules-link
             >
               <span class="material-symbols-outlined">inventory_2</span>
-              Manage Modules
+              Manage modules
             </a>
             <a
               href="assessment-scores.html"
@@ -63,7 +63,7 @@
               data-assessment-scores-link
             >
               <span class="material-symbols-outlined">fact_check</span>
-              Assessment Scores
+              Assessment scores
             </a>
             <a
               href="learner-import.html"
@@ -71,15 +71,15 @@
               data-import-link
             >
               <span class="material-symbols-outlined">upload_file</span>
-              Import Students
+              Import students
             </a>
             <a
               href="learner-enroll.html"
-              class="st-btn st-btn-outline"
+              class="st-btn st-btn-primary"
               data-enroll-link
             >
               <span class="material-symbols-outlined">person_add</span>
-              Enroll Student
+              Enroll student
             </a>
           </div>
         </div>
@@ -113,89 +113,104 @@
             href="class-management.html"
             class="st-class-context-banner-switch"
           >
-            Switch Class
             <span class="material-symbols-outlined">swap_horiz</span>
+            Switch class
           </a>
         </div>
 
-        <!-- Shared filter bar (persists across subtab switches) -->
-        <div class="st-filter-bar">
-          <div class="st-filter-row" style="align-items: center">
-            <div class="st-search" style="flex: 2; min-width: 240px">
-              <span class="material-symbols-outlined">search</span>
-              <input
-                type="text"
-                placeholder="Search learner, LRN, or learning strand..."
-                data-records-search
-                aria-label="Search learner records"
-              />
+        <section class="st-panel st-table-card">
+          <div class="st-lr-head">
+            <div
+              class="st-modality-tabs"
+              role="tablist"
+              aria-label="Learning modality"
+            >
+              <button
+                type="button"
+                class="st-modality-tab is-active"
+                data-modality-tab="modular"
+                role="tab"
+                aria-selected="true"
+              >
+                <span class="material-symbols-outlined">grid_view</span>
+                Modular
+              </button>
+              <button
+                type="button"
+                class="st-modality-tab"
+                data-modality-tab="face-to-face"
+                role="tab"
+                aria-selected="false"
+              >
+                <span class="material-symbols-outlined">groups</span>
+                Face-to-Face
+              </button>
+              <button
+                type="button"
+                class="st-modality-tab"
+                data-modality-tab="blended"
+                role="tab"
+                aria-selected="false"
+              >
+                <span class="material-symbols-outlined">dashboard</span>
+                Blended
+              </button>
             </div>
 
-            <select data-records-filter-risk aria-label="Filter by risk level">
-              <option value="">All Risk Levels</option>
-              <option value="High">High Risk</option>
-              <option value="Moderate">Moderate Risk</option>
-              <option value="Low">Low Risk</option>
-            </select>
+            <div class="st-toolbar st-lr-toolbar">
+              <label class="st-search">
+                <span class="material-symbols-outlined">search</span>
+                <input
+                  type="text"
+                  placeholder="Search learner, LRN, or learning strand"
+                  data-records-search
+                  aria-label="Search learner records"
+                />
+              </label>
+
+              <select class="st-select" data-records-filter-risk aria-label="Filter by risk level">
+                <option value="">All risk levels</option>
+                <option value="High">High Risk</option>
+                <option value="Moderate">Moderate Risk</option>
+                <option value="Low">Low Risk</option>
+              </select>
+            </div>
           </div>
-        </div>
 
-        <!-- Modality subtabs -->
-        <div
-          class="st-modality-tabs"
-          role="tablist"
-          aria-label="Learning modality"
-        >
-          <button
-            type="button"
-            class="st-modality-tab is-active"
-            data-modality-tab="modular"
-            role="tab"
-            aria-selected="true"
-          >
-            <span class="material-symbols-outlined">grid_view</span>
-            Modular
-          </button>
-          <button
-            type="button"
-            class="st-modality-tab"
-            data-modality-tab="face-to-face"
-            role="tab"
-            aria-selected="false"
-          >
-            <span class="material-symbols-outlined">groups</span>
-            Face-to-Face
-          </button>
-          <button
-            type="button"
-            class="st-modality-tab"
-            data-modality-tab="blended"
-            role="tab"
-            aria-selected="false"
-          >
-            <span class="material-symbols-outlined">dashboard</span>
-            Blended
-          </button>
-        </div>
-
-        <!-- MODULAR PANEL -->
-        <div class="st-modality-panel is-active" data-modality-panel="modular">
-          <div class="st-panel col-12">
-            <div class="st-table-scroll st-table-scroll--sticky">
-              <table class="st-data-table">
+          <!-- MODULAR PANEL -->
+          <div class="st-modality-panel is-active" data-modality-panel="modular">
+            <div class="st-table-scroll">
+              <table class="st-data-table st-lr-table">
                 <thead>
                   <tr>
-                    <th>LRN</th>
                     <th>Learner</th>
-                    <th>Modules</th>
-                    <th>Latest Learner Activity</th>
-                    <th>Risk Level</th>
-                    <th class="is-center">Actions</th>
+                    <th>Modules
+                      <span
+                        class="material-symbols-outlined st-th-info"
+                        tabindex="0"
+                        role="img"
+                        aria-label="Number of learning modules the learner has returned, out of those released to them."
+                        data-tip="Number of learning modules the learner has returned, out of those released to them."
+                        >info</span
+                      >
+                    </th>
+                    <th data-activity-head>Latest learner activity</th>
+                    <th>Risk
+                      <span
+                        class="material-symbols-outlined st-th-info"
+                        tabindex="0"
+                        role="img"
+                        aria-label="Predicted likelihood of dropping out, based on the learner's latest risk assessment."
+                        data-tip="Predicted likelihood of dropping out, based on the learner's latest risk assessment."
+                        >info</span
+                      >
+                    </th>
+                    <th class="is-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody data-modular-body>
+                <tbody data-modular-body data-animate-rows>
                   <tr>
-                    <td colspan="6" class="st-table-empty-cell">Loading…</td>
+                    <td colspan="5" class="st-table-empty-cell">Loading…</td>
                   </tr>
                 </tbody>
               </table>
@@ -207,26 +222,41 @@
               <div class="st-pagination-controls" data-modular-pages></div>
             </div>
           </div>
-        </div>
 
-        <!-- FACE-TO-FACE PANEL -->
-        <div class="st-modality-panel" data-modality-panel="face-to-face">
-          <div class="st-panel col-12">
-            <div class="st-table-scroll st-table-scroll--sticky">
-              <table class="st-data-table">
+          <!-- FACE-TO-FACE PANEL -->
+          <div class="st-modality-panel" data-modality-panel="face-to-face">
+            <div class="st-table-scroll">
+              <table class="st-data-table st-lr-table">
                 <thead>
                   <tr>
-                    <th>LRN</th>
                     <th>Learner</th>
-                    <th>Modules</th>
-                    <th>Latest Consultation</th>
-                    <th>Risk Level</th>
-                    <th class="is-center">Actions</th>
+                    <th>Modules
+                      <span
+                        class="material-symbols-outlined st-th-info"
+                        tabindex="0"
+                        role="img"
+                        aria-label="Number of learning modules the learner has returned, out of those released to them."
+                        data-tip="Number of learning modules the learner has returned, out of those released to them."
+                        >info</span
+                      >
+                    </th>
+                    <th data-activity-head>Latest consultation</th>
+                    <th>Risk
+                      <span
+                        class="material-symbols-outlined st-th-info"
+                        tabindex="0"
+                        role="img"
+                        aria-label="Predicted likelihood of dropping out, based on the learner's latest risk assessment."
+                        data-tip="Predicted likelihood of dropping out, based on the learner's latest risk assessment."
+                        >info</span
+                      >
+                    </th>
+                    <th class="is-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody data-f2f-body>
+                <tbody data-f2f-body data-animate-rows>
                   <tr>
-                    <td colspan="6" class="st-table-empty-cell">Loading…</td>
+                    <td colspan="5" class="st-table-empty-cell">Loading…</td>
                   </tr>
                 </tbody>
               </table>
@@ -238,26 +268,41 @@
               <div class="st-pagination-controls" data-f2f-pages></div>
             </div>
           </div>
-        </div>
 
-        <!-- BLENDED PANEL -->
-        <div class="st-modality-panel" data-modality-panel="blended">
-          <div class="st-panel col-12">
-            <div class="st-table-scroll st-table-scroll--sticky">
-              <table class="st-data-table">
+          <!-- BLENDED PANEL -->
+          <div class="st-modality-panel" data-modality-panel="blended">
+            <div class="st-table-scroll">
+              <table class="st-data-table st-lr-table">
                 <thead>
                   <tr>
-                    <th>LRN</th>
                     <th>Learner</th>
-                    <th>Modules</th>
-                    <th>Latest Learning Activity</th>
-                    <th>Risk Level</th>
-                    <th class="is-center">Actions</th>
+                    <th>Modules
+                      <span
+                        class="material-symbols-outlined st-th-info"
+                        tabindex="0"
+                        role="img"
+                        aria-label="Number of learning modules the learner has returned, out of those released to them."
+                        data-tip="Number of learning modules the learner has returned, out of those released to them."
+                        >info</span
+                      >
+                    </th>
+                    <th data-activity-head>Latest learning activity</th>
+                    <th>Risk
+                      <span
+                        class="material-symbols-outlined st-th-info"
+                        tabindex="0"
+                        role="img"
+                        aria-label="Predicted likelihood of dropping out, based on the learner's latest risk assessment."
+                        data-tip="Predicted likelihood of dropping out, based on the learner's latest risk assessment."
+                        >info</span
+                      >
+                    </th>
+                    <th class="is-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody data-blended-body>
+                <tbody data-blended-body data-animate-rows>
                   <tr>
-                    <td colspan="6" class="st-table-empty-cell">Loading…</td>
+                    <td colspan="5" class="st-table-empty-cell">Loading…</td>
                   </tr>
                 </tbody>
               </table>
@@ -269,7 +314,7 @@
               <div class="st-pagination-controls" data-blended-pages></div>
             </div>
           </div>
-        </div>
+        </section>
       </main>
 
       <div data-component="layout/footer"></div>

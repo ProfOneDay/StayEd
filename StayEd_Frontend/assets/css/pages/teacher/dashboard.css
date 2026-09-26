@@ -406,6 +406,7 @@
 .st-risk-strip .high { background: var(--st-risk-high); flex-grow: 1; }
 .st-risk-strip .mod { background: var(--st-risk-moderate); flex-grow: 1; }
 .st-risk-strip .low { background: var(--st-risk-low); flex-grow: 1; }
+.st-risk-strip .none { background: var(--st-line-strong, #cfd5de); flex-grow: 1; }
 
 .st-risk-legend {
   display: grid;
@@ -430,6 +431,7 @@
 .st-risk-legend-item.high { border-color: var(--st-risk-high); background: transparent; }
 .st-risk-legend-item.mod { border-color: var(--st-risk-moderate); background: transparent; }
 .st-risk-legend-item.low { border-color: var(--st-risk-low); background: transparent; }
+.st-risk-legend-item.none { border-color: var(--st-line-strong, #cfd5de); background: transparent; }
 
 .st-risk-legend-item .count {
   font-family: var(--st-font-heading);
@@ -441,6 +443,7 @@
 .st-risk-legend-item.high .count { color: var(--st-risk-high-ink, var(--st-risk-high)); }
 .st-risk-legend-item.mod .count { color: var(--st-risk-moderate-ink, var(--st-risk-moderate)); }
 .st-risk-legend-item.low .count { color: var(--st-risk-low-ink, var(--st-risk-low)); }
+.st-risk-legend-item.none .count { color: var(--st-ink-muted, var(--st-on-surface-variant)); }
 
 .st-risk-legend-item .name {
   font-size: 0.844rem; /* 13.5px */
@@ -941,7 +944,7 @@ body[data-page="Teacher Dashboard"] .st-registry-head {
 
 body[data-page="Teacher Dashboard"] .st-registry-tools {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 8px;
 }
@@ -984,6 +987,16 @@ body[data-page="Teacher Dashboard"] .st-search input {
   font-family: var(--st-font-body);
   background: none;
   color: var(--st-on-surface);
+}
+
+/* components.css's global .st-search input:focus still applies its own
+   border-color/box-shadow on top of this scoped version (only the resting
+   state was overridden above) -- without this, focusing the field shows
+   two concentric rings: one from that leaked box-shadow hugging the input,
+   another from .st-search:focus-within below hugging the wrapper. */
+body[data-page="Teacher Dashboard"] .st-search input:focus {
+  outline: none;
+  box-shadow: none;
 }
 
 body[data-page="Teacher Dashboard"] .st-tool-btn {
@@ -1286,6 +1299,7 @@ body[data-page="Teacher Dashboard"] .st-registry-loading {
   body[data-page="Teacher Dashboard"] .st-data-table td[data-col="level"] { flex-basis: 100%; font-size: 0.8125rem; color: var(--st-ink-muted, var(--st-on-surface-variant)); padding-left: 48px; margin-top: -6px; }
   body[data-page="Teacher Dashboard"] .st-data-table td[data-col="modality"] { padding-left: 48px; }
   body[data-page="Teacher Dashboard"] .st-data-table td[data-col="activity"] { flex-basis: 100%; padding-left: 48px; font-size: 0.781rem; }
+  body[data-page="Teacher Dashboard"] .st-data-table td[data-col="status"] { padding-left: 48px; }
   body[data-page="Teacher Dashboard"] .st-data-table td[data-col="actions"] { flex-basis: 100%; padding-left: 48px; }
   body[data-page="Teacher Dashboard"] .st-data-table td[data-col="actions"] .st-row-actions { justify-content: flex-start; }
   body[data-page="Teacher Dashboard"] .st-pagination { justify-content: center; padding: 14px 16px; }
@@ -1499,120 +1513,40 @@ body[data-page="Teacher Dashboard"] .st-registry-loading {
     color:var(--st-outline);
 }
 
-.st-ewa-summary{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:16px;
-    margin-bottom:24px;
+/* Early Warning now reuses the shared .st-overview (summary) and
+   .st-table-card/.st-toolbar (table card) components -- see
+   learner-records.css's shared 3-page block. .st-ewa-filter-bar/-clear-btn/
+   -table stay as additional classes on those shared elements for this
+   page's own clearing/tooltip logic, not standalone components anymore. */
+body[data-page="Early Warning Alerts"] .st-ewa-clear-btn,
+body[data-page="Student Registry"] .st-mgmt-clear-btn{
+    margin-left:auto;
 }
 
-@media (max-width:992px){
-    .st-ewa-summary{ grid-template-columns:1fr 1fr; }
-}
-
-.st-ewa-summary-card{
-    background:#fff;
-    border-radius:var(--st-radius-lg);
-    box-shadow:var(--st-shadow-sm);
-    padding:16px;
-    border-left:4px solid var(--st-outline-variant);
-}
-
-.st-ewa-summary-card--high{ border-left-color:var(--st-risk-high); }
-.st-ewa-summary-card--moderate{ border-left-color:var(--st-risk-moderate); }
-.st-ewa-summary-card--low{ border-left-color:var(--st-risk-low); }
-.st-ewa-summary-card--total{ border-left-color:var(--st-primary); }
-
-.st-ewa-summary-label{
-    font-size: var(--st-font-size-micro);
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:.04em;
-    color:var(--st-on-surface-variant);
-    margin-bottom:8px;
-}
-
-.st-ewa-summary-row{
-    display:flex;
-    align-items:flex-end;
-    justify-content:space-between;
-}
-
-.st-ewa-summary-value{
-    font-family:var(--st-font-heading);
-    font-size: var(--st-font-size-title);
-    font-weight:700;
-}
-
-.st-ewa-summary-icon{
-    font-size: var(--st-font-size-display);
-    opacity:.18;
-}
-
-.st-ewa-filter-bar{
-    background:#fff;
-    border-radius:var(--st-radius-lg);
-    box-shadow:var(--st-shadow-sm);
-    padding:16px;
-    display:flex;
-    flex-wrap:wrap;
-    align-items:center;
-    gap:12px;
-    margin-bottom:24px;
-}
-
-.st-ewa-filter-bar select{
-    height:40px;
-    padding:0 12px;
-    border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-button-radius);
-    background:#fff;
-    font-family:var(--st-font-body);
-    font-size: var(--st-font-size-label);
-    color:var(--st-on-surface);
-    cursor:pointer;
-}
-
-.st-ewa-filter-bar select:focus{
-    outline:none;
-    border-color:var(--st-secondary);
-    box-shadow:var(--st-focus-ring);
-}
-
-.st-ewa-search{
-    flex:1;
-    min-width:220px;
-}
-
-.st-ewa-clear-btn{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    background:transparent;
-    border:none;
-    color:var(--st-primary);
-    font-weight:700;
-    font-size: var(--st-font-size-caption);
-    cursor:pointer;
-    padding:8px 12px;
-    border-radius:var(--st-radius-lg);
-    transition:var(--st-transition);
-}
-
-.st-ewa-clear-btn:hover{
-    background:var(--st-surface-container-low);
-}
-
-.st-ewa-risk-score{
-    display:inline-flex;
-    align-items:center;
-    gap:4px;
-    font-weight:700;
-    font-size: var(--st-font-size-caption);
-}
-
-.st-ewa-table-name-cell{
-    display:flex;
-    align-items:center;
-    gap:10px;
+@media (max-width:767px){
+    body[data-page="Early Warning Alerts"] .st-ewa-clear-btn,
+    body[data-page="Student Registry"] .st-mgmt-clear-btn{
+        margin-left:0;
+    }
+    body[data-page="Early Warning Alerts"] .st-ewa-table td[data-col="level"]{
+        grid-column:1/-2;
+        order:1;
+        padding-left:48px!important;
+    }
+    body[data-page="Early Warning Alerts"] .st-ewa-table td[data-col="clc"]{
+        grid-column:-2/-1;
+        order:1;
+        justify-self:end;
+    }
+    body[data-page="Early Warning Alerts"] .st-ewa-table td[data-col="risk"]{
+        order:2;
+        padding-left:48px!important;
+    }
+    body[data-page="Early Warning Alerts"] .st-ewa-table td[data-col="date"]{
+        grid-column:1/-1;
+        order:3;
+        padding-left:48px!important;
+        font-size:0.781rem;
+        color:var(--st-ink-faint, var(--st-outline));
+    }
 }

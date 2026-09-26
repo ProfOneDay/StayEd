@@ -50,134 +50,91 @@
           </div>
         </div>
 
-        <!-- Summary strip -->
-        <div class="st-ewa-summary">
-          <div class="st-ewa-summary-card st-ewa-summary-card--total">
-            <p class="st-ewa-summary-label">Total Alerts</p>
-            <div class="st-ewa-summary-row">
-              <span
-                class="st-ewa-summary-value"
-                style="color: var(--st-primary)"
-                data-ewa-total
-                >--</span
-              >
-              <span
-                class="material-symbols-outlined st-ewa-summary-icon"
-                style="color: var(--st-primary)"
-                >notifications_active</span
-              >
+        <section class="st-panel st-panel-pad st-overview" data-animate aria-label="Alert summary">
+          <div class="st-overview-total">
+            <div class="value num" data-ewa-total data-countup>0</div>
+            <div class="label">active alerts</div>
+          </div>
+          <div>
+            <div class="st-risk-strip" data-risk-strip role="img" aria-label="High, moderate and low risk alerts">
+              <span class="high" data-risk-strip-high></span>
+              <span class="mod" data-risk-strip-moderate></span>
+              <span class="low" data-risk-strip-low></span>
+            </div>
+            <div class="st-risk-legend st-risk-legend--3">
+              <div class="st-risk-legend-item high">
+                <span class="count num" data-ewa-high data-countup>0</span>
+                <span class="name">High risk</span>
+              </div>
+              <div class="st-risk-legend-item mod">
+                <span class="count num" data-ewa-moderate data-countup>0</span>
+                <span class="name">Moderate risk</span>
+              </div>
+              <div class="st-risk-legend-item low">
+                <span class="count num" data-ewa-low data-countup>0</span>
+                <span class="name">Low risk</span>
+              </div>
             </div>
           </div>
+        </section>
 
-          <div class="st-ewa-summary-card st-ewa-summary-card--high">
-            <p class="st-ewa-summary-label">High Risk</p>
-            <div class="st-ewa-summary-row">
-              <span
-                class="st-ewa-summary-value"
-                style="color: var(--st-risk-high)"
-                data-ewa-high
-                >--</span
-              >
-              <span
-                class="material-symbols-outlined st-ewa-summary-icon"
-                style="color: var(--st-risk-high)"
-                >priority_high</span
-              >
-            </div>
+        <section class="st-panel st-table-card">
+          <div class="st-table-card-head">
+            <h2 class="st-table-card-title">Learners requiring attention</h2>
+            <span class="st-table-card-count" data-ewa-count>0 alerts</span>
           </div>
 
-          <div class="st-ewa-summary-card st-ewa-summary-card--moderate">
-            <p class="st-ewa-summary-label">Medium Risk</p>
-            <div class="st-ewa-summary-row">
-              <span
-                class="st-ewa-summary-value"
-                style="color: var(--st-risk-moderate)"
-                data-ewa-moderate
-                >--</span
-              >
-              <span
-                class="material-symbols-outlined st-ewa-summary-icon"
-                style="color: var(--st-risk-moderate)"
-                >warning</span
-              >
-            </div>
+          <div class="st-toolbar st-ewa-filter-bar">
+            <label class="st-search">
+              <span class="material-symbols-outlined">search</span>
+              <input
+                type="text"
+                placeholder="Search by name or LRN"
+                data-ewa-search
+                aria-label="Search alerts"
+              />
+            </label>
+
+            <select class="st-select" data-ewa-filter-risk aria-label="Filter by risk level">
+              <option value="">All risk levels</option>
+              <option value="High">High Risk</option>
+              <option value="Moderate">Medium Risk</option>
+              <option value="Low">Low Risk</option>
+            </select>
+
+            <select class="st-select" data-ewa-filter-clc aria-label="Filter by CLC">
+              <option value="">All CLCs</option>
+            </select>
+
+            <button type="button" class="st-text-btn st-ewa-clear-btn" data-ewa-clear>
+              <span class="material-symbols-outlined">filter_list_off</span>
+              Clear filters
+            </button>
           </div>
 
-          <div class="st-ewa-summary-card st-ewa-summary-card--low">
-            <p class="st-ewa-summary-label">Low Risk</p>
-            <div class="st-ewa-summary-row">
-              <span
-                class="st-ewa-summary-value"
-                style="color: var(--st-risk-low)"
-                data-ewa-low
-                >--</span
-              >
-              <span
-                class="material-symbols-outlined st-ewa-summary-icon"
-                style="color: var(--st-risk-low)"
-                >check_circle</span
-              >
-            </div>
-          </div>
-        </div>
-
-        <!-- Filter bar -->
-        <div class="st-ewa-filter-bar">
-          <div class="st-search st-ewa-search">
-            <span class="material-symbols-outlined">search</span>
-            <input
-              type="text"
-              placeholder="Search learner by name or LRN..."
-              data-ewa-search
-              aria-label="Search alerts"
-            />
-          </div>
-
-          <select data-ewa-filter-risk aria-label="Filter by risk level">
-            <option value="">All Risk Levels</option>
-            <option value="High">High Risk</option>
-            <option value="Moderate">Medium Risk</option>
-            <option value="Low">Low Risk</option>
-          </select>
-
-          <select data-ewa-filter-clc aria-label="Filter by CLC">
-            <option value="">All CLCs</option>
-          </select>
-
-          <button type="button" class="st-ewa-clear-btn" data-ewa-clear>
-            <span class="material-symbols-outlined">filter_list_off</span>
-            Clear Filters
-          </button>
-        </div>
-
-        <!-- Table -->
-        <div class="st-panel col-12">
-          <div
-            class="st-panel-head"
-            style="padding: 20px 24px; margin-bottom: 0"
-          >
-            <h4 class="st-panel-title">Learners Requiring Attention</h4>
-            <span class="st-panel-subtitle" data-ewa-count>0 alerts</span>
-          </div>
-
-          <div class="st-table-scroll st-table-scroll--sticky">
-            <table class="st-data-table">
+          <div class="st-table-scroll">
+            <table class="st-data-table st-ewa-table">
               <thead>
                 <tr>
                   <th>Learner</th>
-                  <th>Program</th>
+                  <th>Level</th>
                   <th>CLC</th>
-                  <th class="is-center">Risk Score</th>
-                  <th>Risk Level</th>
-                  <th>Status</th>
-                  <th>Date Generated</th>
-                  <th>Assigned Teacher</th>
-                  <th class="is-center">Action</th>
+                  <th>Risk
+                    <span
+                      class="material-symbols-outlined st-th-info"
+                      tabindex="0"
+                      role="img"
+                      aria-label="Predicted likelihood of dropping out, based on the learner's latest risk assessment."
+                      data-tip="Predicted likelihood of dropping out, based on the learner's latest risk assessment."
+                      >info</span
+                    >
+                  </th>
+                  <th>Date generated</th>
                 </tr>
               </thead>
-              <tbody data-ewa-body>
+              <tbody data-ewa-body data-animate-rows>
                 <tr>
-                  <td colspan="9" class="st-table-empty-cell">
+                  <td colspan="5" class="st-table-empty-cell">
                     Loading alerts…
                   </td>
                 </tr>
@@ -191,7 +148,7 @@
             >
             <div class="st-pagination-controls" data-ewa-pages></div>
           </div>
-        </div>
+        </section>
       </main>
 
       <div data-component="layout/footer"></div>

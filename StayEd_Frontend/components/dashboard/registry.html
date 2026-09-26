@@ -18,16 +18,6 @@
         />
       </div>
 
-      <button class="st-tool-btn" data-registry-filter>
-        <span class="material-symbols-outlined">filter_alt</span>
-        Filter
-      </button>
-
-      <button class="st-tool-btn" data-registry-sort>
-        <span class="material-symbols-outlined">swap_vert</span>
-        Sort: Risk level
-      </button>
-
       <a class="st-btn st-btn-outline st-btn-xs" href="student-registry.html">
         View full registry
       </a>
@@ -38,15 +28,30 @@
     <table class="st-data-table">
       <thead>
         <tr>
-          <th>Learner</th>
+          <th class="has-sort">
+            <button type="button" class="st-sort-btn" data-registry-sort-key="name">
+              Learner
+              <span class="material-symbols-outlined st-sort-icon">unfold_more</span>
+            </button>
+            <span class="st-th-sep">/</span>
+            <button type="button" class="st-sort-btn" data-registry-sort-key="lrn">
+              LRN
+              <span class="material-symbols-outlined st-sort-icon">unfold_more</span>
+            </button>
+          </th>
           <th>Learning level</th>
           <th>Modality</th>
-          <th>Risk level</th>
+          <th class="has-sort">
+            <button type="button" class="st-sort-btn" data-registry-sort-key="risk">
+              Risk level
+              <span class="material-symbols-outlined st-sort-icon">unfold_more</span>
+            </button>
+          </th>
           <th>Latest activity</th>
-          <th class="is-center">Actions</th>
+          <th class="is-right">Actions</th>
         </tr>
       </thead>
-      <tbody data-registry-body>
+      <tbody data-registry-body data-animate-rows>
         <tr>
           <td colspan="6" class="st-registry-loading">Loading learners…</td>
         </tr>

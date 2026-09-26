@@ -4,6 +4,567 @@
     line-height:1.2;
 }
 
+/* ============================================================
+   Shared table-card components: Student Registry, Learner Records,
+   Early Warning Alerts. New classes only -- .st-data-table, .st-pill,
+   .st-risk-badge, .st-row-actions, .st-icon-btn-sm, .st-pagination and
+   .st-search stay global (touched elsewhere in this file already) and
+   are not redefined here.
+   ============================================================ */
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .num{
+    font-variant-numeric:tabular-nums;
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-table-card{
+    overflow:hidden;
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-table-card-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+    padding:16px 20px;
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-table-card-title{
+    margin:0;
+    font-family:var(--st-font-heading);
+    font-weight:700;
+    font-size:1.125rem;
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-table-card-count{
+    font-size:0.844rem;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    padding:0 20px 16px;
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar .st-search{
+    flex:1 1 280px;
+    min-width:0;
+    max-width:420px;
+    height:40px;
+    padding:0 12px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    border:1px solid var(--st-line-strong, var(--st-outline-variant));
+    border-radius:var(--st-radius-control, var(--st-button-radius));
+    background:#fff;
+    color:var(--st-ink-faint, var(--st-outline));
+    transition:border-color var(--st-t-hover, 150ms),box-shadow var(--st-t-hover, 150ms);
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar .st-search:hover{
+    border-color:var(--st-primary);
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar .st-search:focus-within{
+    border-color:var(--st-secondary);
+    box-shadow:0 0 0 3px rgba(0,106,104,.12);
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar .st-search .material-symbols-outlined{
+    position:static;
+    top:auto;
+    left:auto;
+    transform:none;
+    flex:none;
+    color:inherit;
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar .st-search input{
+    height:100%;
+    border:0;
+    outline:0;
+    flex:1;
+    min-width:0;
+    padding:0;
+    font:inherit;
+    font-size:0.875rem;
+    background:none;
+    color:var(--st-on-surface);
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar .st-search input:focus{
+    outline:none;
+    box-shadow:none;
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-select{
+    height:40px;
+    border:1px solid var(--st-line-strong, var(--st-outline-variant));
+    border-radius:var(--st-radius-control, var(--st-button-radius));
+    background:#fff;
+    padding:0 34px 0 12px;
+    font:inherit;
+    font-size:0.875rem;
+    color:var(--st-on-surface);
+    appearance:none;
+    cursor:pointer;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%235a6275' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 10px center;
+    transition:border-color var(--st-t-hover, 150ms),box-shadow var(--st-t-hover, 150ms);
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-select:hover{
+    border-color:var(--st-primary);
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-select:focus{
+    outline:none;
+    border-color:var(--st-secondary);
+    box-shadow:0 0 0 3px rgba(0,106,104,.12);
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-text-btn{
+    appearance:none;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    height:40px;
+    padding:0 10px;
+    border:0;
+    border-radius:8px;
+    background:none;
+    font:inherit;
+    font-size:0.875rem;
+    font-weight:600;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    cursor:pointer;
+    transition:background-color var(--st-t-hover, 150ms),color var(--st-t-hover, 150ms),transform var(--st-t-press, 90ms);
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-text-btn:hover{
+    background:var(--st-background);
+    color:var(--st-on-surface);
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-text-btn:active{
+    transform:scale(.96);
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-text-btn .material-symbols-outlined{
+    font-size:19px;
+}
+
+/* Sort controls: buttons inside a header cell. Also used by the Teacher
+   Dashboard's Student Registry Summary widget. */
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-data-table th.has-sort{
+    padding-top:0;
+    padding-bottom:0;
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-sort-btn{
+    appearance:none;
+    display:inline-flex;
+    align-items:center;
+    gap:2px;
+    border:0;
+    background:none;
+    padding:2px 4px;
+    margin:-2px -4px;
+    border-radius:6px;
+    font:inherit;
+    font-size:0.781rem;
+    font-weight:600;
+    color:inherit;
+    cursor:pointer;
+    transition:background-color var(--st-t-hover, 150ms),color var(--st-t-hover, 150ms);
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-sort-btn:hover{
+    background:#eef1f5;
+    color:var(--st-on-surface);
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-sort-btn .st-sort-icon{
+    font-size:16px;
+    color:var(--st-ink-faint, var(--st-outline));
+    opacity:1;
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-sort-btn.is-sorted{
+    color:var(--st-primary);
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-sort-btn.is-sorted .st-sort-icon{
+    color:var(--st-primary);
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-th-sep{
+    color:#c3c8d1;
+    margin:0 6px;
+}
+
+/* Small info icon next to a column header, for columns whose meaning
+   isn't obvious at a glance (LRN, Risk, Modules, Alert). Reuses the
+   [data-tip] tooltip component already used on icon-only row buttons. */
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-th-info{
+    display:inline-flex;
+    vertical-align:middle;
+    margin-left:3px;
+    font-size:15px!important;
+    color:var(--st-ink-faint, var(--st-outline));
+    cursor:help;
+    border-radius:50%;
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-th-info:hover,
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-th-info:focus-visible{
+    color:var(--st-primary);
+}
+
+/* Header tooltips open downward, not upward like the row-button ones --
+   they sit right at the top edge of .st-table-card (overflow:hidden, for
+   its rounded corners), so an upward-opening tooltip gets clipped there. */
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-th-info[data-tip]::after{
+    top:calc(100% + 8px);
+    bottom:auto;
+    left:0;
+    font-weight:400;
+    white-space:normal;
+    width:200px;
+    text-align:left;
+    transform:translate(0,-4px);
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-th-info[data-tip]:hover::after,
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-th-info[data-tip]:focus-visible::after{
+    transform:translate(0,0);
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-data-table th.is-right,
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-data-table td.is-right{
+    text-align:right;
+}
+
+/* Two-line cell (e.g. Level & modality) */
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-two-line{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    min-width:0;
+    white-space:normal;
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-two-line strong{
+    font-weight:500;
+    font-size:0.875rem;
+    color:var(--st-on-surface);
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-two-line small{
+    font-size:0.781rem;
+    color:var(--st-ink-faint, var(--st-outline));
+    white-space:nowrap;
+    display:flex;
+    align-items:center;
+    gap:4px;
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-two-line small .material-symbols-outlined{
+    font-size:15px;
+}
+
+/* Risk cell: badge + probability meter. Also used by the Teacher
+   Dashboard's Student Registry Summary widget (components/dashboard/registry.html). */
+body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    min-width:128px;
+}
+
+body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+}
+
+body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-pct{
+    font-size:0.813rem;
+    font-weight:700;
+}
+
+body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--high .st-risk-pct{ color:var(--st-risk-high-ink, var(--st-risk-high)); }
+body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--moderate .st-risk-pct{ color:var(--st-risk-moderate-ink, var(--st-risk-moderate)); }
+body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--low .st-risk-pct{ color:var(--st-risk-low-ink, var(--st-risk-low)); }
+
+body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-meter{
+    height:5px;
+    border-radius:999px;
+    background:var(--st-background);
+    overflow:hidden;
+}
+
+body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-meter i{
+    display:block;
+    height:100%;
+    border-radius:999px;
+    width:0;
+    transition:width var(--st-t-fill, 800ms) var(--st-ease-out, ease);
+}
+
+body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) [data-animate-rows].is-inview .st-risk-meter i{
+    width:var(--w);
+}
+
+body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--high .st-risk-meter i{ background:var(--st-risk-high); }
+body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--moderate .st-risk-meter i{ background:var(--st-risk-moderate); }
+body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--low .st-risk-meter i{ background:var(--st-risk-low); }
+
+/* Status / new pill variants (Active/Pending/Archived/Inactive) */
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-pill--active{ background:#e3f4f3; color:#00504e; }
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-pill--pending{ background:var(--st-risk-moderate-soft); color:var(--st-risk-moderate); }
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-pill--archived,
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-pill--inactive{ background:var(--st-background); color:var(--st-ink-faint, var(--st-outline)); }
+
+/* Risk-tinted avatars in the learner cell */
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-learner-cell .st-avatar-initials--high{ background:var(--st-risk-high-soft); color:var(--st-risk-high); border-color:transparent; }
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-learner-cell .st-avatar-initials--moderate{ background:var(--st-risk-moderate-soft); color:var(--st-risk-moderate); border-color:transparent; }
+
+/* Visible tooltip for icon-only buttons */
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) [data-tip]{
+    position:relative;
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) [data-tip]::after{
+    content:attr(data-tip);
+    position:absolute;
+    bottom:calc(100% + 6px);
+    left:50%;
+    transform:translate(-50%,4px);
+    padding:5px 8px;
+    border-radius:6px;
+    background:#111a36;
+    color:#fff;
+    font-size:12px;
+    font-weight:500;
+    white-space:nowrap;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity 120ms ease,transform 120ms ease;
+    z-index:5;
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) [data-tip]:hover::after,
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) [data-tip]:focus-visible::after{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+/* Row entrance: fade in + rise, staggered per row */
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) [data-animate-rows] tr{
+    opacity:0;
+    transform:translateY(4px);
+}
+
+body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) [data-animate-rows].is-inview tr{
+    opacity:1;
+    transform:none;
+    transition:opacity 300ms ease,transform 400ms var(--st-ease-out, ease);
+    transition-delay:calc(var(--i,0) * 30ms);
+}
+
+@media (prefers-reduced-motion:reduce){
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) [data-animate-rows] tr{
+        opacity:1;
+        transform:none;
+    }
+    body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-meter i{
+        width:var(--w);
+    }
+}
+
+/* ---- Mobile: rows become cards, header becomes a compact sort bar ---- */
+@media (max-width:767px){
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-table-card-head{ padding:14px 16px; }
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar{ padding:0 16px 14px; }
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar .st-search{ flex:1 1 100%; max-width:none; }
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar .st-select{ flex:1 1 calc(50% - 5px); min-width:0; }
+
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-table-scroll{ overflow:visible; }
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table,
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table tbody{ display:block; }
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table thead{ display:block; }
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table thead tr{
+        display:flex;
+        align-items:center;
+        gap:6px 14px;
+        flex-wrap:wrap;
+        padding:8px 16px;
+        background:#f8f9fb;
+        border-top:1px solid var(--st-line, var(--st-outline-variant));
+        border-bottom:1px solid var(--st-line, var(--st-outline-variant));
+    }
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table th{ display:none; padding:0!important; border:0; background:none; }
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table th.checkbox-col,
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table th.has-sort{ display:block; }
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table th.checkbox-col{ width:auto; }
+
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table tr{
+        display:grid;
+        grid-template-columns:auto 1fr auto;
+        gap:10px 12px;
+        align-items:center;
+        padding:14px 16px;
+        border-bottom:1px solid var(--st-line, var(--st-outline-variant));
+    }
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table td{ display:block; padding:0!important; border:0; white-space:normal; }
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table td[data-col]{ grid-column:1/-1; }
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table td[data-col="select"]{ grid-column:1; grid-row:1; }
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table td[data-col="learner"]{ grid-column:2/-1; grid-row:1; }
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table tr:not(:has(td[data-col="select"])) td[data-col="learner"]{ grid-column:1/-2; }
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table td[data-col="menu"]{ grid-column:-2/-1; grid-row:1; justify-self:end; }
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table td[data-col="risk"] .st-risk-cell{ min-width:0; }
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table td[data-col="actions"] .st-row-actions{ justify-content:flex-start; }
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table td[data-col="actions"] .st-btn-xs{ flex:1; height:38px; }
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table td[data-col="actions"] .st-icon-btn-sm{ width:38px; height:38px; border:1px solid var(--st-line-strong, var(--st-outline-variant)); }
+
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-pagination{ justify-content:center; padding:14px 16px; }
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-pagination-info{ width:100%; text-align:center; }
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-page-btn:not(.is-active):not([aria-label]){ display:none; }
+    body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) [data-tip]::after{ display:none; }
+}
+
+/* ============================================================
+   Student Registry: 4-item risk legend, table column order on mobile
+   ============================================================ */
+body[data-page="Student Registry"] .st-risk-legend--4{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+}
+
+/* Student Registry now has 8 columns (checkbox, Learner/LRN, Level,
+   Modality, Risk, Latest activity, Status, Actions) -- tighter cell
+   padding and a capped, ellipsis-truncated Latest activity column keep
+   it fitting at 1280px+ without the table's own horizontal scroll. */
+body[data-page="Student Registry"] .st-reg-table th,
+body[data-page="Student Registry"] .st-reg-table td{
+    padding-left:14px;
+    padding-right:14px;
+}
+
+/* Truncation lives on the inner span, not the td itself -- a [data-tip]
+   tooltip is anchored to the td (see the shared [data-tip]::after rule),
+   and if the td itself had overflow:hidden, it would clip its own tooltip
+   pseudo-element along with the text. */
+body[data-page="Student Registry"] .st-reg-table td[data-col="activity"]{
+    max-width:145px;
+}
+body[data-page="Student Registry"] .st-reg-table td[data-col="activity"] .st-activity-text{
+    display:block;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+/* Learner/LRN names vary in length with live data, so without a cap the
+   column (and the table's total width) grows with whatever's on the
+   current page -- cap it and ellipsis-truncate the name/LRN text so the
+   table's fit at 1280px+ doesn't depend on which names happen to render. */
+body[data-page="Student Registry"] .st-reg-table td[data-col="learner"]{
+    max-width:225px;
+}
+body[data-page="Student Registry"] .st-reg-table td[data-col="learner"] .st-learner-name,
+body[data-page="Student Registry"] .st-reg-table td[data-col="learner"] .st-learner-id{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+/* The table fits exactly at 1440px with the caps above, but this page's
+   8 columns (2 more than the other two tables) need further tightening to
+   still avoid the table's own horizontal scroll down to 1280px. Bounded to
+   >=768px so these caps don't also bite the stacked mobile card layout
+   below, which has its own, much roomier per-column widths. */
+@media (min-width:768px) and (max-width:1366px){
+    body[data-page="Student Registry"] .st-reg-table th,
+    body[data-page="Student Registry"] .st-reg-table td{
+        padding-left:10px;
+        padding-right:10px;
+    }
+    body[data-page="Student Registry"] .st-reg-table td[data-col="activity"]{
+        max-width:65px;
+    }
+    body[data-page="Student Registry"] .st-reg-table td[data-col="level"]{
+        max-width:75px;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+    }
+    /* "Learning level" (renamed from "Level") no longer fits the 75px cap
+       above on one line -- let the header itself wrap to two lines instead
+       of forcing the column wider than its data rows. */
+    body[data-page="Student Registry"] .st-reg-table th:nth-child(3){
+        max-width:75px;
+        white-space:normal;
+    }
+    body[data-page="Student Registry"] .st-reg-table td[data-col="modality"]{
+        max-width:100px;
+    }
+}
+
+/* Modality pills, colored per type (a navy/teal ramp, so they never read
+   as risk levels) -- also used by the Teacher Dashboard's Student
+   Registry Summary widget. */
+body:is([data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-modality-pill--f2f{
+    background:var(--st-navy-soft, #e8eef6);
+    color:var(--st-cat-1, var(--st-primary));
+}
+body:is([data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-modality-pill--modular{
+    background:#e3f4f3;
+    color:var(--st-cat-3, var(--st-secondary));
+}
+body:is([data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-modality-pill--blended{
+    background:#eef1f7;
+    color:var(--st-cat-2, #4c6f95);
+}
+
+@media (max-width:767px){
+    body[data-page="Student Registry"] .st-risk-legend--4{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+    body[data-page="Student Registry"] .st-reg-table td[data-col="level"]{
+        grid-column:1/-2;
+        order:1;
+        padding-left:30px!important;
+    }
+    body[data-page="Student Registry"] .st-reg-table td[data-col="modality"]{
+        grid-column:-2/-1;
+        order:1;
+        justify-self:end;
+    }
+    body[data-page="Student Registry"] .st-reg-table td[data-col="risk"]{
+        order:2;
+        padding-left:30px!important;
+    }
+    body[data-page="Student Registry"] .st-reg-table td[data-col="activity"]{
+        order:3;
+        padding-left:30px!important;
+        font-size:0.781rem;
+    }
+    body[data-page="Student Registry"] .st-reg-table td[data-col="status"]{
+        order:4;
+        padding-left:30px!important;
+    }
+    body[data-page="Student Registry"] .st-reg-table td[data-col="actions"]{
+        order:5;
+        padding-left:30px!important;
+    }
+}
+
 .st-modality-tab,
 .st-entry-tab,
 .st-enroll-card-title,
@@ -252,62 +813,79 @@
     background:rgba(18,53,91,.04);
 }
 
-.st-bulk-bar{
+body[data-page="Student Registry"] .st-bulk-bar{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:16px;
-    padding:12px 24px;
-    background:var(--st-primary-fixed);
-    border-bottom:1px solid rgba(18,53,91,.12);
-    animation:st-bulk-in .2s ease;
+    gap:10px;
+    flex-wrap:wrap;
+    margin:0 20px 14px;
+    padding:8px 8px 8px 14px;
+    border-radius:10px;
+    background:var(--st-primary);
+    color:#fff;
+    animation:st-bulk-in .18s var(--st-ease-out, ease);
 }
 
 @keyframes st-bulk-in{
-    from{ opacity:0; transform:translateY(-6px); }
-    to{ opacity:1; transform:translateY(0); }
+    from{ opacity:0; transform:translateY(-4px); }
+    to{ opacity:1; transform:none; }
 }
 
-.st-bulk-bar-count{
-    font-size: var(--st-font-size-caption);
-    font-weight:700;
-    color:var(--st-primary);
-}
-
-.st-bulk-bar-actions{
-    display:flex;
+body[data-page="Student Registry"] .st-bulk-bar-count{
+    display:inline-flex;
     align-items:center;
     gap:8px;
+    font-size:0.875rem;
+    font-weight:600;
+    color:#fff;
 }
 
-.st-bulk-btn{
+body[data-page="Student Registry"] .st-bulk-bar-count .material-symbols-outlined{
+    font-size:19px;
+}
+
+body[data-page="Student Registry"] .st-bulk-bar-actions{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    flex-wrap:wrap;
+}
+
+body[data-page="Student Registry"] .st-bulk-btn{
     display:inline-flex;
     align-items:center;
     gap:6px;
-    padding:6px 14px;
-    border-radius:var(--st-button-radius);
-    border:1px solid var(--st-outline-variant);
-    background:#fff;
-    color:var(--st-on-surface-variant);
-    font-size: var(--st-font-size-caption);
+    height:34px;
+    padding:0 12px;
+    border:0;
+    border-radius:7px;
+    background:rgba(255,255,255,.1);
+    color:#fff;
+    font-size:0.844rem;
     font-weight:600;
     cursor:pointer;
-    transition:var(--st-transition);
+    transition:background-color var(--st-t-hover, 150ms),transform var(--st-t-press, 90ms);
 }
 
-.st-bulk-btn:hover{
-    background:var(--st-surface);
-    border-color:var(--st-primary);
-    color:var(--st-primary);
+body[data-page="Student Registry"] .st-bulk-btn:hover{
+    background:rgba(255,255,255,.2);
 }
 
-.st-bulk-btn--danger:hover{
-    border-color:var(--st-error);
-    color:var(--st-error);
+body[data-page="Student Registry"] .st-bulk-btn:active{
+    transform:scale(.96);
 }
 
-.st-bulk-btn .material-symbols-outlined{
-    font-size:1rem;
+body[data-page="Student Registry"] .st-bulk-btn--danger:hover{
+    background:var(--st-risk-high);
+}
+
+body[data-page="Student Registry"] .st-bulk-btn .material-symbols-outlined{
+    font-size:18px;
+}
+
+@media (max-width:767px){
+    body[data-page="Student Registry"] .st-bulk-bar{ margin:0 16px 12px; }
 }
 
 .st-confidence-value{

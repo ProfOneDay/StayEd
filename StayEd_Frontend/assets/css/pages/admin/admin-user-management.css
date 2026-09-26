@@ -5,7 +5,7 @@ h1,h2,h3,.profile-name{font-family:var(--st-font-heading)}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--st-card-radius);padding:var(--st-card-padding);box-shadow:var(--st-shadow-sm)}
 
 /* KPI row */
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
 .kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--st-card-radius);padding:16px 18px;cursor:pointer;transition:border-color .15s ease,box-shadow .15s ease;text-align:left;position:relative}
 .notify-dot{position:absolute;top:10px;right:10px;width:9px;height:9px;border-radius:50%;background:var(--danger);border:2px solid #fff;display:none}
 .tab{position:relative}

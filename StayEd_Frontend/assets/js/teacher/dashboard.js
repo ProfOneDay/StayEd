@@ -8,6 +8,15 @@
 // earlier version of this file did) corrupted that cache across chart
 // instances and silently broke the tooltip's own fade-in animation.
 const ST_REDUCE_MOTION = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// Same mapping used by the Student Registry page (student-registry.js) so a
+// learner's avatar color is consistent between the two tables.
+const LEVEL_AVATAR_THEMES = {
+  "Basic Literacy": "",
+  "Elementary": " st-avatar-initials--teal",
+  "Junior High": " st-avatar-initials--blue",
+  "Senior High": " st-avatar-initials--slate",
+};
 if (typeof Chart !== "undefined") {
   Chart.defaults.font.family = "Inter, system-ui, sans-serif";
   Chart.defaults.color = "#8a91a0";
@@ -67,7 +76,9 @@ class TeacherDashboard {
     page: 1,
     perPage: 5,
     search: "",
-    sortByRisk: true,
+    sortKey: "risk",
+    sortDir: 1,
+    predicting: new Set(),
     filtersApplied: false,
     riskTrend: [],
     currentRiskCounts: { high: 0, moderate: 0, low: 0 },
@@ -173,12 +184,35 @@ class TeacherDashboard {
         this.applyRegistry({ recomputeStats: false });
       });
 
-    document
-      .querySelector("[data-registry-sort]")
-      ?.addEventListener("click", () => {
-        this.state.sortByRisk = !this.state.sortByRisk;
+    document.querySelectorAll("[data-registry-sort-key]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const key = btn.dataset.registrySortKey;
+        if (this.state.sortKey === key) {
+          this.state.sortDir *= -1;
+        } else {
+          this.state.sortKey = key;
+          this.state.sortDir = 1;
+        }
         this.applyRegistry({ recomputeStats: false });
       });
+    });
+  }
+
+  static updateRegistrySortIndicators() {
+    document.querySelectorAll("[data-registry-sort-key]").forEach((btn) => {
+      const icon = btn.querySelector(".st-sort-icon");
+      const isActive = btn.dataset.registrySortKey === this.state.sortKey;
+
+      btn.classList.toggle("is-sorted", isActive);
+
+      if (icon) {
+        icon.textContent = isActive
+          ? this.state.sortDir === 1
+            ? "arrow_upward"
+            : "arrow_downward"
+          : "unfold_more";
+      }
+    });
   }
 
   static renderWelcome(context = {}) {
@@ -661,12 +695,28 @@ class TeacherDashboard {
       );
     }
 
-    if (this.state.sortByRisk) {
-      const order = { High: 0, Moderate: 1, Low: 2 };
-      rows.sort((a, b) => (order[a.risk] ?? 3) - (order[b.risk] ?? 3));
+    if (this.state.sortKey) {
+      const key = this.state.sortKey;
+      const riskOrder = { High: 0, Moderate: 1, Low: 2 };
+
+      rows.sort((a, b) => {
+        let va = a[key];
+        let vb = b[key];
+
+        if (key === "risk") {
+          va = riskOrder[va] ?? 3;
+          vb = riskOrder[vb] ?? 3;
+        }
+
+        if (va < vb) return -1 * this.state.sortDir;
+        if (va > vb) return 1 * this.state.sortDir;
+        return 0;
+      });
     }
 
     this.state.filtered = rows;
+
+    this.updateRegistrySortIndicators();
 
     this.renderRegistryPage();
 
@@ -766,13 +816,34 @@ class TeacherDashboard {
           window.location.href = `learner-profile.html?id=${encodeURIComponent(el.dataset.viewLearner)}`;
         });
       });
+
+      body.querySelectorAll("[data-registry-run-prediction]").forEach((btn) => {
+        btn.addEventListener("click", () =>
+          this.runRegistryPrediction(btn.dataset.registryRunPrediction),
+        );
+      });
+
+      body.querySelectorAll("[data-registry-archive]").forEach((btn) => {
+        btn.addEventListener("click", () =>
+          this.archiveRegistryLearner(btn.dataset.registryArchive),
+        );
+      });
     }
+
+    // Reveals each row's risk probability meter (width transition gated on
+    // [data-animate-rows].is-inview, see dashboard.css) -- this table isn't
+    // watched by the page's scroll IntersectionObserver, so trigger it
+    // directly on render instead, same as Student Registry/Early Warning.
+    body.classList.remove("is-inview");
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => body.classList.add("is-inview")),
+    );
 
     this.renderPagination();
   }
 
   static registryRow(l, index) {
-    const initialsTheme = ["", "--teal", "--blue"][index % 3];
+    const initialsTheme = LEVEL_AVATAR_THEMES[l.level] || "";
 
     const initials = (l.name || "?")
       .split(" ")
@@ -780,6 +851,8 @@ class TeacherDashboard {
       .slice(0, 2)
       .join("")
       .toUpperCase();
+
+    const isArchived = l.status === "Archived";
 
     return `
             <tr tabindex="0">
@@ -795,18 +868,99 @@ class TeacherDashboard {
                 </td>
                 <td data-col="level">${l.level}</td>
                 <td data-col="modality">${this.modalityPill(l.modality)}</td>
-                <td data-col="risk">${this.riskBadge(l.risk)}</td>
+                <td data-col="risk">${this.riskCell(l)}</td>
                 <td data-col="activity" class="st-activity">${l.activity_text || "\u2014"}</td>
-                <td data-col="actions">
+                <td class="is-right" data-col="actions">
                     <div class="st-row-actions">
                         <button class="st-btn st-btn-outline st-btn-xs"
                             data-view-learner="${l.id}">View profile</button>
-                        <button class="st-icon-btn-sm" aria-label="More options">
-                            <span class="material-symbols-outlined">more_vert</span>
-                        </button>
+                        <div class="st-row-menu" data-row-menu>
+                            <button type="button" class="st-row-menu-trigger" data-row-menu-trigger aria-label="More actions">
+                                <span class="material-symbols-outlined">more_vert</span>
+                            </button>
+                            <div class="st-row-menu-list">
+                                <button type="button" data-registry-run-prediction="${l.id}"
+                                    ${this.state.predicting.has(String(l.id)) ? "disabled" : ""}>
+                                    <span class="material-symbols-outlined">${this.state.predicting.has(String(l.id)) ? "progress_activity" : "bolt"}</span>
+                                    Run prediction
+                                </button>
+                                <button type="button" data-registry-archive="${l.id}">
+                                    <span class="material-symbols-outlined">${isArchived ? "unarchive" : "archive"}</span>
+                                    ${isArchived ? "Restore" : "Archive"}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </td>
             </tr>
+        `;
+  }
+
+  // Same manual trigger as Student Registry's row menu -- updates the row
+  // in place from the response instead of a full reload.
+  static async runRegistryPrediction(id) {
+    const key = String(id);
+    if (this.state.predicting.has(key)) return;
+
+    this.state.predicting.add(key);
+    this.renderRegistryPage();
+
+    try {
+      const result = await API.runPrediction(id);
+      const l = this.state.learners.find((x) => String(x.id) === key);
+      if (l) {
+        l.risk =
+          result.risk_level.charAt(0) + result.risk_level.slice(1).toLowerCase();
+        l.risk_probability = result.risk_probability;
+      }
+      Toast?.success(
+        `Prediction updated: ${result.risk_level} risk (${Math.round(result.risk_probability * 100)}%).`,
+      );
+    } catch (error) {
+      console.error("[TeacherDashboard] runRegistryPrediction", error);
+      Toast?.error(error?.message || "Unable to run a prediction for this learner.");
+    } finally {
+      this.state.predicting.delete(key);
+      this.applyRegistry({ recomputeStats: false });
+    }
+  }
+
+  static async archiveRegistryLearner(id) {
+    const l = this.state.learners.find((x) => String(x.id) === String(id));
+
+    if (!l) return;
+
+    const archiving = l.status !== "Archived";
+
+    try {
+      await API.updateLearner(id, {
+        status: archiving ? "Archived" : "Active",
+      });
+
+      l.status = archiving ? "Archived" : "Active";
+
+      this.applyRegistry({ recomputeStats: false });
+
+      Toast?.success(archiving ? "Learner archived." : "Learner restored.");
+    } catch (error) {
+      console.error(error);
+      Toast?.error("Unable to update learner status.");
+    }
+  }
+
+  // Badge + probability meter, matching Student Registry/Early Warning's
+  // risk cell. Falls back to the plain badge for learners not yet assessed.
+  static riskCell(l) {
+    const cls = { High: "high", Moderate: "moderate", Low: "low" }[l.risk];
+    if (!cls) {
+      return `<div class="st-risk-cell"><div class="st-risk-cell-top">${this.riskBadge(l.risk)}</div></div>`;
+    }
+    const pct = Math.round(Math.min(1, Math.max(0, l.risk_probability ?? 0)) * 100);
+    return `
+            <div class="st-risk-cell st-risk-cell--${cls}" title="Predicted dropout probability">
+                <div class="st-risk-cell-top">${this.riskBadge(l.risk)}<span class="st-risk-pct num">${pct}%</span></div>
+                <div class="st-risk-meter"><i style="--w:${pct}%"></i></div>
+            </div>
         `;
   }
 
@@ -894,7 +1048,8 @@ class TeacherDashboard {
   }
 
   static modalityPill(modality) {
-    return `<span class="st-pill">${modality || "\u2014"}</span>`;
+    const cls = { "Face-to-Face": " st-modality-pill--f2f", Modular: " st-modality-pill--modular", Blended: " st-modality-pill--blended" }[modality] || "";
+    return `<span class="st-pill st-modality-pill${cls}">${modality || "\u2014"}</span>`;
   }
 
   static setText(selector, value) {
@@ -983,6 +1138,44 @@ class TeacherDashboard {
     }
   }
 }
+
+// Row menu (Run prediction / Archive) open/close + fixed positioning, same
+// pattern as Learner Records/Student Registry's row menu. data-view-learner
+// is handled by its own per-row binding in renderRegistryPage(), not here.
+function closeOpenDashboardRowMenus() {
+  document.querySelectorAll(".st-row-menu.is-open").forEach((menu) => {
+    menu.classList.remove("is-open");
+  });
+}
+
+document.addEventListener("click", (event) => {
+  const trigger = event.target.closest("[data-row-menu-trigger]");
+
+  document.querySelectorAll(".st-row-menu.is-open").forEach((menu) => {
+    if (!trigger || menu !== trigger.closest(".st-row-menu")) {
+      menu.classList.remove("is-open");
+    }
+  });
+
+  if (trigger) {
+    const menu = trigger.closest(".st-row-menu");
+    const opening = !menu?.classList.contains("is-open");
+
+    menu?.classList.toggle("is-open");
+
+    if (opening && menu) {
+      const list = menu.querySelector(".st-row-menu-list");
+      const rect = trigger.getBoundingClientRect();
+
+      if (list) {
+        list.style.top = `${rect.bottom + 4}px`;
+        list.style.right = `${window.innerWidth - rect.right}px`;
+      }
+    }
+  }
+});
+
+window.addEventListener("scroll", closeOpenDashboardRowMenus, true);
 
 (function bootDashboard() {
   let started = false;
