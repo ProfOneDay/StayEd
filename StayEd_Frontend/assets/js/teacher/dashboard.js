@@ -53,18 +53,23 @@ const ST_CENTER_TOTAL = {
   id: "centerTotal",
   afterDraw(chart) {
     if (chart.config.type !== "doughnut") return;
-    const { ctx, chartArea: a } = chart;
+    const { ctx } = chart;
     const sum = chart.data.datasets[0].data.reduce((x, y) => x + y, 0);
-    const cx = (a.left + a.right) / 2;
-    const cy = (a.top + a.bottom) / 2;
+    const firstArc = chart.getDatasetMeta(0)?.data?.[0];
+    if (!firstArc) return;
+    // Use the actual arc center instead of the chart-area midpoint. This keeps
+    // the number visually centered even when the legend/layout changes.
+    const cx = firstArc.x;
+    const cy = firstArc.y;
     ctx.save();
     ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
     ctx.fillStyle = "#111a36";
     ctx.font = "800 28px 'Libre Franklin', sans-serif";
-    ctx.fillText(sum, cx, cy + 4);
+    ctx.fillText(sum, cx, cy - 5);
     ctx.font = "500 12px Inter, sans-serif";
     ctx.fillStyle = "#8a91a0";
-    ctx.fillText("learners", cx, cy + 22);
+    ctx.fillText("learners", cx, cy + 15);
     ctx.restore();
   },
 };

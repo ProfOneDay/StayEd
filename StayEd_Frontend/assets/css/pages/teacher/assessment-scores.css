@@ -284,6 +284,33 @@
   text-align: left;
 }
 
+.st-assessment-input--date {
+  width: 190px;
+  min-width: 190px;
+  text-align: left;
+  padding: 0 10px;
+}
+
+.st-assessment-input--rating {
+  width: 110px;
+  min-width: 110px;
+  text-align: center;
+}
+
+.st-assessment-status-select {
+  width: 100%;
+  min-width: 170px;
+  max-width: 220px;
+  height: 36px;
+  padding: 0 34px 0 10px;
+  border: 1px solid var(--st-outline-variant);
+  border-radius: var(--st-radius-sm);
+  background: #fff;
+  color: var(--st-on-surface);
+  font: inherit;
+  font-size: var(--st-font-size-caption);
+}
+
 .st-assessment-rating-banner {
   display: flex;
   align-items: center;
@@ -352,9 +379,9 @@
 }
 
 .st-assessment-likelihood-summary > p {
-  margin-top: 10px;
-  font-size: var(--st-font-size-micro);
-  line-height: 1.45;
+  margin-top: 12px;
+  font-size: var(--st-font-size-caption);
+  line-height: 1.6;
   color: var(--st-on-surface-variant);
 }
 
@@ -416,6 +443,12 @@
   background: rgba(214, 69, 69, 0.12);
   border-color: rgba(214, 69, 69, 0.24);
   color: #bd3939;
+}
+
+.st-assessment-result-pill.is-readiness {
+  background: rgba(18, 53, 91, 0.10);
+  border-color: rgba(18, 53, 91, 0.20);
+  color: var(--st-primary);
 }
 
 .st-assessment-result-note {
@@ -576,4 +609,903 @@
 .st-assessment-input[type="number"]::-webkit-inner-spin-button{
   -webkit-appearance:none;
   margin:0;
+}
+
+/* ============================================================
+   2026-09-27 — AUTHORITATIVE Assessment Scores layout
+   All older stacked spacing patches were removed.
+   ============================================================ */
+
+[data-page="Assessment Scores"] .st-page-header {
+  margin-bottom: 16px;
+}
+
+[data-assessment-form] {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+[data-assessment-form] > .st-assessment-table-card {
+  margin-bottom: 0;
+}
+
+.st-assessment-detail-panel[hidden],
+[data-no-learner-panel][hidden] {
+  display: none !important;
+}
+
+.st-assessment-detail-panel[data-no-learner-panel] {
+  min-height: 170px;
+  align-items: center;
+  justify-content: center;
+}
+
+.st-assessment-detail-panel[data-no-learner-panel] .st-assessment-empty {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 0;
+  line-height: 1.55;
+}
+
+/* AF5 table */
+[data-assessment-form] > .st-assessment-table-card:first-child {
+  overflow-x: auto;
+}
+
+[data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-table {
+  width: 100%;
+  min-width: 1080px;
+  table-layout: fixed;
+}
+
+[data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-table th,
+[data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-table td {
+  box-sizing: border-box;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  vertical-align: middle;
+}
+
+/* Column widths are defined by <colgroup>, not nth-child on <th>.
+   This is important because the first header row has SCORE colspan="2";
+   nth-child widths on that row were making the browser treat the readiness
+   column as a score column and squeeze the right side. */
+.st-assessment-table--af5 .st-assessment-col-area {
+  width: 60%;
+}
+
+.st-assessment-table--af5 .st-assessment-col-score {
+  width: 10%;
+}
+
+.st-assessment-table--af5 .st-assessment-col-readiness {
+  width: 20%;
+}
+
+[data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-table th:first-child,
+[data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-table td:first-child {
+  width: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+[data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-table th:nth-child(2),
+[data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-table td:nth-child(2),
+[data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-table th:nth-child(3),
+[data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-table td:nth-child(3) {
+  padding-left: 8px;
+  padding-right: 8px;
+  text-align: center;
+}
+
+[data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-table td:nth-child(4),
+[data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-subhead th:nth-child(4) {
+  padding-left: 18px;
+  padding-right: 18px;
+  text-align: center;
+}
+
+/* First header row only has three TH elements because SCORE spans two columns. */
+[data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-table thead tr:first-child th:nth-child(2),
+[data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-table thead tr:first-child th:nth-child(3) {
+  text-align: center;
+}
+
+/* Uniform score boxes */
+.st-assessment-input {
+  box-sizing: border-box;
+}
+
+[data-assessment-form] > .st-assessment-table-card:first-child
+  .st-assessment-table td:nth-child(2) > .st-assessment-input,
+[data-assessment-form] > .st-assessment-table-card:first-child
+  .st-assessment-table td:nth-child(3) > .st-assessment-input {
+  display: block;
+  width: 62px;
+  min-width: 62px;
+  max-width: 62px;
+  height: 34px;
+  margin-inline: auto;
+  padding: 0 8px;
+  text-align: center;
+}
+
+.st-assessment-score-entry,
+.st-assessment-score-entry--total,
+.st-assessment-score-entry--overall {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  width: 104px;
+  min-width: 104px;
+  max-width: 104px;
+  min-height: 34px;
+  gap: 6px;
+  margin-inline: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.st-assessment-score-entry .st-assessment-input,
+.st-assessment-readonly-score-box,
+.st-assessment-overall-value-box {
+  box-sizing: border-box;
+  width: 62px;
+  min-width: 62px;
+  max-width: 62px;
+  height: 34px;
+  flex: 0 0 62px;
+  padding: 0 8px;
+  border: 1px solid var(--st-outline-variant);
+  border-radius: var(--st-radius-sm);
+  font-family: var(--st-font-body);
+  font-size: var(--st-font-size-caption);
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+}
+
+.st-assessment-readonly-score-box,
+.st-assessment-overall-value-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--st-surface-container-low);
+  color: var(--st-on-surface);
+}
+
+.st-assessment-group-total-value {
+  text-align: center;
+  font-weight: 700;
+}
+
+.st-assessment-score-denominator,
+.st-assessment-score-entry--overall .st-assessment-score-denominator {
+  display: inline-block;
+  width: 36px;
+  min-width: 36px;
+  max-width: 36px;
+  flex: 0 0 36px;
+  margin: 0;
+  color: var(--st-on-surface-variant);
+  font-size: var(--st-font-size-caption);
+  font-weight: 700;
+  line-height: 1;
+  text-align: left;
+  white-space: nowrap;
+}
+
+/* Readiness / competency */
+.st-assessment-result-cell {
+  text-align: center;
+  vertical-align: middle;
+  overflow: visible;
+}
+
+.st-assessment-result,
+.st-assessment-result--overall {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  flex-wrap: nowrap !important;
+  gap: 10px;
+  max-width: 100%;
+  margin: 0 auto;
+  white-space: nowrap;
+}
+
+.st-assessment-result-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-width: 64px;
+  height: 30px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  font-size: var(--st-font-size-caption);
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.st-assessment-result-note {
+  display: inline-block;
+  flex: 0 0 auto;
+  min-width: 48px;
+  margin: 0;
+  color: var(--st-on-surface-variant);
+  font-size: var(--st-font-size-caption);
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.st-assessment-result-pill.is-invalid-score {
+  background: rgba(214, 69, 69, 0.12);
+  border-color: rgba(214, 69, 69, 0.28);
+  color: var(--st-risk-high);
+}
+
+.st-assessment-input.is-invalid {
+  border-color: var(--st-risk-high);
+  box-shadow: 0 0 0 2px rgba(214, 69, 69, 0.12);
+}
+
+.st-assessment-status-select {
+  margin-inline: auto;
+}
+
+.st-assessment-total-row td {
+  padding-top: 14px;
+  padding-bottom: 14px;
+  font-weight: 700;
+}
+
+.st-assessment-result--overall .st-assessment-result-pill {
+  min-width: 76px;
+}
+
+.st-assessment-result--overall .st-assessment-result-note {
+  min-width: 0;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+/* Overall readiness follows the same alignment as the rest of the
+   Readiness / Competency column. */
+.st-assessment-total-row .st-assessment-result--overall {
+  width: auto;
+  justify-content: center;
+  gap: 8px;
+  padding-left: 0;
+}
+
+.st-assessment-total-row .st-assessment-result--overall .st-assessment-result-note {
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+
+/* Portfolio controls */
+.st-assessment-table td:has(.st-assessment-input--date),
+.st-assessment-table td:has(.st-assessment-input--rating) {
+  text-align: center;
+}
+
+.st-assessment-input--date,
+.st-assessment-input--rating {
+  box-sizing: border-box;
+  width: 220px;
+  min-width: 220px;
+  height: 40px;
+  padding: 0 12px;
+  font-size: 0.95rem;
+  border-radius: var(--st-radius-control, 8px);
+}
+
+.st-assessment-input--date {
+  text-align: left;
+}
+
+.st-assessment-input--rating {
+  text-align: center;
+  font-weight: 700;
+}
+
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-input--date,
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-input--rating {
+  display: block;
+  margin-inline: auto;
+}
+
+/* Readiness estimate */
+.st-assessment-likelihood-summary {
+  display: grid;
+  grid-template-columns: minmax(250px, 310px) minmax(0, 1fr);
+  align-items: center;
+  gap: 30px;
+  margin: 22px 20px 20px;
+  padding: 26px 28px;
+  border: 1px solid rgba(18, 53, 91, 0.16);
+  border-radius: 18px;
+  background: rgba(211, 227, 255, 0.24);
+  box-shadow: 0 1px 3px rgba(18, 53, 91, 0.06);
+  overflow: hidden;
+}
+
+.st-assessment-likelihood-summary > div {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.st-assessment-likelihood-summary .material-symbols-outlined {
+  width: 54px;
+  height: 54px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 54px;
+  border-radius: 14px;
+  background: rgba(18, 53, 91, 0.08);
+  color: var(--st-primary);
+  font-size: 1.9rem;
+}
+
+.st-assessment-likelihood-kicker {
+  margin: 0 0 5px;
+  color: var(--st-on-surface-variant);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.st-assessment-likelihood-summary strong[data-overall-likelihood-preview] {
+  display: block;
+  margin: 0;
+  color: var(--st-primary);
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.st-assessment-likelihood-summary strong[data-overall-likelihood-preview][data-level="readiness"] {
+  color: var(--st-primary);
+}
+
+.st-assessment-likelihood-summary > p {
+  margin: 0;
+  padding-left: 28px;
+  border-left: 1px solid rgba(18, 53, 91, 0.14);
+  color: var(--st-on-surface-variant);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.st-assessment-likelihood-summary > p strong {
+  color: var(--st-on-surface);
+}
+
+@media (max-width: 1100px) {
+  [data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-table {
+    min-width: 1040px;
+  }
+}
+
+@media (max-width: 900px) {
+  .st-assessment-likelihood-summary {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    margin: 18px 16px 16px;
+    padding: 22px;
+    border-radius: 16px;
+  }
+
+  .st-assessment-likelihood-summary > p {
+    padding-left: 0;
+    padding-top: 16px;
+    border-left: 0;
+    border-top: 1px solid rgba(18, 53, 91, 0.14);
+  }
+}
+
+@media (max-width: 768px) {
+  .st-assessment-input--date,
+  .st-assessment-input--rating {
+    width: 190px;
+    min-width: 190px;
+  }
+
+  .st-assessment-status-select {
+    min-width: 150px;
+  }
+}
+
+
+/* ============================================================
+   2026-09-27 — Presentation Portfolio alignment cleanup
+   Portfolio-only spacing update. AF5 layout above is unchanged.
+   ============================================================ */
+
+/* Use a wide label column and a compact right-side Remarks / Raw Score column. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2) .st-assessment-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+[data-assessment-form] > .st-assessment-table-card:nth-child(2) .st-assessment-table th:first-child,
+[data-assessment-form] > .st-assessment-table-card:nth-child(2) .st-assessment-table td:first-child {
+  width: auto;
+  text-align: left;
+}
+
+[data-assessment-form] > .st-assessment-table-card:nth-child(2) .st-assessment-table th:last-child,
+[data-assessment-form] > .st-assessment-table-card:nth-child(2) .st-assessment-table td:last-child {
+  width: 260px;
+  min-width: 260px;
+  padding-left: 16px;
+  padding-right: 22px;
+  text-align: right;
+}
+
+/* Put the "Remarks / Raw Score" header itself at the right edge. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2) .st-assessment-table thead th:last-child {
+  text-align: right;
+  padding-right: 30px;
+}
+
+/* All portfolio score controls align vertically against the right side. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child > .st-assessment-input:not(.st-assessment-input--date):not(.st-assessment-input--rating) {
+  display: block;
+  margin-left: auto;
+  margin-right: 0;
+}
+
+/* Date field: compact enough for a full date without looking oversized. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2) .st-assessment-input--date {
+  display: block;
+  width: 180px;
+  min-width: 180px;
+  max-width: 180px;
+  height: 38px;
+  margin-left: auto;
+  margin-right: 0;
+  padding: 0 10px;
+  text-align: left;
+}
+
+/* Final grade and overall rating: smaller, consistent boxes at the right edge. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2) .st-assessment-input--rating {
+  display: block;
+  width: 150px;
+  min-width: 150px;
+  max-width: 150px;
+  height: 38px;
+  margin-left: auto;
+  margin-right: 0;
+  padding: 0 10px;
+  text-align: center;
+  font-weight: 700;
+}
+
+/* Read-only portfolio total follows the same right alignment. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  [data-portfolio-total] {
+  display: block;
+  margin-left: auto;
+  margin-right: 0;
+}
+
+/* Keep spacing comfortable on smaller screens without stretching the controls. */
+@media (max-width: 900px) {
+  [data-assessment-form] > .st-assessment-table-card:nth-child(2) .st-assessment-table {
+    min-width: 760px;
+  }
+
+  [data-assessment-form] > .st-assessment-table-card:nth-child(2) .st-assessment-table th:last-child,
+  [data-assessment-form] > .st-assessment-table-card:nth-child(2) .st-assessment-table td:last-child {
+    width: 230px;
+    min-width: 230px;
+  }
+}
+
+
+/* ============================================================
+   2026-09-27 — Portfolio layout matched to AF5 score spacing
+   ============================================================ */
+
+/* Presentation Portfolio: make the second column behave like AF5 Score. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2) .st-assessment-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table th:first-child,
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:first-child {
+  width: auto;
+  text-align: left;
+}
+
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table th:last-child,
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child {
+  width: 300px;
+  min-width: 300px;
+  padding-left: 18px;
+  padding-right: 18px;
+  text-align: center;
+}
+
+/* Center Remarks / Raw Score like AF5's Score heading. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table thead th:last-child {
+  text-align: center;
+  padding-right: 18px;
+}
+
+/* Center every portfolio control under Remarks / Raw Score. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child > .st-assessment-input,
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  [data-portfolio-total] {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Compact Date of Assessment while still showing the full date. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-input--date {
+  width: 180px;
+  min-width: 180px;
+  max-width: 180px;
+  height: 38px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 10px;
+}
+
+/* Compact final-grade controls, centered in the same score column. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-input--rating {
+  width: 150px;
+  min-width: 150px;
+  max-width: 150px;
+  height: 38px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 10px;
+  text-align: center;
+}
+
+/* Center the two section headers across the full Portfolio table. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-section-row td {
+  text-align: center !important;
+  font-weight: 700;
+}
+
+/* Overall readiness result: pill + stacked READINESS / ESTIMATE label. */
+.st-assessment-total-row .st-assessment-result--overall {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: auto;
+  padding: 0;
+}
+
+.st-assessment-total-row .st-assessment-result--overall
+  .st-assessment-result-pill {
+  min-width: 76px;
+  height: 30px;
+  padding: 0 12px;
+}
+
+.st-assessment-total-row .st-assessment-result--overall
+  .st-assessment-result-note {
+  display: inline-block;
+  width: 92px;
+  min-width: 92px;
+  max-width: 92px;
+  white-space: normal;
+  text-align: left;
+  line-height: 1.05;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+/* Make the two words stack consistently without changing JS text. */
+.st-assessment-total-row .st-assessment-result--overall
+  .st-assessment-result-note {
+  word-spacing: 92px;
+}
+
+@media (max-width: 900px) {
+  [data-assessment-form] > .st-assessment-table-card:nth-child(2)
+    .st-assessment-table {
+    min-width: 760px;
+  }
+
+  [data-assessment-form] > .st-assessment-table-card:nth-child(2)
+    .st-assessment-table th:last-child,
+  [data-assessment-form] > .st-assessment-table-card:nth-child(2)
+    .st-assessment-table td:last-child {
+    width: 260px;
+    min-width: 260px;
+  }
+}
+
+
+/* ============================================================
+   2026-09-27 — Portfolio raw-score box alignment
+   Based on the ABL Status Only project version.
+   ============================================================ */
+
+/* Match Work Samples, TOTAL SCORE, and Revalida score boxes to the
+   Final Score Percentage Grade box (150 x 38), centered in the
+   Remarks / Raw Score column. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child > .st-assessment-input:not(.st-assessment-input--date):not(.st-assessment-input--rating),
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  [data-portfolio-total] {
+  display: block;
+  box-sizing: border-box;
+  width: 150px;
+  min-width: 150px;
+  max-width: 150px;
+  height: 38px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 10px;
+  text-align: center;
+}
+
+/* Keep the final grade and final assessment rating at the same size,
+   so every numeric box in the right portfolio column lines up. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-input--rating {
+  width: 150px;
+  min-width: 150px;
+  max-width: 150px;
+  height: 38px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+
+/* ============================================================
+   2026-09-27 — Work Sample boxes match FLT score-box size
+   Base: ABL Status Only + aligned portfolio layout
+   ============================================================ */
+
+/* Final Assessment of Work Samples only:
+   use the same compact 62x34 score-box size as the FLT inputs. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table
+  input[data-portfolio-field]:not([data-portfolio-field^="revalida_"]) {
+  display: block;
+  box-sizing: border-box;
+  width: 62px;
+  min-width: 62px;
+  max-width: 62px;
+  height: 34px;
+  min-height: 34px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 8px;
+  text-align: center;
+}
+
+/* TOTAL SCORE follows the same FLT-sized box. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  [data-portfolio-total] {
+  display: block;
+  box-sizing: border-box;
+  width: 62px;
+  min-width: 62px;
+  max-width: 62px;
+  height: 34px;
+  min-height: 34px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 8px;
+  text-align: center;
+}
+
+
+/* ============================================================
+   2026-09-27 — Exact FLT box-size match for Portfolio Work Samples
+   ============================================================ */
+
+/* These MUST match the AF5 Overall Score 35/37 boxes exactly:
+   62px wide x 34px high. The !important values intentionally override
+   earlier 150px portfolio alignment rules. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-portfolio-work-sample-score,
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-portfolio-work-sample-total {
+  display: block !important;
+  box-sizing: border-box !important;
+  width: 62px !important;
+  min-width: 62px !important;
+  max-width: 62px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: 0 8px !important;
+  text-align: center !important;
+  font-size: var(--st-font-size-caption) !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+}
+
+
+/* ============================================================
+   2026-09-27 — Remaining Portfolio boxes match AF5 35/37 size
+   ============================================================ */
+
+/* Inter-District Revalida + final grade/rating:
+   exact same box size as AF5 Overall Score 35 / 37. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  input[data-portfolio-field^="revalida_"],
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-input--rating {
+  display: block !important;
+  box-sizing: border-box !important;
+  width: 62px !important;
+  min-width: 62px !important;
+  max-width: 62px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: 0 6px !important;
+  text-align: center !important;
+  font-size: var(--st-font-size-caption) !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+}
+
+/* Keep the longer placeholder readable in the compact overall rating box. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-input--rating::placeholder {
+  font-size: 0.68rem;
+}
+
+/* Date of Assessment: only wide enough for MM/DD/YYYY + calendar icon. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-input--date {
+  display: block !important;
+  box-sizing: border-box !important;
+  width: 160px !important;
+  min-width: 160px !important;
+  max-width: 160px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: 0 8px !important;
+  text-align: left !important;
+}
+
+
+/* ============================================================
+   2026-09-27 — Remove right-side Portfolio dead space
+   ============================================================ */
+
+/* Make the Remarks / Raw Score column compact instead of leaving
+   a wide empty area after the controls. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table th:last-child,
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child {
+  width: 190px !important;
+  min-width: 190px !important;
+  max-width: 190px !important;
+  padding-left: 12px !important;
+  padding-right: 14px !important;
+  text-align: right !important;
+}
+
+/* Keep the header readable while using the compact right column. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table thead th:last-child {
+  text-align: center !important;
+}
+
+/* Push all score controls toward the right edge so there is no
+   large blank strip after them. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child > .st-assessment-input,
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child > [data-portfolio-total] {
+  margin-left: auto !important;
+  margin-right: 0 !important;
+}
+
+/* Date field: slightly smaller, still comfortable for MM/DD/YYYY
+   and the calendar icon. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-input--date {
+  width: 145px !important;
+  min-width: 145px !important;
+  max-width: 145px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  margin-left: auto !important;
+  margin-right: 0 !important;
+  padding: 0 8px !important;
+  font-size: 0.9rem !important;
+}
+
+
+/* ============================================================
+   2026-09-27 — Balanced Portfolio right-side spacing
+   Keep controls away from the edge without leaving a large dead gap.
+   ============================================================ */
+
+/* Compact right-side column with balanced inset. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table th:last-child,
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child {
+  width: 170px !important;
+  min-width: 170px !important;
+  max-width: 170px !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+  text-align: center !important;
+}
+
+/* Remarks / Raw Score header centered above its compact column. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table thead th:last-child {
+  text-align: center !important;
+}
+
+/* Center all portfolio controls inside the compact right column.
+   This keeps them off the edge while removing the oversized blank strip. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child > .st-assessment-input,
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child > [data-portfolio-total] {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Date stays compact and centered, not flush right. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-input--date {
+  width: 145px !important;
+  min-width: 145px !important;
+  max-width: 145px !important;
+  height: 34px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: 0 8px !important;
 }

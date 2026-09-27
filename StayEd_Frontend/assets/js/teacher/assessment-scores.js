@@ -19,11 +19,11 @@ class AssessmentScores {
     { type: "status", id: "abl_neo", label: "Neo Literate" },
     { type: "status", id: "abl_post", label: "Post Literate" },
     { type: "section", label: "Functional Literacy Assessment (FLT)" },
-    { type: "subsection", label: "LS 1 - Communication Skills (English)" },
+    { type: "subsection", label: "LS 1 - Communication Skills (English)", group: "ls1_en" },
     { type: "score", id: "flt_ls1_en_mc", label: "Multiple Choice", indent: true },
     { type: "score", id: "flt_ls1_en_writing", label: "Writing", indent: true },
     { type: "score", id: "flt_ls1_en_listening", label: "Listening/Speaking", indent: true },
-    { type: "subsection", label: "LS 1 - Communication Skills (Filipino)" },
+    { type: "subsection", label: "LS 1 - Communication Skills (Filipino)", group: "ls1_fil" },
     { type: "score", id: "flt_ls1_fil_mc", label: "Multiple Choice", indent: true },
     { type: "score", id: "flt_ls1_fil_writing", label: "Pagsulat", indent: true },
     { type: "score", id: "flt_ls1_fil_listening", label: "Pakikinig/Pagsasalita", indent: true },
@@ -50,28 +50,27 @@ class AssessmentScores {
     { id: "revalida_interview", label: "Interview" },
   ];
 
-  // Internal display scales used to show the per-row percentage badges that
-  // appear in the AF5 table. These are UI-only helper scales so teachers can
-  // see a percentage-based snapshot beside each encoded post score.
-  static COMPONENT_MAX_SCORES = {
+  // Item totals supplied for the AF5 scoring basis. LS1 English and Filipino
+  // are grouped subjects: their three detailed rows add up to one /15 score.
+  // The full assessment is 98 items total.
+  static SUBJECT_MAX_SCORES = {
     pis: 10,
-    flt_ls1_en_mc: 8.5,
-    flt_ls1_en_writing: 4,
-    flt_ls1_en_listening: 2.5,
-    flt_ls1_fil_mc: 7.5,
-    flt_ls1_fil_writing: 2.6,
-    flt_ls1_fil_listening: 2.5,
-    flt_ls2: 14,
-    flt_ls3: 17,
-    flt_ls4: 11.8,
-    flt_ls5: 11.5,
-    flt_ls6: 11.8,
+    ls1_en: 15,
+    ls1_fil: 15,
+    flt_ls2: 13,
+    flt_ls3: 15,
+    flt_ls4: 10,
+    flt_ls5: 10,
+    flt_ls6: 10,
   };
 
-  static get FLT_TOTAL_MAX_SCORE() {
-    return Object.entries(this.COMPONENT_MAX_SCORES)
-      .filter(([rowId]) => rowId !== "pis")
-      .reduce((sum, [, maxScore]) => sum + maxScore, 0);
+  static SUBJECT_GROUPS = {
+    ls1_en: ["flt_ls1_en_mc", "flt_ls1_en_writing", "flt_ls1_en_listening"],
+    ls1_fil: ["flt_ls1_fil_mc", "flt_ls1_fil_writing", "flt_ls1_fil_listening"],
+  };
+
+  static get TOTAL_ASSESSMENT_MAX_SCORE() {
+    return Object.values(this.SUBJECT_MAX_SCORES).reduce((sum, value) => sum + value, 0);
   }
 
   static async init() {
@@ -233,12 +232,18 @@ class AssessmentScores {
         <div class="st-assessment-table-head">
           <h3>AF5 - ASSESSMENT RESULTS</h3>
         </div>
-        <table class="st-assessment-table">
+        <table class="st-assessment-table st-assessment-table--af5">
+          <colgroup>
+            <col class="st-assessment-col-area">
+            <col class="st-assessment-col-score">
+            <col class="st-assessment-col-score">
+            <col class="st-assessment-col-readiness">
+          </colgroup>
           <thead>
             <tr>
               <th>Assessment Component / Learning Area</th>
               <th colspan="2">Score</th>
-              <th>Likelihood / Competency</th>
+              <th>Readiness / Competency</th>
             </tr>
             <tr class="st-assessment-subhead">
               <th></th><th>Pre</th><th>Post</th><th></th>
@@ -248,8 +253,8 @@ class AssessmentScores {
             ${this.AF5_ROWS.map((row) => this.renderAf5Row(row, scores)).join("")}
             <tr class="st-assessment-total-row">
               <td>Overall Score</td>
-              <td><input type="text" class="st-assessment-input" data-overall-pre readonly value="${f.overallScorePre ?? 0}"></td>
-              <td><input type="text" class="st-assessment-input" data-overall-post readonly value="${f.overallScorePost ?? 0}"></td>
+              <td>${this.renderOverallScoreTotal(f.overallScorePre, "pre")}</td>
+              <td>${this.renderOverallScoreTotal(f.overallScorePost, "post")}</td>
               <td class="st-assessment-result-cell" data-overall-grade-cell>${this.renderOverallLikelihoodCell(f.overallScorePost)}</td>
             </tr>
           </tbody>
@@ -270,20 +275,20 @@ class AssessmentScores {
           <tbody>
             <tr>
               <td>Date of Assessment</td>
-              <td><input type="date" class="st-assessment-input" data-date-of-assessment value="${f.dateOfAssessment || ""}"></td>
+              <td><input type="date" class="st-assessment-input st-assessment-input--date" data-date-of-assessment value="${f.dateOfAssessment || ""}"></td>
             </tr>
             <tr class="st-assessment-section-row"><td colspan="2">Final Assessment of Work Samples (Raw Score)</td></tr>
             ${this.PORTFOLIO_WORK_SAMPLE_ROWS.map(
               (row) => `
                 <tr>
                   <td class="st-assessment-indent">${this.esc(row.label)}</td>
-                  <td><input type="number" step="0.5" class="st-assessment-input" data-portfolio-field="${row.id}" value="${portfolio[row.id] ?? ""}"></td>
+                  <td><input type="number" step="0.5" class="st-assessment-input st-assessment-portfolio-work-sample-score" data-portfolio-field="${row.id}" value="${portfolio[row.id] ?? ""}"></td>
                 </tr>
               `,
             ).join("")}
             <tr class="st-assessment-total-row">
               <td>TOTAL SCORE</td>
-              <td><input type="text" class="st-assessment-input" data-portfolio-total readonly value="${f.portfolioTotalScore ?? 0}"></td>
+              <td><input type="text" class="st-assessment-input st-assessment-portfolio-work-sample-total" data-portfolio-total readonly value="${f.portfolioTotalScore ?? 0}"></td>
             </tr>
             <tr class="st-assessment-section-row"><td colspan="2">Inter-District Revalida</td></tr>
             ${this.PORTFOLIO_REVALIDA_ROWS.map(
@@ -296,24 +301,24 @@ class AssessmentScores {
             ).join("")}
             <tr class="st-assessment-total-row">
               <td>FINAL SCORE PERCENTAGE GRADE</td>
-              <td><input type="number" min="0" max="100" step="0.01" class="st-assessment-input" placeholder="e.g. 68" data-final-grade value="${this.escAttr(f.finalScorePercentageGrade)}"></td>
+              <td><input type="number" min="0" max="100" step="0.01" class="st-assessment-input st-assessment-input--rating" placeholder="e.g. 68" data-final-grade value="${this.escAttr(f.finalScorePercentageGrade)}"></td>
+            </tr>
+            <tr class="st-assessment-total-row">
+              <td>OVERALL FINAL ASSESSMENT RATING</td>
+              <td><input type="number" min="0" max="100" step="0.01" class="st-assessment-input st-assessment-input--rating" placeholder="e.g. 98.55" data-overall-rating value="${this.escAttr(f.overallFinalAssessmentRating)}"></td>
             </tr>
           </tbody>
         </table>
-        <div class="st-assessment-rating-banner">
-          <span>OVERALL FINAL ASSESSMENT RATING</span>
-          <input type="text" class="st-assessment-rating-input" placeholder="e.g. 98.55" data-overall-rating value="${this.escAttr(f.overallFinalAssessmentRating)}">
-        </div>
 
         <div class="st-assessment-likelihood-summary">
           <div>
             <span class="material-symbols-outlined">analytics</span>
             <div>
-              <p class="st-assessment-likelihood-kicker">Likelihood of Passing A&amp;E Exam</p>
-              <strong data-overall-likelihood-preview>${this.esc(scores.overall_likelihood || (f.overallScorePercentage == null ? "Waiting for post-test scores" : this.likelihoodLabel(f.overallScorePercentage)))}</strong>
+              <p class="st-assessment-likelihood-kicker">A&amp;E Readiness Estimate</p>
+              <strong data-overall-likelihood-preview>${f.overallScorePercentage == null ? "Waiting for post-test scores" : `${this.roundPercent(f.overallScorePercentage)}%`}</strong>
             </div>
           </div>
-          <p>Calculated from the learner's <strong>FLT post-test total</strong>. StayEd internal threshold: <strong>High likelihood = 70% or above</strong>; <strong>Low likelihood = below 70%</strong>. This is a project readiness rule, not an official DepEd A&amp;E passing mark.</p>
+          <p>Calculated from the learner's <strong>post-test total out of 98 items</strong> and converted to a <strong>0–100% readiness estimate</strong>. <strong>100% is the highest possible score.</strong> This is a project readiness estimate, not an official DepEd A&amp;E result.</p>
         </div>
       </div>
     `;
@@ -325,31 +330,85 @@ class AssessmentScores {
     if (row.type === "section") {
       return `<tr class="st-assessment-section-row"><td colspan="4">${this.esc(row.label)}</td></tr>`;
     }
+
     if (row.type === "subsection") {
-      return `<tr class="st-assessment-subsection-row"><td colspan="4">${this.esc(row.label)}</td></tr>`;
+      const maxScore = this.SUBJECT_MAX_SCORES[row.group];
+      const preTotal = this.subjectGroupTotal(row.group, scores, "pre");
+      const postTotal = this.subjectGroupTotal(row.group, scores, "post");
+      return `
+        <tr class="st-assessment-subsection-row">
+          <td>${this.esc(row.label)}</td>
+          <td>${this.renderScoreTotal(preTotal, maxScore, row.group, "pre")}</td>
+          <td>${this.renderScoreTotal(postTotal, maxScore, row.group, "post")}</td>
+          <td class="st-assessment-result-cell" data-subject-group-cell="${row.group}">${this.renderSubjectGroupResult(row.group, scores)}</td>
+        </tr>
+      `;
     }
 
     const r = scores[row.id] || {};
     const labelClass = row.indent ? "st-assessment-indent" : "";
 
     if (row.type === "status") {
+      const currentStatus = r.status || "";
       return `
-        <tr>
+        <tr class="st-assessment-status-row">
           <td class="${labelClass}">${this.esc(row.label)}</td>
-          <td><input type="number" step="0.5" class="st-assessment-input" data-score-field="${row.id}" data-score-part="pre" value="${r.pre ?? ""}"></td>
-          <td><input type="number" step="0.5" class="st-assessment-input" data-score-field="${row.id}" data-score-part="post" value="${r.post ?? ""}"></td>
-          <td><input type="text" class="st-assessment-input st-assessment-input--wide" placeholder="Status" data-score-field="${row.id}" data-score-part="status" value="${this.escAttr(r.status)}"></td>
+          <td aria-hidden="true"></td>
+          <td aria-hidden="true"></td>
+          <td>
+            <select class="st-assessment-status-select" data-score-field="${row.id}" data-score-part="status" aria-label="${this.esc(row.label)} status">
+              <option value=""${currentStatus === "" ? " selected" : ""}>Select status</option>
+              <option value="Achieved"${currentStatus === "Achieved" ? " selected" : ""}>Achieved</option>
+              <option value="Not Yet Achieved"${currentStatus === "Not Yet Achieved" ? " selected" : ""}>Not Yet Achieved</option>
+            </select>
+          </td>
         </tr>
       `;
     }
 
+    const directMax = this.SUBJECT_MAX_SCORES[row.id] || null;
+    const grouped = this.isGroupedScoreRow(row.id);
+    const groupKey = grouped ? this.groupForRow(row.id) : null;
+    const groupMax = groupKey ? this.SUBJECT_MAX_SCORES[groupKey] : null;
+    const inputMax = directMax || groupMax || null;
+
     return `
       <tr>
         <td class="${labelClass}">${this.esc(row.label)}</td>
-        <td><input type="number" step="0.5" class="st-assessment-input" data-score-field="${row.id}" data-score-part="pre" value="${r.pre ?? ""}"></td>
-        <td><input type="number" step="0.5" class="st-assessment-input" data-score-field="${row.id}" data-score-part="post" value="${r.post ?? ""}"></td>
+        <td>${this.renderScoreInput(row.id, "pre", r.pre, directMax || groupMax, inputMax)}</td>
+        <td>${this.renderScoreInput(row.id, "post", r.post, directMax || groupMax, inputMax)}</td>
         <td class="st-assessment-result-cell" data-computed-cell="${row.id}">${this.renderComputedRowResult(row.id, r)}</td>
       </tr>
+    `;
+  }
+
+  static renderScoreInput(rowId, part, value, displayMax = null, inputMax = null) {
+    const maxAttr = inputMax ? ` max="${inputMax}"` : "";
+    const input = `<input type="number" step="1" min="0"${maxAttr} inputmode="numeric" class="st-assessment-input" data-score-field="${rowId}" data-score-part="${part}" value="${value ?? ""}">`;
+    if (!displayMax) return input;
+    return `
+      <div class="st-assessment-score-entry">
+        ${input}
+        <span class="st-assessment-score-denominator">/ ${displayMax}</span>
+      </div>
+    `;
+  }
+
+  static renderScoreTotal(value, maxScore, groupKey, part) {
+    return `
+      <div class="st-assessment-score-entry st-assessment-score-entry--total" data-subject-group-total="${groupKey}" data-score-part="${part}">
+        <span class="st-assessment-readonly-score-box st-assessment-group-total-value">${value == null ? "" : this.esc(value)}</span>
+        <span class="st-assessment-score-denominator">/ ${maxScore}</span>
+      </div>
+    `;
+  }
+
+  static renderOverallScoreTotal(value, part) {
+    return `
+      <div class="st-assessment-score-entry st-assessment-score-entry--overall" data-overall-score-wrap="${part}">
+        <span class="st-assessment-readonly-score-box st-assessment-overall-value-box" data-overall-${part}>${value == null ? "" : this.esc(value)}</span>
+        <span class="st-assessment-score-denominator">/ ${this.TOTAL_ASSESSMENT_MAX_SCORE}</span>
+      </div>
     `;
   }
 
@@ -369,6 +428,27 @@ class AssessmentScores {
       `;
     }
 
+    if (percentage > 100) {
+      return `
+        <div class="st-assessment-result">
+          <span class="st-assessment-result-pill is-invalid-score">${percentage}%</span>
+          <span class="st-assessment-result-note">(Invalid)</span>
+        </div>
+      `;
+    }
+
+    const { label, tone } = this.componentLikelihoodMeta(percentage);
+    return `
+      <div class="st-assessment-result">
+        <span class="st-assessment-result-pill is-${tone}">${percentage}%</span>
+        <span class="st-assessment-result-note">(${this.esc(label)})</span>
+      </div>
+    `;
+  }
+
+  static renderSubjectGroupResult(groupKey, scores = {}) {
+    const percentage = this.subjectGroupPercentage(groupKey, scores);
+    if (percentage == null) return `<span class="st-assessment-computed-empty">—</span>`;
     const { label, tone } = this.componentLikelihoodMeta(percentage);
     return `
       <div class="st-assessment-result">
@@ -383,11 +463,10 @@ class AssessmentScores {
     if (percentage == null) {
       return `<span class="st-assessment-computed-empty">Waiting for post-test scores</span>`;
     }
-    const passed = percentage >= 70;
     return `
       <div class="st-assessment-result st-assessment-result--overall">
-        <span class="st-assessment-result-pill ${passed ? "is-high" : "is-low"}">${percentage}%</span>
-        <span class="st-assessment-result-note">${passed ? "HIGH LIKELIHOOD (PASS)" : "LOW LIKELIHOOD"}</span>
+        <span class="st-assessment-result-pill is-readiness">${percentage}%</span>
+        <span class="st-assessment-result-note">READINESS ESTIMATE</span>
       </div>
     `;
   }
@@ -396,16 +475,36 @@ class AssessmentScores {
     if (overallPostScore == null || overallPostScore === "") return null;
     const score = Number(overallPostScore);
     if (!Number.isFinite(score)) return null;
-    return this.roundPercent((score / this.FLT_TOTAL_MAX_SCORE) * 100);
+    return this.roundPercent((score / this.TOTAL_ASSESSMENT_MAX_SCORE) * 100);
+  }
+
+  static subjectGroupTotal(groupKey, scores = {}, part = "post") {
+    const rowIds = this.SUBJECT_GROUPS[groupKey] || [];
+    const values = rowIds.map((rowId) => {
+      const row = scores[rowId] || {};
+      const raw = row[part];
+      return raw == null || raw === "" ? null : Number(raw);
+    });
+    if (!values.some((value) => Number.isFinite(value))) return null;
+    const total = values.reduce((sum, value) => sum + (Number.isFinite(value) ? value : 0), 0);
+    return Number.isInteger(total) ? total : Number(total.toFixed(2));
+  }
+
+  static subjectGroupPercentage(groupKey, scores = {}) {
+    const total = this.subjectGroupTotal(groupKey, scores, "post") ?? this.subjectGroupTotal(groupKey, scores, "pre");
+    const maxScore = this.SUBJECT_MAX_SCORES[groupKey];
+    if (total == null || !maxScore) return null;
+    return this.roundPercent((total / maxScore) * 100);
   }
 
   static rowPercentage(rowId, rowData = {}) {
     const value = rowData.post ?? rowData.pre;
-    const maxScore = this.COMPONENT_MAX_SCORES[rowId];
+    const groupKey = this.groupForRow(rowId);
+    const maxScore = this.SUBJECT_MAX_SCORES[rowId] || (groupKey ? this.SUBJECT_MAX_SCORES[groupKey] : null);
     if (value == null || value === "" || !maxScore) return null;
     const numericValue = Number(value);
     if (!Number.isFinite(numericValue)) return null;
-    return this.roundPercent((numericValue / maxScore) * 100);
+    return Math.round((numericValue / maxScore) * 100);
   }
 
   static roundPercent(value) {
@@ -430,15 +529,14 @@ class AssessmentScores {
 
   static likelihoodLabel(value) {
     if (value == null || String(value).trim() === "") {
-      return "Waiting for final percentage grade";
+      return "Waiting for post-test scores";
     }
     const score = Number(value);
-    if (!Number.isFinite(score)) return "Waiting for final percentage grade";
-    return score >= 70 ? "HIGH LIKELIHOOD" : "LOW LIKELIHOOD";
+    if (!Number.isFinite(score)) return "Waiting for post-test scores";
+    return `${this.roundPercent(score)}%`;
   }
 
   static bindLivePreview() {
-    const grade = document.querySelector("[data-final-grade]");
     const preview = document.querySelector("[data-overall-likelihood-preview]");
     const overallGradeCell = document.querySelector("[data-overall-grade-cell]");
 
@@ -446,29 +544,41 @@ class AssessmentScores {
       const overallPost = this.sumRowScores("post");
       const percentage = this.overallLikelihoodPercentage(overallPost);
       if (preview) {
-        preview.textContent = percentage == null ? "Waiting for post-test scores" : this.likelihoodLabel(percentage);
-        preview.dataset.level = percentage == null ? "neutral" : percentage >= 70 ? "high" : "low";
+        preview.textContent = percentage == null ? "Waiting for post-test scores" : `${percentage}%`;
+        preview.dataset.level = percentage == null ? "neutral" : "readiness";
       }
       if (overallGradeCell) {
         overallGradeCell.innerHTML = this.renderOverallLikelihoodCell(overallPost);
       }
     };
 
+    const updateGroupPreview = (groupKey) => {
+      const scores = this.readAllScoresFromDom();
+      ["pre", "post"].forEach((part) => {
+        const wrap = document.querySelector(`[data-subject-group-total="${groupKey}"][data-score-part="${part}"]`);
+        const valueEl = wrap?.querySelector(".st-assessment-group-total-value");
+        if (valueEl) {
+          const total = this.subjectGroupTotal(groupKey, scores, part);
+          valueEl.textContent = total == null ? "" : total;
+        }
+      });
+      const groupTarget = document.querySelector(`[data-subject-group-cell="${groupKey}"]`);
+      if (groupTarget) groupTarget.innerHTML = this.renderSubjectGroupResult(groupKey, scores);
+    };
+
     const updateRowPreview = (rowId) => {
       const target = document.querySelector(`[data-computed-cell="${rowId}"]`);
-      if (!target) return;
-      target.innerHTML = this.renderComputedRowResult(rowId, this.readScoreRowFromDom(rowId));
+      if (target) target.innerHTML = this.renderComputedRowResult(rowId, this.readScoreRowFromDom(rowId));
+
+      const groupKey = this.groupForRow(rowId);
+      if (groupKey) updateGroupPreview(groupKey);
     };
 
     const updateOverallScores = () => {
       const preEl = document.querySelector("[data-overall-pre]");
       const postEl = document.querySelector("[data-overall-post]");
-      if (preEl) {
-        preEl.value = this.sumRowScores("pre");
-      }
-      if (postEl) {
-        postEl.value = this.sumRowScores("post");
-      }
+      if (preEl) preEl.textContent = this.hasAnyScore("pre") ? this.sumRowScores("pre") : "";
+      if (postEl) postEl.textContent = this.hasAnyScore("post") ? this.sumRowScores("post") : "";
     };
 
     const updatePortfolioTotal = () => {
@@ -488,6 +598,7 @@ class AssessmentScores {
         updateRowPreview(rowId);
         updateOverallScores();
         updateLikelihoodPreview();
+        this.updateScoreValidity();
       });
     });
 
@@ -496,9 +607,11 @@ class AssessmentScores {
     });
 
     this.AF5_ROWS.filter((row) => row.id && row.type === "score").forEach((row) => updateRowPreview(row.id));
+    Object.keys(this.SUBJECT_GROUPS).forEach(updateGroupPreview);
     updateOverallScores();
     updatePortfolioTotal();
     updateLikelihoodPreview();
+    this.updateScoreValidity();
   }
 
   static readScoreRowFromDom(rowId) {
@@ -508,10 +621,82 @@ class AssessmentScores {
     };
   }
 
+  static isGroupedScoreRow(rowId) {
+    return Object.values(this.SUBJECT_GROUPS).some((rowIds) => rowIds.includes(rowId));
+  }
+
+  static groupForRow(rowId) {
+    return Object.entries(this.SUBJECT_GROUPS).find(([, rowIds]) => rowIds.includes(rowId))?.[0] || null;
+  }
+
+  static readAllScoresFromDom() {
+    const scores = {};
+    this.AF5_ROWS.filter((row) => row.id).forEach((row) => {
+      scores[row.id] = this.readScoreRowFromDom(row.id);
+    });
+    return scores;
+  }
+
+  static hasAnyScore(part) {
+    return this.AF5_ROWS.some((row) => row.id && row.type === "score" && this.readNumber(`[data-score-field="${row.id}"][data-score-part="${part}"]`) != null);
+  }
+
   static sumRowScores(part) {
-    const rows = this.AF5_ROWS.filter((row) => row.id && row.type === "score" && row.id !== "pis");
+    const rows = this.AF5_ROWS.filter((row) => row.id && row.type === "score");
     const total = rows.reduce((sum, row) => sum + (this.readNumber(`[data-score-field="${row.id}"][data-score-part="${part}"]`) || 0), 0);
     return Number.isInteger(total) ? total : Number(total.toFixed(2));
+  }
+
+  static scoreValidationErrors() {
+    const errors = [];
+    const scores = this.readAllScoresFromDom();
+
+    Object.entries(this.SUBJECT_MAX_SCORES).forEach(([key, maxScore]) => {
+      if (this.SUBJECT_GROUPS[key]) {
+        ["pre", "post"].forEach((part) => {
+          const total = this.subjectGroupTotal(key, scores, part);
+          if (total != null && total > maxScore) {
+            errors.push(`${key === "ls1_en" ? "LS 1 English" : "LS 1 Filipino"} ${part}-test total cannot exceed ${maxScore}.`);
+          }
+        });
+        return;
+      }
+
+      ["pre", "post"].forEach((part) => {
+        const value = this.readNumber(`[data-score-field="${key}"][data-score-part="${part}"]`);
+        if (value != null && value > maxScore) {
+          const row = this.AF5_ROWS.find((item) => item.id === key);
+          errors.push(`${row?.label || key} ${part}-test score cannot exceed ${maxScore}.`);
+        }
+      });
+    });
+
+    return errors;
+  }
+
+  static updateScoreValidity() {
+    document.querySelectorAll("[data-score-field]").forEach((input) => input.classList.remove("is-invalid"));
+
+    Object.entries(this.SUBJECT_MAX_SCORES).forEach(([key, maxScore]) => {
+      if (this.SUBJECT_GROUPS[key]) {
+        ["pre", "post"].forEach((part) => {
+          const scores = this.readAllScoresFromDom();
+          const total = this.subjectGroupTotal(key, scores, part);
+          if (total != null && total > maxScore) {
+            this.SUBJECT_GROUPS[key].forEach((rowId) => {
+              document.querySelector(`[data-score-field="${rowId}"][data-score-part="${part}"]`)?.classList.add("is-invalid");
+            });
+          }
+        });
+        return;
+      }
+
+      ["pre", "post"].forEach((part) => {
+        const input = document.querySelector(`[data-score-field="${key}"][data-score-part="${part}"]`);
+        const value = input?.value === "" ? null : Number(input?.value);
+        if (value != null && Number.isFinite(value) && value > maxScore) input?.classList.add("is-invalid");
+      });
+    });
   }
 
   static bindSave() {
@@ -521,11 +706,19 @@ class AssessmentScores {
   static async save() {
     if (!this.selectedLearnerId) return;
 
+    const validationErrors = this.scoreValidationErrors();
+    if (validationErrors.length) {
+      this.updateScoreValidity();
+      Toast?.error(validationErrors[0]);
+      return;
+    }
+
     const scores = {};
     this.AF5_ROWS.filter((r) => r.id).forEach((row) => {
+      const statusOnly = row.type === "status";
       scores[row.id] = {
-        pre: this.readNumber(`[data-score-field="${row.id}"][data-score-part="pre"]`),
-        post: this.readNumber(`[data-score-field="${row.id}"][data-score-part="post"]`),
+        pre: statusOnly ? null : this.readNumber(`[data-score-field="${row.id}"][data-score-part="pre"]`),
+        post: statusOnly ? null : this.readNumber(`[data-score-field="${row.id}"][data-score-part="post"]`),
         likelihood: this.currentForm?.scores?.[row.id]?.likelihood ?? null,
         status: this.readText(`[data-score-field="${row.id}"][data-score-part="status"]`)
           ?? this.currentForm?.scores?.[row.id]?.status
@@ -534,7 +727,7 @@ class AssessmentScores {
     });
     const overallPostForLikelihood = this.sumRowScores("post");
     const overallPercentage = this.overallLikelihoodPercentage(overallPostForLikelihood);
-    scores.overall_likelihood = overallPercentage == null ? null : this.likelihoodLabel(overallPercentage);
+    scores.overall_likelihood = overallPercentage == null ? null : `${overallPercentage}%`;
 
     const portfolio = {};
     [...this.PORTFOLIO_WORK_SAMPLE_ROWS, ...this.PORTFOLIO_REVALIDA_ROWS].forEach((row) => {
