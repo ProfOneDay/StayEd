@@ -228,6 +228,36 @@ def suspend_user(user_id: int):
     return {"success": True, "message": "Teacher account suspended."}
 
 
+@bp.delete("/admin/users/<int:user_id>")
+@role_required("admin")
+def delete_deactivated_user(user_id: int):
+    row = fetch_one(
+        """
+        SELECT u.user_id, u.account_status, t.teacher_id
+        FROM users u
+        JOIN teacher t ON t.user_id = u.user_id
+        WHERE u.user_id=%s AND u.role='TEACHER' AND u.account_status='SUSPENDED'
+        """,
+        (user_id,),
+    )
+    if not row:
+        return error("Deactivated teacher account not found.", 404)
+
+    db = get_db()
+    try:
+        with db.cursor() as cur:
+            cur.execute("DELETE FROM teacher_clc WHERE teacher_id=%s", (row["teacher_id"],))
+            cur.execute("DELETE FROM teacher WHERE user_id=%s", (user_id,))
+            cur.execute("DELETE FROM users WHERE user_id=%s", (user_id,))
+            cur.execute("DELETE FROM notification WHERE dedup_key=%s", (f"registration:{user_id}",))
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    return {"success": True, "message": "Deactivated teacher account removed."}
+
+
 @bp.post("/admin/users/<int:user_id>/reject")
 @role_required("admin")
 def reject_user(user_id: int):

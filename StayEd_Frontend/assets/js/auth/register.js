@@ -49,6 +49,7 @@ class RegisterPage {
 
       const response = await Auth.register({
         full_name: form.full_name.trim(),
+        employee_id: form.employee_id.trim(),
         email: form.email.trim(),
         password: form.password,
       });

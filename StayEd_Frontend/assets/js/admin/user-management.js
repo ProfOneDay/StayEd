@@ -277,16 +277,19 @@ function openEdit(id){
   const qaTitle=document.getElementById('edit-quick-title');
   const qaSub=document.getElementById('edit-quick-sub');
   const qaBtn=document.getElementById('edit-quick-btn');
+  const removeBtn=document.getElementById('edit-remove-btn');
   if(t.status==='deactivated'){
-    qaTitle.textContent='Reactivate account';
-    qaSub.textContent="Restore this teacher's sign-in access.";
-    qaBtn.textContent='Reactivate';
-    qaBtn.className='btn primary';
+    qaTitle.textContent='Remove account';
+    qaSub.textContent='Permanently delete this deactivated teacher account.';
+    qaBtn.textContent='Remove';
+    qaBtn.className='btn danger';
+    removeBtn.style.display='inline-flex';
   }else{
     qaTitle.textContent='Deactivate account';
     qaSub.textContent="Revoke this teacher's sign-in access.";
     qaBtn.textContent='Deactivate';
     qaBtn.className='btn danger';
+    removeBtn.style.display='none';
   }
   openModal('modal-edit');
 }
@@ -311,10 +314,17 @@ document.getElementById('edit-save-btn').addEventListener('click',async()=>{
     showToast(error?.data?.message||'Unable to update this account.');
   }
 });
+document.getElementById('edit-remove-btn').addEventListener('click',()=>{
+  const t=teachers.find(x=>x.id===activeTeacherId);
+  if(t?.status==='deactivated'){
+    closeModal('modal-edit');
+    openRemove(t.id);
+  }
+});
 document.getElementById('edit-quick-btn').addEventListener('click',()=>{
   const t=teachers.find(x=>x.id===activeTeacherId);
   closeModal('modal-edit');
-  if(t.status==='deactivated'){ reactivate(t.id); } else { openDeactivate(t.id); }
+  if(t.status==='deactivated'){ openRemove(t.id); } else { openDeactivate(t.id); }
 });
 document.getElementById('edit-reset-btn').addEventListener('click',()=>{
   closeModal('modal-edit');
@@ -369,6 +379,29 @@ document.getElementById('dc-confirm-btn').addEventListener('click',async()=>{
   }catch(error){
     console.error('[UserManagement] Deactivate failed',error);
     showToast('Unable to deactivate this account.');
+  }
+});
+
+function openRemove(id){
+  activeTeacherId=id;
+  const t=teachers.find(x=>x.id===id);
+  if (!t) return;
+  document.getElementById('rm-name').textContent=t.name;
+  document.getElementById('rm-email').textContent=t.email;
+  document.getElementById('rm-status').innerHTML=statusBadge(t.status);
+  openModal('modal-remove');
+}
+document.getElementById('rm-confirm-btn').addEventListener('click',async()=>{
+  const t=teachers.find(x=>x.id===activeTeacherId);
+  const name=t?.name || 'This account';
+  try{
+    await API.delete(`/admin/users/${activeTeacherId}`);
+    closeModal('modal-remove');
+    await loadTeachers();
+    showToast(`${name} removed`);
+  }catch(error){
+    console.error('[UserManagement] Remove failed',error);
+    showToast(error?.data?.message || 'Unable to remove this account.');
   }
 });
 async function reactivate(id){

@@ -140,7 +140,7 @@
     <label style="display:block;font-size:0.90625rem;font-weight:700;margin-bottom:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Personal Information</label>
     <div class="field" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px 16px">
       <div><label for="edit-first">First Name</label><input id="edit-first" type="text"/></div>
-      <div><label for="edit-middle">Middle Name</label><input id="edit-middle" type="text"/></div>
+      <div><label for="edit-middle">Middle Name (optional)</label><input id="edit-middle" type="text"/></div>
       <div><label for="edit-last">Last Name</label><input id="edit-last" type="text"/></div>
     </div>
     <label style="display:block;font-size:0.90625rem;font-weight:700;margin:2px 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Employment &amp; Contact</label>
@@ -175,7 +175,8 @@
     </div>
     <div class="modal-actions" style="justify-content:space-between">
       <button class="btn ghost" id="edit-reset-btn" type="button">Reset Password</button>
-      <div style="display:flex;gap:10px">
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="btn danger" id="edit-remove-btn" type="button" style="display:none">Remove Account</button>
         <button class="btn ghost" onclick="closeModal('modal-edit')">Cancel</button>
         <button class="btn primary" id="edit-save-btn">Save Changes</button>
       </div>
@@ -236,6 +237,24 @@
     <div class="modal-actions">
       <button class="btn ghost" onclick="closeModal('modal-deactivate')">Cancel</button>
       <button class="btn danger" id="dc-confirm-btn">Deactivate Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- Remove Deactivated Account Modal -->
+<div class="overlay" id="modal-remove">
+  <div class="modal">
+    <div class="icon-circle danger"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h10l1-14"/></svg></div>
+    <h2>Remove Deactivated Account?</h2>
+    <div class="modal-sub">This action permanently deletes the teacher account and all associated profile data.</div>
+    <div class="info-card" style="grid-template-columns:1fr">
+      <div><small>Teacher</small><b id="rm-name">—</b><div class="email" id="rm-email" style="margin-top:2px">—</div></div>
+      <div><small>Current Status</small><b id="rm-status">—</b></div>
+    </div>
+    <div class="warning-banner">This cannot be undone. Only deactivated accounts can be removed.</div>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal('modal-remove')">Cancel</button>
+      <button class="btn danger" id="rm-confirm-btn">Remove Account</button>
     </div>
   </div>
 </div>

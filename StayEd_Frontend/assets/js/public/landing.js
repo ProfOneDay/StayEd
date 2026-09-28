@@ -115,6 +115,7 @@ const Landing = {
       try {
         const response = await Auth.register({
           full_name: data.full_name.trim(),
+          employee_id: data.employee_id.trim(),
           email: data.email.trim(),
           password: data.password,
         });

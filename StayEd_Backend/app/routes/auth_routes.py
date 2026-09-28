@@ -128,10 +128,11 @@ def me():
 def register():
     data = request.get_json(silent=True) or {}
     full_name = str(data.get("full_name", "")).strip()
+    employee_id = str(data.get("employee_id") or data.get("employeeId") or "").strip()
     email = str(data.get("email", "")).strip().lower()
     password = str(data.get("password", ""))
-    if not full_name or not email or len(password) < 8:
-        return error("Full name, email, and a password of at least 8 characters are required.", 422)
+    if not full_name or not employee_id or not email or len(password) < 8:
+        return error("Full name, employee ID, email, and a password of at least 8 characters are required.", 422)
     if not EMAIL_RE.match(email):
         return error("Enter a valid email address.", 422)
 
@@ -175,7 +176,7 @@ def register():
                     user_id, employee_id, first_name, last_name, municipality, status
                 ) VALUES (%s, %s, %s, %s, %s, 'INACTIVE')
                 """,
-                (user_id, f"PENDING-{user_id}", first_name, last_name, "Unassigned"),
+                (user_id, employee_id, first_name, last_name, "Unassigned"),
             )
 
             admins = fetch_all("SELECT user_id FROM users WHERE role = 'ADMIN' AND account_status = 'ACTIVE'")
