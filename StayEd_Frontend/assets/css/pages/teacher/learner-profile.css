@@ -941,12 +941,16 @@
 }
 
 .st-active-intervention{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    gap:16px;
+    display:block;
     border-left:4px solid var(--st-risk-high);
     padding:8px 0 8px 16px;
+}
+
+.st-active-intervention-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+    margin-top:12px;
 }
 
 .st-active-intervention-meta{
@@ -1288,6 +1292,26 @@
         overflow:hidden;
         text-overflow:ellipsis;
     }
+}
+.st-outcome-card{
+    cursor:pointer;
+    border-radius:var(--st-radius-md);
+    padding:12px;
+    text-align:center;
+    transition:var(--st-transition);
+}
+
+.st-outcome-card:hover{
+    background:var(--st-surface-container-low);
+}
+
+#ivNotesRich[data-placeholder]:empty::before{
+    content:attr(data-placeholder);
+    color:#9CA3AF;
+}
+
+#ivNotesRich[contenteditable]:focus{
+    outline:none;
 }
 
 /* 2026-09-24 — Learner Profile compact spacing pass.

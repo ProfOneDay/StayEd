@@ -1080,7 +1080,7 @@ class LearnerProfilePage {
               </div>
               ` : ""}
             </div>
-            <div style="display:flex;gap:8px;flex-shrink:0;">
+            <div class="st-active-intervention-actions">
               <button type="button" class="st-btn st-btn-outline st-btn-xs" data-update-status>Update Status</button>
               <button type="button" class="st-btn st-btn-primary st-btn-xs" data-add-outcome>Add Outcome</button>
               ${a.canSaveToHistory ? `<button type="button" class="st-btn st-btn-outline st-btn-xs" data-save-to-history>Save to History</button>` : ""}
@@ -1277,47 +1277,69 @@ class LearnerProfilePage {
   static openAddOutcomeModal(interventionId) {
     if (!window.Modal || !interventionId) return;
 
-    this._outcomePhotos = [];
+    this._outcomeArtifacts = [];
+    this._outcomeStatus = "Successful";
 
     Modal.show({
       title: "Add Outcome",
       size: "xl",
       confirmLabel: "Save Outcome",
       message: `
-        <p style="font-size:13px;color:#6B7280;margin-bottom:16px;">Document what happened after the intervention and record the learner's response or outcome.</p>
-        <div class="st-schedule-modal-field">
-          <label for="ivOutcome">Outcome</label>
-            <select id="ivOutcome" onchange="document.getElementById('ivOutcomeOtherField').style.display = this.value === 'Others' ? '' : 'none';">
-            <option value="Successful">Successful</option>
-            <option value="Failed">Failed</option>
-            <option value="Others">Others</option>
-          </select>
+        <p style="font-size:13px;color:#6B7280;margin-bottom:16px;">Document what happened after the intervention and record the learner's response.</p>
+
+        <p style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:8px;">Outcome Status</p>
+        <div id="ivOutcomeCards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px;">
+          <div class="st-outcome-card" data-outcome-card="Successful" style="border:2px solid #10B981;background:#ECFDF5;">
+            <span class="material-symbols-outlined" style="color:#10B981;font-size:22px;">check_circle</span>
+            <p style="font-weight:700;font-size:0.8125rem;color:#065F46;margin-top:4px;">Successful</p>
+            <p style="font-size:0.6875rem;color:#059669;">Goals achieved</p>
+          </div>
+          <div class="st-outcome-card" data-outcome-card="Failed" style="border:2px solid #E5E7EB;">
+            <span class="material-symbols-outlined" style="color:#DC2626;font-size:22px;">cancel</span>
+            <p style="font-weight:700;font-size:0.8125rem;color:#111827;margin-top:4px;">Failed</p>
+            <p style="font-size:0.6875rem;color:#6B7280;">Needs escalation</p>
+          </div>
+          <div class="st-outcome-card" data-outcome-card="Others" style="border:2px solid #E5E7EB;">
+            <span class="material-symbols-outlined" style="color:#6B7280;font-size:22px;">more_horiz</span>
+            <p style="font-weight:700;font-size:0.8125rem;color:#111827;margin-top:4px;">Others</p>
+            <p style="font-size:0.6875rem;color:#6B7280;">Specify below</p>
+          </div>
         </div>
-        <div class="st-schedule-modal-field" id="ivOutcomeOtherField" style="display:none;">
-          <label for="ivOutcomeOther">Please specify</label>
-          <input id="ivOutcomeOther" type="text" placeholder="Describe the outcome...">
+        <div id="ivOutcomeOtherField" style="display:none;margin-bottom:16px;">
+          <input id="ivOutcomeOther" type="text" placeholder="Please specify the outcome..." style="width:100%;padding:8px 10px;border:1px solid #E5E7EB;border-radius:6px;font-size:13px;">
         </div>
-        <div class="st-schedule-modal-field">
-          <label for="ivNotes">Notes</label>
-          <textarea id="ivNotes" rows="3" placeholder="Details from the follow-up..."></textarea>
+
+        <p style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:8px;">What Happened? *</p>
+        <div style="border:1px solid #E5E7EB;border-radius:8px;overflow:hidden;margin-bottom:16px;">
+          <div style="display:flex;gap:4px;padding:6px 8px;background:#F9FAFB;border-bottom:1px solid #E5E7EB;">
+            <button type="button" data-rt-cmd="bold" style="width:28px;height:28px;border:none;background:transparent;border-radius:4px;cursor:pointer;font-weight:700;">B</button>
+            <button type="button" data-rt-cmd="italic" style="width:28px;height:28px;border:none;background:transparent;border-radius:4px;cursor:pointer;font-style:italic;">I</button>
+            <button type="button" data-rt-cmd="insertUnorderedList" style="width:28px;height:28px;border:none;background:transparent;border-radius:4px;cursor:pointer;">
+              <span class="material-symbols-outlined" style="font-size:18px;">format_list_bulleted</span>
+            </button>
+          </div>
+          <div id="ivNotesRich" contenteditable="true" style="min-height:110px;padding:10px 12px;font-size:13px;color:#111827;outline:none;" data-placeholder="Met with the learner and discussed..."></div>
         </div>
-        <div class="st-schedule-modal-field">
-          <label for="ivPhotoInput">Photos (optional, up to 5)</label>
-          <input id="ivPhotoInput" type="file" accept="image/*" multiple>
-          <div id="ivPhotoPreview" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <p style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.03em;">Attached Artifacts</p>
+          <span id="ivArtifactCount" style="font-size:11px;color:#6B7280;">0 attached</span>
         </div>
+        <input id="ivArtifactInput" type="file" accept="image/*,.pdf,.doc,.docx" multiple style="margin-bottom:10px;">
+        <div id="ivArtifactPreview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
       `,
       onConfirm: async () => {
-        const outcomeSelect = document.getElementById("ivOutcome")?.value;
-        const outcomeOther = document.getElementById("ivOutcomeOther")?.value.trim();
-        const outcome = outcomeSelect === "Others" ? outcomeOther : outcomeSelect;
-        const notes = document.getElementById("ivNotes")?.value.trim();
-        if (outcomeSelect === "Others" && !outcomeOther) {
+        const otherText = document.getElementById("ivOutcomeOther")?.value.trim();
+        const outcome = this._outcomeStatus === "Others" ? otherText : this._outcomeStatus;
+        const notes = document.getElementById("ivNotesRich")?.innerHTML.trim();
+        const notesText = document.getElementById("ivNotesRich")?.textContent.trim();
+
+        if (this._outcomeStatus === "Others" && !otherText) {
           Toast?.error("Please specify the outcome.");
           return;
         }
-        if (!notes) {
-          Toast?.error("Notes are required.");
+        if (!notesText) {
+          Toast?.error("Please describe what happened.");
           return;
         }
 
@@ -1325,10 +1347,10 @@ class LearnerProfilePage {
           await API.addInterventionFollowUp(interventionId, {
             outcome,
             notes,
-            photos: this._outcomePhotos,
+            photos: this._outcomeArtifacts,
           });
           Toast?.success("Outcome recorded.");
-          this._outcomePhotos = [];
+          this._outcomeArtifacts = [];
           await this.load();
           document.querySelector('[data-profile-tab="interventions"]')?.click();
         } catch (error) {
@@ -1338,7 +1360,105 @@ class LearnerProfilePage {
       },
     });
 
-    setTimeout(() => this.bindOutcomePhotoInput(), 0);
+    setTimeout(() => {
+      this.bindOutcomeCardSelection();
+      this.bindOutcomeRichText();
+      this.bindOutcomeArtifactInput();
+    }, 0);
+  }
+
+  static bindOutcomeCardSelection() {
+    const cards = document.querySelectorAll("[data-outcome-card]");
+    const otherField = document.getElementById("ivOutcomeOtherField");
+    cards.forEach((card) => {
+      card.addEventListener("click", () => {
+        this._outcomeStatus = card.dataset.outcomeCard;
+        cards.forEach((c) => {
+          const active = c === card;
+          c.style.border = active ? "2px solid #10B981" : "2px solid #E5E7EB";
+          c.style.background = active ? "#ECFDF5" : "transparent";
+        });
+        if (otherField) {
+          otherField.style.display = this._outcomeStatus === "Others" ? "" : "none";
+        }
+      });
+    });
+  }
+
+  static bindOutcomeRichText() {
+    const editor = document.getElementById("ivNotesRich");
+    document.querySelectorAll("[data-rt-cmd]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        editor?.focus();
+        document.execCommand(btn.dataset.rtCmd, false, null);
+      });
+    });
+  }
+
+  static bindOutcomeArtifactInput() {
+    const input = document.getElementById("ivArtifactInput");
+    const preview = document.getElementById("ivArtifactPreview");
+    if (!input || !preview) return;
+
+    input.addEventListener("change", async (e) => {
+      const files = Array.from(e.target.files || []);
+      for (const file of files) {
+        const isImage = file.type.startsWith("image/");
+        const imageData = isImage
+          ? await this.resizeImageFile(file)
+          : await new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result);
+              reader.onerror = reject;
+              reader.readAsDataURL(file);
+            });
+        this._outcomeArtifacts.push({
+          file_name: file.name,
+          image_data: imageData,
+          artifact_type: "Session Proof",
+          is_image: isImage,
+        });
+        this.renderOutcomeArtifactPreview();
+      }
+      input.value = "";
+    });
+  }
+
+  static renderOutcomeArtifactPreview() {
+    const preview = document.getElementById("ivArtifactPreview");
+    const count = document.getElementById("ivArtifactCount");
+    if (!preview) return;
+    if (count) count.textContent = `${this._outcomeArtifacts.length} attached`;
+
+    const typeOptions = ["Session Proof", "Agreement", "Work Sample", "Other"];
+
+    preview.innerHTML = this._outcomeArtifacts
+      .map((a, i) => `
+        <div style="width:130px;border:1px solid #E5E7EB;border-radius:8px;padding:8px;position:relative;">
+          <button type="button" data-remove-artifact="${i}" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#DC2626;color:#fff;border:none;font-size:12px;cursor:pointer;line-height:1;">×</button>
+          ${a.is_image
+            ? `<img src="${a.image_data}" style="width:100%;height:70px;object-fit:cover;border-radius:6px;">`
+            : `<div style="width:100%;height:70px;display:flex;align-items:center;justify-content:center;background:#F3F4F6;border-radius:6px;"><span class="material-symbols-outlined" style="color:#6B7280;font-size:28px;">description</span></div>`
+          }
+          <p style="font-size:10px;color:#6B7280;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.file_name}</p>
+          <select data-artifact-type="${i}" style="width:100%;font-size:10px;margin-top:4px;padding:2px;border:1px solid #E5E7EB;border-radius:4px;">
+            ${typeOptions.map((t) => `<option value="${t}" ${a.artifact_type === t ? "selected" : ""}>${t}</option>`).join("")}
+          </select>
+        </div>
+      `)
+      .join("");
+
+    preview.querySelectorAll("[data-remove-artifact]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        this._outcomeArtifacts.splice(Number(btn.dataset.removeArtifact), 1);
+        this.renderOutcomeArtifactPreview();
+      });
+    });
+    preview.querySelectorAll("[data-artifact-type]").forEach((sel) => {
+      sel.addEventListener("change", () => {
+        this._outcomeArtifacts[Number(sel.dataset.artifactType)].artifact_type = sel.value;
+      });
+    });
   }
 
   static bindOutcomePhotoInput() {
@@ -1445,12 +1565,17 @@ class LearnerProfilePage {
           <p style="font-size:13px;color:#374151;">${h.aiReason}</p>
         </div>
         ` : ""}
-                  ${h.outcome ? `<p style="font-size:13px;"><strong>Outcome:</strong> ${h.outcome}</p>` : ""}
+          ${h.outcome ? `<p style="font-size:13px;"><strong>Outcome:</strong> ${h.outcome}</p>` : ""}
           ${h.outcomeNotes ? `<p style="font-size:13px;"><strong>Outcome Notes:</strong> ${h.outcomeNotes}</p>` : ""}
           ${photos.length ? `
-          <p style="font-size:13px;font-weight:700;margin-top:12px;margin-bottom:6px;">Photos</p>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;">
-          ${photos.map((p, i) => `<img src="${p.imageData}" alt="${p.fileName || "Outcome photo"}" style="width:90px;height:90px;object-fit:cover;border-radius:6px;border:1px solid #E5E7EB;cursor:pointer;" onclick="LearnerProfilePage.openPhotoLightbox('${p.imageData.replace(/'/g, "\\'")}')">`).join("")}
+          <p style="font-size:13px;font-weight:700;margin-top:12px;margin-bottom:6px;">Attached Artifacts</p>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;">
+          ${photos.map((p, i) => `
+            <div style="width:100px;">
+              <img src="${p.imageData}" alt="${p.fileName || "Outcome photo"}" style="width:100px;height:100px;object-fit:cover;border-radius:6px;border:1px solid #E5E7EB;cursor:pointer;" onclick="LearnerProfilePage.openPhotoLightbox('${p.imageData.replace(/'/g, "\\'")}')">
+              ${p.artifactType ? `<p style="font-size:10px;color:#6B7280;text-align:center;margin-top:3px;">${p.artifactType}</p>` : ""}
+            </div>
+          `).join("")}
           </div>
           ` : ""}
       `,

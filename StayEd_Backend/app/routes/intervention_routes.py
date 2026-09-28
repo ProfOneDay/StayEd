@@ -196,14 +196,15 @@ def add_intervention_follow_up(intervention_id: int):
         for photo in photos:
             file_name = str((photo or {}).get("file_name") or "")[:255]
             image_data = (photo or {}).get("image_data")
+            artifact_type = str((photo or {}).get("artifact_type") or "Other")[:50]
             if not image_data:
                 continue
             execute(
                 """
-                INSERT INTO follow_up_photo (follow_up_id, file_name, image_data)
-                VALUES (%s, %s, %s)
+                INSERT INTO follow_up_photo (follow_up_id, file_name, image_data, artifact_type)
+                VALUES (%s, %s, %s, %s)
                 """,
-                (follow_up_id, file_name, image_data),
+                (follow_up_id, file_name, image_data, artifact_type),
             )
 
     return {"message": "Follow-up recorded.", "next_step": next_step}, 201

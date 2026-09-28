@@ -1039,7 +1039,7 @@ _FACTOR_INFO = {
     "attendance_risk": {
         "label": "Attendance at prediction time",
         "format": "percent",
-        "reason": "This is the attendance value saved with that prediction run, not a live attendance KPI.",
+        "reason": "This shows attendance as of the last prediction, not today's attendance.",
     },
     "age": {
         "label": "Age",
@@ -1298,7 +1298,7 @@ def learner_profile(learner_id: int):
     if follow_up_ids:
         photo_rows = fetch_all(
             f"""
-            SELECT follow_up_id, photo_id, file_name, image_data
+            SELECT follow_up_id, photo_id, file_name, image_data, artifact_type
             FROM follow_up_photo
             WHERE follow_up_id IN ({','.join(['%s'] * len(follow_up_ids))})
             ORDER BY created_at ASC
@@ -1307,8 +1307,13 @@ def learner_profile(learner_id: int):
         )
         for p in photo_rows:
             photos_by_follow_up.setdefault(p["follow_up_id"], []).append(
-                {"id": p["photo_id"], "fileName": p["file_name"], "imageData": p["image_data"]}
-     )
+                {
+                    "id": p["photo_id"],
+                    "fileName": p["file_name"],
+                    "imageData": p["image_data"],
+                    "artifactType": p.get("artifact_type") or "Other",
+                }
+            )
     active_rows = sorted(
         [
             i for i in interventions
@@ -1353,14 +1358,13 @@ def learner_profile(learner_id: int):
             factor_title = "Attendance at Prediction Time"
             if recorded_sessions:
                 factor_text += (
-                    f" Current attendance is {attendance_rate}% "
-                    f"({attended_sessions} of {recorded_sessions} recorded sessions attended)."
+                    f" Right now attendance is {attendance_rate}% "
+                    f"({attended_sessions} out of {recorded_sessions} sessions)."
                 )
             else:
-                factor_text += " Current attendance is 0% because no attendance has been recorded yet."
+                factor_text += " Right now there's no attendance recorded yet, so it shows 0%."
             factor_text += (
-                " If attendance changed after this prediction, run a new prediction "
-                "to refresh the learner's current risk and contributing factors."
+                " If attendance has changed since then, run a new prediction to update it."
             )
         contributor_rows.append({
             "icon": "analytics", "tone": tone,

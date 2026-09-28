@@ -1,0 +1,4 @@
+BEGIN;
+ALTER TABLE follow_up_photo
+    ADD COLUMN IF NOT EXISTS artifact_type VARCHAR(50) NOT NULL DEFAULT 'Other';
+COMMIT;
