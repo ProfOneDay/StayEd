@@ -1356,16 +1356,17 @@ def learner_profile(learner_id: int):
             # change later, so distinguish the prediction-time value from the
             # live Attendance Rate KPI instead of showing contradictory values.
             factor_title = "Attendance at Prediction Time"
+            pred_value = _format_factor_value("percent", display_value)
             if recorded_sessions:
-                factor_text += (
-                    f" Right now attendance is {attendance_rate}% "
-                    f"({attended_sessions} out of {recorded_sessions} sessions)."
+                factor_text = (
+                    f"Attendance was {pred_value} when this was checked. "
+                    f"It's now {attendance_rate}% ({attended_sessions}/{recorded_sessions} days present)."
                 )
             else:
-                factor_text += " Right now there's no attendance recorded yet, so it shows 0%."
-            factor_text += (
-                " If attendance has changed since then, run a new prediction to update it."
-            )
+                factor_text = (
+                    f"Attendance was {pred_value} when this was checked. "
+                    "No attendance has been recorded since then."
+                )
         contributor_rows.append({
             "icon": "analytics", "tone": tone,
             "title": factor_title, "level": level,

@@ -1314,6 +1314,16 @@
     outline:none;
 }
 
+#ivNotesRich ul,
+#ivNotesRich ol{
+    margin:4px 0;
+    padding-left:22px;
+}
+
+#ivNotesRich li{
+    margin-bottom:2px;
+}
+
 /* 2026-09-24 — Learner Profile compact spacing pass.
    The global app layout uses both flex gap and section margins; on this page
    those values stacked and made the header/profile/share/tabs feel too far
