@@ -10,7 +10,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from ..authz import current_user_id
 from ..db import execute, fetch_all, fetch_one, get_db
 from ..helpers import EMAIL_RE, error, split_name
-from ..services.roster_service import is_on_teacher_roster
+from ..services.roster_service import find_roster_clc, is_on_teacher_roster
+from ..services.settings_service import get_active_school_year
 
 bp = Blueprint("auth", __name__)
 
@@ -158,6 +159,14 @@ def register():
         suffix += 1
         username = f"{username_base}{suffix}"
 
+    # Being on the roster (checked above) only proves the name is a real ALS
+    # teacher -- it doesn't guarantee their listed station school has a
+    # matching clc row yet, so this can legitimately come back empty. That's
+    # not an error: the teacher still registers, just as "Unassigned" for an
+    # admin to assign manually later, same as before this existed.
+    roster_clc = find_roster_clc(full_name)
+    municipality = roster_clc["municipality"] if roster_clc else "Unassigned"
+
     db = get_db()
     try:
         with db.cursor() as cur:
@@ -175,9 +184,21 @@ def register():
                 INSERT INTO teacher (
                     user_id, employee_id, first_name, last_name, municipality, status
                 ) VALUES (%s, %s, %s, %s, %s, 'INACTIVE')
+                RETURNING teacher_id
                 """,
-                (user_id, employee_id, first_name, last_name, "Unassigned"),
+                (user_id, employee_id, first_name, last_name, municipality),
             )
+            teacher_id = cur.fetchone()["teacher_id"]
+
+            if roster_clc:
+                cur.execute(
+                    """
+                    INSERT INTO teacher_clc (teacher_id, clc_id, school_year, assignment_status)
+                    VALUES (%s, %s, %s, 'ACTIVE')
+                    ON CONFLICT (teacher_id, clc_id, school_year) DO NOTHING
+                    """,
+                    (teacher_id, roster_clc["clc_id"], get_active_school_year()),
+                )
 
             admins = fetch_all("SELECT user_id FROM users WHERE role = 'ADMIN' AND account_status = 'ACTIVE'")
             for admin in admins:

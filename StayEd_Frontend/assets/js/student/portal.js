@@ -71,7 +71,7 @@ class StudentPortal {
     if (!risk) return "";
 
     const cls =
-      { High: "high", Moderate: "moderate", Low: "low" }[risk.label] ||
+      { High: "high", Moderate: "moderate", Low: "low", Preliminary: "preliminary" }[risk.label] ||
       "neutral";
 
     return `

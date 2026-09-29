@@ -24,7 +24,7 @@ class ReportPrinter {
   }
 
   static riskBadge(risk) {
-    const cls = { High: "high", Moderate: "moderate", Low: "low" }[risk] || "neutral";
+    const cls = { High: "high", Moderate: "moderate", Low: "low", Preliminary: "preliminary" }[risk] || "neutral";
     return { html: `<span class="badge badge-${cls}">${this.escape(risk || "Not Yet Assessed")}</span>` };
   }
 
@@ -210,6 +210,7 @@ class ReportPrinter {
   .badge-moderate { background: rgba(243,148,34,.12); color: #a8620f; }
   .badge-low { background: rgba(107,191,89,.15); color: #3d7a30; }
   .badge-neutral { background: rgba(115,119,127,.12); color: #43474e; }
+  .badge-preliminary { background: rgba(2,136,209,.1); color: #0288d1; }
   .empty-note { color: #73777f; font-style: italic; padding: 4px 0 8px; margin: 0; }
   .print-toolbar {
     position: sticky;

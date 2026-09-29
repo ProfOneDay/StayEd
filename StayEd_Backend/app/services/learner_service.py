@@ -123,7 +123,21 @@ def _shape_learner(row):
     last = row.get("last_name") or ""
     risk_level = row.get("risk_level")
     monitoring_started = bool(row.get("batch_count"))
-    risk = title_enum(risk_level) if risk_level and monitoring_started else "Not Yet Assessed"
+    has_engagement = bool(row.get("has_engagement"))
+    # A prediction only needs one released module batch to run (see
+    # trigger_prediction's gate), so it can fire from demographic features
+    # alone -- age, distance, is_re_enrollee -- before the learner has
+    # actually done anything (no module returned, no attendance recorded).
+    # That's real signal (e.g. re-enrollees are a known risk factor), so the
+    # prediction itself is kept, but it's labeled "Preliminary" rather than
+    # a flat "Moderate"/"High" until real engagement backs it up, so a
+    # teacher doesn't read it as an already-earned verdict.
+    if not risk_level or not monitoring_started:
+        risk = "Not Yet Assessed"
+    elif not has_engagement:
+        risk = "Preliminary"
+    else:
+        risk = title_enum(risk_level)
     probability = float(row.get("risk_probability") or 0) if monitoring_started else 0.0
     activity_text, activity_status, days_inactive = _shape_activity(row)
     return {
@@ -194,7 +208,17 @@ def _learner_query(
             risk.risk_assessment_id, risk.risk_probability, risk.risk_level, risk.assessment_date,
             0 AS assessment_avg,
             latest_event.event_label, latest_event.event_date,
-            (SELECT COUNT(*) FROM module_release_batch mrb WHERE mrb.enrollment_id = ce.enrollment_id) AS batch_count
+            (SELECT COUNT(*) FROM module_release_batch mrb WHERE mrb.enrollment_id = ce.enrollment_id) AS batch_count,
+            (
+                EXISTS (
+                    SELECT 1 FROM module_record mr2
+                    WHERE mr2.enrollment_id = ce.enrollment_id AND mr2.date_returned IS NOT NULL
+                )
+                OR EXISTS (
+                    SELECT 1 FROM session_attendance sa2
+                    WHERE sa2.enrollment_id = ce.enrollment_id AND sa2.attendance_status = 'PRESENT'
+                )
+            ) AS has_engagement
         FROM learner l
         JOIN class_enrollment ce ON ce.learner_id = l.learner_id
         JOIN learning_class lc ON lc.class_id = ce.class_id

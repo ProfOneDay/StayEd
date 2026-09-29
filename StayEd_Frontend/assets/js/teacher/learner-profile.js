@@ -322,7 +322,9 @@ class LearnerProfilePage {
             ? "Needs regular monitoring."
             : p.risk === "Low"
               ? "Continue regular monitoring."
-              : "Risk will appear after a prediction is generated.";
+              : p.risk === "Preliminary"
+                ? "Based on enrollment details only -- no modules returned or attendance recorded yet."
+                : "Risk will appear after a prediction is generated.";
     }
 
     document
@@ -1652,8 +1654,9 @@ class LearnerProfilePage {
 
   static riskPill(risk) {
     const cls =
-      { High: "high", Moderate: "moderate", Low: "low" }[risk] || "neutral";
-    const label = cls === "neutral" ? "Not Yet Assessed" : `${risk} Risk`;
+      { High: "high", Moderate: "moderate", Low: "low", Preliminary: "preliminary" }[risk] || "neutral";
+    const label =
+      cls === "neutral" ? "Not Yet Assessed" : cls === "preliminary" ? "Preliminary" : `${risk} Risk`;
     return `<span class="st-risk-badge st-risk-badge--${cls}" style="padding:4px 16px;font-size:0.75rem;"><span class="st-risk-dot"></span>${label}</span>`;
   }
 
