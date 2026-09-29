@@ -32,10 +32,16 @@ const DIVISION_II_MUNICIPALITIES = [
 const DIVISION_II_IDS = new Set(DIVISION_II_MUNICIPALITIES.map((m) => m.id));
 
 function slugifyMunicipality(name) {
-  return String(name || "")
+  const slug = String(name || "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+  const aliases = {
+    "pozorrobio": "pozorrubio",
+    "sta-maria": "santa-maria",
+    "sto-tomas": "santo-tomas",
+  };
+  return aliases[slug] || slug;
 }
 
 window.DIVISION_II_MUNICIPALITIES = DIVISION_II_MUNICIPALITIES;

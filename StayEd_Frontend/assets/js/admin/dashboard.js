@@ -171,7 +171,8 @@ function selectMunicipality(id){const d=municipalityData[id]||emptyBucket(id);ma
   document.getElementById('municipalitySelect').value=id;
   ['total','clcs','high','moderate'].forEach(k=>document.getElementById(k).textContent=d[k]);
   document.getElementById('lowSummary').textContent=d.low;
-  document.getElementById('scopeMeta').textContent=`Municipality view · ${d.clcs} CLC${d.clcs===1?'':'s'} represented`;
+  const registeredClcs=(clcsByMunicipality[id]||[]).length;
+  document.getElementById('scopeMeta').textContent=`Municipality view · ${registeredClcs} CLC${registeredClcs===1?'':'s'} registered`;
   const pct=k=>d.total?Math.round(d[k]/d.total*100):0;
   [['high','highBar','highPct','highCountText'],['moderate','modBar','modPct','modCountText'],['low','lowBar','lowPct','lowCountText']].forEach(([k,b,p,c])=>{document.getElementById(b).style.width=pct(k)+'%';document.getElementById(p).textContent=pct(k)+'%';document.getElementById(c).textContent=`${d[k]} learner${d[k]===1?'':'s'}`});
   const max=Math.max(1,...Object.values(d.levels),...Object.values(levelAverages));
