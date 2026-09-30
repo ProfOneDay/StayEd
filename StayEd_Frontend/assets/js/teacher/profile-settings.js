@@ -1,3 +1,7 @@
+const PROFILE_SETTINGS_REDUCE_MOTION = matchMedia(
+  "(prefers-reduced-motion: reduce)",
+).matches;
+
 class ProfileSettingsPage {
   static preferences = {};
 
@@ -16,7 +20,46 @@ class ProfileSettingsPage {
 
     this.bindDangerZone();
 
+    this.playEntrance();
+
     await this.restorePreferences();
+  }
+
+  // Cards/sections settle in once on load, staggered via each element's own
+  // --i (see profile-settings.css); the Quick stats "Active learners" count
+  // animates up to its static HTML value the same way CLC Overview's cards
+  // do. Both [data-animate-cards] groups (left column, right column) are
+  // always above the fold, so this fires directly rather than watching
+  // scroll position.
+  static playEntrance() {
+    document.querySelectorAll("[data-animate-cards]").forEach((group) => {
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => group.classList.add("is-inview")),
+      );
+    });
+
+    document
+      .querySelectorAll("[data-countup]")
+      .forEach((el) => this.countTo(el));
+  }
+
+  static countTo(el, value) {
+    if (!el) return;
+    const end = Number(value ?? el.dataset.final ?? el.textContent);
+    el.dataset.final = Number.isFinite(end) ? end : (value ?? "");
+    if (PROFILE_SETTINGS_REDUCE_MOTION || !Number.isFinite(end)) {
+      el.textContent = value ?? el.dataset.final;
+      return;
+    }
+    const t0 = performance.now();
+    const dur = 800;
+    const tick = (t) => {
+      const k = Math.min(1, (t - t0) / dur);
+      const eased = 1 - Math.pow(1 - k, 3);
+      el.textContent = Math.round(end * eased);
+      if (k < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
   }
 
   static populateFromUser() {

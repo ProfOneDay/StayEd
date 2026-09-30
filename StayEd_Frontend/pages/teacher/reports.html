@@ -50,16 +50,16 @@
           </div>
         </div>
 
-        <div class="st-report-grid">
-          <div class="st-report-card">
+        <div class="st-report-grid" data-animate-cards>
+          <article class="st-report-card st-report-card--wide" style="--i:0">
             <div class="st-report-card-head">
-              <div class="st-report-card-icon">
-                <span class="material-symbols-outlined">person_search</span>
-              </div>
+              <span class="st-icon-tile"
+                ><span class="material-symbols-outlined"
+                  >person_search</span
+                ></span
+              >
               <div>
-                <p class="st-report-card-title">
-                  Individual Learner Progress
-                </p>
+                <p class="st-report-card-title">Individual learner progress</p>
                 <p class="st-report-card-desc">
                   Detailed learning milestones, risk trend, module monitoring,
                   and intervention history for one learner.
@@ -68,44 +68,59 @@
             </div>
             <div class="st-report-card-controls">
               <div class="st-report-scope-selects">
-                <label>
-                  <span>From which CLC</span>
-                  <select data-report-learner-clc aria-label="Select learning center">
-                    <option value="">Select a CLC first</option>
-                  </select>
-                </label>
-                <label>
-                  <span>Class</span>
-                  <select data-report-learner-class aria-label="Select class" disabled>
-                    <option value="">Select a CLC first</option>
-                  </select>
-                </label>
-              </div>
-              <div class="st-report-search-wrap">
-                <div class="st-search st-report-search">
-                  <span class="material-symbols-outlined">search</span>
-                  <input
-                    type="text"
-                    data-report-learner-search
-                    placeholder="Search learner by name or LRN…"
-                    autocomplete="off"
-                    aria-label="Search learner by name or LRN"
-                  />
-                  <button
-                    type="button"
-                    class="st-report-search-clear st-hidden"
-                    data-report-learner-clear
-                    aria-label="Clear learner search"
+                <label class="st-field">
+                  <span class="st-field-label">From which CLC</span>
+                  <select
+                    class="st-select"
+                    data-report-learner-clc
+                    aria-label="Select learning center"
                   >
-                    <span class="material-symbols-outlined">close</span>
-                  </button>
+                    <option value="">Select a CLC first</option>
+                  </select>
+                </label>
+                <label class="st-field">
+                  <span class="st-field-label">Class</span>
+                  <select
+                    class="st-select"
+                    data-report-learner-class
+                    aria-label="Select class"
+                    disabled
+                  >
+                    <option value="">Select a CLC first</option>
+                  </select>
+                </label>
+                <div class="st-field st-report-search-wrap">
+                  <span class="st-field-label">Learner</span>
+                  <div class="st-search st-report-search">
+                    <span class="material-symbols-outlined">search</span>
+                    <input
+                      type="text"
+                      data-report-learner-search
+                      placeholder="Search by name or LRN"
+                      autocomplete="off"
+                      aria-label="Search learner by name or LRN"
+                    />
+                    <button
+                      type="button"
+                      class="st-report-search-clear st-hidden"
+                      data-report-learner-clear
+                      aria-label="Clear learner search"
+                    >
+                      <span class="material-symbols-outlined">close</span>
+                    </button>
+                  </div>
+                  <div
+                    class="st-report-search-dropdown st-hidden"
+                    data-report-learner-results
+                  ></div>
+                  <input type="hidden" data-report-learner-id />
                 </div>
-                <div
-                  class="st-report-search-dropdown st-hidden"
-                  data-report-learner-results
-                ></div>
-                <input type="hidden" data-report-learner-id />
               </div>
+            </div>
+            <div class="st-report-card-foot">
+              <span class="st-format-chip"
+                ><span class="material-symbols-outlined">table</span>CSV</span
+              >
               <button
                 type="button"
                 class="st-btn st-btn-primary"
@@ -113,32 +128,33 @@
                 disabled
               >
                 <span class="material-symbols-outlined">preview</span>
-                Preview &amp; Export
+                Preview &amp; export
               </button>
             </div>
-          </div>
+          </article>
 
-          <div class="st-report-card">
+          <article class="st-report-card" style="--i:1">
             <div class="st-report-card-head">
-              <div class="st-report-card-icon">
-                <span class="material-symbols-outlined">groups</span>
-              </div>
+              <span class="st-icon-tile"
+                ><span class="material-symbols-outlined">groups</span></span
+              >
               <div>
-                <p class="st-report-card-title">Class List Report</p>
+                <p class="st-report-card-title">Class list report</p>
                 <p class="st-report-card-desc">
-                  Complete class roster of enrolled learners with demographics,
-                  modality, and enrollment status.
+                  Complete class roster of enrolled learners with
+                  demographics, modality, and enrollment status.
                 </p>
               </div>
             </div>
             <div class="st-report-card-controls">
-              <div class="st-report-search-wrap">
+              <div class="st-field st-report-search-wrap">
+                <span class="st-field-label">Class</span>
                 <div class="st-search st-report-search">
                   <span class="material-symbols-outlined">search</span>
                   <input
                     type="text"
                     data-report-classlist-search
-                    placeholder="Search class or section (e.g. Elementary, JHS)…"
+                    placeholder="Search class or section (e.g. Elementary, JHS)"
                     autocomplete="off"
                     aria-label="Search class roster"
                   />
@@ -157,24 +173,31 @@
                 ></div>
                 <input type="hidden" data-report-classlist-class-id />
               </div>
+            </div>
+            <div class="st-report-card-foot">
+              <span class="st-format-chip"
+                ><span class="material-symbols-outlined">table</span>CSV</span
+              >
               <button
                 type="button"
                 class="st-btn st-btn-primary"
                 data-export-csv-classlist
               >
                 <span class="material-symbols-outlined">preview</span>
-                Preview &amp; Export
+                Preview &amp; export
               </button>
             </div>
-          </div>
+          </article>
 
-          <div class="st-report-card">
+          <article class="st-report-card" style="--i:2">
             <div class="st-report-card-head">
-              <div class="st-report-card-icon">
-                <span class="material-symbols-outlined">event_available</span>
-              </div>
+              <span class="st-icon-tile"
+                ><span class="material-symbols-outlined"
+                  >event_available</span
+                ></span
+              >
               <div>
-                <p class="st-report-card-title">Attendance List Report</p>
+                <p class="st-report-card-title">Attendance list report</p>
                 <p class="st-report-card-desc">
                   Meet-up session attendance tracking, attendance rates, and
                   absence records per learner.
@@ -182,13 +205,14 @@
               </div>
             </div>
             <div class="st-report-card-controls">
-              <div class="st-report-search-wrap">
+              <div class="st-field st-report-search-wrap">
+                <span class="st-field-label">Class</span>
                 <div class="st-search st-report-search">
                   <span class="material-symbols-outlined">search</span>
                   <input
                     type="text"
                     data-report-attendance-search
-                    placeholder="Search class or section (e.g. Elementary, JHS)…"
+                    placeholder="Search class or section (e.g. Elementary, JHS)"
                     autocomplete="off"
                     aria-label="Search attendance records"
                   />
@@ -207,24 +231,29 @@
                 ></div>
                 <input type="hidden" data-report-attendance-class-id />
               </div>
+            </div>
+            <div class="st-report-card-foot">
+              <span class="st-format-chip"
+                ><span class="material-symbols-outlined">table</span>CSV</span
+              >
               <button
                 type="button"
                 class="st-btn st-btn-primary"
                 data-export-csv-attendance
               >
                 <span class="material-symbols-outlined">preview</span>
-                Preview &amp; Export
+                Preview &amp; export
               </button>
             </div>
-          </div>
+          </article>
 
-          <div class="st-report-card">
+          <article class="st-report-card" style="--i:3">
             <div class="st-report-card-head">
-              <div class="st-report-card-icon">
-                <span class="material-symbols-outlined">warning</span>
-              </div>
+              <span class="st-icon-tile st-icon-tile--risk"
+                ><span class="material-symbols-outlined">warning</span></span
+              >
               <div>
-                <p class="st-report-card-title">At-Risk Learners List</p>
+                <p class="st-report-card-title">At-risk learners list</p>
                 <p class="st-report-card-desc">
                   Learners currently flagged High or Moderate risk of
                   dropping out.
@@ -232,13 +261,14 @@
               </div>
             </div>
             <div class="st-report-card-controls">
-              <div class="st-report-search-wrap">
+              <div class="st-field st-report-search-wrap">
+                <span class="st-field-label">Class</span>
                 <div class="st-search st-report-search">
                   <span class="material-symbols-outlined">search</span>
                   <input
                     type="text"
                     data-report-atrisk-search
-                    placeholder="Search class or section (e.g. Elementary, JHS)…"
+                    placeholder="Search class or section (e.g. Elementary, JHS)"
                     autocomplete="off"
                     aria-label="Search at-risk learners"
                   />
@@ -257,25 +287,32 @@
                 ></div>
                 <input type="hidden" data-report-atrisk-class-id />
               </div>
+            </div>
+            <div class="st-report-card-foot">
+              <span class="st-format-chip"
+                ><span class="material-symbols-outlined">table</span>CSV</span
+              >
               <button
                 type="button"
                 class="st-btn st-btn-primary"
                 data-export-csv-atrisk
               >
                 <span class="material-symbols-outlined">preview</span>
-                Preview &amp; Export
+                Preview &amp; export
               </button>
             </div>
-          </div>
+          </article>
 
-          <div class="st-report-card">
+          <article class="st-report-card" style="--i:4">
             <div class="st-report-card-head">
-              <div class="st-report-card-icon">
-                <span class="material-symbols-outlined">fact_check</span>
-              </div>
+              <span class="st-icon-tile"
+                ><span class="material-symbols-outlined"
+                  >fact_check</span
+                ></span
+              >
               <div>
                 <p class="st-report-card-title">
-                  Intervention Tracking Report
+                  Intervention tracking report
                 </p>
                 <p class="st-report-card-desc">
                   Corrective actions logged per learner, including the
@@ -284,13 +321,14 @@
               </div>
             </div>
             <div class="st-report-card-controls">
-              <div class="st-report-search-wrap">
+              <div class="st-field st-report-search-wrap">
+                <span class="st-field-label">Class</span>
                 <div class="st-search st-report-search">
                   <span class="material-symbols-outlined">search</span>
                   <input
                     type="text"
                     data-report-intervention-search
-                    placeholder="Search class, method, or status (e.g. Completed)…"
+                    placeholder="Search class, method, or status (e.g. Completed)"
                     autocomplete="off"
                     aria-label="Search interventions"
                   />
@@ -310,16 +348,21 @@
                 <input type="hidden" data-report-intervention-class-id />
                 <input type="hidden" data-report-intervention-status-val />
               </div>
+            </div>
+            <div class="st-report-card-foot">
+              <span class="st-format-chip"
+                ><span class="material-symbols-outlined">table</span>CSV</span
+              >
               <button
                 type="button"
                 class="st-btn st-btn-primary"
                 data-export-csv-intervention
               >
                 <span class="material-symbols-outlined">preview</span>
-                Preview &amp; Export
+                Preview &amp; export
               </button>
             </div>
-          </div>
+          </article>
         </div>
       </main>
 

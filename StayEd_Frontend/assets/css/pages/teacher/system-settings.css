@@ -1,323 +1,278 @@
+/* System Settings page — see CLAUDE_CODE_PROMPT_teacher-account-pages-v2.md. */
 
-.st-settings-bento{
-    display:grid;
-    grid-template-columns:repeat(12,1fr);
-    gap:24px;
-    align-items:start;
-}
-
-.st-settings-bento-left{
-    grid-column:span 12;
-    display:flex;
-    flex-direction:column;
-    gap:24px;
-}
-
-.st-bento-field-hint{
-    font-size: var(--st-font-size-caption);
-    color:var(--st-on-surface-variant);
-    margin-top:12px;
-}
-
-.st-settings-profile-hint{
-    font-size: var(--st-font-size-caption);
-    color:var(--st-on-surface-variant);
-    text-align:center;
-}
-
-.st-settings-profile-hint a{
-    color:var(--st-secondary);
-    font-weight:600;
-}
-
-.st-bento-field input:disabled{
-    background:var(--st-surface-container-low);
-    color:var(--st-on-surface-variant);
-    cursor:not-allowed;
-}
-
-.st-bento-card{
-    background:#fff;
-    border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-lg);
-    box-shadow:var(--st-shadow-sm);
-    padding:24px;
-}
-
-.st-bento-card-head{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    margin-bottom:16px;
-}
-
-.st-bento-card-head .material-symbols-outlined{
-    color:var(--st-primary);
-    font-size:1.375rem;
-}
-
-.st-bento-card-title{
-    font-family:var(--st-font-heading);
-    font-size: var(--st-font-size-body-lg);
-    font-weight:700;
-    color:var(--st-primary);
-}
-
-.st-bento-form-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:16px;
-}
-
-@media (max-width:520px){
-    .st-bento-form-grid{ grid-template-columns:1fr; }
-}
-
-.st-bento-field{
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-}
-
-.st-bento-field label{
-    font-size: var(--st-font-size-caption);
-    font-weight:600;
-    color:var(--st-on-surface);
-}
-
-.st-bento-field input{
-    height:44px;
-    padding:0 14px;
-    border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-radius-lg);
-    font-family:var(--st-font-body);
-    font-size: var(--st-font-size-label);
-    color:var(--st-on-surface);
-    background:#fff;
-}
-
-.st-bento-field select{
-    height:44px;
-    padding:0 12px;
-    border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-button-radius);
-    font-family:var(--st-font-body);
-    font-size: var(--st-font-size-label);
-    color:var(--st-on-surface);
-    background:#fff;
-    cursor:pointer;
-}
-
-.st-bento-field select:focus,
-.st-bento-field input:focus{
-    outline:none;
-    border-color:var(--st-secondary);
-    box-shadow:var(--st-focus-ring);
-}
-
-.st-strand-table th,
-.st-strand-table td{
-    padding:10px 12px;
-    text-align:left;
-    font-size: var(--st-font-size-caption);
-}
-
-.st-strand-table thead{
-    background:var(--st-surface-container-low);
-}
-
-.st-strand-table tbody tr{
-    border-top:1px solid rgba(195,198,207,.20);
-}
-
-.st-strand-status{
-    display:inline-flex;
-    padding:2px 12px;
-    border-radius:999px;
-    background:var(--st-risk-low-soft);
-    color:var(--st-risk-low);
-    font-size: var(--st-font-size-micro);
-    font-weight:700;
-    text-transform:uppercase;
-}
-
-.st-prediction-info-card{
-    background:var(--st-primary);
-    color:#fff;
-    border-radius:var(--st-radius-lg);
-    box-shadow:var(--st-shadow-sm);
-    padding:24px;
-}
-
-.st-prediction-info-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    margin-bottom:16px;
-}
-
-.st-prediction-info-head h3{
-    font-family:var(--st-font-heading);
-    font-size: var(--st-font-size-body);
-    font-weight:700;
-}
-
-.st-prediction-status-chip{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    padding:2px 10px;
-    border-radius:999px;
-    background:rgba(74,222,128,.20);
-    border:1px solid rgba(74,222,128,.40);
-    font-size: var(--st-font-size-micro);
-    font-weight:700;
-    text-transform:uppercase;
-}
-
-.st-prediction-status-dot{
-    width:8px;
-    height:8px;
-    border-radius:50%;
-    background:#4ade80;
-}
-
-.st-prediction-info-row{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:8px 0;
-    border-bottom:1px solid rgba(255,255,255,.12);
-    font-size: var(--st-font-size-caption);
-}
-
-.st-prediction-info-row:last-child{ border-bottom:none; }
-
-.st-prediction-info-row .label{
-    opacity:.75;
-}
-
-.st-data-action-list{
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-}
-
-.st-data-action-btn{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:12px 16px;
-    border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-radius-lg);
-    background:#fff;
-    cursor:pointer;
-    transition:var(--st-transition);
-    width:100%;
-    text-align:left;
-}
-
-.st-data-action-btn:hover{
-    background:var(--st-surface-container-low);
-}
-
-.st-data-action-btn-left{
-    display:flex;
-    align-items:center;
-    gap:12px;
-}
-
-.st-data-action-btn .material-symbols-outlined:first-child{
-    color:var(--st-secondary);
-}
-
-.st-data-action-btn-chevron{
-    color:var(--st-on-surface-variant);
-    opacity:0;
-    transition:opacity .2s ease;
-}
-
-.st-data-action-btn:hover .st-data-action-btn-chevron{
-    opacity:1;
-}
-
-.st-font-size-control-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:12px;
-}
-
-.st-font-size-current{
-    font-size: var(--st-font-size-caption);
-    font-weight:700;
-    color:var(--st-primary);
-    background:var(--st-primary-fixed);
-    padding:2px 12px;
-    border-radius:999px;
+body[data-page="System Settings"] .st-sr-only{
+    position:absolute;
+    width:1px;
+    height:1px;
+    overflow:hidden;
+    clip:rect(0 0 0 0);
     white-space:nowrap;
 }
 
-.st-font-size-slider-row{
+body[data-page="System Settings"] .st-icon-tile{
+    width:40px;
+    height:40px;
+    flex:none;
+    border-radius:11px;
+    display:grid;
+    place-items:center;
+    background:var(--st-navy-soft);
+    color:var(--st-primary);
+}
+
+body[data-page="System Settings"] .st-icon-tile .material-symbols-outlined{
+    font-size:21px;
+}
+
+body[data-page="System Settings"] .st-settings-bento{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+}
+
+body[data-page="System Settings"] .st-bento-card{
+    background:#fff;
+    border:1px solid var(--st-line, var(--st-outline-variant));
+    border-radius:var(--st-radius-card, var(--st-radius-lg));
+    box-shadow:var(--st-shadow-card, var(--st-shadow-sm));
+    padding:18px 20px 4px;
+}
+
+body[data-page="System Settings"] .st-bento-card-head{
     display:flex;
     align-items:center;
+    gap:12px;
+    padding-bottom:12px;
+    border-bottom:1px solid var(--st-line, var(--st-outline-variant));
+}
+
+body[data-page="System Settings"] .st-bento-card-title{
+    margin:0;
+    font-family:var(--st-font-heading);
+    font-weight:700;
+    font-size:1.0625rem; /* 17px */
+}
+
+body[data-page="System Settings"] .st-setting-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    padding:16px 0;
+}
+
+body[data-page="System Settings"] .st-bento-field{
+    position:relative;
+    flex:none;
+    width:170px;
+}
+
+body[data-page="System Settings"] .st-bento-field input{
+    width:100%;
+    height:40px;
+    border:1px solid var(--st-line, var(--st-outline-variant));
+    border-radius:var(--st-radius-control, 8px);
+    background:#f8f9fb;
+    padding:0 34px 0 12px;
+    font:inherit;
+    font-size:0.906rem; /* 14.5px */
+    font-weight:600;
+    color:var(--st-ink, var(--st-on-surface));
+    font-variant-numeric:tabular-nums;
+}
+
+body[data-page="System Settings"] .st-bento-field .material-symbols-outlined{
+    position:absolute;
+    right:10px;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:17px;
+    color:var(--st-ink-faint, var(--st-outline));
+}
+
+/* ---------- Font size / accessibility ---------- */
+body[data-page="System Settings"] .st-font-size-control{
+    padding:16px 0 18px;
+}
+
+body[data-page="System Settings"] .st-font-size-control-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:16px;
+}
+
+body[data-page="System Settings"] .st-font-size-current{
+    flex:none;
+    padding:3px 10px;
+    border-radius:999px;
+    background:var(--st-navy-soft);
+    color:var(--st-primary);
+    font-size:0.781rem; /* 12.5px */
+    font-weight:600;
+    white-space:nowrap;
+}
+
+body[data-page="System Settings"] .st-font-size-slider-row{
+    display:flex;
+    align-items:flex-start;
     gap:14px;
     margin-top:16px;
 }
 
-.st-font-size-endpoint{
-    color:var(--st-on-surface-variant);
+body[data-page="System Settings"] .st-font-size-endpoint{
+    font-family:var(--st-font-heading);
     font-weight:700;
-    flex-shrink:0;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    line-height:22px;
 }
 
-.st-font-size-endpoint--sm{ font-size: var(--st-font-size-caption); }
-.st-font-size-endpoint--lg{ font-size: var(--st-font-size-heading); }
+body[data-page="System Settings"] .st-font-size-endpoint--sm{ font-size:0.813rem; }
+body[data-page="System Settings"] .st-font-size-endpoint--lg{ font-size:1.375rem; }
 
-.st-font-size-slider{
+body[data-page="System Settings"] .st-font-size-slider-wrap{
     flex:1;
-    appearance:none;
-    -webkit-appearance:none;
-    height:6px;
-    border-radius:999px;
-    background:var(--st-outline-variant);
-    cursor:pointer;
 }
 
-.st-font-size-slider::-webkit-slider-thumb{
+body[data-page="System Settings"] .st-font-size-slider{
+    width:100%;
+    appearance:none;
+    -webkit-appearance:none;
+    height:22px;
+    background:none;
+    cursor:pointer;
+    --p:50%;
+}
+
+body[data-page="System Settings"] .st-font-size-slider::-webkit-slider-runnable-track{
+    height:6px;
+    border-radius:999px;
+    background:linear-gradient(90deg,var(--st-secondary) var(--p),#dfe3ea var(--p));
+}
+
+body[data-page="System Settings"] .st-font-size-slider::-webkit-slider-thumb{
     appearance:none;
     -webkit-appearance:none;
     width:22px;
     height:22px;
+    margin-top:-8px;
     border-radius:50%;
-    background:var(--st-primary);
-    border:3px solid #fff;
-    box-shadow:var(--st-shadow-sm);
+    background:#fff;
+    border:2px solid var(--st-secondary);
+    box-shadow:0 1px 4px rgba(17,26,54,.2);
     cursor:pointer;
+    transition:transform var(--st-t-hover, 150ms) var(--st-ease-out, ease);
 }
 
-.st-font-size-slider::-moz-range-thumb{
-    width:22px;
-    height:22px;
-    border-radius:50%;
-    background:var(--st-primary);
-    border:3px solid #fff;
-    box-shadow:var(--st-shadow-sm);
-    cursor:pointer;
+body[data-page="System Settings"] .st-font-size-slider:hover::-webkit-slider-thumb{
+    transform:scale(1.1);
 }
 
-.st-font-size-slider::-moz-range-track{
+body[data-page="System Settings"] .st-font-size-slider::-moz-range-track{
     height:6px;
     border-radius:999px;
-    background:var(--st-outline-variant);
+    background:#dfe3ea;
 }
 
-.st-font-size-preview{
-    margin-top:16px;
+body[data-page="System Settings"] .st-font-size-slider::-moz-range-progress{
+    height:6px;
+    border-radius:999px;
+    background:var(--st-secondary);
+}
+
+body[data-page="System Settings"] .st-font-size-slider::-moz-range-thumb{
+    width:18px;
+    height:18px;
+    border-radius:50%;
+    background:#fff;
+    border:2px solid var(--st-secondary);
+    cursor:pointer;
+}
+
+body[data-page="System Settings"] .st-font-size-slider:focus-visible{
+    outline:none;
+}
+
+body[data-page="System Settings"] .st-font-size-slider:focus-visible::-webkit-slider-thumb{
+    box-shadow:0 0 0 4px rgba(0,106,104,.2);
+}
+
+body[data-page="System Settings"] .st-font-size-ticks{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    margin-top:4px;
+    font-size:0.719rem; /* 11.5px */
+    color:var(--st-ink-faint, var(--st-outline));
+}
+
+body[data-page="System Settings"] .st-font-size-ticks span{
+    text-align:center;
+}
+
+body[data-page="System Settings"] .st-font-size-ticks span:first-child{ text-align:left; }
+body[data-page="System Settings"] .st-font-size-ticks span:last-child{ text-align:right; }
+
+body[data-page="System Settings"] .st-font-size-preview{
+    margin-top:14px;
     padding:14px 16px;
-    border-radius:var(--st-radius-md);
-    background:var(--st-surface-container-low);
-    color:var(--st-on-surface);
-    font-size: var(--st-font-size-body);
-    line-height:1.5;
+    border:1px dashed var(--st-line-strong, var(--st-outline-variant));
+    border-radius:10px;
+    background:#fbfcfd;
+    color:var(--st-ink, var(--st-on-surface));
+}
+
+/* ---------- Profile hint ---------- */
+body[data-page="System Settings"] .st-settings-profile-hint{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+    margin:4px 2px 0;
+    font-size:0.844rem; /* 13.5px */
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+body[data-page="System Settings"] .st-settings-profile-hint .material-symbols-outlined{
+    font-size:18px;
+    color:var(--st-ink-faint, var(--st-outline));
+}
+
+body[data-page="System Settings"] .st-settings-profile-hint a{
+    color:var(--st-secondary);
+    font-weight:600;
+}
+
+/* ---------- Entrance motion ---------- */
+body[data-page="System Settings"] [data-animate-cards] > *{
+    opacity:0;
+    transform:translateY(8px);
+}
+
+body[data-page="System Settings"] [data-animate-cards].is-inview > *{
+    opacity:1;
+    transform:none;
+    transition:opacity 400ms ease,transform 500ms var(--st-ease-out, ease);
+    transition-delay:calc(var(--i,0)*50ms);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width:767px){
+    body[data-page="System Settings"] .st-bento-card{
+        padding:14px 16px 2px;
+    }
+    body[data-page="System Settings"] .st-setting-row{
+        flex-direction:column;
+        align-items:stretch;
+        gap:10px;
+    }
+    body[data-page="System Settings"] .st-bento-field{
+        width:100%;
+    }
+}
+
+@media (prefers-reduced-motion:reduce){
+    body[data-page="System Settings"] [data-animate-cards] > *{
+        opacity:1;
+        transform:none;
+    }
 }

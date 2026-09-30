@@ -21,8 +21,20 @@ class SystemSettingsPage {
     // away, instead of sitting inert until the settings GET below finishes.
     this.bindToggles();
     this.bindFontSizeSlider();
+    this.playEntrance();
 
     await this.load();
+  }
+
+  // Sections settle in once on load, staggered via each card's own --i
+  // (see system-settings.css). Always above the fold, so this fires
+  // directly rather than watching scroll position.
+  static playEntrance() {
+    const group = document.querySelector("[data-animate-cards]");
+    if (!group) return;
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => group.classList.add("is-inview")),
+    );
   }
 
   static async load() {
@@ -64,6 +76,11 @@ class SystemSettingsPage {
   static setFontScale(level, { persist } = { persist: true }) {
     document.documentElement.setAttribute("data-font-scale", level);
     this.set("[data-font-size-label]", this.FONT_SIZE_LABELS[level] || "Default");
+
+    const slider = document.querySelector("[data-font-size-slider]");
+    if (slider) {
+      slider.style.setProperty("--p", `${((level - 1) / 4) * 100}%`);
+    }
 
     try {
       localStorage.setItem("stayed_font_scale", level);

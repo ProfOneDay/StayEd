@@ -519,6 +519,18 @@ body {
   transform: translateX(2px);
 }
 
+.st-sidebar-secondary.active {
+  background: #fff;
+
+  color: var(--st-primary);
+
+  font-weight: 600;
+}
+
+.st-sidebar-secondary.active .material-symbols-outlined {
+  font-variation-settings: "FILL" 1, "opsz" 20;
+}
+
 .st-sidebar-logout {
   display: flex;
 

@@ -19,6 +19,19 @@ class LearnerImportPage {
       ?.addEventListener("click", () => {
         this.downloadTemplate();
       });
+
+    this.setImportStep(1);
+  }
+
+  // Drives the "Upload file → Review rows → Done" step indicator; called
+  // wherever the three sections are shown/hidden so the indicator always
+  // matches whichever section is currently visible.
+  static setImportStep(n) {
+    document.querySelectorAll("[data-import-step]").forEach((li) => {
+      const step = Number(li.dataset.importStep);
+      li.classList.toggle("is-active", step === n);
+      li.classList.toggle("is-done", step < n);
+    });
   }
 
   // Carries this page's own ?class=&clc= (set by learner-records-hub.js
@@ -148,6 +161,8 @@ class LearnerImportPage {
         .getElementById("importPreviewSection")
         ?.classList.remove("st-hidden");
 
+      this.setImportStep(2);
+
       this.renderPreview();
     } catch (error) {
       console.error(error);
@@ -181,13 +196,26 @@ class LearnerImportPage {
 
     if (body) {
       body.innerHTML = p.rows
-        .map(
-          (row, index) => `
-                <tr class="${row.status !== "valid" ? `st-import-row--${row.status}` : ""}">
-                    <td style="font-family:monospace;font-size:0.75rem;">${this.cell(row.lrn)}</td>
-                    <td style="font-weight:600;">${this.cell(row.last_name)}</td>
-                    <td style="font-weight:600;">${this.cell(row.first_name)}</td>
-                    <td>${this.cell(row.middle_name)}</td>
+        .map((row, index) => {
+          const name =
+            `${this.cell(row.last_name)}, ${this.cell(row.first_name)} ${row.middle_name ? row.middle_name : ""}`.trim();
+          const rowClass =
+            row.status !== "valid" ? `st-import-row--${row.status}` : "";
+
+          return `
+                <tr class="${rowClass}">
+                    <td class="st-import-sticky-left">
+                        <div class="st-import-learner-cell">
+                            <span class="st-import-learner-name">${name}</span>
+                            <span class="st-import-learner-lrn">${this.cell(row.lrn)}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="st-import-status-cell">
+                            ${this.statusBadge(row.status)}
+                            ${row.issue ? `<span class="st-import-issue">${this.cell(row.issue)}</span>` : ""}
+                        </div>
+                    </td>
                     <td>${this.titleCase(row.sex)}</td>
                     <td>${this.cell(row.birthdate)}</td>
                     <td>${this.titleCase(row.modality)}</td>
@@ -198,9 +226,7 @@ class LearnerImportPage {
                     <td>${this.cell(row.civil_status)}</td>
                     <td>${this.cell(row.contact_number)}</td>
                     <td>${this.cell(row.guardian_contact_number)}</td>
-                    <td>${this.statusBadge(row.status)}</td>
-                    <td style="font-size:0.75rem;color:var(--st-on-surface-variant);">${this.cell(row.issue)}</td>
-                    <td>
+                    <td class="st-import-sticky-right">
                         <div class="st-row-actions">
                             <button type="button" class="st-icon-btn-sm" data-edit-row="${index}" aria-label="Edit row" title="Edit">
                                 <span class="material-symbols-outlined">edit</span>
@@ -211,8 +237,8 @@ class LearnerImportPage {
                         </div>
                     </td>
                 </tr>
-            `,
-        )
+            `;
+        })
         .join("");
 
       this.bindRowActions(body);
@@ -262,15 +288,15 @@ class LearnerImportPage {
     `;
 
     Modal.show({
-      title: "Edit Learner Row",
+      title: "Edit learner row",
       size: "lg",
-      confirmLabel: "Save Row",
+      confirmLabel: "Save row",
       message: `
         <div class="st-schedule-modal-row">
           ${field("editLrn", "LRN", row.lrn)}
-          ${field("editLastName", "Last Name", row.last_name)}
-          ${field("editFirstName", "First Name", row.first_name)}
-          ${field("editMiddleName", "Middle Name", row.middle_name)}
+          ${field("editLastName", "Last name", row.last_name)}
+          ${field("editFirstName", "First name", row.first_name)}
+          ${field("editMiddleName", "Middle name", row.middle_name)}
           <div class="st-schedule-modal-field">
             <label for="editSex">Sex</label>
             <select id="editSex">
@@ -278,9 +304,9 @@ class LearnerImportPage {
               <option value="Female" ${row.sex?.toUpperCase() === "FEMALE" ? "selected" : ""}>Female</option>
             </select>
           </div>
-          ${field("editBirthdate", "Date of Birth", row.birthdate, "date")}
+          ${field("editBirthdate", "Date of birth", row.birthdate, "date")}
           <div class="st-schedule-modal-field">
-            <label for="editModality">Learning Modality</label>
+            <label for="editModality">Learning modality</label>
             <select id="editModality">
               <option ${row.modality === "Face-to-Face" ? "selected" : ""}>Face-to-Face</option>
               <option ${row.modality === "Modular" ? "selected" : ""}>Modular</option>
@@ -294,11 +320,11 @@ class LearnerImportPage {
               <option value="Yes" ${String(row.re_enrollee).toLowerCase() === "yes" ? "selected" : ""}>Yes</option>
             </select>
           </div>
-          ${field("editEmployment", "Employment Status", row.employment_status)}
+          ${field("editEmployment", "Employment status", row.employment_status)}
           ${field("editDistance", "Distance from CLC (km)", row.distance_from_clc_km, "number")}
-          ${field("editCivilStatus", "Civil Status", row.civil_status)}
-          ${field("editContact", "Contact Number", row.contact_number)}
-          ${field("editGuardianContact", "Guardian Contact Number", row.guardian_contact_number)}
+          ${field("editCivilStatus", "Civil status", row.civil_status)}
+          ${field("editContact", "Contact number", row.contact_number)}
+          ${field("editGuardianContact", "Guardian contact number", row.guardian_contact_number)}
         </div>
       `,
       onConfirm: async () => {
@@ -354,6 +380,8 @@ class LearnerImportPage {
           .getElementById("importUploadSection")
           ?.classList.remove("st-hidden");
 
+        this.setImportStep(1);
+
         this.resetUploadState();
       });
 
@@ -388,12 +416,14 @@ class LearnerImportPage {
 
           success?.classList.remove("st-hidden");
 
+          this.setImportStep(3);
+
           const addedCount = result.imported + result.attached;
 
-          this.set("[data-success-total]", this.preview.total);
-          this.set("[data-success-imported]", addedCount);
-          this.set("[data-success-duplicates]", this.preview.duplicates);
-          this.set("[data-success-errors]", this.preview.errors);
+          this.countUp("[data-success-total]", this.preview.total);
+          this.countUp("[data-success-imported]", addedCount);
+          this.countUp("[data-success-duplicates]", this.preview.duplicates);
+          this.countUp("[data-success-errors]", this.preview.errors);
 
           Toast?.success(`${addedCount} learner(s) added to this class.`);
         } catch (error) {
@@ -419,6 +449,8 @@ class LearnerImportPage {
         document
           .getElementById("importUploadSection")
           ?.classList.remove("st-hidden");
+
+        this.setImportStep(1);
 
         this.resetUploadState();
       });
@@ -453,6 +485,33 @@ class LearnerImportPage {
     if (el && value !== undefined && value !== null) {
       el.textContent = value;
     }
+  }
+
+  static countUp(selector, value) {
+    const el = document.querySelector(selector);
+    if (!el || value === undefined || value === null) return;
+
+    const target = Number(value) || 0;
+    const reduceMotion = window.matchMedia?.(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    if (reduceMotion) {
+      el.textContent = target;
+      return;
+    }
+
+    const duration = 600;
+    const start = performance.now();
+
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = Math.round(eased * target);
+      if (t < 1) requestAnimationFrame(tick);
+    };
+
+    requestAnimationFrame(tick);
   }
 }
 

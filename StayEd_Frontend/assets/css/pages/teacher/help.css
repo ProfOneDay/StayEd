@@ -1,0 +1,142 @@
+/* Help & User Manual page — see CLAUDE_CODE_PROMPT_teacher-account-pages-v2.md.
+   The body[data-page] attribute is written `Help &amp; User Manual` in the
+   HTML, which the browser reads as `Help & User Manual`. */
+
+body[data-page="Help & User Manual"] .st-icon-tile{
+    width:40px;
+    height:40px;
+    flex:none;
+    border-radius:11px;
+    display:grid;
+    place-items:center;
+    background:var(--st-navy-soft);
+    color:var(--st-primary);
+}
+
+body[data-page="Help & User Manual"] .st-icon-tile .material-symbols-outlined{
+    font-size:21px;
+}
+
+body[data-page="Help & User Manual"] .st-icon-tile--risk{
+    background:#fdecea;
+    color:#a01414;
+}
+
+body[data-page="Help & User Manual"] .st-help-section{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+}
+
+body[data-page="Help & User Manual"] .st-section-title{
+    margin:0;
+    font-family:var(--st-font-heading);
+    font-weight:700;
+    font-size:1.125rem; /* 18px */
+    letter-spacing:-.01em;
+}
+
+body[data-page="Help & User Manual"] .st-faq-list{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:16px;
+}
+
+body[data-page="Help & User Manual"] .st-faq-item{
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+    padding:20px;
+    background:#fff;
+    border:1px solid var(--st-line, var(--st-outline-variant));
+    border-radius:var(--st-radius-card, var(--st-radius-lg));
+    box-shadow:var(--st-shadow-card, var(--st-shadow-sm));
+    min-width:0;
+    transition:border-color var(--st-t-hover, 150ms),box-shadow var(--st-t-hover, 150ms);
+}
+
+body[data-page="Help & User Manual"] .st-faq-item:hover{
+    border-color:var(--st-line-strong, var(--st-outline-variant));
+    box-shadow:0 2px 4px rgba(17,26,54,.05),0 8px 20px rgba(17,26,54,.07);
+}
+
+body[data-page="Help & User Manual"] .st-faq-question{
+    margin:0 0 6px;
+    font-family:var(--st-font-heading);
+    font-weight:700;
+    font-size:1.031rem; /* 16.5px */
+    line-height:1.35;
+}
+
+body[data-page="Help & User Manual"] .st-faq-answer{
+    margin:0;
+    font-size:0.875rem; /* 14px */
+    color:#3a4256;
+    line-height:1.6;
+}
+
+body[data-page="Help & User Manual"] .st-faq-tiers{
+    display:flex;
+    gap:6px;
+    margin-top:12px;
+}
+
+body[data-page="Help & User Manual"] .st-faq-tiers span{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:3px 10px;
+    border-radius:999px;
+    font-size:0.781rem; /* 12.5px */
+    font-weight:600;
+}
+
+body[data-page="Help & User Manual"] .st-faq-tiers span::before{
+    content:"";
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:currentColor;
+}
+
+body[data-page="Help & User Manual"] .st-faq-tiers .low{ background:#edf7ea; color:#2c7121; }
+body[data-page="Help & User Manual"] .st-faq-tiers .mod{ background:#fef3e4; color:#8f5200; }
+body[data-page="Help & User Manual"] .st-faq-tiers .high{ background:#fdecea; color:#a01414; }
+
+/* ---------- Entrance motion ---------- */
+body[data-page="Help & User Manual"] [data-animate-cards] > *{
+    opacity:0;
+    transform:translateY(8px);
+}
+
+body[data-page="Help & User Manual"] [data-animate-cards].is-inview > *{
+    opacity:1;
+    transform:none;
+    transition:opacity 400ms ease,transform 500ms var(--st-ease-out, ease),border-color var(--st-t-hover, 150ms),box-shadow var(--st-t-hover, 150ms);
+    transition-delay:calc(var(--i,0)*60ms),calc(var(--i,0)*60ms),0ms,0ms;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1023px){
+    body[data-page="Help & User Manual"] .st-faq-list{
+        grid-template-columns:1fr;
+    }
+}
+
+@media (max-width:767px){
+    body[data-page="Help & User Manual"] .st-faq-item{
+        padding:16px;
+        gap:12px;
+    }
+    body[data-page="Help & User Manual"] .st-faq-item .st-icon-tile{
+        width:36px;
+        height:36px;
+    }
+}
+
+@media (prefers-reduced-motion:reduce){
+    body[data-page="Help & User Manual"] [data-animate-cards] > *{
+        opacity:1;
+        transform:none;
+    }
+}

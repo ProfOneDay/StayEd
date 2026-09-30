@@ -62,10 +62,16 @@
               data-download-template
             >
               <span class="material-symbols-outlined">download</span>
-              Download Template
+              Download template
             </button>
           </div>
         </div>
+
+        <ol class="st-import-steps" aria-label="Import progress">
+          <li data-import-step="1"><span>1</span>Upload file</li>
+          <li data-import-step="2"><span>2</span>Review rows</li>
+          <li data-import-step="3"><span>3</span>Done</li>
+        </ol>
 
         <!-- STATE 1: Upload zone -->
         <section id="importUploadSection" class="st-panel st-panel-pad">
@@ -75,17 +81,17 @@
             </div>
             <h3>Drag &amp; drop your learner masterlist here</h3>
             <p>or click browse to select a CSV or Excel file</p>
-            <span class="st-upload-zone-hint"
-              >Supported formats: .csv, .xlsx (max 5MB)</span
-            >
             <button
               type="button"
               id="importBrowseBtn"
               class="st-btn st-btn-outline st-mt-sm"
             >
               <span class="material-symbols-outlined">folder_open</span>
-              Browse Files
+              Browse files
             </button>
+            <span class="st-upload-zone-hint"
+              >Supported formats: .csv, .xlsx (max 5MB)</span
+            >
             <input
               type="file"
               id="importFileInput"
@@ -118,7 +124,8 @@
               class="st-btn st-btn-primary"
               disabled
             >
-              Preview Import
+              Preview import
+              <span class="material-symbols-outlined">arrow_forward</span>
             </button>
           </div>
         </section>
@@ -126,26 +133,27 @@
         <!-- STATE 2: Validation preview -->
         <div id="importPreviewSection" class="st-hidden">
           <div class="st-import-preview-summary">
-            <span class="st-import-preview-chip st-import-preview-chip--valid">
-              <span class="material-symbols-outlined" style="font-size:1rem"
-                >check_circle</span
-              >
-              <span data-preview-valid-count>0</span> Valid
-            </span>
-            <span
-              class="st-import-preview-chip st-import-preview-chip--duplicate"
-            >
-              <span class="material-symbols-outlined" style="font-size:1rem"
-                >content_copy</span
-              >
-              <span data-preview-duplicate-count>0</span> Duplicates
-            </span>
-            <span class="st-import-preview-chip st-import-preview-chip--error">
-              <span class="material-symbols-outlined" style="font-size:1rem"
-                >error</span
-              >
-              <span data-preview-error-count>0</span> Errors
-            </span>
+            <div class="st-import-stat-card st-import-stat-card--valid">
+              <span class="material-symbols-outlined">check_circle</span>
+              <div class="st-import-stat-card-body">
+                <p class="st-import-stat-card-count"><span data-preview-valid-count>0</span></p>
+                <p class="st-import-stat-card-label">Valid rows</p>
+              </div>
+            </div>
+            <div class="st-import-stat-card st-import-stat-card--duplicate">
+              <span class="material-symbols-outlined">content_copy</span>
+              <div class="st-import-stat-card-body">
+                <p class="st-import-stat-card-count"><span data-preview-duplicate-count>0</span></p>
+                <p class="st-import-stat-card-label">Duplicates</p>
+              </div>
+            </div>
+            <div class="st-import-stat-card st-import-stat-card--error">
+              <span class="material-symbols-outlined">error</span>
+              <div class="st-import-stat-card-body">
+                <p class="st-import-stat-card-count"><span data-preview-error-count>0</span></p>
+                <p class="st-import-stat-card-label">Errors</p>
+              </div>
+            </div>
           </div>
 
           <div class="st-panel">
@@ -153,23 +161,19 @@
               <table class="st-data-table st-import-preview-table">
                 <thead>
                   <tr>
-                    <th>LRN</th>
-                    <th>Last Name</th>
-                    <th>First Name</th>
-                    <th>Middle Name</th>
+                    <th class="st-import-col-learner st-import-sticky-left">Learner</th>
+                    <th class="st-import-col-status">Status</th>
                     <th>Sex</th>
-                    <th>Date of Birth</th>
-                    <th>Learning Modality</th>
-                    <th>Learning Level</th>
+                    <th>Date of birth</th>
+                    <th>Modality</th>
+                    <th>Level</th>
                     <th>Re-enrollee</th>
-                    <th>Employment Status</th>
-                    <th>Distance from CLC</th>
-                    <th>Civil Status</th>
-                    <th>Contact Number</th>
-                    <th>Guardian Contact Number</th>
-                    <th>Status</th>
-                    <th>Issue</th>
-                    <th>Actions</th>
+                    <th>Employment</th>
+                    <th>Distance</th>
+                    <th>Civil status</th>
+                    <th>Contact</th>
+                    <th>Guardian contact</th>
+                    <th class="st-import-sticky-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody data-preview-body></tbody>
@@ -178,10 +182,8 @@
           </div>
 
           <div class="st-clc-form-footer st-mt-md">
-            <span
-              class="st-clc-form-footer-left"
-              style="font-size:0.8125rem; color: var(--st-on-surface-variant)"
-            >
+            <span class="st-clc-form-footer-left st-import-footer-note">
+              <span class="material-symbols-outlined">info</span>
               Duplicate rows use the learner's existing record and are still
               added to this class. Error rows will be skipped.
             </span>
@@ -198,7 +200,7 @@
               data-preview-confirm
             >
               <span class="material-symbols-outlined">upload</span>
-              Import Valid Records
+              Import valid records
             </button>
           </div>
         </div>
@@ -208,48 +210,54 @@
           id="importSuccessSection"
           class="st-panel st-panel-pad st-hidden st-clc-success-panel"
         >
-          <div class="setup-complete-icon st-clc-success-icon">
+          <div class="st-clc-success-icon">
             <span class="material-symbols-outlined">check_circle</span>
           </div>
-          <h2 class="st-clc-success-title">Import Complete!</h2>
+          <h2 class="st-clc-success-title">Import complete</h2>
           <p class="st-clc-success-text">
             Learner records have been successfully added to the system.
           </p>
 
           <div class="st-import-success-stats">
             <div class="st-import-success-stat">
-              <p class="st-import-success-stat-value" data-success-total>--</p>
-              <p class="st-import-success-stat-label">Total Rows</p>
-            </div>
-            <div class="st-import-success-stat">
               <p
                 class="st-import-success-stat-value"
-                style="color: var(--st-risk-low)"
-                data-success-imported
+                data-success-total
+                data-countup
               >
-                --
+                0
+              </p>
+              <p class="st-import-success-stat-label">Total rows</p>
+            </div>
+            <div class="st-import-success-stat st-import-success-stat--imported">
+              <p
+                class="st-import-success-stat-value"
+                data-success-imported
+                data-countup
+              >
+                0
               </p>
               <p class="st-import-success-stat-label">Imported</p>
             </div>
-            <div class="st-import-success-stat">
+            <div class="st-import-success-stat st-import-success-stat--duplicates">
               <p
                 class="st-import-success-stat-value"
-                style="color: var(--st-risk-moderate)"
                 data-success-duplicates
+                data-countup
               >
-                --
+                0
               </p>
-              <p class="st-import-success-stat-label">Duplicates Merged into Class</p>
+              <p class="st-import-success-stat-label">Duplicates merged into class</p>
             </div>
-            <div class="st-import-success-stat">
+            <div class="st-import-success-stat st-import-success-stat--errors">
               <p
                 class="st-import-success-stat-value"
-                style="color: var(--st-risk-high)"
                 data-success-errors
+                data-countup
               >
-                --
+                0
               </p>
-              <p class="st-import-success-stat-label">Errors Skipped</p>
+              <p class="st-import-success-stat-label">Errors skipped</p>
             </div>
           </div>
 
@@ -265,7 +273,7 @@
               class="st-btn st-btn-outline"
               data-import-another
             >
-              Import Another File
+              Import another file
             </button>
           </div>
         </div>

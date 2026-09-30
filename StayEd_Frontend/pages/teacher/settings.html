@@ -49,110 +49,137 @@
           </div>
         </div>
 
-        <div class="st-settings-bento">
-          <!-- LEFT COLUMN (8-col): editable configuration -->
-          <div class="st-settings-bento-left">
-            <!-- General Settings -->
-            <div class="st-bento-card">
-              <div class="st-bento-card-head">
-                <span class="material-symbols-outlined">calendar_today</span>
-                <h3 class="st-bento-card-title">General Settings</h3>
-              </div>
-              <div class="st-bento-form-grid">
-                <div class="st-bento-field">
-                  <label for="sysSchoolYear">Active School Year</label>
-                  <input
-                    id="sysSchoolYear"
-                    type="text"
-                    value="—"
-                    readonly
-                    disabled
-                  />
-                </div>
-              </div>
-              <p class="st-bento-field-hint">
-                Set by your administrator. All classes, enrollments, and
-                reports automatically follow this school year.
-              </p>
+        <div class="st-settings-bento" data-animate-cards>
+          <!-- General -->
+          <section class="st-bento-card" style="--i:0">
+            <div class="st-bento-card-head">
+              <span class="st-icon-tile"
+                ><span class="material-symbols-outlined"
+                  >calendar_today</span
+                ></span
+              >
+              <h3 class="st-bento-card-title">General</h3>
             </div>
-
-            <!-- Notification Settings -->
-            <div class="st-bento-card">
-              <div class="st-bento-card-head">
-                <span class="material-symbols-outlined"
-                  >notifications_active</span
-                >
-                <h3 class="st-bento-card-title">Notification Settings</h3>
-              </div>
-              <div class="st-toggle-row">
-                <div>
-                  <p class="st-toggle-row-title">Enable Risk Alert Notifications</p>
-                  <p class="st-toggle-row-sub">
-                    Notify me when a learner becomes Moderate/High Risk or
-                    reaches an inactivity threshold.
-                  </p>
-                </div>
-                <label class="st-toggle">
-                  <input
-                    type="checkbox"
-                    data-settings-toggle-pref="ewa-alerts"
-                  />
-                  <span class="st-toggle-track"
-                    ><span class="st-toggle-thumb"></span
-                  ></span>
-                </label>
-              </div>
-            </div>
-
-            <!-- Student Portal -->
-            <div class="st-bento-card">
-              <div class="st-bento-card-head">
-                <span class="material-symbols-outlined">visibility</span>
-                <h3 class="st-bento-card-title">Student Portal</h3>
-              </div>
-              <div class="st-toggle-row">
-                <div>
-                  <p class="st-toggle-row-title">Allow Student View Links</p>
-                  <p class="st-toggle-row-sub">
-                    Master switch for every student view link you've shared.
-                    Turn off to immediately disable all of them at once,
-                    without changing each learner's individual sharing
-                    setting (set per learner on their Learner Profile page).
-                  </p>
-                </div>
-                <label class="st-toggle">
-                  <input
-                    type="checkbox"
-                    data-settings-toggle-pref="student-portal-enabled"
-                    checked
-                  />
-                  <span class="st-toggle-track"
-                    ><span class="st-toggle-thumb"></span
-                  ></span>
-                </label>
-              </div>
-            </div>
-
-            <!-- Accessibility Settings -->
-            <div class="st-bento-card">
-              <div class="st-bento-card-head">
-                <span class="material-symbols-outlined">accessibility_new</span>
-                <h3 class="st-bento-card-title">Accessibility</h3>
-              </div>
-              <div class="st-font-size-control">
-                <div class="st-font-size-control-head">
-                  <p class="st-toggle-row-title">Font Size</p>
-                  <span class="st-font-size-current" data-font-size-label
-                    >Default</span
-                  >
-                </div>
+            <div class="st-setting-row">
+              <div>
+                <p class="st-toggle-row-title">Active school year</p>
                 <p class="st-toggle-row-sub">
-                  Adjust text size across StayEd to make it easier to read.
+                  Set by your administrator. All classes, enrollments, and
+                  reports automatically follow this school year.
                 </p>
-                <div class="st-font-size-slider-row">
-                  <span class="st-font-size-endpoint st-font-size-endpoint--sm"
-                    >A</span
-                  >
+              </div>
+              <div class="st-bento-field">
+                <label for="sysSchoolYear" class="st-sr-only"
+                  >Active school year</label
+                >
+                <input
+                  id="sysSchoolYear"
+                  type="text"
+                  value="—"
+                  readonly
+                  disabled
+                />
+                <span class="material-symbols-outlined">lock</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Notifications -->
+          <section class="st-bento-card" style="--i:1">
+            <div class="st-bento-card-head">
+              <span class="st-icon-tile"
+                ><span class="material-symbols-outlined"
+                  >notifications_active</span
+                ></span
+              >
+              <h3 class="st-bento-card-title">Notifications</h3>
+            </div>
+            <div class="st-toggle-row">
+              <div>
+                <p class="st-toggle-row-title">
+                  Enable risk alert notifications
+                </p>
+                <p class="st-toggle-row-sub">
+                  Notify me when a learner becomes Moderate/High Risk or
+                  reaches an inactivity threshold.
+                </p>
+              </div>
+              <label class="st-toggle">
+                <input
+                  type="checkbox"
+                  data-settings-toggle-pref="ewa-alerts"
+                  aria-label="Enable risk alert notifications"
+                />
+                <span class="st-toggle-track"
+                  ><span class="st-toggle-thumb"></span
+                ></span>
+              </label>
+            </div>
+          </section>
+
+          <!-- Student Portal -->
+          <section class="st-bento-card" style="--i:2">
+            <div class="st-bento-card-head">
+              <span class="st-icon-tile"
+                ><span class="material-symbols-outlined"
+                  >visibility</span
+                ></span
+              >
+              <h3 class="st-bento-card-title">Student portal</h3>
+            </div>
+            <div class="st-toggle-row">
+              <div>
+                <p class="st-toggle-row-title">Allow student view links</p>
+                <p class="st-toggle-row-sub">
+                  Master switch for every student view link you've shared.
+                  Turn off to immediately disable all of them at once,
+                  without changing each learner's individual sharing
+                  setting (set per learner on their Learner Profile page).
+                </p>
+              </div>
+              <label class="st-toggle">
+                <input
+                  type="checkbox"
+                  data-settings-toggle-pref="student-portal-enabled"
+                  checked
+                  aria-label="Allow student view links"
+                />
+                <span class="st-toggle-track"
+                  ><span class="st-toggle-thumb"></span
+                ></span>
+              </label>
+            </div>
+          </section>
+
+          <!-- Accessibility -->
+          <section class="st-bento-card" style="--i:3">
+            <div class="st-bento-card-head">
+              <span class="st-icon-tile"
+                ><span class="material-symbols-outlined"
+                  >accessibility_new</span
+                ></span
+              >
+              <h3 class="st-bento-card-title">Accessibility</h3>
+            </div>
+            <div class="st-font-size-control">
+              <div class="st-font-size-control-head">
+                <div>
+                  <p class="st-toggle-row-title">Font size</p>
+                  <p class="st-toggle-row-sub">
+                    Adjust text size across StayEd to make it easier to
+                    read.
+                  </p>
+                </div>
+                <span class="st-font-size-current" data-font-size-label
+                  >Default</span
+                >
+              </div>
+              <div class="st-font-size-slider-row">
+                <span
+                  class="st-font-size-endpoint st-font-size-endpoint--sm"
+                  >A</span
+                >
+                <div class="st-font-size-slider-wrap">
                   <input
                     type="range"
                     min="1"
@@ -171,22 +198,31 @@
                     <option value="4"></option>
                     <option value="5"></option>
                   </datalist>
-                  <span class="st-font-size-endpoint st-font-size-endpoint--lg"
-                    >A</span
-                  >
+                  <div class="st-font-size-ticks" aria-hidden="true">
+                    <span>Small</span>
+                    <span></span>
+                    <span>Default</span>
+                    <span></span>
+                    <span>Extra large</span>
+                  </div>
                 </div>
-                <div class="st-font-size-preview" data-font-size-preview>
-                  This is a preview of how text will look.
-                </div>
+                <span
+                  class="st-font-size-endpoint st-font-size-endpoint--lg"
+                  >A</span
+                >
+              </div>
+              <div class="st-font-size-preview" data-font-size-preview>
+                This is a preview of how text will look.
               </div>
             </div>
+          </section>
 
-            <p class="st-settings-profile-hint">
-              Need to change your password or update your profile
-              information? Visit
-              <a href="profile.html">Profile Settings</a>.
-            </p>
-          </div>
+          <p class="st-settings-profile-hint">
+            <span class="material-symbols-outlined">manage_accounts</span>
+            Need to change your password or update your profile
+            information? Visit
+            <a href="profile.html">Profile Settings</a>.
+          </p>
         </div>
       </main>
 

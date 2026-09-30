@@ -1,251 +1,324 @@
-.st-report-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--st-card-gap);
+/* Reports page — see CLAUDE_CODE_PROMPT_teacher-account-pages-v2.md. */
+
+body[data-page="Reports"] .st-field label,
+body[data-page="Reports"] .st-field-label{
+    display:block;
+    font-size:0.813rem; /* 13px */
+    font-weight:600;
+    color:var(--st-ink, var(--st-on-surface));
+    margin-bottom:6px;
 }
 
-.st-report-card {
-  background: var(--st-card-background);
-  border: var(--st-card-border);
-  border-radius: var(--st-card-radius);
-  padding: var(--st-card-padding);
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+body[data-page="Reports"] .st-select{
+    width:100%;
+    height:40px;
+    border:1px solid var(--st-line-strong, var(--st-outline-variant));
+    border-radius:var(--st-radius-control, 8px);
+    background:#fff;
+    padding:0 34px 0 12px;
+    font:inherit;
+    font-size:0.875rem; /* 14px */
+    color:var(--st-ink, var(--st-on-surface));
+    appearance:none;
+    cursor:pointer;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%235a6275' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 10px center;
+    transition:border-color var(--st-t-hover, 150ms),box-shadow var(--st-t-hover, 150ms);
 }
 
-.st-report-card-head {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
+body[data-page="Reports"] .st-select:hover:not(:disabled){
+    border-color:var(--st-primary);
 }
 
-.st-report-card-icon {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--st-primary-fixed);
-  color: var(--st-primary);
-  flex-shrink: 0;
+body[data-page="Reports"] .st-select:focus{
+    outline:none;
+    border-color:var(--st-secondary);
+    box-shadow:0 0 0 3px rgba(0,106,104,.12);
 }
 
-.st-report-card-title {
-  font-size: var(--st-font-size-body-lg);
-  font-weight: 600;
-  color: var(--st-text-primary);
-  margin: 0 0 4px;
+body[data-page="Reports"] .st-select:disabled{
+    background-color:#f8f9fb;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    cursor:not-allowed;
+    border-color:var(--st-line, var(--st-outline-variant));
 }
 
-.st-report-card-desc {
-  font-size: var(--st-font-size-caption);
-  color: var(--st-text-secondary);
-  margin: 0;
-  line-height: 1.5;
+body[data-page="Reports"] .st-icon-tile{
+    width:40px;
+    height:40px;
+    flex:none;
+    border-radius:11px;
+    display:grid;
+    place-items:center;
+    background:var(--st-navy-soft);
+    color:var(--st-primary);
 }
 
-@media (max-width: 1050px) {
-  .st-report-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+body[data-page="Reports"] .st-icon-tile .material-symbols-outlined{
+    font-size:21px;
 }
 
-@media (max-width: 680px) {
-  .st-report-grid {
-    grid-template-columns: 1fr;
-  }
+body[data-page="Reports"] .st-icon-tile--risk{
+    background:#fdecea;
+    color:#a01414;
 }
 
-.st-report-card-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: auto;
+/* ---------- Grid + card ---------- */
+body[data-page="Reports"] .st-report-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:20px;
 }
 
-.st-report-scope-selects {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+body[data-page="Reports"] .st-report-card{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    padding:20px;
+    background:#fff;
+    border:1px solid var(--st-line, var(--st-outline-variant));
+    border-radius:var(--st-radius-card, var(--st-radius-lg));
+    box-shadow:var(--st-shadow-card, var(--st-shadow-sm));
+    min-width:0;
+    transition:border-color var(--st-t-hover, 150ms),box-shadow var(--st-t-hover, 150ms);
 }
 
-.st-report-scope-selects label {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  color: var(--st-text-secondary);
-  font-size: var(--st-font-size-micro);
-  font-weight: 700;
+body[data-page="Reports"] .st-report-card:hover{
+    border-color:var(--st-line-strong, var(--st-outline-variant));
+    box-shadow:0 2px 4px rgba(17,26,54,.05),0 8px 20px rgba(17,26,54,.07);
 }
 
-.st-report-scope-selects select {
-  width: 100%;
-  height: 44px;
-  padding: 0 12px;
-  border: 1px solid var(--st-outline-variant);
-  border-radius: var(--st-button-radius);
-  background: #fff;
-  color: var(--st-on-surface);
-  font-family: var(--st-font-body);
-  font-size: var(--st-font-size-label);
-  cursor: pointer;
+body[data-page="Reports"] .st-report-card--wide{
+    grid-column:1/-1;
 }
 
-.st-report-scope-selects select:focus {
-  outline: none;
-  border-color: var(--st-secondary);
-  box-shadow: var(--st-focus-ring);
+body[data-page="Reports"] .st-report-card-head{
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
 }
 
-.st-report-scope-selects select:disabled {
-  background: var(--st-surface-container-low);
-  color: var(--st-text-secondary);
-  cursor: not-allowed;
+body[data-page="Reports"] .st-report-card-title{
+    margin:0;
+    font-family:var(--st-font-heading);
+    font-weight:700;
+    font-size:1.0625rem; /* 17px */
+    letter-spacing:-.01em;
 }
 
-.st-report-btn-group {
-  display: flex;
-  gap: 8px;
+body[data-page="Reports"] .st-report-card-desc{
+    margin:3px 0 0;
+    font-size:0.844rem; /* 13.5px */
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    line-height:1.5;
 }
 
-.st-report-btn-group .st-btn {
-  flex: 1;
-  justify-content: center;
-  font-size: var(--st-font-size-caption);
-  padding: 8px 12px;
+body[data-page="Reports"] .st-report-card-controls{
+    flex:1;
 }
 
-.st-report-search-wrap {
-  position: relative;
-  width: 100%;
+/* "Individual learner progress" is the only card with 3 controls in one
+   row (CLC select, Class select, learner search); the other 4 cards have
+   a single field, which naturally sizes to the controls block's width. */
+body[data-page="Reports"] .st-report-card--wide .st-report-scope-selects{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.4fr);
+    gap:12px;
 }
 
-.st-report-search {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
+body[data-page="Reports"] .st-report-search-wrap{
+    position:relative;
 }
 
-.st-report-search input {
-  width: 100%;
-  height: 44px;
-  padding: 0 40px 0 48px;
+/* .st-search is the shared component (components.css); this scoped
+   override keeps its 40px height while leaving room for the clear (x)
+   button on the right. */
+body[data-page="Reports"] .st-report-search input{
+    padding-right:28px;
 }
 
-/* Clear (X) button */
-.st-report-search-clear {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 28px;
-  height: 28px;
-  background: transparent;
-  border: none;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
-  color: var(--st-text-secondary, #5f6368);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  z-index: 10;
-  transition: background 0.15s ease, color 0.15s ease;
+body[data-page="Reports"] .st-report-search-clear{
+    position:absolute;
+    right:8px;
+    top:50%;
+    transform:translateY(-50%);
+    width:26px;
+    height:26px;
+    background:transparent;
+    border:none;
+    padding:0;
+    margin:0;
+    cursor:pointer;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    transition:background-color var(--st-t-hover, 150ms),color var(--st-t-hover, 150ms);
 }
 
-.st-report-search-clear:hover {
-  background: rgba(0, 0, 0, 0.08);
-  color: var(--st-text-primary, #202124);
+body[data-page="Reports"] .st-report-search-clear:hover{
+    background:var(--st-background, rgba(0,0,0,.06));
+    color:var(--st-ink, var(--st-on-surface));
 }
 
-.st-report-search-clear.st-hidden {
-  display: none !important;
+body[data-page="Reports"] .st-report-search-clear .material-symbols-outlined{
+    position:static;
+    top:auto;
+    left:auto;
+    transform:none;
+    font-size:1.0625rem;
+    line-height:1;
+    color:inherit;
+    pointer-events:none;
 }
 
-/* Ensure the icon stays inside the button and is not affected by .st-search .material-symbols-outlined */
-.st-search .st-report-search-clear .material-symbols-outlined,
-.st-report-search .st-report-search-clear .material-symbols-outlined,
-.st-report-search-clear .material-symbols-outlined {
-  position: static !important;
-  left: auto !important;
-  top: auto !important;
-  transform: none !important;
-  font-size:1.125rem !important;
-  line-height: 1 !important;
-  color: inherit !important;
-  display: inline-block !important;
-  pointer-events: none !important;
+/* ---------- Search dropdown ---------- */
+body[data-page="Reports"] .st-report-search-dropdown{
+    position:absolute;
+    left:0;
+    right:0;
+    top:calc(100% + 6px);
+    z-index:10;
+    background:#fff;
+    border:1px solid var(--st-line, var(--st-outline-variant));
+    border-radius:10px;
+    box-shadow:0 12px 32px rgba(17,26,54,.14);
+    padding:6px;
+    max-height:240px;
+    overflow-y:auto;
+    animation:st-report-pop 160ms var(--st-ease-out, ease);
 }
 
-.st-report-search-dropdown {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  background: #ffffff;
-  border: 1px solid var(--st-outline-variant, #c3c6cf);
-  border-radius: 8px;
-  max-height: 240px;
-  overflow-y: auto;
-  z-index: 200;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+@keyframes st-report-pop{
+    from{ opacity:0; transform:translateY(-4px); }
+    to{ opacity:1; transform:none; }
 }
 
-.st-report-search-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 9px 12px;
-  cursor: pointer;
-  border-bottom: 1px solid #f1f3f7;
-  transition: background 0.15s ease;
-  text-align: left;
-  width: 100%;
-  background: transparent;
-  border-left: none;
-  border-right: none;
-  border-top: none;
-  font-family: inherit;
+body[data-page="Reports"] .st-report-search-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    width:100%;
+    padding:9px 10px;
+    border:0;
+    border-radius:8px;
+    background:transparent;
+    font:inherit;
+    text-align:left;
+    cursor:pointer;
+    transition:background-color var(--st-t-hover, 150ms);
 }
 
-.st-report-search-item:last-child {
-  border-bottom: none;
+/* Learner-search rows also carry a modality badge (reports.js renders
+   .badge.badge-neutral) -- the bare .badge class elsewhere in the app has
+   no "neutral" color of its own, so it's styled here to read as a small
+   tag rather than plain bold text. */
+body[data-page="Reports"] .st-report-search-item .badge{
+    flex:none;
+    background:var(--st-navy-soft);
+    color:var(--st-primary);
+    font-size:0.719rem; /* 11.5px */
 }
 
-.st-report-search-item:hover,
-.st-report-search-item.active,
-.st-report-search-item:focus {
-  background: #f0f4f9;
-  outline: none;
+body[data-page="Reports"] .st-report-search-item:hover,
+body[data-page="Reports"] .st-report-search-item.active,
+body[data-page="Reports"] .st-report-search-item:focus{
+    background:var(--st-background, var(--st-surface-container-low));
+    outline:none;
 }
 
-.st-report-search-item-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  text-align: left;
+body[data-page="Reports"] .st-report-search-item-info{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
 }
 
-.st-report-search-item-name {
-  font-weight: 600;
-  font-size: var(--st-font-size-caption);
-  color: var(--st-text-primary);
+body[data-page="Reports"] .st-report-search-item-name{
+    font-weight:600;
+    font-size:0.875rem; /* 14px */
+    color:var(--st-ink, var(--st-on-surface));
 }
 
-.st-report-search-item-meta {
-  font-size: var(--st-font-size-micro);
-  color: var(--st-text-secondary);
+body[data-page="Reports"] .st-report-search-item-meta{
+    font-size:0.781rem; /* 12.5px */
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
 }
 
-.st-report-search-empty {
-  padding: 12px 14px;
-  font-size: var(--st-font-size-caption);
-  color: var(--st-text-secondary);
-  text-align: center;
-  font-style: italic;
+body[data-page="Reports"] .st-report-search-empty{
+    padding:12px 14px;
+    font-size:0.844rem; /* 13.5px */
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    text-align:center;
 }
 
+/* ---------- Footer ---------- */
+body[data-page="Reports"] .st-report-card-foot{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding-top:14px;
+    border-top:1px solid var(--st-line, var(--st-outline-variant));
+}
+
+body[data-page="Reports"] .st-format-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-size:0.781rem; /* 12.5px */
+    font-weight:600;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+body[data-page="Reports"] .st-format-chip .material-symbols-outlined{
+    font-size:17px;
+}
+
+/* ---------- Entrance motion ---------- */
+body[data-page="Reports"] [data-animate-cards] > *{
+    opacity:0;
+    transform:translateY(8px);
+}
+
+body[data-page="Reports"] [data-animate-cards].is-inview > *{
+    opacity:1;
+    transform:none;
+    transition:opacity 400ms ease,transform 500ms var(--st-ease-out, ease),border-color var(--st-t-hover, 150ms),box-shadow var(--st-t-hover, 150ms);
+    transition-delay:calc(var(--i,0)*60ms),calc(var(--i,0)*60ms),0ms,0ms;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1023px){
+    body[data-page="Reports"] .st-report-grid{
+        grid-template-columns:1fr;
+    }
+    body[data-page="Reports"] .st-report-card--wide{
+        grid-column:auto;
+    }
+}
+
+@media (max-width:767px){
+    body[data-page="Reports"] .st-report-card{
+        padding:16px;
+        gap:14px;
+    }
+    body[data-page="Reports"] .st-report-card--wide .st-report-scope-selects{
+        grid-template-columns:1fr 1fr;
+    }
+    body[data-page="Reports"] .st-report-card--wide .st-report-scope-selects .st-report-search-wrap{
+        grid-column:1/-1;
+    }
+    body[data-page="Reports"] .st-report-card-foot .st-btn{
+        flex:1;
+    }
+}
+
+@media (prefers-reduced-motion:reduce){
+    body[data-page="Reports"] [data-animate-cards] > *{
+        opacity:1;
+        transform:none;
+    }
+}

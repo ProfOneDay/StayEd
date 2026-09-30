@@ -49,18 +49,43 @@
           </div>
         </div>
 
-        <div class="st-panel st-panel-pad col-12">
-          <p class="st-about-text st-mb-md">
+        <section class="st-panel st-about-hero" data-animate-cards>
+          <div class="st-about-brand" style="--i:0">
+            <img
+              src="../../assets/img/brand/logo-white.png"
+              alt="StayEd logo"
+            />
+            <div>
+              <p class="st-about-name">StayEd</p>
+              <p class="st-about-tag">
+                Early Dropout Risk Decision Support System
+              </p>
+            </div>
+          </div>
+          <p class="st-about-text" style="--i:1">
             StayEd is a predictive analytics system built for the Philippine
             Alternative Learning System (ALS). It helps teachers and
-            administrators identify learners at risk of dropping out early, so
-            timely interventions can be provided.
+            administrators identify learners at risk of dropping out early,
+            so timely interventions can be provided.
           </p>
-          <p class="st-about-text">
-            Version 1.0 &middot; Department of Education &middot; Built for
-            Community Learning Centers nationwide.
-          </p>
-        </div>
+          <div class="st-about-facts" style="--i:2">
+            <div>
+              <span class="material-symbols-outlined">new_releases</span>
+              <small>Version</small>
+              <strong>1.0</strong>
+            </div>
+            <div>
+              <span class="material-symbols-outlined">account_balance</span>
+              <small>Organization</small>
+              <strong>Department of Education</strong>
+            </div>
+            <div>
+              <span class="material-symbols-outlined">hub</span>
+              <small>Built for</small>
+              <strong>Community Learning Centers nationwide</strong>
+            </div>
+          </div>
+        </section>
       </main>
 
       <div data-component="layout/footer"></div>
@@ -82,6 +107,17 @@
     <script src="../../assets/js/components/modal.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", () => Guards?.teacher?.());
+      (function playAboutEntrance() {
+        const start = () => {
+          const hero = document.querySelector("[data-animate-cards]");
+          if (!hero) return;
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => hero.classList.add("is-inview")),
+          );
+        };
+        document.addEventListener("components:loaded", start);
+        document.addEventListener("DOMContentLoaded", () => setTimeout(start, 400));
+      })();
     </script>
   </body>
 </html>

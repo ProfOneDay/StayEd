@@ -1007,7 +1007,7 @@ body[data-page="Student Registry"] .st-bulk-btn .material-symbols-outlined{
 .st-enroll-fields{
     display:grid;
     grid-template-columns:1fr 1fr;
-    gap:16px;
+    gap:16px 24px;
 }
 
 @media (max-width:520px){

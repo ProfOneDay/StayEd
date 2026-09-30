@@ -49,13 +49,10 @@
           </div>
         </div>
 
-        <div class="st-dash-grid">
+        <div class="st-profile-layout">
           <!-- LEFT COLUMN -->
-          <div
-            class="col-4"
-            style="display: flex; flex-direction: column; gap: 16px"
-          >
-            <div class="st-profile-summary-card">
+          <div class="st-profile-left" data-animate-cards>
+            <aside class="st-panel st-profile-summary-card" style="--i:0">
               <div class="st-profile-photo-wrap">
                 <div class="st-profile-photo" data-profile-photo>T</div>
                 <button
@@ -63,12 +60,9 @@
                   class="st-profile-photo-edit"
                   data-change-photo
                   aria-label="Change profile photo"
+                  title="Change photo"
                 >
-                  <span
-                    class="material-symbols-outlined"
-                    style="font-size:1rem"
-                    >photo_camera</span
-                  >
+                  <span class="material-symbols-outlined">photo_camera</span>
                 </button>
                 <input
                   type="file"
@@ -93,70 +87,84 @@
               </h2>
               <p class="st-profile-summary-role">ALS Teacher</p>
 
-              <div class="st-profile-status-chip">
-                <span class="dot"></span>
-                Active
-              </div>
+              <span class="st-profile-status-chip">Active</span>
 
-              <div class="st-profile-summary-details">
+              <dl class="st-profile-summary-details">
                 <div>
-                  <label>Employee ID</label>
-                  <p data-settings-employee-id>ED-ALS-2026-0001</p>
+                  <dt>Employee ID</dt>
+                  <dd data-settings-employee-id>ED-ALS-2026-0001</dd>
                 </div>
                 <div>
-                  <label>Assigned CLC</label>
-                  <p data-settings-clc>San Felipe Sur CLC</p>
+                  <dt>Assigned CLC</dt>
+                  <dd data-settings-clc>San Felipe Sur CLC</dd>
                 </div>
                 <div>
-                  <label>Join Date</label>
-                  <p data-settings-join-date>September 12, 2024</p>
+                  <dt>Join date</dt>
+                  <dd data-settings-join-date>September 12, 2024</dd>
                 </div>
-              </div>
-            </div>
+              </dl>
+            </aside>
 
-            <div class="st-profile-summary-card" style="align-items: stretch">
-              <h3
-                class="st-panel-title"
-                style="margin-bottom: 16px; text-align: left"
-              >
-                Quick Stats
-              </h3>
+            <section class="st-panel st-quick-stats-card" style="--i:1">
+              <h3 class="st-quick-stats-title">Quick stats</h3>
               <div class="st-quick-stats-grid">
                 <div class="st-quick-stat">
-                  <p class="st-quick-stat-value" data-settings-stat-learners>
+                  <span class="st-quick-stat-icon">
+                    <span class="material-symbols-outlined">groups</span>
+                  </span>
+                  <p
+                    class="st-quick-stat-value"
+                    data-settings-stat-learners
+                    data-countup
+                  >
                     124
                   </p>
-                  <p class="st-quick-stat-label">Active Learners</p>
+                  <p class="st-quick-stat-label">Active learners</p>
                 </div>
                 <div class="st-quick-stat">
+                  <span class="st-quick-stat-icon st-quick-stat-icon--teal">
+                    <span class="material-symbols-outlined">task_alt</span>
+                  </span>
                   <p
                     class="st-quick-stat-value st-quick-stat-value--teal"
                     data-settings-stat-success
                   >
                     92%
                   </p>
-                  <p class="st-quick-stat-label">Intervention Success</p>
+                  <p class="st-quick-stat-label">Intervention success</p>
                 </div>
               </div>
-            </div>
+            </section>
           </div>
 
           <!-- RIGHT COLUMN: Collapsible sections -->
-          <div class="col-8">
+          <div class="st-profile-sections" data-animate-cards>
             <!-- Profile Information -->
-            <div
+            <section
               class="st-settings-section is-open"
               data-settings-section="profile-info"
+              style="--i:0"
             >
               <button
                 type="button"
                 class="st-settings-section-header"
                 data-settings-toggle
               >
-                <div class="st-settings-section-header-left">
-                  <span class="material-symbols-outlined">person</span>
-                  <h3 class="st-settings-section-title">Profile Information</h3>
-                </div>
+                <span class="st-settings-section-header-left">
+                  <span class="st-icon-tile"
+                    ><span class="material-symbols-outlined"
+                      >person</span
+                    ></span
+                  >
+                  <span>
+                    <h3 class="st-settings-section-title">
+                      Profile information
+                    </h3>
+                    <span class="st-settings-section-sub"
+                      >Your name and contact details</span
+                    >
+                  </span>
+                </span>
                 <span
                   class="material-symbols-outlined st-settings-section-caret"
                   >expand_more</span
@@ -165,94 +173,112 @@
               <div class="st-settings-section-body">
                 <div class="st-settings-section-body-inner">
                   <form class="st-settings-form-grid" id="profileInfoForm">
-                    <div class="st-settings-field">
-                      <label for="settingsFirstName">First Name</label>
+                    <div class="st-field">
+                      <label for="settingsFirstName">First name</label>
                       <input
+                        class="st-input"
                         id="settingsFirstName"
                         type="text"
                         value="Trisha"
                       />
                     </div>
-                    <div class="st-settings-field">
-                      <label for="settingsLastName">Last Name</label>
-                      <input id="settingsLastName" type="text" value="Santos" />
-                    </div>
-                    <div class="st-settings-field st-settings-field--full">
-                      <label for="settingsEmail">Email Address</label>
+                    <div class="st-field">
+                      <label for="settingsLastName">Last name</label>
                       <input
+                        class="st-input"
+                        id="settingsLastName"
+                        type="text"
+                        value="Santos"
+                      />
+                    </div>
+                    <div class="st-field st-field--full">
+                      <label for="settingsEmail">Email address</label>
+                      <input
+                        class="st-input"
                         id="settingsEmail"
                         type="email"
                         value="trisha.santos@deped.gov.ph"
                       />
                     </div>
-                    <div class="st-settings-field">
-                      <label for="settingsMobile">Mobile Number</label>
+                    <div class="st-field">
+                      <label for="settingsMobile">Mobile number</label>
                       <input
+                        class="st-input"
                         id="settingsMobile"
                         type="tel"
                         value="+63 917 123 4567"
                       />
                     </div>
-                    <div class="st-settings-field">
+                    <div class="st-field st-field--locked">
                       <label for="settingsPosition">Position</label>
                       <input
+                        class="st-input"
                         id="settingsPosition"
                         type="text"
                         value="ALS Teacher"
                         readonly
-                        style="
-                          background: var(--st-surface-container-low);
-                          cursor: not-allowed;
-                        "
                       />
                     </div>
-                    <div class="st-settings-field">
+                    <div class="st-field st-field--locked">
                       <label for="settingsOrg">Organization</label>
                       <input
+                        class="st-input"
                         id="settingsOrg"
                         type="text"
                         value="Department of Education"
                         readonly
-                        style="
-                          background: var(--st-surface-container-low);
-                          cursor: not-allowed;
-                        "
                       />
                     </div>
-                    <div class="st-settings-field">
+                    <div class="st-field st-field--locked">
                       <label for="settingsClcAssign">Assigned CLC</label>
                       <input
+                        class="st-input"
                         id="settingsClcAssign"
                         type="text"
                         value="San Felipe Sur CLC"
                         readonly
-                        style="
-                          background: var(--st-surface-container-low);
-                          cursor: not-allowed;
-                        "
                       />
                     </div>
+                    <p class="st-locked-note st-field--full">
+                      <span class="material-symbols-outlined">lock</span>
+                      Locked fields are managed by your administrator.
+                    </p>
                     <div class="st-settings-form-footer">
                       <button type="submit" class="st-btn st-btn-primary">
-                        Save Changes
+                        Save changes
                       </button>
                     </div>
                   </form>
                 </div>
               </div>
-            </div>
+            </section>
 
             <!-- Account Settings -->
-            <div class="st-settings-section" data-settings-section="account">
+            <section
+              class="st-settings-section"
+              data-settings-section="account"
+              style="--i:1"
+            >
               <button
                 type="button"
                 class="st-settings-section-header"
                 data-settings-toggle
               >
-                <div class="st-settings-section-header-left">
-                  <span class="material-symbols-outlined">security</span>
-                  <h3 class="st-settings-section-title">Account Settings</h3>
-                </div>
+                <span class="st-settings-section-header-left">
+                  <span class="st-icon-tile"
+                    ><span class="material-symbols-outlined"
+                      >shield_person</span
+                    ></span
+                  >
+                  <span>
+                    <h3 class="st-settings-section-title">
+                      Account settings
+                    </h3>
+                    <span class="st-settings-section-sub"
+                      >Password, alerts, and sign-in security</span
+                    >
+                  </span>
+                </span>
                 <span
                   class="material-symbols-outlined st-settings-section-caret"
                   >expand_more</span
@@ -260,38 +286,37 @@
               </button>
               <div class="st-settings-section-body">
                 <div class="st-settings-section-body-inner">
-                  <form
-                    class="st-settings-form-grid"
-                    id="passwordForm"
-                    style="margin-bottom: 24px"
-                  >
-                    <div class="st-settings-field st-settings-field--full">
-                      <label for="currentPassword">Current Password</label>
+                  <form class="st-settings-form-grid" id="passwordForm">
+                    <div class="st-field st-field--full">
+                      <label for="currentPassword">Current password</label>
                       <input
+                        class="st-input"
                         id="currentPassword"
                         type="password"
                         placeholder="••••••••"
                       />
                     </div>
-                    <div class="st-settings-field">
-                      <label for="newPassword">New Password</label>
+                    <div class="st-field">
+                      <label for="newPassword">New password</label>
                       <input
+                        class="st-input"
                         id="newPassword"
                         type="password"
                         placeholder="••••••••"
                       />
                     </div>
-                    <div class="st-settings-field">
+                    <div class="st-field">
                       <label for="confirmNewPassword"
-                        >Confirm New Password</label
+                        >Confirm new password</label
                       >
                       <input
+                        class="st-input"
                         id="confirmNewPassword"
                         type="password"
                         placeholder="••••••••"
                       />
                     </div>
-                    <div class="st-settings-info-box">
+                    <div class="st-settings-info-box st-field--full">
                       <span class="material-symbols-outlined">info</span>
                       <p>
                         Password must be at least 12 characters and include a
@@ -300,20 +325,15 @@
                     </div>
                     <div class="st-settings-form-footer">
                       <button type="submit" class="st-btn st-btn-primary">
-                        Update Password
+                        Update password
                       </button>
                     </div>
                   </form>
 
-                  <div
-                    style="
-                      padding-top: 8px;
-                      border-top: 1px solid rgba(195, 198, 207, 0.2);
-                    "
-                  >
+                  <div class="st-settings-prefs">
                     <div class="st-toggle-row">
                       <div>
-                        <p class="st-toggle-row-title">Email Alerts</p>
+                        <p class="st-toggle-row-title">Email alerts</p>
                         <p class="st-toggle-row-sub">
                           Receive weekly learner progress summaries
                         </p>
@@ -331,7 +351,7 @@
 
                     <div class="st-toggle-row">
                       <div>
-                        <p class="st-toggle-row-title">System Reports</p>
+                        <p class="st-toggle-row-title">System reports</p>
                         <p class="st-toggle-row-sub">
                           Notify me when new predictive analytics are ready
                         </p>
@@ -349,7 +369,7 @@
 
                     <div class="st-toggle-row">
                       <div>
-                        <p class="st-toggle-row-title">Learner Activity</p>
+                        <p class="st-toggle-row-title">Learner activity</p>
                         <p class="st-toggle-row-sub">
                           Instant alerts when a learner goes inactive
                         </p>
@@ -368,10 +388,11 @@
                     <div class="st-toggle-row">
                       <div>
                         <p class="st-toggle-row-title">
-                          Two-Factor Authentication
+                          Two-factor authentication
                         </p>
                         <p class="st-toggle-row-sub">
-                          Require a verification code at login (UI only for now)
+                          Require a verification code at login (UI only for
+                          now)
                         </p>
                       </div>
                       <label class="st-toggle">
@@ -387,80 +408,53 @@
                   </div>
                 </div>
               </div>
-            </div>
+            </section>
 
             <!-- Danger Zone -->
-            <div
-              class="st-settings-section is-open st-settings-section--danger"
+            <section
+              class="st-settings-section st-settings-section--danger is-open"
               data-settings-section="danger"
+              style="--i:2"
             >
-              <div class="st-settings-section-header" style="cursor: default">
-                <div class="st-settings-section-header-left">
-                  <span class="material-symbols-outlined">report_problem</span>
-                  <h3 class="st-settings-section-title">Danger Zone</h3>
-                </div>
+              <div class="st-danger-head">
+                <span class="material-symbols-outlined">warning</span>
+                <h3 class="st-settings-section-title">Danger zone</h3>
               </div>
-              <div class="st-settings-section-body" style="max-height: 400px">
-                <div class="st-settings-section-body-inner">
-                  <div
-                    style="
-                      display: flex;
-                      flex-wrap: wrap;
-                      justify-content: space-between;
-                      align-items: center;
-                      gap: 16px;
-                      padding: 12px 0;
-                      border-bottom: 1px solid rgba(195, 198, 207, 0.2);
-                    "
-                  >
-                    <div>
-                      <p class="st-toggle-row-title">Sign Out from System</p>
-                      <p class="st-toggle-row-sub">
-                        End your current session across all devices.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      class="st-btn st-btn-outline"
-                      data-st-logout
-                    >
-                      Log Out
-                    </button>
-                  </div>
-                  <div
-                    style="
-                      display: flex;
-                      flex-wrap: wrap;
-                      justify-content: space-between;
-                      align-items: center;
-                      gap: 16px;
-                      padding: 16px 0 4px;
-                    "
-                  >
-                    <div>
-                      <p
-                        class="st-toggle-row-title"
-                        style="color: var(--st-error)"
-                      >
-                        Deactivate Account
-                      </p>
-                      <p class="st-toggle-row-sub">
-                        Once deactivated, you will lose access to administrative
-                        tools.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      class="st-btn"
-                      style="background: var(--st-error); color: #fff"
-                      data-deactivate-account
-                    >
-                      Deactivate
-                    </button>
-                  </div>
+              <div class="st-danger-row">
+                <div>
+                  <p class="st-toggle-row-title">Sign out from system</p>
+                  <p class="st-toggle-row-sub">
+                    End your current session across all devices.
+                  </p>
                 </div>
+                <button
+                  type="button"
+                  class="st-btn st-btn-outline st-btn-sm"
+                  data-st-logout
+                >
+                  <span class="material-symbols-outlined">logout</span>
+                  Log out
+                </button>
               </div>
-            </div>
+              <div class="st-danger-row">
+                <div>
+                  <p class="st-toggle-row-title st-danger-title">
+                    Deactivate account
+                  </p>
+                  <p class="st-toggle-row-sub">
+                    Once deactivated, you will lose access to administrative
+                    tools.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  class="st-btn st-btn-danger st-btn-sm"
+                  data-deactivate-account
+                >
+                  Deactivate
+                </button>
+              </div>
+            </section>
           </div>
         </div>
       </main>

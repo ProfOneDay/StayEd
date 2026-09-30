@@ -1,147 +1,619 @@
-/* Manage Modules page (class-level module catalog + bulk release). Reuses
-  .st-panel/.st-data-table/.st-schedule-modal-field/.st-empty/.st-badge-*
-  .st-search from the shared component styles -- only the pieces with no
-  existing equivalent are defined here. */
+/* Manage Modules page. Reuses .st-panel/.st-data-table/.st-badge-*/.st-pill/
+   .st-icon-btn-sm/.st-btn-text/.st-empty class NAMES for visual consistency
+   with the rest of the app, but .st-search/.st-select/.st-table-card-*/
+   .st-class-context-banner* have NO truly shared/unscoped definition
+   anywhere -- every page that uses them defines its own page-scoped copy
+   (learner-records.css does this for Student Registry/Learner Records/
+   Early Warning Alerts). This file previously assumed those were free
+   reuses and only defined "the pieces with no existing equivalent",
+   which left .st-select, .st-table-card-head/-title/-count, and the
+   .st-class-context-banner background/icon-tile/switch-button all
+   unstyled (bare browser defaults) until this was caught and fixed. */
 
-/* Deliberate no-op placeholder rule. Confirmed by direct testing: the
-   literal first rule of this file was being silently dropped by the
-   browser's CSS parser when loaded through the @import chain (reproducible,
-   not a syntax error -- the exact same rule parsed fine as inline <style>,
-   and the network response byte-for-byte contained it). Keeping a throwaway
-   rule ahead of everything real sidesteps whatever that boundary condition
-   is. Do not delete this without re-verifying the rule after it still
-   applies (check getComputedStyle, not just visually). */
+/* Deliberate no-op placeholder rule -- see git history for why (a real
+   first-rule-in-file parsing quirk through the @import chain). Do not
+   delete without re-verifying the next rule still applies via
+   getComputedStyle, not just visually. */
 .st-module-management-root {
   display: block;
 }
 
-.st-module-summary-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 14px;
-  margin-bottom: 24px;
-}
-
-.st-module-summary-stat {
-  background: #fff;
-  border: 1px solid rgba(195, 198, 207, 0.35);
-  border-radius: var(--st-card-radius);
-  min-height: 112px;
-  padding: 12px 14px;
+body[data-page="Manage Modules"] [data-view-root] {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  text-align: center;
+  gap: 20px;
 }
 
-.st-module-summary-value {
-  font-size: var(--st-font-size-title);
-  font-weight: 700;
+/* ---------- Class context banner: white card, not the navy fallback ----------
+   The base .st-class-context-banner in learner-records-hub.css defaults to
+   a solid navy fill (background:var(--st-primary)) -- Learner Records
+   overrides that to a white card with a navy left accent, which is what
+   makes its dark on-surface icon/text/button colors below legible. This
+   page reused the shared banner markup but was missing that same
+   background override, so the icon tile and Switch button (also missing
+   until now) would otherwise render as dark-on-navy and be unreadable.
+   Mirrors body[data-page="Learner Records"] exactly. */
+body[data-page="Manage Modules"] .st-class-context-banner {
+  background: #fff;
+  border: 1px solid var(--st-line, var(--st-outline-variant));
+  border-left: 4px solid var(--st-primary);
+}
+
+body[data-page="Manage Modules"] .st-class-context-banner-clc {
+  color: var(--st-ink-faint, var(--st-outline));
+}
+
+body[data-page="Manage Modules"] .st-class-context-banner-level {
+  color: var(--st-on-surface);
+}
+
+body[data-page="Manage Modules"] .st-class-context-banner-meta {
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+body[data-page="Manage Modules"] .st-class-context-banner-icon {
   color: var(--st-primary);
-  line-height: 1;
+  background: var(--st-navy-soft, var(--st-primary-fixed));
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 1.25rem;
 }
 
-.st-module-summary-label {
-  font-size: var(--st-font-size-caption);
-  color: var(--st-on-surface-variant);
+body[data-page="Manage Modules"] .st-class-context-banner-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--st-line-strong, var(--st-outline-variant));
+  border-radius: var(--st-radius-control, var(--st-button-radius));
+  color: var(--st-on-surface);
+  text-decoration: none;
+  transition:
+    background-color var(--st-t-hover, 150ms),
+    border-color var(--st-t-hover, 150ms),
+    color var(--st-t-hover, 150ms),
+    transform var(--st-t-press, 90ms);
 }
 
-.st-panel[data-catalog-panel] .st-panel-head--flush {
-  padding: 18px 24px 14px;
-  margin-bottom: 0;
+body[data-page="Manage Modules"] .st-class-context-banner-switch:hover {
+  border-color: var(--st-primary);
+  color: var(--st-primary);
+  background: var(--st-navy-soft, var(--st-primary-fixed));
+  text-decoration: none;
 }
 
-.st-panel[data-catalog-panel] .st-panel-title {
-  font-size: var(--st-font-size-body-lg);
+body[data-page="Manage Modules"] .st-class-context-banner-switch:active {
+  transform: scale(0.96);
 }
 
-.st-module-toolbar {
+body[data-page="Manage Modules"] .st-class-context-banner-switch .material-symbols-outlined {
+  color: inherit;
+  font-size: 19px;
+}
+
+@media (max-width: 767px) {
+  body[data-page="Manage Modules"] .st-class-context-banner {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  body[data-page="Manage Modules"] .st-class-context-banner-icon {
+    width: 40px;
+    height: 40px;
+  }
+  body[data-page="Manage Modules"] .st-class-context-banner-switch {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+}
+
+/* ---------- Summary: one card ---------- */
+body[data-page="Manage Modules"] .st-module-summary-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
+  background: #fff;
+  border: 1px solid var(--st-line, var(--st-outline-variant));
+  border-radius: var(--st-radius-card, var(--st-radius-lg));
+  box-shadow: var(--st-shadow-card, var(--st-shadow-sm));
+}
+
+body[data-page="Manage Modules"] .st-module-summary-stat {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 18px 22px;
+  min-width: 0;
+}
+
+body[data-page="Manage Modules"] .st-module-summary-stat + .st-module-summary-stat {
+  border-left: 1px solid var(--st-line, var(--st-outline-variant));
+}
+
+body[data-page="Manage Modules"] .st-module-summary-value {
+  font-family: var(--st-font-heading);
+  font-weight: 800;
+  font-size: 1.875rem; /* 30px */
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--st-ink, var(--st-on-surface));
+}
+
+body[data-page="Manage Modules"] .st-module-summary-stat--total .st-module-summary-value {
+  font-size: 2.5rem; /* 40px */
+  color: var(--st-primary);
+}
+
+body[data-page="Manage Modules"] .st-module-summary-label {
+  font-size: 0.844rem; /* 13.5px */
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+body[data-page="Manage Modules"] .st-release-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  gap: 3px;
+  background: var(--st-background, var(--st-surface-container-low));
+  margin: 4px 0 8px;
+  clip-path: inset(0 100% 0 0 round 999px);
+  transition: clip-path 900ms var(--st-ease-out, ease);
+}
+
+body[data-page="Manage Modules"] .is-inview .st-release-bar {
+  clip-path: inset(0 0 0 0 round 999px);
+}
+
+body[data-page="Manage Modules"] .st-release-bar .rel {
+  background: var(--st-secondary);
+}
+
+body[data-page="Manage Modules"] .st-release-bar .not {
+  background: #cfd5de;
+}
+
+body[data-page="Manage Modules"] .st-release-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 0.844rem; /* 13.5px */
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+body[data-page="Manage Modules"] .st-release-legend b {
+  font-family: var(--st-font-heading);
+  font-size: 1.1875rem; /* 19px */
+  font-weight: 800;
+  color: var(--st-ink, var(--st-on-surface));
+  margin-right: 4px;
+}
+
+body[data-page="Manage Modules"] .st-release-legend i {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  margin-right: 6px;
+  vertical-align: 1px;
+}
+
+/* .st-table-card-head/-title/-count also have no shared/unscoped
+   definition -- matched to Student Registry/Learner Records/Early Warning
+   Alerts' own page-scoped copy in learner-records.css exactly (flex row,
+   count on the right, same font stack/sizes). */
+body[data-page="Manage Modules"] .st-table-card-head {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
-  margin-bottom: 16px;
-  padding: 0 24px;
+  padding: 16px 20px;
 }
 
-.st-module-search {
-  flex: 1;
-  min-width: 220px;
-  max-width: 320px;
+body[data-page="Manage Modules"] .st-table-card-title {
+  margin: 0;
+  font-family: var(--st-font-heading);
+  font-weight: 700;
+  font-size: 1.125rem;
 }
 
-.st-module-toolbar select {
-  height: 40px;
-  padding: 0 12px;
+body[data-page="Manage Modules"] .st-table-card-count {
+  font-size: 0.844rem;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+/* ---------- Catalog toolbar ---------- */
+body[data-page="Manage Modules"] .st-module-toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 0 20px 16px;
+}
+
+body[data-page="Manage Modules"] .st-module-search {
+  flex: 1 1 260px;
+  max-width: 380px;
+}
+
+/* The global .st-search input (components.css) uses --st-button-radius
+   (4px) -- every page-scoped .st-search override in the app instead uses
+   --st-radius-control (8px), which is the actual standard controls like
+   selects/search bars are meant to share. Matching that here so this
+   page's search bar isn't the odd one out. */
+body[data-page="Manage Modules"] .st-module-search input {
+  border-radius: var(--st-radius-control, var(--st-button-radius));
+}
+
+/* .st-select has no shared/unscoped definition anywhere in the app (each
+   page that uses it defines its own) -- this page's file header comment
+   claiming it was "reused from shared component styles" was wrong, so the
+   status/sort dropdowns were rendering as bare native <select> elements
+   next to the properly-styled 44px .st-search input. Matched to the
+   global .st-search input's 44px height (not the 40px variant Learner
+   Records uses, since that page's search is also 40px via its own
+   page-scoped override, while this page's search stays at the global
+   default height), and to --st-radius-control (8px) for the corner
+   radius, matching every other page's controls instead of the sharper
+   4px --st-button-radius. */
+body[data-page="Manage Modules"] .st-select {
+  height: 44px;
   border: 1px solid var(--st-outline-variant);
-  border-radius: var(--st-button-radius);
-  font-family: var(--st-font-body);
-  font-size: var(--st-font-size-label);
-  color: var(--st-on-surface);
+  border-radius: var(--st-radius-control, var(--st-button-radius));
   background: #fff;
+  padding: 0 34px 0 14px;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--st-on-surface);
+  appearance: none;
   cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%235a6275' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
 }
 
-.st-module-toolbar select:focus {
+/* Archived/active toggle sits at the same row/level as the search+filters,
+   pushed to the far right of the toolbar. */
+body[data-page="Manage Modules"] .st-mm-view-toggle {
+  margin-left: auto;
+  height: 44px;
+  white-space: nowrap;
+}
+
+body[data-page="Manage Modules"] .st-select:hover {
+  border-color: var(--st-primary);
+}
+
+body[data-page="Manage Modules"] .st-select:focus {
   outline: none;
   border-color: var(--st-secondary);
   box-shadow: var(--st-focus-ring);
 }
 
-.st-module-topic {
-  font-size: var(--st-font-size-caption);
+body[data-page="Manage Modules"] .st-select:disabled {
+  background-color: var(--st-surface-container-low, #f3f5f8);
   color: var(--st-on-surface-variant);
+  cursor: not-allowed;
+}
+
+/* ---------- Catalog: Module cell ---------- */
+body[data-page="Manage Modules"] .st-module-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+body[data-page="Manage Modules"] .st-module-num {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--st-navy-soft);
+  color: var(--st-primary);
+  font-family: var(--st-font-heading);
+  font-weight: 800;
+  font-size: 0.938rem; /* 15px */
+}
+
+body[data-page="Manage Modules"] .st-strand-chip {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 5px;
+  background: var(--st-background, var(--st-surface-container-low));
+  border: 1px solid var(--st-line, var(--st-outline-variant));
+  font-size: 0.719rem; /* 11.5px */
+  font-weight: 700;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  letter-spacing: 0.02em;
+}
+
+body[data-page="Manage Modules"] .st-module-title {
+  font-weight: 600;
+  font-size: 0.906rem; /* 14.5px */
+}
+
+body[data-page="Manage Modules"] .st-module-topic {
+  font-size: 0.781rem; /* 12.5px */
+  color: var(--st-ink-faint, var(--st-outline));
+  margin-top: 1px;
+}
+
+body[data-page="Manage Modules"] .st-learners-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 130px;
+}
+
+body[data-page="Manage Modules"] .st-learners-cell span {
+  font-size: 0.813rem; /* 13px */
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+body[data-page="Manage Modules"] .st-learners-cell b {
+  color: var(--st-ink, var(--st-on-surface));
+  font-weight: 600;
+}
+
+body[data-page="Manage Modules"] .st-mini-track {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--st-background, var(--st-surface-container-low));
+  overflow: hidden;
+}
+
+body[data-page="Manage Modules"] .st-mini-track i {
+  display: block;
+  height: 100%;
+  background: var(--st-secondary);
+  border-radius: 999px;
+  width: 0;
+  transition: width var(--st-t-fill, 800ms) var(--st-ease-out, ease);
+}
+
+body[data-page="Manage Modules"] .is-inview .st-mini-track i {
+  width: var(--w);
+}
+
+body[data-page="Manage Modules"] tr[data-module-row] {
+  cursor: pointer;
+}
+
+body[data-page="Manage Modules"] tr[data-module-row] .st-row-go {
+  color: var(--st-ink-faint, var(--st-outline));
+  transition: transform var(--st-t-hover, 150ms) var(--st-ease-out, ease), color var(--st-t-hover, 150ms);
+}
+
+body[data-page="Manage Modules"] tr[data-module-row]:hover .st-row-go {
+  transform: translateX(3px);
+  color: var(--st-primary);
+}
+
+body[data-page="Manage Modules"] tr[data-module-row]:hover .st-module-title {
+  color: var(--st-primary);
+}
+
+/* "Not released" reads as neutral gray on this page (matching the stage
+   summary bar's gray segment), not the shared .st-badge-info's default
+   blue -- overridden here rather than in components.css, since that class
+   keeps its usual blue meaning on every other page. */
+body[data-page="Manage Modules"] .st-badge-info {
+  background: var(--st-background, #f3f5f8);
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+body[data-page="Manage Modules"] .st-empty--flush {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* .st-empty .material-symbols-outlined{font-size:3rem;color:var(--st-outline)}
+   (dashboard.css) is meant for the big decorative gray icon at the top of
+   the empty state, but the "Add module" button's own icon is also a
+   descendant of .st-empty, so it was inheriting that same 48px gray
+   styling instead of the normal 19px white button-icon look
+   (.st-btn-primary sets color:#fff, which this was overriding). */
+body[data-page="Manage Modules"] .st-mm-empty-add .material-symbols-outlined {
+  font-size: 19px;
+  margin-bottom: 0;
+  color: #fff;
+}
+
+body[data-page="Manage Modules"] .st-mm-empty-cell {
+  padding: 0;
+}
+
+body[data-page="Manage Modules"] .st-mm-empty-add {
   margin-top: 2px;
 }
 
-.st-panel[data-catalog-panel] .st-table-scroll {
-  padding: 0 24px 24px;
-}
-
-.st-panel[data-catalog-panel] .st-data-table th,
-.st-panel[data-catalog-panel] .st-data-table td {
-  padding: 12px 16px;
+/* ---------- Detail view ---------- */
+body[data-page="Manage Modules"] .st-back-link {
+  appearance: none;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: none;
+  padding: 6px 8px 6px 4px;
+  margin-left: -4px;
+  border-radius: 8px;
+  font: inherit;
   font-size: 0.875rem; /* 14px */
-  line-height: 1.4;
+  font-weight: 600;
+  color: var(--st-primary);
+  cursor: pointer;
+  transition: background-color var(--st-t-hover, 150ms);
 }
 
-.st-panel[data-catalog-panel] .st-data-table th {
-  font-size: 0.781rem; /* 12.5px */
+body[data-page="Manage Modules"] .st-back-link:hover {
+  background: var(--st-navy-soft);
 }
 
-.st-module-detail-header {
+body[data-page="Manage Modules"] .st-back-link .material-symbols-outlined {
+  font-size: 19px;
+  transition: transform var(--st-t-hover, 150ms) var(--st-ease-out, ease);
+}
+
+body[data-page="Manage Modules"] .st-back-link:hover .material-symbols-outlined {
+  transform: translateX(-3px);
+}
+
+body[data-page="Manage Modules"] .st-module-detail-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  margin: 12px 0 20px;
+  flex-wrap: wrap;
+  padding: 18px 20px 14px;
+}
+
+body[data-page="Manage Modules"] .st-module-detail-title {
+  margin: 0;
+  font-family: var(--st-font-heading);
+  font-weight: 800;
+  font-size: 1.375rem; /* 22px */
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
-.st-module-bulk-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  background: var(--st-primary-fixed);
-  border-radius: var(--st-radius-lg);
-  padding: 10px 16px;
-  margin-bottom: 14px;
-  font-size: var(--st-font-size-label);
-  font-weight: 600;
-  color: var(--st-primary);
-}
-
-.st-table-actions {
+body[data-page="Manage Modules"] .st-module-detail-meta {
+  margin: 6px 0 0;
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  font-size: 0.844rem; /* 13.5px */
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
 }
 
-.st-roster-checklist {
+body[data-page="Manage Modules"] .st-table-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+body[data-page="Manage Modules"] .st-btn-danger-text {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font: inherit;
+  font-size: 0.844rem; /* 13.5px */
+  font-weight: 600;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  cursor: pointer;
+  transition: background-color var(--st-t-hover, 150ms), color var(--st-t-hover, 150ms);
+}
+
+body[data-page="Manage Modules"] .st-btn-danger-text:hover {
+  background: #fdecea;
+  color: #a01414;
+}
+
+/* ---------- Stage summary bar ---------- */
+body[data-page="Manage Modules"] .st-stage-summary {
+  padding: 0 20px 16px;
+}
+
+body[data-page="Manage Modules"] .st-stage-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  gap: 3px;
+  background: var(--st-background, var(--st-surface-container-low));
+  clip-path: inset(0 100% 0 0 round 999px);
+  transition: clip-path 900ms var(--st-ease-out, ease);
+}
+
+body[data-page="Manage Modules"] .is-inview .st-stage-bar {
+  clip-path: inset(0 0 0 0 round 999px);
+}
+
+body[data-page="Manage Modules"] .st-stage-bar .not {
+  background: #cfd5de;
+}
+
+body[data-page="Manage Modules"] .st-stage-bar .rel {
+  background: #f39422;
+}
+
+body[data-page="Manage Modules"] .st-stage-bar .ret {
+  background: var(--st-secondary);
+}
+
+body[data-page="Manage Modules"] .st-stage-legend {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  font-size: 0.813rem; /* 13px */
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+body[data-page="Manage Modules"] .st-stage-legend b {
+  color: var(--st-ink, var(--st-on-surface));
+  font-weight: 700;
+}
+
+body[data-page="Manage Modules"] .st-stage-legend i {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  margin-right: 6px;
+  vertical-align: 0;
+}
+
+/* ---------- Dates cell (merges Release date + Return date) ---------- */
+body[data-page="Manage Modules"] .st-date-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+body[data-page="Manage Modules"] .st-date-cell span {
+  font-size: 0.813rem; /* 13px */
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+body[data-page="Manage Modules"] .st-muted {
+  color: var(--st-ink-faint, var(--st-outline));
+}
+
+body[data-page="Manage Modules"] .st-icon-btn-sm--tiny {
+  width: 26px;
+  height: 26px;
+}
+
+body[data-page="Manage Modules"] .st-icon-btn-sm--tiny .material-symbols-outlined {
+  font-size: 16px;
+}
+
+/* ---------- Add/Edit module modal ---------- */
+body[data-page="Manage Modules"] .st-roster-checklist {
   max-height: 240px;
   overflow-y: auto;
   border: 1px solid var(--st-outline-variant);
@@ -149,7 +621,7 @@
   padding: 4px 12px;
 }
 
-.st-roster-checklist-row {
+body[data-page="Manage Modules"] .st-roster-checklist-row {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -158,18 +630,18 @@
   font-size: var(--st-font-size-label);
 }
 
-.st-roster-checklist-row:last-child {
+body[data-page="Manage Modules"] .st-roster-checklist-row:last-child {
   border-bottom: none;
 }
 
-.st-roster-checklist-row input[type="checkbox"] {
+body[data-page="Manage Modules"] .st-roster-checklist-row input[type="checkbox"] {
   margin-right: 8px;
 }
 
 /* Overrides .st-schedule-modal-field's generic uppercase/micro label style
    (equal specificity, wins on source order) -- these labels are learner
    names, not field labels, so they should read like normal body text. */
-.st-roster-checklist-row label {
+body[data-page="Manage Modules"] .st-roster-checklist-row label {
   font-size: var(--st-font-size-label);
   font-weight: 400;
   text-transform: none;
@@ -182,4 +654,184 @@
 .st-schedule-modal-field label .required {
   color: var(--st-error);
   margin-left: 2px;
+}
+
+/* ---------- Entrance motion ---------- */
+body[data-page="Manage Modules"] [data-animate] {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+body[data-page="Manage Modules"] [data-animate].is-inview {
+  opacity: 1;
+  transform: none;
+  transition: opacity 400ms ease, transform 500ms var(--st-ease-out, ease);
+}
+
+body[data-page="Manage Modules"] [data-animate-rows] tr {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+body[data-page="Manage Modules"] [data-animate-rows].is-inview tr {
+  opacity: 1;
+  transform: none;
+  transition: opacity 300ms ease, transform 400ms var(--st-ease-out, ease), background-color var(--st-t-hover, 150ms);
+  transition-delay: calc(var(--i, 0) * 30ms), calc(var(--i, 0) * 30ms), 0ms;
+}
+
+/* ---------- Responsive: catalog + detail tables become cards ---------- */
+@media (max-width: 1023px) {
+  body[data-page="Manage Modules"] .st-module-summary-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  body[data-page="Manage Modules"] .st-module-summary-stat--bar {
+    grid-column: 1/-1;
+    order: 3;
+    border-left: 0 !important;
+    border-top: 1px solid var(--st-line, var(--st-outline-variant));
+  }
+  body[data-page="Manage Modules"] .st-module-summary-stat:nth-child(3) {
+    border-left: 1px solid var(--st-line, var(--st-outline-variant));
+  }
+}
+
+@media (max-width: 767px) {
+  body[data-page="Manage Modules"] .st-page-header-actions {
+    width: 100%;
+  }
+  body[data-page="Manage Modules"] .st-page-header-actions .st-btn {
+    width: 100%;
+    height: 44px;
+  }
+  body[data-page="Manage Modules"] .st-module-summary-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  body[data-page="Manage Modules"] .st-module-summary-stat {
+    padding: 14px 16px;
+  }
+  body[data-page="Manage Modules"] .st-module-summary-stat--total {
+    grid-column: 1/-1;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 10px;
+    border-bottom: 1px solid var(--st-line, var(--st-outline-variant));
+  }
+  body[data-page="Manage Modules"] .st-module-summary-stat--bar {
+    grid-column: 1/-1;
+  }
+  body[data-page="Manage Modules"] .st-module-summary-stat:nth-child(3) {
+    border-left: 0;
+  }
+  body[data-page="Manage Modules"] .st-module-summary-value {
+    font-size: 1.5rem;
+  }
+  body[data-page="Manage Modules"] .st-module-summary-stat--total .st-module-summary-value {
+    font-size: 2rem;
+  }
+  body[data-page="Manage Modules"] .st-module-toolbar {
+    padding: 0 16px 14px;
+  }
+  body[data-page="Manage Modules"] .st-module-toolbar .st-select {
+    flex: 1 1 calc(50% - 5px);
+  }
+  body[data-page="Manage Modules"] .st-module-search {
+    max-width: none;
+    flex: 1 1 100%;
+  }
+  body[data-page="Manage Modules"] .st-mm-view-toggle {
+    margin-left: 0;
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+  body[data-page="Manage Modules"] .st-module-detail-header {
+    padding: 16px;
+  }
+  body[data-page="Manage Modules"] .st-table-actions {
+    width: 100%;
+  }
+  body[data-page="Manage Modules"] .st-table-actions .st-btn {
+    flex: 1;
+  }
+  body[data-page="Manage Modules"] .st-stage-summary {
+    padding: 0 16px 14px;
+  }
+
+  /* Base table -> card mechanics (this page isn't in the other three pages'
+     shared mobile .st-data-table scope in learner-records.css, so it needs
+     its own copy of the same transform, keyed off .st-mm-table). */
+  body[data-page="Manage Modules"] .st-table-scroll {
+    overflow: visible;
+  }
+  body[data-page="Manage Modules"] .st-mm-table,
+  body[data-page="Manage Modules"] .st-mm-table tbody {
+    display: block;
+  }
+  body[data-page="Manage Modules"] .st-mm-table thead {
+    display: none;
+  }
+  body[data-page="Manage Modules"] .st-mm-table tr {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px 12px;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--st-line, var(--st-outline-variant));
+  }
+  body[data-page="Manage Modules"] .st-mm-table td {
+    display: block;
+    padding: 0 !important;
+    border: 0;
+    white-space: normal;
+  }
+  body[data-page="Manage Modules"] .st-mm-table td[data-col] {
+    grid-column: 1/-1;
+  }
+  body[data-page="Manage Modules"] .st-mm-table td[data-col="learner"] {
+    grid-column: 1/-2;
+    grid-row: 1;
+  }
+
+  /* Catalog table -> cards */
+  body[data-page="Manage Modules"] .st-mm-table td[data-col="status"],
+  body[data-page="Manage Modules"] .st-mm-table td[data-col="learners"] {
+    padding-left: 48px !important;
+  }
+  body[data-page="Manage Modules"] .st-mm-table td[data-col="go"] {
+    grid-column: -2/-1;
+    grid-row: 1;
+  }
+
+  /* Detail table -> cards */
+  body[data-page="Manage Modules"] .st-mm-table--detail td[data-col="select"] {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  body[data-page="Manage Modules"] .st-mm-table--detail td[data-col="modality"] {
+    grid-column: 1/-2;
+    order: 1;
+  }
+  body[data-page="Manage Modules"] .st-mm-table--detail td[data-col="stage"] {
+    grid-column: -2/-1;
+    order: 1;
+    justify-self: end;
+    padding-left: 0 !important;
+  }
+  body[data-page="Manage Modules"] .st-mm-table--detail td[data-col="dates"] {
+    order: 2;
+  }
+  body[data-page="Manage Modules"] .st-mm-table--detail td[data-col="actions"] {
+    order: 3;
+  }
+  body[data-page="Manage Modules"] .st-mm-table--detail td[data-col="actions"] .st-btn {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-page="Manage Modules"] [data-animate],
+  body[data-page="Manage Modules"] [data-animate-rows] tr {
+    opacity: 1;
+    transform: none;
+  }
 }

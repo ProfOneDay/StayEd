@@ -1,383 +1,13 @@
-
-
-.st-profile-summary-card{
-    background:#fff;
-    border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-lg);
-    box-shadow:var(--st-shadow-sm);
-    padding:24px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    text-align:center;
-}
-
-.st-profile-photo-wrap{
-    position:relative;
-    margin-bottom:16px;
-}
-
-.st-profile-photo{
-    width:112px;
-    height:112px;
-    border-radius:50%;
-    border:4px solid var(--st-surface-container);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:var(--st-primary-fixed);
-    color:var(--st-primary);
-    font-family:var(--st-font-heading);
-    font-size:2.25rem;
-    font-weight:700;
-    overflow:hidden;
-}
-
-.st-profile-photo img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-}
-
-.st-profile-photo-edit{
-    position:absolute;
-    bottom:2px;
-    right:2px;
-    width:36px;
-    height:36px;
-    border-radius:50%;
-    background:var(--st-secondary);
-    color:#fff;
-    border:none;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-    box-shadow:var(--st-shadow-md);
-    transition:var(--st-transition);
-}
-
-.st-profile-photo-edit:hover{
-    background:var(--st-secondary-container);
-    color:var(--st-on-secondary-container);
-}
-
-.st-profile-photo-edit .material-symbols-outlined{
-    font-size:18px !important;
-    line-height:1;
-}
-
-.st-profile-photo-remove{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:6px;
-    margin:-4px 0 14px;
-    padding:6px 10px;
-    border:0;
-    background:transparent;
-    color:var(--st-error);
-    border-radius:var(--st-radius-md);
-    font:inherit;
-    font-size:var(--st-font-size-caption);
-    font-weight:700;
-    cursor:pointer;
-    transition:background .15s ease,color .15s ease;
-}
-
-.st-profile-photo-remove:hover{
-    background:var(--st-error-container, #fde8e8);
-}
-
-.st-profile-photo-remove .material-symbols-outlined{
-    font-size:16px;
-}
-
-.st-profile-photo-remove[hidden]{display:none!important;}
-
-.st-profile-summary-name{
-    font-family:var(--st-font-heading);
-    font-size: var(--st-font-size-body-lg);
-    font-weight:700;
-    color:var(--st-primary);
-    margin-bottom:4px;
-}
-
-.st-profile-summary-role{
-    font-size: var(--st-font-size-caption);
-    color:var(--st-on-surface-variant);
-    margin-bottom:16px;
-}
-
-.st-profile-status-chip{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    padding:4px 12px;
-    border-radius:999px;
-    background:var(--st-risk-low-soft);
-    color:var(--st-risk-low);
-    font-size: var(--st-font-size-caption);
-    font-weight:700;
-    margin-bottom:20px;
-}
-
-.st-profile-status-chip .dot{
-    width:8px;
-    height:8px;
-    border-radius:50%;
-    background:var(--st-risk-low);
-}
-
-.st-profile-summary-details{
-    width:100%;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    padding-top:20px;
-    border-top:1px solid rgba(195,198,207,.25);
-    text-align:left;
-}
-
-.st-profile-summary-details label{
-    display:block;
-    font-size: var(--st-font-size-micro);
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:.04em;
-    color:var(--st-on-surface-variant);
-    margin-bottom:2px;
-}
-
-.st-profile-summary-details p{
-    font-size: var(--st-font-size-label);
-    font-weight:600;
-    color:var(--st-primary);
-}
-
-.st-quick-stats-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:12px;
-}
-
-.st-quick-stat{
-    background:var(--st-surface-container-low);
-    border-radius:var(--st-radius-md);
-    padding:16px;
-    text-align:center;
-}
-
-.st-quick-stat-value{
-    font-size: var(--st-font-size-heading);
-    font-weight:700;
-    color:var(--st-primary);
-}
-
-.st-quick-stat-value--teal{ color:var(--st-secondary); }
-
-.st-quick-stat-label{
-    font-size: var(--st-font-size-micro);
-    color:var(--st-on-surface-variant);
-    margin-top:2px;
-}
-
-.st-settings-section{
-    background:#fff;
-    border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-lg);
-    box-shadow:var(--st-shadow-sm);
-    overflow:hidden;
-    margin-bottom:16px;
-}
-
-.st-settings-section:last-child{ margin-bottom:0; }
-
-.st-settings-section-header{
-    width:100%;
-    padding:20px 24px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    background:transparent;
-    border:none;
-    cursor:pointer;
-    transition:var(--st-transition);
-    text-align:left;
-}
-
-.st-settings-section-header:hover{
-    background:var(--st-surface-container-low);
-}
-
-.st-settings-section-header-left{
-    display:flex;
-    align-items:center;
-    gap:12px;
-}
-
-.st-settings-section-header-left .material-symbols-outlined{
-    color:var(--st-primary);
-    font-size:1.375rem;
-}
-
-.st-settings-section-title{
-    font-family:var(--st-font-heading);
-    font-size: var(--st-font-size-body);
-    font-weight:700;
-    color:var(--st-primary);
-}
-
-.st-settings-section-caret{
-    transition:transform .2s ease;
-    color:var(--st-on-surface-variant);
-}
-
-.st-settings-section.is-open .st-settings-section-caret{
-    transform:rotate(180deg);
-}
-
-.st-settings-section-body{
-    max-height:0;
-    overflow:hidden;
-    transition:max-height .3s cubic-bezier(.4,0,.2,1);
-}
-
-.st-settings-section.is-open .st-settings-section-body{
-    max-height:1200px;
-}
-
-.st-settings-section-body-inner{
-    padding:0 24px 24px;
-}
-
-.st-settings-section--danger{
-    border-color:rgba(186,26,26,.30);
-}
-
-.st-settings-section--danger .st-settings-section-header{
-    background:rgba(186,26,26,.04);
-}
-
-.st-settings-section--danger .st-settings-section-title,
-.st-settings-section--danger .st-settings-section-header-left .material-symbols-outlined{
-    color:var(--st-error);
-}
-
-.st-settings-form-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:16px;
-    padding-top:16px;
-}
-
-@media (max-width:600px){
-    .st-settings-form-grid{ grid-template-columns:1fr; }
-}
-
-.st-settings-field{
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-}
-
-.st-settings-field--full{
-    grid-column:1/-1;
-}
-
-.st-settings-field label{
-    font-size: var(--st-font-size-caption);
-    font-weight:600;
-    color:var(--st-on-surface);
-}
-
-.st-settings-field input{
-    height:44px;
-    padding:0 16px;
-    border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-radius-lg);
-    background:#fff;
-    font-family:var(--st-font-body);
-    font-size: var(--st-font-size-label);
-    color:var(--st-on-surface);
-    transition:var(--st-transition);
-}
-
-.st-settings-field select{
-    height:44px;
-    padding:0 12px;
-    border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-button-radius);
-    background:#fff;
-    font-family:var(--st-font-body);
-    font-size: var(--st-font-size-label);
-    color:var(--st-on-surface);
-    cursor:pointer;
-    transition:var(--st-transition);
-}
-
-.st-settings-field input:focus,
-.st-settings-field select:focus{
-    outline:none;
-    border-color:var(--st-secondary);
-    box-shadow:var(--st-focus-ring);
-}
-
-.st-settings-form-footer{
-    grid-column:1/-1;
-    display:flex;
-    justify-content:flex-end;
-    padding-top:8px;
-}
-
-.st-settings-info-box{
-    grid-column:1/-1;
-    display:flex;
-    gap:12px;
-    align-items:flex-start;
-    background:var(--st-surface-container-low);
-    border-radius:var(--st-radius-md);
-    padding:16px;
-}
-
-.st-settings-info-box .material-symbols-outlined{
-    color:var(--st-secondary);
-    font-size:1.25rem;
-}
-
-.st-settings-info-box p{
-    font-size: var(--st-font-size-caption);
-    color:var(--st-on-surface-variant);
-}
-
-.st-toggle-row{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:14px 0;
-    border-bottom:1px solid rgba(195,198,207,.20);
-}
-
-.st-toggle-row:last-child{ border-bottom:none; }
-
-.st-toggle-row-title{
-    font-size: var(--st-font-size-label);
-    font-weight:600;
-    color:var(--st-on-surface);
-}
-
-.st-toggle-row-sub{
-    font-size: var(--st-font-size-caption);
-    color:var(--st-on-surface-variant);
-    margin-top:2px;
-}
+/* Profile Settings page — see CLAUDE_CODE_PROMPT_teacher-account-pages-v2.md.
+   .st-toggle/-track/-thumb below is the ONE shared toggle refresh: it's
+   intentionally left unscoped (this file is the toggle's only source, and
+   main.css imports every page's CSS globally) so Learner Profile and the
+   admin pages' toggles pick up the same 44x26 track / 20px thumb look. */
 
 .st-toggle{
     position:relative;
     display:inline-flex;
-    width:44px;
-    height:24px;
-    flex-shrink:0;
+    flex:none;
     cursor:pointer;
 }
 
@@ -392,23 +22,24 @@
 }
 
 .st-toggle-track{
-    position:absolute;
-    inset:0;
-    background:#D0D3D9;
+    width:44px;
+    height:26px;
     border-radius:999px;
-    transition:background .2s ease;
+    background:#cfd5de;
+    position:relative;
+    transition:background-color 200ms ease;
 }
 
 .st-toggle-thumb{
     position:absolute;
-    top:2px;
-    left:2px;
+    top:3px;
+    left:3px;
     width:20px;
     height:20px;
-    background:#fff;
     border-radius:50%;
-    box-shadow:var(--st-shadow-xs);
-    transition:transform .2s ease;
+    background:#fff;
+    box-shadow:0 1px 3px rgba(17,26,54,.25);
+    transition:transform 220ms var(--st-ease-out, cubic-bezier(.2,.7,.2,1));
 }
 
 .st-toggle input:checked + .st-toggle-track{
@@ -416,21 +47,559 @@
 }
 
 .st-toggle input:checked + .st-toggle-track .st-toggle-thumb{
-    transform:translateX(20px);
+    transform:translateX(18px);
 }
 
 .st-toggle input:focus-visible + .st-toggle-track{
-    outline:2px solid var(--st-secondary);
-    outline-offset:2px;
+    box-shadow:0 0 0 3px rgba(0,106,104,.25);
 }
 
-
-.st-profile-photo-help{
-    margin:-8px 0 12px;
-    color:var(--st-on-surface-variant);
-    font-size:11px;
+.st-toggle:active .st-toggle-thumb{
+    width:24px;
 }
 
+.st-toggle-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    padding:16px 0;
+}
+
+.st-toggle-row + .st-toggle-row{
+    border-top:1px solid var(--st-line, var(--st-outline-variant));
+}
+
+.st-toggle-row-title{
+    margin:0;
+    font-weight:600;
+    font-size:0.906rem; /* 14.5px */
+}
+
+.st-toggle-row-sub{
+    margin:3px 0 0;
+    font-size:0.844rem; /* 13.5px */
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    max-width:640px;
+}
+
+/* ---------- Fields (shared 40px control, used by Profile/Reports/System
+   Settings) -- scoped per page per the prompt, so each page defines its own
+   copy rather than promoting .st-field to components.css. ---------- */
+body[data-page="Profile Settings"] .st-field label,
+body[data-page="Profile Settings"] .st-field-label{
+    display:block;
+    font-size:0.813rem; /* 13px */
+    font-weight:600;
+    color:var(--st-ink, var(--st-on-surface));
+    margin-bottom:6px;
+}
+
+body[data-page="Profile Settings"] .st-input,
+body[data-page="Profile Settings"] .st-select{
+    width:100%;
+    height:40px;
+    border:1px solid var(--st-line-strong, var(--st-outline-variant));
+    border-radius:var(--st-radius-control, 8px);
+    background:#fff;
+    padding:0 12px;
+    font:inherit;
+    font-size:0.875rem; /* 14px */
+    color:var(--st-ink, var(--st-on-surface));
+    transition:border-color var(--st-t-hover, 150ms), box-shadow var(--st-t-hover, 150ms);
+}
+
+body[data-page="Profile Settings"] .st-input:hover:not(:disabled):not([readonly]){
+    border-color:var(--st-primary);
+}
+
+body[data-page="Profile Settings"] .st-input:focus{
+    outline:none;
+    border-color:var(--st-secondary);
+    box-shadow:0 0 0 3px rgba(0,106,104,.12);
+}
+
+body[data-page="Profile Settings"] .st-input[readonly],
+body[data-page="Profile Settings"] .st-input:disabled{
+    background:#f8f9fb;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    cursor:not-allowed;
+    border-color:var(--st-line, var(--st-outline-variant));
+}
+
+/* ---------- Icon tile (shared small look, also used by Reports/System
+   Settings/Help, each page scoping its own copy). ---------- */
+body[data-page="Profile Settings"] .st-icon-tile{
+    width:40px;
+    height:40px;
+    flex:none;
+    border-radius:11px;
+    display:grid;
+    place-items:center;
+    background:var(--st-navy-soft);
+    color:var(--st-primary);
+}
+
+body[data-page="Profile Settings"] .st-icon-tile .material-symbols-outlined{
+    font-size:21px;
+}
+
+/* ---------- Layout ---------- */
+body[data-page="Profile Settings"] .st-profile-layout{
+    display:grid;
+    grid-template-columns:minmax(280px,1fr) minmax(0,2fr);
+    gap:20px;
+    align-items:start;
+}
+
+body[data-page="Profile Settings"] .st-profile-left{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    position:sticky;
+    top:84px;
+    min-width:0;
+}
+
+/* ---------- Summary card ---------- */
+body[data-page="Profile Settings"] .st-profile-summary-card{
+    padding:24px 20px 20px;
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+body[data-page="Profile Settings"] .st-profile-photo-wrap{
+    position:relative;
+    margin-bottom:12px;
+}
+
+body[data-page="Profile Settings"] .st-profile-photo{
+    width:96px;
+    height:96px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    background:var(--st-navy-soft);
+    color:var(--st-primary);
+    font-family:var(--st-font-heading);
+    font-weight:800;
+    font-size:2rem; /* 32px */
+    box-shadow:0 0 0 4px #fff,0 0 0 5px var(--st-line, var(--st-outline-variant));
+    overflow:hidden;
+}
+
+body[data-page="Profile Settings"] .st-profile-photo img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+body[data-page="Profile Settings"] .st-profile-photo-edit{
+    position:absolute;
+    right:-2px;
+    bottom:-2px;
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    border:3px solid #fff;
+    background:var(--st-secondary);
+    color:#fff;
+    display:grid;
+    place-items:center;
+    cursor:pointer;
+    transition:transform var(--st-t-hover, 150ms) var(--st-ease-out, ease),background-color var(--st-t-hover, 150ms);
+}
+
+body[data-page="Profile Settings"] .st-profile-photo-edit .material-symbols-outlined{
+    font-size:17px;
+}
+
+body[data-page="Profile Settings"] .st-profile-photo-edit:hover{
+    transform:scale(1.08);
+    background:#005452;
+}
+
+body[data-page="Profile Settings"] .st-profile-photo-help{
+    margin:10px 0 0;
+    font-size:0.75rem; /* 12px */
+    color:var(--st-ink-faint, var(--st-outline));
+}
+
+body[data-page="Profile Settings"] .st-profile-photo-remove{
+    appearance:none;
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    margin-top:6px;
+    border:0;
+    background:none;
+    padding:4px 8px;
+    border-radius:6px;
+    font:inherit;
+    font-size:0.781rem; /* 12.5px */
+    font-weight:600;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    cursor:pointer;
+    transition:background-color var(--st-t-hover, 150ms),color var(--st-t-hover, 150ms);
+}
+
+body[data-page="Profile Settings"] .st-profile-photo-remove:hover{
+    background:#fdecea;
+    color:#a01414;
+}
+
+body[data-page="Profile Settings"] .st-profile-photo-remove .material-symbols-outlined{
+    font-size:16px;
+}
+
+body[data-page="Profile Settings"] .st-profile-photo-remove[hidden]{
+    display:none;
+}
+
+body[data-page="Profile Settings"] .st-profile-summary-name{
+    margin:0;
+    font-family:var(--st-font-heading);
+    font-weight:800;
+    font-size:1.25rem; /* 20px */
+}
+
+body[data-page="Profile Settings"] .st-profile-summary-role{
+    margin:2px 0 8px;
+    font-size:0.875rem; /* 14px */
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+body[data-page="Profile Settings"] .st-profile-status-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:3px 10px;
+    border-radius:999px;
+    background:#e3f4f3;
+    color:#00504e;
+    font-size:0.781rem; /* 12.5px */
+    font-weight:600;
+}
+
+body[data-page="Profile Settings"] .st-profile-status-chip::before{
+    content:"";
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:currentColor;
+}
+
+body[data-page="Profile Settings"] .st-profile-summary-details{
+    width:100%;
+    margin:18px 0 0;
+    padding-top:16px;
+    border-top:1px solid var(--st-line, var(--st-outline-variant));
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    text-align:left;
+}
+
+body[data-page="Profile Settings"] .st-profile-summary-details div{
+    display:flex;
+    flex-direction:column;
+    gap:1px;
+}
+
+body[data-page="Profile Settings"] .st-profile-summary-details dt{
+    font-size:0.75rem; /* 12px */
+    color:var(--st-ink-faint, var(--st-outline));
+}
+
+body[data-page="Profile Settings"] .st-profile-summary-details dd{
+    margin:0;
+    font-size:0.875rem; /* 14px */
+    font-weight:600;
+    overflow-wrap:anywhere;
+}
+
+/* ---------- Quick stats card ---------- */
+body[data-page="Profile Settings"] .st-quick-stats-card{
+    padding:18px 20px 20px;
+}
+
+body[data-page="Profile Settings"] .st-quick-stats-title{
+    margin:0 0 14px;
+    font-family:var(--st-font-heading);
+    font-weight:700;
+    font-size:1.0625rem; /* 17px */
+}
+
+body[data-page="Profile Settings"] .st-quick-stats-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+}
+
+body[data-page="Profile Settings"] .st-quick-stat{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    padding:14px;
+    border-radius:10px;
+    background:var(--st-background, var(--st-surface-container-low));
+}
+
+body[data-page="Profile Settings"] .st-quick-stat-icon{
+    width:32px;
+    height:32px;
+    border-radius:9px;
+    display:grid;
+    place-items:center;
+    background:var(--st-navy-soft);
+    color:var(--st-primary);
+    margin-bottom:8px;
+}
+
+body[data-page="Profile Settings"] .st-quick-stat-icon .material-symbols-outlined{
+    font-size:18px;
+}
+
+body[data-page="Profile Settings"] .st-quick-stat-icon--teal{
+    background:#e3f4f3;
+    color:var(--st-secondary);
+}
+
+body[data-page="Profile Settings"] .st-quick-stat-value{
+    margin:0;
+    font-family:var(--st-font-heading);
+    font-weight:800;
+    font-size:1.75rem; /* 28px */
+    line-height:1.05;
+    letter-spacing:-.02em;
+    color:var(--st-primary);
+}
+
+body[data-page="Profile Settings"] .st-quick-stat-value--teal{
+    color:var(--st-secondary);
+}
+
+body[data-page="Profile Settings"] .st-quick-stat-label{
+    margin:0;
+    font-size:0.781rem; /* 12.5px */
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+/* ---------- Collapsible sections ---------- */
+body[data-page="Profile Settings"] .st-profile-sections{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    min-width:0;
+}
+
+body[data-page="Profile Settings"] .st-settings-section{
+    background:#fff;
+    border:1px solid var(--st-line, var(--st-outline-variant));
+    border-radius:var(--st-radius-card, var(--st-radius-lg));
+    box-shadow:var(--st-shadow-card, var(--st-shadow-sm));
+    overflow:hidden;
+}
+
+body[data-page="Profile Settings"] .st-settings-section-header{
+    appearance:none;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    width:100%;
+    padding:16px 20px;
+    border:0;
+    background:none;
+    font:inherit;
+    color:inherit;
+    text-align:left;
+    cursor:pointer;
+    transition:background-color var(--st-t-hover, 150ms);
+}
+
+body[data-page="Profile Settings"] .st-settings-section-header:hover{
+    background:#f8fafd;
+}
+
+body[data-page="Profile Settings"] .st-settings-section-header-left{
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+
+body[data-page="Profile Settings"] .st-settings-section-title{
+    margin:0;
+    font-family:var(--st-font-heading);
+    font-weight:700;
+    font-size:1.0625rem; /* 17px */
+}
+
+body[data-page="Profile Settings"] .st-settings-section-sub{
+    display:block;
+    font-size:0.813rem; /* 13px */
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+body[data-page="Profile Settings"] .st-settings-section-caret{
+    flex:none;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    transition:transform 250ms var(--st-ease-out, ease);
+}
+
+body[data-page="Profile Settings"] .st-settings-section.is-open .st-settings-section-caret{
+    transform:rotate(180deg);
+}
+
+body[data-page="Profile Settings"] .st-settings-section-body{
+    display:grid;
+    grid-template-rows:0fr;
+    transition:grid-template-rows 300ms var(--st-ease-out, ease);
+}
+
+body[data-page="Profile Settings"] .st-settings-section.is-open .st-settings-section-body{
+    grid-template-rows:1fr;
+}
+
+body[data-page="Profile Settings"] .st-settings-section-body-inner{
+    overflow:hidden;
+}
+
+body[data-page="Profile Settings"] .st-settings-section-body-inner > *{
+    margin-left:20px;
+    margin-right:20px;
+}
+
+body[data-page="Profile Settings"] .st-settings-section-body-inner > :first-child{
+    padding-top:18px;
+    border-top:1px solid var(--st-line, var(--st-outline-variant));
+}
+
+body[data-page="Profile Settings"] .st-settings-section-body-inner > :last-child{
+    margin-bottom:20px;
+}
+
+body[data-page="Profile Settings"] .st-settings-form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px 16px;
+}
+
+body[data-page="Profile Settings"] .st-field--full{
+    grid-column:1/-1;
+}
+
+body[data-page="Profile Settings"] .st-field--locked label::after{
+    content:"lock";
+    font-family:"Material Symbols Outlined";
+    font-size:14px;
+    color:var(--st-ink-faint, var(--st-outline));
+    margin-left:5px;
+    vertical-align:-2px;
+    font-weight:400;
+}
+
+body[data-page="Profile Settings"] .st-locked-note{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin:-4px 0 0;
+    font-size:0.781rem; /* 12.5px */
+    color:var(--st-ink-faint, var(--st-outline));
+}
+
+body[data-page="Profile Settings"] .st-locked-note .material-symbols-outlined{
+    font-size:15px;
+}
+
+body[data-page="Profile Settings"] .st-settings-form-footer{
+    grid-column:1/-1;
+    display:flex;
+    justify-content:flex-end;
+    padding-top:4px;
+}
+
+body[data-page="Profile Settings"] .st-settings-info-box{
+    display:flex;
+    gap:10px;
+    padding:10px 12px;
+    border-radius:10px;
+    background:#e3f4f3;
+    color:#00504e;
+    font-size:0.813rem; /* 13px */
+}
+
+body[data-page="Profile Settings"] .st-settings-info-box p{
+    margin:0;
+}
+
+body[data-page="Profile Settings"] .st-settings-info-box .material-symbols-outlined{
+    font-size:19px;
+}
+
+body[data-page="Profile Settings"] .st-settings-prefs{
+    margin-top:18px!important;
+    border-top:1px solid var(--st-line, var(--st-outline-variant));
+}
+
+/* ---------- Danger zone ---------- */
+body[data-page="Profile Settings"] .st-settings-section--danger{
+    border-color:#f0c9c9;
+}
+
+body[data-page="Profile Settings"] .st-danger-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 20px;
+    background:#fdf3f3;
+    border-bottom:1px solid #f4d8d8;
+    color:#a01414;
+}
+
+body[data-page="Profile Settings"] .st-danger-head .st-settings-section-title{
+    color:#a01414;
+}
+
+body[data-page="Profile Settings"] .st-danger-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding:14px 20px;
+}
+
+body[data-page="Profile Settings"] .st-danger-row + .st-danger-row{
+    border-top:1px solid var(--st-line, var(--st-outline-variant));
+}
+
+body[data-page="Profile Settings"] .st-danger-title{
+    color:#a01414;
+}
+
+body[data-page="Profile Settings"] .st-btn-sm{
+    height:34px;
+    padding:0 12px;
+    font-size:0.844rem; /* 13.5px */
+}
+
+/* ---------- Entrance motion: cards/sections settle in once on load ---------- */
+body[data-page="Profile Settings"] [data-animate-cards] > *{
+    opacity:0;
+    transform:translateY(8px);
+}
+
+body[data-page="Profile Settings"] [data-animate-cards].is-inview > *{
+    opacity:1;
+    transform:none;
+    transition:opacity 400ms ease,transform 500ms var(--st-ease-out, ease);
+    transition-delay:calc(var(--i,0) * 60ms);
+}
+
+/* ---------- Avatar preview dialog (Modal.show content, unscoped like the
+   modal itself) ---------- */
 .st-avatar-preview-dialog{
     display:flex;
     align-items:center;
@@ -457,4 +626,52 @@
     margin-top:4px;
     color:var(--st-on-surface-variant);
     font-size:12px;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1023px){
+    body[data-page="Profile Settings"] .st-profile-layout{
+        grid-template-columns:1fr;
+    }
+    body[data-page="Profile Settings"] .st-profile-left{
+        position:static;
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        align-items:stretch;
+    }
+}
+
+@media (max-width:767px){
+    body[data-page="Profile Settings"] .st-profile-left{
+        display:flex;
+        flex-direction:column;
+    }
+    body[data-page="Profile Settings"] .st-settings-form-grid{
+        grid-template-columns:1fr;
+    }
+    body[data-page="Profile Settings"] .st-settings-section-header{
+        padding:14px 16px;
+    }
+    body[data-page="Profile Settings"] .st-settings-section-body-inner > *{
+        margin-left:16px;
+        margin-right:16px;
+    }
+    body[data-page="Profile Settings"] .st-settings-form-footer .st-btn{
+        width:100%;
+    }
+    body[data-page="Profile Settings"] .st-danger-row{
+        flex-direction:column;
+        align-items:stretch;
+        padding:14px 16px;
+    }
+    body[data-page="Profile Settings"] .st-danger-row .st-btn{
+        height:40px;
+    }
+}
+
+@media (prefers-reduced-motion:reduce){
+    body[data-page="Profile Settings"] [data-animate-cards] > *{
+        opacity:1;
+        transform:none;
+    }
 }

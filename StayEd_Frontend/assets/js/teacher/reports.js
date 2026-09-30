@@ -18,7 +18,20 @@ class TeacherReports {
     this.setupAtRiskSearch();
     this.setupInterventionSearch();
 
+    this.playEntrance();
+
     await this.loadFilters();
+  }
+
+  // Report cards settle in once on load, staggered via each card's own --i
+  // (see reports.css). Always above the fold, so this fires directly
+  // rather than watching scroll position.
+  static playEntrance() {
+    const grid = document.querySelector("[data-animate-cards]");
+    if (!grid) return;
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => grid.classList.add("is-inview")),
+    );
   }
 
   static async loadFilters() {

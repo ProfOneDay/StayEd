@@ -1,0 +1,112 @@
+/* About StayEd page — see CLAUDE_CODE_PROMPT_teacher-account-pages-v2.md. */
+
+body[data-page="About StayEd"] .st-about-hero{
+    overflow:hidden;
+}
+
+body[data-page="About StayEd"] .st-about-brand{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:24px 24px 22px;
+    background:var(--st-primary);
+    color:#fff;
+}
+
+body[data-page="About StayEd"] .st-about-brand img{
+    width:56px;
+    height:56px;
+}
+
+body[data-page="About StayEd"] .st-about-name{
+    margin:0;
+    font-family:var(--st-font-heading);
+    font-weight:800;
+    font-size:1.75rem; /* 28px */
+    letter-spacing:-.02em;
+    line-height:1.1;
+}
+
+body[data-page="About StayEd"] .st-about-tag{
+    margin:2px 0 0;
+    font-size:0.875rem; /* 14px */
+    color:rgba(255,255,255,.75);
+}
+
+body[data-page="About StayEd"] .st-about-text{
+    margin:0;
+    padding:22px 24px 6px;
+    font-size:0.969rem; /* 15.5px */
+    line-height:1.7;
+    color:#2b3346;
+}
+
+body[data-page="About StayEd"] .st-about-facts{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:12px;
+    padding:18px 24px 24px;
+}
+
+body[data-page="About StayEd"] .st-about-facts div{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    padding:14px 16px;
+    border-radius:10px;
+    background:var(--st-background, var(--st-surface-container-low));
+}
+
+body[data-page="About StayEd"] .st-about-facts .material-symbols-outlined{
+    font-size:20px;
+    color:var(--st-primary);
+    margin-bottom:6px;
+}
+
+body[data-page="About StayEd"] .st-about-facts small{
+    font-size:0.75rem; /* 12px */
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+body[data-page="About StayEd"] .st-about-facts strong{
+    font-size:0.906rem; /* 14.5px */
+    font-weight:600;
+}
+
+/* ---------- Entrance motion ---------- */
+body[data-page="About StayEd"] [data-animate-cards] > *{
+    opacity:0;
+    transform:translateY(8px);
+}
+
+body[data-page="About StayEd"] [data-animate-cards].is-inview > *{
+    opacity:1;
+    transform:none;
+    transition:opacity 400ms ease,transform 500ms var(--st-ease-out, ease);
+    transition-delay:calc(var(--i,0)*80ms);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width:767px){
+    body[data-page="About StayEd"] .st-about-facts{
+        grid-template-columns:1fr;
+        padding:14px 16px 16px;
+    }
+    body[data-page="About StayEd"] .st-about-brand{
+        padding:18px 16px;
+    }
+    body[data-page="About StayEd"] .st-about-text{
+        padding:16px 16px 4px;
+        font-size:0.938rem; /* 15px */
+    }
+    body[data-page="About StayEd"] .st-about-name{
+        font-size:1.5rem; /* 24px */
+    }
+}
+
+@media (prefers-reduced-motion:reduce){
+    body[data-page="About StayEd"] [data-animate-cards] > *{
+        opacity:1;
+        transform:none;
+    }
+}

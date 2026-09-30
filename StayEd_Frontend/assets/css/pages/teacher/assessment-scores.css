@@ -13,6 +13,31 @@
   align-items: start;
 }
 
+/* The shared global .st-badge (components.css) has no status-dot -- this
+   page's assessed/not-assessed tag is the same badge used in every other
+   table's status column, which does carry a dot, so it's added here
+   scoped to just this page rather than touching the global component. */
+body[data-page="Assessment Scores"] [data-detail-assessed-badge] {
+  gap: 6px;
+}
+
+body[data-page="Assessment Scores"] [data-detail-assessed-badge]::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* .st-badge-info defaults to blue (components.css) -- every other table's
+   "not yet done" status badge (e.g. Manage Modules' "Not released")
+   overrides it to neutral gray instead, since blue reads as informational
+   rather than "nothing here yet". Matched here for the same standard. */
+body[data-page="Assessment Scores"] .st-badge-info {
+  background: var(--st-background, #f3f5f8);
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
 @media (max-width: 900px) {
   .st-assessment-scores-layout {
     grid-template-columns: 1fr;
@@ -87,12 +112,17 @@
 .st-assessment-learner-row-text {
   display: flex;
   flex-direction: column;
+  gap: 3px;
   min-width: 0;
 }
 
+/* Matches .st-learner-name/.st-learner-id (dashboard.css) -- the system's
+   established default sizing for an avatar+name+id list row, reused here
+   instead of inventing page-specific sizes. */
 .st-assessment-learner-row-name {
-  font-size: var(--st-font-size-label);
+  font-size: 0.906rem; /* 14.5px */
   font-weight: 600;
+  font-family: var(--st-font-body);
   color: var(--st-on-surface);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -100,8 +130,8 @@
 }
 
 .st-assessment-learner-row-lrn {
-  font-size: var(--st-font-size-micro);
-  color: var(--st-on-surface-variant);
+  font-size: 0.781rem; /* 12.5px */
+  color: var(--st-ink-faint, var(--st-outline));
 }
 
 .st-assessment-avatar {
@@ -166,6 +196,14 @@
   min-width: 0;
 }
 
+/* Whichever learner is showing in the detail header is by definition the
+   selected one (there's no "unselected" state here, unlike the list row),
+   so this avatar is always the solid-navy treatment. */
+.st-assessment-learner-header-identity .st-assessment-avatar {
+  background: var(--st-primary);
+  color: #fff;
+}
+
 .st-assessment-learner-header-name-row {
   display: flex;
   align-items: center;
@@ -203,7 +241,7 @@
 }
 
 .st-assessment-table-head h3 {
-  font-size: var(--st-font-size-label);
+  font-size: 1.0625rem; /* 17px */
   font-weight: 700;
   color: var(--st-on-surface);
   letter-spacing: 0.02em;
@@ -218,15 +256,14 @@
 .st-assessment-table td {
   padding: 8px 12px;
   text-align: center;
-  font-size: var(--st-font-size-caption);
+  font-size: 0.875rem; /* 14px */
   border-bottom: 1px solid rgba(195, 198, 207, 0.2);
 }
 
 .st-assessment-table thead th {
-  font-size: var(--st-font-size-micro);
+  font-size: 0.75rem; /* 12px */
   color: var(--st-on-surface-variant);
   font-weight: 700;
-  text-transform: uppercase;
 }
 
 .st-assessment-table th:first-child,
@@ -358,7 +395,6 @@
   margin: 0;
   font-size: var(--st-font-size-micro);
   font-weight: 700;
-  text-transform: uppercase;
   letter-spacing: .03em;
   color: var(--st-on-surface-variant);
 }
@@ -376,6 +412,10 @@
 
 .st-assessment-likelihood-summary strong[data-overall-likelihood-preview][data-level="low"] {
   color: var(--st-risk-high);
+}
+
+.st-assessment-likelihood-summary strong[data-overall-likelihood-preview][data-level="neutral"] {
+  color: var(--st-on-surface-variant);
 }
 
 .st-assessment-likelihood-summary > p {
@@ -502,29 +542,50 @@
   font-weight: 700;
 }
 
-.st-assessment-search input { height: 42px; }
-.st-assessment-learner-list { gap: 8px; padding-right: 2px; }
+.st-assessment-search input {
+  height: 42px;
+  border-radius: var(--st-radius-control, var(--st-button-radius));
+}
+.st-assessment-learner-list { gap: 6px; padding-right: 2px; }
 
+/* Prototype: no per-row border/card -- rows sit flush in a continuous
+   list, distinguished only by hover/active background. */
 .st-assessment-learner-row {
-  gap: 12px;
-  padding: 12px;
-  border: 1px solid rgba(195, 198, 207, 0.28);
-  background: #fff;
+  position: relative;
+  gap: 10px;
+  padding: 12px 10px;
+  border: 0;
+  background: none;
 }
 
 .st-assessment-learner-row:hover {
-  background: rgba(27, 74, 128, 0.04);
-  border-color: rgba(27, 74, 128, 0.18);
+  background: var(--st-surface-container-low);
 }
 
 .st-assessment-learner-row.is-active {
-  background: rgba(27, 74, 128, 0.08);
-  border-color: rgba(27, 74, 128, 0.22);
-  box-shadow: inset 3px 0 0 var(--st-secondary);
+  background: var(--st-navy-soft, var(--st-primary-fixed));
 }
 
-.st-assessment-learner-row-name { line-height: 1.35; }
-.st-assessment-avatar { background: rgba(27, 74, 128, 0.08); }
+.st-assessment-learner-row.is-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--st-primary);
+}
+
+.st-assessment-learner-row-name { font-weight: 600; }
+
+/* Avatar stays the light navy-soft tile by default; only the active
+   row's avatar turns solid navy with white text. */
+.st-assessment-avatar { background: var(--st-navy-soft, var(--st-primary-fixed)); color: var(--st-primary); }
+.st-assessment-learner-row.is-active .st-assessment-avatar {
+  background: var(--st-primary);
+  color: #fff;
+}
 .st-assessment-detail-panel { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
 
 .st-assessment-learner-header {
@@ -556,8 +617,13 @@
 
 .st-assessment-table-head h3 { margin: 0; }
 
+.st-assessment-table-head-subtitle {
+  font-size: var(--st-font-size-caption);
+  color: var(--st-on-surface-variant);
+  white-space: nowrap;
+}
+
 .st-assessment-table {
-  min-width: 880px;
   table-layout: fixed;
 }
 
@@ -617,7 +683,7 @@
    ============================================================ */
 
 [data-page="Assessment Scores"] .st-page-header {
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 
 [data-assessment-form] {
@@ -655,7 +721,7 @@
 
 [data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-table {
   width: 100%;
-  min-width: 1080px;
+  min-width: 620px;
   table-layout: fixed;
 }
 
@@ -672,15 +738,15 @@
    nth-child widths on that row were making the browser treat the readiness
    column as a score column and squeeze the right side. */
 .st-assessment-table--af5 .st-assessment-col-area {
-  width: 60%;
+  width: auto;
 }
 
 .st-assessment-table--af5 .st-assessment-col-score {
-  width: 10%;
+  width: 104px;
 }
 
 .st-assessment-table--af5 .st-assessment-col-readiness {
-  width: 20%;
+  width: 200px;
 }
 
 [data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-table th:first-child,
@@ -930,95 +996,67 @@
 
 /* Readiness estimate */
 .st-assessment-likelihood-summary {
-  display: grid;
-  grid-template-columns: minmax(250px, 310px) minmax(0, 1fr);
-  align-items: center;
-  gap: 30px;
-  margin: 22px 20px 20px;
-  padding: 26px 28px;
-  border: 1px solid rgba(18, 53, 91, 0.16);
-  border-radius: 18px;
-  background: rgba(211, 227, 255, 0.24);
-  box-shadow: 0 1px 3px rgba(18, 53, 91, 0.06);
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 0;
+  padding: 16px 18px;
+  border: 0;
+  border-radius: 0;
+  background: none;
 }
 
 .st-assessment-likelihood-summary > div {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   min-width: 0;
 }
 
 .st-assessment-likelihood-summary .material-symbols-outlined {
-  width: 54px;
-  height: 54px;
+  width: 40px;
+  height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 54px;
-  border-radius: 14px;
-  background: rgba(18, 53, 91, 0.08);
-  color: var(--st-primary);
-  font-size: 1.9rem;
+  flex: 0 0 40px;
+  border-radius: 11px;
+  background: var(--st-background, #f3f5f8);
+  color: var(--st-on-surface-variant);
 }
 
 .st-assessment-likelihood-kicker {
-  margin: 0 0 5px;
+  margin: 0;
   color: var(--st-on-surface-variant);
-  font-size: 0.9rem;
-  font-weight: 700;
-  line-height: 1.3;
-  letter-spacing: 0.045em;
-  text-transform: uppercase;
+  font-size: 0.781rem; /* 12.5px */
+  font-weight: 600;
+  letter-spacing: normal;
 }
 
 .st-assessment-likelihood-summary strong[data-overall-likelihood-preview] {
   display: block;
   margin: 0;
-  color: var(--st-primary);
-  font-size: 2.25rem;
+  font-family: var(--st-font-heading);
+  color: var(--st-on-surface-variant);
+  font-size: 1.125rem; /* 18px */
   font-weight: 800;
-  line-height: 1;
+  line-height: 1.2;
 }
 
-.st-assessment-likelihood-summary strong[data-overall-likelihood-preview][data-level="readiness"] {
-  color: var(--st-primary);
+.st-assessment-likelihood-summary strong[data-overall-likelihood-preview][data-level="neutral"] {
+  color: var(--st-on-surface-variant);
 }
 
 .st-assessment-likelihood-summary > p {
   margin: 0;
-  padding-left: 28px;
-  border-left: 1px solid rgba(18, 53, 91, 0.14);
   color: var(--st-on-surface-variant);
-  font-size: 1rem;
-  line-height: 1.75;
-}
-
-.st-assessment-likelihood-summary > p strong {
-  color: var(--st-on-surface);
+  font-size: 0.781rem; /* 12.5px */
+  line-height: 1.55;
 }
 
 @media (max-width: 1100px) {
   [data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-table {
     min-width: 1040px;
-  }
-}
-
-@media (max-width: 900px) {
-  .st-assessment-likelihood-summary {
-    grid-template-columns: 1fr;
-    gap: 18px;
-    margin: 18px 16px 16px;
-    padding: 22px;
-    border-radius: 16px;
-  }
-
-  .st-assessment-likelihood-summary > p {
-    padding-left: 0;
-    padding-top: 16px;
-    border-left: 0;
-    border-top: 1px solid rgba(18, 53, 91, 0.14);
   }
 }
 
@@ -1508,4 +1546,64 @@
   margin-left: auto !important;
   margin-right: auto !important;
   padding: 0 8px !important;
+}
+
+/* ============================================================
+   Learner header stays reachable while scrolling a long AF5 form,
+   and under 1024px the learner panel becomes a horizontal row of
+   compact chips instead of a tall vertical list.
+   ============================================================ */
+
+.st-assessment-learner-header {
+  position: sticky;
+  top: calc(var(--st-navbar-height, 72px) - 1px);
+  z-index: 3;
+  background: #fff;
+}
+
+@media (max-width: 1023px) {
+  .st-assessment-learner-panel {
+    max-height: none;
+    padding-bottom: 10px;
+  }
+
+  .st-assessment-learner-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .st-assessment-learner-row {
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 76px;
+    padding: 10px 6px;
+    text-align: center;
+  }
+
+  .st-assessment-learner-row-text {
+    display: flex;
+    align-items: center;
+  }
+
+  .st-assessment-learner-row-name {
+    max-width: 68px;
+    font-size: var(--st-font-size-micro);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .st-assessment-learner-row-lrn {
+    display: none;
+  }
+
+  .st-assessment-learner-row.is-active {
+    box-shadow: inset 0 -3px 0 var(--st-secondary);
+  }
 }

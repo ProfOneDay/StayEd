@@ -64,8 +64,10 @@
                        known to StayEd before showing the enrollment wizard. -->
           <div class="st-enroll-step-card st-enroll-gate" data-enroll-gate>
             <h3 class="st-enroll-step-title">
-              <span class="material-symbols-outlined">how_to_reg</span>
-              Enroll a Learner
+              <span class="st-enroll-step-icon-tile">
+                <span class="material-symbols-outlined">how_to_reg</span>
+              </span>
+              Enroll a learner
             </h3>
 
             <div data-gate-options>
@@ -79,28 +81,34 @@
                   class="st-enroll-gate-option"
                   data-gate-choice="new"
                 >
-                  <span class="material-symbols-outlined">person_add</span>
+                  <span class="st-enroll-gate-option-icon">
+                    <span class="material-symbols-outlined">person_add</span>
+                  </span>
                   <span class="st-enroll-gate-option-text">
-                    <strong>New Student</strong>
+                    <strong>New student</strong>
                     <span
                       >Register a learner who has never been added to
                       StayEd.</span
                     >
                   </span>
+                  <span class="material-symbols-outlined st-enroll-gate-option-arrow">arrow_forward</span>
                 </button>
                 <button
                   type="button"
                   class="st-enroll-gate-option"
                   data-gate-choice="existing"
                 >
-                  <span class="material-symbols-outlined">manage_search</span>
+                  <span class="st-enroll-gate-option-icon st-enroll-gate-option-icon--teal">
+                    <span class="material-symbols-outlined">manage_search</span>
+                  </span>
                   <span class="st-enroll-gate-option-text">
-                    <strong>Existing Student</strong>
+                    <strong>Existing student</strong>
                     <span
                       >Add a learner already in the system to this
                       class.</span
                     >
                   </span>
+                  <span class="material-symbols-outlined st-enroll-gate-option-arrow">arrow_forward</span>
                 </button>
               </div>
             </div>
@@ -179,6 +187,18 @@
               <div class="st-enroll-progress-dot">8</div>
               <span class="st-enroll-progress-label">Done</span>
             </div>
+
+            <!-- Compact mobile-only progress readout (below 768px the dot
+                 stepper is hidden and this text+bar summary is shown instead). -->
+            <div class="st-enroll-progress-compact">
+              <p>
+                <span data-progress-compact-step>Step 1 of 8</span>
+                <span data-progress-compact-name>Personal</span>
+              </p>
+              <div class="st-enroll-progress-compact-track">
+                <div class="st-enroll-progress-compact-fill" data-progress-compact-fill></div>
+              </div>
+            </div>
           </div>
 
           <form id="enrollWizardForm" novalidate>
@@ -186,8 +206,13 @@
             <div class="st-enroll-step is-active" data-enroll-step="1">
               <div class="st-enroll-step-card">
                 <h3 class="st-enroll-step-title">
-                  <span class="material-symbols-outlined">person</span>
-                  Personal Information
+                  <span class="st-enroll-step-icon-tile">
+                    <span class="material-symbols-outlined">person</span>
+                  </span>
+                  <span class="st-enroll-step-title-text">
+                    Personal information
+                    <small>The learner's basic identifying details.</small>
+                  </span>
                 </h3>
                 <div class="st-enroll-fields">
                   <div class="st-enroll-field st-enroll-field--full">
@@ -202,13 +227,19 @@
                     />
                   </div>
                   <div class="st-enroll-field">
-                    <label for="wLrn">Learner Reference Number (LRN)</label>
+                    <label for="wLrn"
+                      >Learner Reference Number (LRN)
+                      <span class="required">*</span></label
+                    >
                     <input
                       id="wLrn"
                       type="text"
                       placeholder="12-digit LRN"
                       maxlength="12"
                     />
+                    <p class="st-field-hint">
+                      Also used to check enrollment history.
+                    </p>
                   </div>
                   <div class="st-enroll-field">
                     <label for="wSex"
@@ -244,8 +275,13 @@
             <div class="st-enroll-step" data-enroll-step="2">
               <div class="st-enroll-step-card">
                 <h3 class="st-enroll-step-title">
-                  <span class="material-symbols-outlined">call</span>
-                  Contact Information
+                  <span class="st-enroll-step-icon-tile">
+                    <span class="material-symbols-outlined">call</span>
+                  </span>
+                  <span class="st-enroll-step-title-text">
+                    Contact information
+                    <small>How to reach the learner or their household.</small>
+                  </span>
                 </h3>
                 <div class="st-enroll-fields">
                   <div class="st-enroll-field">
@@ -279,8 +315,13 @@
             <div class="st-enroll-step" data-enroll-step="3">
               <div class="st-enroll-step-card">
                 <h3 class="st-enroll-step-title">
-                  <span class="material-symbols-outlined">family_restroom</span>
-                  Guardian Information
+                  <span class="st-enroll-step-icon-tile">
+                    <span class="material-symbols-outlined">family_restroom</span>
+                  </span>
+                  <span class="st-enroll-step-title-text">
+                    Guardian information
+                    <small>Who to contact on the learner's behalf.</small>
+                  </span>
                 </h3>
                 <div class="st-enroll-fields">
                   <div class="st-enroll-field">
@@ -321,24 +362,32 @@
             <div class="st-enroll-step" data-enroll-step="4">
               <div class="st-enroll-step-card">
                 <h3 class="st-enroll-step-title">
-                  <span class="material-symbols-outlined">school</span>
-                  Learning Modality
+                  <span class="st-enroll-step-icon-tile">
+                    <span class="material-symbols-outlined">school</span>
+                  </span>
+                  <span class="st-enroll-step-title-text">
+                    Learning modality
+                    <small>How this learner will attend sessions.</small>
+                  </span>
                 </h3>
                 <div class="st-enroll-fields">
                   <div class="st-enroll-field st-enroll-field--full">
                     <label>Learning Modality</label>
-                    <div class="st-enroll-segment" data-segment="modality">
+                    <div class="st-enroll-segment st-enroll-segment--cards" data-segment="modality">
                       <button
                         type="button"
                         class="is-active"
                         data-value="Face-to-Face"
                       >
-                        F2F
+                        <span class="material-symbols-outlined">groups</span>
+                        Face-to-Face
                       </button>
                       <button type="button" data-value="Modular">
+                        <span class="material-symbols-outlined">menu_book</span>
                         Modular
                       </button>
                       <button type="button" data-value="Blended">
+                        <span class="material-symbols-outlined">devices</span>
                         Blended
                       </button>
                     </div>
@@ -353,8 +402,13 @@
             <div class="st-enroll-step" data-enroll-step="5">
               <div class="st-enroll-step-card">
                 <h3 class="st-enroll-step-title">
-                  <span class="material-symbols-outlined">hub</span>
-                  Class Context
+                  <span class="st-enroll-step-icon-tile">
+                    <span class="material-symbols-outlined">hub</span>
+                  </span>
+                  <span class="st-enroll-step-title-text">
+                    Class context
+                    <small>The class and CLC this learner is joining.</small>
+                  </span>
                 </h3>
                 <div class="st-settings-info-box" style="margin-bottom: 16px">
                   <span class="material-symbols-outlined">info</span>
@@ -371,6 +425,7 @@
                       id="wClc"
                       type="text"
                       placeholder="Loading…"
+                      class="st-enroll-field-locked"
                       readonly
                     />
                   </div>
@@ -389,6 +444,7 @@
                       id="wSchoolYear"
                       type="text"
                       placeholder="Loading…"
+                      class="st-enroll-field-locked"
                       readonly
                     />
                   </div>
@@ -400,8 +456,13 @@
             <div class="st-enroll-step" data-enroll-step="6">
               <div class="st-enroll-step-card">
                 <h3 class="st-enroll-step-title">
-                  <span class="material-symbols-outlined">auto_stories</span>
-                  Educational Background
+                  <span class="st-enroll-step-icon-tile">
+                    <span class="material-symbols-outlined">auto_stories</span>
+                  </span>
+                  <span class="st-enroll-step-title-text">
+                    Educational background
+                    <small>Prior schooling and household context.</small>
+                  </span>
                 </h3>
                 <div class="st-enroll-fields">
                   <div class="st-enroll-field st-enroll-field--full">
@@ -425,13 +486,7 @@
                     </select>
                   </div>
                   <div class="st-enroll-field">
-                    <label for="wOccupation"
-                      >Socio-economic Status
-                      <span style="font-weight:400;font-size:11px;"
-                        >(learner's job, or parent's/guardian's if not
-                        employed)</span
-                      ></label
-                    >
+                    <label for="wOccupation">Socio-economic Status</label>
                     <select id="wOccupation">
                       <option value="" disabled selected>Select Status</option>
                       <option>Unemployed / No Income</option>
@@ -442,6 +497,9 @@
                       <option>Retired / Pensioner</option>
                       <option>Other</option>
                     </select>
+                    <p class="st-field-hint">
+                      Learner's job, or parent's/guardian's if not employed.
+                    </p>
                   </div>
                   <div class="st-enroll-field">
                     <label for="wMonthlyIncome">Monthly Household Income (₱)</label>
@@ -469,8 +527,13 @@
             <div class="st-enroll-step" data-enroll-step="7">
               <div class="st-enroll-step-card">
                 <h3 class="st-enroll-step-title">
-                  <span class="material-symbols-outlined">fact_check</span>
-                  Review Information
+                  <span class="st-enroll-step-icon-tile">
+                    <span class="material-symbols-outlined">fact_check</span>
+                  </span>
+                  <span class="st-enroll-step-title-text">
+                    Review information
+                    <small>Confirm everything is correct before enrolling.</small>
+                  </span>
                 </h3>
                 <div data-review-content></div>
               </div>
@@ -479,11 +542,11 @@
             <!-- Step 8: Confirmation -->
             <div class="st-enroll-step" data-enroll-step="8">
               <div class="st-enroll-step-card st-enroll-confirm-panel">
-                <div class="setup-complete-icon st-clc-success-icon">
+                <div class="st-clc-success-icon">
                   <span class="material-symbols-outlined">check_circle</span>
                 </div>
                 <h2 class="st-clc-success-title">
-                  Learner Enrolled Successfully!
+                  Learner enrolled successfully
                 </h2>
                 <p class="st-clc-success-text" data-confirm-summary>
                   The learner has been added to the system.
@@ -500,7 +563,7 @@
                     class="st-btn st-btn-outline"
                     data-enroll-another
                   >
-                    Enroll Another Learner
+                    Enroll another learner
                   </button>
                 </div>
               </div>

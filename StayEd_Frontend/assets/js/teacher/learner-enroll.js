@@ -7,6 +7,28 @@ class LearnerEnrollWizard {
 
   static existingLearnerId = null;
 
+  static stepNames = {
+    1: "Personal",
+    2: "Contact",
+    3: "Guardian",
+    4: "Modality",
+    5: "Class",
+    6: "Education",
+    7: "Review",
+    8: "Done",
+  };
+
+  static initials(name) {
+    if (!name) return "?";
+    return String(name)
+      .replace(/,/g, " ")
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((w) => w[0]?.toUpperCase() || "")
+      .join("");
+  }
+
   static async init() {
     if (window.Guards) Guards.teacher();
 
@@ -100,11 +122,12 @@ class LearnerEnrollWizard {
         .map(
           (l) => `
             <button type="button" class="st-enroll-gate-result" data-gate-select="${l.id}">
-              <span class="material-symbols-outlined">person</span>
+              <span class="st-enroll-gate-result-avatar">${this.initials(l.name)}</span>
               <span class="st-enroll-gate-result-info">
                 <strong>${l.name}</strong>
                 <small>LRN ${l.lrn || "—"} · ${l.clc || "—"} · ${l.level || "—"}</small>
               </span>
+              <span class="st-enroll-gate-result-select">Select <span class="material-symbols-outlined">arrow_forward</span></span>
             </button>
           `,
         )
@@ -323,7 +346,7 @@ class LearnerEnrollWizard {
       .querySelector("[data-wizard-prev]")
       ?.addEventListener("click", () => {
         if (this.currentStep > 1) {
-          this.goToStep(this.currentStep - 1);
+          this.goToStep(this.currentStep - 1, "back");
         } else {
           // Step 1 has nowhere earlier to go inside the wizard itself --
           // send them back to the New/Existing Student gate instead.
@@ -344,16 +367,31 @@ class LearnerEnrollWizard {
         }
 
         if (this.currentStep < this.totalSteps) {
-          this.goToStep(this.currentStep + 1);
+          this.goToStep(this.currentStep + 1, "forward");
         }
       });
   }
 
-  static goToStep(step) {
+  static goToStep(step, direction = "forward") {
     this.currentStep = step;
 
     document.querySelectorAll("[data-enroll-step]").forEach((el) => {
-      el.classList.toggle("is-active", Number(el.dataset.enrollStep) === step);
+      const isTarget = Number(el.dataset.enrollStep) === step;
+
+      el.classList.remove(
+        "st-enroll-step--from-right",
+        "st-enroll-step--from-left",
+      );
+
+      if (isTarget) {
+        el.classList.add(
+          direction === "back"
+            ? "st-enroll-step--from-left"
+            : "st-enroll-step--from-right",
+        );
+      }
+
+      el.classList.toggle("is-active", isTarget);
     });
 
     this.updateProgress();
@@ -390,6 +428,20 @@ class LearnerEnrollWizard {
 
       el.classList.toggle("is-complete", step < this.currentStep);
     });
+
+    this.set(
+      "[data-progress-compact-step]",
+      `Step ${this.currentStep} of ${this.totalSteps}`,
+    );
+    this.set(
+      "[data-progress-compact-name]",
+      this.stepNames[this.currentStep] || "",
+    );
+
+    const fill = document.querySelector("[data-progress-compact-fill]");
+    if (fill) {
+      fill.style.width = `${(this.currentStep / this.totalSteps) * 100}%`;
+    }
   }
 
   static validateStep(step) {
@@ -439,9 +491,18 @@ class LearnerEnrollWizard {
 
     const val = (id) => document.getElementById(id)?.value || "\u2014";
 
+    const monthlyIncomeRaw = document.getElementById("wMonthlyIncome")?.value;
+    const monthlyIncome =
+      monthlyIncomeRaw !== undefined &&
+      monthlyIncomeRaw !== null &&
+      monthlyIncomeRaw !== ""
+        ? `\u20b1${Number(monthlyIncomeRaw).toLocaleString("en-PH")}`
+        : "\u2014";
+
     const sections = [
       {
-        title: "Personal Information",
+        title: "Personal information",
+        icon: "person",
         rows: [
           ["Full Name", val("wFullName")],
           ["LRN", val("wLrn")],
@@ -451,7 +512,8 @@ class LearnerEnrollWizard {
         ],
       },
       {
-        title: "Contact Information",
+        title: "Contact information",
+        icon: "call",
         rows: [
           ["Contact Number", val("wPhone")],
           ["Email", val("wEmail")],
@@ -459,7 +521,8 @@ class LearnerEnrollWizard {
         ],
       },
       {
-        title: "Guardian Information",
+        title: "Guardian information",
+        icon: "family_restroom",
         rows: [
           ["Guardian Name", val("wGuardianName")],
           ["Relationship", val("wGuardianRelation")],
@@ -467,13 +530,15 @@ class LearnerEnrollWizard {
         ],
       },
       {
-        title: "Learning Modality",
+        title: "Learning modality",
+        icon: "school",
         rows: [
           ["Modality", this.getSegmentValue("modality")],
         ],
       },
       {
-        title: "Class Context",
+        title: "Class context",
+        icon: "hub",
         rows: [
           ["CLC", val("wClc")],
           ["Distance Category", val("wDistance")],
@@ -481,10 +546,13 @@ class LearnerEnrollWizard {
         ],
       },
       {
-        title: "Educational Background",
+        title: "Educational background",
+        icon: "auto_stories",
         rows: [
           ["Re-enrollee", val("wReenrollee")],
           ["Employment Status", val("wEmployment")],
+          ["Socio-economic Status", val("wOccupation")],
+          ["Monthly Household Income", monthlyIncome],
           ["Last Grade Completed", val("wLastGrade")],
         ],
       },
@@ -494,7 +562,10 @@ class LearnerEnrollWizard {
       .map(
         (section) => `
             <div class="st-enroll-review-section">
-                <p class="st-enroll-review-section-title">${section.title}</p>
+                <p class="st-enroll-review-section-title">
+                    <span class="material-symbols-outlined">${section.icon}</span>
+                    ${section.title}
+                </p>
                 <div class="st-enroll-review-grid">
                     ${section.rows
                       .map(

@@ -723,8 +723,9 @@ class API {
     return this.delete(`/classes/${id}`);
   }
 
-  static getClassModules(classId) {
-    return this.get(`/classes/${classId}/modules`);
+  static getClassModules(classId, { includeArchived = false } = {}) {
+    const query = includeArchived ? "?includeArchived=true" : "";
+    return this.get(`/classes/${classId}/modules${query}`);
   }
 
   static createClassModule(classId, payload) {

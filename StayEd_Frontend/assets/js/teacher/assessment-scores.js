@@ -14,10 +14,10 @@ class AssessmentScores {
   // the FLT post-test total compared with the same component scales used by
   // the percentage column, instead of from the separate portfolio final grade.
   static AF5_ROWS = [
-    { type: "score", id: "pis", label: "PIS Score" },
+    { type: "score", id: "pis", label: "PIS score" },
     { type: "section", label: "Assessment for Basic Literacy (ABL)" },
-    { type: "status", id: "abl_neo", label: "Neo Literate" },
-    { type: "status", id: "abl_post", label: "Post Literate" },
+    { type: "status", id: "abl_neo", label: "Neo literate" },
+    { type: "status", id: "abl_post", label: "Post literate" },
     { type: "section", label: "Functional Literacy Assessment (FLT)" },
     { type: "subsection", label: "LS 1 - Communication Skills (English)", group: "ls1_en" },
     { type: "score", id: "flt_ls1_en_mc", label: "Multiple Choice", indent: true },
@@ -170,7 +170,7 @@ class AssessmentScores {
             <span class="st-assessment-avatar st-assessment-avatar--sm">${this.initials(l.name)}</span>
             <span class="st-assessment-learner-row-text">
               <span class="st-assessment-learner-row-name">${this.esc(l.name)}</span>
-              <span class="st-assessment-learner-row-lrn">LRN: ${this.esc(l.lrn || "—")}</span>
+              <span class="st-assessment-learner-row-lrn">LRN ${this.esc(l.lrn || "—")}</span>
             </span>
           </button>
         `,
@@ -216,7 +216,7 @@ class AssessmentScores {
     const badge = document.querySelector("[data-detail-assessed-badge]");
     if (!badge) return;
     const assessed = Boolean(this.currentForm?.assessed);
-    badge.textContent = assessed ? "Assessed" : "Not Assessed";
+    badge.textContent = assessed ? "Assessed" : "Not assessed";
     badge.classList.toggle("st-badge-success", assessed);
     badge.classList.toggle("st-badge-info", !assessed);
   }
@@ -230,7 +230,8 @@ class AssessmentScores {
     root.innerHTML = `
       <div class="st-assessment-table-card">
         <div class="st-assessment-table-head">
-          <h3>AF5 - ASSESSMENT RESULTS</h3>
+          <h3>AF5 · Assessment results</h3>
+          <span class="st-assessment-table-head-subtitle">Pre-test and post-test scores</span>
         </div>
         <table class="st-assessment-table st-assessment-table--af5">
           <colgroup>
@@ -241,21 +242,19 @@ class AssessmentScores {
           </colgroup>
           <thead>
             <tr>
-              <th>Assessment Component / Learning Area</th>
-              <th colspan="2">Score</th>
-              <th>Readiness / Competency</th>
-            </tr>
-            <tr class="st-assessment-subhead">
-              <th></th><th>Pre</th><th>Post</th><th></th>
+              <th>Component / learning area</th>
+              <th>Pre</th>
+              <th>Post</th>
+              <th>Likelihood / competency</th>
             </tr>
           </thead>
           <tbody>
             ${this.AF5_ROWS.map((row) => this.renderAf5Row(row, scores)).join("")}
             <tr class="st-assessment-total-row">
-              <td>Overall Score</td>
+              <td>Overall score</td>
               <td>${this.renderOverallScoreTotal(f.overallScorePre, "pre")}</td>
               <td>${this.renderOverallScoreTotal(f.overallScorePost, "post")}</td>
-              <td class="st-assessment-result-cell" data-overall-grade-cell>${this.renderOverallLikelihoodCell(f.overallScorePost)}</td>
+              <td class="st-assessment-result-cell" data-overall-grade-cell>${this.renderOverallLikelihoodCell(f.overallScorePost, this.hasAnyPostScoreInData(scores))}</td>
             </tr>
           </tbody>
         </table>
@@ -263,18 +262,18 @@ class AssessmentScores {
 
       <div class="st-assessment-table-card">
         <div class="st-assessment-table-head">
-          <h3>PRESENTATION PORTFOLIO ASSESSMENT</h3>
+          <h3>Presentation portfolio assessment</h3>
         </div>
         <table class="st-assessment-table">
           <thead>
             <tr>
-              <th>Activity / Component</th>
-              <th>Remarks / Raw Score</th>
+              <th>Activity / component</th>
+              <th>Remarks / raw score</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Date of Assessment</td>
+              <td>Date of assessment</td>
               <td><input type="date" class="st-assessment-input st-assessment-input--date" data-date-of-assessment value="${f.dateOfAssessment || ""}"></td>
             </tr>
             <tr class="st-assessment-section-row"><td colspan="2">Final Assessment of Work Samples (Raw Score)</td></tr>
@@ -287,7 +286,7 @@ class AssessmentScores {
               `,
             ).join("")}
             <tr class="st-assessment-total-row">
-              <td>TOTAL SCORE</td>
+              <td>Total score</td>
               <td><input type="text" class="st-assessment-input st-assessment-portfolio-work-sample-total" data-portfolio-total readonly value="${f.portfolioTotalScore ?? 0}"></td>
             </tr>
             <tr class="st-assessment-section-row"><td colspan="2">Inter-District Revalida</td></tr>
@@ -300,11 +299,11 @@ class AssessmentScores {
               `,
             ).join("")}
             <tr class="st-assessment-total-row">
-              <td>FINAL SCORE PERCENTAGE GRADE</td>
+              <td>Final score percentage grade</td>
               <td><input type="number" min="0" max="100" step="0.01" class="st-assessment-input st-assessment-input--rating" placeholder="e.g. 68" data-final-grade value="${this.escAttr(f.finalScorePercentageGrade)}"></td>
             </tr>
             <tr class="st-assessment-total-row">
-              <td>OVERALL FINAL ASSESSMENT RATING</td>
+              <td>Overall final assessment rating</td>
               <td><input type="number" min="0" max="100" step="0.01" class="st-assessment-input st-assessment-input--rating" placeholder="e.g. 98.55" data-overall-rating value="${this.escAttr(f.overallFinalAssessmentRating)}"></td>
             </tr>
           </tbody>
@@ -314,11 +313,15 @@ class AssessmentScores {
           <div>
             <span class="material-symbols-outlined">analytics</span>
             <div>
-              <p class="st-assessment-likelihood-kicker">A&amp;E Readiness Estimate</p>
-              <strong data-overall-likelihood-preview>${f.overallScorePercentage == null ? "Waiting for post-test scores" : `${this.roundPercent(f.overallScorePercentage)}%`}</strong>
+              <p class="st-assessment-likelihood-kicker">Likelihood of passing A&amp;E exam</p>
+              <strong data-overall-likelihood-preview data-level="${this.hasAnyPostScoreInData(scores) ? "readiness" : "neutral"}">${(() => {
+                if (!this.hasAnyPostScoreInData(scores)) return "Waiting for post-test scores";
+                const percentage = this.overallLikelihoodPercentage(f.overallScorePost);
+                return percentage == null ? "Waiting for post-test scores" : `${percentage}%`;
+              })()}</strong>
             </div>
           </div>
-          <p>Calculated from the learner's <strong>post-test total out of 98 items</strong> and converted to a <strong>0–100% readiness estimate</strong>. <strong>100% is the highest possible score.</strong> This is a project readiness estimate, not an official DepEd A&amp;E result.</p>
+          <p>Calculated from the learner's <strong>FLT post-test total</strong>. StayEd internal threshold: <strong>High likelihood = 70% or above</strong>; <strong>Low likelihood = below 70%</strong>. This is a project readiness rule, not an official DepEd A&amp;E passing mark.</p>
         </div>
       </div>
     `;
@@ -458,9 +461,9 @@ class AssessmentScores {
     `;
   }
 
-  static renderOverallLikelihoodCell(overallPostScore) {
+  static renderOverallLikelihoodCell(overallPostScore, hasAnyPost) {
     const percentage = this.overallLikelihoodPercentage(overallPostScore);
-    if (percentage == null) {
+    if (percentage == null || !hasAnyPost) {
       return `<span class="st-assessment-computed-empty">Waiting for post-test scores</span>`;
     }
     return `
@@ -469,6 +472,25 @@ class AssessmentScores {
         <span class="st-assessment-result-note">READINESS ESTIMATE</span>
       </div>
     `;
+  }
+
+  // The summed post-test total defaults to 0 (not null) when no FLT
+  // post-test field has been filled in yet, which made an unassessed
+  // learner's 0% total render as a real (misleadingly low) readiness
+  // result. These check whether any post field actually has a value,
+  // independent of what that value sums to.
+  static hasAnyPostScoreInData(scores = {}) {
+    return this.AF5_ROWS.some((row) => {
+      if (row.type !== "score" || !row.id) return false;
+      const v = scores[row.id]?.post;
+      return v !== null && v !== undefined && v !== "";
+    });
+  }
+
+  static hasAnyPostScoreInDom() {
+    return Array.from(
+      document.querySelectorAll('[data-score-part="post"]'),
+    ).some((el) => el.value !== null && el.value !== undefined && String(el.value).trim() !== "");
   }
 
   static overallLikelihoodPercentage(overallPostScore) {
@@ -542,13 +564,14 @@ class AssessmentScores {
 
     const updateLikelihoodPreview = () => {
       const overallPost = this.sumRowScores("post");
-      const percentage = this.overallLikelihoodPercentage(overallPost);
+      const hasAnyPost = this.hasAnyPostScoreInDom();
+      const percentage = hasAnyPost ? this.overallLikelihoodPercentage(overallPost) : null;
       if (preview) {
         preview.textContent = percentage == null ? "Waiting for post-test scores" : `${percentage}%`;
         preview.dataset.level = percentage == null ? "neutral" : "readiness";
       }
       if (overallGradeCell) {
-        overallGradeCell.innerHTML = this.renderOverallLikelihoodCell(overallPost);
+        overallGradeCell.innerHTML = this.renderOverallLikelihoodCell(overallPost, hasAnyPost);
       }
     };
 

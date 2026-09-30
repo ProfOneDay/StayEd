@@ -49,52 +49,82 @@
           </div>
         </div>
 
-        <div class="st-dash-grid">
-          <div class="st-panel st-panel-pad col-12">
-            <h3 class="st-panel-title st-mb-md">Frequently Asked Questions</h3>
-
-            <div class="st-faq-list">
+        <section class="st-help-section">
+          <h2 class="st-section-title">Frequently asked questions</h2>
+          <div class="st-faq-list" data-animate-cards>
+            <article class="st-faq-item" style="--i:0">
+              <span class="st-icon-tile"
+                ><span class="material-symbols-outlined"
+                  >monitoring</span
+                ></span
+              >
               <div>
-                <h4 class="st-faq-question">
+                <h3 class="st-faq-question">
                   How is a learner's risk level calculated?
-                </h4>
+                </h3>
                 <p class="st-faq-answer">
                   StayEd's prediction model considers attendance, module
-                  completion, and assessment scores to estimate each learner's
-                  probability of dropping out. Results are grouped into Low,
-                  Moderate, and High risk tiers.
+                  completion, and assessment scores to estimate each
+                  learner's probability of dropping out. Results are
+                  grouped into Low, Moderate, and High risk tiers.
                 </p>
+                <div class="st-faq-tiers" aria-hidden="true">
+                  <span class="low">Low</span>
+                  <span class="mod">Moderate</span>
+                  <span class="high">High</span>
+                </div>
               </div>
+            </article>
+            <article class="st-faq-item" style="--i:1">
+              <span class="st-icon-tile"
+                ><span class="material-symbols-outlined"
+                  >upload_file</span
+                ></span
+              >
               <div>
-                <h4 class="st-faq-question">
+                <h3 class="st-faq-question">
                   How do I import learner records?
-                </h4>
+                </h3>
                 <p class="st-faq-answer">
                   Go to Data Upload, then drag and drop a CSV or Excel
-                  masterlist. You'll be able to review and confirm the import
-                  before it's finalized.
+                  masterlist. You'll be able to review and confirm the
+                  import before it's finalized.
                 </p>
               </div>
+            </article>
+            <article class="st-faq-item" style="--i:2">
+              <span class="st-icon-tile st-icon-tile--risk"
+                ><span class="material-symbols-outlined">warning</span></span
+              >
               <div>
-                <h4 class="st-faq-question">
+                <h3 class="st-faq-question">
                   What should I do with a High Risk alert?
-                </h4>
+                </h3>
                 <p class="st-faq-answer">
-                  Visit Early Warning Alerts to see recommended interventions
-                  for each flagged learner, such as home visits or remedial
-                  modules.
+                  Visit Early Warning Alerts to see recommended
+                  interventions for each flagged learner, such as home
+                  visits or remedial modules.
                 </p>
               </div>
+            </article>
+            <article class="st-faq-item" style="--i:3">
+              <span class="st-icon-tile"
+                ><span class="material-symbols-outlined"
+                  >lock_person</span
+                ></span
+              >
               <div>
-                <h4 class="st-faq-question">Who can see my learners' data?</h4>
+                <h3 class="st-faq-question">
+                  Who can see my learners' data?
+                </h3>
                 <p class="st-faq-answer">
-                  Only you and authorized Division Administrators can access
-                  learner records tied to your assigned classes.
+                  Only you and authorized Division Administrators can
+                  access learner records tied to your assigned classes.
                 </p>
               </div>
-            </div>
+            </article>
           </div>
-        </div>
+        </section>
       </main>
 
       <div data-component="layout/footer"></div>
@@ -116,6 +146,17 @@
     <script src="../../assets/js/components/modal.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", () => Guards?.teacher?.());
+      (function playHelpEntrance() {
+        const start = () => {
+          const list = document.querySelector("[data-animate-cards]");
+          if (!list) return;
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => list.classList.add("is-inview")),
+          );
+        };
+        document.addEventListener("components:loaded", start);
+        document.addEventListener("DOMContentLoaded", () => setTimeout(start, 400));
+      })();
     </script>
   </body>
 </html>

@@ -14,6 +14,7 @@ class ModuleManagement {
   static selectedEnrollmentIds = new Set();
 
   static catalogFilters = { search: "", status: "all", sortBy: "number" };
+  static catalogView = "active"; // "active" | "archived"
   static detailFilters = { search: "", stage: "all", modality: "all" };
 
   static async init() {
@@ -117,23 +118,60 @@ class ModuleManagement {
     this.updateUrl();
 
     try {
-      const response = await API.getClassModules(this.classId);
+      const response = await API.getClassModules(this.classId, { includeArchived: true });
       this.modules = response.data || [];
       this.totalLearners = response.totalLearners || 0;
       this.summary = response.summary || null;
-      this.renderCatalogView();
+      this.renderCatalogView(true);
     } catch (error) {
       console.error("[ModuleManagement] Unable to load module catalog", error);
       Toast?.error("Unable to load this class's module catalog.");
     }
   }
 
+  // initials("Dela Cruz, Juan") -> "DJ" -- presentational only, used by the
+  // detail table's learner-cell avatar.
+  static initials(name) {
+    return String(name || "?")
+      .replace(",", "")
+      .split(" ")
+      .filter(Boolean)
+      .map((w) => w[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
+  }
+
+  // Cards/rows settle in with a fade+rise only on a "real" render (initial
+  // load, or opening/leaving a module's detail) -- not on the re-render
+  // that runs on every catalog search/filter keystroke, which just needs
+  // content visible immediately with no replay.
+  static revealAnimated(root, animate) {
+    const targets = [
+      root.querySelector("[data-animate]"),
+      root.querySelector("[data-animate-rows]"),
+    ].filter(Boolean);
+    const reveal = () => targets.forEach((el) => el.classList.add("is-inview"));
+    if (animate) requestAnimationFrame(() => requestAnimationFrame(reveal));
+    else reveal();
+  }
+
+  // Modules currently in the toggled view (active vs archived), before the
+  // search/status/sort toolbar filters are applied -- also used for the
+  // "N modules" count in the card header, so that count always matches
+  // whichever tab is showing rather than the combined active+archived total.
+  static modulesInView() {
+    const wantArchived = this.catalogView === "archived";
+    return this.modules.filter((m) => Boolean(m.isArchived) === wantArchived);
+  }
+
   static filteredSortedModules() {
     const { search, status, sortBy } = this.catalogFilters;
-    let list = this.modules.filter((m) => {
+    const inArchivedView = this.catalogView === "archived";
+    let list = this.modulesInView().filter((m) => {
       if (search && !m.title.toLowerCase().includes(search.toLowerCase())) return false;
-      if (status === "released" && m.releaseStatus !== "Released") return false;
-      if (status === "not_released" && m.releaseStatus !== "Not Released") return false;
+      if (!inArchivedView && status === "released" && m.releaseStatus !== "Released") return false;
+      if (!inArchivedView && status === "not_released" && m.releaseStatus !== "Not Released") return false;
       return true;
     });
     list = [...list].sort((a, b) => {
@@ -143,83 +181,98 @@ class ModuleManagement {
     return list;
   }
 
-  static renderCatalogView() {
+  static renderCatalogView(animate = false) {
     const root = document.querySelector("[data-view-root]");
     if (!root) return;
 
     const list = this.filteredSortedModules();
     const s = this.summary || {};
+    const released = s.releasedModules ?? 0;
+    const notYet = s.notYetReleased ?? 0;
+    const isArchivedView = this.catalogView === "archived";
+    const archivedCount = this.modules.filter((m) => m.isArchived).length;
 
     root.innerHTML = `
-      <div class="st-module-summary-row">
-        <div class="st-module-summary-stat">
+      <div class="st-module-summary-row" data-animate>
+        <div class="st-module-summary-stat st-module-summary-stat--total">
           <span class="st-module-summary-value">${s.totalModules ?? 0}</span>
-          <span class="st-module-summary-label">Total Modules</span>
+          <span class="st-module-summary-label">Total modules</span>
         </div>
-        <div class="st-module-summary-stat">
-          <span class="st-module-summary-value">${s.releasedModules ?? 0}</span>
-          <span class="st-module-summary-label">Released</span>
-        </div>
-        <div class="st-module-summary-stat">
-          <span class="st-module-summary-value">${s.notYetReleased ?? 0}</span>
-          <span class="st-module-summary-label">Not Yet Released</span>
+        <div class="st-module-summary-stat st-module-summary-stat--bar">
+          <div class="st-release-bar" role="img" aria-label="${released} released, ${notYet} not yet released">
+            <span class="rel" style="flex-grow:${released}"></span>
+            <span class="not" style="flex-grow:${notYet}"></span>
+          </div>
+          <div class="st-release-legend">
+            <span><i style="background:var(--st-secondary)"></i><b>${released}</b>released</span>
+            <span><i style="background:#cfd5de"></i><b>${notYet}</b>not yet released</span>
+          </div>
         </div>
         <div class="st-module-summary-stat">
           <span class="st-module-summary-value">${s.activeTransactions ?? 0}</span>
-          <span class="st-module-summary-label">Active Modules</span>
+          <span class="st-module-summary-label">Active modules</span>
         </div>
         <div class="st-module-summary-stat">
           <span class="st-module-summary-value">${s.returnedTransactions ?? 0}</span>
-          <span class="st-module-summary-label">Returned Modules</span>
+          <span class="st-module-summary-label">Returned modules</span>
         </div>
       </div>
 
-      <div class="st-panel" data-catalog-panel>
-        <div class="st-panel-head st-panel-head--flush">
-          <h4 class="st-panel-title">Module Catalog</h4>
+      <section class="st-panel st-table-card" data-catalog-panel>
+        <div class="st-table-card-head">
+          <h2 class="st-table-card-title">${isArchivedView ? "Archived modules" : "Module catalog"}</h2>
+          <span class="st-table-card-count">${this.modulesInView().length} modules</span>
         </div>
         <div class="st-module-toolbar">
-          <div class="st-search st-module-search">
+          <label class="st-search st-module-search">
             <span class="material-symbols-outlined">search</span>
-            <input type="text" placeholder="Search modules..." data-catalog-search value="${this.catalogFilters.search}">
-          </div>
-          <select data-catalog-status-filter>
-            <option value="all" ${this.catalogFilters.status === "all" ? "selected" : ""}>All Statuses</option>
+            <input type="text" placeholder="Search modules" data-catalog-search value="${this.catalogFilters.search}">
+          </label>
+          <select class="st-select" data-catalog-status-filter ${isArchivedView ? "disabled" : ""}>
+            <option value="all" ${this.catalogFilters.status === "all" ? "selected" : ""}>All statuses</option>
             <option value="released" ${this.catalogFilters.status === "released" ? "selected" : ""}>Released</option>
-            <option value="not_released" ${this.catalogFilters.status === "not_released" ? "selected" : ""}>Not Released</option>
+            <option value="not_released" ${this.catalogFilters.status === "not_released" ? "selected" : ""}>Not released</option>
           </select>
-          <select data-catalog-sort>
-            <option value="number" ${this.catalogFilters.sortBy === "number" ? "selected" : ""}>Sort by Module Number</option>
-            <option value="status" ${this.catalogFilters.sortBy === "status" ? "selected" : ""}>Sort by Status</option>
+          <select class="st-select" data-catalog-sort>
+            <option value="number" ${this.catalogFilters.sortBy === "number" ? "selected" : ""}>Sort by module number</option>
+            <option value="status" ${this.catalogFilters.sortBy === "status" ? "selected" : ""}>Sort by status</option>
           </select>
+          <button type="button" class="st-btn st-btn-outline st-mm-view-toggle" data-catalog-view-toggle>
+            <span class="material-symbols-outlined">${isArchivedView ? "unarchive" : "archive"}</span>
+            ${isArchivedView ? "View active modules" : `View archived${archivedCount ? ` (${archivedCount})` : ""}`}
+          </button>
         </div>
         <div class="st-table-scroll">
-          <table class="st-data-table">
+          <table class="st-data-table st-mm-table">
             <thead>
               <tr>
                 <th>Module</th>
-                <th>Strand</th>
-                <th>Title/Topic</th>
-                <th>Module Status</th>
-                <th>Learners</th>
+                <th>Status</th>
+                <th>${isArchivedView ? "Action" : "Learners released"}</th>
+                ${isArchivedView ? "" : "<th></th>"}
               </tr>
             </thead>
-            <tbody>
+            <tbody data-animate-rows>
               ${
                 list.length
-                  ? list.map((m) => this.renderCatalogRow(m)).join("")
-                  : `<tr><td colspan="5">
-                      <div class="st-empty" style="border:none;background:transparent;">
+                  ? list.map((m, i) => this.renderCatalogRow(m, i)).join("")
+                  : `<tr><td colspan="${isArchivedView ? 3 : 4}" class="st-mm-empty-cell">
+                      <div class="st-empty st-empty--flush">
                         <span class="material-symbols-outlined">inventory_2</span>
-                        <p class="st-empty-title">${this.modules.length ? "No modules match your filters" : "No modules set up yet"}</p>
-                        <p class="st-empty-text">${this.modules.length ? "Try clearing the search or status filter." : "Add this class's first module (e.g. \"Module 1\") to get started."}</p>
+                        <p class="st-empty-title">${isArchivedView ? "No archived modules" : this.modulesInView().length ? "No modules match your filters" : "No modules set up yet"}</p>
+                        <p class="st-empty-text">${isArchivedView ? "Modules you archive from a class will show up here." : this.modulesInView().length ? "Try clearing the search or status filter." : "Add this class's first module (e.g. \"Module 1\") to get started."}</p>
+                        ${
+                          !isArchivedView && !this.modulesInView().length
+                            ? `<button type="button" class="st-btn st-btn-primary st-mm-empty-add" data-empty-add-module><span class="material-symbols-outlined">add</span>Add module</button>`
+                            : ""
+                        }
                       </div>
                     </td></tr>`
               }
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
     `;
 
     root.querySelector("[data-catalog-search]")?.addEventListener("input", (e) => {
@@ -230,6 +283,10 @@ class ModuleManagement {
       this.catalogFilters.status = e.target.value;
       this.renderCatalogView();
     });
+    root.querySelector("[data-catalog-view-toggle]")?.addEventListener("click", () => {
+      this.catalogView = isArchivedView ? "active" : "archived";
+      this.renderCatalogView(true);
+    });
     root.querySelector("[data-catalog-sort]")?.addEventListener("change", (e) => {
       this.catalogFilters.sortBy = e.target.value;
       this.renderCatalogView();
@@ -238,20 +295,61 @@ class ModuleManagement {
     root.querySelectorAll("[data-module-row]").forEach((tr) => {
       tr.addEventListener("click", () => this.openModuleDetail(Number(tr.dataset.moduleRow)));
     });
+    root.querySelector("[data-empty-add-module]")?.addEventListener("click", () => this.openAddModuleModal());
+    root.querySelectorAll("[data-unarchive-module]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.unarchiveModule(Number(btn.dataset.unarchiveModule));
+      });
+    });
+
+    this.revealAnimated(root, animate);
   }
 
-  static renderCatalogRow(m) {
-    const statusClass = this.badgeClassFor(m.releaseStatus);
+  static renderCatalogRow(m, i) {
+    const statusClass = m.isArchived ? "info" : this.badgeClassFor(m.releaseStatus);
+    const statusLabel = m.isArchived
+      ? "Archived"
+      : m.releaseStatus === "Not Released"
+        ? "Not released"
+        : m.releaseStatus;
+    const pct = m.totalLearners ? Math.round((m.releasedCount / m.totalLearners) * 100) : 0;
+    const moduleCell = `
+      <td data-col="learner">
+        <div class="st-module-cell">
+          <span class="st-module-num">${m.sequenceNumber ?? ""}</span>
+          <div>
+            <div class="st-module-title">${m.title}</div>
+            <div class="st-module-topic"><span class="st-strand-chip">${m.strandCode || "—"}</span>${m.topic ? " " + m.topic : ""}</div>
+          </div>
+        </div>
+      </td>
+      <td data-col="status"><span class="st-badge st-badge-${statusClass}">${statusLabel}</span></td>
+    `;
+
+    if (m.isArchived) {
+      return `
+        <tr data-module-row="${m.id}" style="--i:${i}">
+          ${moduleCell}
+          <td data-col="action" class="is-right">
+            <button type="button" class="st-btn st-btn-outline st-mm-unarchive-btn" data-unarchive-module="${m.id}">
+              <span class="material-symbols-outlined">unarchive</span>Unarchive
+            </button>
+          </td>
+        </tr>
+      `;
+    }
+
     return `
-      <tr data-module-row="${m.id}" style="cursor:pointer;">
-        <td><strong>Module ${m.sequenceNumber ?? ""}</strong></td>
-        <td>${m.strandCode || "—"}</td>
-        <td>
-          ${m.title}
-          ${m.topic ? `<div class="st-module-topic">${m.topic}</div>` : ""}
+      <tr data-module-row="${m.id}" style="--i:${i}">
+        ${moduleCell}
+        <td data-col="learners">
+          <div class="st-learners-cell">
+            <span><b>${m.releasedCount} of ${m.totalLearners}</b> learners</span>
+            <div class="st-mini-track"><i style="--w:${pct}%"></i></div>
+          </div>
         </td>
-        <td><span class="st-badge st-badge-${statusClass}">${m.releaseStatus}</span></td>
-        <td>${m.releasedCount} of ${m.totalLearners}</td>
+        <td data-col="go" class="is-right"><span class="material-symbols-outlined st-row-go">chevron_right</span></td>
       </tr>
     `;
   }
@@ -264,24 +362,24 @@ class ModuleManagement {
       .join("");
 
     Modal.show({
-      title: "Add Module",
+      title: "Add module",
       size: "sm",
-      confirmLabel: "Save Module",
+      confirmLabel: "Save module",
       asyncConfirm: true,
       message: `
         <div class="st-schedule-modal-field">
-          <label for="amStrand">Learning Strand</label>
+          <label for="amStrand">Learning strand</label>
           <select id="amStrand">
             <option value="" selected disabled>Select strand…</option>
             ${strandOptionsHtml}
           </select>
         </div>
         <div class="st-schedule-modal-field">
-          <label for="amTitle">Module Title <span class="required">*</span></label>
+          <label for="amTitle">Module title <span class="required">*</span></label>
           <input id="amTitle" type="text" placeholder="e.g. Communication Skills">
         </div>
         <div class="st-schedule-modal-field">
-          <label for="amTopic">Unit/Topic (optional)</label>
+          <label for="amTopic">Unit/topic (optional)</label>
           <input id="amTopic" type="text" placeholder="e.g. Reading Comprehension">
         </div>
         <div class="st-schedule-modal-field">
@@ -322,21 +420,21 @@ class ModuleManagement {
       .join("");
 
     Modal.show({
-      title: `Edit Module ${module.sequenceNumber ?? ""}`,
+      title: `Edit module ${module.sequenceNumber ?? ""}`,
       size: "sm",
-      confirmLabel: "Save Changes",
+      confirmLabel: "Save changes",
       asyncConfirm: true,
       message: `
         <div class="st-schedule-modal-field">
-          <label for="emStrand">Learning Strand</label>
+          <label for="emStrand">Learning strand</label>
           <select id="emStrand">${strandOptionsHtml}</select>
         </div>
         <div class="st-schedule-modal-field">
-          <label for="emTitle">Module Title</label>
+          <label for="emTitle">Module title</label>
           <input id="emTitle" type="text" value="${module.title}">
         </div>
         <div class="st-schedule-modal-field">
-          <label for="emTopic">Unit/Topic (optional)</label>
+          <label for="emTopic">Unit/topic (optional)</label>
           <input id="emTopic" type="text" value="${module.topic || ""}">
         </div>
         <div class="st-schedule-modal-field">
@@ -346,7 +444,7 @@ class ModuleManagement {
         <div style="display:flex;justify-content:flex-end;margin-top:12px;">
           <button type="button" class="st-btn-text" data-remove-edit-module>
             <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:-3px;">delete</span>
-            Remove from Catalog
+            Remove from catalog
           </button>
         </div>
       `,
@@ -386,9 +484,9 @@ class ModuleManagement {
     const module = this.modules.find((m) => m.id === classModuleId);
 
     Modal.show({
-      title: "Remove Module from Catalog",
+      title: "Remove module from catalog",
       size: "sm",
-      confirmLabel: "Remove Module",
+      confirmLabel: "Remove module",
       asyncConfirm: true,
       message: `Remove <strong>${module?.title || "this module"}</strong> from the active catalog? Every learner's release and return history for it will be kept.`,
       onConfirm: async () => {
@@ -403,6 +501,17 @@ class ModuleManagement {
         }
       },
     });
+  }
+
+  static async unarchiveModule(classModuleId) {
+    try {
+      await API.unarchiveClassModule(this.classId, classModuleId);
+      Toast?.success("Module restored to the active catalog.");
+      await this.loadCatalog();
+    } catch (error) {
+      console.error("[ModuleManagement] Unarchive failed", error);
+      Toast?.error(error?.data?.message || "Unable to unarchive this module.");
+    }
   }
 
   // ==================================================================
@@ -423,7 +532,7 @@ class ModuleManagement {
     // loaded, and after an edit, so the detail header can't show a stale
     // title/strand from before the edit.
     try {
-      const response = await API.getClassModules(this.classId);
+      const response = await API.getClassModules(this.classId, { includeArchived: true });
       this.modules = response.data || [];
       this.totalLearners = response.totalLearners || 0;
       this.summary = response.summary || null;
@@ -431,10 +540,10 @@ class ModuleManagement {
       console.error("[ModuleManagement] Unable to load module catalog", error);
     }
 
-    await this.loadRoster({ resetSelection: true });
+    await this.loadRoster({ resetSelection: true, animate: true });
   }
 
-  static async loadRoster({ resetSelection = false } = {}) {
+  static async loadRoster({ resetSelection = false, animate = false } = {}) {
     try {
       const [rosterResponse, catalogResponse] = await Promise.all([
         API.getClassModuleRoster(this.classId, this.activeModuleId),
@@ -443,7 +552,7 @@ class ModuleManagement {
         // detail header (Overall Status badge) reads from `this.modules`,
         // not from the roster response, so skipping this left the header
         // showing a stale status right after a release/return.
-        API.getClassModules(this.classId),
+        API.getClassModules(this.classId, { includeArchived: true }),
       ]);
       this.roster = rosterResponse.data || [];
       this.modules = catalogResponse.data || [];
@@ -460,7 +569,7 @@ class ModuleManagement {
           this.roster.filter((r) => this.stageFor(r) === "Not Released").map((r) => r.enrollmentId),
         );
       }
-      this.renderDetailView();
+      this.renderDetailView(animate);
     } catch (error) {
       console.error("[ModuleManagement] Unable to load roster", error);
       Toast?.error("Unable to load this module's student list.");
@@ -495,7 +604,7 @@ class ModuleManagement {
     });
   }
 
-  static renderDetailView() {
+  static renderDetailView(animate = false) {
     const root = document.querySelector("[data-view-root]");
     if (!root) return;
 
@@ -509,48 +618,64 @@ class ModuleManagement {
     const releasableIds = list.filter((r) => this.stageFor(r) === "Not Released").map((r) => r.enrollmentId);
     const allSelected = releasableIds.length > 0 && releasableIds.every((id) => this.selectedEnrollmentIds.has(id));
 
-    root.innerHTML = `
-      <div class="st-panel st-panel-pad">
-        <div style="display:flex;justify-content:flex-end;">
-          <button type="button" class="st-btn-text" data-back-to-catalog>
-            <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:-3px;">arrow_back</span>
-            Back to Modules
-          </button>
-        </div>
+    // Stage summary bar: counts from the FULL roster (not the filtered
+    // list), so it always reflects the whole module regardless of the
+    // active search/stage/modality filter.
+    const notCount = this.roster.filter((r) => this.stageFor(r) === "Not Released").length;
+    const relCount = this.roster.filter((r) => this.stageFor(r) === "Released").length;
+    const retCount = this.roster.filter((r) => this.stageFor(r) === "Returned").length;
 
+    root.innerHTML = `
+      <button type="button" class="st-back-link" data-back-to-catalog>
+        <span class="material-symbols-outlined">arrow_back</span>All modules
+      </button>
+      <section class="st-panel st-table-card" data-animate>
         <div class="st-module-detail-header">
           <div>
-            <h3 class="st-panel-title">
-              Module ${module?.sequenceNumber ?? ""} — ${module?.strandCode || ""} ${module?.strandCode ? "–" : ""} ${module?.title || ""}
-            </h3>
-            <p class="st-panel-subtitle">
-              Class: ${this.classInfo?.level || ""} · Overall Status:
-              <span class="st-badge st-badge-${this.badgeClassFor(module?.releaseStatus)}">${module?.releaseStatus || "—"}</span>
+            <h2 class="st-module-detail-title">
+              <span class="st-module-num">${module?.sequenceNumber ?? ""}</span>${module?.title || ""}
+            </h2>
+            <p class="st-module-detail-meta">
+              <span class="st-strand-chip">${module?.strandCode || "—"}</span>
+              ${module?.topic ? `Topic: ${module.topic}<span>·</span>` : ""}
+              <span class="st-badge st-badge-${this.badgeClassFor(module?.releaseStatus)}">${module?.releaseStatus === "Not Released" ? "Not released" : module?.releaseStatus || "—"}</span>
             </p>
-            ${module?.topic ? `<p class="st-panel-subtitle">Topic: ${module.topic}</p>` : ""}
           </div>
           <div class="st-table-actions">
-            <button type="button" class="st-btn st-btn-outline st-btn-xs" data-edit-active-module>Edit Module</button>
-            <button type="button" class="st-btn st-btn-primary st-btn-xs" data-release-selected ${selectedCount ? "" : "disabled"}>
-              Release${selectedCount ? ` (${selectedCount})` : ""}
+            <button type="button" class="st-btn st-btn-outline st-btn-sm" data-edit-active-module><span class="material-symbols-outlined">edit</span>Edit module</button>
+            <button type="button" class="st-btn st-btn-primary st-btn-sm" data-release-selected ${selectedCount ? "" : "disabled"}>
+              <span class="material-symbols-outlined">send</span>Release${selectedCount ? ` (${selectedCount})` : ""}
             </button>
-            <button type="button" class="st-btn-text" data-archive-active-module>Archive</button>
+            <button type="button" class="st-btn-danger-text" data-archive-active-module><span class="material-symbols-outlined">archive</span>Archive</button>
+          </div>
+        </div>
+
+        <div class="st-stage-summary">
+          <div class="st-stage-bar" role="img" aria-label="${notCount} not released, ${relCount} released, ${retCount} returned">
+            <span class="not" style="flex-grow:${notCount}"></span>
+            <span class="rel" style="flex-grow:${relCount}"></span>
+            <span class="ret" style="flex-grow:${retCount}"></span>
+          </div>
+          <div class="st-stage-legend">
+            <span><i style="background:#cfd5de"></i><b>${notCount}</b> not released</span>
+            <span><i style="background:#f39422"></i><b>${relCount}</b> released</span>
+            <span><i style="background:var(--st-secondary)"></i><b>${retCount}</b> returned</span>
           </div>
         </div>
 
         <div class="st-module-toolbar">
-          <div class="st-search st-module-search">
+          <label class="st-search st-module-search">
             <span class="material-symbols-outlined">search</span>
-            <input type="text" placeholder="Search learners..." data-detail-search value="${this.detailFilters.search}">
-          </div>
-          <select data-detail-stage-filter>
-            <option value="all" ${this.detailFilters.stage === "all" ? "selected" : ""}>All Stages</option>
-            <option value="Not Released" ${this.detailFilters.stage === "Not Released" ? "selected" : ""}>Not Released</option>
+            <input type="text" placeholder="Search learners" data-detail-search value="${this.detailFilters.search}">
+          </label>
+          <select class="st-select" data-detail-stage-filter>
+            <option value="all" ${this.detailFilters.stage === "all" ? "selected" : ""}>All stages</option>
+            <option value="Not Released" ${this.detailFilters.stage === "Not Released" ? "selected" : ""}>Not released</option>
             <option value="Released" ${this.detailFilters.stage === "Released" ? "selected" : ""}>Released</option>
             <option value="Returned" ${this.detailFilters.stage === "Returned" ? "selected" : ""}>Returned</option>
           </select>
-          <select data-detail-modality-filter>
-            <option value="all" ${this.detailFilters.modality === "all" ? "selected" : ""}>All Modalities</option>
+          <select class="st-select" data-detail-modality-filter>
+            <option value="all" ${this.detailFilters.modality === "all" ? "selected" : ""}>All modalities</option>
             <option value="Face-to-Face" ${this.detailFilters.modality === "Face-to-Face" ? "selected" : ""}>Face-to-Face</option>
             <option value="Modular" ${this.detailFilters.modality === "Modular" ? "selected" : ""}>Modular</option>
             <option value="Blended" ${this.detailFilters.modality === "Blended" ? "selected" : ""}>Blended</option>
@@ -558,10 +683,10 @@ class ModuleManagement {
         </div>
 
         <div class="st-table-scroll">
-          <table class="st-data-table">
+          <table class="st-data-table st-mm-table st-mm-table--detail">
             <thead>
               <tr>
-                <th style="width:32px;">
+                <th class="checkbox-col">
                   ${
                     releasableIds.length
                       ? `<input type="checkbox" data-select-all-learners title="Select all students" ${allSelected ? "checked" : ""}>`
@@ -571,17 +696,16 @@ class ModuleManagement {
                 <th>Learner</th>
                 <th>Modality</th>
                 <th>Stage</th>
-                <th>Release Date</th>
-                <th>Return Date</th>
-                <th>Action</th>
+                <th>Dates</th>
+                <th class="is-right">Action</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody data-animate-rows>
               ${
                 list.length
-                  ? list.map((r) => this.renderDetailRow(r)).join("")
-                  : `<tr><td colspan="7">
-                      <div class="st-empty" style="border:none;background:transparent;">
+                  ? list.map((r, i) => this.renderDetailRow(r, i)).join("")
+                  : `<tr><td colspan="6" style="padding:0">
+                      <div class="st-empty st-empty--flush">
                         <span class="material-symbols-outlined">group_off</span>
                         <p class="st-empty-title">No learners match your filters</p>
                       </div>
@@ -590,7 +714,7 @@ class ModuleManagement {
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
     `;
 
     root.querySelector("[data-back-to-catalog]")?.addEventListener("click", () => this.loadCatalog());
@@ -657,9 +781,11 @@ class ModuleManagement {
         if (r) this.confirmUndoReturn(r);
       });
     });
+
+    this.revealAnimated(root, animate);
   }
 
-  static renderDetailRow(r) {
+  static renderDetailRow(r, i) {
     const stage = this.stageFor(r);
     const badgeClass = this.badgeClassFor(stage);
     const checked = this.selectedEnrollmentIds.has(r.enrollmentId) ? "checked" : "";
@@ -668,26 +794,25 @@ class ModuleManagement {
     if (stage === "Not Released") {
       actionHtml = `<button type="button" class="st-btn st-btn-outline st-btn-xs" data-release-one="${r.enrollmentId}">Release</button>`;
     } else if (stage === "Released") {
-      actionHtml = `<button type="button" class="st-btn st-btn-primary st-btn-xs" data-return-one="${r.enrollmentId}">Mark as Returned</button>`;
+      actionHtml = `<button type="button" class="st-btn st-btn-primary st-btn-xs" data-return-one="${r.enrollmentId}"><span class="material-symbols-outlined" style="font-size:17px">assignment_return</span>Mark as returned</button>`;
     } else if (stage === "Returned") {
-      actionHtml = `<button type="button" class="st-btn-text" data-undo-return="${r.enrollmentId}">Undo</button>`;
+      actionHtml = `<button type="button" class="st-btn-text" data-undo-return="${r.enrollmentId}"><span class="material-symbols-outlined" style="font-size:17px;vertical-align:-4px">undo</span>Undo</button>`;
     }
 
     const releaseDateHtml = r.releaseDate
-      ? `${r.releaseDate} <button type="button" class="st-icon-btn" data-edit-release-date="${r.enrollmentId}" title="Edit release date" style="vertical-align:middle;border:none;background:none;cursor:pointer;color:var(--st-on-surface-variant);">
-          <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:-3px;">edit</span>
+      ? `${r.releaseDate} <button type="button" class="st-icon-btn-sm st-icon-btn-sm--tiny" data-edit-release-date="${r.enrollmentId}" title="Edit release date">
+          <span class="material-symbols-outlined">edit</span>
         </button>`
       : "—";
 
     return `
-      <tr>
-        <td>${stage === "Not Released" ? `<input type="checkbox" data-select-learner="${r.enrollmentId}" ${checked}>` : ""}</td>
-        <td>${r.name}</td>
-        <td>${this.modalityPill(r.modality)}</td>
-        <td><span class="st-badge st-badge-${badgeClass}">${stage}</span></td>
-        <td>${releaseDateHtml}</td>
-        <td>${r.returnDate || "—"}</td>
-        <td>${actionHtml}</td>
+      <tr style="--i:${i}" class="${checked ? "is-selected" : ""}">
+        <td class="checkbox-col" data-col="select">${stage === "Not Released" ? `<input type="checkbox" data-select-learner="${r.enrollmentId}" ${checked}>` : ""}</td>
+        <td data-col="learner"><div class="st-learner-cell"><span class="st-avatar-initials">${this.initials(r.name)}</span><span class="st-module-title">${r.name}</span></div></td>
+        <td data-col="modality">${this.modalityPill(r.modality)}</td>
+        <td data-col="stage"><span class="st-badge st-badge-${badgeClass}">${stage === "Not Released" ? "Not released" : stage}</span></td>
+        <td data-col="dates"><div class="st-date-cell"><span>Released ${releaseDateHtml}</span><span class="st-muted">Returned ${r.returnDate || "—"}</span></div></td>
+        <td data-col="actions" class="is-right">${actionHtml}</td>
       </tr>
     `;
   }
@@ -718,11 +843,11 @@ class ModuleManagement {
       candidates.length > 1
         ? `
           <div class="st-schedule-modal-field">
-            <label>Students Receiving This Module</label>
+            <label>Students receiving this module</label>
             <div class="st-roster-checklist" id="rmChecklist">
               <div class="st-roster-checklist-row" style="font-weight:600;">
                 <input type="checkbox" id="rmSelectAll" checked>
-                <label for="rmSelectAll" style="cursor:pointer;margin:0;font-weight:600;">Select All (${candidates.length})</label>
+                <label for="rmSelectAll" style="cursor:pointer;margin:0;font-weight:600;">Select all (${candidates.length})</label>
               </div>
               ${candidates
                 .map(
@@ -740,18 +865,18 @@ class ModuleManagement {
         : `<p style="color:var(--st-on-surface-variant);font-size:0.875rem;">${candidates[0]?.name || ""}</p>`;
 
     Modal.show({
-      title: candidates.length === 1 ? "Release Module" : `Release Module to ${candidates.length} Learners`,
+      title: candidates.length === 1 ? "Release module" : `Release module to ${candidates.length} learners`,
       size: "sm",
-      confirmLabel: "Confirm Release",
+      confirmLabel: "Confirm release",
       asyncConfirm: true,
       message: `
         ${recipientsHtml}
         <div class="st-schedule-modal-field">
-          <label for="rmReleaseDate">Release Date</label>
+          <label for="rmReleaseDate">Release date</label>
           <input type="date" id="rmReleaseDate" value="${today}" max="${today}">
         </div>
         <div class="st-schedule-modal-field">
-          <label for="rmPlannedReturn">Planned Return Date</label>
+          <label for="rmPlannedReturn">Planned return date</label>
           <input type="date" id="rmPlannedReturn" value="${plannedReturn}">
           <p class="st-mrf-subtitle" style="margin-top:4px;">
             Auto-suggested (${this.defaultDurationDays} days from release). Adjust if needed.
@@ -809,14 +934,14 @@ class ModuleManagement {
     const current = this.parseLongDate(rosterRow.releaseDate) || today;
 
     Modal.show({
-      title: "Edit Release Date",
+      title: "Edit release date",
       size: "sm",
-      confirmLabel: "Save Changes",
+      confirmLabel: "Save changes",
       asyncConfirm: true,
       message: `
         <p style="color:var(--st-on-surface-variant);font-size:0.875rem;">${rosterRow.name}</p>
         <div class="st-schedule-modal-field">
-          <label for="erdReleaseDate">Release Date</label>
+          <label for="erdReleaseDate">Release date</label>
           <input type="date" id="erdReleaseDate" value="${current}" max="${today}">
         </div>
         <p class="st-mrf-subtitle" style="margin-top:4px;">
@@ -849,14 +974,14 @@ class ModuleManagement {
     const today = new Date().toISOString().slice(0, 10);
 
     Modal.show({
-      title: "Mark as Returned",
+      title: "Mark as returned",
       size: "sm",
-      confirmLabel: "Confirm Return",
+      confirmLabel: "Confirm return",
       asyncConfirm: true,
       message: `
         <p style="color:var(--st-on-surface-variant);font-size:0.875rem;">${rosterRow.name}</p>
         <div class="st-schedule-modal-field">
-          <label for="rtReturnDate">Return Date</label>
+          <label for="rtReturnDate">Return date</label>
           <input type="date" id="rtReturnDate" value="${today}" max="${today}">
         </div>
       `,
@@ -882,9 +1007,9 @@ class ModuleManagement {
     if (!window.Modal) return;
 
     Modal.show({
-      title: "Undo Return?",
+      title: "Undo return?",
       size: "sm",
-      confirmLabel: "Undo Return",
+      confirmLabel: "Undo return",
       asyncConfirm: true,
       message: `
         <p><strong>${rosterRow.name}</strong></p>
