@@ -127,6 +127,15 @@ body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page=
     box-shadow:0 0 0 3px rgba(0,106,104,.12);
 }
 
+/* While viewing Archived learners the status filter is disabled -- every
+   row in that view already has status "Archived", so the filter has
+   nothing left to do (same treatment as Manage Modules' status filter). */
+body[data-page="Student Registry"] .st-select:disabled{
+    background-color:var(--st-background, #f3f5f8);
+    color:var(--st-on-surface-variant);
+    cursor:not-allowed;
+}
+
 body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-text-btn{
     appearance:none;
     display:inline-flex;

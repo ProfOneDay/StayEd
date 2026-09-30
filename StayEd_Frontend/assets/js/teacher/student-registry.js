@@ -23,6 +23,8 @@ class StudentRegistry {
     status: "",
     sortKey: null,
     sortDir: 1,
+    // "active" | "archived" -- mirrors Manage Modules' catalogView toggle.
+    registryView: "active",
   };
 
   static async init() {
@@ -44,6 +46,7 @@ class StudentRegistry {
       this.state.all = response.data || [];
 
       this.renderStats();
+      this.renderViewChrome();
 
       this.apply();
     } catch (error) {
@@ -144,6 +147,39 @@ class StudentRegistry {
       const selected = this.state.all.filter((l) => this.state.selected.has(l.id));
       this.exportLearners(selected);
     });
+
+    on("[data-mgmt-view-toggle]", "click", () => {
+      this.state.registryView = this.state.registryView === "archived" ? "active" : "archived";
+      this.state.page = 1;
+      this.state.selected.clear();
+
+      this.renderViewChrome();
+      this.apply();
+    });
+  }
+
+  // Updates the parts of the toolbar/head that depend on which view (active
+  // vs archived) is showing -- title, the view-toggle button itself, and
+  // disabling the status filter while viewing archived learners (their
+  // status is always "Archived", so the filter has nothing to do there).
+  static renderViewChrome() {
+    const isArchivedView = this.state.registryView === "archived";
+    const archivedCount = this.state.all.filter((l) => l.status === "Archived").length;
+
+    this.set("[data-mgmt-title]", isArchivedView ? "Archived learners" : "All learners");
+
+    const toggleIcon = document.querySelector("[data-mgmt-view-toggle-icon]");
+    if (toggleIcon) toggleIcon.textContent = isArchivedView ? "unarchive" : "archive";
+
+    this.set(
+      "[data-mgmt-view-toggle-label]",
+      isArchivedView
+        ? "View active learners"
+        : `View archived${archivedCount ? ` (${archivedCount})` : ""}`,
+    );
+
+    const statusFilter = document.querySelector("[data-mgmt-filter-status]");
+    if (statusFilter) statusFilter.disabled = isArchivedView;
   }
 
   static exportLearners(learners) {
@@ -162,7 +198,9 @@ class StudentRegistry {
   }
 
   static renderStats() {
-    const all = this.state.all;
+    // Archived learners are excluded from the roster summary -- they've
+    // effectively been taken out of the active caseload.
+    const all = this.state.all.filter((l) => l.status !== "Archived");
 
     const count = (level) => all.filter((l) => l.risk === level).length;
 
@@ -234,7 +272,10 @@ class StudentRegistry {
   static apply() {
     let rows = [...this.state.all];
 
-    const { search, level, risk, status } = this.state;
+    const { search, level, risk, status, registryView } = this.state;
+    const wantArchived = registryView === "archived";
+
+    rows = rows.filter((l) => (l.status === "Archived") === wantArchived);
 
     if (search) {
       rows = rows.filter(
@@ -246,7 +287,7 @@ class StudentRegistry {
 
     if (level) rows = rows.filter((l) => l.level === level);
     if (risk) rows = rows.filter((l) => l.risk === risk);
-    if (status) rows = rows.filter((l) => l.status === status);
+    if (!wantArchived && status) rows = rows.filter((l) => l.status === status);
 
     if (this.state.sortKey) {
       const key = this.state.sortKey;
@@ -308,13 +349,28 @@ class StudentRegistry {
     const pageRows = this.currentPageRows();
 
     if (!pageRows.length) {
+      const isArchivedView = this.state.registryView === "archived";
+      const hasFilters = Boolean(
+        this.state.search || this.state.level || this.state.risk || this.state.status,
+      );
+
+      const icon = isArchivedView ? "inventory_2" : "search_off";
+      const title = isArchivedView
+        ? "No archived learners"
+        : "No learners found";
+      const text = isArchivedView
+        ? "Learners you archive will show up here."
+        : hasFilters
+          ? "Try adjusting your search or filters."
+          : "No learners have been enrolled yet.";
+
       body.innerHTML = `
                 <tr>
                     <td colspan="8">
                         <div class="st-empty" style="border:none;background:transparent;">
-                            <span class="material-symbols-outlined">search_off</span>
-                            <p class="st-empty-title">No learners found</p>
-                            <p class="st-empty-text">Try adjusting your search or filters.</p>
+                            <span class="material-symbols-outlined">${icon}</span>
+                            <p class="st-empty-title">${title}</p>
+                            <p class="st-empty-text">${text}</p>
                         </div>
                     </td>
                 </tr>
@@ -420,11 +476,13 @@ class StudentRegistry {
                                 <span class="material-symbols-outlined">more_vert</span>
                             </button>
                             <div class="st-row-menu-list">
+                                ${isArchived ? "" : `
                                 <button type="button" data-run-prediction="${l.id}"
                                     ${this.state.predicting.has(String(l.id)) ? "disabled" : ""}>
                                     <span class="material-symbols-outlined">${this.state.predicting.has(String(l.id)) ? "progress_activity" : "bolt"}</span>
                                     Run prediction
                                 </button>
+                                `}
                                 <button type="button" data-archive-learner="${l.id}">
                                     <span class="material-symbols-outlined">${isArchived ? "unarchive" : "archive"}</span>
                                     ${isArchived ? "Restore" : "Archive"}
@@ -490,6 +548,12 @@ class StudentRegistry {
     if (count) {
       count.textContent = `${n} selected`;
     }
+
+    const isArchivedView = this.state.registryView === "archived";
+    const archiveIcon = document.querySelector("[data-mgmt-bulk-archive-icon]");
+    const archiveLabel = document.querySelector("[data-mgmt-bulk-archive-label]");
+    if (archiveIcon) archiveIcon.textContent = isArchivedView ? "unarchive" : "archive";
+    if (archiveLabel) archiveLabel.textContent = isArchivedView ? "Restore" : "Archive";
   }
 
   static renderPagination() {
@@ -573,6 +637,8 @@ class StudentRegistry {
 
       l.status = archiving ? "Archived" : "Active";
 
+      this.renderStats();
+      this.renderViewChrome();
       this.apply();
 
       Toast?.success(archiving ? "Learner archived." : "Learner restored.");
@@ -617,32 +683,40 @@ class StudentRegistry {
 
     if (!ids.length || !window.Modal) return;
 
+    const restoring = this.state.registryView === "archived";
+    const newStatus = restoring ? "Active" : "Archived";
+
     Modal.show({
-      title: "Archive Learners",
-      message: `Archive <strong>${ids.length}</strong> selected learner(s)? They can be restored later.`,
+      title: restoring ? "Restore Learners" : "Archive Learners",
+      message: restoring
+        ? `Restore <strong>${ids.length}</strong> selected learner(s) to active?`
+        : `Archive <strong>${ids.length}</strong> selected learner(s)? They can be restored later.`,
       onConfirm: async () => {
-        let archived = 0;
+        let done = 0;
 
         for (const id of ids) {
           try {
-            await API.updateLearner(id, { status: "Archived" });
+            await API.updateLearner(id, { status: newStatus });
             const learner = this.state.all.find(
               (item) => String(item.id) === String(id),
             );
-            if (learner) learner.status = "Archived";
-            archived += 1;
+            if (learner) learner.status = newStatus;
+            done += 1;
           } catch (error) {
             console.error(error);
           }
         }
 
         this.state.selected.clear();
+        this.renderStats();
+        this.renderViewChrome();
         this.apply();
 
-        if (archived === ids.length) {
-          Toast?.success(`${archived} learner(s) archived.`);
+        const verb = restoring ? "restored" : "archived";
+        if (done === ids.length) {
+          Toast?.success(`${done} learner(s) ${verb}.`);
         } else {
-          Toast?.warning(`${archived} of ${ids.length} learner(s) were archived.`);
+          Toast?.warning(`${done} of ${ids.length} learner(s) were ${verb}.`);
         }
       },
     });
@@ -675,6 +749,7 @@ class StudentRegistry {
         this.state.selected.clear();
 
         this.renderStats();
+        this.renderViewChrome();
 
         this.apply();
 

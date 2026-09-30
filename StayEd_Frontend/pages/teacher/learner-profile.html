@@ -51,13 +51,13 @@
         </div>
 
         <!-- Profile Hero -->
-        <div class="st-profile-hero" data-profile-hero>
+        <div class="st-profile-hero st-profile-hero--neutral" data-profile-hero data-animate>
           <!-- Learner identity -->
           <section class="st-profile-hero-left">
             <div class="st-profile-hero-avatar" data-profile-avatar>?</div>
             <div class="st-profile-hero-heading">
               <h2 class="st-profile-hero-name" data-profile-name>Loading…</h2>
-              <p class="st-profile-hero-lrn">LRN: <span data-profile-lrn>—</span></p>
+              <p class="st-profile-hero-lrn">LRN <span data-profile-lrn>—</span></p>
               <div class="st-profile-chip-row">
                 <span class="st-profile-level-chip" data-profile-level>—</span>
               </div>
@@ -98,10 +98,10 @@
           </section>
 
           <!-- Current risk -->
-          <section class="st-profile-hero-risk-panel" aria-label="Current learner risk">
-            <p class="st-profile-risk-panel-label">Current Risk</p>
-            <div class="st-profile-risk-panel-icon" aria-hidden="true">
-              <span class="material-symbols-outlined">warning</span>
+          <section class="st-profile-hero-risk-panel is-neutral" aria-label="Current learner risk" data-profile-risk-panel>
+            <p class="st-profile-risk-panel-label">Current risk</p>
+            <div class="st-profile-risk-panel-icon" aria-hidden="true" data-profile-risk-icon>
+              <span class="material-symbols-outlined">help</span>
             </div>
             <div class="st-profile-risk-panel-badge" data-profile-risk-badge></div>
             <p class="st-profile-risk-panel-helper" data-profile-risk-helper></p>
@@ -112,22 +112,22 @@
             <div class="st-profile-hero-actions">
               <button type="button" class="st-btn st-btn-primary" data-profile-assign-btn>
                 <span class="material-symbols-outlined">person_add</span>
-                <span>Assign Intervention</span>
+                <span>Assign intervention</span>
                 <span class="material-symbols-outlined st-btn-tail">chevron_right</span>
               </button>
               <a href="#" class="st-btn st-btn-outline" data-profile-class-btn hidden>
                 <span class="material-symbols-outlined">school</span>
-                <span>View Class</span>
+                <span>View class</span>
                 <span class="material-symbols-outlined st-btn-tail">chevron_right</span>
               </a>
               <a href="student-registry.html" class="st-btn st-btn-outline">
                 <span class="material-symbols-outlined">visibility</span>
-                <span>View Student Registry</span>
+                <span>View student registry</span>
                 <span class="material-symbols-outlined st-btn-tail">chevron_right</span>
               </a>
               <button type="button" class="st-btn st-btn-outline" data-profile-edit-btn>
                 <span class="material-symbols-outlined">edit</span>
-                <span>Edit Learner</span>
+                <span>Edit learner</span>
                 <span class="material-symbols-outlined st-btn-tail">chevron_right</span>
               </button>
             </div>
@@ -139,11 +139,9 @@
              control) -->
         <div class="st-portal-share-card" data-portal-share-card>
           <div class="st-portal-share-head">
+            <span class="st-icon-tile"><span class="material-symbols-outlined">visibility</span></span>
             <div class="st-portal-share-head-text">
-              <p class="st-portal-share-title">
-                <span class="material-symbols-outlined">visibility</span>
-                Student View Link
-              </p>
+              <p class="st-portal-share-title">Student view link</p>
               <p class="st-portal-share-sub">
                 Anyone with this link can view this learner's modules and
                 risk tag &mdash; no login needed, like sharing a Google Drive
@@ -158,19 +156,22 @@
             </label>
           </div>
           <div class="st-portal-share-link-row" data-portal-share-link-row hidden>
-            <input
-              type="text"
-              readonly
-              data-portal-share-link-input
-              aria-label="Student view link"
-            />
+            <div class="st-portal-share-link">
+              <span class="material-symbols-outlined">link</span>
+              <input
+                type="text"
+                readonly
+                data-portal-share-link-input
+                aria-label="Student view link"
+              />
+            </div>
             <button
               type="button"
               class="st-btn st-btn-outline"
               data-portal-share-copy-btn
             >
               <span class="material-symbols-outlined">content_copy</span>
-              Copy Link
+              Copy link
             </button>
           </div>
         </div>
@@ -184,7 +185,7 @@
             role="tab"
             aria-selected="true"
           >
-            Overview
+            <span class="material-symbols-outlined">dashboard</span>Overview
           </button>
           <button
             type="button"
@@ -193,7 +194,7 @@
             role="tab"
             aria-selected="false"
           >
-            Monitoring History
+            <span class="material-symbols-outlined">history</span>Monitoring history
           </button>
           <button
             type="button"
@@ -202,7 +203,7 @@
             role="tab"
             aria-selected="false"
           >
-            Risk Explanation
+            <span class="material-symbols-outlined">insights</span>Risk explanation
           </button>
           <button
             type="button"
@@ -211,135 +212,149 @@
             role="tab"
             aria-selected="false"
           >
-            Interventions
+            <span class="material-symbols-outlined">support_agent</span>Interventions
           </button>
         </div>
 
         <!-- OVERVIEW PANEL -->
         <div class="st-profile-panel is-active" data-profile-panel="overview">
-          <div class="st-profile-metrics st-profile-metrics--engagement">
-            <div class="st-metric-card">
-              <p class="st-metric-card-label">Module Rate</p>
-              <span class="st-metric-card-value" data-metric-module-rate>—</span>
-              <p class="st-metric-card-subtext" data-metric-module-rate-text></p>
-            </div>
-            <div class="st-metric-card">
-              <p class="st-metric-card-label">Modules Released</p>
-              <span class="st-metric-card-value" data-metric-released>—</span>
-            </div>
-            <div class="st-metric-card">
-              <p class="st-metric-card-label">Modules Returned</p>
-              <span class="st-metric-card-value" data-metric-returned>—</span>
-            </div>
-            <div class="st-metric-card">
-              <p class="st-metric-card-label">Active Modules</p>
-              <span class="st-metric-card-value" data-metric-active>—</span>
-            </div>
-            <div class="st-metric-card">
-              <p class="st-metric-card-label">Last Learner Activity</p>
-              <span
-                class="st-metric-card-value st-metric-card-value--sm"
-                data-metric-last-activity
-                >—</span
-              >
-            </div>
-            <div class="st-metric-card">
-              <p class="st-metric-card-label">Days Since Last Return</p>
-              <span class="st-metric-card-value" data-metric-days-since>—</span>
-            </div>
-            <div class="st-metric-card">
-              <p class="st-metric-card-label">Overdue Modules</p>
-              <span class="st-metric-card-value" data-metric-overdue>—</span>
-            </div>
-            <div class="st-metric-card">
-              <p class="st-metric-card-label">Attendance Rate</p>
-              <span class="st-metric-card-value" data-metric-attendance-rate>—</span>
-              <p class="st-metric-card-subtext" data-metric-attendance-rate-text></p>
-            </div>
+          <div class="st-profile-metrics" data-animate>
+            <section class="st-metric-group st-metric-group--modules">
+              <div class="st-metric-group-head">
+                <span class="st-icon-tile"><span class="material-symbols-outlined">menu_book</span></span>
+                <h3>Modules</h3>
+              </div>
+              <div class="st-metric-card st-metric-card--hero">
+                <p class="st-metric-card-label">Module rate</p>
+                <span class="st-metric-card-value" data-metric-module-rate>—</span>
+                <div class="st-metric-rate-bar"><i data-metric-module-rate-bar></i></div>
+                <p class="st-metric-card-subtext" data-metric-module-rate-text></p>
+              </div>
+              <div class="st-metric-card">
+                <p class="st-metric-card-label">Modules released</p>
+                <span class="st-metric-card-value" data-metric-released>—</span>
+              </div>
+              <div class="st-metric-card">
+                <p class="st-metric-card-label">Modules returned</p>
+                <span class="st-metric-card-value" data-metric-returned>—</span>
+              </div>
+              <div class="st-metric-card">
+                <p class="st-metric-card-label">Active modules</p>
+                <span class="st-metric-card-value" data-metric-active>—</span>
+              </div>
+              <div class="st-metric-card">
+                <p class="st-metric-card-label">Overdue modules</p>
+                <span class="st-metric-card-value" data-metric-overdue>—</span>
+              </div>
+            </section>
+            <section class="st-metric-group st-metric-group--engagement">
+              <div class="st-metric-group-head">
+                <span class="st-icon-tile st-icon-tile--teal"><span class="material-symbols-outlined">event_repeat</span></span>
+                <h3>Engagement</h3>
+              </div>
+              <div class="st-metric-card st-metric-card--wide">
+                <p class="st-metric-card-label">Last learner activity</p>
+                <span
+                  class="st-metric-card-value st-metric-card-value--sm"
+                  data-metric-last-activity
+                  >—</span
+                >
+              </div>
+              <div class="st-metric-card">
+                <p class="st-metric-card-label">Days since last return</p>
+                <span class="st-metric-card-value" data-metric-days-since>—</span>
+              </div>
+              <div class="st-metric-card st-metric-card--attendance">
+                <p class="st-metric-card-label">Attendance rate</p>
+                <span class="st-metric-card-value" data-metric-attendance-rate>—</span>
+                <p class="st-metric-card-subtext" data-metric-attendance-rate-text></p>
+              </div>
+            </section>
           </div>
 
-          <!-- Task 1: learner performance progress using cumulative module return rate. -->
-          <div class="st-performance-progress-card">
-            <div class="st-performance-progress-head">
-              <div>
-                <h4 class="st-panel-title" style="font-size:1.125rem">
-                  Student Performance Progress
-                </h4>
-                <p class="st-panel-subtitle">
-                  Cumulative module return rate over time for this learner.
-                </p>
-              </div>
-              <div class="st-performance-progress-current">
-                <span>Current Progress</span>
-                <strong data-performance-progress-current>—</strong>
-              </div>
-            </div>
-            <div
-              class="st-performance-progress-chart"
-              data-performance-progress-chart
-              role="img"
-              aria-label="Student performance progress line graph"
-            ></div>
-          </div>
-
-          <!-- Task 2: separate A&E passing-chance predictor. This is based
-               on recorded learner performance and is intentionally not the
-               dropout/non-completion risk model shown elsewhere. -->
-          <div class="st-exam-readiness-card" data-exam-readiness-card>
-            <div class="st-exam-readiness-head">
-              <div class="st-exam-readiness-title-wrap">
-                <span class="material-symbols-outlined st-exam-readiness-icon">school</span>
+          <div class="st-overview-row">
+            <!-- Task 1: learner performance progress using cumulative module return rate. -->
+            <section class="st-performance-progress-card st-card" data-animate>
+              <div class="st-performance-progress-head">
                 <div>
-                  <h4 class="st-panel-title" style="font-size:1.125rem;margin:0;">
-                    A&amp;E Exam Passing Chance
-                  </h4>
-                  <p class="st-panel-subtitle">
-                    Performance-based estimate of whether the learner is currently on track to pass the ALS A&amp;E exam.
+                  <h4 class="st-card-title">Student performance progress</h4>
+                  <p class="st-card-sub">
+                    Cumulative module return rate over time for this learner.
                   </p>
                 </div>
-              </div>
-              <span class="st-exam-readiness-badge st-exam-readiness-badge--neutral" data-exam-readiness-badge>
-                Not enough data
-              </span>
-            </div>
-
-            <div class="st-exam-readiness-body">
-              <div class="st-exam-readiness-score-block">
-                <p class="st-exam-readiness-score-label">Readiness Score</p>
-                <div class="st-exam-readiness-score-line">
-                  <strong data-exam-readiness-score>—</strong>
-                  <span data-exam-readiness-confidence>Waiting for assessment scores</span>
+                <div class="st-performance-progress-current">
+                  <span>Current progress</span>
+                  <strong data-performance-progress-current>—</strong>
                 </div>
-                <div class="st-exam-readiness-progress" aria-hidden="true">
-                  <span data-exam-readiness-bar></span>
+              </div>
+              <div
+                class="st-performance-progress-chart"
+                data-performance-progress-chart
+                role="img"
+                aria-label="Student performance progress line graph"
+              ></div>
+            </section>
+
+            <!-- Task 2: separate A&E passing-chance predictor. This is based
+                 on recorded learner performance and is intentionally not the
+                 dropout/non-completion risk model shown elsewhere. -->
+            <section class="st-exam-readiness-card st-card" data-exam-readiness-card data-animate>
+              <div class="st-exam-readiness-head">
+                <div class="st-exam-readiness-title-wrap">
+                  <span class="st-icon-tile"><span class="material-symbols-outlined">school</span></span>
+                  <div>
+                    <h4 class="st-card-title">A&amp;E exam passing chance</h4>
+                    <p class="st-card-sub">
+                      Performance-based estimate of whether the learner is currently on track to pass the ALS A&amp;E exam.
+                    </p>
+                  </div>
                 </div>
-                <p class="st-exam-readiness-summary" data-exam-readiness-summary>
-                  Record at least one module pre-test or post-test score to estimate the learner's passing chance.
-                </p>
+                <span class="st-exam-readiness-badge st-exam-readiness-badge--neutral" data-exam-readiness-badge>
+                  Not enough data
+                </span>
               </div>
 
-              <div class="st-exam-readiness-factors" data-exam-readiness-factors>
-                <p class="st-assessment-empty">No performance factors available yet.</p>
-              </div>
-            </div>
+              <div class="st-exam-readiness-body">
+                <div class="st-exam-readiness-score-block">
+                  <p class="st-exam-readiness-score-label">Readiness score</p>
+                  <div class="st-exam-readiness-score-line">
+                    <strong data-exam-readiness-score>—</strong>
+                    <span data-exam-readiness-confidence>Waiting for assessment scores</span>
+                  </div>
+                  <div class="st-exam-readiness-progress" aria-hidden="true">
+                    <span data-exam-readiness-bar></span>
+                    <i class="st-exam-cutoff" style="left:70%" title="70/100 cutoff"></i>
+                  </div>
+                  <p class="st-exam-readiness-summary" data-exam-readiness-summary>
+                    Record at least one module pre-test or post-test score to estimate the learner's passing chance.
+                  </p>
+                </div>
 
-            <p class="st-exam-readiness-note" data-exam-readiness-note>
-              Performance-based readiness estimate only; this is not an official A&amp;E result or passing mark.
-            </p>
+                <div class="st-exam-readiness-factors" data-exam-readiness-factors>
+                  <p class="st-assessment-empty">No performance factors available yet.</p>
+                </div>
+              </div>
+
+              <p class="st-exam-readiness-note" data-exam-readiness-note>
+                <span class="material-symbols-outlined">info</span>
+                Performance-based readiness estimate only; this is not an official A&amp;E result or passing mark.
+              </p>
+            </section>
           </div>
 
           <!-- ALS Accreditation & Equivalency assessment history -- a
                separate, learner-level exam record independent of any one
                module (a learner can retake it across cycles). -->
-          <div class="st-assessment-card">
+          <section class="st-assessment-card st-card">
             <div class="st-assessment-card-head">
-              <div>
-                <p class="st-panel-title" style="font-size:1.125rem;margin:0;">
-                  ALS Assessment
-                </p>
-                <p class="st-panel-subtitle">
-                  Accreditation &amp; Equivalency (A&amp;E) test results for this learner.
-                </p>
+              <div class="st-head-with-icon">
+                <span class="st-icon-tile"><span class="material-symbols-outlined">assignment</span></span>
+                <div>
+                  <p class="st-card-title">ALS assessment</p>
+                  <p class="st-card-sub">
+                    Accreditation &amp; Equivalency (A&amp;E) test results for this learner.
+                  </p>
+                </div>
               </div>
               <button
                 type="button"
@@ -347,86 +362,66 @@
                 data-add-assessment-btn
               >
                 <span class="material-symbols-outlined">add</span>
-                Record Assessment
+                Record assessment
               </button>
             </div>
             <div data-assessment-list>
               <p class="st-assessment-empty">No assessments recorded yet.</p>
             </div>
-          </div>
+          </section>
 
-          <div class="st-risk-trend-card">
-            <div
-              style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-              "
-            >
+          <section class="st-risk-trend-card st-card" data-animate>
+            <div class="st-risk-trend-head">
               <div>
-                <h4 class="st-panel-title" style="font-size:1.125rem">
-                  Risk Trend Over Time
-                </h4>
-                <p class="st-panel-subtitle">
+                <h4 class="st-card-title">Risk trend over time</h4>
+                <p class="st-card-sub">
                   Risk level assigned at each recorded assessment.
                 </p>
               </div>
               <div class="st-risk-trend-legend">
                 <div class="st-risk-trend-legend-item">
-                  <span
-                    class="st-risk-trend-legend-dot"
-                    style="background: var(--st-risk-high)"
-                  ></span
-                  >High
+                  <span class="st-risk-trend-legend-dot st-risk-trend-legend-dot--high"></span>High
                 </div>
                 <div class="st-risk-trend-legend-item">
-                  <span
-                    class="st-risk-trend-legend-dot"
-                    style="background: var(--st-risk-moderate)"
-                  ></span
-                  >Moderate
+                  <span class="st-risk-trend-legend-dot st-risk-trend-legend-dot--moderate"></span>Moderate
                 </div>
                 <div class="st-risk-trend-legend-item">
-                  <span
-                    class="st-risk-trend-legend-dot"
-                    style="background: var(--st-risk-low)"
-                  ></span
-                  >Low
+                  <span class="st-risk-trend-legend-dot st-risk-trend-legend-dot--low"></span>Low
                 </div>
               </div>
             </div>
-            <div class="st-risk-trend-chart" data-risk-trend-chart>
-              <div class="st-risk-trend-zone st-risk-trend-zone--high">
-                <span style="color: var(--st-risk-high)">High Risk</span>
+            <div class="st-risk-trend-body">
+              <div class="st-risk-trend-chart" data-risk-trend-chart>
+                <div class="st-risk-trend-zone st-risk-trend-zone--high">
+                  <span>High risk</span>
+                </div>
+                <div class="st-risk-trend-zone st-risk-trend-zone--moderate">
+                  <span>Moderate risk</span>
+                </div>
+                <div class="st-risk-trend-zone st-risk-trend-zone--low">
+                  <span>Low risk</span>
+                </div>
+                <div class="st-risk-trend-points" data-risk-trend-points></div>
               </div>
-              <div class="st-risk-trend-zone st-risk-trend-zone--moderate">
-                <span style="color: var(--st-risk-moderate)"
-                  >Moderate Risk</span
-                >
-              </div>
-              <div class="st-risk-trend-zone st-risk-trend-zone--low">
-                <span style="color: var(--st-risk-low)">Low Risk</span>
-              </div>
-              <div class="st-risk-trend-points" data-risk-trend-points></div>
+              <div class="st-risk-trend-list" data-risk-trend-list></div>
             </div>
-            <div class="st-risk-trend-list" data-risk-trend-list></div>
-          </div>
+          </section>
 
           <div class="st-profile-grid">
             <div class="st-stack-col-lg">
-              <div class="st-panel">
+              <div class="st-panel st-card st-card--flush">
                 <div class="st-panel-head st-panel-head--flush">
-                  <h4 class="st-panel-title">Recent Monitoring Activity</h4>
+                  <h4 class="st-card-title">Recent monitoring activity</h4>
                   <button
                     type="button"
                     class="st-panel-link"
                     data-view-all-monitoring
                   >
-                    View All
+                    View all<span class="material-symbols-outlined">arrow_forward</span>
                   </button>
                 </div>
                 <div class="st-table-scroll">
-                  <table class="st-data-table">
+                  <table class="st-data-table st-lp-table">
                     <thead>
                       <tr>
                         <th>Category</th>
@@ -441,9 +436,9 @@
             </div>
 
             <div class="st-stack-col-lg">
-              <div class="st-sidebar-info-card st-activity-panel">
-                <h4 class="st-sidebar-info-title">Recent Activity</h4>
-                <div class="st-timeline st-timeline--compact" data-activity-feed></div>
+              <div class="st-activity-panel st-card">
+                <h4 class="st-card-title">Recent activity</h4>
+                <div class="st-timeline st-timeline--compact" data-activity-feed data-animate-list></div>
               </div>
             </div>
           </div>
@@ -451,10 +446,10 @@
 
         <!-- MONITORING HISTORY PANEL -->
         <div class="st-profile-panel" data-profile-panel="monitoring">
-          <div class="st-panel st-panel-pad">
-            <div style="margin-bottom: 24px">
-              <h3 class="st-panel-title">Monitoring History</h3>
-              <p class="st-panel-subtitle">
+          <div class="st-panel st-card">
+            <div class="st-card-head-block">
+              <h3 class="st-card-title">Monitoring history</h3>
+              <p class="st-card-sub">
                 What has happened over time — module releases, returns,
                 interventions, and risk updates.
               </p>
@@ -467,87 +462,81 @@
                   class="st-history-chip is-active"
                   data-history-filter="all"
                 >
-                  All Records
+                  All records
                 </button>
                 <button
                   type="button"
                   class="st-history-chip"
                   data-history-filter="month"
                 >
-                  This Month
+                  This month
                 </button>
                 <button
                   type="button"
                   class="st-history-chip"
                   data-history-filter="semester"
                 >
-                  This Semester
+                  This semester
                 </button>
               </div>
-              <div class="st-search" style="min-width: 280px">
+              <label class="st-search">
                 <span class="material-symbols-outlined">search</span>
                 <input
                   type="text"
-                  placeholder="Search by date or title..."
+                  placeholder="Search by date or title"
                   data-history-search
                   aria-label="Search monitoring history"
                 />
-              </div>
+              </label>
             </div>
 
-            <div class="st-timeline" data-monitoring-timeline></div>
+            <div class="st-timeline" data-monitoring-timeline data-animate-list></div>
           </div>
         </div>
 
         <!-- RISK EXPLANATION PANEL -->
         <div class="st-profile-panel" data-profile-panel="risk">
-          <div class="st-prediction-card">
-            <div
-              style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-              "
-            >
-              <h4 class="st-panel-title">Current Risk</h4>
+          <div class="st-prediction-card st-card">
+            <div class="st-card-head-row">
+              <div class="st-head-with-icon">
+                <span class="st-icon-tile st-icon-tile--risk"><span class="material-symbols-outlined">insights</span></span>
+                <h4 class="st-card-title">Current risk</h4>
+              </div>
               <div data-risk-current-badge></div>
             </div>
             <p class="st-prediction-summary-box" data-risk-summary></p>
-            <p class="st-prediction-meta-line" data-risk-records-used></p>
+            <p class="st-prediction-meta-line" data-risk-records-used><span class="material-symbols-outlined">dataset</span><span data-risk-records-used-text></span></p>
 
             <h5 class="st-prediction-subsection-title">
-              Contributing Factors
+              Contributing factors
             </h5>
             <p class="st-prediction-explanation" data-risk-model-explanation></p>
-            <div class="st-stack-col-md" data-risk-contributors></div>
+            <div class="st-contributor-grid" data-risk-contributors></div>
           </div>
 
-          <div class="st-prediction-card">
-            <div class="st-card-title-row">
-              <h4 class="st-panel-title" style="margin-bottom: 0">
-                Related Monitoring Information
-              </h4>
-              <span
-                class="st-info-tooltip"
-                data-tooltip-text="This information is not part of the prediction model, but may help explain the learner's current situation."
-                tabindex="0"
-                role="note"
-              >
-                <span class="material-symbols-outlined">info</span>
-              </span>
+          <div class="st-risk-row">
+            <div class="st-prediction-card st-card">
+              <div class="st-card-title-row">
+                <h4 class="st-card-title">Related monitoring information</h4>
+                <span
+                  class="st-info-tooltip"
+                  data-tooltip-text="This information is not part of the prediction model, but may help explain the learner's current situation."
+                  tabindex="0"
+                  role="note"
+                >
+                  <span class="material-symbols-outlined">info</span>
+                </span>
+              </div>
+              <div
+                class="st-stack-col-md"
+                data-risk-monitoring-context
+              ></div>
             </div>
-            <div
-              class="st-stack-col-md"
-              data-risk-monitoring-context
-              style="margin-top: 14px"
-            ></div>
-          </div>
 
-          <div class="st-prediction-card" data-risk-changes-card>
-            <h4 class="st-panel-title" style="margin-bottom: 16px">
-              Risk Level History
-            </h4>
-            <ul class="st-change-list" data-risk-changes></ul>
+            <div class="st-prediction-card st-card" data-risk-changes-card>
+              <h4 class="st-card-title">Risk level history</h4>
+              <ul class="st-change-list" data-risk-changes></ul>
+            </div>
           </div>
         </div>
 
@@ -555,64 +544,51 @@
         <div class="st-profile-panel" data-profile-panel="interventions">
           <div class="st-profile-grid">
             <div class="st-stack-col-lg">
-              <div class="st-panel st-panel-pad">
-                <div class="st-panel-head">
-                  <div>
-                    <h4 class="st-panel-title">AI-Recommended Interventions</h4>
-                    <p class="st-panel-subtitle">
-                      Suggested actions based on the learner's current risk
-                      factors. Teachers may also assign interventions
-                      manually.
-                    </p>
-                  </div>
+              <div class="st-panel st-card">
+                <div class="st-card-head-block">
+                  <h4 class="st-card-title">AI-recommended interventions</h4>
+                  <p class="st-card-sub">
+                    Suggested actions based on the learner's current risk
+                    factors. Teachers may also assign interventions
+                    manually.
+                  </p>
                 </div>
                 <div
-                  class="st-stack-col-md"
+                  class="st-rec-list"
                   data-intervention-recommendations
+                  data-animate-list
                 ></div>
               </div>
 
-                              <div class="st-panel st-panel-pad">
-                  <div
-                    style="
-                      display: flex;
-                      align-items: center;
-                      justify-content: space-between;
-                      gap: 8px;
-                      margin-bottom: 20px;
-                    "
-                  >
-                    <div style="display: flex; align-items: center; gap: 8px">
-                      <span
-                        class="material-symbols-outlined"
-                        style="color: var(--st-secondary)"
-                        >assignment_turned_in</span
-                      >
-                      <h4 class="st-panel-title">Active Intervention</h4>
-                    </div>
-                    <button
-                      type="button"
-                      class="st-btn st-btn-primary st-btn-xs"
-                      data-add-intervention-btn
-                    >
-                      <span class="material-symbols-outlined">add</span>
-                      Add Intervention
-                    </button>
+              <div class="st-panel st-card">
+                <div class="st-card-head-row">
+                  <div class="st-head-with-icon">
+                    <span class="st-icon-tile st-icon-tile--teal"><span class="material-symbols-outlined">assignment_turned_in</span></span>
+                    <h4 class="st-card-title">Active intervention</h4>
                   </div>
-                  <div data-active-intervention></div>
+                  <button
+                    type="button"
+                    class="st-btn st-btn-primary st-btn-xs"
+                    data-add-intervention-btn
+                  >
+                    <span class="material-symbols-outlined">add</span>
+                    Add intervention
+                  </button>
                 </div>
-              <div class="st-panel">
+                <div data-active-intervention></div>
+              </div>
+              <div class="st-panel st-card st-card--flush">
                 <div class="st-panel-head st-panel-head--flush">
-                  <h4 class="st-panel-title">Intervention History</h4>
+                  <h4 class="st-card-title">Intervention history</h4>
                 </div>
                 <div class="st-table-scroll">
-                  <table class="st-data-table">
+                  <table class="st-data-table st-lp-table">
                     <thead>
                       <tr>
                         <th>Date</th>
                         <th>Intervention</th>
                         <th>Remarks</th>
-                        <th>Action</th>
+                        <th class="is-right">Action</th>
                       </tr>
                     </thead>
                     <tbody data-intervention-history></tbody>
@@ -622,9 +598,9 @@
             </div>
 
             <div class="st-stack-col-lg">
-              <div class="st-sidebar-info-card">
-                <h4 class="st-sidebar-info-title">Current Risk Factors</h4>
-                <div data-current-risk-factors></div>
+              <div class="st-card st-sticky-side">
+                <h4 class="st-card-title">Current risk factors</h4>
+                <div class="st-risk-factor-list" data-current-risk-factors></div>
               </div>
             </div>
           </div>

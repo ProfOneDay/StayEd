@@ -276,12 +276,41 @@ body[data-page="Manage Modules"] .st-select {
   background-position: right 12px center;
 }
 
-/* Archived/active toggle sits at the same row/level as the search+filters,
-   pushed to the far right of the toolbar. */
-body[data-page="Manage Modules"] .st-mm-view-toggle {
+/* "Clear filters" sits in line with the search/status/sort controls, pushed
+   to the far right of the toolbar -- same treatment as Student Registry's
+   Clear filters button. The archived/active toggle now lives in the page
+   header instead (see .st-page-header-actions), beside "Add module". */
+body[data-page="Manage Modules"] .st-mm-clear-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  cursor: pointer;
   margin-left: auto;
-  height: 44px;
   white-space: nowrap;
+  transition: background-color var(--st-t-hover, 150ms), color var(--st-t-hover, 150ms), transform var(--st-t-press, 90ms);
+}
+
+body[data-page="Manage Modules"] .st-mm-clear-btn:hover {
+  background: var(--st-background, #f3f5f8);
+  color: var(--st-on-surface);
+}
+
+body[data-page="Manage Modules"] .st-mm-clear-btn:active {
+  transform: scale(0.96);
+}
+
+body[data-page="Manage Modules"] .st-mm-clear-btn .material-symbols-outlined {
+  font-size: 19px;
 }
 
 body[data-page="Manage Modules"] .st-select:hover {
@@ -699,6 +728,7 @@ body[data-page="Manage Modules"] [data-animate-rows].is-inview tr {
 @media (max-width: 767px) {
   body[data-page="Manage Modules"] .st-page-header-actions {
     width: 100%;
+    flex-direction: column;
   }
   body[data-page="Manage Modules"] .st-page-header-actions .st-btn {
     width: 100%;
@@ -739,7 +769,7 @@ body[data-page="Manage Modules"] [data-animate-rows].is-inview tr {
     max-width: none;
     flex: 1 1 100%;
   }
-  body[data-page="Manage Modules"] .st-mm-view-toggle {
+  body[data-page="Manage Modules"] .st-mm-clear-btn {
     margin-left: 0;
     flex: 1 1 100%;
     justify-content: center;

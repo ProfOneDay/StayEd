@@ -29,12 +29,20 @@ class ModuleManagement {
     if (!this.classId) {
       document.querySelector("[data-no-class-notice]").style.display = "";
       document.querySelector("[data-add-module-btn]").disabled = true;
+      document.querySelector("[data-catalog-view-toggle]").style.display = "none";
       return;
     }
 
     document
       .querySelector("[data-add-module-btn]")
       ?.addEventListener("click", () => this.openAddModuleModal());
+
+    document
+      .querySelector("[data-catalog-view-toggle]")
+      ?.addEventListener("click", () => {
+        this.catalogView = this.catalogView === "archived" ? "active" : "archived";
+        this.renderCatalogView(true);
+      });
 
     await this.loadStrandsAndDuration();
 
@@ -115,6 +123,7 @@ class ModuleManagement {
     this.view = "catalog";
     this.activeModuleId = null;
     document.querySelector("[data-add-module-btn]").style.display = "";
+    document.querySelector("[data-catalog-view-toggle]").style.display = "";
     this.updateUrl();
 
     try {
@@ -192,6 +201,15 @@ class ModuleManagement {
     const isArchivedView = this.catalogView === "archived";
     const archivedCount = this.modules.filter((m) => m.isArchived).length;
 
+    const toggleIcon = document.querySelector("[data-catalog-view-toggle-icon]");
+    if (toggleIcon) toggleIcon.textContent = isArchivedView ? "unarchive" : "archive";
+    const toggleLabel = document.querySelector("[data-catalog-view-toggle-label]");
+    if (toggleLabel) {
+      toggleLabel.textContent = isArchivedView
+        ? "View active modules"
+        : `View archived${archivedCount ? ` (${archivedCount})` : ""}`;
+    }
+
     root.innerHTML = `
       <div class="st-module-summary-row" data-animate>
         <div class="st-module-summary-stat st-module-summary-stat--total">
@@ -237,9 +255,9 @@ class ModuleManagement {
             <option value="number" ${this.catalogFilters.sortBy === "number" ? "selected" : ""}>Sort by module number</option>
             <option value="status" ${this.catalogFilters.sortBy === "status" ? "selected" : ""}>Sort by status</option>
           </select>
-          <button type="button" class="st-btn st-btn-outline st-mm-view-toggle" data-catalog-view-toggle>
-            <span class="material-symbols-outlined">${isArchivedView ? "unarchive" : "archive"}</span>
-            ${isArchivedView ? "View active modules" : `View archived${archivedCount ? ` (${archivedCount})` : ""}`}
+          <button type="button" class="st-text-btn st-mm-clear-btn" data-catalog-clear>
+            <span class="material-symbols-outlined">filter_list_off</span>
+            Clear filters
           </button>
         </div>
         <div class="st-table-scroll">
@@ -283,9 +301,9 @@ class ModuleManagement {
       this.catalogFilters.status = e.target.value;
       this.renderCatalogView();
     });
-    root.querySelector("[data-catalog-view-toggle]")?.addEventListener("click", () => {
-      this.catalogView = isArchivedView ? "active" : "archived";
-      this.renderCatalogView(true);
+    root.querySelector("[data-catalog-clear]")?.addEventListener("click", () => {
+      this.catalogFilters = { search: "", status: "all", sortBy: "number" };
+      this.renderCatalogView();
     });
     root.querySelector("[data-catalog-sort]")?.addEventListener("change", (e) => {
       this.catalogFilters.sortBy = e.target.value;
@@ -524,6 +542,7 @@ class ModuleManagement {
     this.selectedEnrollmentIds = new Set();
     this.detailFilters = { search: "", stage: "all", modality: "all" };
     document.querySelector("[data-add-module-btn]").style.display = "none";
+    document.querySelector("[data-catalog-view-toggle]").style.display = "none";
 
     if (pushState) this.updateUrl();
 

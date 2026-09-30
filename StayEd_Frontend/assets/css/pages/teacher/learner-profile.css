@@ -1,1819 +1,2304 @@
-.st-profile-hero{
-    background:#fff;
-    border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-lg);
-    box-shadow:var(--st-shadow-sm);
-    padding:24px;
-    display:grid;
-    grid-template-columns:1fr;
-    gap:24px;
-    align-items:center;
-    margin-bottom:24px;
+/* ==========================================================================
+   Learner Profile — matches design/teacher-learner-profile prototype.
+   Everything here is scoped under body[data-page="Learner Profile"]; shared
+   classes (.st-data-table, .st-risk-badge, .st-empty, .st-toggle*,
+   .st-timeline*) are only ever overridden in scope, never redefined bare.
+   ========================================================================== */
+
+body[data-page="Learner Profile"] .st-content {
+  gap: 20px;
+}
+
+/* ---------- Small shared building blocks for this page ---------- */
+body[data-page="Learner Profile"] .st-icon-tile {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: var(--st-navy-soft);
+  color: var(--st-primary);
+}
+body[data-page="Learner Profile"] .st-icon-tile .material-symbols-outlined {
+  font-size: 1.3125rem;
+}
+body[data-page="Learner Profile"] .st-icon-tile--teal {
+  background: #e3f4f3;
+  color: var(--st-secondary);
+}
+body[data-page="Learner Profile"] .st-icon-tile--risk {
+  background: var(--st-risk-high-soft-2, #fdecea);
+  color: var(--st-risk-high-ink, #a01414);
+}
+
+body[data-page="Learner Profile"] .st-card {
+  background: #fff;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-card);
+  box-shadow: var(--st-shadow-card);
+  padding: 20px 22px;
+  min-width: 0;
+}
+body[data-page="Learner Profile"] .st-card--flush {
+  padding: 0;
+  overflow: hidden;
+}
+body[data-page="Learner Profile"] .st-card-title {
+  margin: 0;
+  font-family: var(--st-font-heading);
+  font-weight: 700;
+  font-size: 1.125rem;
+  letter-spacing: -0.01em;
+  color: var(--st-on-surface);
+}
+body[data-page="Learner Profile"] .st-card-sub {
+  margin: 4px 0 0;
+  font-size: 0.844rem;
+  color: var(--st-on-surface-variant);
+  line-height: 1.5;
+}
+body[data-page="Learner Profile"] .st-card-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+body[data-page="Learner Profile"] .st-card-head-block {
+  margin-bottom: 20px;
+}
+body[data-page="Learner Profile"] .st-head-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+body[data-page="Learner Profile"] .st-stack-col-lg {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+body[data-page="Learner Profile"] .st-stack-col-md {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+body[data-page="Learner Profile"] .st-profile-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+body[data-page="Learner Profile"] .st-sticky-side {
+  position: sticky;
+  top: 136px;
+}
+
+/* ==========================================================================
+   Hero
+   ========================================================================== */
+body[data-page="Learner Profile"] .st-profile-hero {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(0, 1.15fr) minmax(190px, 0.85fr) minmax(230px, 1fr);
+  background: #fff;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-card);
+  box-shadow: var(--st-shadow-card);
+  overflow: hidden;
+}
+body[data-page="Learner Profile"] .st-profile-hero > section {
+  padding: 22px;
+  min-width: 0;
+}
+body[data-page="Learner Profile"] .st-profile-hero > section + section {
+  border-left: 1px solid var(--st-line);
+}
+
+/* Identity */
+body[data-page="Learner Profile"] .st-profile-hero-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+}
+body[data-page="Learner Profile"] .st-profile-hero-avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--st-navy-soft);
+  color: var(--st-primary);
+  font-family: var(--st-font-heading);
+  font-weight: 800;
+  font-size: 1.75rem;
+  box-shadow: 0 0 0 4px #fff, 0 0 0 6px #dfe3ea;
+}
+/* Avatar outer ring tints with the learner's current risk state. */
+body[data-page="Learner Profile"] .st-profile-hero--high .st-profile-hero-avatar {
+  box-shadow: 0 0 0 4px #fff, 0 0 0 6px #f6c9c6;
+}
+body[data-page="Learner Profile"] .st-profile-hero--moderate .st-profile-hero-avatar {
+  box-shadow: 0 0 0 4px #fff, 0 0 0 6px #f8d9ac;
+}
+body[data-page="Learner Profile"] .st-profile-hero--low .st-profile-hero-avatar {
+  box-shadow: 0 0 0 4px #fff, 0 0 0 6px #c9e6c1;
+}
+body[data-page="Learner Profile"] .st-profile-hero--preliminary .st-profile-hero-avatar {
+  box-shadow: 0 0 0 4px #fff, 0 0 0 6px #bcdcf3;
+}
+body[data-page="Learner Profile"] .st-profile-hero--neutral .st-profile-hero-avatar {
+  box-shadow: 0 0 0 4px #fff, 0 0 0 6px #dfe3ea;
+}
+body[data-page="Learner Profile"] .st-profile-hero-heading {
+  min-width: 0;
+}
+body[data-page="Learner Profile"] .st-profile-hero-name {
+  margin: 0;
+  font-family: var(--st-font-heading);
+  font-weight: 800;
+  font-size: 1.625rem;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+body[data-page="Learner Profile"] .st-profile-hero-lrn {
+  margin: 4px 0 0;
+  font-size: 0.844rem;
+  color: var(--st-on-surface-variant);
+}
+body[data-page="Learner Profile"] .st-profile-hero-lrn span {
+  font-weight: 700;
+  color: var(--st-on-surface);
+  font-variant-numeric: tabular-nums;
+}
+body[data-page="Learner Profile"] .st-profile-chip-row {
+  margin-top: 8px;
+}
+body[data-page="Learner Profile"] .st-profile-level-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--st-navy-soft);
+  color: var(--st-primary);
+  font-size: 0.781rem;
+  font-weight: 600;
+}
+
+/* Details */
+body[data-page="Learner Profile"] .st-profile-hero-middle {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  align-content: center;
+}
+body[data-page="Learner Profile"] .st-profile-meta-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  min-width: 0;
+}
+body[data-page="Learner Profile"] .st-profile-meta-row > .material-symbols-outlined {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--st-background);
+  color: var(--st-primary);
+  font-size: 1.1875rem;
+}
+body[data-page="Learner Profile"] .st-profile-meta-label {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--st-ink-faint);
+}
+body[data-page="Learner Profile"] .st-profile-meta-value {
+  margin: 1px 0 0;
+  font-size: 0.906rem;
+  font-weight: 600;
+  color: var(--st-on-surface);
+  overflow-wrap: anywhere;
+}
+body[data-page="Learner Profile"] .st-profile-meta-note {
+  margin: 1px 0 0;
+  font-size: 0.75rem;
+  color: var(--st-on-surface-variant);
+}
+
+/* Current risk panel */
+body[data-page="Learner Profile"] .st-profile-hero-risk-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+  background: var(--st-background);
+}
+body[data-page="Learner Profile"] .st-profile-risk-panel-label {
+  margin: 0;
+  font-size: 0.781rem;
+  font-weight: 600;
+  color: var(--st-on-surface-variant);
+}
+body[data-page="Learner Profile"] .st-profile-risk-panel-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  color: var(--st-on-surface-variant);
+}
+body[data-page="Learner Profile"] .st-profile-risk-panel-icon .material-symbols-outlined {
+  font-size: 1.875rem;
+  font-variation-settings: "FILL" 1;
+}
+body[data-page="Learner Profile"] .st-profile-risk-panel-helper {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--st-on-surface-variant);
+  max-width: 200px;
+}
+body[data-page="Learner Profile"] .st-profile-risk-panel-badge .st-risk-badge {
+  padding: 4px 12px;
+  font-size: 0.781rem;
+}
+
+body[data-page="Learner Profile"] .st-profile-hero-risk-panel.is-high {
+  background: linear-gradient(180deg, #fdf1f0, #fff 90%);
+}
+body[data-page="Learner Profile"] .st-profile-hero-risk-panel.is-high .st-profile-risk-panel-icon {
+  background: var(--st-risk-high-soft-2, #fdecea);
+  color: var(--st-risk-high, #ba1a1a);
+  animation: st-lp-pulse-once 900ms var(--st-ease-out) 300ms;
+}
+body[data-page="Learner Profile"] .st-profile-hero-risk-panel.is-moderate {
+  background: linear-gradient(180deg, #fef6ea, #fff 90%);
+}
+body[data-page="Learner Profile"] .st-profile-hero-risk-panel.is-moderate .st-profile-risk-panel-icon {
+  background: var(--st-risk-moderate-soft-2, #fef3e4);
+  color: #c46b00;
+  animation: st-lp-pulse-once 900ms var(--st-ease-out) 300ms;
+}
+body[data-page="Learner Profile"] .st-profile-hero-risk-panel.is-low {
+  background: linear-gradient(180deg, #f0f8ee, #fff 90%);
+}
+body[data-page="Learner Profile"] .st-profile-hero-risk-panel.is-low .st-profile-risk-panel-icon {
+  background: var(--st-risk-low-soft-2, #edf7ea);
+  color: var(--st-risk-low-ink, #2c7121);
+  animation: st-lp-pulse-once 900ms var(--st-ease-out) 300ms;
+}
+body[data-page="Learner Profile"] .st-profile-hero-risk-panel.is-preliminary {
+  background: linear-gradient(180deg, #eef6fc, #fff 90%);
+}
+body[data-page="Learner Profile"] .st-profile-hero-risk-panel.is-preliminary .st-profile-risk-panel-icon {
+  background: #e6f2fb;
+  color: #1f7fcf;
+  animation: st-lp-pulse-once 900ms var(--st-ease-out) 300ms;
+}
+body[data-page="Learner Profile"] .st-profile-hero-risk-panel.is-neutral {
+  background: linear-gradient(180deg, var(--st-background), #fff 90%);
+}
+body[data-page="Learner Profile"] .st-profile-hero-risk-panel.is-neutral .st-profile-risk-panel-icon {
+  background: var(--st-background);
+  color: var(--st-on-surface-variant);
+}
+@keyframes st-lp-pulse-once {
+  0% { transform: scale(0.8); opacity: 0.3; }
+  60% { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+/* Actions */
+body[data-page="Learner Profile"] .st-profile-hero-side {
+  display: flex;
+  align-items: center;
+}
+body[data-page="Learner Profile"] .st-profile-hero-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+body[data-page="Learner Profile"] .st-profile-hero-actions .st-btn {
+  justify-content: flex-start;
+  height: 40px;
+  width: 100%;
+  min-width: 0;
+}
+/* Author rules always beat the UA [hidden]{display:none} default regardless
+   of specificity, so .st-btn's own display:inline-flex would otherwise keep
+   "View class" visible for learners with no class. */
+body[data-page="Learner Profile"] .st-profile-hero-actions .st-btn[hidden] {
+  display: none;
+}
+body[data-page="Learner Profile"] .st-profile-hero-actions .st-btn span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+body[data-page="Learner Profile"] .st-btn-tail {
+  font-size: 1.1875rem !important;
+  opacity: 0.6;
+  transition: transform var(--st-t-hover) var(--st-ease-out), opacity var(--st-t-hover);
+}
+body[data-page="Learner Profile"] .st-profile-hero-actions .st-btn:hover .st-btn-tail {
+  transform: translateX(3px);
+  opacity: 1;
+}
+
+@media (max-width: 1279px) {
+  body[data-page="Learner Profile"] .st-profile-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  }
+  body[data-page="Learner Profile"] .st-profile-hero > section + section {
+    border-left: 0;
+  }
+  body[data-page="Learner Profile"] .st-profile-hero-middle {
+    border-left: 1px solid var(--st-line) !important;
+  }
+  body[data-page="Learner Profile"] .st-profile-hero-risk-panel,
+  body[data-page="Learner Profile"] .st-profile-hero-side {
+    border-top: 1px solid var(--st-line);
+  }
+  body[data-page="Learner Profile"] .st-profile-hero-side {
+    border-left: 1px solid var(--st-line) !important;
+  }
+}
+@media (max-width: 767px) {
+  body[data-page="Learner Profile"] .st-profile-hero {
+    grid-template-columns: 1fr;
+  }
+  body[data-page="Learner Profile"] .st-profile-hero > section {
+    padding: 18px 16px;
+  }
+  body[data-page="Learner Profile"] .st-profile-hero-middle,
+  body[data-page="Learner Profile"] .st-profile-hero-side {
+    border-left: 0 !important;
+  }
+  body[data-page="Learner Profile"] .st-profile-hero > section + section {
+    border-top: 1px solid var(--st-line);
+  }
+  body[data-page="Learner Profile"] .st-profile-hero-left {
+    flex-direction: row;
+    text-align: left;
+    justify-content: flex-start;
+  }
+  body[data-page="Learner Profile"] .st-profile-hero-avatar {
+    width: 64px;
+    height: 64px;
+    font-size: 1.375rem;
+  }
+  body[data-page="Learner Profile"] .st-profile-hero-name {
+    font-size: 1.375rem;
+  }
+  body[data-page="Learner Profile"] .st-profile-hero-middle {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  body[data-page="Learner Profile"] .st-profile-hero-risk-panel {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    text-align: left;
+    gap: 10px 12px;
+  }
+  body[data-page="Learner Profile"] .st-profile-risk-panel-label {
+    width: 100%;
+  }
+  body[data-page="Learner Profile"] .st-profile-risk-panel-icon {
+    width: 44px;
+    height: 44px;
+  }
+  body[data-page="Learner Profile"] .st-profile-risk-panel-helper {
+    max-width: none;
+    width: 100%;
+  }
+}
+
+/* ==========================================================================
+   Student view link
+   ========================================================================== */
+body[data-page="Learner Profile"] .st-portal-share-card {
+  background: #fff;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-card);
+  box-shadow: var(--st-shadow-card);
+  padding: 16px 20px;
+}
+body[data-page="Learner Profile"] .st-portal-share-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+body[data-page="Learner Profile"] .st-portal-share-head-text {
+  flex: 1;
+  min-width: 0;
+}
+body[data-page="Learner Profile"] .st-portal-share-title {
+  margin: 0;
+  font-family: var(--st-font-heading);
+  font-weight: 700;
+  font-size: 1.03rem;
+  color: var(--st-on-surface);
+}
+body[data-page="Learner Profile"] .st-portal-share-sub {
+  margin: 2px 0 0;
+  font-size: 0.844rem;
+  color: var(--st-on-surface-variant);
+  line-height: 1.5;
+}
+body[data-page="Learner Profile"] .st-portal-share-link-row:not([hidden]) {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--st-line);
+  flex-wrap: wrap;
+  animation: st-lp-pop 200ms var(--st-ease-out);
+}
+@keyframes st-lp-pop {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+body[data-page="Learner Profile"] .st-portal-share-link {
+  flex: 1 1 240px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-control);
+  background: var(--st-background);
+  color: var(--st-ink-faint);
+}
+body[data-page="Learner Profile"] .st-portal-share-link input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--st-on-surface);
+  outline: 0;
+}
+@media (max-width: 767px) {
+  body[data-page="Learner Profile"] .st-portal-share-card {
+    padding: 14px 16px;
+  }
+  body[data-page="Learner Profile"] .st-portal-share-head .st-icon-tile {
+    display: none;
+  }
+  body[data-page="Learner Profile"] .st-portal-share-link-row:not([hidden]) {
+    flex-direction: column;
+  }
+}
+
+/* ==========================================================================
+   Tabs
+   ========================================================================== */
+body[data-page="Learner Profile"] .st-profile-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  background: #fff;
+  border: 1px solid var(--st-line);
+  border-radius: 12px;
+  box-shadow: var(--st-shadow-card);
+  overflow-x: auto;
+  scrollbar-width: none;
+  position: sticky;
+  top: 72px;
+  z-index: 8;
+}
+body[data-page="Learner Profile"] .st-profile-tabs::-webkit-scrollbar {
+  display: none;
+}
+body[data-page="Learner Profile"] .st-profile-tab {
+  appearance: none;
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--st-on-surface-variant);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--st-t-hover) ease, color var(--st-t-hover) ease, transform var(--st-t-press) ease;
+}
+body[data-page="Learner Profile"] .st-profile-tab .material-symbols-outlined {
+  font-size: 1.1875rem;
+}
+body[data-page="Learner Profile"] .st-profile-tab:hover {
+  background: var(--st-background);
+  color: var(--st-on-surface);
+}
+body[data-page="Learner Profile"] .st-profile-tab:active {
+  transform: scale(0.97);
+}
+body[data-page="Learner Profile"] .st-profile-tab.is-active {
+  background: var(--st-primary);
+  color: #fff;
+  font-weight: 600;
+}
+body[data-page="Learner Profile"] .st-profile-panel {
+  display: none;
+  flex-direction: column;
+  gap: 20px;
+}
+body[data-page="Learner Profile"] .st-profile-panel.is-active {
+  display: flex;
+  animation: st-lp-panel-in 260ms var(--st-ease-out);
+}
+@keyframes st-lp-panel-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@media (max-width: 767px) {
+  body[data-page="Learner Profile"] .st-profile-tabs {
+    top: 60px;
+  }
+  body[data-page="Learner Profile"] .st-profile-tab {
+    flex: none;
+    padding: 0 12px;
+  }
+}
+
+/* ==========================================================================
+   Overview: metrics
+   ========================================================================== */
+body[data-page="Learner Profile"] .st-profile-metrics {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: 20px;
+}
+body[data-page="Learner Profile"] .st-metric-group {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  background: #fff;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-card);
+  box-shadow: var(--st-shadow-card);
+  padding: 16px;
+}
+body[data-page="Learner Profile"] .st-metric-group--modules {
+  grid-template-columns: 1.4fr repeat(4, minmax(0, 1fr));
+}
+body[data-page="Learner Profile"] .st-metric-group--engagement {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+body[data-page="Learner Profile"] .st-metric-group-head {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+body[data-page="Learner Profile"] .st-metric-group-head .st-icon-tile {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+}
+body[data-page="Learner Profile"] .st-metric-group-head .st-icon-tile .material-symbols-outlined {
+  font-size: 1.1875rem;
+}
+body[data-page="Learner Profile"] .st-metric-group-head h3 {
+  margin: 0;
+  font-family: var(--st-font-heading);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--st-on-surface);
+}
+body[data-page="Learner Profile"] .st-metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--st-background);
+  min-width: 0;
+}
+body[data-page="Learner Profile"] .st-metric-card--hero {
+  background: var(--st-navy-soft);
+}
+body[data-page="Learner Profile"] .st-metric-card--wide {
+  grid-column: 1 / -1;
+}
+body[data-page="Learner Profile"] .st-metric-card-label {
+  margin: 0;
+  font-size: 0.781rem;
+  color: var(--st-on-surface-variant);
+  font-weight: 500;
+}
+body[data-page="Learner Profile"] .st-metric-card-value {
+  font-family: var(--st-font-heading);
+  font-weight: 800;
+  font-size: 1.75rem;
+  line-height: 1.1;
+  color: var(--st-on-surface);
+  font-variant-numeric: tabular-nums;
+}
+body[data-page="Learner Profile"] .st-metric-card--hero .st-metric-card-value {
+  color: var(--st-primary);
+  font-size: 2rem;
+}
+body[data-page="Learner Profile"] .st-metric-card-value--sm {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+body[data-page="Learner Profile"] .st-metric-card-subtext {
+  margin: 0;
+  font-size: 0.781rem;
+  color: var(--st-on-surface-variant);
+}
+body[data-page="Learner Profile"] .st-metric-rate-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: #fff;
+  overflow: hidden;
+  margin: 4px 0 2px;
+}
+body[data-page="Learner Profile"] .st-metric-rate-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--st-primary);
+  width: 0;
+  transition: width var(--st-t-fill) var(--st-ease-out);
+}
+body[data-page="Learner Profile"] [data-animate].is-inview .st-metric-rate-bar i {
+  width: var(--w, 0%);
+}
+@media (max-width: 1023px) {
+  body[data-page="Learner Profile"] .st-metric-group--modules {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  body[data-page="Learner Profile"] .st-metric-card--hero {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 1279px) {
+  body[data-page="Learner Profile"] .st-profile-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   Overview: performance progress + A&E passing chance
+   ========================================================================== */
+body[data-page="Learner Profile"] .st-overview-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+}
+@media (max-width: 1279px) {
+  body[data-page="Learner Profile"] .st-overview-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+body[data-page="Learner Profile"] .st-performance-progress-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+body[data-page="Learner Profile"] .st-performance-progress-current {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: var(--st-navy-soft);
+  flex: none;
+}
+body[data-page="Learner Profile"] .st-performance-progress-current span {
+  font-size: 0.75rem;
+  color: var(--st-on-surface-variant);
+  font-weight: 600;
+}
+body[data-page="Learner Profile"] .st-performance-progress-current strong {
+  font-family: var(--st-font-heading);
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--st-primary);
+}
+body[data-page="Learner Profile"] .st-performance-progress-chart {
+  position: relative;
+  height: 250px;
+}
+body[data-page="Learner Profile"] .st-performance-progress-plot {
+  position: absolute;
+  left: 40px;
+  right: 8px;
+  top: 8px;
+  bottom: 28px;
+}
+body[data-page="Learner Profile"] .st-performance-progress-grid-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed var(--st-line);
+  pointer-events: none;
+}
+body[data-page="Learner Profile"] .st-performance-progress-grid-line span {
+  position: absolute;
+  right: calc(100% + 8px);
+  top: -8px;
+  font-size: 0.719rem;
+  color: var(--st-ink-faint);
+  white-space: nowrap;
+}
+body[data-page="Learner Profile"] .st-performance-progress-line {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+body[data-page="Learner Profile"] .st-performance-progress-area {
+  fill: url(#stPpGrad);
+  opacity: 0;
+  transition: opacity 600ms ease 500ms;
+}
+body[data-page="Learner Profile"] .st-performance-progress-path {
+  fill: none;
+  stroke: var(--st-primary);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  transition: stroke-dashoffset 1100ms var(--st-ease-out);
+}
+body[data-page="Learner Profile"] [data-animate].is-inview .st-performance-progress-area {
+  opacity: 1;
+}
+body[data-page="Learner Profile"] [data-animate].is-inview .st-performance-progress-path {
+  stroke-dashoffset: 0;
+}
+body[data-page="Learner Profile"] .st-performance-progress-point {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2.5px solid var(--st-primary);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 300ms var(--st-ease-out);
+  cursor: pointer;
+  z-index: 3;
+}
+body[data-page="Learner Profile"] [data-animate].is-inview .st-performance-progress-point {
+  transform: translate(-50%, -50%) scale(1);
+  transition-delay: calc(var(--d, 0) * 1ms);
+}
+body[data-page="Learner Profile"] .st-performance-progress-point:hover,
+body[data-page="Learner Profile"] .st-performance-progress-point:focus-visible {
+  transform: translate(-50%, -50%) scale(1.25) !important;
+  outline: none;
+}
+/* Dark tooltip bubble, matching the dashboard's chart hover tooltip. */
+body[data-page="Learner Profile"] .st-performance-progress-point[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  transform: translateX(-50%) translateY(4px);
+  width: max-content;
+  max-width: 260px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #111a36;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--st-t-hover) ease, transform var(--st-t-hover) ease;
+  z-index: 20;
+}
+body[data-page="Learner Profile"] .st-performance-progress-point:hover[data-tooltip]::after,
+body[data-page="Learner Profile"] .st-performance-progress-point:focus-visible[data-tooltip]::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+body[data-page="Learner Profile"] .st-performance-progress-point.is-last[data-tooltip]::after {
+  left: auto;
+  right: -6px;
+  transform: translateY(4px);
+}
+body[data-page="Learner Profile"] .st-performance-progress-point.is-last:hover[data-tooltip]::after,
+body[data-page="Learner Profile"] .st-performance-progress-point.is-last:focus-visible[data-tooltip]::after {
+  transform: none;
+}
+body[data-page="Learner Profile"] .st-performance-progress-point.is-first[data-tooltip]::after {
+  left: -6px;
+  transform: translateY(4px);
+}
+body[data-page="Learner Profile"] .st-performance-progress-point.is-first:hover[data-tooltip]::after,
+body[data-page="Learner Profile"] .st-performance-progress-point.is-first:focus-visible[data-tooltip]::after {
+  transform: none;
+}
+body[data-page="Learner Profile"] .st-performance-progress-x-label {
+  position: absolute;
+  top: calc(100% + 8px);
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 0.719rem;
+  color: var(--st-ink-faint);
+}
+body[data-page="Learner Profile"] .st-performance-progress-x-label.is-first {
+  transform: none;
+}
+body[data-page="Learner Profile"] .st-performance-progress-x-label.is-last {
+  transform: translateX(-100%);
+}
+body[data-page="Learner Profile"] .st-performance-progress-empty {
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  border: 1px dashed var(--st-line-strong);
+  border-radius: 10px;
+  text-align: center;
+  color: var(--st-on-surface-variant);
+  font-size: 0.844rem;
+}
+@media (max-width: 767px) {
+  body[data-page="Learner Profile"] .st-performance-progress-head {
+    flex-direction: column;
+  }
+  body[data-page="Learner Profile"] .st-performance-progress-current {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 8px;
+    width: 100%;
+  }
+  body[data-page="Learner Profile"] .st-performance-progress-chart {
+    height: 210px;
+  }
+}
+
+/* A&E exam passing chance */
+body[data-page="Learner Profile"] .st-exam-readiness-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+body[data-page="Learner Profile"] .st-exam-readiness-title-wrap {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  flex: 1;
+  min-width: 220px;
+}
+body[data-page="Learner Profile"] .st-exam-readiness-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.781rem;
+  font-weight: 700;
+  white-space: nowrap;
+  text-transform: lowercase;
+}
+body[data-page="Learner Profile"] .st-exam-readiness-badge::first-letter {
+  text-transform: uppercase;
+}
+body[data-page="Learner Profile"] .st-exam-readiness-badge--high {
+  background: var(--st-risk-low-soft-2, #edf7ea);
+  color: var(--st-risk-low-ink, #2c7121);
+}
+body[data-page="Learner Profile"] .st-exam-readiness-badge--low {
+  background: var(--st-risk-high-soft-2, #fdecea);
+  color: var(--st-risk-high-ink, #a01414);
+}
+body[data-page="Learner Profile"] .st-exam-readiness-badge--neutral {
+  background: var(--st-background);
+  color: var(--st-on-surface-variant);
+}
+body[data-page="Learner Profile"] .st-exam-readiness-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+body[data-page="Learner Profile"] .st-exam-readiness-score-label {
+  margin: 0;
+  font-size: 0.781rem;
+  font-weight: 600;
+  color: var(--st-on-surface-variant);
+}
+body[data-page="Learner Profile"] .st-exam-readiness-score-line {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 2px 0 8px;
+  flex-wrap: wrap;
+}
+body[data-page="Learner Profile"] .st-exam-readiness-score-line strong {
+  font-family: var(--st-font-heading);
+  font-weight: 800;
+  font-size: 2.125rem;
+  letter-spacing: -0.02em;
+  color: var(--st-on-surface);
+}
+body[data-page="Learner Profile"] .st-exam-readiness-score-line span {
+  font-size: 0.813rem;
+  color: var(--st-on-surface-variant);
+  font-weight: 600;
+}
+body[data-page="Learner Profile"] .st-exam-readiness-progress {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--st-background);
+}
+body[data-page="Learner Profile"] .st-exam-readiness-progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 999px;
+  background: var(--st-outline);
+  width: 0;
+  transition: width var(--st-t-fill) var(--st-ease-out);
+}
+body[data-page="Learner Profile"] [data-animate].is-inview .st-exam-readiness-progress-fill {
+  width: var(--w, 0%);
+}
+body[data-page="Learner Profile"] .st-exam-readiness-progress-fill--high {
+  background: var(--st-risk-low, #2c7121);
+}
+body[data-page="Learner Profile"] .st-exam-readiness-progress-fill--low {
+  background: var(--st-risk-high, #ba1a1a);
+}
+body[data-page="Learner Profile"] .st-exam-cutoff {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  background: var(--st-on-surface);
+  border-radius: 2px;
+  opacity: 0.5;
+}
+body[data-page="Learner Profile"] .st-exam-readiness-summary {
+  margin: 10px 0 0;
+  font-size: 0.844rem;
+  color: var(--st-on-surface-variant);
+  line-height: 1.55;
+}
+body[data-page="Learner Profile"] .st-exam-readiness-factors {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--st-line);
+  border-radius: 10px;
+  padding: 2px 14px;
+}
+body[data-page="Learner Profile"] .st-exam-readiness-factor {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  font-size: 0.844rem;
+}
+body[data-page="Learner Profile"] .st-exam-readiness-factor + .st-exam-readiness-factor {
+  border-top: 1px solid var(--st-line);
+}
+body[data-page="Learner Profile"] .st-exam-readiness-factor-name {
+  font-weight: 600;
+  color: var(--st-on-surface);
+}
+body[data-page="Learner Profile"] .st-exam-readiness-factor-detail {
+  color: var(--st-on-surface-variant);
+  text-align: right;
+}
+body[data-page="Learner Profile"] .st-exam-readiness-note {
+  display: flex;
+  gap: 6px;
+  margin: 16px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--st-line);
+  font-size: 0.75rem;
+  color: var(--st-ink-faint);
+  line-height: 1.5;
+}
+body[data-page="Learner Profile"] .st-exam-readiness-note .material-symbols-outlined {
+  font-size: 1rem;
+  flex: none;
+}
+
+/* ==========================================================================
+   Overview: ALS assessment
+   ========================================================================== */
+body[data-page="Learner Profile"] .st-assessment-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+body[data-page="Learner Profile"] .st-assessment-summary {
+  border: 1px solid var(--st-line);
+  border-radius: 12px;
+  padding: 16px;
+}
+body[data-page="Learner Profile"] .st-assessment-summary-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+body[data-page="Learner Profile"] .st-assessment-summary-title {
+  margin: 0;
+  font-weight: 700;
+  color: var(--st-on-surface);
+  font-size: 0.938rem;
 }
-
-.st-portal-share-card{
-    background:#fff;
-    border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-lg);
-    box-shadow:var(--st-shadow-sm);
-    padding:20px 24px;
-    margin-bottom:24px;
-}
-
-.st-portal-share-head{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:16px;
-    flex-wrap:wrap;
-}
-
-.st-portal-share-head-text{
-    min-width:0;
-    flex:1 1 260px;
-}
-
-.st-portal-share-title{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    font-family:var(--st-font-heading);
-    font-size: var(--st-font-size-body);
-    font-weight:700;
-    color:var(--st-primary);
-}
-
-.st-portal-share-title .material-symbols-outlined{
-    font-size:1.25rem;
-}
-
-.st-portal-share-sub{
-    margin-top:4px;
-    font-size: var(--st-font-size-caption);
-    color:var(--st-on-surface-variant);
-    line-height:1.5;
-}
-
-/* :not([hidden]) so the UA's [hidden]{display:none} default isn't beaten
-   by this rule's own display:flex -- author display rules otherwise always
-   win over it regardless of specificity, which would keep the row visible
-   even with the hidden attribute set. */
-.st-portal-share-link-row:not([hidden]){
-    display:flex;
-    align-items:center;
-    gap:12px;
-    margin-top:16px;
-    padding-top:16px;
-    border-top:1px solid rgba(195,198,207,.20);
-    flex-wrap:wrap;
-}
-
-.st-portal-share-link-row input{
-    flex:1 1 240px;
-    min-width:0;
-    height:44px;
-    padding:0 14px;
-    border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-radius-lg);
-    background:var(--st-surface-container-low);
-    font-family:var(--st-font-body);
-    font-size: var(--st-font-size-caption);
-    color:var(--st-on-surface-variant);
-}
-
-@media (min-width:900px){
-    .st-profile-hero{
-        grid-template-columns:5fr 4fr 3fr;
-    }
-}
-
-.st-profile-hero-identity{
-    display:flex;
-    align-items:center;
-    gap:20px;
-}
-
-.st-profile-hero-avatar{
-    width:88px;
-    height:88px;
-    border-radius:50%;
-    border:4px solid var(--st-secondary-container);
-    flex-shrink:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:var(--st-primary-fixed);
-    color:var(--st-primary);
-    font-family:var(--st-font-heading);
-    font-size:1.75rem;
-    font-weight:700;
-    overflow:hidden;
-}
-
-.st-profile-hero-avatar img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-}
-
-.st-profile-hero-name{
-    font-family:var(--st-font-heading);
-    font-size: var(--st-font-size-heading);
-    font-weight:700;
-    color:var(--st-on-surface);
-    margin-bottom:6px;
-}
-
-.st-profile-hero-meta{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:2px 16px;
-}
-
-.st-profile-hero-meta p{
-    font-size: var(--st-font-size-label);
-    color:var(--st-on-surface-variant);
-}
-
-.st-profile-hero-meta p span{
-    color:var(--st-on-surface);
-    font-weight:600;
-}
-
-.st-profile-hero-risk{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:6px;
-    padding:0 24px;
-    border-left:1px solid rgba(195,198,207,.30);
-    border-right:1px solid rgba(195,198,207,.30);
-    height:100%;
-    text-align:center;
-}
-
-@media (max-width:899px){
-    .st-profile-hero-risk{
-        border-left:none;
-        border-right:none;
-        border-top:1px solid rgba(195,198,207,.30);
-        border-bottom:1px solid rgba(195,198,207,.30);
-        padding:16px 0;
-    }
-}
-
-.st-profile-hero-risk-label{
-    font-size: var(--st-font-size-micro);
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:.06em;
-    color:var(--st-on-surface-variant);
-}
-
-.st-profile-hero-actions{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-}
-
-.st-profile-hero-actions .st-btn{
-    width:100%;
-    justify-content:center;
-}
-
-.st-profile-tabs{
-    display:flex;
-    gap:32px;
-    border-bottom:1px solid rgba(195,198,207,.30);
-    margin-bottom:24px;
-    overflow-x:auto;
-    white-space:nowrap;
-}
-
-.st-profile-tab{
-    padding:4px 4px 14px;
-    background:transparent;
-    border:none;
-    border-bottom:3px solid transparent;
-    font-size: var(--st-font-size-label);
-    font-weight:600;
-    color:var(--st-on-surface-variant);
-    cursor:pointer;
-    transition:var(--st-transition-color);
-}
-
-.st-profile-tab:hover{
-    color:var(--st-primary);
-}
-
-.st-profile-tab.is-active{
-    color:var(--st-primary);
-    border-bottom-color:var(--st-primary);
-    font-weight:700;
-}
-
-.st-profile-panel{
-    display:none;
-}
-
-.st-profile-panel.is-active{
-    display:block;
-    animation:st-fade-in .25s ease;
-}
-
-.st-profile-metrics{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:16px;
-    margin-bottom:24px;
-}
-
-@media (max-width:900px){
-    .st-profile-metrics{ grid-template-columns:1fr 1fr; }
-}
-
-.st-profile-metrics--engagement{
-    grid-template-columns:repeat(4,minmax(0,1fr));
-}
-
-@media (max-width:1200px){
-    .st-profile-metrics--engagement{ grid-template-columns:repeat(2,minmax(0,1fr)); }
-}
-
-@media (max-width:600px){
-    .st-profile-metrics--engagement{ grid-template-columns:1fr; }
-    .st-profile-hero-meta{ grid-template-columns:1fr; }
-}
-
-.st-metric-card{
-    background:#fff;
-    border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-lg);
-    box-shadow:var(--st-shadow-sm);
-    padding:16px;
-}
-
-.st-metric-card-label{
-    font-size: var(--st-font-size-micro);
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:.04em;
-    color:var(--st-on-surface-variant);
-    margin-bottom:8px;
-}
-
-.st-metric-card-value{
-    font-size: var(--st-font-size-heading);
-    font-weight:700;
-    color:var(--st-on-surface);
-}
-
-.st-metric-card-value--sm{
-    font-size: var(--st-font-size-label);
-    display:block;
-}
-
-.st-metric-card-subtext{
-    font-size: var(--st-font-size-caption);
-    color:var(--st-on-surface-variant);
-    margin-top:4px;
-}
-
-
-.st-performance-progress-card{
-    background:#fff;
-    border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-lg);
-    box-shadow:var(--st-shadow-sm);
-    padding:24px;
-    margin-bottom:24px;
-}
-
-.st-performance-progress-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    gap:20px;
-    margin-bottom:18px;
-}
-
-.st-performance-progress-current{
-    min-width:132px;
-    padding:10px 14px;
-    border-radius:var(--st-radius-md);
-    background:var(--st-primary-fixed);
-    text-align:right;
-}
-
-.st-performance-progress-current span{
-    display:block;
-    font-size:var(--st-font-size-micro);
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:.04em;
-    color:var(--st-on-surface-variant);
-}
-
-.st-performance-progress-current strong{
-    display:block;
-    margin-top:2px;
-    font-family:var(--st-font-heading);
-    font-size:1.4rem;
-    color:var(--st-primary);
-}
-
-.st-performance-progress-chart{
-    min-height:250px;
-}
-
-.st-performance-progress-plot{
-    position:relative;
-    height:230px;
-    margin-left:4px;
-    border-bottom:1px solid rgba(195,198,207,.55);
-}
-
-.st-performance-progress-grid-line{
-    position:absolute;
-    left:0;
-    right:0;
-    border-top:1px dashed rgba(195,198,207,.38);
-    pointer-events:none;
-}
-
-.st-performance-progress-grid-line span{
-    position:absolute;
-    left:0;
-    top:-16px;
-    padding-right:6px;
-    background:#fff;
-    font-size:.6875rem;
-    color:var(--st-on-surface-variant);
-}
-
-.st-performance-progress-line{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    overflow:visible;
-}
-
-.st-performance-progress-area{
-    fill:var(--st-primary-fixed);
-    opacity:.55;
-}
-
-.st-performance-progress-path{
-    fill:none;
-    stroke:var(--st-primary);
-    stroke-width:2.25;
-    vector-effect:non-scaling-stroke;
-}
-
-.st-performance-progress-point{
-    position:absolute;
-    width:12px;
-    height:12px;
-    border-radius:50%;
-    transform:translate(-50%,-50%);
-    background:var(--st-primary);
-    border:2px solid #fff;
-    box-shadow:0 0 0 2px rgba(31,78,121,.12),var(--st-shadow-xs);
-    cursor:pointer;
-    z-index:3;
-    transition:transform .14s ease, box-shadow .14s ease;
-}
-
-.st-performance-progress-point:hover,
-.st-performance-progress-point:focus-visible{
-    transform:translate(-50%,-50%) scale(1.22);
-    box-shadow:0 0 0 4px rgba(31,78,121,.14),var(--st-shadow-sm);
-    outline:none;
-}
-
-.st-performance-progress-point::after{
-    content:attr(data-tooltip);
-    position:absolute;
-    left:50%;
-    bottom:calc(100% + 10px);
-    transform:translateX(-50%) translateY(4px);
-    width:max-content;
-    max-width:280px;
-    padding:7px 10px;
-    border-radius:4px;
-    background:#202124;
-    color:#fff;
-    font-size:.75rem;
-    font-weight:500;
-    line-height:1.25;
-    white-space:nowrap;
-    box-shadow:0 3px 10px rgba(0,0,0,.22);
-    opacity:0;
-    visibility:hidden;
-    pointer-events:none;
-    transition:opacity .12s ease, transform .12s ease, visibility .12s ease;
-    z-index:20;
-}
-
-.st-performance-progress-point::before{
-    content:"";
-    position:absolute;
-    left:50%;
-    bottom:calc(100% + 5px);
-    transform:translateX(-50%) translateY(4px);
-    border:5px solid transparent;
-    border-top-color:#202124;
-    opacity:0;
-    visibility:hidden;
-    pointer-events:none;
-    transition:opacity .12s ease, transform .12s ease, visibility .12s ease;
-    z-index:19;
-}
-
-.st-performance-progress-point:hover::after,
-.st-performance-progress-point:hover::before,
-.st-performance-progress-point:focus-visible::after,
-.st-performance-progress-point:focus-visible::before{
-    opacity:1;
-    visibility:visible;
-    transform:translateX(-50%) translateY(0);
-}
-
-.st-performance-progress-x-label{
-    position:absolute;
-    bottom:-24px;
-    transform:translateX(-50%);
-    white-space:nowrap;
-    font-size:.6875rem;
-    color:var(--st-on-surface-variant);
-}
-
-.st-performance-progress-empty{
-    min-height:220px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:24px;
-    border:1px dashed rgba(195,198,207,.65);
-    border-radius:var(--st-radius-md);
-    text-align:center;
-    color:var(--st-on-surface-variant);
-    font-size:var(--st-font-size-caption);
-}
-
-@media (max-width:600px){
-    .st-performance-progress-card{ padding:18px; }
-    .st-performance-progress-head{ flex-direction:column; }
-    .st-performance-progress-current{ width:100%; text-align:left; }
-    .st-performance-progress-x-label{ font-size:.625rem; }
-}
-
-.st-risk-trend-card{
-    background:#fff;
-    border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-lg);
-    box-shadow:var(--st-shadow-sm);
-    padding:24px;
-    margin-bottom:24px;
-}
-
-.st-risk-trend-legend{
-    display:flex;
-    gap:16px;
-}
-
-.st-risk-trend-legend-item{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    font-size: var(--st-font-size-micro);
-    font-weight:700;
-    color:var(--st-on-surface-variant);
-}
-
-.st-risk-trend-legend-dot{
-    width:8px;
-    height:8px;
-    border-radius:50%;
-}
-
-.st-risk-trend-chart{
-    position:relative;
-    height:220px;
-    border-left:1px solid rgba(195,198,207,.5);
-    border-bottom:1px solid rgba(195,198,207,.5);
-    margin-top:16px;
-}
-
-.st-risk-trend-zone{
-    position:absolute;
-    width:100%;
-    display:flex;
-    align-items:center;
-    justify-content:flex-end;
-    padding:0 12px;
-}
-
-.st-risk-trend-zone span{
-    font-size: var(--st-font-size-micro);
-    font-weight:700;
-    text-transform:uppercase;
-}
-
-.st-risk-trend-points{
-    position:absolute;
-    inset:0;
-}
-
-.st-risk-trend-line{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    overflow:visible;
-}
-
-.st-risk-trend-point{
-    position:absolute;
-    width:12px;
-    height:12px;
-    border-radius:50%;
-    transform:translate(-50%,-50%);
-    border:2px solid #fff;
-    box-shadow:var(--st-shadow-xs);
-}
-
-.st-risk-trend-point--high{ background:var(--st-risk-high); }
-.st-risk-trend-point--moderate{ background:var(--st-risk-moderate); }
-.st-risk-trend-point--low{ background:var(--st-risk-low); }
-
-.st-risk-trend-list{
-    display:flex;
-    flex-direction:column;
-    gap:2px;
-    margin-top:16px;
-}
-
-.st-risk-trend-list-row{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    font-size: var(--st-font-size-caption);
-    padding:8px 4px;
-    border-bottom:1px solid rgba(195,198,207,.15);
-}
-
-.st-risk-trend-list-row:last-child{ border-bottom:none; }
-
-.st-risk-trend-empty{
-    text-align:center;
-    color:var(--st-on-surface-variant);
-    font-size: var(--st-font-size-caption);
-    padding:24px 0 0;
-}
-
-.st-profile-grid{
-    display:grid;
-    grid-template-columns:1fr;
-    gap:24px;
-}
-
-@media (min-width:1100px){
-    .st-profile-grid{
-        grid-template-columns:3fr 1fr;
-        align-items:flex-start;
-    }
-}
-
-.st-priority-chip{
-    display:inline-flex;
-    padding:2px 8px;
-    border-radius:var(--st-radius-sm);
-    font-size: var(--st-font-size-micro);
-    font-weight:700;
-    text-transform:uppercase;
-    color:#fff;
-}
-
-.st-priority-chip--high{ background:var(--st-risk-high); }
-.st-priority-chip--medium{ background:var(--st-risk-moderate); }
-.st-priority-chip--low{ background:var(--st-outline); }
-
-.st-sidebar-info-card{
-    background:#fff;
-    border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-lg);
-    box-shadow:var(--st-shadow-sm);
-    padding:20px;
-}
-
-.st-sidebar-info-title{
-    font-size: var(--st-font-size-label);
-    font-weight:700;
-    color:var(--st-primary);
-    margin-bottom:16px;
-    padding-bottom:8px;
-    border-bottom:1px solid rgba(195,198,207,.20);
-}
-
-.st-timeline--compact{
-    max-height:420px;
-    overflow-y:auto;
-}
-
-.st-history-filters{
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:space-between;
-    align-items:center;
-    gap:16px;
-    margin-bottom:24px;
-}
-
-.st-history-chips{
-    display:flex;
-    gap:8px;
-}
-
-.st-history-chip{
-    padding:6px 16px;
-    border-radius:999px;
-    background:var(--st-surface-container-low);
-    color:var(--st-on-surface-variant);
-    font-size: var(--st-font-size-caption);
-    font-weight:600;
-    border:none;
-    cursor:pointer;
-    transition:var(--st-transition);
-}
-
-.st-history-chip:hover{
-    background:var(--st-surface-container);
-}
-
-.st-history-chip.is-active{
-    background:var(--st-primary);
-    color:#fff;
-}
-
-.st-timeline{
-    position:relative;
-    padding-left:32px;
-}
-
-.st-timeline::before{
-    content:"";
-    position:absolute;
-    left:11px;
-    top:4px;
-    bottom:4px;
-    width:2px;
-    background:rgba(195,198,207,.40);
-}
-
-.st-timeline-item{
-    position:relative;
-    margin-bottom:20px;
-}
-
-.st-timeline-item:last-child{ margin-bottom:0; }
-
-.st-timeline-dot{
-    position:absolute;
-    left:-32px;
-    top:4px;
-    width:24px;
-    height:24px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:#fff;
-    border:2px solid var(--st-outline-variant);
-    z-index:1;
-}
-
-.st-timeline-dot .material-symbols-outlined{ font-size:0.875rem; }
-
-.st-timeline-dot--module{ border-color:var(--st-risk-moderate); color:var(--st-risk-moderate); }
-.st-timeline-dot--intervention{ border-color:var(--st-secondary); color:var(--st-secondary); }
-.st-timeline-dot--risk{ border-color:var(--st-primary); color:var(--st-primary); }
-.st-timeline-dot--modality{ border-color:var(--st-outline); color:var(--st-outline); }
-
-.st-timeline-card{
-    background:#fff;
-    border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-md);
-    box-shadow:var(--st-shadow-sm);
-    padding:14px 16px;
-}
-
-.st-timeline-card-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    gap:12px;
-    margin-bottom:4px;
-}
-
-.st-timeline-card-title{
-    font-size: var(--st-font-size-body-lg);
-    font-weight:700;
-    color:var(--st-on-surface);
-}
-
-.st-timeline-card-date{
-    font-size: var(--st-font-size-micro);
-    color:var(--st-outline);
-    white-space:nowrap;
-}
-
-.st-timeline-card-text{
-    font-size: var(--st-font-size-caption);
-    color:var(--st-on-surface-variant);
-}
-
-.st-prediction-card{
-    background:#fff;
-    border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-lg);
-    box-shadow:var(--st-shadow-sm);
-    padding:24px;
-    margin-bottom:24px;
-}
-
-.st-prediction-summary-box{
-    background:var(--st-surface-container-low);
-    border-radius:var(--st-radius-md);
-    padding:16px;
-    font-size: var(--st-font-size-small);
-    color:var(--st-on-surface-variant);
-    line-height:1.6;
-}
-
-.st-prediction-meta-line{
-    font-size: var(--st-font-size-caption);
-    color:var(--st-outline);
-    margin-top:8px;
-}
-
-.st-prediction-subsection-title{
-    font-size: var(--st-font-size-caption);
-    font-weight:700;
-    color:var(--st-on-surface);
-    margin:20px 0 4px;
-}
-
-.st-prediction-explanation{
-    font-size: var(--st-font-size-label);
-    color:var(--st-on-surface-variant);
-    margin-bottom:14px;
-}
-
-.st-card-title-row{
-    display:flex;
-    align-items:center;
-    gap:8px;
-}
-
-.st-info-tooltip{
-    position:relative;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    color:var(--st-outline);
-    cursor:help;
-}
-
-.st-info-tooltip .material-symbols-outlined{
-    font-size:1.0625rem;
-}
-
-.st-info-tooltip::after{
-    content:attr(data-tooltip-text);
-    position:absolute;
-    left:0;
-    top:calc(100% + 8px);
-    width:260px;
-    background:var(--st-inverse-surface,#262f4c);
-    color:#fff;
-    padding:10px 12px;
-    border-radius:var(--st-radius-sm);
-    font-size: var(--st-font-size-caption);
-    font-weight:500;
-    line-height:1.5;
-    white-space:normal;
-    opacity:0;
-    pointer-events:none;
-    transition:opacity .15s ease;
-    z-index:20;
-    box-shadow:var(--st-shadow-md);
-}
-
-.st-info-tooltip:hover::after,
-.st-info-tooltip:focus-visible::after{
-    opacity:1;
-}
-
-.st-change-list{
-    list-style:none;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-}
-
-.st-change-list li{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    font-size: var(--st-font-size-caption);
-}
-
-.st-change-list-label{
-    display:flex;
-    align-items:center;
-    gap:8px;
-}
-
-.st-change-list-label .material-symbols-outlined{ font-size:1rem; }
-
-.st-change-list-empty{
-    color:var(--st-on-surface-variant);
-    font-size: var(--st-font-size-caption);
-}
-
-.st-contributor-item{
-    display:flex;
-    gap:12px;
-    align-items:flex-start;
-}
-
-.st-contributor-dot{
-    width:8px;
-    height:8px;
-    border-radius:50%;
-    margin-top:6px;
-    flex-shrink:0;
-}
-
-.st-contributor-title-row{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    margin-bottom:2px;
-}
-
-.st-contributor-title{
-    font-size: var(--st-font-size-body-lg);
-    font-weight:700;
-    color:var(--st-on-surface);
-}
-
-.st-contributor-badge{
-    font-size: var(--st-font-size-micro);
-    font-weight:700;
-    text-transform:uppercase;
-    padding:2px 7px;
-    border-radius:var(--st-radius-sm);
-}
-
-.st-contributor-text{
-    font-size: var(--st-font-size-caption);
-    color:var(--st-on-surface-variant);
-}
-
-.st-intervention-card{
-    background:#fff;
-    border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-md);
-    padding:16px;
-    transition:var(--st-transition);
-}
-
-.st-intervention-card:hover{
-    background:var(--st-surface-container-low);
-}
-
-.st-intervention-card-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    margin-bottom:8px;
-}
-
-.st-intervention-card-title-row{
-    display:flex;
-    align-items:center;
-    gap:10px;
-}
-
-.st-intervention-rank{
-    font-size: var(--st-font-size-micro);
-    font-weight:700;
-    color:var(--st-on-surface-variant);
-}
-
-.st-intervention-card-text{
-    font-size: var(--st-font-size-caption);
-    color:var(--st-on-surface);
-    margin-bottom:12px;
-}
-
-.st-intervention-card-factor{
-    font-size: var(--st-font-size-micro);
-    color:var(--st-on-surface-variant);
-    margin-bottom:8px;
-}
-
-.st-intervention-card-footer{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:12px;
-}
-
-.st-intervention-action-hint{
-    font-size: var(--st-font-size-micro);
-    font-style:italic;
-    color:var(--st-secondary);
-}
-
-.st-active-intervention{
-    display:block;
-    border-left:4px solid var(--st-risk-high);
-    padding:8px 0 8px 16px;
-}
-
-.st-active-intervention-actions{
-    display:flex;
-    justify-content:flex-end;
-    gap:8px;
-    margin-top:12px;
-}
-
-.st-active-intervention-meta{
-    display:flex;
-    gap:16px;
-    font-size: var(--st-font-size-caption);
-    color:var(--st-on-surface-variant);
-    margin-top:4px;
-}
-
-.st-table-empty-cell{
-    text-align:center;
-    padding:24px;
-    color:var(--st-on-surface-variant);
-    font-size: var(--st-font-size-caption);
-}
-
-.st-schedule-modal-field--row{
-    flex-direction:row;
-    align-items:center;
-    gap:8px;
-}
-
-.st-schedule-modal-field--inline{
-    display:grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    align-items:center;
-    gap:8px;
-    margin-bottom:20px;
-    width:30%;
-    min-width:200px;
-    max-width:280px;
-    justify-self:end;
-}
-
-.st-schedule-modal-field--inline label{
-    margin-bottom:0;
-    white-space:nowrap;
-    padding-bottom:0;
-    display:flex;
-    align-items:center;
-}
-
-.st-schedule-modal-field--inline input,
-.st-schedule-modal-field--inline .st-btn{
-    width:100%;
-    min-width:0;
-}
-
-.st-schedule-modal-field--inline .st-btn{
-    min-width:150px;
-    justify-content:center;
-}
-
-.st-risk-factor-item{
-    display:flex;
-    gap:10px;
-    align-items:flex-start;
-    margin-bottom:14px;
-}
-
-.st-risk-factor-item:last-child{ margin-bottom:0; }
-
-.st-risk-factor-dot{
-    width:8px;
-    height:8px;
-    border-radius:50%;
-    margin-top:5px;
-    flex-shrink:0;
-}
-
-.st-stack-col-lg{
-    display:flex;
-    flex-direction:column;
-    gap:24px;
-}
-
-.st-stack-col-md{
-    display:flex;
-    flex-direction:column;
-    gap:16px;
-}
-
-.st-panel-head--flush{
-    padding:20px 24px;
-    margin-bottom:0;
-}
-
-.st-panel-head--tight{
-    flex-direction:column;
-    align-items:flex-start;
-    gap:2px;
-}
-
-.st-activity-panel{
-    max-height:450px;
-    display:flex;
-    flex-direction:column;
-}
-
-.st-risk-trend-zone--high{ top:0; height:30%; background:var(--st-risk-high-soft); }
-.st-risk-trend-zone--moderate{ top:30%; height:40%; background:var(--st-risk-moderate-soft); }
-.st-risk-trend-zone--low{ top:70%; height:30%; background:var(--st-risk-low-soft); }
-
-/* Learner profile header */
-@media (min-width:900px){
-    .st-profile-hero{
-        grid-template-columns:minmax(0,1fr) 180px 280px;
-        gap:32px;
-    }
-}
-
-.st-profile-hero-meta{
-    gap:8px 32px;
-}
-
-.st-profile-hero-meta p{
-    line-height:1.5;
-}
-
-.st-profile-hero-risk{
-    padding:0 20px;
-}
-
-.st-profile-hero-identity > div:last-child{
-    flex:1;
-    min-width:0;
-}
-
-[data-profile-modality-since]{
-    display:block;
-}
-/* Task 2 — A&E exam passing-chance predictor (performance based). */
-.st-exam-readiness-card{
-    background:#fff;
-    border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-lg);
-    box-shadow:var(--st-shadow-sm);
-    padding:20px 24px;
-    margin-bottom:24px;
-}
-
-.st-exam-readiness-head{
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:16px;
-    flex-wrap:wrap;
-    margin-bottom:18px;
-}
-
-.st-exam-readiness-title-wrap{
-    display:flex;
-    align-items:flex-start;
-    gap:12px;
-    min-width:0;
-    flex:1 1 420px;
-}
-
-.st-exam-readiness-icon{
-    width:40px;
-    height:40px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex:0 0 40px;
-    background:var(--st-primary-fixed);
-    color:var(--st-primary);
-}
-
-.st-exam-readiness-badge{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    min-height:32px;
-    padding:6px 12px;
-    border-radius:999px;
-    font-size:var(--st-font-size-caption);
-    font-weight:700;
-    white-space:nowrap;
-}
-
-.st-exam-readiness-badge--high{
-    background:var(--st-risk-low-soft);
-    color:var(--st-risk-low);
-}
-
-.st-exam-readiness-badge--low{
-    background:var(--st-risk-high-soft);
-    color:var(--st-risk-high);
-}
-
-.st-exam-readiness-badge--neutral{
-    background:var(--st-surface-container);
-    color:var(--st-on-surface-variant);
-}
-
-.st-exam-readiness-body{
-    display:grid;
-    grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);
-    gap:24px;
-    align-items:start;
-}
-
-@media (max-width:850px){
-    .st-exam-readiness-body{ grid-template-columns:1fr; }
-}
-
-.st-exam-readiness-score-block{
-    min-width:0;
-}
-
-.st-exam-readiness-score-label{
-    font-size:var(--st-font-size-micro);
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:.04em;
-    color:var(--st-on-surface-variant);
-    margin-bottom:5px;
-}
-
-.st-exam-readiness-score-line{
-    display:flex;
-    align-items:baseline;
-    gap:12px;
-    flex-wrap:wrap;
-}
-
-.st-exam-readiness-score-line strong{
-    font-family:var(--st-font-heading);
-    font-size:1.75rem;
-    color:var(--st-on-surface);
-}
-
-.st-exam-readiness-score-line span{
-    font-size:var(--st-font-size-caption);
-    font-weight:600;
-    color:var(--st-on-surface-variant);
-}
-
-.st-exam-readiness-progress{
-    height:9px;
-    margin:10px 0 12px;
-    border-radius:999px;
-    background:var(--st-surface-container);
-    overflow:hidden;
-}
-
-.st-exam-readiness-progress > span,
-.st-exam-readiness-progress-fill{
-    display:block;
-    height:100%;
-    width:0;
-    border-radius:inherit;
-    transition:width .55s ease;
-    background:var(--st-outline);
-}
-
-.st-exam-readiness-progress-fill--high{ background:var(--st-risk-low); }
-.st-exam-readiness-progress-fill--low{ background:var(--st-risk-high); }
-.st-exam-readiness-progress-fill--neutral{ background:var(--st-outline); }
-
-.st-exam-readiness-summary{
-    font-size:var(--st-font-size-caption);
-    color:var(--st-on-surface-variant);
-    line-height:1.55;
-}
-
-.st-exam-readiness-factors{
-    border-left:1px solid rgba(195,198,207,.28);
-    padding-left:20px;
-}
-
-@media (max-width:850px){
-    .st-exam-readiness-factors{
-        border-left:none;
-        border-top:1px solid rgba(195,198,207,.28);
-        padding-left:0;
-        padding-top:14px;
-    }
-}
-
-.st-exam-readiness-factor{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    gap:16px;
-    padding:8px 0;
-    border-bottom:1px solid rgba(195,198,207,.16);
-}
-
-.st-exam-readiness-factor:last-child{ border-bottom:none; }
-
-.st-exam-readiness-factor-name{
-    font-size:var(--st-font-size-caption);
-    font-weight:700;
-    color:var(--st-on-surface);
-}
-
-.st-exam-readiness-factor-detail{
-    max-width:58%;
-    text-align:right;
-    font-size:var(--st-font-size-caption);
-    color:var(--st-on-surface-variant);
-}
-
-.st-exam-readiness-note{
-    margin-top:16px;
-    padding-top:12px;
-    border-top:1px solid rgba(195,198,207,.20);
-    font-size:var(--st-font-size-micro);
-    color:var(--st-on-surface-variant);
-    line-height:1.5;
-}
-
-/* Make the single recorded risk point unmistakable even before a trend line exists. */
-.st-risk-trend-point--single {
-    width:16px;
-    height:16px;
-    box-shadow:0 0 0 5px rgba(18,53,91,.10), var(--st-shadow-xs);
-}
-
-.st-risk-trend-date-label {
-    position:absolute;
-    bottom:6px;
-    transform:translateX(-50%);
-    padding:2px 6px;
-    border-radius:999px;
-    background:rgba(255,255,255,.88);
-    font-size:var(--st-font-size-micro);
-    color:var(--st-on-surface-variant);
-    white-space:nowrap;
-}
-
-@media (max-width:600px){
-    .st-risk-trend-date-label{
-        max-width:82%;
-        overflow:hidden;
-        text-overflow:ellipsis;
-    }
-}
-.st-outcome-card{
-    cursor:pointer;
-    border-radius:var(--st-radius-md);
-    padding:12px;
-    text-align:center;
-    transition:var(--st-transition);
-}
-
-.st-outcome-card:hover{
-    background:var(--st-surface-container-low);
-}
-
-#ivNotesRich[data-placeholder]:empty::before{
-    content:attr(data-placeholder);
-    color:#9CA3AF;
-}
-
-#ivNotesRich[contenteditable]:focus{
-    outline:none;
-}
-
-#ivNotesRich ul,
-#ivNotesRich ol{
-    margin:4px 0;
-    padding-left:22px;
-}
-
-#ivNotesRich li{
-    margin-bottom:2px;
-}
-
-/* 2026-09-24 — Learner Profile compact spacing pass.
-   The global app layout uses both flex gap and section margins; on this page
-   those values stacked and made the header/profile/share/tabs feel too far
-   apart. Keep comfortable breathing room without the oversized vertical gaps. */
-body[data-page="Learner Profile"] .st-content{
-    gap:20px;
-}
-
-body[data-page="Learner Profile"] .st-page-header{
-    margin-bottom:0;
-}
-
-body[data-page="Learner Profile"] .st-profile-hero{
-    margin-bottom:0;
-    padding:20px 22px;
-    gap:24px;
-}
-
-body[data-page="Learner Profile"] .st-profile-hero-identity{
-    gap:16px;
-}
-
-body[data-page="Learner Profile"] .st-profile-hero-meta{
-    gap:5px 24px;
-}
-
-body[data-page="Learner Profile"] .st-profile-hero-meta p{
-    line-height:1.4;
-}
-
-body[data-page="Learner Profile"] .st-profile-hero-actions{
-    gap:8px;
-}
-
-body[data-page="Learner Profile"] .st-portal-share-card{
-    margin-bottom:0;
-    padding:16px 20px;
-}
-
-body[data-page="Learner Profile"] .st-profile-tabs{
-    margin-bottom:0;
-    gap:28px;
-}
-
-body[data-page="Learner Profile"] .st-profile-tab{
-    padding-bottom:11px;
-}
-
-@media (min-width:900px){
-    body[data-page="Learner Profile"] .st-profile-hero{
-        grid-template-columns:minmax(0,1fr) 160px 260px;
-        gap:24px;
-    }
-}
-
-@media (max-width:899px){
-    body[data-page="Learner Profile"] .st-content{
-        gap:16px;
-    }
-
-    body[data-page="Learner Profile"] .st-profile-hero{
-        padding:18px;
-        gap:18px;
-    }
-
-    body[data-page="Learner Profile"] .st-portal-share-card{
-        padding:16px 18px;
-    }
-}
-
-
-/* === MERGED LOCAL LEARNER PROFILE UPDATES === */
-body[data-page="Learner Profile"] .st-assessment-card-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    gap:14px;
-    flex-wrap:wrap;
-}
-
-body[data-page="Learner Profile"] .st-assessment-summary{
-    border:1px solid rgba(195,198,207,.28);
-    border-radius:14px;
-    background:var(--st-surface-container-lowest, #fff);
-    padding:14px 16px;
-}
-
-body[data-page="Learner Profile"] .st-assessment-summary-top{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    gap:12px;
-    flex-wrap:wrap;
-    margin-bottom:12px;
-}
-
-body[data-page="Learner Profile"] .st-assessment-summary-title{
-    margin:0;
-    font-weight:700;
-    color:var(--st-on-surface);
-}
-
 body[data-page="Learner Profile"] .st-assessment-summary-date,
-body[data-page="Learner Profile"] .st-assessment-empty-sub{
-    margin:4px 0 0;
-    color:var(--st-on-surface-variant);
-    font-size:var(--st-font-size-caption);
+body[data-page="Learner Profile"] .st-assessment-empty-sub {
+  margin: 2px 0 0;
+  color: var(--st-ink-faint);
+  font-size: 0.781rem;
+}
+body[data-page="Learner Profile"] .st-assessment-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+body[data-page="Learner Profile"] .st-assessment-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--st-background);
+}
+body[data-page="Learner Profile"] .st-assessment-summary-label {
+  font-size: 0.781rem;
+  color: var(--st-on-surface-variant);
+}
+body[data-page="Learner Profile"] .st-assessment-summary-value {
+  font-family: var(--st-font-heading);
+  font-weight: 800;
+  font-size: 1.375rem;
+  color: var(--st-on-surface);
+}
+body[data-page="Learner Profile"] .st-assessment-summary-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+body[data-page="Learner Profile"] .st-assessment-summary-actions .st-btn .material-symbols-outlined {
+  font-size: 1.0625rem;
+  transition: transform var(--st-t-hover) var(--st-ease-out);
+}
+body[data-page="Learner Profile"] .st-assessment-summary-actions .st-btn:hover .material-symbols-outlined {
+  transform: translateX(3px);
+}
+body[data-page="Learner Profile"] .st-assessment-summary-empty {
+  border: 1px dashed var(--st-line-strong);
+  border-radius: 12px;
+  padding: 16px;
+  background: var(--st-background);
+}
+body[data-page="Learner Profile"] .st-assessment-summary-empty .st-assessment-empty {
+  margin: 0;
+}
+@media (max-width: 767px) {
+  body[data-page="Learner Profile"] .st-assessment-summary-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-body[data-page="Learner Profile"] .st-assessment-summary-grid{
-    display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:12px;
+/* ==========================================================================
+   Overview: risk trend
+   ========================================================================== */
+body[data-page="Learner Profile"] .st-risk-trend-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+body[data-page="Learner Profile"] .st-risk-trend-legend {
+  display: flex;
+  gap: 14px;
+  font-size: 0.781rem;
+  color: var(--st-on-surface-variant);
+  font-weight: 600;
+}
+body[data-page="Learner Profile"] .st-risk-trend-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+body[data-page="Learner Profile"] .st-risk-trend-legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+body[data-page="Learner Profile"] .st-risk-trend-legend-dot--high {
+  background: var(--st-risk-high);
+}
+body[data-page="Learner Profile"] .st-risk-trend-legend-dot--moderate {
+  background: var(--st-risk-moderate);
+}
+body[data-page="Learner Profile"] .st-risk-trend-legend-dot--low {
+  background: var(--st-risk-low);
+}
+body[data-page="Learner Profile"] .st-risk-trend-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 20px;
+  align-items: start;
+}
+body[data-page="Learner Profile"] .st-risk-trend-chart {
+  position: relative;
+  height: 200px;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 0 6px;
+}
+body[data-page="Learner Profile"] .st-risk-trend-zone {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 6px 10px;
+}
+body[data-page="Learner Profile"] .st-risk-trend-zone span {
+  font-size: 0.688rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+body[data-page="Learner Profile"] .st-risk-trend-zone--high {
+  top: 0;
+  height: 30%;
+  background: var(--st-risk-high-soft-2, #fdf1f0);
+}
+body[data-page="Learner Profile"] .st-risk-trend-zone--high span {
+  color: var(--st-risk-high-ink, #a01414);
+}
+body[data-page="Learner Profile"] .st-risk-trend-zone--moderate {
+  top: 30%;
+  height: 40%;
+  background: var(--st-risk-moderate-soft-2, #fef8ee);
+}
+body[data-page="Learner Profile"] .st-risk-trend-zone--moderate span {
+  color: var(--st-risk-moderate-ink, #8f5200);
+}
+body[data-page="Learner Profile"] .st-risk-trend-zone--low {
+  top: 70%;
+  height: 30%;
+  background: var(--st-risk-low-soft-2, #f2f9f0);
+}
+body[data-page="Learner Profile"] .st-risk-trend-zone--low span {
+  color: var(--st-risk-low-ink, #2c7121);
+}
+body[data-page="Learner Profile"] .st-risk-trend-points {
+  position: absolute;
+  inset: 0;
+}
+body[data-page="Learner Profile"] .st-risk-trend-line {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+body[data-page="Learner Profile"] .st-risk-trend-line polyline {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  transition: stroke-dashoffset 1100ms var(--st-ease-out);
+}
+body[data-page="Learner Profile"] [data-animate].is-inview .st-risk-trend-line polyline {
+  stroke-dashoffset: 0;
+}
+body[data-page="Learner Profile"] .st-risk-trend-point {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2.5px solid #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 300ms var(--st-ease-out);
+  cursor: pointer;
+}
+body[data-page="Learner Profile"] [data-animate].is-inview .st-risk-trend-point {
+  transform: translate(-50%, -50%) scale(1);
+  transition-delay: calc(var(--d, 0) * 1ms);
+}
+body[data-page="Learner Profile"] .st-risk-trend-point:hover,
+body[data-page="Learner Profile"] .st-risk-trend-point:focus-visible {
+  transform: translate(-50%, -50%) scale(1.3) !important;
+  outline: none;
+}
+body[data-page="Learner Profile"] .st-risk-trend-point--high {
+  background: var(--st-risk-high);
+}
+body[data-page="Learner Profile"] .st-risk-trend-point--moderate {
+  background: var(--st-risk-moderate);
+}
+body[data-page="Learner Profile"] .st-risk-trend-point--low {
+  background: var(--st-risk-low);
+}
+body[data-page="Learner Profile"] .st-risk-trend-point--single {
+  width: 16px;
+  height: 16px;
+}
+body[data-page="Learner Profile"] .st-risk-trend-point[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  transform: translateX(-50%) translateY(4px);
+  width: max-content;
+  max-width: 240px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #111a36;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--st-t-hover) ease, transform var(--st-t-hover) ease;
+  z-index: 20;
+}
+body[data-page="Learner Profile"] .st-risk-trend-point:hover[data-tooltip]::after,
+body[data-page="Learner Profile"] .st-risk-trend-point:focus-visible[data-tooltip]::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+body[data-page="Learner Profile"] .st-risk-trend-date-label {
+  position: absolute;
+  bottom: 6px;
+  transform: translateX(-50%);
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  font-size: 0.719rem;
+  color: var(--st-on-surface-variant);
+  white-space: nowrap;
+}
+body[data-page="Learner Profile"] .st-risk-trend-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--st-line);
+  border-radius: 10px;
+  padding: 2px 14px;
+}
+body[data-page="Learner Profile"] .st-risk-trend-list-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  font-size: 0.813rem;
+}
+body[data-page="Learner Profile"] .st-risk-trend-list-row + .st-risk-trend-list-row {
+  border-top: 1px solid var(--st-line);
+}
+body[data-page="Learner Profile"] .st-risk-trend-list .st-risk-badge {
+  padding: 3px 10px;
+  font-size: 0.75rem;
+}
+body[data-page="Learner Profile"] .st-risk-trend-empty {
+  text-align: center;
+  color: var(--st-on-surface-variant);
+  font-size: 0.844rem;
+  padding: 12px 0 0;
+}
+@media (max-width: 1023px) {
+  body[data-page="Learner Profile"] .st-risk-trend-body {
+    grid-template-columns: 1fr;
+  }
 }
 
-body[data-page="Learner Profile"] .st-assessment-summary-item{
-    background:var(--st-surface-container-low);
-    border:1px solid rgba(195,198,207,.2);
-    border-radius:12px;
-    padding:12px 13px;
+/* ==========================================================================
+   Overview: recent monitoring activity + recent activity
+   ========================================================================== */
+body[data-page="Learner Profile"] .st-panel-head--flush {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 20px;
+}
+body[data-page="Learner Profile"] .st-panel-head--flush .st-card-title {
+  font-size: 1.0625rem;
+}
+body[data-page="Learner Profile"] .st-panel-link {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  border: 0;
+  background: none;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.844rem;
+  font-weight: 600;
+  color: var(--st-secondary);
+  cursor: pointer;
+  transition: background-color var(--st-t-hover);
+}
+body[data-page="Learner Profile"] .st-panel-link:hover {
+  background: #e3f4f3;
+}
+body[data-page="Learner Profile"] .st-panel-link .material-symbols-outlined {
+  font-size: 1.0625rem;
+  transition: transform var(--st-t-hover) var(--st-ease-out);
+}
+body[data-page="Learner Profile"] .st-panel-link:hover .material-symbols-outlined {
+  transform: translateX(3px);
+}
+body[data-page="Learner Profile"] .st-cat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px 3px 8px;
+  border-radius: 999px;
+  font-size: 0.781rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+body[data-page="Learner Profile"] .st-cat-chip .material-symbols-outlined {
+  font-size: 1rem;
+}
+body[data-page="Learner Profile"] .st-cat-chip--module {
+  background: var(--st-risk-moderate-soft-2, #fef3e4);
+  color: var(--st-risk-moderate-ink, #8f5200);
+}
+body[data-page="Learner Profile"] .st-cat-chip--intervention {
+  background: #e3f4f3;
+  color: var(--st-secondary);
+}
+body[data-page="Learner Profile"] .st-cat-chip--risk {
+  background: var(--st-risk-high-soft-2, #fdecea);
+  color: var(--st-risk-high-ink, #a01414);
+}
+body[data-page="Learner Profile"] .st-cat-chip--modality {
+  background: var(--st-navy-soft);
+  color: var(--st-primary);
+}
+body[data-page="Learner Profile"] .st-lp-table td[data-col="date"] {
+  white-space: nowrap;
+  color: var(--st-on-surface-variant);
+  font-size: 0.844rem;
+}
+body[data-page="Learner Profile"] .st-lp-table td[data-col="det"] {
+  color: #3a4256;
+  font-size: 0.844rem;
+}
+body[data-page="Learner Profile"] .st-activity-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 420px;
+}
+body[data-page="Learner Profile"] .st-activity-panel .st-timeline {
+  overflow: auto;
+  padding-right: 4px;
+  min-height: 0;
 }
 
-body[data-page="Learner Profile"] .st-assessment-summary-label{
-    display:block;
-    font-size:var(--st-font-size-micro);
-    text-transform:uppercase;
-    letter-spacing:.05em;
-    color:var(--st-on-surface-variant);
-    margin-bottom:6px;
+/* ==========================================================================
+   Timeline (Recent activity + Monitoring history)
+   ========================================================================== */
+body[data-page="Learner Profile"] .st-timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+body[data-page="Learner Profile"] .st-timeline-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+}
+body[data-page="Learner Profile"] .st-timeline-item:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 34px;
+  bottom: -10px;
+  width: 2px;
+  background: var(--st-line);
+}
+body[data-page="Learner Profile"] .st-timeline-dot {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  z-index: 1;
+}
+body[data-page="Learner Profile"] .st-timeline-dot .material-symbols-outlined {
+  font-size: 1.125rem;
+}
+body[data-page="Learner Profile"] .st-timeline-dot--module {
+  background: var(--st-risk-moderate-soft-2, #fef3e4);
+  color: #c46b00;
+}
+body[data-page="Learner Profile"] .st-timeline-dot--intervention {
+  background: #e3f4f3;
+  color: var(--st-secondary);
+}
+body[data-page="Learner Profile"] .st-timeline-dot--risk {
+  background: var(--st-risk-high-soft-2, #fdecea);
+  color: var(--st-risk-high-ink, #a01414);
+}
+body[data-page="Learner Profile"] .st-timeline-dot--modality {
+  background: var(--st-navy-soft);
+  color: var(--st-primary);
+}
+body[data-page="Learner Profile"] .st-timeline-card {
+  padding: 10px 14px;
+  border: 1px solid var(--st-line);
+  border-radius: 10px;
+  background: #fff;
+  transition: border-color var(--st-t-hover), box-shadow var(--st-t-hover);
+}
+body[data-page="Learner Profile"] .st-timeline-card:hover {
+  border-color: var(--st-line-strong);
+  box-shadow: 0 4px 12px rgba(17, 26, 54, 0.06);
+}
+body[data-page="Learner Profile"] .st-timeline-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+}
+body[data-page="Learner Profile"] .st-timeline-card-title {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.906rem;
+  color: var(--st-on-surface);
+}
+body[data-page="Learner Profile"] .st-timeline-card-date {
+  font-size: 0.75rem;
+  color: var(--st-ink-faint);
+  white-space: nowrap;
+}
+body[data-page="Learner Profile"] .st-timeline-card-text {
+  margin: 2px 0 0;
+  font-size: 0.844rem;
+  color: var(--st-on-surface-variant);
+}
+body[data-page="Learner Profile"] .st-timeline--compact .st-timeline-card {
+  padding: 8px 12px;
+}
+body[data-page="Learner Profile"] .st-timeline--compact .st-timeline-card-head {
+  flex-direction: column;
+  gap: 0;
+}
+body[data-page="Learner Profile"] .st-timeline--compact .st-timeline-card-title {
+  font-size: 0.875rem;
+}
+body[data-page="Learner Profile"] [data-animate-list] > * {
+  opacity: 0;
+  transform: translateY(6px);
+}
+body[data-page="Learner Profile"] [data-animate-list].is-inview > * {
+  opacity: 1;
+  transform: none;
+  transition: opacity 300ms ease, transform 400ms var(--st-ease-out);
+  transition-delay: calc(var(--i, 0) * 50ms);
 }
 
-body[data-page="Learner Profile"] .st-assessment-summary-value{
-    font-size:1.05rem;
-    color:var(--st-on-surface);
+/* ==========================================================================
+   Monitoring history tab
+   ========================================================================== */
+body[data-page="Learner Profile"] .st-history-filters {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+body[data-page="Learner Profile"] .st-history-chips {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--st-background);
+  border-radius: var(--st-radius-control);
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+body[data-page="Learner Profile"] .st-history-chip {
+  appearance: none;
+  white-space: nowrap;
+  flex: none;
+  height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  font: inherit;
+  font-size: 0.844rem;
+  font-weight: 500;
+  color: var(--st-on-surface-variant);
+  cursor: pointer;
+  transition: background-color var(--st-t-hover), color var(--st-t-hover), transform var(--st-t-press);
+}
+body[data-page="Learner Profile"] .st-history-chip:hover {
+  color: var(--st-on-surface);
+}
+body[data-page="Learner Profile"] .st-history-chip:active {
+  transform: scale(0.96);
+}
+body[data-page="Learner Profile"] .st-history-chip.is-active {
+  background: #fff;
+  color: var(--st-primary);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(17, 26, 54, 0.12);
+}
+body[data-page="Learner Profile"] .st-history-filters .st-search {
+  flex: 0 1 340px;
+}
+@media (max-width: 767px) {
+  body[data-page="Learner Profile"] .st-history-filters .st-search {
+    flex: 1 1 100%;
+  }
 }
 
-body[data-page="Learner Profile"] .st-assessment-summary-actions{
-    margin-top:12px;
-    display:flex;
-    justify-content:flex-end;
+/* ==========================================================================
+   Risk explanation tab
+   ========================================================================== */
+body[data-page="Learner Profile"] .st-prediction-summary-box {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--st-background);
+  font-size: 0.938rem;
+  color: var(--st-on-surface);
+  border-left: 4px solid var(--st-outline);
+  line-height: 1.5;
+}
+body[data-page="Learner Profile"] .st-prediction-summary-box.is-high {
+  background: #fdf5f4;
+  border-left-color: var(--st-risk-high);
+}
+body[data-page="Learner Profile"] .st-prediction-summary-box.is-moderate {
+  background: #fef9f0;
+  border-left-color: var(--st-risk-moderate);
+}
+body[data-page="Learner Profile"] .st-prediction-summary-box.is-low {
+  background: #f3f9f1;
+  border-left-color: var(--st-risk-low);
+}
+body[data-page="Learner Profile"] .st-prediction-meta-line:not([hidden]) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 0;
+  font-size: 0.813rem;
+  color: var(--st-on-surface-variant);
+}
+body[data-page="Learner Profile"] .st-prediction-meta-line .material-symbols-outlined {
+  font-size: 1.0625rem;
+  color: var(--st-ink-faint);
+}
+body[data-page="Learner Profile"] .st-prediction-subsection-title {
+  margin: 20px 0 4px;
+  font-family: var(--st-font-heading);
+  font-weight: 700;
+  font-size: 0.938rem;
+  color: var(--st-on-surface);
+}
+body[data-page="Learner Profile"] .st-prediction-explanation {
+  margin: 0 0 12px;
+  font-size: 0.844rem;
+  color: var(--st-on-surface-variant);
+}
+body[data-page="Learner Profile"] .st-contributor-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+body[data-page="Learner Profile"] .st-contributor-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px;
+  border: 1px solid var(--st-line);
+  border-radius: 10px;
+  border-top: 3px solid var(--st-outline-variant);
+  transition: box-shadow var(--st-t-hover);
+}
+body[data-page="Learner Profile"] .st-contributor-item:hover {
+  box-shadow: 0 4px 12px rgba(17, 26, 54, 0.06);
+}
+body[data-page="Learner Profile"] .st-contributor-item > .material-symbols-outlined {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: var(--st-background);
+  color: var(--st-on-surface-variant);
+  font-size: 1.1875rem;
+}
+body[data-page="Learner Profile"] .st-contributor-item--high {
+  border-top-color: var(--st-risk-high);
+}
+body[data-page="Learner Profile"] .st-contributor-item--high > .material-symbols-outlined {
+  background: var(--st-risk-high-soft-2, #fdecea);
+  color: var(--st-risk-high-ink, #a01414);
+}
+body[data-page="Learner Profile"] .st-contributor-item--high .st-contributor-badge {
+  background: var(--st-risk-high-soft-2, #fdecea);
+  color: var(--st-risk-high-ink, #a01414);
+}
+body[data-page="Learner Profile"] .st-contributor-item--moderate {
+  border-top-color: var(--st-risk-moderate);
+}
+body[data-page="Learner Profile"] .st-contributor-item--moderate > .material-symbols-outlined {
+  background: var(--st-risk-moderate-soft-2, #fef3e4);
+  color: var(--st-risk-moderate-ink, #8f5200);
+}
+body[data-page="Learner Profile"] .st-contributor-item--moderate .st-contributor-badge {
+  background: var(--st-risk-moderate-soft-2, #fef3e4);
+  color: var(--st-risk-moderate-ink, #8f5200);
+}
+body[data-page="Learner Profile"] .st-contributor-item--low {
+  border-top-color: var(--st-risk-low);
+}
+body[data-page="Learner Profile"] .st-contributor-item--low > .material-symbols-outlined {
+  background: var(--st-risk-low-soft-2, #edf7ea);
+  color: var(--st-risk-low-ink, #2c7121);
+}
+body[data-page="Learner Profile"] .st-contributor-item--low .st-contributor-badge {
+  background: var(--st-risk-low-soft-2, #edf7ea);
+  color: var(--st-risk-low-ink, #2c7121);
+}
+body[data-page="Learner Profile"] .st-contributor-item--neutral {
+  border-top-width: 1px;
+  border-top-color: var(--st-line);
+}
+body[data-page="Learner Profile"] .st-contributor-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+body[data-page="Learner Profile"] .st-contributor-title {
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.938rem;
+  color: var(--st-on-surface);
+}
+body[data-page="Learner Profile"] .st-contributor-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--st-background);
+  color: var(--st-on-surface-variant);
+  font-size: 0.719rem;
+  font-weight: 700;
+  text-transform: lowercase;
+  display: inline-block;
+}
+body[data-page="Learner Profile"] .st-contributor-badge::first-letter {
+  text-transform: uppercase;
+}
+body[data-page="Learner Profile"] .st-contributor-text {
+  margin: 4px 0 0;
+  font-size: 0.844rem;
+  color: #3a4256;
+  line-height: 1.5;
+}
+body[data-page="Learner Profile"] .st-risk-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+body[data-page="Learner Profile"] .st-card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+body[data-page="Learner Profile"] .st-info-tooltip {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  color: var(--st-ink-faint);
+  cursor: help;
+}
+body[data-page="Learner Profile"] .st-info-tooltip .material-symbols-outlined {
+  font-size: 1.125rem;
+}
+body[data-page="Learner Profile"] .st-info-tooltip::after {
+  content: attr(data-tooltip-text);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translate(-50%, 4px);
+  width: 260px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #111a36;
+  color: #fff;
+  font-size: 0.781rem;
+  line-height: 1.45;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--st-t-hover), transform var(--st-t-hover);
+  z-index: 5;
+}
+body[data-page="Learner Profile"] .st-info-tooltip:hover::after,
+body[data-page="Learner Profile"] .st-info-tooltip:focus-visible::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+body[data-page="Learner Profile"] .st-change-list {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+body[data-page="Learner Profile"] .st-change-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  font-size: 0.844rem;
+  border-bottom: 1px solid var(--st-line);
+}
+body[data-page="Learner Profile"] .st-change-item:last-child {
+  border-bottom: 0;
+}
+body[data-page="Learner Profile"] .st-change-list-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+body[data-page="Learner Profile"] .st-change-list-label .material-symbols-outlined {
+  font-size: 1rem;
+}
+body[data-page="Learner Profile"] .st-change-item-date {
+  font-weight: 700;
+  white-space: nowrap;
+}
+body[data-page="Learner Profile"] .st-change-item--high .material-symbols-outlined,
+body[data-page="Learner Profile"] .st-change-item--high .st-change-item-date {
+  color: var(--st-risk-high);
+}
+body[data-page="Learner Profile"] .st-change-item--moderate .material-symbols-outlined,
+body[data-page="Learner Profile"] .st-change-item--moderate .st-change-item-date {
+  color: var(--st-risk-moderate);
+}
+body[data-page="Learner Profile"] .st-change-item--low .material-symbols-outlined,
+body[data-page="Learner Profile"] .st-change-item--low .st-change-item-date {
+  color: var(--st-risk-low);
+}
+body[data-page="Learner Profile"] .st-change-list-empty {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px dashed var(--st-line-strong);
+  border-radius: 10px;
+  font-size: 0.844rem;
+  color: var(--st-ink-faint);
+}
+body[data-page="Learner Profile"] .st-change-list-empty .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+@media (max-width: 1279px) {
+  body[data-page="Learner Profile"] .st-contributor-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 1023px) {
+  body[data-page="Learner Profile"] .st-risk-row {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 767px) {
+  body[data-page="Learner Profile"] .st-contributor-grid {
+    grid-template-columns: 1fr;
+  }
+  body[data-page="Learner Profile"] .st-info-tooltip::after {
+    left: auto;
+    right: -8px;
+    transform: translateY(4px);
+    width: min(260px, 70vw);
+  }
+  body[data-page="Learner Profile"] .st-info-tooltip:hover::after,
+  body[data-page="Learner Profile"] .st-info-tooltip:focus-visible::after {
+    transform: none;
+  }
 }
 
-body[data-page="Learner Profile"] .st-assessment-summary-empty{
-    border:1px dashed rgba(195,198,207,.42);
-    border-radius:14px;
-    padding:16px;
-    background:var(--st-surface-container-low);
+/* ==========================================================================
+   Interventions tab
+   ========================================================================== */
+body[data-page="Learner Profile"] .st-rec-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+body[data-page="Learner Profile"] .st-intervention-card {
+  padding: 14px 16px;
+  border: 1px solid var(--st-line);
+  border-radius: 12px;
+  border-left: 4px solid var(--st-outline-variant);
+  transition: box-shadow var(--st-t-hover), background-color var(--st-t-hover);
+}
+body[data-page="Learner Profile"] .st-intervention-card:hover {
+  box-shadow: 0 6px 16px rgba(17, 26, 54, 0.07);
+  background: #fbfcfe;
+}
+body[data-page="Learner Profile"] .st-intervention-card--high {
+  border-left-color: var(--st-risk-high);
+}
+body[data-page="Learner Profile"] .st-intervention-card--medium {
+  border-left-color: var(--st-risk-moderate);
+}
+body[data-page="Learner Profile"] .st-intervention-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+body[data-page="Learner Profile"] .st-intervention-card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+body[data-page="Learner Profile"] .st-intervention-card-title {
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.938rem;
+  color: var(--st-on-surface);
+}
+body[data-page="Learner Profile"] .st-priority-chip {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 0.719rem;
+  font-weight: 700;
+  text-transform: lowercase;
+}
+body[data-page="Learner Profile"] .st-priority-chip::first-letter {
+  text-transform: uppercase;
+}
+body[data-page="Learner Profile"] .st-priority-chip--high {
+  background: var(--st-risk-high-soft-2, #fdecea);
+  color: var(--st-risk-high-ink, #a01414);
+}
+body[data-page="Learner Profile"] .st-priority-chip--medium {
+  background: var(--st-risk-moderate-soft-2, #fef3e4);
+  color: var(--st-risk-moderate-ink, #8f5200);
+}
+body[data-page="Learner Profile"] .st-intervention-rank {
+  display: inline-grid;
+  place-items: center;
+  min-width: 34px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--st-background);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--st-on-surface-variant);
+  white-space: nowrap;
+}
+body[data-page="Learner Profile"] .st-intervention-card-factor {
+  margin: 8px 0 0;
+  font-size: 0.781rem;
+  color: var(--st-on-surface-variant);
+}
+body[data-page="Learner Profile"] .st-intervention-card-factor strong {
+  color: var(--st-on-surface);
+  font-weight: 600;
+}
+body[data-page="Learner Profile"] .st-intervention-card-text {
+  margin: 6px 0 0;
+  font-size: 0.875rem;
+  color: #3a4256;
+}
+body[data-page="Learner Profile"] .st-ai-insight {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: #f5f3ff;
+  border-left: 3px solid #7c3aed;
+  border-radius: 8px;
+}
+body[data-page="Learner Profile"] .st-ai-insight-kicker {
+  margin: 0 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #6d28d9;
+}
+body[data-page="Learner Profile"] .st-ai-insight-kicker .material-symbols-outlined {
+  font-size: 1rem;
+}
+body[data-page="Learner Profile"] .st-ai-insight p {
+  margin: 0 0 6px;
+  font-size: 0.813rem;
+  color: #374151;
+}
+body[data-page="Learner Profile"] .st-ai-insight p:last-child {
+  margin-bottom: 0;
+}
+body[data-page="Learner Profile"] .st-ai-disclaimer {
+  margin-top: 6px;
+  font-size: 0.781rem;
+  color: #6b7280;
+  font-style: italic;
+}
+body[data-page="Learner Profile"] .st-intervention-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--st-line);
+}
+body[data-page="Learner Profile"] .st-intervention-action-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.781rem;
+  color: var(--st-secondary);
+  font-weight: 600;
+}
+body[data-page="Learner Profile"] .st-intervention-action-hint .material-symbols-outlined {
+  font-size: 1rem;
+}
+body[data-page="Learner Profile"] .st-active-intervention {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 16px;
+  border: 1px solid var(--st-line);
+  border-radius: 12px;
+  border-left: 4px solid var(--st-secondary);
+}
+body[data-page="Learner Profile"] .st-active-intervention + .st-active-intervention {
+  margin-top: 12px;
+}
+body[data-page="Learner Profile"] .st-active-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+body[data-page="Learner Profile"] .st-active-title {
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.938rem;
+  color: var(--st-on-surface);
+}
+body[data-page="Learner Profile"] .st-active-priority {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--st-risk-high-soft-2, #fdecea);
+  color: var(--st-risk-high-ink, #a01414);
+  font-size: 0.719rem;
+  font-weight: 700;
+}
+body[data-page="Learner Profile"] .st-active-intervention-meta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+  font-size: 0.813rem;
+  color: var(--st-on-surface-variant);
+}
+body[data-page="Learner Profile"] .st-active-intervention-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+body[data-page="Learner Profile"] .st-active-intervention-meta .material-symbols-outlined {
+  font-size: 1rem;
+}
+body[data-page="Learner Profile"] .st-due-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.781rem;
+  font-weight: 700;
+}
+body[data-page="Learner Profile"] .st-due-flag .material-symbols-outlined {
+  font-size: 1rem;
+}
+body[data-page="Learner Profile"] .st-due-flag--overdue {
+  background: var(--st-risk-high-soft-2, #fdecea);
+  color: var(--st-risk-high-ink, #a01414);
+}
+body[data-page="Learner Profile"] .st-due-flag--due {
+  background: var(--st-risk-moderate-soft-2, #fef3e4);
+  color: var(--st-risk-moderate-ink, #8f5200);
+}
+body[data-page="Learner Profile"] .st-active-status-row {
+  margin-top: 10px;
+}
+body[data-page="Learner Profile"] .st-active-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+body[data-page="Learner Profile"] .st-empty-inline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 28px 16px;
+  border: 1px dashed var(--st-line-strong);
+  border-radius: 12px;
+}
+body[data-page="Learner Profile"] .st-empty-inline .material-symbols-outlined {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--st-background);
+  color: var(--st-ink-faint);
+  font-size: 1.75rem;
+}
+body[data-page="Learner Profile"] .st-empty-inline p {
+  margin: 0;
+}
+body[data-page="Learner Profile"] .st-empty-inline .t {
+  font-weight: 600;
+  font-size: 0.938rem;
+  color: var(--st-on-surface);
+}
+body[data-page="Learner Profile"] .st-empty-inline .s {
+  font-size: 0.844rem;
+  color: var(--st-on-surface-variant);
+}
+body[data-page="Learner Profile"] .st-history-link {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--st-primary);
+  cursor: pointer;
+  text-align: left;
+}
+body[data-page="Learner Profile"] .st-history-link:hover {
+  text-decoration: underline;
+}
+body[data-page="Learner Profile"] .st-row-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+body[data-page="Learner Profile"] .st-btn-danger-outline:hover {
+  border-color: #e7b4b4 !important;
+  background: var(--st-risk-high-soft-2, #fdecea) !important;
+  color: var(--st-risk-high-ink, #a01414) !important;
+}
+body[data-page="Learner Profile"] .st-risk-factor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 14px;
+}
+body[data-page="Learner Profile"] .st-risk-factor-item {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--st-background);
+}
+body[data-page="Learner Profile"] .st-risk-factor-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+  margin-top: 6px;
+  background: var(--st-outline-variant);
+}
+body[data-page="Learner Profile"] .st-risk-factor-item--high .st-risk-factor-dot {
+  background: var(--st-risk-high);
+}
+body[data-page="Learner Profile"] .st-risk-factor-item--moderate .st-risk-factor-dot {
+  background: var(--st-risk-moderate);
+}
+body[data-page="Learner Profile"] .st-risk-factor-item--neutral .st-risk-factor-dot {
+  background: #60a5fa;
+}
+body[data-page="Learner Profile"] .st-risk-factor-title {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.844rem;
+  color: var(--st-on-surface);
+}
+body[data-page="Learner Profile"] .st-risk-factor-text {
+  margin: 2px 0 0;
+  font-size: 0.781rem;
+  color: var(--st-on-surface-variant);
+  line-height: 1.45;
+}
+@media (max-width: 1023px) {
+  body[data-page="Learner Profile"] .st-profile-grid {
+    grid-template-columns: 1fr;
+  }
+  body[data-page="Learner Profile"] .st-sticky-side {
+    position: static;
+  }
+}
+@media (max-width: 767px) {
+  body[data-page="Learner Profile"] .st-intervention-card-head {
+    flex-direction: column-reverse;
+    gap: 6px;
+  }
+  body[data-page="Learner Profile"] .st-intervention-card-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  body[data-page="Learner Profile"] .st-intervention-card-footer .st-btn {
+    width: 100%;
+  }
+  body[data-page="Learner Profile"] .st-active-intervention {
+    flex-direction: column;
+  }
+  body[data-page="Learner Profile"] .st-active-actions .st-btn {
+    flex: 1;
+  }
 }
 
-body[data-page="Learner Profile"] .st-assessment-summary-empty .st-assessment-empty{
-    margin:0;
+/* ==========================================================================
+   Shared data-table tweaks (scoped override of the global .st-data-table)
+   ========================================================================== */
+body[data-page="Learner Profile"] .st-data-table th.is-right,
+body[data-page="Learner Profile"] .st-data-table td.is-right {
+  text-align: right;
+}
+body[data-page="Learner Profile"] .st-table-empty-cell {
+  text-align: center;
+  padding: 24px;
+  color: var(--st-on-surface-variant);
+  font-size: 0.844rem;
 }
 
-@media (max-width: 899px){
-    body[data-page="Learner Profile"] .st-assessment-summary-grid{
-        grid-template-columns:1fr;
-    }
-
-    body[data-page="Learner Profile"] .st-assessment-summary-actions{
-        justify-content:stretch;
-    }
-
-    body[data-page="Learner Profile"] .st-assessment-summary-actions .st-btn{
-        width:100%;
-    }
+/* ==========================================================================
+   Motion: entrance on view + list stagger (mirrors the dashboard pattern)
+   ========================================================================== */
+body[data-page="Learner Profile"] [data-animate] {
+  --w: 0%;
 }
 
-/* 2026-09-25 — approved four-column learner profile layout */
-body[data-page="Learner Profile"] .st-profile-hero{
-    display:grid;
-    grid-template-columns:minmax(280px,.95fr) minmax(340px,1.15fr) minmax(220px,.62fr) minmax(300px,.9fr);
-    align-items:stretch;
-    gap:0;
-    padding:20px 22px;
-    min-height:0;
-    border-radius:20px;
+@media (prefers-reduced-motion: reduce) {
+  body[data-page="Learner Profile"] *,
+  body[data-page="Learner Profile"] *::before,
+  body[data-page="Learner Profile"] *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+  body[data-page="Learner Profile"] .st-performance-progress-area,
+  body[data-page="Learner Profile"] .st-performance-progress-path,
+  body[data-page="Learner Profile"] .st-performance-progress-point,
+  body[data-page="Learner Profile"] .st-risk-trend-line polyline,
+  body[data-page="Learner Profile"] .st-risk-trend-point,
+  body[data-page="Learner Profile"] [data-animate-list] > * {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  body[data-page="Learner Profile"] .st-performance-progress-path,
+  body[data-page="Learner Profile"] .st-risk-trend-line polyline {
+    stroke-dashoffset: 0 !important;
+  }
+  body[data-page="Learner Profile"] .st-performance-progress-point {
+    transform: translate(-50%, -50%) scale(1) !important;
+  }
+  body[data-page="Learner Profile"] .st-risk-trend-point {
+    transform: translate(-50%, -50%) scale(1) !important;
+  }
+  body[data-page="Learner Profile"] .st-metric-rate-bar i,
+  body[data-page="Learner Profile"] .st-exam-readiness-progress-fill {
+    width: var(--w, 0%) !important;
+  }
 }
 
-body[data-page="Learner Profile"] .st-profile-hero-left,
-body[data-page="Learner Profile"] .st-profile-hero-middle,
-body[data-page="Learner Profile"] .st-profile-hero-risk-panel,
-body[data-page="Learner Profile"] .st-profile-hero-side{
-    min-width:0;
+/* ==========================================================================
+   Outcome modal helper (unchanged from the previous revision — out of scope
+   for this pass, kept only so its two small hooks still resolve).
+   ========================================================================== */
+body[data-page="Learner Profile"] .st-outcome-card {
+  cursor: pointer;
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+  transition: var(--st-t-hover, 150ms);
 }
-
-/* Left: profile picture + identity */
-body[data-page="Learner Profile"] .st-profile-hero-left{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    gap:12px;
-    padding:6px 28px 6px 12px;
-    border-right:1px solid rgba(195,198,207,.45);
+body[data-page="Learner Profile"] #ivNotesRich[data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  color: #9ca3af;
 }
-
-body[data-page="Learner Profile"] .st-profile-hero-avatar{
-    width:96px;
-    height:96px;
-    border-width:5px;
-    font-size:1.85rem;
-    background:linear-gradient(180deg,#dceaff 0%,#d4e5fd 100%);
-    box-shadow:none;
+body[data-page="Learner Profile"] #ivNotesRich[contenteditable]:focus {
+  outline: none;
 }
-
-body[data-page="Learner Profile"] .st-profile-hero-heading{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:7px;
-    width:100%;
+body[data-page="Learner Profile"] #ivNotesRich ul,
+body[data-page="Learner Profile"] #ivNotesRich ol {
+  margin: 4px 0;
+  padding-left: 22px;
 }
-
-body[data-page="Learner Profile"] .st-profile-hero-name{
-    margin:0;
-    font-size:clamp(1.8rem,2.2vw,2.35rem);
-    line-height:1.05;
-    letter-spacing:-.025em;
-    text-align:center;
+body[data-page="Learner Profile"] #ivNotesRich li {
+  margin-bottom: 2px;
 }
-
-body[data-page="Learner Profile"] .st-profile-hero-lrn{
-    margin:0;
-    font-size:.95rem;
-    line-height:1.3;
-    color:var(--st-on-surface-variant);
-}
-
-body[data-page="Learner Profile"] .st-profile-hero-lrn span{
-    color:var(--st-on-surface);
-    font-weight:700;
-}
-
-body[data-page="Learner Profile"] .st-profile-chip-row{
-    display:flex;
-    justify-content:center;
-    margin-top:2px;
-}
-
-body[data-page="Learner Profile"] .st-profile-level-chip{
-    padding:6px 13px;
-    font-size:.78rem;
-    border-radius:999px;
-    min-height:0;
-}
-
-/* Middle: CLC / modality / enrolled / class */
-body[data-page="Learner Profile"] .st-profile-hero-middle{
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    gap:12px;
-    padding:4px 34px;
-    border-right:1px solid rgba(195,198,207,.45);
-}
-
-body[data-page="Learner Profile"] .st-profile-meta-row{
-    display:grid;
-    grid-template-columns:50px minmax(0,1fr);
-    align-items:center;
-    gap:14px;
-    min-height:48px;
-}
-
-body[data-page="Learner Profile"] .st-profile-meta-row > .material-symbols-outlined{
-    width:46px;
-    height:46px;
-    border-radius:14px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:linear-gradient(180deg,#f4f7fc 0%,#edf2f8 100%);
-    color:#315b94;
-    font-size:1.35rem;
-}
-
-body[data-page="Learner Profile"] .st-profile-meta-label{
-    margin:0 0 2px;
-    font-size:.82rem;
-    line-height:1.15;
-    color:var(--st-on-surface-variant);
-    font-weight:500;
-}
-
-body[data-page="Learner Profile"] .st-profile-meta-value{
-    margin:0;
-    font-size:1rem;
-    line-height:1.2;
-    font-weight:700;
-    color:var(--st-on-surface);
-}
-
-body[data-page="Learner Profile"] .st-profile-meta-note{
-    margin:2px 0 0;
-    font-size:.76rem;
-    line-height:1.2;
-    color:var(--st-on-surface-variant);
-}
-
-/* Dedicated square risk card beside learner details */
-body[data-page="Learner Profile"] .st-profile-hero-risk-panel{
-    align-self:center;
-    justify-self:center;
-    width:min(100%, 230px);
-    min-height:210px;
-    margin:0 28px;
-    padding:18px 16px;
-    border:1px solid rgba(244,160,55,.35);
-    border-radius:18px;
-    background:linear-gradient(180deg,rgba(255,250,244,.98),rgba(255,246,235,.96));
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    gap:12px;
-}
-
-body[data-page="Learner Profile"] .st-profile-risk-panel-label{
-    margin:0;
-    font-size:.78rem;
-    font-weight:800;
-    letter-spacing:.08em;
-    text-transform:uppercase;
-    color:#68758b;
-}
-
-body[data-page="Learner Profile"] .st-profile-risk-panel-icon{
-    width:62px;
-    height:62px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:rgba(255,170,62,.16);
-    color:#ec8a05;
-}
-
-body[data-page="Learner Profile"] .st-profile-risk-panel-icon .material-symbols-outlined{
-    font-size:2rem;
-    font-variation-settings:'FILL' 1;
-}
-
-body[data-page="Learner Profile"] .st-profile-risk-panel-badge .st-risk-badge{
-    padding:7px 13px !important;
-    font-size:.8rem !important;
-    border-radius:999px !important;
-}
-
-body[data-page="Learner Profile"] .st-profile-risk-panel-helper{
-    margin:0;
-    max-width:170px;
-    font-size:.84rem;
-    line-height:1.35;
-    color:var(--st-on-surface-variant);
-}
-
-/* Right: actions */
-body[data-page="Learner Profile"] .st-profile-hero-side{
-    display:flex;
-    align-items:center;
-    padding:4px 0 4px 28px;
-    border-left:1px solid rgba(195,198,207,.45);
-}
-
-body[data-page="Learner Profile"] .st-profile-hero-actions{
-    width:100%;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-}
-
-body[data-page="Learner Profile"] .st-profile-hero-actions .st-btn{
-    width:100%;
-    height:46px;
-    min-height:46px;
-    padding:0 16px;
-    border-radius:13px;
-    font-size:.92rem;
-    font-weight:700;
-    gap:12px;
-}
-
-body[data-page="Learner Profile"] .st-profile-hero-actions .st-btn > span:nth-child(2){
-    flex:1 1 auto;
-    text-align:left;
-}
-
-body[data-page="Learner Profile"] .st-profile-hero-actions .st-btn .material-symbols-outlined,
-body[data-page="Learner Profile"] .st-btn-tail{
-    font-size:1.25rem;
-}
-
-body[data-page="Learner Profile"] .st-btn-tail{
-    margin-left:auto;
-}
-
-@media (max-width: 1320px){
-    body[data-page="Learner Profile"] .st-profile-hero{
-        grid-template-columns:minmax(250px,.9fr) minmax(320px,1.15fr) minmax(205px,.65fr) minmax(270px,.85fr);
-    }
-
-    body[data-page="Learner Profile"] .st-profile-hero-middle{
-        padding-inline:24px;
-    }
-
-    body[data-page="Learner Profile"] .st-profile-hero-risk-panel{
-        margin-inline:20px;
-    }
-
-    body[data-page="Learner Profile"] .st-profile-hero-side{
-        padding-left:20px;
-    }
-}
-
-@media (max-width: 1120px){
-    body[data-page="Learner Profile"] .st-profile-hero{
-        grid-template-columns:1fr 1fr;
-        gap:0;
-    }
-
-    body[data-page="Learner Profile"] .st-profile-hero-left,
-    body[data-page="Learner Profile"] .st-profile-hero-middle{
-        min-height:230px;
-    }
-
-    body[data-page="Learner Profile"] .st-profile-hero-middle{
-        border-right:0;
-    }
-
-    body[data-page="Learner Profile"] .st-profile-hero-risk-panel{
-        width:auto;
-        min-height:0;
-        margin:20px 20px 0 0;
-        align-self:stretch;
-    }
-
-    body[data-page="Learner Profile"] .st-profile-hero-side{
-        margin-top:20px;
-        border-left:1px solid rgba(195,198,207,.45);
-        padding-left:20px;
-    }
-}
-
-@media (max-width: 760px){
-    body[data-page="Learner Profile"] .st-profile-hero{
-        grid-template-columns:1fr;
-        padding:18px;
-    }
-
-    body[data-page="Learner Profile"] .st-profile-hero-left,
-    body[data-page="Learner Profile"] .st-profile-hero-middle,
-    body[data-page="Learner Profile"] .st-profile-hero-side{
-        min-height:0;
-        border-right:0;
-        border-left:0;
-    }
-
-    body[data-page="Learner Profile"] .st-profile-hero-left{
-        padding:4px 0 18px;
-        border-bottom:1px solid rgba(195,198,207,.45);
-    }
-
-    body[data-page="Learner Profile"] .st-profile-hero-middle{
-        padding:18px 0;
-        border-bottom:1px solid rgba(195,198,207,.45);
-    }
-
-    body[data-page="Learner Profile"] .st-profile-hero-risk-panel{
-        width:100%;
-        margin:18px 0 0;
-        min-height:170px;
-    }
-
-    body[data-page="Learner Profile"] .st-profile-hero-side{
-        margin-top:18px;
-        padding:18px 0 0;
-        border-top:1px solid rgba(195,198,207,.45);
-    }
-}
-
-/* Merged 2026-09-25: assessment + risk-trend spacing */
-body[data-page="Learner Profile"] .st-assessment-card{
-    background:#fff;
-    border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-lg);
-    box-shadow:var(--st-shadow-sm);
-    padding:18px 18px 14px;
-    margin-bottom:12px;
-}
-body[data-page="Learner Profile"] .st-assessment-card [data-assessment-list]{ margin-top:10px; }
-body[data-page="Learner Profile"] .st-risk-trend-card{ margin-top:0; }

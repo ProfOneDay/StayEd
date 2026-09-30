@@ -175,20 +175,20 @@ class LearnerProfilePage {
         </div>
         <div class="st-assessment-summary-grid">
           <div class="st-assessment-summary-item">
-            <span class="st-assessment-summary-label">Final Score Percentage Grade</span>
+            <span class="st-assessment-summary-label">Final score percentage grade</span>
             <strong class="st-assessment-summary-value">${finalGrade == null ? "—" : `${finalGrade}%`}</strong>
           </div>
           <div class="st-assessment-summary-item">
-            <span class="st-assessment-summary-label">Overall Final Assessment Rating</span>
+            <span class="st-assessment-summary-label">Overall final assessment rating</span>
             <strong class="st-assessment-summary-value">${overallRating == null ? "—" : `${overallRating}%`}</strong>
           </div>
           <div class="st-assessment-summary-item">
-            <span class="st-assessment-summary-label">Overall Post Score</span>
+            <span class="st-assessment-summary-label">Overall post score</span>
             <strong class="st-assessment-summary-value">${overallPost == null ? "—" : overallPost}</strong>
           </div>
         </div>
         <div class="st-assessment-summary-actions">
-          <a class="st-btn st-btn-outline st-btn-xs" href="${this.buildAssessmentScoresUrl()}">Open full assessment record</a>
+          <a class="st-btn st-btn-outline st-btn-xs" href="${this.buildAssessmentScoresUrl()}">Open full assessment record<span class="material-symbols-outlined">arrow_forward</span></a>
         </div>
       </div>
     `;
@@ -229,6 +229,8 @@ class LearnerProfilePage {
       this.renderInterventions();
 
       this.updatePageBreadcrumb();
+
+      this.setupMotionObserver();
     } catch (error) {
       console.error("[LearnerProfile]", error);
 
@@ -268,6 +270,9 @@ class LearnerProfilePage {
             panel.dataset.profilePanel === target,
           );
         });
+
+        const activePanel = document.querySelector(`[data-profile-panel="${target}"]`);
+        this.replayAnimations(activePanel);
       });
     });
   }
@@ -325,6 +330,40 @@ class LearnerProfilePage {
               : p.risk === "Preliminary"
                 ? "Based on enrollment details only -- no modules returned or attendance recorded yet."
                 : "Risk will appear after a prediction is generated.";
+    }
+
+    const hero = document.querySelector("[data-profile-hero]");
+    const riskPanel = document.querySelector("[data-profile-risk-panel]");
+    const riskIcon = document.querySelector("[data-profile-risk-icon] .material-symbols-outlined");
+    const riskState =
+      p.risk === "High"
+        ? "high"
+        : p.risk === "Moderate"
+          ? "moderate"
+          : p.risk === "Low"
+            ? "low"
+            : p.risk === "Preliminary"
+              ? "preliminary"
+              : "neutral";
+    const allStates = ["high", "moderate", "low", "preliminary", "neutral"];
+
+    if (riskPanel) {
+      riskPanel.classList.remove(...allStates.map((s) => `is-${s}`));
+      riskPanel.classList.add(`is-${riskState}`);
+    }
+    if (hero) {
+      hero.classList.remove(...allStates.map((s) => `st-profile-hero--${s}`));
+      hero.classList.add(`st-profile-hero--${riskState}`);
+    }
+    if (riskIcon) {
+      riskIcon.textContent =
+        riskState === "high" || riskState === "moderate"
+          ? "warning"
+          : riskState === "low"
+            ? "check_circle"
+            : riskState === "preliminary"
+              ? "hourglass_top"
+              : "help";
     }
 
     document
@@ -508,6 +547,13 @@ class LearnerProfilePage {
       m.moduleRate == null ? "Not Yet Available" : `${m.moduleRate}%`,
     );
     this.set("[data-metric-module-rate-text]", m.moduleRate == null ? "" : m.moduleRateText);
+    const moduleRateBar = document.querySelector("[data-metric-module-rate-bar]");
+    if (moduleRateBar) {
+      moduleRateBar.style.setProperty(
+        "--w",
+        m.moduleRate == null ? "0%" : `${Math.max(0, Math.min(100, Number(m.moduleRate) || 0))}%`,
+      );
+    }
     this.set("[data-metric-released]", m.modulesReleased);
     this.set("[data-metric-returned]", m.modulesReturned);
     this.set("[data-metric-active]", m.activeModules);
@@ -566,45 +612,37 @@ class LearnerProfilePage {
     const latest = progress[progress.length - 1];
     if (current) current.textContent = `${latest.rate}%`;
 
-    const leftPad = 7;
-    const rightPad = 3;
-    const topPad = 8;
-    const bottomPad = 10;
-    const usableWidth = 100 - leftPad - rightPad;
-    const usableHeight = 100 - topPad - bottomPad;
-
+    // Coordinates are relative to the inset .st-performance-progress-plot
+    // box (see CSS: left:40px; right:8px; top:8px; bottom:28px), matching
+    // the approved prototype's plot layout.
     const coords = progress.map((pt, i) => ({
-      x:
-        progress.length === 1
-          ? leftPad + usableWidth / 2
-          : leftPad + (i / (progress.length - 1)) * usableWidth,
-      y:
-        topPad +
-        (1 - Math.max(0, Math.min(100, Number(pt.rate) || 0)) / 100) *
-          usableHeight,
+      x: progress.length === 1 ? 50 : (i / (progress.length - 1)) * 100,
+      y: 100 - Math.max(0, Math.min(100, Number(pt.rate) || 0)),
       pt,
     }));
 
     const line = coords.map((c) => `${c.x},${c.y}`).join(" ");
     const area = [
-      `${coords[0].x},${topPad + usableHeight}`,
+      `${coords[0].x},100`,
       ...coords.map((c) => `${c.x},${c.y}`),
-      `${coords[coords.length - 1].x},${topPad + usableHeight}`,
+      `${coords[coords.length - 1].x},100`,
     ].join(" ");
 
     const dots = coords
-      .map(({ x, y, pt }) => {
+      .map(({ x, y, pt }, i) => {
         const tooltip = `${pt.date}: ${pt.rate}% (${pt.returned} of ${pt.released} modules returned)`;
         const safeTooltip = String(tooltip)
           .replace(/&/g, "&amp;")
           .replace(/"/g, "&quot;")
           .replace(/</g, "&lt;")
           .replace(/>/g, "&gt;");
+        const edgeClass =
+          i === coords.length - 1 ? " is-last" : i === 0 ? " is-first" : "";
 
         return `
           <span
-            class="st-performance-progress-point"
-            style="left:${x}%;top:${y}%;"
+            class="st-performance-progress-point${edgeClass}"
+            style="left:${x}%;top:${y}%;--d:${700 + i * 120}"
             data-tooltip="${safeTooltip}"
             aria-label="${safeTooltip}"
             tabindex="0"
@@ -623,11 +661,11 @@ class LearnerProfilePage {
     }
 
     const labels = coords
-      .map(({ x, pt }, i) =>
-        labelIndexes.has(i)
-          ? `<span class="st-performance-progress-x-label" style="left:${x}%;">${pt.date}</span>`
-          : "",
-      )
+      .map(({ x, pt }, i) => {
+        if (!labelIndexes.has(i)) return "";
+        const edgeClass = i === 0 ? "is-first" : i === coords.length - 1 ? "is-last" : "";
+        return `<span class="st-performance-progress-x-label ${edgeClass}" style="left:${x}%;">${pt.date}</span>`;
+      })
       .join("");
 
     chart.innerHTML = `
@@ -635,15 +673,21 @@ class LearnerProfilePage {
         ${[100, 75, 50, 25, 0]
           .map(
             (value) => `
-              <div class="st-performance-progress-grid-line" style="top:${topPad + ((100 - value) / 100) * usableHeight}%;">
+              <div class="st-performance-progress-grid-line" style="top:${100 - value}%;">
                 <span>${value}%</span>
               </div>
             `,
           )
           .join("")}
         <svg class="st-performance-progress-line" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="stPpGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="var(--st-primary)" stop-opacity=".18" />
+              <stop offset="1" stop-color="var(--st-primary)" stop-opacity="0" />
+            </linearGradient>
+          </defs>
           <polygon points="${area}" class="st-performance-progress-area"></polygon>
-          <polyline points="${line}" class="st-performance-progress-path"></polyline>
+          <polyline points="${line}" class="st-performance-progress-path" pathLength="100" vector-effect="non-scaling-stroke"></polyline>
         </svg>
         ${dots}
         ${labels}
@@ -675,7 +719,7 @@ class LearnerProfilePage {
 
     scoreEl.textContent = score == null ? "—" : `${Math.round(score)}/100`;
     confidenceEl.textContent = readiness.confidence || "Waiting for assessment scores";
-    bar.style.width = score == null ? "0%" : `${score}%`;
+    bar.style.setProperty("--w", score == null ? "0%" : `${score}%`);
     bar.className = `st-exam-readiness-progress-fill st-exam-readiness-progress-fill--${className}`;
 
     summary.textContent =
@@ -726,8 +770,9 @@ class LearnerProfilePage {
     if (trend.length === 1) {
       const pt = trend[0];
       const y = yForPoint(pt);
+      const tip = `${pt.date}: ${pt.level} Risk${pt.probability != null ? ` (${pt.probability}%)` : ""}`;
       points.innerHTML = `
-        <span class="st-risk-trend-point st-risk-trend-point--${pt.level.toLowerCase()} st-risk-trend-point--single" style="left:50%;top:${y}%;" title="${pt.date}: ${pt.level} Risk${pt.probability != null ? ` (${pt.probability}%)` : ""}"></span>
+        <span class="st-risk-trend-point st-risk-trend-point--${pt.level.toLowerCase()} st-risk-trend-point--single" style="left:50%;top:${y}%;" data-tooltip="${this.escAttr(tip)}" aria-label="${this.escAttr(tip)}" tabindex="0"></span>
         <span class="st-risk-trend-date-label" style="left:50%;">${pt.date}</span>
       `;
       list.innerHTML = `
@@ -749,15 +794,15 @@ class LearnerProfilePage {
     const line = coords.map((c) => `${c.x},${c.y}`).join(" ");
 
     const dots = coords
-      .map(
-        ({ x, y, pt }) =>
-          `<span class="st-risk-trend-point st-risk-trend-point--${pt.level.toLowerCase()}" style="left:${x}%;top:${y}%;" title="${pt.date}: ${pt.level} Risk${pt.probability != null ? ` (${pt.probability}%)` : ""}"></span>`,
-      )
+      .map(({ x, y, pt }, i) => {
+        const tip = `${pt.date}: ${pt.level} Risk${pt.probability != null ? ` (${pt.probability}%)` : ""}`;
+        return `<span class="st-risk-trend-point st-risk-trend-point--${pt.level.toLowerCase()}" style="left:${x}%;top:${y}%;--d:${500 + i * 150}" data-tooltip="${this.escAttr(tip)}" aria-label="${this.escAttr(tip)}" tabindex="0"></span>`;
+      })
       .join("");
 
     points.innerHTML = `
       <svg class="st-risk-trend-line" viewBox="0 0 100 100" preserveAspectRatio="none">
-        <polyline points="${line}" fill="none" stroke="var(--st-primary)" stroke-width="1.5" vector-effect="non-scaling-stroke" />
+        <polyline points="${line}" fill="none" stroke="var(--st-primary)" stroke-width="2" pathLength="100" vector-effect="non-scaling-stroke" />
       </svg>
       ${dots}
     `;
@@ -791,13 +836,20 @@ class LearnerProfilePage {
       return;
     }
 
+    const catIcon = {
+      module: "menu_book",
+      intervention: "support_agent",
+      risk: "trending_up",
+      modality: "swap_horiz",
+    };
+
     body.innerHTML = timeline
       .map(
         (item) => `
             <tr>
-                <td style="font-weight:600;color:var(--st-primary);">${this.capitalize(item.type)}</td>
-                <td>${item.date}</td>
-                <td>${item.title}${item.text ? ` — ${item.text}` : ""}</td>
+                <td data-col="cat"><span class="st-cat-chip st-cat-chip--${item.type}"><span class="material-symbols-outlined">${catIcon[item.type] || "circle"}</span>${this.capitalize(item.type)}</span></td>
+                <td data-col="date">${item.date}</td>
+                <td data-col="det">${item.title}${item.text ? ` — ${item.text}` : ""}</td>
             </tr>
         `,
       )
@@ -845,8 +897,8 @@ class LearnerProfilePage {
 
     container.innerHTML = items
       .map(
-        (item) => `
-            <div class="st-timeline-item">
+        (item, i) => `
+            <div class="st-timeline-item" style="--i:${i}">
                 <div class="st-timeline-dot st-timeline-dot--${item.type}">
                     <span class="material-symbols-outlined">${iconMap[item.type] || "circle"}</span>
                 </div>
@@ -861,6 +913,10 @@ class LearnerProfilePage {
         `,
       )
       .join("");
+
+    if (container.hasAttribute("data-animate-list")) {
+      this.triggerInView(container);
+    }
   }
 
   static bindHistoryFilters() {
@@ -916,49 +972,58 @@ class LearnerProfilePage {
 
     if (badge) badge.innerHTML = this.riskPill(this.profile.risk);
 
+    const summaryBox = document.querySelector("[data-risk-summary]");
+    if (summaryBox) {
+      summaryBox.classList.remove("is-high", "is-moderate", "is-low");
+      const tone =
+        this.profile.risk === "High" ? "is-high" : this.profile.risk === "Moderate" ? "is-moderate" : this.profile.risk === "Low" ? "is-low" : "";
+      if (tone) summaryBox.classList.add(tone);
+    }
     this.set("[data-risk-summary]", r.summary);
     this.set("[data-risk-model-explanation]", r.modelExplanation);
-    this.set(
-      "[data-risk-records-used]",
-      r.recordsUsed ? `Based on ${r.recordsUsed}.` : "",
-    );
+
+    const recordsUsedEl = document.querySelector("[data-risk-records-used]");
+    const recordsUsedText = document.querySelector("[data-risk-records-used-text]");
+    if (recordsUsedText) recordsUsedText.textContent = r.recordsUsed ? `Based on ${r.recordsUsed}.` : "";
+    if (recordsUsedEl) recordsUsedEl.hidden = !r.recordsUsed;
 
     const changesList = document.querySelector("[data-risk-changes]");
     const changesCard = document.querySelector("[data-risk-changes-card]");
 
     if (changesList) {
       if (!r.changes || !r.changes.length) {
-        changesList.innerHTML = `<li class="st-change-list-empty">No risk level changes recorded yet.</li>`;
+        changesList.innerHTML = `<li class="st-change-list-empty"><span class="material-symbols-outlined">timeline</span>No risk level changes recorded yet.</li>`;
       } else {
         changesList.innerHTML = r.changes
           .map(
             (c) => `
-                <li>
+                <li class="st-change-item st-change-item--${c.severity}">
                     <span class="st-change-list-label">
-                        <span class="material-symbols-outlined" style="color:var(--st-risk-${c.severity});">${c.icon}</span>
+                        <span class="material-symbols-outlined">${c.icon}</span>
                         ${c.text}
                     </span>
-                    <span style="font-weight:700;color:var(--st-risk-${c.severity});">${c.date}</span>
+                    <span class="st-change-item-date">${c.date}</span>
                 </li>
             `,
           )
           .join("");
       }
     }
-    if (changesCard) changesCard.style.display = "";
+    if (changesCard) changesCard.hidden = false;
 
     const contributors = document.querySelector("[data-risk-contributors]");
+    const toneClass = (tone) => (tone === "error" ? "high" : tone === "moderate" ? "moderate" : "low");
 
     if (contributors) {
       contributors.innerHTML = (r.contributors || [])
         .map(
           (c) => `
-                <div class="st-contributor-item">
-                    <span class="material-symbols-outlined" style="color:var(--st-risk-${c.tone === "error" ? "high" : c.tone === "moderate" ? "moderate" : "low"});font-size:1.125rem;">${c.icon}</span>
+                <div class="st-contributor-item st-contributor-item--${toneClass(c.tone)}">
+                    <span class="material-symbols-outlined">${c.icon}</span>
                     <div>
                         <div class="st-contributor-title-row">
                             <p class="st-contributor-title">${c.title}</p>
-                            <span class="st-contributor-badge" style="background:var(--st-risk-${c.tone === "error" ? "high" : c.tone === "moderate" ? "moderate" : "low"}-soft);color:var(--st-risk-${c.tone === "error" ? "high" : c.tone === "moderate" ? "moderate" : "low"});">${c.level}</span>
+                            <span class="st-contributor-badge">${c.level}</span>
                         </div>
                         <p class="st-contributor-text">${c.text}</p>
                     </div>
@@ -976,8 +1041,8 @@ class LearnerProfilePage {
         monitoringContext.innerHTML = r.monitoringContext
           .map(
             (m) => `
-                <div class="st-contributor-item">
-                    <span class="material-symbols-outlined" style="color:var(--st-on-surface-variant);font-size:1.125rem;">${m.icon}</span>
+                <div class="st-contributor-item st-contributor-item--neutral">
+                    <span class="material-symbols-outlined">${m.icon}</span>
                     <div>
                         <p class="st-contributor-text">${m.text}</p>
                     </div>
@@ -1001,35 +1066,36 @@ class LearnerProfilePage {
 
     if (recs) {
       if (!iv.recommended || !iv.recommended.length) {
-        recs.innerHTML = `<div class="st-empty" style="border:none;background:transparent;"><p class="st-empty-title">No recommendations available.</p></div>`;
+        recs.innerHTML = `<div class="st-empty-inline"><p class="t">No recommendations available.</p></div>`;
       } else {
         recs.innerHTML = iv.recommended
-          .map(
-            (r) => `
-                <div class="st-intervention-card">
+          .map((r, i) => {
+            const level = r.priority.toLowerCase().includes("high") ? "high" : "medium";
+            return `
+                <div class="st-intervention-card st-intervention-card--${level}" style="--i:${i}">
                     <div class="st-intervention-card-head">
                         <div class="st-intervention-card-title-row">
-                            <span class="st-priority-chip st-priority-chip--${r.priority.toLowerCase().includes("high") ? "high" : "medium"}">${r.priority}</span>
-                            <p style="font-weight:700;color:var(--st-primary);font-size:0.875rem;">${r.title}</p>
+                            <span class="st-priority-chip st-priority-chip--${level}">${r.priority}</span>
+                            <p class="st-intervention-card-title">${r.title}</p>
                         </div>
                         <span class="st-intervention-rank">Rank #${r.rank}</span>
                     </div>
-                                          <p class="st-intervention-card-factor"><strong>Factor:</strong> ${r.factor || "â€”"}</p>
-                      <p class="st-intervention-card-text">${r.text}</p>
-                      ${r.aiInsight ? `
-                      <div style="margin-top:12px;padding:10px 12px;background:#F5F3FF;border-left:3px solid #7C3AED;border-radius:6px;">
-                          <p style="font-size:0.6875rem;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:4px;">AI Insight</p>
-                          <p style="font-size:0.8125rem;color:#374151;margin-bottom:6px;">${r.aiInsight.reason}</p>
-                          <p style="font-size:0.8125rem;color:#6B7280;font-style:italic;margin-top:6px;">Disclaimer: AI generated suggestions may not always be accurate or appropriate. Please review and use professional judgment before applying any intervention.</p>
-                      </div>
-                      ` : ""}
-                      <div class="st-intervention-card-footer">
-                          <span class="st-intervention-action-hint">Action: ${r.action}</span>
-                          <button type="button" class="st-btn st-btn-primary st-btn-xs" data-assign-recommendation="${r.rank}">Select</button>
+                    <p class="st-intervention-card-factor"><strong>Factor:</strong> ${r.factor || "—"}</p>
+                    <p class="st-intervention-card-text">${r.text}</p>
+                    ${r.aiInsight ? `
+                    <div class="st-ai-insight">
+                        <p class="st-ai-insight-kicker"><span class="material-symbols-outlined">auto_awesome</span>AI insight</p>
+                        <p>${r.aiInsight.reason}</p>
+                        <p class="st-ai-disclaimer">Disclaimer: AI generated suggestions may not always be accurate or appropriate. Please review and use professional judgment before applying any intervention.</p>
+                    </div>
+                    ` : ""}
+                    <div class="st-intervention-card-footer">
+                        <span class="st-intervention-action-hint"><span class="material-symbols-outlined">bolt</span>Action: ${r.action}</span>
+                        <button type="button" class="st-btn st-btn-primary st-btn-xs" data-assign-recommendation="${r.rank}">Select</button>
                     </div>
                 </div>
-            `,
-          )
+            `;
+          })
           .join("");
 
         recs.querySelectorAll("[data-assign-recommendation]").forEach((btn) => {
@@ -1049,43 +1115,43 @@ class LearnerProfilePage {
 
       if (!list.length) {
         active.innerHTML = `
-          <div class="st-empty" style="border:none;background:transparent;">
+          <div class="st-empty-inline">
             <span class="material-symbols-outlined">assignment_turned_in</span>
-            <p class="st-empty-title">No interventions have been assigned.</p>
-            <p class="st-empty-text">Assign an intervention once a learner requires additional support.</p>
+            <p class="t">No interventions have been assigned.</p>
+            <p class="s">Assign an intervention once a learner requires additional support.</p>
           </div>
         `;
       } else {
         active.innerHTML = list.map((a) => `
-          <div class="st-active-intervention" data-iv-id="${a.id}" style="margin-bottom:12px;">
+          <div class="st-active-intervention" data-iv-id="${a.id}">
             <div>
-              <div style="display:flex;align-items:center;gap:8px;">
-                <p style="font-weight:700;font-size:0.875rem;">${a.title}</p>
-                <span style="font-size:0.625rem;font-weight:700;color:var(--st-risk-high);text-transform:uppercase;">${a.priority}</span>
+              <div class="st-active-title-row">
+                <p class="st-active-title">${a.title}</p>
+                <span class="st-active-priority">${a.priority}</span>
               </div>
               <div class="st-active-intervention-meta">
-                <span>Assigned: ${a.assigned}</span>
-                ${a.followUp && a.followUp !== "—" ? `<span>Due: ${a.followUp}</span>` : ""}
+                <span><span class="material-symbols-outlined">event</span>Assigned: ${a.assigned}</span>
+                ${a.followUp && a.followUp !== "—" ? `<span><span class="material-symbols-outlined">schedule</span>Due: ${a.followUp}</span>` : ""}
               </div>
               ${a.dueStatus ? `
-              <p style="margin-top:8px;font-size:0.75rem;font-weight:700;color:${a.dueStatus === "overdue" ? "#B91C1C" : "#B45309"};">
-                ⚠️ ${a.dueStatus === "overdue" ? "Overdue" : a.dueStatus === "due" ? "Due Today" : "Due Soon"} - Update Required
-              </p>
+              <span class="st-due-flag st-due-flag--${a.dueStatus === "overdue" ? "overdue" : "due"}">
+                <span class="material-symbols-outlined">warning</span>${a.dueStatus === "overdue" ? "Overdue" : a.dueStatus === "due" ? "Due Today" : "Due Soon"} - Update Required
+              </span>
               ` : ""}
-              ${["COMPLETED", "CANCELLED"].includes(a.status?.toUpperCase()) ? `<div style="margin-top:10px;"><span class="st-pill st-pill--teal">${a.status}</span></div>` : ""}
+              ${["COMPLETED", "CANCELLED"].includes(a.status?.toUpperCase()) ? `<div class="st-active-status-row"><span class="st-pill st-pill--teal">${a.status}</span></div>` : ""}
               ${a.aiReason || a.aiNextStep ? `
-              <div style="margin-top:12px;padding:10px 12px;background:#F5F3FF;border-left:3px solid #7C3AED;border-radius:6px;">
-                <p style="font-size:0.6875rem;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:4px;">AI Insight</p>
-                ${a.aiReason ? `<p style="font-size:0.8125rem;color:#374151;margin-bottom:6px;">${a.aiReason}</p>` : ""}
-                ${a.aiNextStep ? `<p style="font-size:0.75rem;color:#4B5563;"><strong>Suggested next step:</strong> ${a.aiNextStep}</p>` : ""}
-                <p style="font-size:0.8125rem;color:#6B7280;font-style:italic;margin-top:8px;">Disclaimer: AI generated suggestions may not always be accurate or appropriate. Please review and use professional judgment before applying any intervention.</p>
+              <div class="st-ai-insight">
+                <p class="st-ai-insight-kicker"><span class="material-symbols-outlined">auto_awesome</span>AI insight</p>
+                ${a.aiReason ? `<p>${a.aiReason}</p>` : ""}
+                ${a.aiNextStep ? `<p><strong>Suggested next step:</strong> ${a.aiNextStep}</p>` : ""}
+                <p class="st-ai-disclaimer">Disclaimer: AI generated suggestions may not always be accurate or appropriate. Please review and use professional judgment before applying any intervention.</p>
               </div>
               ` : ""}
             </div>
-            <div class="st-active-intervention-actions">
-              <button type="button" class="st-btn st-btn-outline st-btn-xs" data-update-status>Update Status</button>
-              <button type="button" class="st-btn st-btn-primary st-btn-xs" data-add-outcome>Add Outcome</button>
-              ${a.canSaveToHistory ? `<button type="button" class="st-btn st-btn-outline st-btn-xs" data-save-to-history>Save to History</button>` : ""}
+            <div class="st-active-actions">
+              <button type="button" class="st-btn st-btn-outline st-btn-xs" data-update-status>Update status</button>
+              <button type="button" class="st-btn st-btn-primary st-btn-xs" data-add-outcome>Add outcome</button>
+              ${a.canSaveToHistory ? `<button type="button" class="st-btn st-btn-outline st-btn-xs" data-save-to-history>Save to history</button>` : ""}
             </div>
           </div>
         `).join("");
@@ -1125,12 +1191,14 @@ class LearnerProfilePage {
           .map(
             (h) => `
                 <tr>
-                    <td>${h.date}</td>
-                    <td style="font-weight:600;color:var(--st-primary);cursor:pointer;text-decoration:underline;" data-view-history="${h.id}">${h.intervention}</td>
-                    <td>${h.remarks}</td>
-                    <td>
-                        <button type="button" class="st-btn st-btn-outline st-btn-xs" data-edit-history="${h.id}">Edit</button>
-                        <button type="button" class="st-btn st-btn-outline st-btn-xs" data-delete-history="${h.id}">Delete</button>
+                    <td data-col="date">${h.date}</td>
+                    <td><button type="button" class="st-history-link" data-view-history="${h.id}">${h.intervention}</button></td>
+                    <td data-col="det">${h.remarks}</td>
+                    <td class="is-right">
+                        <div class="st-row-actions">
+                            <button type="button" class="st-btn st-btn-outline st-btn-xs" data-edit-history="${h.id}">Edit</button>
+                            <button type="button" class="st-btn st-btn-outline st-btn-xs st-btn-danger-outline" data-delete-history="${h.id}">Delete</button>
+                        </div>
                     </td>
                 </tr>
             `,
@@ -1162,11 +1230,7 @@ class LearnerProfilePage {
     const factors = document.querySelector("[data-current-risk-factors]");
 
     if (factors) {
-      const toneMap = {
-        error: "var(--st-risk-high)",
-        moderate: "var(--st-risk-moderate)",
-        neutral: "#60a5fa",
-      };
+      const toneClass = { error: "high", moderate: "moderate", neutral: "neutral" };
 
       const contributors = this.profile.riskExplanation?.contributors || [];
 
@@ -1175,17 +1239,17 @@ class LearnerProfilePage {
             .slice(0, 3)
             .map(
               (c) => `
-                <div class="st-risk-factor-item">
-                    <span class="st-risk-factor-dot" style="background:${toneMap[c.tone] || "var(--st-outline)"};"></span>
+                <div class="st-risk-factor-item st-risk-factor-item--${toneClass[c.tone] || "neutral"}">
+                    <span class="st-risk-factor-dot"></span>
                     <div>
-                        <p style="font-weight:600;font-size:0.8125rem;">Important Factor: ${c.title}</p>
-                        <p style="font-size:0.6875rem;color:var(--st-on-surface-variant);">${c.text}</p>
+                        <p class="st-risk-factor-title">Important factor: ${c.title}</p>
+                        <p class="st-risk-factor-text">${c.text}</p>
                     </div>
                 </div>
             `,
             )
             .join("")
-        : `<p class="st-empty-text" style="padding:8px 0;">No risk factors on record.</p>`;
+        : `<p class="st-empty-text">No risk factors on record.</p>`;
     }
 
     document
@@ -1657,11 +1721,64 @@ class LearnerProfilePage {
       { High: "high", Moderate: "moderate", Low: "low", Preliminary: "preliminary" }[risk] || "neutral";
     const label =
       cls === "neutral" ? "Not Yet Assessed" : cls === "preliminary" ? "Preliminary" : `${risk} Risk`;
-    return `<span class="st-risk-badge st-risk-badge--${cls}" style="padding:4px 16px;font-size:0.75rem;"><span class="st-risk-dot"></span>${label}</span>`;
+    return `<span class="st-risk-badge st-risk-badge--${cls}"><span class="st-risk-dot"></span>${label}</span>`;
   }
 
   static capitalize(s) {
     return s ? s[0].toUpperCase() + s.slice(1) : s;
+  }
+
+  static escAttr(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  // One IntersectionObserver for every [data-animate]/[data-animate-list]
+  // block on the page: fills bars, draws lines and pops points in via CSS
+  // (.is-inview, see learner-profile.css), and replays each time the block
+  // comes back into view -- same pattern as the dashboard.
+  static setupMotionObserver() {
+    if (!this._motionObserver) {
+      this._motionObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach(({ target, isIntersecting, intersectionRatio }) => {
+            if (isIntersecting && intersectionRatio >= 0.2) {
+              target.classList.add("is-inview");
+            } else if (!isIntersecting) {
+              target.classList.remove("is-inview");
+            }
+          });
+        },
+        { threshold: [0, 0.2] },
+      );
+    }
+
+    document
+      .querySelectorAll("[data-animate],[data-animate-list]")
+      .forEach((el) => this._motionObserver.observe(el));
+  }
+
+  static triggerInView(el) {
+    if (!el) return;
+    el.classList.remove("is-inview");
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => el.classList.add("is-inview")),
+    );
+  }
+
+  // Replays entrance motion for a freshly-shown tab panel (or any scope),
+  // matching the prototype's showTab() behavior.
+  static replayAnimations(scope) {
+    const root = scope || document;
+    const targets = new Set();
+
+    if (root.matches?.("[data-animate],[data-animate-list]")) targets.add(root);
+    root.querySelectorAll?.("[data-animate],[data-animate-list]").forEach((el) => targets.add(el));
+
+    targets.forEach((el) => this.triggerInView(el));
   }
 
   static set(selector, value) {

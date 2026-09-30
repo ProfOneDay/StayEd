@@ -49,6 +49,10 @@
             </p>
           </div>
           <div class="st-page-header-actions">
+            <button type="button" class="st-btn st-btn-outline" data-mgmt-view-toggle>
+              <span class="material-symbols-outlined" data-mgmt-view-toggle-icon>archive</span>
+              <span data-mgmt-view-toggle-label>View archived</span>
+            </button>
             <button
               type="button"
               class="st-btn st-btn-outline"
@@ -95,7 +99,7 @@
 
         <section class="st-panel st-table-card">
           <div class="st-table-card-head">
-            <h2 class="st-table-card-title">All learners</h2>
+            <h2 class="st-table-card-title" data-mgmt-title>All learners</h2>
             <span class="st-table-card-count" data-mgmt-info-top>0 learners</span>
           </div>
 
@@ -130,7 +134,6 @@
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
               <option value="Pending">Pending</option>
-              <option value="Archived">Archived</option>
             </select>
 
             <button type="button" class="st-text-btn st-mgmt-clear-btn" data-mgmt-clear>
@@ -155,8 +158,8 @@
                 class="st-bulk-btn"
                 data-mgmt-bulk-archive
               >
-                <span class="material-symbols-outlined">archive</span>
-                Archive
+                <span class="material-symbols-outlined" data-mgmt-bulk-archive-icon>archive</span>
+                <span data-mgmt-bulk-archive-label>Archive</span>
               </button>
               <button
                 type="button"
