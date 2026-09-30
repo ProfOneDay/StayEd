@@ -59,14 +59,15 @@ def dashboard():
     learners = [_shape_learner(row) for row in latest_by_learner.values()]
 
     # Every learner falls into exactly one of these buckets, so high+moderate+low
-    # always equals registered -- learners with no completed prediction yet
-    # default into Low rather than vanishing from the KPI cards/chart, while
-    # `_shape_learner`'s "Not Yet Assessed" risk value (kept as-is on each
-    # learner) still lets tables/profiles show the distinction.
+    # always equals registered -- learners with no completed prediction yet,
+    # or only a "Preliminary" one (demographic-only, no real engagement --
+    # see _shape_learner), default into Low rather than vanishing from the
+    # KPI cards/chart, while `_shape_learner`'s actual risk value (kept as-is
+    # on each learner) still lets tables/profiles show the distinction.
     registered = len(learners)
     high = sum(l["risk"] == "High" for l in learners)
     moderate = sum(l["risk"] == "Moderate" for l in learners)
-    low_pending = sum(l["risk"] == "Not Yet Assessed" for l in learners)
+    low_pending = sum(l["risk"] in ("Not Yet Assessed", "Preliminary") for l in learners)
     low = sum(l["risk"] == "Low" for l in learners) + low_pending
     predicted = registered - low_pending
 

@@ -956,7 +956,7 @@ class TeacherDashboard {
   // Badge + probability meter, matching Student Registry/Early Warning's
   // risk cell. Falls back to the plain badge for learners not yet assessed.
   static riskCell(l) {
-    const cls = { High: "high", Moderate: "moderate", Low: "low" }[l.risk];
+    const cls = { High: "high", Moderate: "moderate", Low: "low", Preliminary: "preliminary" }[l.risk];
     if (!cls) {
       return `<div class="st-risk-cell"><div class="st-risk-cell-top">${this.riskBadge(l.risk)}</div></div>`;
     }
@@ -1041,6 +1041,7 @@ class TeacherDashboard {
       High: "high",
       Moderate: "moderate",
       Low: "low",
+      Preliminary: "preliminary",
     };
 
     const cls = map[risk] || "neutral";

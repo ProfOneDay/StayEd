@@ -450,7 +450,7 @@ class StudentRegistry {
   }
 
   static riskCell(l) {
-    const cls = { High: "high", Moderate: "moderate", Low: "low" }[l.risk];
+    const cls = { High: "high", Moderate: "moderate", Low: "low", Preliminary: "preliminary" }[l.risk];
     if (!cls) {
       return `<div class="st-risk-cell"><div class="st-risk-cell-top">${this.riskBadge(l.risk)}</div></div>`;
     }
@@ -688,7 +688,7 @@ class StudentRegistry {
   }
 
   static riskBadge(risk) {
-    const cls = { High: "high", Moderate: "moderate", Low: "low" }[risk];
+    const cls = { High: "high", Moderate: "moderate", Low: "low", Preliminary: "preliminary" }[risk];
     const label = cls ? risk : "Not yet assessed";
     return `<span class="st-risk-badge st-risk-badge--${cls || "neutral"}"><span class="st-risk-dot"></span>${label}</span>`;
   }

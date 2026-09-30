@@ -294,7 +294,7 @@ class EarlyWarningPage {
   }
 
   static row(l, i) {
-    const cls = { High: "high", Moderate: "moderate", Low: "low" }[l.risk];
+    const cls = { High: "high", Moderate: "moderate", Low: "low", Preliminary: "preliminary" }[l.risk];
 
     const initials = (l.name || "?")
       .split(" ")
@@ -404,7 +404,7 @@ class EarlyWarningPage {
   }
 
   static riskBadge(risk) {
-    const cls = { High: "high", Moderate: "moderate", Low: "low" }[risk];
+    const cls = { High: "high", Moderate: "moderate", Low: "low", Preliminary: "preliminary" }[risk];
     const label = cls ? risk : "Not yet assessed";
     return `<span class="st-risk-badge st-risk-badge--${cls || "neutral"}"><span class="st-risk-dot"></span>${label}</span>`;
   }

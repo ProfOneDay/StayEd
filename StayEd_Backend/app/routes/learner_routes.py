@@ -1356,16 +1356,17 @@ def learner_profile(learner_id: int):
             # change later, so distinguish the prediction-time value from the
             # live Attendance Rate KPI instead of showing contradictory values.
             factor_title = "Attendance at Prediction Time"
+            pred_value = _format_factor_value("percent", display_value)
             if recorded_sessions:
-                factor_text += (
-                    f" Right now attendance is {attendance_rate}% "
-                    f"({attended_sessions} out of {recorded_sessions} sessions)."
+                factor_text = (
+                    f"Attendance was {pred_value} when this was checked. "
+                    f"It's now {attendance_rate}% ({attended_sessions}/{recorded_sessions} days present)."
                 )
             else:
-                factor_text += " Right now there's no attendance recorded yet, so it shows 0%."
-            factor_text += (
-                " If attendance has changed since then, run a new prediction to update it."
-            )
+                factor_text = (
+                    f"Attendance was {pred_value} when this was checked. "
+                    "No attendance has been recorded since then."
+                )
         contributor_rows.append({
             "icon": "analytics", "tone": tone,
             "title": factor_title, "level": level,
@@ -2967,11 +2968,12 @@ def public_student_view(token: str):
 
     shaped = _shape_learner(row)
     risk_label = shaped["risk"]
-    risk_summary = (
-        f"StayEd currently classifies you as {risk_label} Risk based on the latest available monitoring data."
-        if risk_label != "Not Yet Assessed"
-        else "Your risk level hasn't been assessed yet. Check back after your teacher releases your modules and records your progress."
-    )
+    if risk_label == "Not Yet Assessed":
+        risk_summary = "Your risk level hasn't been assessed yet. Check back after your teacher releases your modules and records your progress."
+    elif risk_label == "Preliminary":
+        risk_summary = "StayEd has an early, preliminary read on your risk level based on your enrollment details -- it will update once your teacher records your progress."
+    else:
+        risk_summary = f"StayEd currently classifies you as {risk_label} Risk based on the latest available monitoring data."
 
     return {
         "profile": {

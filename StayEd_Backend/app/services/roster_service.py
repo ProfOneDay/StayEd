@@ -1,6 +1,8 @@
 """Checks a self-registering teacher's typed name against the division's
 official ALS Teachers roster (als_teacher_roster, seeded from
-LIST_OF_ALS_TEACHERS.csv by sql/22_als_teacher_roster.sql).
+LIST_OF_ALS_TEACHERS.csv by sql/22_als_teacher_roster.sql), and resolves
+their roster-listed station school to a real clc row (seeded from the same
+CSV by sql/31_seed_division_ii_clcs.sql) so registration can auto-assign it.
 
 Per the panel's requirement, registration must auto-reject anyone not on
 that list. Matching is deliberately lenient about formatting -- the roster
@@ -17,13 +19,26 @@ from __future__ import annotations
 import re
 import unicodedata
 
-from ..db import fetch_all
+from ..db import fetch_all, fetch_one
 
 _SUFFIXES = {"jr", "sr", "ii", "iii", "iv", "v"}
 
 # "Ma." is a very common Filipino name prefix (short for "Maria") that a
 # teacher may reasonably spell out in full when typing their own name.
 _TOKEN_EQUIVALENTS = {"ma": {"ma", "maria"}}
+
+# als_district on the roster is really "<municipality> <cluster number>"
+# (e.g. "Manaoag I", "Villasis II") or a program name ("BPOSA-Mangaldan"),
+# not the plain municipality clc.municipality stores -- this is the same
+# normalization used to verify the roster import (see 31_seed_division_ii_clcs.sql
+# and its cross-check against LIST_OF_ALS_TEACHERS.csv).
+_DISTRICT_CLUSTER_RE = re.compile(r"\s+(I{1,3}|IV)$")
+_DISTRICT_MUNICIPALITY_FIX = {
+    "sta. maria": "Santa Maria",
+    "sto. tomas": "Santo Tomas",
+    "pozorrobio": "Pozorrubio",
+    "bposa-mangaldan": "Mangaldan",
+}
 
 
 def _normalize_tokens(name: str) -> set[str]:
@@ -38,14 +53,48 @@ def _token_satisfied(token: str, submitted_tokens: set[str]) -> bool:
     return bool(_TOKEN_EQUIVALENTS.get(token, {token}) & submitted_tokens)
 
 
-def is_on_teacher_roster(full_name: str) -> bool:
+def _match_roster_row(full_name: str) -> dict | None:
     submitted_tokens = _normalize_tokens(full_name)
     if not submitted_tokens:
-        return False
+        return None
 
-    for row in fetch_all("SELECT full_name FROM als_teacher_roster"):
+    for row in fetch_all("SELECT full_name, als_district, station_school FROM als_teacher_roster"):
         roster_tokens = _normalize_tokens(row["full_name"])
         if roster_tokens and all(_token_satisfied(t, submitted_tokens) for t in roster_tokens):
-            return True
+            return row
 
-    return False
+    return None
+
+
+def _district_to_municipality(als_district: str) -> str:
+    stripped = _DISTRICT_CLUSTER_RE.sub("", (als_district or "").strip())
+    return _DISTRICT_MUNICIPALITY_FIX.get(stripped.lower(), stripped)
+
+
+def is_on_teacher_roster(full_name: str) -> bool:
+    return _match_roster_row(full_name) is not None
+
+
+def find_roster_clc(full_name: str) -> dict | None:
+    """Resolves a roster-matched teacher's station school to a real clc row.
+
+    Returns {"municipality": ..., "clc_id": ..., "clc_name": ...} on a clean
+    match, or None if the name isn't on the roster, or its station school
+    doesn't (yet) match a seeded clc row -- callers should treat that as
+    "couldn't auto-assign" and fall back to leaving it for an admin, never as
+    a reason to fail registration outright.
+    """
+    row = _match_roster_row(full_name)
+    if not row or not row.get("station_school"):
+        return None
+
+    municipality = _district_to_municipality(row["als_district"])
+    clc = fetch_one(
+        "SELECT clc_id, clc_name FROM clc WHERE LOWER(BTRIM(clc_name)) = LOWER(BTRIM(%s)) "
+        "AND LOWER(BTRIM(municipality)) = LOWER(BTRIM(%s)) AND status = 'ACTIVE' LIMIT 1",
+        (row["station_school"], municipality),
+    )
+    if not clc:
+        return None
+
+    return {"municipality": municipality, "clc_id": clc["clc_id"], "clc_name": clc["clc_name"]}
