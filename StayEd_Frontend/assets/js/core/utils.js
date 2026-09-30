@@ -14,6 +14,8 @@ class Utils {
       "Civil Status (if applicable)",
       "Contact Number",
       "Guardian Contact Number (if applicable)",
+      "Monthly Income",
+      "Socio-economic Status",
     ];
 
     const sampleRow = [
@@ -22,14 +24,16 @@ class Utils {
       "Juan",
       "Reyes",
       "Male",
-      "2008-05-14",
+      "5/14/2008",
       "Face-to-Face",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
+      "No",
+      "Employed",
+      "5.5",
+      "Single",
+      "09171234567",
+      "09181234567",
+      "8000",
+      "Formal Employment",
     ];
 
     const csvContent = [headers, sampleRow]

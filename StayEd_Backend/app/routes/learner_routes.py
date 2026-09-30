@@ -2579,6 +2579,8 @@ def _canonical_rows(frame: pd.DataFrame):
         "civil_status_(if_applicable)": "civil_status",
         "guardian_contact_number_(if_applicable)": "guardian_contact_number",
         "middle_name_(optional)": "middle_name",
+        "socio-economic_status": "occupation",
+        "socio_economic_status": "occupation",
     }
     frame = frame.rename(columns={k: v for k, v in aliases.items() if k in frame.columns})
     records = frame.where(pd.notna(frame), None).to_dict(orient="records")
@@ -2608,6 +2610,13 @@ def _parse_import_bool(value):
 
 
 def _parse_import_distance(value):
+    try:
+        return float(value) if value not in (None, "") else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _parse_import_income(value):
     try:
         return float(value) if value not in (None, "") else None
     except (TypeError, ValueError):
@@ -2713,9 +2722,10 @@ def _insert_import_rows(rows, teacher, class_id=None):
                     """
                     INSERT INTO learner (
                         lrn, first_name, middle_name, last_name, sex, date_of_birth,
-                        employment_status, civil_status, contact_number, guardian_contact_number
+                        employment_status, civil_status, contact_number, guardian_contact_number,
+                        monthly_income, occupation
                     )
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING learner_id
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING learner_id
                     """,
                     (
                         row["lrn"], first, row.get("middle_name") or None, last, sex, dob,
@@ -2723,6 +2733,8 @@ def _insert_import_rows(rows, teacher, class_id=None):
                         row.get("civil_status") or None,
                         row.get("contact_number") or None,
                         row.get("guardian_contact_number") or None,
+                        _parse_import_income(row.get("monthly_income")),
+                        row.get("occupation") or None,
                     ),
                 )
                 learner_id = cur.fetchone()["learner_id"]
