@@ -32,6 +32,7 @@ class ClcUpload {
     ["dragenter", "dragover"].forEach((evt) => {
       zone.addEventListener(evt, (e) => {
         e.preventDefault();
+        if (e.dataTransfer) e.dataTransfer.dropEffect = "copy";
         zone.classList.add("is-dragover");
       });
     });
@@ -49,6 +50,16 @@ class ClcUpload {
     });
 
     continueBtn?.addEventListener("click", () => this.showConfirmation());
+
+    // See learner-import.js's bindDropzone() for why this matters: without
+    // it, a drop that misses the dashed zone falls through to the browser's
+    // default "navigate to the dropped file" behavior instead of doing
+    // nothing.
+    ["dragover", "drop"].forEach((evt) => {
+      document.addEventListener(evt, (e) => {
+        if (!zone.contains(e.target)) e.preventDefault();
+      });
+    });
   }
 
   static selectFile(file) {

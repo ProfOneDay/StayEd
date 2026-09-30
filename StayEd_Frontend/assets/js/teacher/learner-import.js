@@ -78,6 +78,7 @@ class LearnerImportPage {
     ["dragenter", "dragover"].forEach((evt) => {
       zone.addEventListener(evt, (e) => {
         e.preventDefault();
+        if (e.dataTransfer) e.dataTransfer.dropEffect = "copy";
         zone.classList.add("is-dragover");
       });
     });
@@ -95,6 +96,20 @@ class LearnerImportPage {
     });
 
     previewBtn?.addEventListener("click", () => this.runPreview());
+
+    // Without this, a drop that lands just outside the dashed zone (e.g. on
+    // the surrounding card's own padding, which a user can easily aim for)
+    // falls through to the browser's default behavior: navigating the whole
+    // page to the raw dropped file. That reads exactly like "drag and drop
+    // doesn't work" -- nothing visibly happens in the zone, the page just
+    // seems to do nothing (or blanks out) instead of accepting the file.
+    // Swallowing dragover/drop anywhere outside the zone turns that missed
+    // drop into a harmless no-op instead.
+    ["dragover", "drop"].forEach((evt) => {
+      document.addEventListener(evt, (e) => {
+        if (!zone.contains(e.target)) e.preventDefault();
+      });
+    });
   }
 
   static selectFile(file) {
