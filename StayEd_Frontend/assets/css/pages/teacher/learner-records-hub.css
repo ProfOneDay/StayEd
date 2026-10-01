@@ -158,7 +158,7 @@ body[data-page="Learner Records"] .st-lr-actions{
 
 /* Row menu: floating card popup. Also used by Student Registry and the
    Teacher Dashboard's Student Registry Summary widget, for the same
-   View profile + (Run prediction / Archive) menu pattern. */
+   View profile + Archive menu pattern. */
 body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu-trigger{
     appearance:none;
     width:34px;

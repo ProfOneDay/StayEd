@@ -556,7 +556,7 @@ class LearnerRecordsHub {
   }
 
   static riskBadge(risk) {
-    const cls = { High: "high", Moderate: "moderate", Low: "low", Preliminary: "preliminary" }[risk];
+    const cls = { High: "high", Moderate: "moderate", Low: "low" }[risk];
     const label = cls ? risk : "Not yet assessed";
     return `<span class="st-risk-badge st-risk-badge--${cls || "neutral"}"><span class="st-risk-dot"></span>${label}</span>`;
   }

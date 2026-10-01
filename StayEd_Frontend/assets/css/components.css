@@ -386,18 +386,6 @@
   background: var(--st-risk-neutral);
 }
 
-.st-risk-badge--preliminary {
-  background: rgba(2, 136, 209, 0.1);
-
-  color: var(--st-info);
-
-  border-color: rgba(2, 136, 209, 0.2);
-}
-
-.st-risk-badge--preliminary .st-risk-dot {
-  background: var(--st-info);
-}
-
 .st-pill {
   display: inline-flex;
 

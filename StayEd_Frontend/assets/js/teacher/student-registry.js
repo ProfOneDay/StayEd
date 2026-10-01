@@ -14,7 +14,6 @@ class StudentRegistry {
     all: [],
     filtered: [],
     selected: new Set(),
-    predicting: new Set(),
     page: 1,
     perPage: 8,
     search: "",
@@ -398,11 +397,6 @@ class StudentRegistry {
         );
       });
 
-      body.querySelectorAll("[data-run-prediction]").forEach((btn) => {
-        btn.addEventListener("click", () =>
-          this.runPrediction(btn.dataset.runPrediction),
-        );
-      });
     }
 
     body.classList.remove("is-inview");
@@ -476,13 +470,6 @@ class StudentRegistry {
                                 <span class="material-symbols-outlined">more_vert</span>
                             </button>
                             <div class="st-row-menu-list">
-                                ${isArchived ? "" : `
-                                <button type="button" data-run-prediction="${l.id}"
-                                    ${this.state.predicting.has(String(l.id)) ? "disabled" : ""}>
-                                    <span class="material-symbols-outlined">${this.state.predicting.has(String(l.id)) ? "progress_activity" : "bolt"}</span>
-                                    Run prediction
-                                </button>
-                                `}
                                 <button type="button" data-archive-learner="${l.id}">
                                     <span class="material-symbols-outlined">${isArchived ? "unarchive" : "archive"}</span>
                                     ${isArchived ? "Restore" : "Archive"}
@@ -508,7 +495,7 @@ class StudentRegistry {
   }
 
   static riskCell(l) {
-    const cls = { High: "high", Moderate: "moderate", Low: "low", Preliminary: "preliminary" }[l.risk];
+    const cls = { High: "high", Moderate: "moderate", Low: "low" }[l.risk];
     if (!cls) {
       return `<div class="st-risk-cell"><div class="st-risk-cell-top">${this.riskBadge(l.risk)}</div></div>`;
     }
@@ -648,36 +635,6 @@ class StudentRegistry {
     }
   }
 
-  // Same manual trigger as Learner Profile's "Run Prediction" button, just
-  // reachable per-row here without leaving the registry table. Updates the
-  // row in place from the response instead of a full reload.
-  static async runPrediction(id) {
-    const key = String(id);
-    if (this.state.predicting.has(key)) return;
-
-    this.state.predicting.add(key);
-    this.apply();
-
-    try {
-      const result = await API.runPrediction(id);
-      const l = this.state.all.find((x) => String(x.id) === key);
-      if (l) {
-        l.risk =
-          result.risk_level.charAt(0) + result.risk_level.slice(1).toLowerCase();
-        l.risk_probability = result.risk_probability;
-      }
-      Toast?.success(
-        `Prediction updated: ${result.risk_level} risk (${Math.round(result.risk_probability * 100)}%).`,
-      );
-    } catch (error) {
-      console.error("[StudentRegistry] runPrediction", error);
-      Toast?.error(error?.message || "Unable to run a prediction for this learner.");
-    } finally {
-      this.state.predicting.delete(key);
-      this.apply();
-    }
-  }
-
   static bulkArchive() {
     const ids = [...this.state.selected];
 
@@ -763,7 +720,7 @@ class StudentRegistry {
   }
 
   static riskBadge(risk) {
-    const cls = { High: "high", Moderate: "moderate", Low: "low", Preliminary: "preliminary" }[risk];
+    const cls = { High: "high", Moderate: "moderate", Low: "low" }[risk];
     const label = cls ? risk : "Not yet assessed";
     return `<span class="st-risk-badge st-risk-badge--${cls || "neutral"}"><span class="st-risk-dot"></span>${label}</span>`;
   }
@@ -781,8 +738,8 @@ class StudentRegistry {
   }
 }
 
-// Row menu (Run prediction / Archive) open/close + fixed positioning, same
-// pattern as Learner Records' row menu. data-view-learner is handled by its
+// Row menu (Archive) open/close + fixed positioning, same pattern as
+// Learner Records' row menu. data-view-learner is handled by its
 // own per-row binding in renderPage(), not here, so it isn't duplicated.
 function closeOpenRegistryRowMenus() {
   document.querySelectorAll(".st-row-menu.is-open").forEach((menu) => {

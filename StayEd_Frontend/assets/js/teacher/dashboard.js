@@ -83,7 +83,6 @@ class TeacherDashboard {
     search: "",
     sortKey: "risk",
     sortDir: 1,
-    predicting: new Set(),
     filtersApplied: false,
     riskTrend: [],
     currentRiskCounts: { high: 0, moderate: 0, low: 0 },
@@ -822,12 +821,6 @@ class TeacherDashboard {
         });
       });
 
-      body.querySelectorAll("[data-registry-run-prediction]").forEach((btn) => {
-        btn.addEventListener("click", () =>
-          this.runRegistryPrediction(btn.dataset.registryRunPrediction),
-        );
-      });
-
       body.querySelectorAll("[data-registry-archive]").forEach((btn) => {
         btn.addEventListener("click", () =>
           this.archiveRegistryLearner(btn.dataset.registryArchive),
@@ -884,11 +877,6 @@ class TeacherDashboard {
                                 <span class="material-symbols-outlined">more_vert</span>
                             </button>
                             <div class="st-row-menu-list">
-                                <button type="button" data-registry-run-prediction="${l.id}"
-                                    ${this.state.predicting.has(String(l.id)) ? "disabled" : ""}>
-                                    <span class="material-symbols-outlined">${this.state.predicting.has(String(l.id)) ? "progress_activity" : "bolt"}</span>
-                                    Run prediction
-                                </button>
                                 <button type="button" data-registry-archive="${l.id}">
                                     <span class="material-symbols-outlined">${isArchived ? "unarchive" : "archive"}</span>
                                     ${isArchived ? "Restore" : "Archive"}
@@ -899,35 +887,6 @@ class TeacherDashboard {
                 </td>
             </tr>
         `;
-  }
-
-  // Same manual trigger as Student Registry's row menu -- updates the row
-  // in place from the response instead of a full reload.
-  static async runRegistryPrediction(id) {
-    const key = String(id);
-    if (this.state.predicting.has(key)) return;
-
-    this.state.predicting.add(key);
-    this.renderRegistryPage();
-
-    try {
-      const result = await API.runPrediction(id);
-      const l = this.state.learners.find((x) => String(x.id) === key);
-      if (l) {
-        l.risk =
-          result.risk_level.charAt(0) + result.risk_level.slice(1).toLowerCase();
-        l.risk_probability = result.risk_probability;
-      }
-      Toast?.success(
-        `Prediction updated: ${result.risk_level} risk (${Math.round(result.risk_probability * 100)}%).`,
-      );
-    } catch (error) {
-      console.error("[TeacherDashboard] runRegistryPrediction", error);
-      Toast?.error(error?.message || "Unable to run a prediction for this learner.");
-    } finally {
-      this.state.predicting.delete(key);
-      this.applyRegistry({ recomputeStats: false });
-    }
   }
 
   static async archiveRegistryLearner(id) {
@@ -956,7 +915,7 @@ class TeacherDashboard {
   // Badge + probability meter, matching Student Registry/Early Warning's
   // risk cell. Falls back to the plain badge for learners not yet assessed.
   static riskCell(l) {
-    const cls = { High: "high", Moderate: "moderate", Low: "low", Preliminary: "preliminary" }[l.risk];
+    const cls = { High: "high", Moderate: "moderate", Low: "low" }[l.risk];
     if (!cls) {
       return `<div class="st-risk-cell"><div class="st-risk-cell-top">${this.riskBadge(l.risk)}</div></div>`;
     }
@@ -1041,7 +1000,6 @@ class TeacherDashboard {
       High: "high",
       Moderate: "moderate",
       Low: "low",
-      Preliminary: "preliminary",
     };
 
     const cls = map[risk] || "neutral";
@@ -1145,8 +1103,8 @@ class TeacherDashboard {
   }
 }
 
-// Row menu (Run prediction / Archive) open/close + fixed positioning, same
-// pattern as Learner Records/Student Registry's row menu. data-view-learner
+// Row menu (Archive) open/close + fixed positioning, same pattern as
+// Learner Records/Student Registry's row menu. data-view-learner
 // is handled by its own per-row binding in renderRegistryPage(), not here.
 function closeOpenDashboardRowMenus() {
   document.querySelectorAll(".st-row-menu.is-open").forEach((menu) => {

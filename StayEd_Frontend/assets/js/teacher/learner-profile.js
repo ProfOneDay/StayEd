@@ -327,9 +327,7 @@ class LearnerProfilePage {
             ? "Needs regular monitoring."
             : p.risk === "Low"
               ? "Continue regular monitoring."
-              : p.risk === "Preliminary"
-                ? "Based on enrollment details only -- no modules returned or attendance recorded yet."
-                : "Risk will appear after a prediction is generated.";
+              : "Risk will appear after a prediction is generated.";
     }
 
     const hero = document.querySelector("[data-profile-hero]");
@@ -342,10 +340,8 @@ class LearnerProfilePage {
           ? "moderate"
           : p.risk === "Low"
             ? "low"
-            : p.risk === "Preliminary"
-              ? "preliminary"
-              : "neutral";
-    const allStates = ["high", "moderate", "low", "preliminary", "neutral"];
+            : "neutral";
+    const allStates = ["high", "moderate", "low", "neutral"];
 
     if (riskPanel) {
       riskPanel.classList.remove(...allStates.map((s) => `is-${s}`));
@@ -361,9 +357,7 @@ class LearnerProfilePage {
           ? "warning"
           : riskState === "low"
             ? "check_circle"
-            : riskState === "preliminary"
-              ? "hourglass_top"
-              : "help";
+            : "help";
     }
 
     document
@@ -1718,9 +1712,8 @@ class LearnerProfilePage {
 
   static riskPill(risk) {
     const cls =
-      { High: "high", Moderate: "moderate", Low: "low", Preliminary: "preliminary" }[risk] || "neutral";
-    const label =
-      cls === "neutral" ? "Not Yet Assessed" : cls === "preliminary" ? "Preliminary" : `${risk} Risk`;
+      { High: "high", Moderate: "moderate", Low: "low" }[risk] || "neutral";
+    const label = cls === "neutral" ? "Not Yet Assessed" : `${risk} Risk`;
     return `<span class="st-risk-badge st-risk-badge--${cls}"><span class="st-risk-dot"></span>${label}</span>`;
   }
 

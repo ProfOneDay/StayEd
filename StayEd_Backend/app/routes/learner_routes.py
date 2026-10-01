@@ -50,6 +50,13 @@ LEARNER_SESSION_SCHEDULE_STATUSES = {
 }
 LEARNER_SESSION_SCHEDULE_NOTE_MAX_LENGTH = 2000
 
+# update_learner() fields that feed the dropout-risk model (features.py):
+# editing any of these should refresh the learner's prediction.
+_PREDICTION_RELEVANT_LEARNER_FIELDS = {
+    "sex", "birthdate", "date_of_birth", "monthly_income", "occupation",
+    "distance_from_clc_km", "is_re_enrollee", "modality",
+}
+
 
 def _teacher_scope():
     teacher = teacher_for_user()
@@ -484,6 +491,27 @@ def update_learner(learner_id: int):
             except Exception:
                 db.rollback()
                 raise
+
+    # Every one of the model's inputs (features.py) is editable on this form --
+    # sex, birthdate (age), distance, is_re_enrollee, modality, monthly_income,
+    # occupation -- so a save here is exactly the kind of edit that should
+    # refresh the risk score, same as a module release or intervention
+    # change already does elsewhere. Backgrounded for the same reason those
+    # call sites are: trigger_prediction() shells out to the model bridge and
+    # can take long enough to risk the save itself timing out.
+    if _PREDICTION_RELEVANT_LEARNER_FIELDS & data.keys():
+        app_obj = current_app._get_current_object()
+        enrollment_id = row["enrollment_id"]
+        changed_by = current_user_id()
+
+        def _refresh_prediction_in_background():
+            with app_obj.app_context():
+                try:
+                    trigger_prediction(enrollment_id, changed_by)
+                except Exception:
+                    pass
+
+        threading.Thread(target=_refresh_prediction_in_background, daemon=True).start()
 
     refreshed = fetch_one(
         _learner_query("WHERE l.learner_id = %s AND lc.teacher_id = %s", "ce.enrollment_date DESC") + " LIMIT 1",
@@ -2980,12 +3008,11 @@ def public_student_view(token: str):
 
     shaped = _shape_learner(row)
     risk_label = shaped["risk"]
-    if risk_label == "Not Yet Assessed":
-        risk_summary = "Your risk level hasn't been assessed yet. Check back after your teacher releases your modules and records your progress."
-    elif risk_label == "Preliminary":
-        risk_summary = "StayEd has an early, preliminary read on your risk level based on your enrollment details -- it will update once your teacher records your progress."
-    else:
-        risk_summary = f"StayEd currently classifies you as {risk_label} Risk based on the latest available monitoring data."
+    risk_summary = (
+        f"StayEd currently classifies you as {risk_label} Risk based on the latest available monitoring data."
+        if risk_label != "Not Yet Assessed"
+        else "Your risk level hasn't been assessed yet. Check back after your teacher releases your modules and records your progress."
+    )
 
     return {
         "profile": {

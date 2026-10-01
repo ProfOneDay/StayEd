@@ -21,7 +21,7 @@ class Config:
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024
     MODEL_COMMAND = os.getenv("MODEL_COMMAND", "").strip()
 
-    SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
+    SMTP_HOST = os.getenv("SMTP_HOST", "smtp-relay.brevo.com")
     SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
     SMTP_USERNAME = os.getenv("SMTP_USERNAME", "").strip()
     SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "").strip()

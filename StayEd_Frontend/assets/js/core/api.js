@@ -872,10 +872,6 @@ class API {
     return this.put(`/learners/${learnerId}/assessment-scores`, data);
   }
 
-  static runPrediction(learnerId) {
-    return this.post("/predictions/run", { learner_id: learnerId });
-  }
-
   static getLearnerRecordsDetail(id) {
     return this.get(`/learners/${id}/records-detail`);
   }

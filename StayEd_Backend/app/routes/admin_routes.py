@@ -10,6 +10,7 @@ from ..authz import current_user_id, role_required
 from ..db import execute, fetch_all, fetch_one, get_db
 from ..helpers import error, is_deped_email, split_name
 from ..services.mailer import send_email
+from ..services.roster_service import is_on_teacher_roster
 from ..services.settings_service import (
     get_active_school_year,
     get_default_module_duration_days,
@@ -53,6 +54,7 @@ def _admin_teacher_row(row):
         "name": full_name,
         "email": email,
         "isDepedVerified": is_deped_email(email),
+        "isOnRoster": is_on_teacher_roster(full_name),
         "phone": row.get("contact_number") or "",
         "employeeId": row.get("employee_id") or "",
         "clc": clcs[0] if clcs else "",

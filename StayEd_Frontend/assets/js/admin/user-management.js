@@ -162,6 +162,11 @@ function openReview(id){
   verifiedBadge.innerHTML=t.isDepedVerified
     ? checkSvg+'DepEd Verified Account'
     : warnSvg+'Not a DepEd Email — verify manually';
+  const rosterBadge=document.getElementById('rv-roster-badge');
+  rosterBadge.classList.toggle('not-verified',!t.isOnRoster);
+  rosterBadge.innerHTML=t.isOnRoster
+    ? checkSvg+'On Official ALS Teachers Roster'
+    : warnSvg+'Not Found on Roster — verify manually';
   document.getElementById('rv-empid').textContent=t.employeeId;
   document.getElementById('rv-phone').textContent=t.phone;
   document.getElementById('rv-date').textContent=t.date;

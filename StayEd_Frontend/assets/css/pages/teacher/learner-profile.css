@@ -148,9 +148,6 @@ body[data-page="Learner Profile"] .st-profile-hero--moderate .st-profile-hero-av
 body[data-page="Learner Profile"] .st-profile-hero--low .st-profile-hero-avatar {
   box-shadow: 0 0 0 4px #fff, 0 0 0 6px #c9e6c1;
 }
-body[data-page="Learner Profile"] .st-profile-hero--preliminary .st-profile-hero-avatar {
-  box-shadow: 0 0 0 4px #fff, 0 0 0 6px #bcdcf3;
-}
 body[data-page="Learner Profile"] .st-profile-hero--neutral .st-profile-hero-avatar {
   box-shadow: 0 0 0 4px #fff, 0 0 0 6px #dfe3ea;
 }
@@ -292,14 +289,6 @@ body[data-page="Learner Profile"] .st-profile-hero-risk-panel.is-low {
 body[data-page="Learner Profile"] .st-profile-hero-risk-panel.is-low .st-profile-risk-panel-icon {
   background: var(--st-risk-low-soft-2, #edf7ea);
   color: var(--st-risk-low-ink, #2c7121);
-  animation: st-lp-pulse-once 900ms var(--st-ease-out) 300ms;
-}
-body[data-page="Learner Profile"] .st-profile-hero-risk-panel.is-preliminary {
-  background: linear-gradient(180deg, #eef6fc, #fff 90%);
-}
-body[data-page="Learner Profile"] .st-profile-hero-risk-panel.is-preliminary .st-profile-risk-panel-icon {
-  background: #e6f2fb;
-  color: #1f7fcf;
   animation: st-lp-pulse-once 900ms var(--st-ease-out) 300ms;
 }
 body[data-page="Learner Profile"] .st-profile-hero-risk-panel.is-neutral {

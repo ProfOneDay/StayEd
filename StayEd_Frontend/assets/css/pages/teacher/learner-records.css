@@ -310,7 +310,6 @@ body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-
 body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--high .st-risk-pct{ color:var(--st-risk-high-ink, var(--st-risk-high)); }
 body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--moderate .st-risk-pct{ color:var(--st-risk-moderate-ink, var(--st-risk-moderate)); }
 body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--low .st-risk-pct{ color:var(--st-risk-low-ink, var(--st-risk-low)); }
-body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--preliminary .st-risk-pct{ color:var(--st-info); }
 
 body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-meter{
     height:5px;
@@ -334,7 +333,6 @@ body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-
 body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--high .st-risk-meter i{ background:var(--st-risk-high); }
 body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--moderate .st-risk-meter i{ background:var(--st-risk-moderate); }
 body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--low .st-risk-meter i{ background:var(--st-risk-low); }
-body:is([data-page="Student Registry"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--preliminary .st-risk-meter i{ background:var(--st-info); }
 
 /* Status / new pill variants (Active/Pending/Archived/Inactive) */
 body:is([data-page="Student Registry"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-pill--active{ background:#e3f4f3; color:#00504e; }

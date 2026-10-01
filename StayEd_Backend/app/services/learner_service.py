@@ -128,17 +128,11 @@ def _shape_learner(row):
     # trigger_prediction's gate), so it can fire from demographic features
     # alone -- age, distance, is_re_enrollee -- before the learner has
     # actually done anything (no module returned, no attendance recorded).
-    # That's real signal (e.g. re-enrollees are a known risk factor), so the
-    # prediction itself is kept, but it's labeled "Preliminary" rather than
-    # a flat "Moderate"/"High" until real engagement backs it up, so a
-    # teacher doesn't read it as an already-earned verdict.
-    if not risk_level or not monitoring_started:
-        risk = "Not Yet Assessed"
-    elif not has_engagement:
-        risk = "Preliminary"
-    else:
-        risk = title_enum(risk_level)
-    probability = float(row.get("risk_probability") or 0) if monitoring_started else 0.0
+    # Until real engagement backs it up, treat it the same as not having a
+    # prediction at all rather than showing an unearned Moderate/High verdict.
+    assessed = bool(risk_level) and monitoring_started and has_engagement
+    risk = title_enum(risk_level) if assessed else "Not Yet Assessed"
+    probability = float(row.get("risk_probability") or 0) if assessed else 0.0
     activity_text, activity_status, days_inactive = _shape_activity(row)
     return {
         "id": row["learner_id"],

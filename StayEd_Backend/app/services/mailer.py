@@ -7,11 +7,20 @@ from flask import current_app
 
 
 def send_email(to: str, subject: str, body: str) -> bool:
-    """Send a plain-text email via the configured SMTP account (Gmail SMTP by
-    default). Returns False (and logs) instead of raising on any failure, so
-    a broken/unconfigured mail setup never blocks the action that triggered
-    it (e.g. approving a teacher account still succeeds even if the email
-    can't be sent).
+    """Send a plain-text email via the configured SMTP account (Brevo's SMTP
+    relay by default -- smtp-relay.brevo.com -- rather than a personal Gmail
+    account, since transactional mail like approval notices needs a sending
+    reputation Gmail's consumer SMTP isn't built for). SMTP_USERNAME/
+    SMTP_PASSWORD are the "SMTP login" and generated SMTP key from Brevo's
+    dashboard (Senders, Domains & Dedicated IPs -> SMTP & API -> SMTP tab),
+    NOT your Brevo account password. SMTP_FROM_EMAIL must be a sender address
+    verified in that same Brevo account, or sends will fail even with valid
+    credentials.
+
+    Returns False (and logs) instead of raising on any failure, so a broken/
+    unconfigured mail setup never blocks the action that triggered it (e.g.
+    approving a teacher account still succeeds even if the email can't be
+    sent).
     """
     config = current_app.config
     username = config.get("SMTP_USERNAME")
@@ -30,7 +39,7 @@ def send_email(to: str, subject: str, body: str) -> bool:
     message.set_content(body)
 
     try:
-        with smtplib.SMTP(config.get("SMTP_HOST", "smtp.gmail.com"), config.get("SMTP_PORT", 587)) as smtp:
+        with smtplib.SMTP(config.get("SMTP_HOST", "smtp-relay.brevo.com"), config.get("SMTP_PORT", 587)) as smtp:
             smtp.starttls()
             smtp.login(username, password)
             smtp.send_message(message)
