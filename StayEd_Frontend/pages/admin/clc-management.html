@@ -31,30 +31,38 @@
 <div data-component="layout/sidebar-admin"></div>
 <div class="st-main">
 <div data-component="layout/navbar"></div>
-<main class="st-content"><div class="st-page-header"><h1 class="st-page-header-title">CLC Management</h1><p class="st-page-header-subtitle">Manage Community Learning Centers and their assigned teachers.</p></div>
-
-  <div class="kpis" id="kpis">
-    <button class="kpi active" data-filter="all"><small>Total CLCs</small><b id="kpiTotal">0</b></button>
-    <button class="kpi k-active" data-filter="active"><small>Active</small><b id="kpiActive">0</b></button>
-    <button class="kpi k-archived" data-filter="archived"><small>Inactive</small><b id="kpiArchived">0</b></button>
+<main class="st-content">
+  <div class="st-page-header">
+    <div><h1 class="st-page-header-title">CLC Management</h1><p class="st-page-header-subtitle">Manage Community Learning Centers and their assigned teachers.</p></div>
+    <div class="st-page-header-actions"><button class="st-btn st-btn-primary" id="addClcBtn"><span class="material-symbols-outlined">add_business</span>Add new CLC</button></div>
   </div>
 
-  <section class="card">
-    <div class="toolbar">
-      <div class="search-box">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-        <input id="searchInput" type="text" placeholder="Search by name or municipality…" />
+  <section class="st-panel st-panel-pad" aria-label="CLC summary" data-animate>
+    <div class="st-adm-overview" id="kpis">
+      <button class="kpi active st-overview-total" data-filter="all"><div class="value num" id="kpiTotal" data-countup>0</div><div class="label">total CLCs<span class="st-adm-sub">Click a status to filter</span></div></button>
+      <div>
+        <div class="st-adm-strip" role="img" id="admStrip" aria-label="0 active, 0 inactive"><span class="active" id="stripActive"></span><span class="off" id="stripOff"></span></div>
+        <div class="st-adm-legend st-adm-legend--2">
+          <button class="kpi k-active" data-filter="active"><b id="kpiActive" data-countup>0</b><small>Active</small><span class="pct" id="kpiActivePct"></span></button>
+          <button class="kpi k-archived" data-filter="archived"><b id="kpiArchived" data-countup>0</b><small>Inactive</small><span class="pct" id="kpiArchivedPct"></span></button>
+        </div>
       </div>
-      <div class="select-wrap select-wrap--chevron" style="width:200px">
-        <select id="muniFilterSelect"><option value="">All Municipalities</option></select>
-      </div>
-      <button class="btn primary" id="addClcBtn">+ Add new CLC</button>
     </div>
-    <table class="st-data-table">
-      <thead><tr><th>CLC</th><th>Municipality</th><th>Teachers</th><th>Status</th><th>Actions</th></tr></thead>
-      <tbody id="tbody"></tbody>
-    </table>
-    <div class="pagination" id="clcPagination"></div>
+  </section>
+
+  <section class="st-panel st-table-card">
+    <div class="st-table-card-head"><h2 class="st-table-card-title">Community Learning Centers</h2><span class="st-table-card-count" data-clc-count>0 CLCs</span></div>
+    <div class="st-adm-toolbar">
+      <label class="st-search"><span class="material-symbols-outlined">search</span><input id="searchInput" type="text" placeholder="Search by name or municipality" /></label>
+      <select class="st-select" id="muniFilterSelect" aria-label="Filter by municipality"><option value="">All municipalities</option></select>
+    </div>
+    <div class="st-table-scroll">
+      <table class="st-data-table st-reg-table st-clc-table">
+        <thead><tr><th>CLC</th><th>Municipality</th><th>Teachers</th><th>Status</th><th class="is-right">Actions</th></tr></thead>
+        <tbody id="tbody" data-animate-rows></tbody>
+      </table>
+    </div>
+    <div class="st-pagination" id="clcPagination"></div>
   </section>
 </main>
 <div data-component="layout/footer"></div>
@@ -67,12 +75,10 @@
   <div class="modal wide">
     <h2 id="clc-modal-title">Add New CLC</h2>
     <div class="modal-sub" id="clc-modal-sub">Register a new Community Learning Center to the system.</div>
-    <div class="field" style="display:grid;grid-template-columns:1fr 1fr;gap:14px 16px">
+    <div class="field st-field-grid-2">
       <div>
         <label for="new-clc-muni">Municipality</label>
-        <div class="select-wrap select-wrap--chevron">
-          <select id="new-clc-muni"><option value="">Select Municipality</option></select>
-        </div>
+        <select id="new-clc-muni"><option value="">Select Municipality</option></select>
       </div>
       <div>
         <label for="new-clc-brgy">Barangay</label>
@@ -81,16 +87,16 @@
     </div>
     <div class="field"><label for="new-clc-name">CLC Name</label><input id="new-clc-name" type="text" placeholder="Enter CLC Name"/></div>
     <div class="field"><label for="new-clc-street">Street/Building Number</label><input id="new-clc-street" type="text" placeholder="e.g. 123 Rizal St., Alcala Elementary School Bldg."/></div>
-    <div class="quick-actions" id="clc-quick-actions" style="display:none">
+    <div class="quick-actions quick-actions--neutral" id="clc-quick-actions" hidden>
       <div>
         <b>Assigned Teachers</b>
         <div class="qa-sub" id="qa-teacher-count">0 teachers assigned</div>
       </div>
-      <button class="btn" type="button" id="qa-assign-btn">Assign Teachers</button>
+      <button class="st-btn st-btn-outline" type="button" id="qa-assign-btn"><span class="material-symbols-outlined">group_add</span>Assign teachers</button>
     </div>
     <div class="modal-actions">
-      <button class="btn ghost" onclick="closeModal('modal-add-clc')">Cancel</button>
-      <button class="btn primary" id="addClcSaveBtn">Add CLC</button>
+      <button class="st-btn st-btn-outline" onclick="closeModal('modal-add-clc')">Cancel</button>
+      <button class="st-btn st-btn-primary" id="addClcSaveBtn">Add CLC</button>
     </div>
   </div>
 </div>
@@ -102,18 +108,16 @@
     <div class="modal-sub" id="as-clc-name">Choose teachers for this CLC.</div>
     <div class="field">
       <label for="as-teacher-select">Add new teacher</label>
-      <div style="display:flex;gap:10px">
-        <div class="select-wrap select-wrap--chevron" style="flex:1">
-          <select id="as-teacher-select"><option value="">Choose an active teacher…</option></select>
-        </div>
-        <button class="btn primary" id="as-add-btn" type="button" style="white-space:nowrap">Assign Teacher</button>
+      <div class="st-inline-add">
+        <select id="as-teacher-select"><option value="">Choose an active teacher…</option></select>
+        <button class="st-btn st-btn-primary" id="as-add-btn" type="button">Assign teacher</button>
       </div>
     </div>
-    <label style="display:block;font-size:0.96875rem;font-weight:700;margin:16px 0 8px">Currently assigned</label>
+    <span class="st-modal-section-label">Currently assigned</span>
     <div class="assign-current" id="assign-current"></div>
     <div class="modal-actions">
-      <button class="btn ghost" onclick="closeModal('modal-assign')">Cancel</button>
-      <button class="btn primary" id="as-save-btn">Save assignments</button>
+      <button class="st-btn st-btn-outline" onclick="closeModal('modal-assign')">Cancel</button>
+      <button class="st-btn st-btn-primary" id="as-save-btn">Save assignments</button>
     </div>
   </div>
 </div>
@@ -121,7 +125,7 @@
 <!-- Archive CLC Confirmation Modal -->
 <div class="overlay" id="modal-archive">
   <div class="modal">
-    <div class="icon-circle danger"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M10.29 3.86l-8.18 14A2 2 0 0 0 3.82 21h16.36a2 2 0 0 0 1.71-3.14l-8.18-14a2 2 0 0 0-3.42 0Z"/></svg></div>
+    <div class="icon-circle danger"><span class="material-symbols-outlined">archive</span></div>
     <h2>Archive <span id="ar-name">this CLC</span>?</h2>
     <div class="info-card">
       <div><small>CLC Name</small><b id="ar-info-name">—</b></div>
@@ -131,8 +135,8 @@
     </div>
     <div class="warning-banner" id="ar-warning">This Community Learning Center will become inactive and can no longer be assigned to teachers. Existing learner records will remain in the system.</div>
     <div class="modal-actions">
-      <button class="btn ghost" onclick="closeModal('modal-archive')">Cancel</button>
-      <button class="btn danger" id="ar-confirm-btn">Archive CLC</button>
+      <button class="st-btn st-btn-outline" onclick="closeModal('modal-archive')">Cancel</button>
+      <button class="st-btn st-btn-danger" id="ar-confirm-btn">Archive CLC</button>
     </div>
   </div>
 </div>
@@ -140,7 +144,7 @@
 <!-- Restore CLC Modal -->
 <div class="overlay" id="modal-restore">
   <div class="modal">
-    <div class="icon-circle success"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg></div>
+    <div class="icon-circle success"><span class="material-symbols-outlined">restore</span></div>
     <h2>Restore <span id="rs-name">this CLC</span>?</h2>
     <div class="info-card">
       <div><small>CLC Name</small><b id="rs-info-name">—</b></div>
@@ -149,13 +153,11 @@
     </div>
     <div class="info-banner">Restoring will re-enable data collection and reporting for this location immediately.</div>
     <div class="modal-actions">
-      <button class="btn ghost" onclick="closeModal('modal-restore')">Cancel</button>
-      <button class="btn primary" id="rs-confirm-btn">Restore CLC</button>
+      <button class="st-btn st-btn-outline" onclick="closeModal('modal-restore')">Cancel</button>
+      <button class="st-btn st-btn-primary" id="rs-confirm-btn">Restore CLC</button>
     </div>
   </div>
 </div>
-
-<div class="toast" id="toast"></div>
 
 <script src="../../assets/js/config.js"></script>
 <script src="../../assets/js/core/utils.js"></script>
@@ -169,6 +171,6 @@
 <script src="../../assets/js/components/toast.js"></script>
 <script src="../../assets/js/components/modal.js"></script>
 <script src="../../assets/js/admin/division-ii-municipalities.js?v=2"></script>
-<script src="../../assets/js/admin/clc-management.js?v=2"></script>
+<script src="../../assets/js/admin/clc-management.js?v=3"></script>
 </body>
 </html>

@@ -25,19 +25,85 @@
   rel="apple-touch-icon"
   href="../../assets/img/brand/apple-touch-icon.png"
 />
-<title>StayEd Admin Risk Map Demo</title>
+<title>StayEd | Admin Dashboard</title>
 </head>
 <body class="st-app" data-page="Admin Dashboard">
 <div data-component="layout/sidebar-admin"></div>
 <div class="st-main">
 <div data-component="layout/navbar"></div>
-<main class="st-content"><div class="st-page-header"><h1 class="st-page-header-title">Pangasinan II Risk Overview</h1><p class="st-page-header-subtitle">Click a municipality to update the dashboard data.</p></div>
-<div class="grid"><section class="card"><h2 style="margin:0">Interactive Municipality Map</h2><div class="sub">Gray areas are outside the configured Pangasinan II scope.</div>
-<div class="toolbar"><div class="search-box"><select id="municipalitySelect" aria-label="Jump to a municipality"><option value="" disabled hidden>Select Municipality</option><option value="all" selected>All (Pangasinan II)</option></select></div><div class="legend-hint"><span class="material-symbols-outlined">touch_app</span> Select an area on the map or use the list.</div></div>
-<div class="mapwrap"><?xml version='1.0' encoding='utf-8'?>
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" baseProfile="full" width="100%" height="100%" style="background-color:#E8F7F6" cursorshover="true" viewBox="0 0 800 533" role="img" aria-label="Clickable Pangasinan municipality map for StayEd">
-    <rect width="100%" height="100%" fill="#E8F7F6" />
-<g id="zoomGroup"><path d="M 183.9598 275.1782 L 189.4616 266.6543 L 196.087 256.529 L 225.8043 218.7657 L 226.6179 217.3709 L 226.6567 212.9798 L 223.9058 208.0721 L 220.9999 205.3341 L 209.7252 202.2345 L 205.9669 202.9578 L 202.2862 198.4634 L 193.2199 191.3343 L 191.5926 187.6148 L 185.2384 180.3824 L 178.0319 176.9729 L 178.2643 178.1611 L 176.1334 182.0356 L 176.8695 188.9063 L 176.3271 191.076 L 174.2736 194.3822 L 175.0485 195.5188 L 174.5061 197.6885 L 175.0485 198.1018 L 176.2109 196.8103 L 180.0854 196.9652 L 181.2864 198.1018 L 181.4802 199.5482 L 180.4341 200.8397 L 180.9765 207.4005 L 182.5263 209.1053 L 182.9912 214.1679 L 183.6499 214.5812 L 184.9285 213.2897 L 185.2772 213.7547 L 184.1923 215.4594 L 183.5336 219.6439 L 182.0226 222.4852 L 180.2403 223.0018 L 179.0392 221.607 L 177.6444 227.6512 L 177.8382 231.1124 L 179.7754 234.9868 L 180.2016 237.8281 L 178.3418 241.1344 L 178.7293 246.3003 L 175.9397 253.1711 L 175.126 257.9238 L 176.2109 261.8499 L 179.4654 262.5215 L 181.4802 265.1045 L 182.2938 269.8572 L 182.0226 271.8719 L 180.2016 273.2668 L 178.4968 276.573 L 176.9858 276.0047 L 178.8455 277.3479 L 180.1241 277.5545 L 183.9598 275.1782 Z" fill="#d9dee7" fill-opacity="1" stroke="#000000" stroke-width="0.5" paint-order="fill" stroke-opacity="1" stroke-dasharray="" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" clip-path="none" id="agno" class="municipality outside-division" data-name="Agno" data-division-ii="false" tabindex="-1" aria-label="Agno"><title>Agno</title></path>
+<main class="st-content">
+  <section class="st-welcome">
+    <div>
+      <h2 class="st-welcome-title">Pangasinan II Risk Overview</h2>
+      <p class="st-welcome-subtitle">Click a municipality to update the dashboard data.</p>
+    </div>
+    <div class="st-term-card">
+      <div class="st-term-item"><span class="st-term-item-label">Division</span><span class="st-term-item-value">Pangasinan II</span></div>
+      <div class="st-term-divider"></div>
+      <div class="st-term-item"><span class="st-term-item-label">Municipalities</span><span class="st-term-item-value" id="muniCount">0</span></div>
+    </div>
+  </section>
+
+  <section class="st-filter-bar">
+    <div class="st-adm-filter-row">
+      <div class="st-filter-group st-adm-area-group">
+        <label class="st-filter-label" for="municipalitySelect">Selected area</label>
+        <select id="municipalitySelect" aria-label="Jump to a municipality">
+          <option value="" disabled hidden>Select Municipality</option>
+          <option value="all" selected>All (Pangasinan II)</option>
+        </select>
+      </div>
+      <div class="st-adm-area-summary">
+        <span class="st-adm-area-label">Now showing</span>
+        <div id="name" class="selected-title" aria-live="polite">Choose a municipality</div>
+        <div id="scopeMeta" class="scope-meta">Select an area to view its learner summary.</div>
+      </div>
+      <div class="legend-hint"><span class="material-symbols-outlined">touch_app</span>Select an area on the map or use the list.</div>
+    </div>
+  </section>
+
+  <div id="empty" class="st-empty">
+    <span class="material-symbols-outlined">map</span>
+    <p class="st-empty-title">Click a municipality on the map to load its data here.</p>
+  </div>
+
+  <div id="panel" class="st-dash-grid" hidden>
+    <!-- Overview: same component as teacher "statistics" -->
+    <div class="st-panel st-panel-pad col-9" aria-label="Learner overview" data-animate>
+      <div class="st-overview">
+        <div class="st-overview-total">
+          <div class="value num" id="total" data-countup>0</div>
+          <div class="label">total learners<span class="st-adm-sub">Current learners in this view</span></div>
+        </div>
+        <div>
+          <div class="st-risk-strip" role="img" aria-label="Risk distribution">
+            <span class="high"></span><span class="mod"></span><span class="low"></span><span class="none"></span>
+          </div>
+          <div class="st-risk-legend st-risk-legend--4">
+            <div class="st-risk-legend-item high"><span class="count num" id="high" data-countup>0</span><span class="name">High risk</span><span class="pct num">0%<span class="pct-suffix"> &middot; Needs closer follow-up</span></span></div>
+            <div class="st-risk-legend-item mod"><span class="count num" id="moderate" data-countup>0</span><span class="name">Moderate risk</span><span class="pct num">0%<span class="pct-suffix"> &middot; Needs monitoring</span></span></div>
+            <div class="st-risk-legend-item low"><span class="count num" id="lowSummary" data-countup>0</span><span class="name">Low risk</span><span class="pct num">0%<span class="pct-suffix"> &middot; Currently lower concern</span></span></div>
+            <div class="st-risk-legend-item none"><span class="count num" id="unassessed" data-countup>0</span><span class="name">Not yet assessed</span><span class="pct num">0%<span class="pct-suffix"> &middot; No prediction yet</span></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLC count: same slot/shape as teacher "Interventions to update" -->
+    <div class="st-panel st-panel-pad col-3 st-adm-clc-card" data-animate>
+      <div class="head"><span class="material-symbols-outlined">hub</span>Community Learning Centers</div>
+      <div class="st-adm-clc-figure"><strong class="num" id="clcs" data-countup>0</strong><span>CLCs represented</span></div>
+      <p class="hint">Across the selected area. Pick a municipality to list its centers.</p>
+    </div>
+
+    <!-- Map -->
+    <div class="st-panel st-panel-pad col-8 st-adm-map-card" data-animate>
+      <div class="st-panel-head">
+        <div><h3 class="st-panel-title">Interactive Municipality Map</h3><p class="st-panel-subtitle">Gray areas are outside the configured Pangasinan II scope.</p></div>
+      </div>
+      <div class="mapwrap">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" baseProfile="full" width="100%" height="100%" cursorshover="true" viewBox="0 0 800 533" role="img" aria-label="Clickable Pangasinan municipality map for StayEd">
+    <g id="zoomGroup"><path d="M 183.9598 275.1782 L 189.4616 266.6543 L 196.087 256.529 L 225.8043 218.7657 L 226.6179 217.3709 L 226.6567 212.9798 L 223.9058 208.0721 L 220.9999 205.3341 L 209.7252 202.2345 L 205.9669 202.9578 L 202.2862 198.4634 L 193.2199 191.3343 L 191.5926 187.6148 L 185.2384 180.3824 L 178.0319 176.9729 L 178.2643 178.1611 L 176.1334 182.0356 L 176.8695 188.9063 L 176.3271 191.076 L 174.2736 194.3822 L 175.0485 195.5188 L 174.5061 197.6885 L 175.0485 198.1018 L 176.2109 196.8103 L 180.0854 196.9652 L 181.2864 198.1018 L 181.4802 199.5482 L 180.4341 200.8397 L 180.9765 207.4005 L 182.5263 209.1053 L 182.9912 214.1679 L 183.6499 214.5812 L 184.9285 213.2897 L 185.2772 213.7547 L 184.1923 215.4594 L 183.5336 219.6439 L 182.0226 222.4852 L 180.2403 223.0018 L 179.0392 221.607 L 177.6444 227.6512 L 177.8382 231.1124 L 179.7754 234.9868 L 180.2016 237.8281 L 178.3418 241.1344 L 178.7293 246.3003 L 175.9397 253.1711 L 175.126 257.9238 L 176.2109 261.8499 L 179.4654 262.5215 L 181.4802 265.1045 L 182.2938 269.8572 L 182.0226 271.8719 L 180.2016 273.2668 L 178.4968 276.573 L 176.9858 276.0047 L 178.8455 277.3479 L 180.1241 277.5545 L 183.9598 275.1782 Z" fill="#d9dee7" fill-opacity="1" stroke="#000000" stroke-width="0.5" paint-order="fill" stroke-opacity="1" stroke-dasharray="" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" clip-path="none" id="agno" class="municipality outside-division" data-name="Agno" data-division-ii="false" tabindex="-1" aria-label="Agno"><title>Agno</title></path>
                                                                                                         <path d="M 340.7215 419.7223 L 381.946 365.9444 L 388.8814 361.0368 L 387.7965 358.9704 L 384.5807 357.6272 L 384.0383 353.5461 L 383.3408 352.6162 L 377.9166 348.9484 L 373.6159 343.0075 L 371.1362 338.2031 L 370.71 333.2955 L 368.3853 330.0925 L 367.3392 331.2291 L 365.4795 331.2291 L 359.939 336.4984 L 356.8781 336.395 L 353.4298 339.8046 L 350.9502 343.989 L 348.4705 346.0554 L 348.1218 348.4834 L 345.6034 353.5978 L 345.8746 354.7859 L 344.1311 356.9556 L 344.2085 360.3652 L 341.6514 365.1696 L 341.9226 375.5015 L 341.1864 380.0992 L 333.8249 386.66 L 334.4836 395.2356 L 340.7215 419.7223 Z" fill="#d9dee7" fill-opacity="1" stroke="#000000" stroke-width="0.5" paint-order="fill" stroke-opacity="1" stroke-dasharray="" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" clip-path="none" id="aguilar" class="municipality outside-division" data-name="Aguilar" data-division-ii="false" tabindex="-1" aria-label="Aguilar"><title>Aguilar</title></path>
                                                                                                           <path d="M 226.7342 215.8727 L 230.8024 220.4188 L 238.8226 224.8099 L 241.5347 227.4445 L 244.0144 232.3005 L 244.828 237.7765 L 246.1066 240.9794 L 253.8556 240.9794 L 256.2965 242.2709 L 259.2023 245.1122 L 267.8424 233.5404 L 283.999 209.1053 L 295.3513 193.349 L 290.7019 191.4376 L 290.1982 189.3196 L 288.261 190.6627 L 287.7186 189.7845 L 289.0359 187.2015 L 288.9196 185.91 L 288.3772 184.1536 L 287.0599 183.1721 L 287.5248 185.4451 L 286.8662 186.8916 L 285.6651 186.1683 L 286.6337 187.7698 L 285.2389 186.6333 L 285.0452 187.6148 L 283.9603 186.1683 L 284.154 184.7735 L 285.2389 183.8953 L 284.154 183.8953 L 283.4179 185.0318 L 282.0231 184.1536 L 282.7592 186.7366 L 282.4493 187.3565 L 281.7131 186.3233 L 281.4806 183.482 L 281.2482 186.8916 L 280.4345 188.958 L 281.0544 191.4893 L 280.2795 192.7808 L 277.6061 195.6737 L 276.87 194.6922 L 274.9328 194.2273 L 274.1579 192.9358 L 273.9254 188.958 L 272.9955 187.7698 L 272.6081 184.7219 L 271.2907 182.5522 L 270.4771 182.7071 L 269.8572 181.4673 L 268.4236 181.4673 L 268.0362 179.6075 L 265.7502 177.8511 L 264.7041 178.4194 L 264.3554 180.0208 L 263.6193 177.8511 L 261.992 178.5743 L 262.9218 177.1279 L 261.8757 174.6999 L 260.9071 173.8216 L 260.171 176.1463 L 260.3647 174.1316 L 258.6599 173.4084 L 259.3186 171.7036 L 262.3794 168.3457 L 261.682 166.5893 L 259.2411 166.7959 L 259.0474 165.8144 L 258.2337 165.5044 L 257.73 166.2277 L 257.0326 165.2461 L 257.6913 164.1096 L 255.4441 162.9214 L 254.7854 168.9656 L 253.5069 168.8106 L 252.1895 160.3384 L 249.6324 159.6152 L 248.8575 160.2351 L 247.8888 159.2019 L 245.0605 158.6337 L 244.2468 156.3606 L 243.0457 156.464 L 241.8446 153.4677 L 241.2635 155.6374 L 243.0845 160.0801 L 246.649 163.0247 L 248.5863 162.4048 L 249.1287 163.3347 L 249.3224 166.2793 L 247.1914 170.5154 L 249.7099 172.5301 L 249.8648 173.46 L 247.4627 174.3382 L 246.9202 175.2681 L 230.0662 211.43 L 226.7342 215.8727 Z M 286.5562 181.5706 L 285.6651 179.7109 L 285.4714 181.0024 L 286.0913 181.3123 L 286.3237 182.7588 L 284.9677 185.8067 L 286.7499 184.8768 L 286.5562 181.5706 Z M 285.8975 182.8621 L 285.6651 182.1905 L 285.1226 182.2939 L 285.3551 182.7588 L 285.8975 182.8621 Z M 283.1854 178.7293 L 282.8754 179.4009 L 282.4493 178.316 L 280.6282 179.1426 L 282.1393 179.8658 L 281.2869 181.6223 L 282.5655 183.1721 L 283.4179 182.7588 L 283.1079 181.8806 L 282.333 182.1905 L 282.7592 181.4673 L 282.2168 180.8474 L 282.5655 180.4341 L 283.1079 181.1573 L 283.5341 179.2976 L 283.1854 178.7293 Z M 284.0765 178.7293 L 283.8441 179.6075 L 284.3865 180.2791 L 284.619 179.8658 L 284.0765 178.7293 Z M 281.3644 177.5928 L 281.5969 178.4194 L 281.9068 176.4046 L 281.5969 176.7146 L 281.3644 177.5928 Z M 285.1226 183.1721 L 283.5341 180.4341 L 283.6503 183.0171 L 285.4714 183.482 L 285.1226 183.1721 Z M 285.4326 175.8364 L 285.7813 175.0098 L 284.2703 175.1131 L 283.9603 175.9914 L 285.2389 178.4194 L 285.5876 178.0061 L 284.6965 176.1463 L 285.4326 175.8364 Z M 286.6337 174.2866 L 286.0138 173.4084 L 284.619 173.7183 L 286.3237 174.5449 L 286.6337 174.2866 Z M 287.0599 172.5301 L 287.6023 171.7036 L 286.6337 170.4121 L 285.7813 170.8254 L 285.6651 172.1169 L 284.9289 170.9804 L 284.9289 172.8401 L 286.0913 172.9951 L 286.5562 171.5486 L 287.0599 172.5301 Z M 270.3996 174.5449 L 270.9808 173.5117 L 267.4937 174.2866 L 268.8886 175.1131 L 270.3996 174.5449 Z M 283.9603 172.4268 L 284.2703 173.8216 L 284.5802 171.032 L 283.3016 172.1169 L 283.9603 172.4268 Z M 289.2296 169.3272 L 289.1134 170.2571 L 289.3458 170.5671 L 289.772 168.8106 L 289.2296 169.3272 Z M 289.3458 167.6225 L 289.0359 168.6557 L 290.082 167.1059 L 289.6558 167.1059 L 289.3458 167.6225 Z M 288.4935 167.5191 L 287.7186 166.9509 L 287.5248 167.9841 L 288.0285 168.3974 L 288.4935 167.5191 Z" fill="#d9dee7" fill-opacity="1" stroke="#000000" stroke-width="0.5" paint-order="fill" stroke-opacity="1" stroke-dasharray="" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" clip-path="none" id="alaminos-city" class="municipality outside-division" data-name="Alaminos City" data-division-ii="false" tabindex="-1" aria-label="Alaminos City"><title>Alaminos City</title></path>
                                                                                                             <path d="M 460.8693 369.509 L 471.6791 369.354 L 491.8652 369.2507 L 494.5386 356.1291 L 486.8671 351.1181 L 484.1162 347.7602 L 486.3247 343.6791 L 489.8504 340.9928 L 459.4745 353.3395 L 461.528 368.4241 L 460.8693 369.509 Z" fill="#d9dee7" fill-opacity="1" stroke="#000000" stroke-width="0.5" paint-order="fill" stroke-opacity="1" stroke-dasharray="" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" clip-path="none" id="alcala" class="municipality division-ii" data-name="Alcala" data-division-ii="true" tabindex="0" aria-label="Alcala"><title>Alcala</title></path>
@@ -85,17 +151,98 @@
                                                                                                                                                                                                 <path d="M 424.3329 399.8333 L 427.1613 397.2503 L 421.8532 361.3984 L 419.9935 352.3579 L 399.6524 357.059 L 389.54 362.0183 L 392.2909 363.1548 L 392.3297 363.7747 L 389.85 367.0293 L 389.5013 369.509 L 390.1599 371.4204 L 391.671 372.6086 L 395.158 371.3687 L 396.7078 371.937 L 398.2576 377.7229 L 401.0085 378.2395 L 401.9771 379.686 L 399.3037 383.2505 L 399.2262 385.4202 L 402.752 385.1102 L 406.2391 391.1544 L 409.2612 392.7559 L 412.477 390.4312 L 413.2906 390.5862 L 419.9935 398.0768 L 422.9381 398.1802 L 424.3329 399.8333 Z" fill="#d9dee7" fill-opacity="1" stroke="#000000" stroke-width="0.5" paint-order="fill" stroke-opacity="1" stroke-dasharray="" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" clip-path="none" id="urbiztondo" class="municipality outside-division" data-name="Urbiztondo" data-division-ii="false" tabindex="-1" aria-label="Urbiztondo"><title>Urbiztondo</title></path>
                                                                                                                                                                                                   <path d="M 466.6423 321.2071 L 472.2215 317.0743 L 482.4502 311.4434 L 501.1252 307.2073 L 513.8723 305.9674 L 514.4534 297.7018 L 513.9885 293.5174 L 514.1435 279.8276 L 513.6785 277.5545 L 512.3999 276.1597 L 491.3227 274.4033 L 484.7361 279.6726 L 478.4982 277.9678 L 478.072 276.9863 L 474.8949 278.691 L 469.1607 277.2962 L 463.8527 277.6062 L 462.3416 278.1228 L 461.2567 281.0674 L 457.8859 285.0969 L 454.5151 283.4954 L 453.7015 283.9087 L 457.8859 287.7315 L 460.7531 293.0008 L 462.9615 300.3882 L 463.6589 312.7349 L 466.6423 321.2071 Z" fill="#d9dee7" fill-opacity="1" stroke="#000000" stroke-width="0.5" paint-order="fill" stroke-opacity="1" stroke-dasharray="" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" clip-path="none" id="urdaneta-city" class="municipality division-ii" data-name="Urdaneta City" data-division-ii="true" tabindex="0" aria-label="Urdaneta City"><title>Urdaneta City</title></path>
                                                                                                                                                                                                     <path d="M 466.6423 321.2071 L 471.7179 335.2069 L 475.3211 347.3986 L 489.153 341.0444 L 491.9814 342.9042 L 494.4611 342.3876 L 498.6068 336.8083 L 501.3189 335.1552 L 505.5809 333.9154 L 509.4941 330.7641 L 510.8889 328.6977 L 509.6103 322.6535 L 511.0439 321.3104 L 514.9571 321.4137 L 517.5918 314.388 L 514.9184 310.9268 L 514.0272 308.7054 L 513.8723 305.9674 L 501.1252 307.2073 L 480.8616 311.96 L 466.6423 321.2071 Z" fill="#d9dee7" fill-opacity="1" stroke="#000000" stroke-width="0.5" paint-order="fill" stroke-opacity="1" stroke-dasharray="" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" clip-path="none" id="villasis" class="municipality division-ii" data-name="Villasis" data-division-ii="true" tabindex="0" aria-label="Villasis"><title>Villasis</title></path></g>
-                                                                                                                                                                                                        </svg><div id="mapTooltip" class="map-tooltip" role="tooltip" aria-hidden="true"></div><div class="zoom-controls" role="group" aria-label="Map zoom controls"><button id="zoomInBtn" aria-label="Zoom in" title="Zoom in">+</button><button id="zoomOutBtn" aria-label="Zoom out" title="Zoom out">−</button><button id="zoomResetBtn" aria-label="Reset view" title="Reset view"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg></button></div></div><div class="map-legend-head"><strong>Map legend</strong><span>Municipalities are colored by current learner risk.</span></div><div class="legend" id="legend" role="group" aria-label="Filter map by risk level"><button class="legend-item" data-level="low"><i class="dot" style="background:#6BBF59"></i>Low <span class="legend-count" id="countLow">0</span></button><button class="legend-item" data-level="moderate"><i class="dot" style="background:#F39422"></i>Moderate <span class="legend-count" id="countModerate">0</span></button><button class="legend-item" data-level="high"><i class="dot" style="background:#D64545"></i>High <span class="legend-count" id="countHigh">0</span></button><button class="legend-item" data-level="outside"><i class="dot" style="background:#d9dee7"></i>Outside scope</button></div></section>
-<section class="card dashboard-summary-card"><div class="summary-eyebrow">Selected Area</div><div id="name" class="selected-title" aria-live="polite">Choose a municipality</div><div id="scopeMeta" class="scope-meta">Select an area to view its learner summary.</div><div id="empty" class="empty">Click a municipality on the map to load its data here.</div><div id="panel" hidden><div class="stats"><div class="stat"><small>Total learners</small><b id="total">0</b><span>Current learners in this view</span></div><div class="stat"><small>Community Learning Centers</small><b id="clcs">0</b><span>CLCs represented</span></div><div class="stat stat--high"><small>High risk</small><b id="high">0</b><span>Needs closer follow-up</span></div><div class="stat stat--moderate"><small>Moderate risk</small><b id="moderate">0</b><span>Needs monitoring</span></div><div class="stat stat--low"><small>Low risk</small><b id="lowSummary">0</b><span>Currently lower concern</span></div></div>
-<div id="clcListSection" class="dashboard-section"><div class="dashboard-section-head"><div><h3>Community Learning Centers</h3><p>Centers included in the selected municipality.</p></div></div><div id="clcList" class="clc-list"></div></div>
-<div class="dashboard-section"><div class="dashboard-section-head"><div><h3>Risk Distribution</h3><p>Current learner risk levels for the selected area.</p></div><div class="chart-type-toggle" role="group" aria-label="Choose chart type" id="riskChartToggle"><button type="button" class="chart-type-btn is-active" data-chart-type="bar">Bar</button><button type="button" class="chart-type-btn" data-chart-type="pie">Pie</button><button type="button" class="chart-type-btn" data-chart-type="line">Trend</button></div></div><div id="riskBarView"><div class="barrow"><div class="bar-label"><span>High Risk</span><small id="highCountText">0 learners</small></div><div class="track"><div id="highBar" class="fill high"></div></div><b id="highPct">0%</b></div><div class="barrow"><div class="bar-label"><span>Moderate Risk</span><small id="modCountText">0 learners</small></div><div class="track"><div id="modBar" class="fill moderate"></div></div><b id="modPct">0%</b></div><div class="barrow"><div class="bar-label"><span>Low Risk</span><small id="lowCountText">0 learners</small></div><div class="track"><div id="lowBar" class="fill low"></div></div><b id="lowPct">0%</b></div></div><div id="riskChartView" class="chart-canvas-wrap" hidden><canvas id="riskChartCanvas" height="220"></canvas><p class="chart-canvas-note" id="riskChartNote"></p></div></div>
-<div class="dashboard-section"><div class="dashboard-section-head"><div><h3>Learning Level Distribution</h3><p>Shows how learners are distributed across ALS learning levels.</p></div><div class="chart-type-toggle" role="group" aria-label="Choose chart type" id="levelChartToggle"><button type="button" class="chart-type-btn is-active" data-chart-type="bar">Bar</button><button type="button" class="chart-type-btn" data-chart-type="pie">Pie</button></div></div><div id="levelBarView"><div id="levels" class="levelchart"></div></div><div id="levelChartView" class="chart-canvas-wrap" hidden><canvas id="levelChartCanvas" height="220"></canvas><p class="chart-canvas-note" id="levelChartNote"></p></div></div>
-<div class="dashboard-section"><div class="dashboard-section-head"><div><h3>Risk by Gender</h3><p>Division-wide comparison of High-Risk rate between male and female learners.</p></div><div class="chart-type-toggle" role="group" aria-label="Choose chart type" id="genderChartToggle"><button type="button" class="chart-type-btn is-active" data-chart-type="bar">Bar</button><button type="button" class="chart-type-btn" data-chart-type="grouped">Compare</button><button type="button" class="chart-type-btn" data-chart-type="pie">Pie</button></div></div><div id="genderRiskCallout" class="gender-risk-callout"></div><div id="genderBarView"><div class="barrow"><div class="bar-label"><span>Male</span><small id="maleCountText">0 learners</small></div><div class="track"><div id="maleBar" class="fill high"></div></div><b id="malePct">0%</b></div><div class="barrow"><div class="bar-label"><span>Female</span><small id="femaleCountText">0 learners</small></div><div class="track"><div id="femaleBar" class="fill high"></div></div><b id="femalePct">0%</b></div></div><div id="genderChartView" class="chart-canvas-wrap" hidden><canvas id="genderChartCanvas" height="220"></canvas><p class="chart-canvas-note" id="genderChartNote"></p></div></div></div></section></div></main>
-<div data-component="layout/footer"></div>
+                                                                                                                                                                                                        </svg>
+        <div id="mapTooltip" class="map-tooltip" role="tooltip" aria-hidden="true"></div>
+        <div class="zoom-controls" role="group" aria-label="Map zoom controls">
+          <button id="zoomInBtn" aria-label="Zoom in" title="Zoom in"><span class="material-symbols-outlined">add</span></button>
+          <button id="zoomOutBtn" aria-label="Zoom out" title="Zoom out"><span class="material-symbols-outlined">remove</span></button>
+          <button id="zoomResetBtn" aria-label="Reset view" title="Reset view"><span class="material-symbols-outlined">restart_alt</span></button>
+        </div>
+      </div>
+      <div class="map-legend-head"><strong>Map legend</strong><span>Municipalities are colored by current learner risk.</span></div>
+      <div class="legend" id="legend" role="group" aria-label="Filter map by risk level">
+        <button class="legend-item" data-level="low"><i class="dot dot--low"></i>Low <span class="legend-count" id="countLow">0</span></button>
+        <button class="legend-item" data-level="moderate"><i class="dot dot--moderate"></i>Moderate <span class="legend-count" id="countModerate">0</span></button>
+        <button class="legend-item" data-level="high"><i class="dot dot--high"></i>High <span class="legend-count" id="countHigh">0</span></button>
+        <button class="legend-item" data-level="outside"><i class="dot dot--outside"></i>Outside scope</button>
+      </div>
+    </div>
+
+    <div class="col-4 st-adm-side">
+    <!-- Risk distribution: same component as teacher analytics bars -->
+    <div class="st-panel st-panel-pad" data-animate>
+      <div class="st-panel-head">
+        <div><h3 class="st-panel-title">Risk Distribution</h3><p class="st-panel-subtitle">Current learner risk levels for the selected area.</p></div>
+        <div class="chart-type-toggle" role="group" aria-label="Choose chart type" id="riskChartToggle">
+          <button type="button" class="chart-type-btn is-active" data-chart-type="bar">Bar</button>
+          <button type="button" class="chart-type-btn" data-chart-type="pie">Donut</button>
+          <button type="button" class="chart-type-btn" data-chart-type="line">Trend</button>
+        </div>
+      </div>
+      <div id="riskBarView" class="st-hbars st-adm-hbars">
+        <div class="st-hbar-row"><span class="st-hbar-label">High<small id="highCountText">0 learners</small></span><div class="st-hbar-track"><div id="highBar" class="st-hbar st-hbar--high" style="--w:0%"></div></div><span class="st-hbar-value num" id="highPct">0%</span></div>
+        <div class="st-hbar-row"><span class="st-hbar-label">Moderate<small id="modCountText">0 learners</small></span><div class="st-hbar-track"><div id="modBar" class="st-hbar st-hbar--moderate" style="--w:0%"></div></div><span class="st-hbar-value num" id="modPct">0%</span></div>
+        <div class="st-hbar-row"><span class="st-hbar-label">Low<small id="lowCountText">0 learners</small></span><div class="st-hbar-track"><div id="lowBar" class="st-hbar st-hbar--low" style="--w:0%"></div></div><span class="st-hbar-value num" id="lowPct">0%</span></div>
+      </div>
+      <div id="riskChartView" class="chart-canvas-wrap" hidden><canvas id="riskChartCanvas" height="220"></canvas><p class="chart-canvas-note" id="riskChartNote"></p></div>
+    </div>
+
+    <!-- Risk by gender -->
+    <div class="st-panel st-panel-pad" data-animate>
+      <div class="st-panel-head">
+        <div><h3 class="st-panel-title">Risk by Gender</h3><p class="st-panel-subtitle">Division-wide comparison of High-Risk rate between male and female learners.</p></div>
+        <div class="chart-type-toggle" role="group" aria-label="Choose chart type" id="genderChartToggle">
+          <button type="button" class="chart-type-btn is-active" data-chart-type="bar">Bar</button>
+          <button type="button" class="chart-type-btn" data-chart-type="grouped">Compare</button>
+          <button type="button" class="chart-type-btn" data-chart-type="pie">Donut</button>
+        </div>
+      </div>
+      <div id="genderRiskCallout" class="gender-risk-callout st-insights"></div>
+      <div id="genderBarView" class="st-hbars st-adm-hbars">
+        <div class="st-hbar-row"><span class="st-hbar-label">Male<small id="maleCountText">0 learners</small></span><div class="st-hbar-track"><div id="maleBar" class="st-hbar st-hbar--high" style="--w:0%"></div></div><span class="st-hbar-value num" id="malePct">0%</span></div>
+        <div class="st-hbar-row"><span class="st-hbar-label">Female<small id="femaleCountText">0 learners</small></span><div class="st-hbar-track"><div id="femaleBar" class="st-hbar st-hbar--high" style="--w:0%"></div></div><span class="st-hbar-value num" id="femalePct">0%</span></div>
+      </div>
+      <div id="genderChartView" class="chart-canvas-wrap" hidden><canvas id="genderChartCanvas" height="220"></canvas><p class="chart-canvas-note" id="genderChartNote"></p></div>
+    </div>
+
+    </div>
+    <!-- Learning level -->
+    <div class="st-panel st-panel-pad col-6 st-adm-level-card" data-animate>
+      <div class="st-panel-head">
+        <div><h3 class="st-panel-title">Learning Level Distribution</h3><p class="st-panel-subtitle">Shows how learners are distributed across ALS learning levels.</p></div>
+        <div class="chart-type-toggle" role="group" aria-label="Choose chart type" id="levelChartToggle">
+          <button type="button" class="chart-type-btn is-active" data-chart-type="bar">Bar</button>
+          <button type="button" class="chart-type-btn" data-chart-type="pie">Donut</button>
+        </div>
+      </div>
+      <div id="levelBarView"><div id="levels" class="st-hbars st-adm-hbars"></div>
+        <p class="st-adm-avg-note"><i></i>Line marks the division average per municipality</p></div>
+      <div id="levelChartView" class="chart-canvas-wrap" hidden><canvas id="levelChartCanvas" height="220"></canvas><p class="chart-canvas-note" id="levelChartNote"></p></div>
+    </div>
+
+    <!-- CLC list: municipality view only -->
+    <div id="clcListSection" class="st-panel st-panel-pad col-6" hidden data-animate>
+      <div class="st-panel-head"><div><h3 class="st-panel-title">Community Learning Centers</h3><p class="st-panel-subtitle">Centers included in the selected municipality.</p></div></div>
+      <div id="clcList" class="clc-list"></div>
+    </div>
+  </div>
+</main>
+
+<footer class="st-footer">
+  <div class="st-footer-left">
+    <span>&copy; 2026 Department of Education - Alternative Learning System</span>
+    <span class="st-footer-version">Version 1.0</span>
+  </div>
+  <div class="st-footer-right">
+    <a href="privacy-policy.html">Privacy Policy</a>
+    <a href="terms-of-service.html">Terms of Service</a>
+    <a href="contact-us.html">Contact Us</a>
+  </div>
+</footer>
+
 </div>
 <div data-component="layout/toast"></div>
 <div data-component="layout/modal"></div>
-<div class="toast" id="toast"></div>
 <script src="../../assets/js/config.js"></script>
 <script src="../../assets/js/core/utils.js"></script>
 <script src="../../assets/js/core/api.js"></script>
@@ -108,6 +255,6 @@
 <script src="../../assets/js/components/toast.js"></script>
 <script src="../../assets/js/components/modal.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js"></script>
-<script src="../../assets/js/admin/division-ii-municipalities.js?v=2"></script>
-<script src="../../assets/js/admin/dashboard.js?v=2"></script>
+<script src="../../assets/js/admin/division-ii-municipalities.js?v=3"></script>
+<script src="../../assets/js/admin/dashboard.js?v=3"></script>
 </body></html>

@@ -95,6 +95,13 @@ class Layout {
 
     document.querySelectorAll("[data-st-user-avatar]").forEach((image) => {
       if (user.avatar) {
+        image.onerror = () => {
+          image.hidden = true;
+          image.onerror = null;
+          const wrap = image.closest("[data-st-user-avatar-fallback]") || image.parentElement;
+          const fallback = wrap && wrap.querySelector("[data-st-user-initials]");
+          if (fallback) fallback.hidden = false;
+        };
         image.src = user.avatar;
         image.hidden = false;
       } else {

@@ -31,28 +31,38 @@
 <div data-component="layout/sidebar-admin"></div>
 <div class="st-main">
 <div data-component="layout/navbar"></div>
-<main class="st-content"><div class="st-page-header"><h1 class="st-page-header-title">User Management</h1><p class="st-page-header-subtitle">Review teacher registrations and manage existing accounts.</p></div>
-
-  <div class="kpis" id="kpis">
-    <button class="kpi active" data-filter="all"><small>Total teachers</small><b id="kpiTotal">0</b></button>
-    <button class="kpi k-pending" data-filter="pending"><span class="notify-dot" id="pendingKpiDot"></span><small>Pending registrations</small><b id="kpiPending">0</b></button>
-    <button class="kpi k-active" data-filter="active"><small>Active accounts</small><b id="kpiActive">0</b></button>
-    <button class="kpi k-deactivated" data-filter="deactivated"><small>Deactivated</small><b id="kpiDeactivated">0</b></button>
+<main class="st-content">
+  <div class="st-page-header">
+    <div><h1 class="st-page-header-title">User Management</h1><p class="st-page-header-subtitle">Review teacher registrations and manage existing accounts.</p></div>
+    <div class="st-page-header-actions"><button class="st-btn st-btn-primary" id="createTeacherBtn"><span class="material-symbols-outlined">person_add</span>Create account</button></div>
   </div>
 
-  <section class="card">
-    <div class="toolbar">
-      <div class="search-box">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-        <input id="searchInput" type="text" placeholder="Search by name or CLC…" />
+  <section class="st-panel st-panel-pad" aria-label="Account summary" data-animate>
+    <div class="st-adm-overview" id="kpis">
+      <button class="kpi active st-overview-total" data-filter="all"><div class="value num" id="kpiTotal" data-countup>0</div><div class="label">total teachers<span class="st-adm-sub">Click a status to filter</span></div></button>
+      <div>
+        <div class="st-adm-strip" role="img" id="admStrip" aria-label="0 pending, 0 active, 0 deactivated"><span class="pending" id="stripPending"></span><span class="active" id="stripActive"></span><span class="off" id="stripOff"></span></div>
+        <div class="st-adm-legend st-adm-legend--3">
+          <button class="kpi k-pending" data-filter="pending"><span class="notify-dot" id="pendingKpiDot"></span><b id="kpiPending" data-countup>0</b><small>Pending registrations</small><span class="pct" id="kpiPendingPct"></span></button>
+          <button class="kpi k-active" data-filter="active"><b id="kpiActive" data-countup>0</b><small>Active accounts</small><span class="pct" id="kpiActivePct"></span></button>
+          <button class="kpi k-deactivated" data-filter="deactivated"><b id="kpiDeactivated" data-countup>0</b><small>Deactivated</small><span class="pct" id="kpiDeactivatedPct"></span></button>
+        </div>
       </div>
-      <button class="btn primary" id="createTeacherBtn">+ Create Account</button>
     </div>
-    <table class="st-data-table">
-      <thead><tr><th>Teacher</th><th>Assigned CLC</th><th>Status</th><th>Actions</th></tr></thead>
-      <tbody id="tbody"></tbody>
-    </table>
-    <div class="pagination" id="umPagination"></div>
+  </section>
+
+  <section class="st-panel st-table-card">
+    <div class="st-table-card-head"><h2 class="st-table-card-title">Teacher accounts</h2><span class="st-table-card-count" data-um-count>0 teachers</span></div>
+    <div class="st-adm-toolbar">
+      <label class="st-search"><span class="material-symbols-outlined">search</span><input id="searchInput" type="text" placeholder="Search by name or CLC" /></label>
+    </div>
+    <div class="st-table-scroll">
+      <table class="st-data-table st-reg-table">
+        <thead><tr><th>Teacher</th><th>Assigned CLC</th><th>Status</th><th class="is-right">Actions</th></tr></thead>
+        <tbody id="tbody" data-animate-rows></tbody>
+      </table>
+    </div>
+    <div class="st-pagination" id="umPagination"></div>
   </section>
 </main>
 <div data-component="layout/footer"></div>
@@ -68,9 +78,9 @@
     <div class="review-header">
       <div class="avatar-lg" id="rv-avatar">—</div>
       <div>
-        <div style="font-weight:800;font-size:1.1875rem" id="rv-name">—</div>
+        <div class="rv-name" id="rv-name">—</div>
         <div class="verified-badge" id="rv-verified-badge">—</div>
-        <div class="verified-badge" id="rv-roster-badge" style="margin-top:2px">—</div>
+        <div class="verified-badge" id="rv-roster-badge">—</div>
       </div>
     </div>
     <div class="detail-grid">
@@ -83,10 +93,12 @@
       <div><small>Municipality</small><b id="rv-muni">—</b></div>
       <div><small>Community Learning Center</small><b id="rv-clc">—</b></div>
     </div>
-    <div class="modal-actions">
-      <button class="btn ghost" onclick="closeModal('modal-review')">Close</button>
-      <button class="btn danger" id="rv-reject-btn">Reject Application</button>
-      <button class="btn primary" id="rv-approve-btn">Approve Account</button>
+    <div class="modal-actions modal-actions--split">
+      <button class="st-btn st-btn-ghost" onclick="closeModal('modal-review')">Close</button>
+      <div class="st-modal-actions-right">
+        <button class="st-btn st-btn-danger-outline" id="rv-reject-btn">Reject application</button>
+        <button class="st-btn st-btn-primary" id="rv-approve-btn"><span class="material-symbols-outlined">how_to_reg</span>Approve account</button>
+      </div>
     </div>
   </div>
 </div>
@@ -96,15 +108,15 @@
   <div class="modal">
     <h2>Approve Teacher Account?</h2>
     <div class="modal-sub">Approving this registration will activate the teacher account and allow access to StayEd.</div>
-    <div class="info-card" style="grid-template-columns:1fr">
-      <div><small>Teacher</small><b id="ap-name">—</b><div class="email" id="ap-email" style="margin-top:2px">—</div></div>
+    <div class="info-card st-field-grid-1col">
+      <div><small>Teacher</small><b id="ap-name">—</b><div class="st-learner-sub" id="ap-email">—</div></div>
     </div>
     <div class="field"><label for="ap-muni">Municipality</label><input id="ap-muni" type="text" disabled/></div>
     <div class="field"><label for="ap-clc">Assigned Community Learning Center</label><input id="ap-clc" type="text" disabled/></div>
     <div class="info-banner">The teacher will be notified of their CLC assignment via email upon approval.</div>
     <div class="modal-actions">
-      <button class="btn ghost" onclick="closeModal('modal-approve')">Cancel</button>
-      <button class="btn primary" id="ap-confirm-btn">Approve Account</button>
+      <button class="st-btn st-btn-ghost" onclick="closeModal('modal-approve')">Cancel</button>
+      <button class="st-btn st-btn-primary" id="ap-confirm-btn">Approve account</button>
     </div>
   </div>
 </div>
@@ -114,10 +126,10 @@
   <div class="modal wide edit-account-modal">
     <h2>Reject Teacher Registration?</h2>
     <div class="modal-sub">Review the details before proceeding with rejection.</div>
-    <div class="info-card" style="grid-template-columns:1fr">
-      <div><small>Teacher</small><b id="rj-name">—</b><div class="email" id="rj-email" style="margin-top:2px">—</div></div>
+    <div class="info-card st-field-grid-1col">
+      <div><small>Teacher</small><b id="rj-name">—</b><div class="st-learner-sub" id="rj-email">—</div></div>
     </div>
-    <label style="display:block;font-size:0.96875rem;font-weight:700;margin:14px 0 8px">Reason for rejection</label>
+    <span class="st-modal-section-label">Reason for rejection</span>
     <div class="radio-list">
       <label class="radio-item"><input type="radio" name="reject-reason" value="Duplicate account"/>Duplicate account</label>
       <label class="radio-item"><input type="radio" name="reject-reason" value="Invalid or non-DepEd email"/>Invalid or non-DepEd email</label>
@@ -127,8 +139,8 @@
     </div>
     <div class="field"><label for="reject-remarks">Optional remarks</label><textarea id="reject-remarks" placeholder="Provide additional details for the rejection notification…"></textarea></div>
     <div class="modal-actions">
-      <button class="btn ghost" onclick="closeModal('modal-reject')">Cancel</button>
-      <button class="btn danger" id="rj-confirm-btn">Reject Application</button>
+      <button class="st-btn st-btn-ghost" onclick="closeModal('modal-reject')">Cancel</button>
+      <button class="st-btn st-btn-danger-outline" id="rj-confirm-btn">Reject application</button>
     </div>
   </div>
 </div>
@@ -138,30 +150,28 @@
   <div class="modal wide edit-account-modal">
     <h2>Edit Teacher Account</h2>
     <div class="modal-sub">Update credentials and view administrative metadata.</div>
-    <label style="display:block;font-size:0.90625rem;font-weight:700;margin-bottom:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Personal Information</label>
-    <div class="field" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px 16px">
+    <span class="st-modal-section-label">Personal information</span>
+    <div class="field st-field-grid-3">
       <div><label for="edit-first">First Name</label><input id="edit-first" type="text"/></div>
       <div><label for="edit-middle">Middle Name (optional)</label><input id="edit-middle" type="text"/></div>
       <div><label for="edit-last">Last Name</label><input id="edit-last" type="text"/></div>
     </div>
-    <label style="display:block;font-size:0.90625rem;font-weight:700;margin:2px 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Employment &amp; Contact</label>
+    <span class="st-modal-section-label">Employment &amp; contact</span>
     <div class="field edit-employment-grid">
       <div><label for="edit-empid">Employee ID</label><input id="edit-empid" type="text"/></div>
       <div><label for="edit-phone">Contact Number</label><input id="edit-phone" type="text"/></div>
     </div>
     <div class="edit-contact-grid">
       <div class="field"><label for="edit-email">DepEd Email</label><input id="edit-email" type="email"/></div>
-      <div class="field"><label for="edit-muni">Municipality</label>
-        <div class="select-wrap select-wrap--chevron edit-municipality-select-wrap"><select id="edit-muni"></select></div>
-      </div>
+      <div class="field"><label for="edit-muni">Municipality</label><select id="edit-muni"></select></div>
     </div>
     <div class="field">
       <label>Assign CLC</label>
-      <div style="display:flex;gap:10px">
-        <div class="select-wrap select-wrap--chevron edit-clc-select-wrap"><select id="edit-clc-select"><option value="" disabled selected hidden>Select CLC…</option></select></div>
-        <button class="btn" type="button" id="edit-clc-add-btn" style="white-space:nowrap">Add CLC</button>
+      <div class="st-inline-add">
+        <select id="edit-clc-select"><option value="" disabled selected hidden>Select CLC…</option></select>
+        <button class="st-btn st-btn-outline" type="button" id="edit-clc-add-btn"><span class="material-symbols-outlined">add</span>Add CLC</button>
       </div>
-      <div class="assign-current" id="edit-clc-list" style="margin-top:10px"></div>
+      <div class="assign-current" id="edit-clc-list"></div>
     </div>
     <div class="info-card">
       <div><small>Account Status</small><b id="edit-status-val">—</b></div>
@@ -172,14 +182,14 @@
         <b id="edit-quick-title">Deactivate account</b>
         <div class="qa-sub" id="edit-quick-sub">Revoke this teacher's sign-in access.</div>
       </div>
-      <button class="btn" type="button" id="edit-quick-btn">Deactivate</button>
+      <button class="st-btn st-btn-danger-outline" type="button" id="edit-quick-btn">Deactivate</button>
     </div>
-    <div class="modal-actions" style="justify-content:space-between">
-      <button class="btn ghost" id="edit-reset-btn" type="button">Reset Password</button>
-      <div style="display:flex;gap:10px;align-items:center">
-        <button class="btn danger" id="edit-remove-btn" type="button" style="display:none">Remove Account</button>
-        <button class="btn ghost" onclick="closeModal('modal-edit')">Cancel</button>
-        <button class="btn primary" id="edit-save-btn">Save Changes</button>
+    <div class="modal-actions modal-actions--split">
+      <button class="st-btn st-btn-ghost" id="edit-reset-btn" type="button"><span class="material-symbols-outlined">lock_reset</span>Reset password</button>
+      <div class="st-modal-actions-right">
+        <button class="st-btn st-btn-danger" id="edit-remove-btn" type="button" hidden>Remove account</button>
+        <button class="st-btn st-btn-outline" onclick="closeModal('modal-edit')">Cancel</button>
+        <button class="st-btn st-btn-primary" id="edit-save-btn">Save changes</button>
       </div>
     </div>
   </div>
@@ -188,12 +198,12 @@
 <!-- Reset Teacher Password Modal -->
 <div class="overlay" id="modal-reset">
   <div class="modal">
-    <div class="icon-circle danger"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg></div>
+    <div class="icon-circle danger"><span class="material-symbols-outlined">lock_reset</span></div>
     <h2>Reset Teacher Password?</h2>
     <div class="modal-sub">Teacher: <b id="rs-name">—</b><br/>Email: <span id="rs-email">—</span></div>
     <div class="modal-actions">
-      <button class="btn ghost" onclick="closeModal('modal-reset')">Cancel</button>
-      <button class="btn primary" id="rs-confirm-btn">Reset Password</button>
+      <button class="st-btn st-btn-ghost" onclick="closeModal('modal-reset')">Cancel</button>
+      <button class="st-btn st-btn-primary" id="rs-confirm-btn">Reset password</button>
     </div>
   </div>
 </div>
@@ -201,25 +211,25 @@
 <!-- Password Reset Success Modal -->
 <div class="overlay" id="modal-reset-success">
   <div class="modal">
-    <div class="icon-circle success"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div>
+    <div class="icon-circle success"><span class="material-symbols-outlined">check_circle</span></div>
     <h2>Password Reset Successful</h2>
     <div class="modal-sub">The teacher's credentials have been updated.</div>
-    <div class="detail-grid" style="grid-template-columns:1fr;margin:12px 0 4px">
+    <div class="detail-grid st-field-grid-1col">
       <div><small>Teacher Name</small><b id="ps-name">—</b></div>
     </div>
-    <label style="display:block;font-size:0.96875rem;font-weight:700;margin:10px 0 6px">Temporary Password</label>
+    <span class="st-modal-section-label">Temporary Password</span>
     <div class="password-field">
       <span id="temp-pass-val">••••••••••••</span>
       <button class="icon-btn" id="toggle-pass-btn" type="button" aria-label="Show or hide password" title="Show/hide">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span class="material-symbols-outlined">visibility</span>
       </button>
       <button class="icon-btn" id="copy-pass-btn" type="button" aria-label="Copy password" title="Copy">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <span class="material-symbols-outlined">content_copy</span>
       </button>
     </div>
-    <div class="info-banner" style="margin-top:10px">Share this temporary password securely with the teacher.</div>
+    <div class="info-banner">Share this temporary password securely with the teacher.</div>
     <div class="modal-actions">
-      <button class="btn primary" style="width:100%" onclick="closeModal('modal-reset-success')">Done</button>
+      <button class="st-btn st-btn-primary st-btn-block" onclick="closeModal('modal-reset-success')">Done</button>
     </div>
   </div>
 </div>
@@ -227,17 +237,17 @@
 <!-- Deactivate Account Modal -->
 <div class="overlay" id="modal-deactivate">
   <div class="modal">
-    <div class="icon-circle danger"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M10.29 3.86l-8.18 14A2 2 0 0 0 3.82 21h16.36a2 2 0 0 0 1.71-3.14l-8.18-14a2 2 0 0 0-3.42 0Z"/></svg></div>
+    <div class="icon-circle danger"><span class="material-symbols-outlined">person_off</span></div>
     <h2>Deactivate <span id="dc-name">this account</span>?</h2>
     <div class="info-card">
       <div><small>Account Status</small><b id="dc-status">Active</b></div>
       <div><small>Assigned CLC</small><b id="dc-clc-count">—</b></div>
     </div>
-    <div class="warning-banner" id="dc-warning" style="display:none">This teacher is still assigned to a Community Learning Center. Review the assignment before deactivation.</div>
+    <div class="warning-banner" id="dc-warning" hidden>This teacher is still assigned to a Community Learning Center. Review the assignment before deactivation.</div>
     <div class="info-banner">The teacher will no longer be able to sign in. Existing learner and monitoring records will remain in the system.</div>
     <div class="modal-actions">
-      <button class="btn ghost" onclick="closeModal('modal-deactivate')">Cancel</button>
-      <button class="btn danger" id="dc-confirm-btn">Deactivate Account</button>
+      <button class="st-btn st-btn-ghost" onclick="closeModal('modal-deactivate')">Cancel</button>
+      <button class="st-btn st-btn-danger" id="dc-confirm-btn">Deactivate account</button>
     </div>
   </div>
 </div>
@@ -245,17 +255,17 @@
 <!-- Remove Deactivated Account Modal -->
 <div class="overlay" id="modal-remove">
   <div class="modal">
-    <div class="icon-circle danger"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h10l1-14"/></svg></div>
+    <div class="icon-circle danger"><span class="material-symbols-outlined">delete</span></div>
     <h2>Remove Deactivated Account?</h2>
     <div class="modal-sub">This action permanently deletes the teacher account and all associated profile data.</div>
-    <div class="info-card" style="grid-template-columns:1fr">
-      <div><small>Teacher</small><b id="rm-name">—</b><div class="email" id="rm-email" style="margin-top:2px">—</div></div>
+    <div class="info-card st-field-grid-1col">
+      <div><small>Teacher</small><b id="rm-name">—</b><div class="st-learner-sub" id="rm-email">—</div></div>
       <div><small>Current Status</small><b id="rm-status">—</b></div>
     </div>
     <div class="warning-banner">This cannot be undone. Only deactivated accounts can be removed.</div>
     <div class="modal-actions">
-      <button class="btn ghost" onclick="closeModal('modal-remove')">Cancel</button>
-      <button class="btn danger" id="rm-confirm-btn">Remove Account</button>
+      <button class="st-btn st-btn-ghost" onclick="closeModal('modal-remove')">Cancel</button>
+      <button class="st-btn st-btn-danger" id="rm-confirm-btn">Remove account</button>
     </div>
   </div>
 </div>
@@ -266,38 +276,32 @@
     <h2>Create Account</h2>
     <div class="modal-sub">Create a StayEd account and, for teachers, assign them to a Community Learning Center.</div>
 
-    <label style="display:block;font-size:0.90625rem;font-weight:700;margin-bottom:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Account Type</label>
+    <span class="st-modal-section-label">Account Type</span>
     <div class="role-toggle" id="cr-role-toggle" role="group" aria-label="Account type">
       <button type="button" class="role-toggle-btn active" data-role="teacher">Teacher</button>
       <button type="button" class="role-toggle-btn" data-role="admin">Admin</button>
     </div>
 
-    <div class="field" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px 16px;margin-top:16px">
+    <div class="field st-field-grid-3">
       <div><label for="cr-first">First Name</label><input id="cr-first" type="text" placeholder="e.g. Maria"/></div>
       <div><label for="cr-middle">Middle Name (Optional)</label><input id="cr-middle" type="text" placeholder="e.g. Clara"/></div>
       <div><label for="cr-last">Last Name</label><input id="cr-last" type="text" placeholder="e.g. Santos"/></div>
     </div>
     <div class="field"><label for="cr-email">DepEd Email</label><input id="cr-email" type="email" placeholder="maria.santos@deped.gov.ph"/></div>
-    <div class="field" style="display:grid;grid-template-columns:1fr 1fr;gap:14px 16px">
+    <div class="field st-field-grid-2">
       <div><label for="cr-phone">Contact Number (Optional)</label><input id="cr-phone" type="text" placeholder="+63 9xx xxx xxxx"/></div>
       <div id="cr-empid-field"><label for="cr-empid">Employee ID (Optional)</label><input id="cr-empid" type="text" placeholder="e.g. 1234567"/></div>
     </div>
-    <div class="field" id="cr-clc-fields" style="display:grid;grid-template-columns:1fr 1fr;gap:14px 16px">
-      <div><label for="cr-muni">Municipality</label>
-        <div class="select-wrap select-wrap--chevron"><select id="cr-muni"><option value="" disabled selected hidden>Select Municipality…</option></select></div>
-      </div>
-      <div><label for="cr-clc">Assign CLC</label>
-        <div class="select-wrap select-wrap--chevron"><select id="cr-clc"><option value="" disabled selected hidden>Select CLC…</option></select></div>
-      </div>
+    <div class="field st-field-grid-2" id="cr-clc-fields">
+      <div><label for="cr-muni">Municipality</label><select id="cr-muni"><option value="" disabled selected hidden>Select Municipality…</option></select></div>
+      <div><label for="cr-clc">Assign CLC</label><select id="cr-clc"><option value="" disabled selected hidden>Select CLC…</option></select></div>
     </div>
     <div class="modal-actions">
-      <button class="btn ghost" onclick="closeModal('modal-create')">Cancel</button>
-      <button class="btn primary" id="cr-save-btn">Create Account</button>
+      <button class="st-btn st-btn-ghost" onclick="closeModal('modal-create')">Cancel</button>
+      <button class="st-btn st-btn-primary" id="cr-save-btn">Create account</button>
     </div>
   </div>
 </div>
-
-<div class="toast" id="toast"></div>
 
 <script src="../../assets/js/config.js"></script>
 <script src="../../assets/js/core/utils.js"></script>
@@ -311,6 +315,6 @@
 <script src="../../assets/js/components/toast.js"></script>
 <script src="../../assets/js/components/modal.js"></script>
 <script src="../../assets/js/admin/division-ii-municipalities.js?v=2"></script>
-<script src="../../assets/js/admin/user-management.js?v=4"></script>
+<script src="../../assets/js/admin/user-management.js?v=5"></script>
 </body>
 </html>

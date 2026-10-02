@@ -159,7 +159,7 @@ body[data-page="Learner Records"] .st-lr-actions{
 /* Row menu: floating card popup. Also used by Student Registry and the
    Teacher Dashboard's Student Registry Summary widget, for the same
    View profile + Archive menu pattern. */
-body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu-trigger{
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu-trigger{
     appearance:none;
     width:34px;
     height:34px;
@@ -174,25 +174,25 @@ body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page=
     transition:background-color var(--st-t-hover, 150ms),border-color var(--st-t-hover, 150ms),transform var(--st-t-press, 90ms);
 }
 
-body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu-trigger:hover,
-body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu.is-open .st-row-menu-trigger{
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu-trigger:hover,
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu.is-open .st-row-menu-trigger{
     border-color:var(--st-primary);
     background:var(--st-navy-soft, var(--st-primary-fixed));
     color:var(--st-primary);
 }
 
-body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu-trigger:active{
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu-trigger:active{
     transform:scale(.94);
 }
 
-body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu-list{
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu-list{
     min-width:230px;
     padding:6px;
     border-radius:10px;
     box-shadow:0 12px 32px rgba(17,26,54,.16);
 }
 
-body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu.is-open .st-row-menu-list{
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu.is-open .st-row-menu-list{
     animation:st-lr-menu-pop 160ms var(--st-ease-out, ease);
 }
 
@@ -201,7 +201,7 @@ body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page=
     to{ opacity:1; transform:none; }
 }
 
-body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu-list button{
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu-list button{
     padding:9px 10px;
     border-radius:7px;
     font-size:0.875rem;
@@ -209,28 +209,28 @@ body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page=
     transition:background-color var(--st-t-hover, 150ms);
 }
 
-body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu-list button .material-symbols-outlined{
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu-list button .material-symbols-outlined{
     font-size:19px;
     color:var(--st-ink-muted, var(--st-on-surface-variant));
 }
 
-body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu-list button:hover{
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu-list button:hover{
     background:var(--st-background);
     color:var(--st-primary);
 }
 
-body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu-list button:hover .material-symbols-outlined{
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu-list button:hover .material-symbols-outlined{
     color:var(--st-primary);
 }
 
-body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu-list button:disabled{
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu-list button:disabled{
     opacity:.5;
     cursor:default;
     background:none;
     color:var(--st-on-surface);
 }
 
-body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="Teacher Dashboard"]) .st-row-menu-list button:disabled .material-symbols-outlined{
+body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu-list button:disabled .material-symbols-outlined{
     color:var(--st-ink-muted, var(--st-on-surface-variant));
 }
 

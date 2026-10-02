@@ -21,7 +21,7 @@ async function loadClcs(){
       .map(fromApiShape);
   }catch(error){
     console.error('[AdminClcManagement] Unable to load CLCs',error);
-    showToast('Unable to load Community Learning Centers.');
+    showToast('Unable to load Community Learning Centers.','error');
     clcs=[];
   }
 }
@@ -41,43 +41,85 @@ async function loadTeachers(){
 let activeFilter="all",searchTerm="",muniFilter="",activeClcId=null,currentPage=1;
 const PAGE_SIZE=10;
 
-function statusBadge(s){return `<span class="badge ${s}">${s==='active'?'Active':'Inactive'}</span>`}
+const ST_REDUCE_MOTION=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Counts a [data-countup] element up from its previous value to `value`
+// over ~800ms (ease-out-cubic), mirroring the dashboard/registry pattern.
+function countTo(el,value){
+  if(!el) return;
+  const end=Number(value);
+  if(ST_REDUCE_MOTION||!Number.isFinite(end)){ el.textContent=value; return; }
+  const start=Number(el.dataset.final??0)||0;
+  el.dataset.final=end;
+  const t0=performance.now();
+  const dur=800;
+  const tick=(t)=>{
+    const k=Math.min(1,(t-t0)/dur);
+    const eased=1-Math.pow(1-k,3);
+    el.textContent=Math.round(start+(end-start)*eased);
+    if(k<1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+function replay(el){
+  if(!el) return;
+  el.classList.remove('is-inview');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('is-inview')));
+}
+
+function statusBadge(s){return `<span class="st-pill st-pill--status st-pill--${s}">${s==='active'?'Active':'Inactive'}</span>`}
 function clcCode(c){return `CLC-2026-${String(c.id).padStart(3,'0')}`}
 function renderPagination(containerId,totalItems,page,pageSize,onPageChange){
   const container=document.getElementById(containerId);
   const totalPages=Math.max(1,Math.ceil(totalItems/pageSize));
   const startItem=totalItems===0?0:(page-1)*pageSize+1;
   const endItem=Math.min(page*pageSize,totalItems);
-  const addBtn=p=>`<button class="page-btn ${p===page?'active':''}" data-page="${p}">${p}</button>`;
+  const addBtn=p=>`<button class="st-page-btn ${p===page?'is-active':''}" data-page="${p}">${p}</button>`;
   let pageBtns='';
   if(totalPages<=7){
     for(let p=1;p<=totalPages;p++) pageBtns+=addBtn(p);
   }else{
     pageBtns+=addBtn(1);
-    if(page>3) pageBtns+='<span class="page-ellipsis">…</span>';
+    if(page>3) pageBtns+='<span class="st-page-ellipsis">…</span>';
     const start=Math.max(2,page-1), end=Math.min(totalPages-1,page+1);
     for(let p=start;p<=end;p++) pageBtns+=addBtn(p);
-    if(page<totalPages-2) pageBtns+='<span class="page-ellipsis">…</span>';
+    if(page<totalPages-2) pageBtns+='<span class="st-page-ellipsis">…</span>';
     pageBtns+=addBtn(totalPages);
   }
   container.innerHTML=`
-    <div class="pagination-info">Showing ${startItem} to ${endItem} of ${totalItems} entries</div>
-    <div class="pagination-controls">
-      <button class="page-nav" id="${containerId}-prev" ${page<=1?'disabled':''} aria-label="Previous page">&lt;</button>
+    <span class="st-pagination-info">Showing ${startItem}–${endItem} of ${totalItems} entries</span>
+    <div class="st-pagination-controls">
+      <button class="st-page-btn" id="${containerId}-prev" ${page<=1?'disabled':''} aria-label="Previous page"><span class="material-symbols-outlined">chevron_left</span></button>
       ${pageBtns}
-      <button class="page-nav" id="${containerId}-next" ${page>=totalPages?'disabled':''} aria-label="Next page">&gt;</button>
+      <button class="st-page-btn" id="${containerId}-next" ${page>=totalPages?'disabled':''} aria-label="Next page"><span class="material-symbols-outlined">chevron_right</span></button>
     </div>`;
-  container.querySelectorAll('.page-btn').forEach(btn=>btn.addEventListener('click',()=>onPageChange(+btn.dataset.page)));
+  container.querySelectorAll('.st-page-btn[data-page]').forEach(btn=>btn.addEventListener('click',()=>onPageChange(+btn.dataset.page)));
   const prevBtn=document.getElementById(`${containerId}-prev`);
   const nextBtn=document.getElementById(`${containerId}-next`);
   if(prevBtn) prevBtn.addEventListener('click',()=>{if(page>1)onPageChange(page-1)});
   if(nextBtn) nextBtn.addEventListener('click',()=>{if(page<totalPages)onPageChange(page+1)});
 }
 
+function pct(part,total){ return total?Math.round((part/total)*100):0; }
+
 function renderKPIs(){
-  document.getElementById('kpiTotal').textContent=clcs.length;
-  document.getElementById('kpiActive').textContent=clcs.filter(c=>c.status==='active').length;
-  document.getElementById('kpiArchived').textContent=clcs.filter(c=>c.status==='archived').length;
+  const total=clcs.length;
+  const activeCount=clcs.filter(c=>c.status==='active').length;
+  const archivedCount=clcs.filter(c=>c.status==='archived').length;
+
+  countTo(document.getElementById('kpiTotal'),total);
+  countTo(document.getElementById('kpiActive'),activeCount);
+  countTo(document.getElementById('kpiArchived'),archivedCount);
+
+  document.getElementById('kpiActivePct').textContent=total?`${pct(activeCount,total)}% of CLCs`:'';
+  document.getElementById('kpiArchivedPct').textContent=total?`${pct(archivedCount,total)}% of CLCs`:'';
+
+  document.getElementById('stripActive').style.flexGrow=Math.max(activeCount,total?0:1);
+  document.getElementById('stripOff').style.flexGrow=Math.max(archivedCount,total?0:1);
+  document.getElementById('admStrip').setAttribute('aria-label',`${activeCount} active, ${archivedCount} inactive`);
+
+  replay(document.querySelector('.st-panel[data-animate]'));
 }
 
 function renderTable(){
@@ -89,31 +131,34 @@ function renderTable(){
   const totalPages=Math.max(1,Math.ceil(totalFiltered/PAGE_SIZE));
   if(currentPage>totalPages) currentPage=totalPages;
   const pageRows=rows.slice((currentPage-1)*PAGE_SIZE,currentPage*PAGE_SIZE);
+  const countEl=document.querySelector('[data-clc-count]');
+  if(countEl) countEl.textContent=`${clcs.length} CLC${clcs.length===1?'':'s'}`;
   if(!totalFiltered){
     const filtered=searchTerm||muniFilter||activeFilter!=='all';
-    tbody.innerHTML=`<tr class="empty-row"><td colspan="5"><div class="empty-state">
-      <div class="empty-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div>
+    tbody.innerHTML=`<tr><td colspan="5"><div class="empty-state">
+      <div class="empty-icon"><span class="material-symbols-outlined">search_off</span></div>
       <div class="empty-title">No CLCs found</div>
       <div class="empty-desc">${filtered?"We couldn't find any CLCs matching your current filters. Try adjusting your search.":'No Community Learning Centers have been added yet.'}</div>
-      ${filtered?'<button class="btn primary" onclick="clearClcFilters()">Clear filters</button>':'<button class="btn primary" onclick="openAddClcModal()">+ Add new CLC</button>'}
+      ${filtered?'<button class="st-btn st-btn-primary" onclick="clearClcFilters()">Clear filters</button>':'<button class="st-btn st-btn-primary" onclick="openAddClcModal()"><span class="material-symbols-outlined">add_business</span>Add new CLC</button>'}
     </div></td></tr>`;
     renderPagination('clcPagination',0,currentPage,PAGE_SIZE,p=>{currentPage=p;renderTable()});
     return;
   }
-  tbody.innerHTML=pageRows.map(c=>{
+  tbody.innerHTML=pageRows.map((c,i)=>{
     let actions=c.status==='active'
-      ? `<button class="btn" onclick="openEditClc(${c.id})">Edit</button><button class="btn danger" onclick="openArchive(${c.id})">Archive</button>`
-      : `<button class="btn" onclick="openEditClc(${c.id})">Edit</button><button class="btn primary" onclick="openRestore(${c.id})">Restore</button>`;
-    const archivedMeta=c.status==='archived'&&c.archivedDate?`<div class="archived-meta">Archived ${c.archivedDate}${c.archivedBy?' · '+c.archivedBy:''}</div>`:'';
-    return `<tr>
-      <td><div class="clcname">${c.name}</div><div class="addr">ID: ${clcCode(c)}</div></td>
-      <td>${c.muni}</td>
-      <td>${c.teachers.length}</td>
-      <td>${statusBadge(c.status)}${archivedMeta}</td>
-      <td><div class="rowActions">${actions}</div></td>
+      ? `<button class="st-btn st-btn-outline st-btn-xs" onclick="openEditClc(${c.id})">Edit</button><button class="st-btn st-btn-danger-outline st-btn-xs" onclick="openArchive(${c.id})">Archive</button>`
+      : `<button class="st-btn st-btn-outline st-btn-xs" onclick="openEditClc(${c.id})">Edit</button><button class="st-btn st-btn-primary st-btn-xs" onclick="openRestore(${c.id})">Restore</button>`;
+    const archivedMeta=c.status==='archived'&&c.archivedDate?`<span class="archived-meta">Archived ${c.archivedDate}${c.archivedBy?' · '+c.archivedBy:''}</span>`:'';
+    return `<tr style="--i:${i}">
+      <td data-col="learner"><div class="st-clc-cell${c.status==='archived'?' is-archived':''}"><span class="st-clc-tile"><span class="material-symbols-outlined">hub</span></span><div><div class="clcname">${c.name}</div><div class="addr">ID: ${clcCode(c)}</div></div></div></td>
+      <td data-col="level">${c.muni}</td>
+      <td data-col="meta"><span class="st-teacher-count${c.teachers.length?'':' is-zero'}"><span class="material-symbols-outlined">person</span>${c.teachers.length?c.teachers.length+' teacher'+(c.teachers.length===1?'':'s'):'Unassigned'}</span></td>
+      <td data-col="status">${statusBadge(c.status)}${archivedMeta}</td>
+      <td data-col="actions" class="is-right"><div class="st-row-actions">${actions}</div></td>
     </tr>`;
   }).join('');
   renderPagination('clcPagination',totalFiltered,currentPage,PAGE_SIZE,p=>{currentPage=p;renderTable()});
+  replay(tbody);
 }
 function clearClcFilters(){
   searchTerm=''; muniFilter=''; document.getElementById('searchInput').value=''; muniFilterSelect.value='';
@@ -133,17 +178,13 @@ document.getElementById('searchInput').addEventListener('input',e=>{searchTerm=e
 const muniFilterSelect=document.getElementById('muniFilterSelect');
 function refreshMuniFilterOptions(){
   const current=muniFilterSelect.value;
-  muniFilterSelect.innerHTML='<option value="">All Municipalities</option>'+[...new Set(clcs.map(c=>c.muni))].sort().map(m=>`<option ${m===current?'selected':''}>${m}</option>`).join('');
+  muniFilterSelect.innerHTML='<option value="">All municipalities</option>'+[...new Set(clcs.map(c=>c.muni))].sort().map(m=>`<option ${m===current?'selected':''}>${m}</option>`).join('');
 }
 muniFilterSelect.addEventListener('change',()=>{muniFilter=muniFilterSelect.value;currentPage=1;renderTable()});
 
 
-function showToast(msg){
-  const t=document.getElementById('toast');
-  t.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>${msg}`;
-  t.classList.add('show');
-  clearTimeout(window._toastTimer);
-  window._toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
+function showToast(msg,type='success'){
+  Utils.toast(msg,type);
 }
 function openModal(id){document.getElementById(id).classList.add('show')}
 function closeModal(id){document.getElementById(id).classList.remove('show')}
@@ -167,7 +208,7 @@ function openAddClcModal(){
   document.getElementById('new-clc-street').value='';
   muniSelect.innerHTML='<option value="">Select Municipality</option>'+DIVISION_II_MUNI_NAMES.map(m=>`<option>${m}</option>`).join('');
   brgyInput.value='';
-  document.getElementById('clc-quick-actions').style.display='none';
+  document.getElementById('clc-quick-actions').hidden=true;
   openModal('modal-add-clc');
 }
 function openEditClc(id){
@@ -185,7 +226,7 @@ function openEditClc(id){
   brgyInput.value=c.barangay||'';
   const qaBtn=document.getElementById('qa-assign-btn');
   const qaCount=document.getElementById('qa-teacher-count');
-  document.getElementById('clc-quick-actions').style.display='flex';
+  document.getElementById('clc-quick-actions').hidden=false;
   if(c.status==='archived'){
     qaCount.textContent=`${c.teachers.length} ${c.teachers.length===1?'teacher':'teachers'} assigned · restore this CLC to make changes`;
     qaBtn.disabled=true;
@@ -206,7 +247,7 @@ document.getElementById('addClcSaveBtn').addEventListener('click',async()=>{
   const muni=muniSelect.value;
   const barangay=brgyInput.value.trim();
   const street=document.getElementById('new-clc-street').value.trim();
-  if(!name||!muni||!barangay){ showToast('Please fill in CLC name, municipality, and barangay'); return; }
+  if(!name||!muni||!barangay){ showToast('Please fill in CLC name, municipality, and barangay','warning'); return; }
   const address=`${street?street+', ':''}Brgy. ${barangay}, ${muni}`;
   const btn=document.getElementById('addClcSaveBtn');
   const originalText=btn.textContent;
@@ -224,7 +265,7 @@ document.getElementById('addClcSaveBtn').addEventListener('click',async()=>{
     closeModal('modal-add-clc'); renderKPIs(); renderTable();
   }catch(error){
     console.error('[AdminClcManagement] Save CLC failed',error);
-    showToast(error?.data?.message||'Unable to save this CLC.');
+    showToast(error?.data?.message||'Unable to save this CLC.','error');
   }finally{
     btn.disabled=false; btn.textContent=originalText;
   }
@@ -270,7 +311,7 @@ document.getElementById('as-save-btn').addEventListener('click',async()=>{
     closeModal('modal-assign'); renderKPIs(); renderTable(); showToast('Teacher assignments updated');
   }catch(error){
     console.error('[AdminClcManagement] Assign teachers failed',error);
-    showToast(error?.data?.message||'Unable to update teacher assignments.');
+    showToast(error?.data?.message||'Unable to update teacher assignments.','error');
   }finally{
     btn.disabled=false; btn.textContent=originalText;
   }
@@ -299,7 +340,7 @@ document.getElementById('ar-confirm-btn').addEventListener('click',async()=>{
     closeModal('modal-archive'); renderKPIs(); renderTable(); showToast(`${c.name} archived`);
   }catch(error){
     console.error('[AdminClcManagement] Archive failed',error);
-    showToast(error?.data?.message||'Unable to archive this CLC.');
+    showToast(error?.data?.message||'Unable to archive this CLC.','error');
   }finally{
     btn.disabled=false; btn.textContent=originalText;
   }
@@ -324,7 +365,7 @@ document.getElementById('rs-confirm-btn').addEventListener('click',async()=>{
     closeModal('modal-restore'); renderKPIs(); renderTable(); showToast(`${c.name} restored`);
   }catch(error){
     console.error('[AdminClcManagement] Restore failed',error);
-    showToast(error?.data?.message||'Unable to restore this CLC.');
+    showToast(error?.data?.message||'Unable to restore this CLC.','error');
   }finally{
     btn.disabled=false; btn.textContent=originalText;
   }
@@ -335,6 +376,3 @@ document.getElementById('rs-confirm-btn').addEventListener('click',async()=>{
   refreshMuniFilterOptions();
   renderKPIs(); renderTable();
 })();
-
-
-document.querySelectorAll('.select-wrap select').forEach(sel=>{sel.addEventListener('focus',()=>sel.closest('.select-wrap').classList.add('open'));sel.addEventListener('blur',()=>sel.closest('.select-wrap').classList.remove('open'));});

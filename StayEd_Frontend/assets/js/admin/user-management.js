@@ -29,7 +29,7 @@ async function loadTeachers(){
     teachers=response.data||[];
   }catch(error){
     console.error('[UserManagement] Failed to load teachers',error);
-    showToast('Unable to load teacher accounts.');
+    showToast('Unable to load teacher accounts.','error');
     teachers=[];
   }
   renderKPIs();
@@ -40,33 +40,60 @@ let activeFilter="all",searchTerm="",currentPage=1;
 const PAGE_SIZE=10;
 let activeTeacherId=null,realPassword="",passwordVisible=false;
 
+const ST_REDUCE_MOTION=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Counts a [data-countup] element up from its previous value to `value`
+// over ~800ms (ease-out-cubic), mirroring the dashboard/registry pattern.
+function countTo(el,value){
+  if(!el) return;
+  const end=Number(value);
+  if(ST_REDUCE_MOTION||!Number.isFinite(end)){ el.textContent=value; return; }
+  const start=Number(el.dataset.final??0)||0;
+  el.dataset.final=end;
+  const t0=performance.now();
+  const dur=800;
+  const tick=(t)=>{
+    const k=Math.min(1,(t-t0)/dur);
+    const eased=1-Math.pow(1-k,3);
+    el.textContent=Math.round(start+(end-start)*eased);
+    if(k<1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+function replay(el){
+  if(!el) return;
+  el.classList.remove('is-inview');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('is-inview')));
+}
+
 function initials(name){return name.split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase()}
-function statusBadge(s){const label={active:"Active",pending:"Pending",deactivated:"Deactivated"}[s];return `<span class="badge ${s}">${label}</span>`}
+function statusBadge(s){const label={active:"Active",pending:"Pending",deactivated:"Deactivated"}[s];return `<span class="st-pill st-pill--status st-pill--${s}">${label}</span>`}
 function renderPagination(containerId,totalItems,page,pageSize,onPageChange){
   const container=document.getElementById(containerId);
   const totalPages=Math.max(1,Math.ceil(totalItems/pageSize));
   const startItem=totalItems===0?0:(page-1)*pageSize+1;
   const endItem=Math.min(page*pageSize,totalItems);
-  const addBtn=p=>`<button class="page-btn ${p===page?'active':''}" data-page="${p}">${p}</button>`;
+  const addBtn=p=>`<button class="st-page-btn ${p===page?'is-active':''}" data-page="${p}">${p}</button>`;
   let pageBtns='';
   if(totalPages<=7){
     for(let p=1;p<=totalPages;p++) pageBtns+=addBtn(p);
   }else{
     pageBtns+=addBtn(1);
-    if(page>3) pageBtns+='<span class="page-ellipsis">…</span>';
+    if(page>3) pageBtns+='<span class="st-page-ellipsis">…</span>';
     const start=Math.max(2,page-1), end=Math.min(totalPages-1,page+1);
     for(let p=start;p<=end;p++) pageBtns+=addBtn(p);
-    if(page<totalPages-2) pageBtns+='<span class="page-ellipsis">…</span>';
+    if(page<totalPages-2) pageBtns+='<span class="st-page-ellipsis">…</span>';
     pageBtns+=addBtn(totalPages);
   }
   container.innerHTML=`
-    <div class="pagination-info">Showing ${startItem} to ${endItem} of ${totalItems} entries</div>
-    <div class="pagination-controls">
-      <button class="page-nav" id="${containerId}-prev" ${page<=1?'disabled':''} aria-label="Previous page">&lt;</button>
+    <span class="st-pagination-info">Showing ${startItem}–${endItem} of ${totalItems} entries</span>
+    <div class="st-pagination-controls">
+      <button class="st-page-btn" id="${containerId}-prev" ${page<=1?'disabled':''} aria-label="Previous page"><span class="material-symbols-outlined">chevron_left</span></button>
       ${pageBtns}
-      <button class="page-nav" id="${containerId}-next" ${page>=totalPages?'disabled':''} aria-label="Next page">&gt;</button>
+      <button class="st-page-btn" id="${containerId}-next" ${page>=totalPages?'disabled':''} aria-label="Next page"><span class="material-symbols-outlined">chevron_right</span></button>
     </div>`;
-  container.querySelectorAll('.page-btn').forEach(btn=>btn.addEventListener('click',()=>onPageChange(+btn.dataset.page)));
+  container.querySelectorAll('.st-page-btn[data-page]').forEach(btn=>btn.addEventListener('click',()=>onPageChange(+btn.dataset.page)));
   const prevBtn=document.getElementById(`${containerId}-prev`);
   const nextBtn=document.getElementById(`${containerId}-next`);
   if(prevBtn) prevBtn.addEventListener('click',()=>{if(page>1)onPageChange(page-1)});
@@ -79,13 +106,31 @@ function clcChips(list){
   return shown+extra;
 }
 
+function pct(part,total){ return total?Math.round((part/total)*100):0; }
+
 function renderKPIs(){
-  document.getElementById('kpiTotal').textContent=teachers.length;
+  const total=teachers.length;
   const pendingCount=teachers.filter(t=>t.status==='pending').length;
-  document.getElementById('kpiPending').textContent=pendingCount;
-  document.getElementById('kpiActive').textContent=teachers.filter(t=>t.status==='active').length;
-  document.getElementById('kpiDeactivated').textContent=teachers.filter(t=>t.status==='deactivated').length;
+  const activeCount=teachers.filter(t=>t.status==='active').length;
+  const deactivatedCount=teachers.filter(t=>t.status==='deactivated').length;
+
+  document.getElementById('kpiTotal').dataset.final=total;
+  countTo(document.getElementById('kpiTotal'),total);
+  countTo(document.getElementById('kpiPending'),pendingCount);
+  countTo(document.getElementById('kpiActive'),activeCount);
+  countTo(document.getElementById('kpiDeactivated'),deactivatedCount);
   document.getElementById('pendingKpiDot').style.display=pendingCount>0?'block':'none';
+
+  document.getElementById('kpiPendingPct').textContent=total?`${pct(pendingCount,total)}%${pendingCount>0?' · needs review':''}`:'';
+  document.getElementById('kpiActivePct').textContent=total?`${pct(activeCount,total)}%`:'';
+  document.getElementById('kpiDeactivatedPct').textContent=total?`${pct(deactivatedCount,total)}%`:'';
+
+  document.getElementById('stripPending').style.flexGrow=Math.max(pendingCount,total?0:1);
+  document.getElementById('stripActive').style.flexGrow=Math.max(activeCount,total?0:1);
+  document.getElementById('stripOff').style.flexGrow=Math.max(deactivatedCount,total?0:1);
+  document.getElementById('admStrip').setAttribute('aria-label',`${pendingCount} pending, ${activeCount} active, ${deactivatedCount} deactivated`);
+
+  replay(document.querySelector('.st-panel[data-animate]'));
 }
 
 
@@ -97,32 +142,35 @@ function renderTable(){
   const totalPages=Math.max(1,Math.ceil(totalFiltered/PAGE_SIZE));
   if(currentPage>totalPages) currentPage=totalPages;
   const pageRows=rows.slice((currentPage-1)*PAGE_SIZE,currentPage*PAGE_SIZE);
+  const countEl=document.querySelector('[data-um-count]');
+  if(countEl) countEl.textContent=`${teachers.length} teacher${teachers.length===1?'':'s'}`;
   if(!totalFiltered){
     const filtered=searchTerm||activeFilter!=='all';
-    tbody.innerHTML=`<tr class="empty-row"><td colspan="4"><div class="empty-state">
-      <div class="empty-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div>
+    tbody.innerHTML=`<tr><td colspan="4"><div class="empty-state">
+      <div class="empty-icon"><span class="material-symbols-outlined">search_off</span></div>
       <div class="empty-title">No teachers found</div>
       <div class="empty-desc">${filtered?"We couldn't find any teachers matching your current filters. Try adjusting your search.":'No teachers have been added yet.'}</div>
-      ${filtered?'<button class="btn primary" onclick="clearTeacherFilters()">Clear filters</button>':''}
+      ${filtered?'<button class="st-btn st-btn-primary" onclick="clearTeacherFilters()">Clear filters</button>':''}
     </div></td></tr>`;
     renderPagination('umPagination',0,currentPage,PAGE_SIZE,p=>{currentPage=p;renderTable()});
     return;
   }
-  tbody.innerHTML=pageRows.map(t=>{
+  tbody.innerHTML=pageRows.map((t,i)=>{
     let actions='';
     if(t.status==='pending'){
-      actions=`<button class="btn primary" onclick="openReview(${t.id})">Review</button>`;
+      actions=`<button class="st-btn st-btn-primary st-btn-xs" onclick="openReview(${t.id})"><span class="material-symbols-outlined">fact_check</span>Review</button>`;
     }else{
-      actions=`<button class="btn" onclick="openEdit(${t.id})">Edit</button>`;
+      actions=`<button class="st-btn st-btn-outline st-btn-xs" onclick="openEdit(${t.id})">Edit</button>`;
     }
-    return `<tr>
-      <td><div class="person"><div class="avatar">${initials(t.name)}</div><div><div class="name">${t.name}</div><div class="email">${t.email}</div></div></div></td>
-      <td>${clcChips(t.clcs)}</td>
-      <td>${statusBadge(t.status)}</td>
-      <td><div class="rowActions">${actions}</div></td>
+    return `<tr style="--i:${i}">
+      <td data-col="learner"><div class="st-learner-cell"><span class="st-avatar-initials${t.status==='pending'?' st-avatar-initials--moderate':''}">${initials(t.name)}</span><div style="min-width:0"><span class="st-learner-name" style="cursor:default">${t.name}</span><p class="st-learner-sub">${t.email}</p></div></div></td>
+      <td data-col="level"><div class="st-clc-chips">${clcChips(t.clcs)}</div></td>
+      <td data-col="status">${statusBadge(t.status)}</td>
+      <td data-col="actions" class="is-right"><div class="st-row-actions">${actions}</div></td>
     </tr>`;
   }).join('');
   renderPagination('umPagination',totalFiltered,currentPage,PAGE_SIZE,p=>{currentPage=p;renderTable()});
+  replay(tbody);
 }
 function clearTeacherFilters(){
   searchTerm=''; document.getElementById('searchInput').value='';
@@ -139,12 +187,8 @@ function setFilter(f){
 document.querySelectorAll('.kpi').forEach(b=>b.addEventListener('click',()=>setFilter(b.dataset.filter)));
 document.getElementById('searchInput').addEventListener('input',e=>{searchTerm=e.target.value.trim().toLowerCase();currentPage=1;renderTable()});
 
-function showToast(msg){
-  const t=document.getElementById('toast');
-  t.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>${msg}`;
-  t.classList.add('show');
-  clearTimeout(window._toastTimer);
-  window._toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
+function showToast(msg,type='success'){
+  Utils.toast(msg,type);
 }
 function openModal(id){document.getElementById(id).classList.add('show')}
 function closeModal(id){document.getElementById(id).classList.remove('show')}
@@ -156,17 +200,11 @@ function openReview(id){
   document.getElementById('rv-name').textContent=t.name;
   document.getElementById('rv-email').textContent=t.email;
   const verifiedBadge=document.getElementById('rv-verified-badge');
-  const checkSvg='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>';
-  const warnSvg='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a1 1 0 0 0 .86 1.5h18.64a1 1 0 0 0 .86-1.5L13.71 3.86a1 1 0 0 0-1.72 0Z"/></svg>';
-  verifiedBadge.classList.toggle('not-verified',!t.isDepedVerified);
-  verifiedBadge.innerHTML=t.isDepedVerified
-    ? checkSvg+'DepEd Verified Account'
-    : warnSvg+'Not a DepEd Email — verify manually';
+  verifiedBadge.classList.toggle('is-unverified',!t.isDepedVerified);
+  verifiedBadge.textContent=t.isDepedVerified?'DepEd email verified':'Not a DepEd email — verify manually';
   const rosterBadge=document.getElementById('rv-roster-badge');
-  rosterBadge.classList.toggle('not-verified',!t.isOnRoster);
-  rosterBadge.innerHTML=t.isOnRoster
-    ? checkSvg+'On Official ALS Teachers Roster'
-    : warnSvg+'Not Found on Roster — verify manually';
+  rosterBadge.classList.toggle('is-unverified',!t.isOnRoster);
+  rosterBadge.textContent=t.isOnRoster?'On official ALS teachers roster':'Not found on roster — verify manually';
   document.getElementById('rv-empid').textContent=t.employeeId;
   document.getElementById('rv-phone').textContent=t.phone;
   document.getElementById('rv-date').textContent=t.date;
@@ -195,7 +233,7 @@ document.getElementById('ap-confirm-btn').addEventListener('click',async()=>{
     showToast(`${name} approved`);
   }catch(error){
     console.error('[UserManagement] Approve failed',error);
-    showToast('Unable to approve this account.');
+    showToast('Unable to approve this account.','error');
   }
 });
 
@@ -220,7 +258,7 @@ document.getElementById('rj-confirm-btn').addEventListener('click',async()=>{
     showToast(`${name}'s registration rejected`);
   }catch(error){
     console.error('[UserManagement] Reject failed',error);
-    showToast('Unable to reject this registration.');
+    showToast('Unable to reject this registration.','error');
   }
 });
 
@@ -287,14 +325,12 @@ function openEdit(id){
     qaTitle.textContent='Remove account';
     qaSub.textContent='Permanently delete this deactivated teacher account.';
     qaBtn.textContent='Remove';
-    qaBtn.className='btn danger';
-    removeBtn.style.display='inline-flex';
+    removeBtn.hidden=false;
   }else{
     qaTitle.textContent='Deactivate account';
     qaSub.textContent="Revoke this teacher's sign-in access.";
     qaBtn.textContent='Deactivate';
-    qaBtn.className='btn danger';
-    removeBtn.style.display='none';
+    removeBtn.hidden=true;
   }
   openModal('modal-edit');
 }
@@ -316,7 +352,7 @@ document.getElementById('edit-save-btn').addEventListener('click',async()=>{
     showToast('Teacher account updated');
   }catch(error){
     console.error('[UserManagement] Update failed',error);
-    showToast(error?.data?.message||'Unable to update this account.');
+    showToast(error?.data?.message||'Unable to update this account.','error');
   }
 });
 document.getElementById('edit-remove-btn').addEventListener('click',()=>{
@@ -353,7 +389,7 @@ document.getElementById('rs-confirm-btn').addEventListener('click',async()=>{
     openModal('modal-reset-success');
   }catch(error){
     console.error('[UserManagement] Reset password failed',error);
-    showToast('Unable to reset this password.');
+    showToast('Unable to reset this password.','error');
   }
 });
 document.getElementById('toggle-pass-btn').addEventListener('click',()=>{
@@ -370,7 +406,7 @@ function openDeactivate(id){
   document.getElementById('dc-name').textContent=t.name;
   document.getElementById('dc-status').innerHTML=statusBadge(t.status);
   document.getElementById('dc-clc-count').textContent=(t.clcs&&t.clcs.length)?`${t.clcs.length} CLC${t.clcs.length>1?'s':''}`:'Unassigned';
-  document.getElementById('dc-warning').style.display=(t.clcs&&t.clcs.length)?'block':'none';
+  document.getElementById('dc-warning').hidden=!(t.clcs&&t.clcs.length);
   openModal('modal-deactivate');
 }
 document.getElementById('dc-confirm-btn').addEventListener('click',async()=>{
@@ -383,7 +419,7 @@ document.getElementById('dc-confirm-btn').addEventListener('click',async()=>{
     showToast(`${name} deactivated`);
   }catch(error){
     console.error('[UserManagement] Deactivate failed',error);
-    showToast('Unable to deactivate this account.');
+    showToast('Unable to deactivate this account.','error');
   }
 });
 
@@ -406,7 +442,7 @@ document.getElementById('rm-confirm-btn').addEventListener('click',async()=>{
     showToast(`${name} removed`);
   }catch(error){
     console.error('[UserManagement] Remove failed',error);
-    showToast(error?.data?.message || 'Unable to remove this account.');
+    showToast(error?.data?.message || 'Unable to remove this account.','error');
   }
 });
 async function reactivate(id){
@@ -418,7 +454,7 @@ async function reactivate(id){
     showToast(`${name} reactivated`);
   }catch(error){
     console.error('[UserManagement] Reactivate failed',error);
-    showToast('Unable to reactivate this account.');
+    showToast('Unable to reactivate this account.','error');
   }
 }
 
@@ -457,7 +493,7 @@ document.getElementById('cr-save-btn').addEventListener('click',async()=>{
   const first=document.getElementById('cr-first').value.trim();
   const last=document.getElementById('cr-last').value.trim();
   const email=document.getElementById('cr-email').value.trim();
-  if(!first||!last||!email){ showToast('Please fill in first name, last name, and email'); return; }
+  if(!first||!last||!email){ showToast('Please fill in first name, last name, and email','warning'); return; }
   const payload={
     role:createRole,
     firstName:first,
@@ -471,7 +507,7 @@ document.getElementById('cr-save-btn').addEventListener('click',async()=>{
     payload.municipality=createMuniSelect.value;
     payload.clc=createClcSelect.value;
     if(!payload.municipality||!payload.clc){
-      showToast('Please select a municipality and assign a CLC');
+      showToast('Please select a municipality and assign a CLC','warning');
       return;
     }
   }
@@ -486,11 +522,9 @@ document.getElementById('cr-save-btn').addEventListener('click',async()=>{
     showToast(createRole==='admin'?'Admin account created':'Teacher account created');
   }catch(error){
     console.error('[UserManagement] Create failed',error);
-    showToast(error?.data?.message||'Unable to create this account.');
+    showToast(error?.data?.message||'Unable to create this account.','error');
   }
 });
 
 loadTeachers();
 loadClcOptions();
-
-document.querySelectorAll('.select-wrap select').forEach(sel=>{sel.addEventListener('focus',()=>sel.closest('.select-wrap').classList.add('open'));sel.addEventListener('blur',()=>sel.closest('.select-wrap').classList.remove('open'));});

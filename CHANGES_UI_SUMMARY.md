@@ -277,6 +277,98 @@ pages' toolbar layouts per follow-up feedback.
 
 ---
 
+## 2026-10-02 — Admin Dashboard: rebuilt on the teacher dashboard's components
+
+Replaced the admin dashboard's standalone, hand-rolled layout with the same components and CSS the
+teacher dashboard already uses, matching a design prototype (`design/admin-dashboard/`). No backend,
+API, Division II scoping, risk thresholds, deep-link, or map zoom/pan logic changed — purely a
+presentational rebuild, with every stat, chart, toggle, legend item, and the CLC list/pager preserved.
+
+- **Shared CSS, not duplicated**: `assets/css/pages/teacher/dashboard.css` now scopes under
+  `body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"])` instead of just the
+  teacher page, so admin gets the exact same panel/grid/overview/`st-hbar`/filter-bar/motion rules.
+  This also fixed a real bug: the teacher dashboard's chart-type toggle (bordered pill, navy active
+  state) was *leaking in* from the old `admin-dashboard.css`, which `main.css` imports after the
+  teacher file — not from `dashboard.css` itself as it looked. That old file's `.chart-type-toggle`/
+  `.chart-canvas-wrap`/etc. rules are gone now that admin pulls from the same shared definition.
+- **`admin-dashboard.css` rewritten** to hold only what the shared teacher components don't already
+  cover: the area-selector bar, the risk dot, the CLC card's teal tint, and the map container/hover/
+  select behavior. Also removed the old `@media (min-width: 981px)` lock that forced `overflow:hidden`
+  on the whole page and squeezed everything into one non-scrolling screen — the page now scrolls
+  normally like every other page in the app.
+- **New "Not yet assessed" stat**: the overview card's risk strip/legend gained a 4th segment
+  (`total − high − moderate − low`, clamped at 0) so the displayed percentages always sum to 100% —
+  previously the gap between "learners with a risk result" and "total learners" was invisible.
+- **Map**: kept the original interaction exactly (navy outline on hover, navy fill + lift on select,
+  the pill tooltip, the real risk-level colors) but moved the SVG's background out of an inline
+  `<rect>`/style attribute into the `.mapwrap` container's own CSS, and switched the zoom buttons to
+  icon-based controls matching the teacher dashboard's icon-button style.
+- **Chart.js views upgraded** to match the teacher dashboard's styling: dark tooltips showing
+  "value (share%)", a bottom legend, a 68%-cutout doughnut with a center total, and the same
+  stagger/draw-in animation — plus a working count-up on every stat number that counts *from* the
+  previous value when you switch municipalities, not just snapping to the new one.
+- **Avatar fallback** (`core/layout.js`): a broken/missing avatar image now falls back to the
+  initials bubble instead of showing a broken-image icon — this was visible on the admin navbar
+  specifically, since no admin account in this environment has an avatar set.
+
+---
+
+## 2026-10-02 — User Management & CLC Management: rebuilt on the teacher Student Registry's components
+
+Redesigned the admin **User Management** and **CLC Management** pages to use the same overview strip,
+table card, search/select, pills, row buttons and pagination as the revised teacher Student Registry
+and the teacher dashboard, matching `design/admin-users-and-clcs/` prototypes. Frontend-only: no
+filtering/search/pagination/approve/reject/edit/reset/deactivate/remove/add/archive/restore logic or
+API calls changed — every KPI, modal, field, banner, radio option and button was kept and only
+restyled. All JS hook ids (`#kpis`, `#tbody`, `#umPagination`/`#clcPagination`, every modal id and its
+field ids, `.kpi[data-filter]`, `data-clc`, `name="reject-reason"`, etc.) are unchanged.
+
+- **Fixed a real CSS bug affecting every table in the app**: a comment in
+  `assets/css/pages/teacher/dashboard.css` contained a stray `*/` mid-sentence
+  (`.st-pagination*/.st-page-btn`), which closed the comment early and turned the rest of it into an
+  invalid selector — silently dropping the shared `.st-data-table { width:100%; text-align:left; … }`
+  rule that followed. Every data table in the app (Student Registry, Learner Records, Early Warning,
+  the teacher dashboard registry, and now the two admin list pages) was quietly relying on a fallback
+  width instead of filling its card. Fixed by adding spaces around the `/`.
+- **Shared the teacher list styles instead of copying them**: every selector scoped to
+  `[data-page="Student Registry"]` across `learner-records.css`, `learner-records-hub.css` and
+  `dashboard.css` now also matches `[data-page="User Management"]` and `[data-page="CLC Management"]`,
+  so the two admin pages get the exact same overview strip, `.st-table-card`, `.st-search`/`.st-select`,
+  `.st-data-table`/`.st-reg-table` (including the mobile card-stacking rules), `.st-pill`,
+  `.st-row-actions`/`.st-btn-xs`, `.st-pagination`/`.st-page-btn` and row-menu styling the teacher pages
+  already have — nothing visually changed for the teacher pages themselves, they just gained two more
+  pages in their `:is(...)` selector lists.
+- **New shared admin-only layer** (`assets/css/pages/admin/admin-list-pages.css`, scoped under
+  `body:is([data-page="User Management"],[data-page="CLC Management"])`): the KPI overview
+  (big total + proportional strip + bordered/tinted legend buttons), CLC/teacher chips, status pills,
+  and the `.overlay`/`.modal` visual language (16px radius, large shadow, scale-in, bottom-sheet on
+  mobile) that both pages' modals share.
+- **Old per-page CSS files were leaking globally**: `admin-user-management.css` and
+  `admin-clc-management.css` declared bare, unscoped `.btn`, `.badge`, `.card`, `.kpi`, `.overlay`,
+  `.modal`, `.field`, `.pagination*` and `.empty-state` rules that `main.css`'s `@import` chain applied
+  to *every* page — most visibly, `admin-settings.css`'s unscoped `.modal{width:39.6vw;min-width:456px}`
+  broke every other page's dialogs on phones. Both old admin-list files were rewritten to hold only
+  what's page-exclusive (User Management's Create Account role toggle, reject-reason radio list, and
+  reset-password reveal field; CLC Management has nothing left over), and `admin-settings.css`'s rules
+  were scoped to `body[data-page="Settings"]`. `admin-reports.css` was already properly namespaced.
+- **Modals**: moved every inline `style=""` (font sizes, margins, grids, `display:none`) into classes
+  (`.st-modal-section-label`, `.st-field-grid-2`/`-3`, `.modal-actions--split` + `.st-modal-actions-right`)
+  or the `hidden` attribute, and remapped button classes to the shared `.st-btn-*` set (`st-btn-primary`,
+  `st-btn-outline`, `st-btn-ghost`, `st-btn-danger` for final confirms, `st-btn-danger-outline` for
+  Reject). Replaced the inline SVG icons in confirm dialogs with Material Symbols matching the same
+  meaning (`archive`, `restore`, `lock_reset`, `check_circle`, `person_off`, `delete`).
+- **Toasts**: both pages' custom inline `#toast` div + hand-rolled `showToast()` were replaced with the
+  shared `Utils.toast(message, type)` / `data-component="layout/toast"` system already used by the
+  admin dashboard, with error paths now passing `'error'` and validation messages `'warning'` instead of
+  every toast using the same green checkmark regardless of outcome.
+- **Motion**: the overview strip reveals via the same `[data-animate]`/`is-inview` clip-path pattern as
+  the teacher dashboard (triggered directly on render, since the panel is always above the fold — same
+  approach as Student Registry's summary), KPI numbers count up from their previous value, and table
+  rows fade in with a 30ms stagger via `[data-animate-rows]` after every render (load, filter, search,
+  page change). All of it collapses to its final state under `prefers-reduced-motion: reduce`.
+
+---
+
 ## Recurring patterns worth knowing
 
 - **CSS leaks globally**: `main.css` `@import`s every page's stylesheet unscoped, so a class name

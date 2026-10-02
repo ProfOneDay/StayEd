@@ -15,7 +15,7 @@ let divisionGenderRiskData=null;
 let levelAverages={BLP:0,Elementary:0,JHS:0,SHS:0};
 let genderRiskData=null;
 let riskTrendData=[];
-let currentRiskCounts={high:0,moderate:0,low:0};
+let currentRiskCounts={high:0,moderate:0,low:0,unassessed:0,total:0};
 let currentLevelCounts={BLP:0,Elementary:0,JHS:0,SHS:0};
 let riskChartType='bar';
 let levelChartType='bar';
@@ -87,7 +87,7 @@ map.addEventListener('click',e=>{if(justPanned){e.stopPropagation();justPanned=f
 function riskLevel(d){if(!d.total)return 'low';const rate=d.high/d.total; return rate>=.20?'high':rate>=.10?'moderate':'low'}
 function riskColor(d){return {high:'#D64545',moderate:'#F39422',low:'#6BBF59'}[riskLevel(d)]}
 const levelKeys=['BLP','Elementary','JHS','SHS'];
-const levelLabels={BLP:'Basic Literacy Program',Elementary:'Elementary',JHS:'Junior High School',SHS:'Senior High School'};
+const levelLabels={BLP:'Basic Literacy',Elementary:'Elementary',JHS:'Junior High',SHS:'Senior High'};
 function recolorMap(){
   // Every Division II municipality gets a risk color, whether or not it has
   // a CLC registered yet -- riskLevel() defaults an empty bucket to "low"
@@ -111,7 +111,6 @@ function recolorMap(){
 }
 const tooltip=document.getElementById('mapTooltip');
 function positionTooltip(event){
-  const wrap=document.querySelector('.mapwrap');
   const rect=wrap.getBoundingClientRect();
   tooltip.style.left=(event.clientX-rect.left)+'px';
   tooltip.style.top=(event.clientY-rect.top)+'px';
@@ -156,30 +155,75 @@ function renderClcList(id){
   }).join('');
   const pager=list.length>CLC_LIST_PAGE_SIZE?`
     <div class="clc-list-pager">
-      <button type="button" class="clc-pager-btn" id="clcListPrev" ${clcListPage<=1?'disabled':''} aria-label="Previous CLCs">&lt;</button>
+      <button type="button" class="clc-pager-btn" id="clcListPrev" ${clcListPage<=1?'disabled':''} aria-label="Previous CLCs"><span class="material-symbols-outlined">chevron_left</span></button>
       <span class="clc-pager-info">${start+1}–${Math.min(start+CLC_LIST_PAGE_SIZE,list.length)} of ${list.length}</span>
-      <button type="button" class="clc-pager-btn" id="clcListNext" ${clcListPage>=totalPages?'disabled':''} aria-label="Next CLCs">&gt;</button>
+      <button type="button" class="clc-pager-btn" id="clcListNext" ${clcListPage>=totalPages?'disabled':''} aria-label="Next CLCs"><span class="material-symbols-outlined">chevron_right</span></button>
     </div>`:'';
   container.innerHTML=rows+pager;
   document.getElementById('clcListPrev')?.addEventListener('click',()=>{clcListPage--;renderClcList(id)});
   document.getElementById('clcListNext')?.addEventListener('click',()=>{clcListPage++;renderClcList(id)});
 }
+
+// ── Shared chart helpers (mirrors assets/js/teacher/dashboard.js's ST_*
+// constants/motion so Chart.js views and [data-animate] panels behave the
+// same on both dashboards -- kept local here rather than imported, since the
+// teacher file doesn't expose these on window). ───────────────────────────
+const ST_REDUCE_MOTION = matchMedia('(prefers-reduced-motion: reduce)').matches;
+Chart.defaults.font.family = "Inter, system-ui, sans-serif";
+Chart.defaults.color = '#5a6275';
+const ST_LEGEND_BOTTOM = { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 8, boxHeight: 8, padding: 16, color: '#5a6275' } };
+const ST_TOOLTIP = { backgroundColor: '#111a36', padding: 10, cornerRadius: 8, displayColors: true, boxPadding: 4 };
+const ST_TOOLTIP_SHARE = { ...ST_TOOLTIP, callbacks: { label(ctx){ const total=ctx.dataset.data.reduce((a,b)=>a+b,0); const pct=total?Math.round(ctx.parsed/total*100):0; return ` ${ctx.label}: ${ctx.parsed} (${pct}%)`; } } };
+const ST_CHART_STAGGER = (step) => ({ delay: (ctx) => ctx.type === 'data' && ctx.mode === 'default' ? ctx.dataIndex * step : 0 });
+const ST_CENTER_TOTAL = {
+  id: 'stCenterTotal',
+  afterDraw(chart){
+    if(chart.config.type!=='doughnut')return;
+    const {ctx,chartArea:a}=chart;
+    const sum=chart.data.datasets[0].data.reduce((x,y)=>x+y,0);
+    const cx=(a.left+a.right)/2, cy=(a.top+a.bottom)/2;
+    ctx.save();
+    ctx.textAlign='center';
+    ctx.fillStyle='#111a36';
+    ctx.font="800 24px 'Libre Franklin', sans-serif";
+    ctx.fillText(sum,cx,cy+4);
+    ctx.font='500 11px Inter';
+    ctx.fillStyle='#8a91a0';
+    ctx.fillText(chart.canvas.dataset.unit||'learners',cx,cy+21);
+    ctx.restore();
+  },
+};
+function countTo(el,to){
+  const from=Number(el.dataset.cur??0);
+  el.dataset.cur=to;
+  if(ST_REDUCE_MOTION){el.textContent=to;return;}
+  const t0=performance.now(),dur=700;
+  const tick=(t)=>{
+    const k=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-k,3);
+    el.textContent=Math.round(from+(to-from)*e);
+    if(k<1)requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
 function selectMunicipality(id){const d=municipalityData[id]||emptyBucket(id);map.querySelectorAll('.municipality').forEach(x=>x.classList.remove('selected'));const el=map.querySelector('#'+CSS.escape(id));if(el){el.classList.add('selected');el.parentNode.appendChild(el)}
-  document.getElementById('name').innerHTML=`<span class="risk-dot" style="background:${riskColor(d)}"></span>${d.name}`;
+  const dotClass={high:'is-high',moderate:'is-moderate',low:'is-low'}[riskLevel(d)]||'';
+  document.getElementById('name').innerHTML=`<span class="risk-dot ${dotClass}"></span>${d.name}`;
   document.getElementById('empty').hidden=true;document.getElementById('panel').hidden=false;
   document.getElementById('clcListSection').hidden=false;
   document.getElementById('municipalitySelect').value=id;
-  ['total','clcs','high','moderate'].forEach(k=>document.getElementById(k).textContent=d[k]);
-  document.getElementById('lowSummary').textContent=d.low;
-  const registeredClcs=(clcsByMunicipality[id]||[]).length;
-  document.getElementById('scopeMeta').textContent=`Municipality view · ${registeredClcs} CLC${registeredClcs===1?'':'s'} registered`;
-  const pct=k=>d.total?Math.round(d[k]/d.total*100):0;
-  [['high','highBar','highPct','highCountText'],['moderate','modBar','modPct','modCountText'],['low','lowBar','lowPct','lowCountText']].forEach(([k,b,p,c])=>{document.getElementById(b).style.width=pct(k)+'%';document.getElementById(p).textContent=pct(k)+'%';document.getElementById(c).textContent=`${d[k]} learner${d[k]===1?'':'s'}`});
+  document.getElementById('scopeMeta').textContent=`Municipality view · ${(clcsByMunicipality[id]||[]).length} CLC${(clcsByMunicipality[id]||[]).length===1?'':'s'} registered`;
+  const unassessed=Math.max(0,d.total-d.high-d.moderate-d.low);
+  applyOverview({total:d.total,clcs:d.clcs,high:d.high,moderate:d.moderate,low:d.low,unassessed});
+  applyRiskBars({high:d.high,moderate:d.moderate,low:d.low},d.total);
   const max=Math.max(1,...Object.values(d.levels),...Object.values(levelAverages));
-  document.getElementById('levels').innerHTML=levelKeys.map(label=>{const val=d.levels[label];const avgPct=Math.min(100,levelAverages[label]/max*100);return `<div class="levelbar"><span class="levelbar-label"><strong>${levelLabels[label]}</strong><small>${val} learner${val===1?'':'s'}</small></span><div class="track level-track"><div class="fill" style="width:${val/max*100}%"></div><div class="avg-mark" style="left:${avgPct}%" title="Division average: ${levelAverages[label].toFixed(1)} learners"></div></div><b>${val}</b></div>`}).join('');
+  document.getElementById('levels').innerHTML=levelKeys.map(k=>{
+    const val=d.levels[k];const avg=levelAverages[k];const avgPct=Math.min(100,avg/max*100);
+    return `<div class="st-hbar-row"><span class="st-hbar-label">${levelLabels[k]}<small>${val} learner${val===1?'':'s'}</small></span><div class="st-hbar-track" data-tooltip="${levelLabels[k]}: ${val} learner${val===1?'':'s'} · division average ${avg.toFixed(1)}"><div class="st-hbar st-hbar--level" style="--w:${val/max*100}%"></div><div class="avg-mark" style="left:${avgPct}%" title="Division average: ${avg.toFixed(1)} learners"></div></div><span class="st-hbar-value num">${val}</span></div>`;
+  }).join('');
   clcListPage=1;
   renderClcList(id);
-  currentRiskCounts={high:d.high,moderate:d.moderate,low:d.low};
+  currentRiskCounts={high:d.high,moderate:d.moderate,low:d.low,unassessed,total:d.total};
   currentLevelCounts={...d.levels};
   genderRiskData=d.genderRisk||null;
   renderGenderRisk();
@@ -188,7 +232,7 @@ function selectMunicipality(id){const d=municipalityData[id]||emptyBucket(id);ma
 }
 function selectAllMunicipalities(){
   map.querySelectorAll('.municipality').forEach(x=>x.classList.remove('selected'));
-  document.getElementById('name').innerHTML='Pangasinan II — All Municipalities';
+  document.getElementById('name').innerHTML='<span class="risk-dot"></span>Pangasinan II — All Municipalities';
   document.getElementById('empty').hidden=true;document.getElementById('panel').hidden=false;
   // Listing every CLC across the whole province here would swamp the panel --
   // that view is per-municipality only.
@@ -200,17 +244,16 @@ function selectAllMunicipalities(){
     t.total+=d.total; t.clcs+=d.clcs; t.high+=d.high; t.moderate+=d.moderate; t.low+=d.low;
     Object.keys(lv).forEach(k=>lv[k]+=d.levels[k]);
   });
-  document.getElementById('total').textContent=t.total;
-  document.getElementById('clcs').textContent=t.clcs;
-  document.getElementById('high').textContent=t.high;
-  document.getElementById('moderate').textContent=t.moderate;
-  document.getElementById('lowSummary').textContent=t.low;
   document.getElementById('scopeMeta').textContent=`Division-wide snapshot · ${Object.keys(municipalityData).length} municipalities`;
-  const pct=k=>t.total?Math.round(t[k]/t.total*100):0;
-  [['high','highBar','highPct','highCountText'],['moderate','modBar','modPct','modCountText'],['low','lowBar','lowPct','lowCountText']].forEach(([k,b,p,c])=>{document.getElementById(b).style.width=pct(k)+'%';document.getElementById(p).textContent=pct(k)+'%';document.getElementById(c).textContent=`${t[k]} learner${t[k]===1?'':'s'}`});
+  const unassessed=Math.max(0,t.total-t.high-t.moderate-t.low);
+  applyOverview({total:t.total,clcs:t.clcs,high:t.high,moderate:t.moderate,low:t.low,unassessed});
+  applyRiskBars({high:t.high,moderate:t.moderate,low:t.low},t.total);
   const max=Math.max(1,...Object.values(lv));
-  document.getElementById('levels').innerHTML=levelKeys.map(label=>{const val=lv[label];return `<div class="levelbar"><span class="levelbar-label"><strong>${levelLabels[label]}</strong><small>${val} learner${val===1?'':'s'}</small></span><div class="track level-track"><div class="fill" style="width:${val/max*100}%"></div></div><b>${val}</b></div>`}).join('');
-  currentRiskCounts={high:t.high,moderate:t.moderate,low:t.low};
+  document.getElementById('levels').innerHTML=levelKeys.map(k=>{
+    const val=lv[k];
+    return `<div class="st-hbar-row"><span class="st-hbar-label">${levelLabels[k]}<small>${val} learner${val===1?'':'s'}</small></span><div class="st-hbar-track" data-tooltip="${levelLabels[k]}: ${val} learner${val===1?'':'s'}"><div class="st-hbar st-hbar--level" style="--w:${val/max*100}%"></div></div><span class="st-hbar-value num">${val}</span></div>`;
+  }).join('');
+  currentRiskCounts={high:t.high,moderate:t.moderate,low:t.low,unassessed,total:t.total};
   currentLevelCounts={...lv};
   genderRiskData=divisionGenderRiskData;
   renderGenderRisk();
@@ -218,19 +261,49 @@ function selectAllMunicipalities(){
   renderLevelChart();
 }
 
-// ── Chart type toggles: Risk Distribution (Bar/Pie/Trend), Learning Level
-// (Bar/Pie), Risk by Gender (Bar/Compare/Pie) -- all rendered with Chart.js,
-// loaded from cdnjs in dashboard.html. ───────────────────────────────────────
+// Overview card: total + 4-segment risk strip + 4-item legend (High /
+// Moderate / Low / Not yet assessed). The strip's segments and the legend's
+// percentages always sum to 100%, which is what explains the "not yet
+// assessed" bucket -- riskLevel() alone only ever covers assessed learners.
+const HELP_TEXT={high:'Needs closer follow-up',moderate:'Needs monitoring',low:'Currently lower concern',unassessed:'No prediction yet'};
+function applyOverview({total,clcs,high,moderate,low,unassessed}){
+  countTo(document.getElementById('total'),total);
+  countTo(document.getElementById('clcs'),clcs);
+  countTo(document.getElementById('high'),high);
+  countTo(document.getElementById('moderate'),moderate);
+  countTo(document.getElementById('lowSummary'),low);
+  countTo(document.getElementById('unassessed'),unassessed);
+  const vals={high,moderate,low,unassessed};
+  const stripSpans=document.querySelectorAll('.st-risk-strip > span');
+  const order=['high','moderate','low','unassessed'];
+  stripSpans.forEach((span,i)=>{ span.style.flexGrow=vals[order[i]]||0; });
+  const pct=(k)=>total?Math.round(vals[k]/total*100):0;
+  document.querySelectorAll('.st-risk-legend--4 .pct').forEach((el,i)=>{
+    const key=order[i];
+    el.innerHTML=`${pct(key)}%<span class="pct-suffix"> · ${HELP_TEXT[key]}</span>`;
+  });
+}
+
+function applyRiskBars(counts,total){
+  const pct=(k)=>total?Math.round(counts[k]/total*100):0;
+  const names={high:'High risk',moderate:'Moderate risk',low:'Low risk'};
+  [['high','highBar','highPct','highCountText'],['moderate','modBar','modPct','modCountText'],['low','lowBar','lowPct','lowCountText']].forEach(([k,b,p,c])=>{
+    const bar=document.getElementById(b);
+    const pctVal=pct(k);
+    bar.style.setProperty('--w',pctVal+'%');
+    document.getElementById(p).textContent=pctVal+'%';
+    document.getElementById(c).textContent=`${counts[k]} learner${counts[k]===1?'':'s'}`;
+    bar.closest('.st-hbar-track').dataset.tooltip=`${names[k]}: ${counts[k]} learner${counts[k]===1?'':'s'} (${pctVal}%)`;
+  });
+}
+
+// ── Chart type toggles: Risk Distribution (Bar/Donut/Trend), Learning Level
+// (Bar/Donut), Risk by Gender (Bar/Compare/Donut) -- all rendered with
+// Chart.js, loaded from cdnjs in dashboard.html. ───────────────────────────
 function renderGenderRisk(){
   if(!genderRiskData) return;
   const {male,female,higherRiskGender}=genderRiskData;
-  const pct=(bucket)=>bucket.total?Math.round(bucket.high/bucket.total*100):0;
-  document.getElementById('maleBar').style.width=pct(male)+'%';
-  document.getElementById('malePct').textContent=pct(male)+'%';
-  document.getElementById('maleCountText').textContent=`${male.high} of ${male.total} learner${male.total===1?'':'s'}`;
-  document.getElementById('femaleBar').style.width=pct(female)+'%';
-  document.getElementById('femalePct').textContent=pct(female)+'%';
-  document.getElementById('femaleCountText').textContent=`${female.high} of ${female.total} learner${female.total===1?'':'s'}`;
+  applyGenderBars(male,female);
   const callout=document.getElementById('genderRiskCallout');
   if(callout){
     let text;
@@ -238,9 +311,22 @@ function renderGenderRisk(){
     else if(higherRiskGender==='female') text=`Female learners currently show a higher High-Risk rate (${female.highRiskRate}% vs ${male.highRiskRate}% for male learners).`;
     else if(higherRiskGender==='tie') text=`Male and female learners currently show the same High-Risk rate (${male.highRiskRate}%).`;
     else text='Not enough assessed learners yet to compare risk by gender.';
-    callout.innerHTML=`<span class="material-symbols-outlined">insights</span>${text}`;
+    callout.innerHTML=`<span class="material-symbols-outlined">insights</span><span>${text}</span>`;
   }
   renderGenderChart();
+}
+function applyGenderBars(male,female){
+  const pct=(bucket)=>bucket.total?Math.round(bucket.high/bucket.total*100):0;
+  const malePct=pct(male), femalePct=pct(female);
+  const maleBar=document.getElementById('maleBar'), femaleBar=document.getElementById('femaleBar');
+  maleBar.style.setProperty('--w',malePct+'%');
+  document.getElementById('malePct').textContent=malePct+'%';
+  document.getElementById('maleCountText').textContent=`${male.high} of ${male.total} learner${male.total===1?'':'s'}`;
+  maleBar.closest('.st-hbar-track').dataset.tooltip=`Male: ${male.high} of ${male.total} learner${male.total===1?'':'s'} are High risk (${malePct}%)`;
+  femaleBar.style.setProperty('--w',femalePct+'%');
+  document.getElementById('femalePct').textContent=femalePct+'%';
+  document.getElementById('femaleCountText').textContent=`${female.high} of ${female.total} learner${female.total===1?'':'s'}`;
+  femaleBar.closest('.st-hbar-track').dataset.tooltip=`Female: ${female.high} of ${female.total} learner${female.total===1?'':'s'} are High risk (${femalePct}%)`;
 }
 
 // Chart.js is loaded from a CDN script tag -- if that request ever fails
@@ -270,13 +356,15 @@ function renderRiskChart(){
 
   if(riskChartType==='pie'){
     note.textContent='Current risk distribution for the selected area.';
+    canvas.dataset.unit='assessed';
     riskChartInstance=new Chart(canvas.getContext('2d'),{
       type:'doughnut',
+      plugins:[ST_CENTER_TOTAL],
       data:{
         labels:['High Risk','Moderate Risk','Low Risk'],
-        datasets:[{data:[currentRiskCounts.high,currentRiskCounts.moderate,currentRiskCounts.low],backgroundColor:['#D64545','#F39422','#6BBF59'],borderColor:'#fff',borderWidth:2}],
+        datasets:[{data:[currentRiskCounts.high,currentRiskCounts.moderate,currentRiskCounts.low],backgroundColor:['#D64545','#F39422','#6BBF59'],borderColor:'#fff',borderWidth:3,hoverOffset:6}],
       },
-      options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom'},tooltip:{enabled:true}}},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'68%',animation:ST_REDUCE_MOTION?false:{animateRotate:true,animateScale:false,duration:1000},plugins:{legend:ST_LEGEND_BOTTOM,tooltip:ST_TOOLTIP_SHARE}},
     });
     return;
   }
@@ -287,17 +375,17 @@ function renderRiskChart(){
       return;
     }
     note.textContent='Division-wide monthly trend of assessed risk levels (last 6 months) -- not filtered by the selected area.';
+    const ds=(label,color,key)=>({label,data:riskTrendData.map(m=>m[key]),borderColor:color,backgroundColor:color+'22',fill:false,tension:.35,pointRadius:3,pointHoverRadius:6,borderWidth:2.5});
     riskChartInstance=new Chart(canvas.getContext('2d'),{
       type:'line',
       data:{
         labels:riskTrendData.map(m=>m.month),
-        datasets:[
-          {label:'High',data:riskTrendData.map(m=>m.high),borderColor:'#D64545',backgroundColor:'#D6454522',tension:.3},
-          {label:'Moderate',data:riskTrendData.map(m=>m.moderate),borderColor:'#F39422',backgroundColor:'#F3942222',tension:.3},
-          {label:'Low',data:riskTrendData.map(m=>m.low),borderColor:'#6BBF59',backgroundColor:'#6BBF5922',tension:.3},
-        ],
+        datasets:[ds('High','#D64545','high'),ds('Moderate','#F39422','moderate'),ds('Low','#6BBF59','low')],
       },
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}},
+      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+        animation:ST_REDUCE_MOTION?false:{duration:700,delay:(ctx)=>ctx.type==='data'&&ctx.mode==='default'?ctx.dataIndex*110:0},
+        plugins:{legend:ST_LEGEND_BOTTOM,tooltip:{...ST_TOOLTIP,callbacks:{footer:(items)=>`Total assessed: ${items.reduce((a,i)=>a+i.parsed.y,0)}`}}},
+        scales:{y:{beginAtZero:true,ticks:{precision:0},grid:{color:'#eef1f5'},border:{display:false}},x:{grid:{display:false},border:{display:false}}}},
     });
   }
 }
@@ -319,13 +407,15 @@ function renderLevelChart(){
   if(!canvas||!chartJsReady(canvas,note)) return;
 
   note.textContent='Learner count per ALS learning level for the selected area.';
+  canvas.dataset.unit='learners';
   levelChartInstance=new Chart(canvas.getContext('2d'),{
     type:'doughnut',
+    plugins:[ST_CENTER_TOTAL],
     data:{
       labels:levelKeys.map(k=>levelLabels[k]),
-      datasets:[{data:levelKeys.map(k=>currentLevelCounts[k]||0),backgroundColor:['#3B7DDD','#6BBF59','#F39422','#8E5BD6'],borderColor:'#fff',borderWidth:2}],
+      datasets:[{data:levelKeys.map(k=>currentLevelCounts[k]||0),backgroundColor:['#12355b','#4c6f95','#006a68','#9db5d3'],borderColor:'#fff',borderWidth:3,hoverOffset:6}],
     },
-    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom'},tooltip:{enabled:true}}},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'68%',animation:ST_REDUCE_MOTION?false:{animateRotate:true,animateScale:false,duration:1000},plugins:{legend:ST_LEGEND_BOTTOM,tooltip:ST_TOOLTIP_SHARE}},
   });
 }
 
@@ -357,31 +447,32 @@ function renderGenderChart(){
       data:{
         labels:['High Risk','Moderate Risk','Low Risk'],
         datasets:[
-          {label:'Male',data:[male.high,male.moderate,male.low],backgroundColor:'#3B7DDD'},
-          {label:'Female',data:[female.high,female.moderate,female.low],backgroundColor:'#D6459A'},
+          {label:'Male',data:[male.high,male.moderate,male.low],backgroundColor:'#12355b',borderRadius:6,barThickness:26},
+          {label:'Female',data:[female.high,female.moderate,female.low],backgroundColor:'#4c6f95',borderRadius:6,barThickness:26},
         ],
       },
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}},
+      options:{responsive:true,maintainAspectRatio:false,animation:ST_REDUCE_MOTION?false:{duration:900,...ST_CHART_STAGGER(100)},plugins:{legend:ST_LEGEND_BOTTOM,tooltip:ST_TOOLTIP},scales:{y:{beginAtZero:true,ticks:{precision:0},grid:{color:'#eef1f5'},border:{display:false}},x:{grid:{display:false},border:{display:false}}}},
     });
     return;
   }
 
   if(genderChartType==='pie'){
     note.textContent='Share of all currently High-Risk learners, by gender.';
+    canvas.dataset.unit='high risk';
     genderChartInstance=new Chart(canvas.getContext('2d'),{
       type:'doughnut',
+      plugins:[ST_CENTER_TOTAL],
       data:{
         labels:['Male (High Risk)','Female (High Risk)'],
-        datasets:[{data:[male.high,female.high],backgroundColor:['#3B7DDD','#D6459A'],borderColor:'#fff',borderWidth:2}],
+        datasets:[{data:[male.high,female.high],backgroundColor:['#12355b','#4c6f95'],borderColor:'#fff',borderWidth:3,hoverOffset:6}],
       },
-      options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom'},tooltip:{enabled:true}}},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'68%',animation:ST_REDUCE_MOTION?false:{animateRotate:true,animateScale:false,duration:1000},plugins:{legend:ST_LEGEND_BOTTOM,tooltip:ST_TOOLTIP_SHARE}},
     });
   }
 }
 
 function bindChartToggle(toggleId,onChange){
   document.querySelectorAll(`#${toggleId} .chart-type-btn`).forEach(btn=>{
-    if(btn.dataset.chartType==='pie')btn.textContent='Donut';
     btn.addEventListener('click',()=>{
       document.querySelectorAll(`#${toggleId} .chart-type-btn`).forEach(b=>b.classList.toggle('is-active',b===btn));
       onChange(btn.dataset.chartType);
@@ -392,6 +483,24 @@ function bindChartToggle(toggleId,onChange){
 bindChartToggle('riskChartToggle',(type)=>{riskChartType=type;renderRiskChart();});
 bindChartToggle('levelChartToggle',(type)=>{levelChartType=type;renderLevelChart();});
 bindChartToggle('genderChartToggle',(type)=>{genderChartType=type;renderGenderChart();});
+
+// ── Motion: [data-animate] panels fill in once they scroll into view (same
+// pattern as the teacher dashboard's own IntersectionObserver). Once a panel
+// is in view, its bars/strip already transition smoothly on their own --
+// --w, flex-grow and the count-up numbers above are updated unconditionally
+// on every selection change, and the CSS transitions already declared on
+// .st-hbar/.st-risk-strip animate old value -> new value directly. Toggling
+// .is-inview off and back on here would instead force every bar through a
+// visible "collapse to 0% then regrow" each time, which is wrong for a
+// value change -- scrolling back into view (the actual "replay" case) is
+// already handled by this same observer re-firing on intersection change. */
+const motionObserver=new IntersectionObserver((entries)=>{
+  entries.forEach(({target,isIntersecting})=>{
+    target.classList.toggle('is-inview',isIntersecting);
+  });
+},{threshold:.2});
+document.querySelectorAll('[data-animate]').forEach(el=>motionObserver.observe(el));
+
 // Normalize the SVG asset against the canonical list. The map contains other
 // province areas for context, but only the requested municipalities are
 // selectable and included in the dashboard scope.
@@ -424,6 +533,7 @@ function populateMunicipalitySelect(){
 select.addEventListener('change',()=>{if(select.value==='all')selectAllMunicipalities();else if(select.value)selectMunicipality(select.value)});
 
 async function loadDashboard(){
+  document.getElementById('muniCount').textContent=DIVISION_II_MUNICIPALITIES.length;
   try{
     const [dashboardData,clcResponse]=await Promise.all([
       API.getAdminDashboard(),
@@ -447,7 +557,7 @@ async function loadDashboard(){
     });
   }catch(error){
     console.error('[AdminDashboard] Unable to load dashboard data',error);
-    showToast('Unable to load division risk data.');
+    Utils.toast('Unable to load division risk data.','error');
     municipalityData={};
     clcsByMunicipality={};
     genderRiskData=null;
@@ -487,16 +597,3 @@ document.querySelectorAll('.legend-item').forEach(btn=>{
     });
   });
 });
-
-function openModal(id){document.getElementById(id).classList.add('show')}
-function closeModal(id){document.getElementById(id).classList.remove('show')}
-document.querySelectorAll('.overlay').forEach(ov=>ov.addEventListener('click',e=>{if(e.target===ov)ov.classList.remove('show')}));
-function showToast(msg){
-  const t=document.getElementById('toast');
-  t.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>${msg}`;
-  t.classList.add('show');
-  clearTimeout(window._toastTimer);
-  window._toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
-}
-
-document.querySelectorAll('.search-box select').forEach(sel=>{sel.addEventListener('focus',()=>sel.closest('.search-box').classList.add('open'));sel.addEventListener('blur',()=>sel.closest('.search-box').classList.remove('open'));});
