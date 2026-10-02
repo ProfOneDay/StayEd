@@ -91,10 +91,18 @@ class ProfileSettingsPage {
     if (last && user.last_name) last.value = user.last_name;
     if (email && user.email) email.value = user.email;
     if (mobile) mobile.value = user.phone || "";
-    if (clcInput) clcInput.value = user.school || "";
+    // A teacher can be assigned more than one CLC (e.g. a cluster
+    // coordinator) -- show all of them, not just the single most-recently-
+    // assigned one `user.school` used to be limited to.
+    const schoolsText =
+      user.schools && user.schools.length ? user.schools.join(", ") : user.school || "";
+    if (clcInput) {
+      clcInput.value = schoolsText;
+      clcInput.title = schoolsText;
+    }
 
     this.set("[data-settings-employee-id]", user.employee_id || "—");
-    this.set("[data-settings-clc]", user.school || "—");
+    this.set("[data-settings-clc]", schoolsText || "—");
     this.set(
       "[data-settings-join-date]",
       user.join_date

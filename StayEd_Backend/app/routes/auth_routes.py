@@ -20,6 +20,11 @@ def _safe_user(row):
     full_name = " ".join(
         p for p in [row.get("first_name"), row.get("middle_name"), row.get("last_name")] if p
     ).strip()
+    # A teacher can have several ACTIVE teacher_clc rows (e.g. a cluster
+    # coordinator covering multiple CLCs) -- "school" stays a single string
+    # for anything that only ever showed one, "schools" is the full list so
+    # Profile Settings can show all of them instead of just the newest.
+    schools = row.get("clc_names") or []
     return {
         "id": row["user_id"],
         "role": str(row["role"]).lower(),
@@ -29,7 +34,8 @@ def _safe_user(row):
         "last_name": row.get("last_name") or "",
         "full_name": full_name or row.get("username"),
         "phone": row.get("contact_number") or "",
-        "school": row.get("clc_name") or "",
+        "school": schools[0] if schools else "",
+        "schools": schools,
         "municipality": row.get("municipality") or "",
         "avatar": row.get("avatar") or "",
         "employee_id": row.get("employee_id") or "",
@@ -37,27 +43,29 @@ def _safe_user(row):
     }
 
 
+_TEACHER_CLC_NAMES_SUBQUERY = """
+    (
+        SELECT json_agg(c.clc_name ORDER BY tc.assigned_at DESC)
+        FROM teacher_clc tc
+        JOIN clc c ON c.clc_id = tc.clc_id
+        WHERE tc.teacher_id = t.teacher_id
+          AND tc.assignment_status = 'ACTIVE'
+    ) AS clc_names
+"""
+
+
 def _user_by_email(email: str):
     return fetch_one(
-        """
+        f"""
         SELECT
             u.user_id, u.username, u.password_hash, u.email, u.role, u.account_status, u.avatar,
             t.teacher_id, t.middle_name, t.municipality, t.employee_id, t.created_at,
             COALESCE(t.first_name, u.first_name) AS first_name,
             COALESCE(t.last_name, u.last_name) AS last_name,
             COALESCE(t.contact_number, u.contact_number) AS contact_number,
-            c.clc_name
+            {_TEACHER_CLC_NAMES_SUBQUERY}
         FROM users u
         LEFT JOIN teacher t ON t.user_id = u.user_id
-        LEFT JOIN LATERAL (
-            SELECT c.clc_name
-            FROM teacher_clc tc
-            JOIN clc c ON c.clc_id = tc.clc_id
-            WHERE tc.teacher_id = t.teacher_id
-              AND tc.assignment_status = 'ACTIVE'
-            ORDER BY tc.assigned_at DESC
-            LIMIT 1
-        ) c ON TRUE
         WHERE LOWER(u.email) = LOWER(%s)
         """,
         (email,),
@@ -97,25 +105,16 @@ def logout():
 @jwt_required()
 def me():
     row = fetch_one(
-        """
+        f"""
         SELECT
             u.user_id, u.username, u.email, u.role, u.account_status, u.avatar,
             t.middle_name, t.municipality, t.employee_id, t.created_at,
             COALESCE(t.first_name, u.first_name) AS first_name,
             COALESCE(t.last_name, u.last_name) AS last_name,
             COALESCE(t.contact_number, u.contact_number) AS contact_number,
-            c.clc_name
+            {_TEACHER_CLC_NAMES_SUBQUERY}
         FROM users u
         LEFT JOIN teacher t ON t.user_id = u.user_id
-        LEFT JOIN LATERAL (
-            SELECT c.clc_name
-            FROM teacher_clc tc
-            JOIN clc c ON c.clc_id = tc.clc_id
-            WHERE tc.teacher_id = t.teacher_id
-              AND tc.assignment_status = 'ACTIVE'
-            ORDER BY tc.assigned_at DESC
-            LIMIT 1
-        ) c ON TRUE
         WHERE u.user_id = %s
         """,
         (current_user_id(),),
@@ -140,12 +139,16 @@ def register():
     if fetch_one("SELECT user_id FROM users WHERE LOWER(email) = LOWER(%s)", (email,)):
         return error("Email already exists.", 409)
 
-    # A name not on the division's official ALS Teachers roster no longer
-    # blocks registration outright -- it still goes through, but flagged
-    # (isOnRoster, surfaced in the admin review screen same as isDepedVerified)
-    # so an admin manually verifies it before approving, instead of nobody
-    # ever checking.
-    on_roster = is_on_teacher_roster(full_name)
+    # Panel requirement: only names on the division's official ALS Teachers
+    # roster may self-register. Checked here, before any account is
+    # created, so an unlisted name is rejected outright rather than merely
+    # flagged for admin review.
+    if not is_on_teacher_roster(full_name):
+        return error(
+            "This name was not found in the official ALS Teachers roster for this division. "
+            "Please contact your school administrator if you believe this is an error.",
+            403,
+        )
 
     first_name, last_name = split_name(full_name)
     username_base = email.split("@", 1)[0][:80] or "teacher"
@@ -207,10 +210,9 @@ def register():
                     (
                         admin["user_id"],
                         "New Teacher Registration",
-                        f"{full_name} ({email}) has registered and is awaiting approval."
-                        + ("" if on_roster else " Not found on the official ALS Teachers roster -- verify manually."),
+                        f"{full_name} ({email}) has registered and is awaiting approval.",
                         "user-management.html",
-                        "Pending" if on_roster else "Not on Roster",
+                        "Pending",
                         f"registration:{user_id}",
                     ),
                 )
