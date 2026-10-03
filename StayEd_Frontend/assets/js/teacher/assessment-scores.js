@@ -14,10 +14,10 @@ class AssessmentScores {
   // the FLT post-test total compared with the same component scales used by
   // the percentage column, instead of from the separate portfolio final grade.
   static AF5_ROWS = [
-    { type: "score", id: "pis", label: "PIS score" },
+    { type: "score", id: "pis", label: "PIS Score" },
     { type: "section", label: "Assessment for Basic Literacy (ABL)" },
-    { type: "status", id: "abl_neo", label: "Neo literate" },
-    { type: "status", id: "abl_post", label: "Post literate" },
+    { type: "abl", id: "abl_neo", label: "Neo Literate", preMax: 23, postMax: 38 },
+    { type: "abl", id: "abl_post", label: "Post Literate", preMax: 40, postMax: 40 },
     { type: "section", label: "Functional Literacy Assessment (FLT)" },
     { type: "subsection", label: "LS 1 - Communication Skills (English)", group: "ls1_en" },
     { type: "score", id: "flt_ls1_en_mc", label: "Multiple Choice", indent: true },
@@ -50,6 +50,28 @@ class AssessmentScores {
     { id: "revalida_interview", label: "Interview" },
   ];
 
+  // Presentation Portfolio Assessment scoring basis used by the later PPA Year 5 rules:
+  // 7 work-sample learning strands x HPS 4 = 28 points, plus 41 points
+  // for the Inter-District Revalida (18 Oral Reading + 18 Writing + 5 Interview).
+  static PORTFOLIO_WORK_SAMPLE_HPS = 4;
+  static PORTFOLIO_REVALIDA_MAX_SCORES = {
+    revalida_oral_reading: 18,
+    revalida_writing: 18,
+    revalida_interview: 5,
+  };
+
+  static get PORTFOLIO_WORK_SAMPLE_MAX_SCORE() {
+    return this.PORTFOLIO_WORK_SAMPLE_ROWS.length * this.PORTFOLIO_WORK_SAMPLE_HPS;
+  }
+
+  static get PORTFOLIO_REVALIDA_MAX_SCORE() {
+    return Object.values(this.PORTFOLIO_REVALIDA_MAX_SCORES).reduce((sum, value) => sum + value, 0);
+  }
+
+  static get PORTFOLIO_MAX_SCORE() {
+    return this.PORTFOLIO_WORK_SAMPLE_MAX_SCORE + this.PORTFOLIO_REVALIDA_MAX_SCORE;
+  }
+
   // Item totals supplied for the AF5 scoring basis. LS1 English and Filipino
   // are grouped subjects: their three detailed rows add up to one /15 score.
   // The full assessment is 98 items total.
@@ -68,6 +90,9 @@ class AssessmentScores {
     ls1_en: ["flt_ls1_en_mc", "flt_ls1_en_writing", "flt_ls1_en_listening"],
     ls1_fil: ["flt_ls1_fil_mc", "flt_ls1_fil_writing", "flt_ls1_fil_listening"],
   };
+
+  // Each LS1 detailed component contributes 5 points to its /15 strand total.
+  static GROUP_COMPONENT_MAX_SCORE = 5;
 
   static get TOTAL_ASSESSMENT_MAX_SCORE() {
     return Object.values(this.SUBJECT_MAX_SCORES).reduce((sum, value) => sum + value, 0);
@@ -227,11 +252,21 @@ class AssessmentScores {
     const scores = f.scores || {};
     const portfolio = f.portfolio || {};
 
+    // Recompute these from the stored row values instead of trusting legacy
+    // backend aggregate fields, so the page is consistent immediately on load.
+    const overallPre = this.sumScoreData(scores, "pre");
+    const overallPost = this.sumScoreData(scores, "post");
+    const hasAnyPost = this.hasAnyPostScoreInData(scores);
+    const workSampleTotal = this.portfolioWorkSampleTotal(portfolio);
+    const revalidaTotal = this.portfolioRevalidaTotal(portfolio);
+    const portfolioRawTotal = this.portfolioRawTotal(portfolio);
+    const finalPercentage = this.portfolioPercentageGrade(portfolio);
+
     root.innerHTML = `
       <div class="st-assessment-table-card">
         <div class="st-assessment-table-head">
-          <h3>AF5 · Assessment results</h3>
-          <span class="st-assessment-table-head-subtitle">Pre-test and post-test scores</span>
+          <h3>AF5 · Assessment Results</h3>
+          <span class="st-assessment-table-head-subtitle">Pre-Test and Post-Test Scores</span>
         </div>
         <table class="st-assessment-table st-assessment-table--af5">
           <colgroup>
@@ -242,19 +277,19 @@ class AssessmentScores {
           </colgroup>
           <thead>
             <tr>
-              <th>Component / learning area</th>
+              <th>Component / Learning Area</th>
               <th>Pre</th>
               <th>Post</th>
-              <th>Likelihood / competency</th>
+              <th>Likelihood / Competency</th>
             </tr>
           </thead>
           <tbody>
             ${this.AF5_ROWS.map((row) => this.renderAf5Row(row, scores)).join("")}
             <tr class="st-assessment-total-row">
-              <td>Overall score</td>
-              <td>${this.renderOverallScoreTotal(f.overallScorePre, "pre")}</td>
-              <td>${this.renderOverallScoreTotal(f.overallScorePost, "post")}</td>
-              <td class="st-assessment-result-cell" data-overall-grade-cell>${this.renderOverallLikelihoodCell(f.overallScorePost, this.hasAnyPostScoreInData(scores))}</td>
+              <td>Overall Score</td>
+              <td>${this.renderOverallScoreTotal(overallPre, "pre")}</td>
+              <td>${this.renderOverallScoreTotal(overallPost, "post")}</td>
+              <td class="st-assessment-result-cell" data-overall-grade-cell>${this.renderOverallLikelihoodCell(overallPost, hasAnyPost)}</td>
             </tr>
           </tbody>
         </table>
@@ -262,18 +297,18 @@ class AssessmentScores {
 
       <div class="st-assessment-table-card">
         <div class="st-assessment-table-head">
-          <h3>Presentation portfolio assessment</h3>
+          <h3>Presentation Portfolio Assessment</h3>
         </div>
         <table class="st-assessment-table">
           <thead>
             <tr>
-              <th>Activity / component</th>
-              <th>Remarks / raw score</th>
+              <th>Activity / Component</th>
+              <th>Remarks / Raw Score</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Date of assessment</td>
+              <td>Date of Assessment</td>
               <td><input type="date" class="st-assessment-input st-assessment-input--date" data-date-of-assessment value="${f.dateOfAssessment || ""}"></td>
             </tr>
             <tr class="st-assessment-section-row"><td colspan="2">Final Assessment of Work Samples (Raw Score)</td></tr>
@@ -281,47 +316,55 @@ class AssessmentScores {
               (row) => `
                 <tr>
                   <td class="st-assessment-indent">${this.esc(row.label)}</td>
-                  <td><input type="number" step="0.5" class="st-assessment-input st-assessment-portfolio-work-sample-score" data-portfolio-field="${row.id}" value="${portfolio[row.id] ?? ""}"></td>
+                  <td><input type="number" min="0" max="${this.PORTFOLIO_WORK_SAMPLE_HPS}" step="0.5" class="st-assessment-input st-assessment-portfolio-work-sample-score" data-portfolio-field="${row.id}" value="${this.escAttr(this.validNumber(portfolio[row.id], this.PORTFOLIO_WORK_SAMPLE_HPS) ?? "")}" aria-label="${this.esc(row.label)} raw score, highest possible score ${this.PORTFOLIO_WORK_SAMPLE_HPS}"></td>
                 </tr>
               `,
             ).join("")}
             <tr class="st-assessment-total-row">
-              <td>Total score</td>
-              <td><input type="text" class="st-assessment-input st-assessment-portfolio-work-sample-total" data-portfolio-total readonly value="${f.portfolioTotalScore ?? 0}"></td>
+              <td>Total Work Samples Raw Score</td>
+              <td><input type="text" class="st-assessment-input st-assessment-portfolio-work-sample-total" data-portfolio-total readonly value="${workSampleTotal ?? ""}"></td>
             </tr>
             <tr class="st-assessment-section-row"><td colspan="2">Inter-District Revalida</td></tr>
             ${this.PORTFOLIO_REVALIDA_ROWS.map(
               (row) => `
                 <tr>
                   <td class="st-assessment-indent">${this.esc(row.label)}</td>
-                  <td><input type="number" step="0.5" class="st-assessment-input" data-portfolio-field="${row.id}" value="${portfolio[row.id] ?? ""}"></td>
+                  <td><input type="number" min="0" max="${this.PORTFOLIO_REVALIDA_MAX_SCORES[row.id]}" step="0.5" class="st-assessment-input" data-portfolio-field="${row.id}" value="${this.escAttr(this.validNumber(portfolio[row.id], this.PORTFOLIO_REVALIDA_MAX_SCORES[row.id]) ?? "")}" aria-label="${this.esc(row.label)} raw score, highest possible score ${this.PORTFOLIO_REVALIDA_MAX_SCORES[row.id]}"></td>
                 </tr>
               `,
             ).join("")}
             <tr class="st-assessment-total-row">
-              <td>Final score percentage grade</td>
-              <td><input type="number" min="0" max="100" step="0.01" class="st-assessment-input st-assessment-input--rating" placeholder="e.g. 68" data-final-grade value="${this.escAttr(f.finalScorePercentageGrade)}"></td>
+              <td>Total Inter-District Revalida Raw Score</td>
+              <td><input type="text" class="st-assessment-input" data-revalida-total readonly value="${revalidaTotal ?? ""}"></td>
             </tr>
             <tr class="st-assessment-total-row">
-              <td>Overall final assessment rating</td>
+              <td>Total Presentation Portfolio Assessment Raw Score</td>
+              <td><input type="text" class="st-assessment-input" data-portfolio-raw-total readonly value="${portfolioRawTotal ?? ""}"></td>
+            </tr>
+            <tr class="st-assessment-total-row">
+              <td>Final Score Percentage Grade</td>
+              <td><input type="number" min="0" max="100" step="0.01" class="st-assessment-input st-assessment-input--rating" data-final-grade readonly value="${this.escAttr(finalPercentage)}"></td>
+            </tr>
+            <tr class="st-assessment-total-row">
+              <td>Overall Final Assessment Rating</td>
               <td><input type="number" min="0" max="100" step="0.01" class="st-assessment-input st-assessment-input--rating" placeholder="e.g. 98.55" data-overall-rating value="${this.escAttr(f.overallFinalAssessmentRating)}"></td>
             </tr>
           </tbody>
         </table>
 
         <div class="st-assessment-likelihood-summary">
-          <div>
-            <span class="material-symbols-outlined">analytics</span>
-            <div>
-              <p class="st-assessment-likelihood-kicker">Likelihood of passing A&amp;E exam</p>
-              <strong data-overall-likelihood-preview data-level="${this.hasAnyPostScoreInData(scores) ? "readiness" : "neutral"}">${(() => {
-                if (!this.hasAnyPostScoreInData(scores)) return "Waiting for post-test scores";
-                const percentage = this.overallLikelihoodPercentage(f.overallScorePost);
+          <div class="st-assessment-likelihood-main">
+            <span class="material-symbols-outlined" aria-hidden="true">analytics</span>
+            <div class="st-assessment-likelihood-result">
+              <p class="st-assessment-likelihood-kicker">Likelihood of Passing A&amp;E Exam</p>
+              <strong aria-live="polite" data-overall-likelihood-preview data-level="${hasAnyPost ? "readiness" : "neutral"}">${(() => {
+                if (!hasAnyPost) return "Waiting for post-test scores";
+                const percentage = this.overallLikelihoodPercentage(overallPost);
                 return percentage == null ? "Waiting for post-test scores" : `${percentage}%`;
               })()}</strong>
             </div>
           </div>
-          <p>Calculated from the learner's <strong>FLT post-test total</strong>. StayEd internal threshold: <strong>High likelihood = 70% or above</strong>; <strong>Low likelihood = below 70%</strong>. This is a project readiness rule, not an official DepEd A&amp;E passing mark.</p>
+          <p class="st-assessment-likelihood-note">Calculated from the learner's <strong>FLT post-test total</strong>. StayEd internal threshold: <strong>High likelihood = 70% or above</strong>; <strong>Low likelihood = below 70%</strong>. This is a project readiness rule, not an official DepEd A&amp;E passing mark.</p>
         </div>
       </div>
     `;
@@ -351,20 +394,13 @@ class AssessmentScores {
     const r = scores[row.id] || {};
     const labelClass = row.indent ? "st-assessment-indent" : "";
 
-    if (row.type === "status") {
-      const currentStatus = r.status || "";
+    if (row.type === "abl") {
       return `
-        <tr class="st-assessment-status-row">
+        <tr class="st-assessment-abl-row">
           <td class="${labelClass}">${this.esc(row.label)}</td>
-          <td aria-hidden="true"></td>
-          <td aria-hidden="true"></td>
-          <td>
-            <select class="st-assessment-status-select" data-score-field="${row.id}" data-score-part="status" aria-label="${this.esc(row.label)} status">
-              <option value=""${currentStatus === "" ? " selected" : ""}>Select status</option>
-              <option value="Achieved"${currentStatus === "Achieved" ? " selected" : ""}>Achieved</option>
-              <option value="Not Yet Achieved"${currentStatus === "Not Yet Achieved" ? " selected" : ""}>Not Yet Achieved</option>
-            </select>
-          </td>
+          <td>${this.renderScoreInput(row.id, "pre", r.pre, row.preMax, row.preMax)}</td>
+          <td>${this.renderScoreInput(row.id, "post", r.post, row.postMax, row.postMax)}</td>
+          <td class="st-assessment-result-cell" aria-hidden="true"></td>
         </tr>
       `;
     }
@@ -372,22 +408,24 @@ class AssessmentScores {
     const directMax = this.SUBJECT_MAX_SCORES[row.id] || null;
     const grouped = this.isGroupedScoreRow(row.id);
     const groupKey = grouped ? this.groupForRow(row.id) : null;
-    const groupMax = groupKey ? this.SUBJECT_MAX_SCORES[groupKey] : null;
-    const inputMax = directMax || groupMax || null;
+    const inputMax = grouped ? this.GROUP_COMPONENT_MAX_SCORE : directMax;
+    const displayMax = inputMax;
 
     return `
       <tr>
         <td class="${labelClass}">${this.esc(row.label)}</td>
-        <td>${this.renderScoreInput(row.id, "pre", r.pre, directMax || groupMax, inputMax)}</td>
-        <td>${this.renderScoreInput(row.id, "post", r.post, directMax || groupMax, inputMax)}</td>
+        <td>${this.renderScoreInput(row.id, "pre", r.pre, displayMax, inputMax)}</td>
+        <td>${this.renderScoreInput(row.id, "post", r.post, displayMax, inputMax)}</td>
         <td class="st-assessment-result-cell" data-computed-cell="${row.id}">${this.renderComputedRowResult(row.id, r)}</td>
       </tr>
     `;
   }
 
+
   static renderScoreInput(rowId, part, value, displayMax = null, inputMax = null) {
     const maxAttr = inputMax ? ` max="${inputMax}"` : "";
-    const input = `<input type="number" step="1" min="0"${maxAttr} inputmode="numeric" class="st-assessment-input" data-score-field="${rowId}" data-score-part="${part}" value="${value ?? ""}">`;
+    const safeValue = inputMax ? this.validNumber(value, inputMax) : this.validNumber(value, null);
+    const input = `<input type="number" step="1" min="0"${maxAttr} inputmode="numeric" class="st-assessment-input" data-score-field="${rowId}" data-score-part="${part}" value="${safeValue ?? ""}">`;
     if (!displayMax) return input;
     return `
       <div class="st-assessment-score-entry">
@@ -488,9 +526,11 @@ class AssessmentScores {
   }
 
   static hasAnyPostScoreInDom() {
-    return Array.from(
-      document.querySelectorAll('[data-score-part="post"]'),
-    ).some((el) => el.value !== null && el.value !== undefined && String(el.value).trim() !== "");
+    return this.AF5_ROWS.some((row) => {
+      if (row.type !== "score" || !row.id) return false;
+      const el = document.querySelector(`[data-score-field="${row.id}"][data-score-part="post"]`);
+      return el && String(el.value ?? "").trim() !== "";
+    });
   }
 
   static overallLikelihoodPercentage(overallPostScore) {
@@ -504,8 +544,7 @@ class AssessmentScores {
     const rowIds = this.SUBJECT_GROUPS[groupKey] || [];
     const values = rowIds.map((rowId) => {
       const row = scores[rowId] || {};
-      const raw = row[part];
-      return raw == null || raw === "" ? null : Number(raw);
+      return this.validNumber(row[part], this.GROUP_COMPONENT_MAX_SCORE);
     });
     if (!values.some((value) => Number.isFinite(value))) return null;
     const total = values.reduce((sum, value) => sum + (Number.isFinite(value) ? value : 0), 0);
@@ -522,11 +561,11 @@ class AssessmentScores {
   static rowPercentage(rowId, rowData = {}) {
     const value = rowData.post ?? rowData.pre;
     const groupKey = this.groupForRow(rowId);
-    const maxScore = this.SUBJECT_MAX_SCORES[rowId] || (groupKey ? this.SUBJECT_MAX_SCORES[groupKey] : null);
+    const maxScore = this.SUBJECT_MAX_SCORES[rowId] || (groupKey ? this.GROUP_COMPONENT_MAX_SCORE : null);
     if (value == null || value === "" || !maxScore) return null;
-    const numericValue = Number(value);
-    if (!Number.isFinite(numericValue)) return null;
-    return Math.round((numericValue / maxScore) * 100);
+    const numericValue = this.validNumber(value, maxScore);
+    if (numericValue == null) return null;
+    return this.roundPercent((numericValue / maxScore) * 100);
   }
 
   static roundPercent(value) {
@@ -556,6 +595,57 @@ class AssessmentScores {
     const score = Number(value);
     if (!Number.isFinite(score)) return "Waiting for post-test scores";
     return `${this.roundPercent(score)}%`;
+  }
+
+  static sumScoreData(scores = {}, part = "post") {
+    const rows = this.AF5_ROWS.filter((row) => row.id && row.type === "score");
+    const values = rows.map((row) => {
+      const raw = scores[row.id]?.[part];
+      const maxScore = this.SUBJECT_MAX_SCORES[row.id] || (this.isGroupedScoreRow(row.id) ? this.GROUP_COMPONENT_MAX_SCORE : null);
+      return this.validNumber(raw, maxScore);
+    });
+    if (!values.some((value) => Number.isFinite(value))) return null;
+    const total = values.reduce((sum, value) => sum + (Number.isFinite(value) ? value : 0), 0);
+    return Number.isInteger(total) ? total : Number(total.toFixed(2));
+  }
+
+  static portfolioWorkSampleTotal(portfolio = {}) {
+    return this.sumPortfolioFields(portfolio, this.PORTFOLIO_WORK_SAMPLE_ROWS.map((row) => row.id));
+  }
+
+  static portfolioRevalidaTotal(portfolio = {}) {
+    return this.sumPortfolioFields(portfolio, this.PORTFOLIO_REVALIDA_ROWS.map((row) => row.id));
+  }
+
+  static portfolioRawTotal(portfolio = {}) {
+    const allIds = [...this.PORTFOLIO_WORK_SAMPLE_ROWS, ...this.PORTFOLIO_REVALIDA_ROWS].map((row) => row.id);
+    return this.sumPortfolioFields(portfolio, allIds);
+  }
+
+  static sumPortfolioFields(portfolio = {}, ids = []) {
+    const values = ids.map((id) => {
+      const isWorkSample = this.PORTFOLIO_WORK_SAMPLE_ROWS.some((row) => row.id === id);
+      const maxScore = isWorkSample ? this.PORTFOLIO_WORK_SAMPLE_HPS : this.PORTFOLIO_REVALIDA_MAX_SCORES[id];
+      return this.validNumber(portfolio[id], maxScore);
+    });
+    if (!values.some((value) => Number.isFinite(value))) return null;
+    const total = values.reduce((sum, value) => sum + (Number.isFinite(value) ? value : 0), 0);
+    return Number.isInteger(total) ? total : Number(total.toFixed(2));
+  }
+
+  static readPortfolioFromDom() {
+    const portfolio = {};
+    [...this.PORTFOLIO_WORK_SAMPLE_ROWS, ...this.PORTFOLIO_REVALIDA_ROWS].forEach((row) => {
+      portfolio[row.id] = this.readNumber(`[data-portfolio-field="${row.id}"]`);
+    });
+    return portfolio;
+  }
+
+  static portfolioPercentageGrade(portfolio = {}) {
+    const rawTotal = this.portfolioRawTotal(portfolio);
+    if (rawTotal == null) return null;
+    const percentage = Math.max(0, Math.min(100, (rawTotal / this.PORTFOLIO_MAX_SCORE) * 100));
+    return Number(percentage.toFixed(2));
   }
 
   static bindLivePreview() {
@@ -604,21 +694,30 @@ class AssessmentScores {
       if (postEl) postEl.textContent = this.hasAnyScore("post") ? this.sumRowScores("post") : "";
     };
 
-    const updatePortfolioTotal = () => {
-      const totalEl = document.querySelector("[data-portfolio-total]");
-      if (!totalEl) return;
-      let total = 0;
-      this.PORTFOLIO_WORK_SAMPLE_ROWS.forEach((row) => {
-        const value = this.readNumber(`[data-portfolio-field="${row.id}"]`);
-        total += value || 0;
-      });
-      totalEl.value = total;
+    const updatePortfolioPreview = () => {
+      const portfolio = this.readPortfolioFromDom();
+      const workTotal = this.portfolioWorkSampleTotal(portfolio);
+      const revalidaTotal = this.portfolioRevalidaTotal(portfolio);
+      const rawTotal = this.portfolioRawTotal(portfolio);
+      const finalPercentage = this.portfolioPercentageGrade(portfolio);
+
+      const workEl = document.querySelector("[data-portfolio-total]");
+      const revalidaEl = document.querySelector("[data-revalida-total]");
+      const rawEl = document.querySelector("[data-portfolio-raw-total]");
+      const finalEl = document.querySelector("[data-final-grade]");
+      if (workEl) workEl.value = workTotal ?? "";
+      if (revalidaEl) revalidaEl.value = revalidaTotal ?? "";
+      if (rawEl) rawEl.value = rawTotal ?? "";
+      if (finalEl) finalEl.value = finalPercentage ?? "";
+      this.updatePortfolioValidity();
     };
 
     document.querySelectorAll("[data-score-field][data-score-part='pre'], [data-score-field][data-score-part='post']").forEach((input) => {
       input.addEventListener("input", () => {
+        this.clampInputToBounds(input);
         const rowId = input.dataset.scoreField;
-        updateRowPreview(rowId);
+        const row = this.AF5_ROWS.find((item) => item.id === rowId);
+        if (row?.type === "score") updateRowPreview(rowId);
         updateOverallScores();
         updateLikelihoodPreview();
         this.updateScoreValidity();
@@ -626,13 +725,20 @@ class AssessmentScores {
     });
 
     document.querySelectorAll("[data-portfolio-field]").forEach((input) => {
-      input.addEventListener("input", updatePortfolioTotal);
+      input.addEventListener("input", () => {
+        this.clampInputToBounds(input);
+        updatePortfolioPreview();
+      });
+    });
+
+    document.querySelector("[data-overall-rating]")?.addEventListener("input", (event) => {
+      this.clampInputToBounds(event.currentTarget);
     });
 
     this.AF5_ROWS.filter((row) => row.id && row.type === "score").forEach((row) => updateRowPreview(row.id));
     Object.keys(this.SUBJECT_GROUPS).forEach(updateGroupPreview);
     updateOverallScores();
-    updatePortfolioTotal();
+    updatePortfolioPreview();
     updateLikelihoodPreview();
     this.updateScoreValidity();
   }
@@ -694,6 +800,34 @@ class AssessmentScores {
       });
     });
 
+    this.AF5_ROWS.filter((row) => row.type === "abl").forEach((row) => {
+      [["pre", row.preMax], ["post", row.postMax]].forEach(([part, maxScore]) => {
+        const value = this.readNumber(`[data-score-field="${row.id}"][data-score-part="${part}"]`);
+        if (value != null && maxScore != null && value > maxScore) {
+          errors.push(`${row.label} ${part}-test score cannot exceed ${maxScore}.`);
+        }
+      });
+    });
+
+    return [...errors, ...this.portfolioValidationErrors()];
+  }
+
+  static portfolioValidationErrors() {
+    const errors = [];
+    this.PORTFOLIO_WORK_SAMPLE_ROWS.forEach((row) => {
+      const value = this.readNumber(`[data-portfolio-field="${row.id}"]`);
+      if (value != null && (value < 0 || value > this.PORTFOLIO_WORK_SAMPLE_HPS)) {
+        errors.push(`${row.label} work-sample score must be from 0 to ${this.PORTFOLIO_WORK_SAMPLE_HPS}.`);
+      }
+    });
+
+    this.PORTFOLIO_REVALIDA_ROWS.forEach((row) => {
+      const value = this.readNumber(`[data-portfolio-field="${row.id}"]`);
+      const maxScore = this.PORTFOLIO_REVALIDA_MAX_SCORES[row.id];
+      if (value != null && (value < 0 || value > maxScore)) {
+        errors.push(`${row.label} Revalida score must be from 0 to ${maxScore}.`);
+      }
+    });
     return errors;
   }
 
@@ -720,6 +854,35 @@ class AssessmentScores {
         if (value != null && Number.isFinite(value) && value > maxScore) input?.classList.add("is-invalid");
       });
     });
+
+    this.AF5_ROWS.filter((row) => row.type === "abl").forEach((row) => {
+      [["pre", row.preMax], ["post", row.postMax]].forEach(([part, maxScore]) => {
+        const input = document.querySelector(`[data-score-field="${row.id}"][data-score-part="${part}"]`);
+        const value = input?.value === "" ? null : Number(input?.value);
+        if (value != null && Number.isFinite(value) && maxScore != null && value > maxScore) input?.classList.add("is-invalid");
+      });
+    });
+  }
+
+  static updatePortfolioValidity() {
+    document.querySelectorAll("[data-portfolio-field]").forEach((input) => input.classList.remove("is-invalid"));
+
+    this.PORTFOLIO_WORK_SAMPLE_ROWS.forEach((row) => {
+      const input = document.querySelector(`[data-portfolio-field="${row.id}"]`);
+      const value = input?.value === "" ? null : Number(input?.value);
+      if (value != null && Number.isFinite(value) && (value < 0 || value > this.PORTFOLIO_WORK_SAMPLE_HPS)) {
+        input?.classList.add("is-invalid");
+      }
+    });
+
+    this.PORTFOLIO_REVALIDA_ROWS.forEach((row) => {
+      const input = document.querySelector(`[data-portfolio-field="${row.id}"]`);
+      const value = input?.value === "" ? null : Number(input?.value);
+      const maxScore = this.PORTFOLIO_REVALIDA_MAX_SCORES[row.id];
+      if (value != null && Number.isFinite(value) && (value < 0 || value > maxScore)) {
+        input?.classList.add("is-invalid");
+      }
+    });
   }
 
   static bindSave() {
@@ -732,36 +895,35 @@ class AssessmentScores {
     const validationErrors = this.scoreValidationErrors();
     if (validationErrors.length) {
       this.updateScoreValidity();
+      this.updatePortfolioValidity();
       Toast?.error(validationErrors[0]);
       return;
     }
 
     const scores = {};
     this.AF5_ROWS.filter((r) => r.id).forEach((row) => {
-      const statusOnly = row.type === "status";
       scores[row.id] = {
-        pre: statusOnly ? null : this.readNumber(`[data-score-field="${row.id}"][data-score-part="pre"]`),
-        post: statusOnly ? null : this.readNumber(`[data-score-field="${row.id}"][data-score-part="post"]`),
+        pre: this.readNumber(`[data-score-field="${row.id}"][data-score-part="pre"]`),
+        post: this.readNumber(`[data-score-field="${row.id}"][data-score-part="post"]`),
         likelihood: this.currentForm?.scores?.[row.id]?.likelihood ?? null,
-        status: this.readText(`[data-score-field="${row.id}"][data-score-part="status"]`)
-          ?? this.currentForm?.scores?.[row.id]?.status
-          ?? null,
+        // ABL achievement status is intentionally not manually encoded.
+        // Keep it unset until the official score threshold is confirmed.
+        status: row.type === "abl"
+          ? null
+          : (this.currentForm?.scores?.[row.id]?.status ?? null),
       };
     });
     const overallPostForLikelihood = this.sumRowScores("post");
     const overallPercentage = this.overallLikelihoodPercentage(overallPostForLikelihood);
     scores.overall_likelihood = overallPercentage == null ? null : `${overallPercentage}%`;
 
-    const portfolio = {};
-    [...this.PORTFOLIO_WORK_SAMPLE_ROWS, ...this.PORTFOLIO_REVALIDA_ROWS].forEach((row) => {
-      portfolio[row.id] = this.readNumber(`[data-portfolio-field="${row.id}"]`);
-    });
+    const portfolio = this.readPortfolioFromDom();
 
     const payload = {
       dateOfAssessment: document.querySelector("[data-date-of-assessment]")?.value || null,
       scores,
       portfolio,
-      finalScorePercentageGrade: this.readNumber("[data-final-grade]"),
+      finalScorePercentageGrade: this.portfolioPercentageGrade(portfolio),
       overallFinalAssessmentRating: this.readNumber("[data-overall-rating]"),
     };
 
@@ -779,6 +941,26 @@ class AssessmentScores {
     } finally {
       if (btn) btn.disabled = false;
     }
+  }
+
+  static validNumber(value, maxScore = null, minScore = 0) {
+    if (value == null || value === "") return null;
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric) || numeric < minScore) return null;
+    if (maxScore != null && Number.isFinite(Number(maxScore)) && numeric > Number(maxScore)) return null;
+    return numeric;
+  }
+
+  static clampInputToBounds(input) {
+    if (!input || input.value === "") return;
+    const numeric = Number(input.value);
+    if (!Number.isFinite(numeric)) return;
+    const min = input.min === "" ? null : Number(input.min);
+    const max = input.max === "" ? null : Number(input.max);
+    let next = numeric;
+    if (Number.isFinite(min)) next = Math.max(min, next);
+    if (Number.isFinite(max)) next = Math.min(max, next);
+    if (next !== numeric) input.value = String(next);
   }
 
   static readNumber(selector) {

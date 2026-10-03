@@ -44,7 +44,7 @@
           <div>
             <h1 class="st-page-header-title">Profile Settings</h1>
             <p class="st-page-header-subtitle">
-              Manage your account, preferences, and security.
+              Manage your profile, account, and security.
             </p>
           </div>
         </div>
@@ -99,45 +99,16 @@
                   <dd data-settings-clc>San Felipe Sur CLC</dd>
                 </div>
                 <div>
-                  <dt>Join date</dt>
+                  <dt>Join Date</dt>
                   <dd data-settings-join-date>September 12, 2024</dd>
                 </div>
               </dl>
             </aside>
 
-            <section class="st-panel st-quick-stats-card" style="--i:1">
-              <h3 class="st-quick-stats-title">Quick stats</h3>
-              <div class="st-quick-stats-grid">
-                <div class="st-quick-stat">
-                  <span class="st-quick-stat-icon">
-                    <span class="material-symbols-outlined">groups</span>
-                  </span>
-                  <p
-                    class="st-quick-stat-value"
-                    data-settings-stat-learners
-                    data-countup
-                  >
-                    124
-                  </p>
-                  <p class="st-quick-stat-label">Active learners</p>
-                </div>
-                <div class="st-quick-stat">
-                  <span class="st-quick-stat-icon st-quick-stat-icon--teal">
-                    <span class="material-symbols-outlined">task_alt</span>
-                  </span>
-                  <p
-                    class="st-quick-stat-value st-quick-stat-value--teal"
-                    data-settings-stat-success
-                  >
-                    92%
-                  </p>
-                  <p class="st-quick-stat-label">Intervention success</p>
-                </div>
-              </div>
-            </section>
+
           </div>
 
-          <!-- RIGHT COLUMN: Collapsible sections -->
+          <!-- RIGHT COLUMN: Profile and account sections -->
           <div class="st-profile-sections" data-animate-cards>
             <!-- Profile Information -->
             <section
@@ -145,68 +116,73 @@
               data-settings-section="profile-info"
               style="--i:0"
             >
-              <button
-                type="button"
-                class="st-settings-section-header"
-                data-settings-toggle
-              >
+              <div class="st-settings-section-header st-settings-section-header--static">
                 <span class="st-settings-section-header-left">
                   <span class="st-icon-tile"
-                    ><span class="material-symbols-outlined"
-                      >person</span
-                    ></span
+                    ><span class="material-symbols-outlined">person</span></span
                   >
                   <span>
-                    <h3 class="st-settings-section-title">
-                      Profile information
-                    </h3>
+                    <h3 class="st-settings-section-title">Profile Information</h3>
                     <span class="st-settings-section-sub"
                       >Your name and contact details</span
                     >
                   </span>
                 </span>
-                <span
-                  class="material-symbols-outlined st-settings-section-caret"
-                  >expand_more</span
+                <button
+                  type="button"
+                  class="st-btn st-btn-outline st-btn-sm st-profile-edit-button"
+                  data-profile-edit
                 >
-              </button>
+                  <span class="material-symbols-outlined">edit</span>
+                  <span>Edit</span>
+                </button>
+              </div>
               <div class="st-settings-section-body">
                 <div class="st-settings-section-body-inner">
                   <form class="st-settings-form-grid" id="profileInfoForm">
                     <div class="st-field">
-                      <label for="settingsFirstName">First name</label>
+                      <label for="settingsFirstName">First Name</label>
                       <input
                         class="st-input"
                         id="settingsFirstName"
                         type="text"
                         value="Trisha"
+                        data-profile-editable
+                        readonly
+                        required
                       />
                     </div>
                     <div class="st-field">
-                      <label for="settingsLastName">Last name</label>
+                      <label for="settingsLastName">Last Name</label>
                       <input
                         class="st-input"
                         id="settingsLastName"
                         type="text"
                         value="Santos"
+                        data-profile-editable
+                        readonly
+                        required
                       />
                     </div>
-                    <div class="st-field st-field--full">
-                      <label for="settingsEmail">Email address</label>
+                    <div class="st-field st-field--full st-field--locked">
+                      <label for="settingsEmail">Email Address</label>
                       <input
                         class="st-input"
                         id="settingsEmail"
                         type="email"
                         value="trisha.santos@deped.gov.ph"
+                        readonly
                       />
                     </div>
                     <div class="st-field">
-                      <label for="settingsMobile">Mobile number</label>
+                      <label for="settingsMobile">Mobile Number</label>
                       <input
                         class="st-input"
                         id="settingsMobile"
                         type="tel"
                         value="+63 917 123 4567"
+                        data-profile-editable
+                        readonly
                       />
                     </div>
                     <div class="st-field st-field--locked">
@@ -241,11 +217,18 @@
                     </div>
                     <p class="st-locked-note st-field--full">
                       <span class="material-symbols-outlined">lock</span>
-                      Locked fields are managed by your administrator.
+                      Email Address, Position, Organization, and Assigned CLC are read-only on this page.
                     </p>
-                    <div class="st-settings-form-footer">
+                    <div class="st-settings-form-footer" data-profile-edit-actions hidden>
+                      <button
+                        type="button"
+                        class="st-btn st-btn-outline"
+                        data-profile-cancel
+                      >
+                        Cancel
+                      </button>
                       <button type="submit" class="st-btn st-btn-primary">
-                        Save changes
+                        Save Changes
                       </button>
                     </div>
                   </form>
@@ -272,10 +255,10 @@
                   >
                   <span>
                     <h3 class="st-settings-section-title">
-                      Account settings
+                      Account Settings
                     </h3>
                     <span class="st-settings-section-sub"
-                      >Password, alerts, and sign-in security</span
+                      >Password and sign-in security</span
                     >
                   </span>
                 </span>
@@ -288,7 +271,7 @@
                 <div class="st-settings-section-body-inner">
                   <form class="st-settings-form-grid" id="passwordForm">
                     <div class="st-field st-field--full">
-                      <label for="currentPassword">Current password</label>
+                      <label for="currentPassword">Current Password</label>
                       <input
                         class="st-input"
                         id="currentPassword"
@@ -297,7 +280,7 @@
                       />
                     </div>
                     <div class="st-field">
-                      <label for="newPassword">New password</label>
+                      <label for="newPassword">New Password</label>
                       <input
                         class="st-input"
                         id="newPassword"
@@ -307,7 +290,7 @@
                     </div>
                     <div class="st-field">
                       <label for="confirmNewPassword"
-                        >Confirm new password</label
+                        >Confirm New Password</label
                       >
                       <input
                         class="st-input"
@@ -325,87 +308,12 @@
                     </div>
                     <div class="st-settings-form-footer">
                       <button type="submit" class="st-btn st-btn-primary">
-                        Update password
+                        Update Password
                       </button>
                     </div>
                   </form>
 
-                  <div class="st-settings-prefs">
-                    <div class="st-toggle-row">
-                      <div>
-                        <p class="st-toggle-row-title">Email alerts</p>
-                        <p class="st-toggle-row-sub">
-                          Receive weekly learner progress summaries
-                        </p>
-                      </div>
-                      <label class="st-toggle">
-                        <input
-                          type="checkbox"
-                          data-settings-toggle-pref="email-alerts"
-                        />
-                        <span class="st-toggle-track"
-                          ><span class="st-toggle-thumb"></span
-                        ></span>
-                      </label>
-                    </div>
 
-                    <div class="st-toggle-row">
-                      <div>
-                        <p class="st-toggle-row-title">System reports</p>
-                        <p class="st-toggle-row-sub">
-                          Notify me when new predictive analytics are ready
-                        </p>
-                      </div>
-                      <label class="st-toggle">
-                        <input
-                          type="checkbox"
-                          data-settings-toggle-pref="system-reports"
-                        />
-                        <span class="st-toggle-track"
-                          ><span class="st-toggle-thumb"></span
-                        ></span>
-                      </label>
-                    </div>
-
-                    <div class="st-toggle-row">
-                      <div>
-                        <p class="st-toggle-row-title">Learner activity</p>
-                        <p class="st-toggle-row-sub">
-                          Instant alerts when a learner goes inactive
-                        </p>
-                      </div>
-                      <label class="st-toggle">
-                        <input
-                          type="checkbox"
-                          data-settings-toggle-pref="learner-activity"
-                        />
-                        <span class="st-toggle-track"
-                          ><span class="st-toggle-thumb"></span
-                        ></span>
-                      </label>
-                    </div>
-
-                    <div class="st-toggle-row">
-                      <div>
-                        <p class="st-toggle-row-title">
-                          Two-factor authentication
-                        </p>
-                        <p class="st-toggle-row-sub">
-                          Require a verification code at login (UI only for
-                          now)
-                        </p>
-                      </div>
-                      <label class="st-toggle">
-                        <input
-                          type="checkbox"
-                          data-settings-toggle-pref="2fa"
-                        />
-                        <span class="st-toggle-track"
-                          ><span class="st-toggle-thumb"></span
-                        ></span>
-                      </label>
-                    </div>
-                  </div>
                 </div>
               </div>
             </section>
@@ -477,6 +385,6 @@
     <script src="../../assets/js/components/component-loader.js"></script>
     <script src="../../assets/js/components/toast.js"></script>
     <script src="../../assets/js/components/modal.js"></script>
-    <script src="../../assets/js/teacher/profile-settings.js"></script>
+    <script src="../../assets/js/teacher/profile-settings.js?v=20261003-profile-edit"></script>
   </body>
 </html>

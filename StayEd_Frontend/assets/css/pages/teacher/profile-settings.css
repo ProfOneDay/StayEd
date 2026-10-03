@@ -101,7 +101,7 @@ body[data-page="Profile Settings"] .st-select{
     height:40px;
     border:1px solid var(--st-line-strong, var(--st-outline-variant));
     border-radius:var(--st-radius-control, 8px);
-    background:#fff;
+    background:var(--st-input-background);
     padding:0 12px;
     font:inherit;
     font-size:0.875rem; /* 14px */
@@ -116,12 +116,12 @@ body[data-page="Profile Settings"] .st-input:hover:not(:disabled):not([readonly]
 body[data-page="Profile Settings"] .st-input:focus{
     outline:none;
     border-color:var(--st-secondary);
-    box-shadow:0 0 0 3px rgba(0,106,104,.12);
+    box-shadow:var(--st-focus-ring);
 }
 
 body[data-page="Profile Settings"] .st-input[readonly],
 body[data-page="Profile Settings"] .st-input:disabled{
-    background:#f8f9fb;
+    background:var(--st-background);
     color:var(--st-ink-muted, var(--st-on-surface-variant));
     cursor:not-allowed;
     border-color:var(--st-line, var(--st-outline-variant));
@@ -320,73 +320,6 @@ body[data-page="Profile Settings"] .st-profile-summary-details dd{
     overflow-wrap:anywhere;
 }
 
-/* ---------- Quick stats card ---------- */
-body[data-page="Profile Settings"] .st-quick-stats-card{
-    padding:18px 20px 20px;
-}
-
-body[data-page="Profile Settings"] .st-quick-stats-title{
-    margin:0 0 14px;
-    font-family:var(--st-font-heading);
-    font-weight:700;
-    font-size:1.0625rem; /* 17px */
-}
-
-body[data-page="Profile Settings"] .st-quick-stats-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:12px;
-}
-
-body[data-page="Profile Settings"] .st-quick-stat{
-    display:flex;
-    flex-direction:column;
-    gap:2px;
-    padding:14px;
-    border-radius:10px;
-    background:var(--st-background, var(--st-surface-container-low));
-}
-
-body[data-page="Profile Settings"] .st-quick-stat-icon{
-    width:32px;
-    height:32px;
-    border-radius:9px;
-    display:grid;
-    place-items:center;
-    background:var(--st-navy-soft);
-    color:var(--st-primary);
-    margin-bottom:8px;
-}
-
-body[data-page="Profile Settings"] .st-quick-stat-icon .material-symbols-outlined{
-    font-size:18px;
-}
-
-body[data-page="Profile Settings"] .st-quick-stat-icon--teal{
-    background:#e3f4f3;
-    color:var(--st-secondary);
-}
-
-body[data-page="Profile Settings"] .st-quick-stat-value{
-    margin:0;
-    font-family:var(--st-font-heading);
-    font-weight:800;
-    font-size:1.75rem; /* 28px */
-    line-height:1.05;
-    letter-spacing:-.02em;
-    color:var(--st-primary);
-}
-
-body[data-page="Profile Settings"] .st-quick-stat-value--teal{
-    color:var(--st-secondary);
-}
-
-body[data-page="Profile Settings"] .st-quick-stat-label{
-    margin:0;
-    font-size:0.781rem; /* 12.5px */
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
-}
-
 /* ---------- Collapsible sections ---------- */
 body[data-page="Profile Settings"] .st-profile-sections{
     display:flex;
@@ -396,7 +329,7 @@ body[data-page="Profile Settings"] .st-profile-sections{
 }
 
 body[data-page="Profile Settings"] .st-settings-section{
-    background:#fff;
+    background:var(--st-card-background);
     border:1px solid var(--st-line, var(--st-outline-variant));
     border-radius:var(--st-radius-card, var(--st-radius-lg));
     box-shadow:var(--st-shadow-card, var(--st-shadow-sm));
@@ -408,20 +341,36 @@ body[data-page="Profile Settings"] .st-settings-section-header{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:12px;
+    gap:var(--st-space-12);
     width:100%;
-    padding:16px 20px;
+    padding:var(--st-space-16) var(--st-space-20);
     border:0;
-    background:none;
+    background:var(--st-card-background);
     font:inherit;
     color:inherit;
     text-align:left;
+}
+
+body[data-page="Profile Settings"] button.st-settings-section-header{
     cursor:pointer;
     transition:background-color var(--st-t-hover, 150ms);
 }
 
-body[data-page="Profile Settings"] .st-settings-section-header:hover{
-    background:#f8fafd;
+body[data-page="Profile Settings"] button.st-settings-section-header:hover{
+    background:var(--st-background);
+}
+
+body[data-page="Profile Settings"] .st-settings-section-header--static{
+    cursor:default;
+}
+
+body[data-page="Profile Settings"] .st-profile-edit-button{
+    flex:none;
+    gap:var(--st-space-8);
+}
+
+body[data-page="Profile Settings"] .st-profile-edit-button .material-symbols-outlined{
+    font-size:var(--st-icon-sm);
 }
 
 body[data-page="Profile Settings"] .st-settings-section-header-left{
@@ -459,7 +408,8 @@ body[data-page="Profile Settings"] .st-settings-section-body{
     transition:grid-template-rows 300ms var(--st-ease-out, ease);
 }
 
-body[data-page="Profile Settings"] .st-settings-section.is-open .st-settings-section-body{
+body[data-page="Profile Settings"] .st-settings-section.is-open .st-settings-section-body,
+body[data-page="Profile Settings"] [data-settings-section="profile-info"] .st-settings-section-body{
     grid-template-rows:1fr;
 }
 
@@ -518,17 +468,34 @@ body[data-page="Profile Settings"] .st-settings-form-footer{
     grid-column:1/-1;
     display:flex;
     justify-content:flex-end;
-    padding-top:4px;
+    gap:var(--st-space-8);
+    padding-top:var(--st-space-4);
+}
+
+body[data-page="Profile Settings"] .st-settings-form-footer[hidden],
+body[data-page="Profile Settings"] .st-profile-edit-button[hidden]{
+    display:none;
+}
+
+body[data-page="Profile Settings"] #profileInfoForm.is-editing [data-profile-editable]{
+    background:var(--st-input-background);
+    color:var(--st-on-surface);
+    cursor:text;
+    border-color:var(--st-line-strong);
+}
+
+body[data-page="Profile Settings"] #profileInfoForm.is-editing [data-profile-editable]:hover{
+    border-color:var(--st-primary);
 }
 
 body[data-page="Profile Settings"] .st-settings-info-box{
     display:flex;
     gap:10px;
     padding:10px 12px;
-    border-radius:10px;
-    background:#e3f4f3;
-    color:#00504e;
-    font-size:0.813rem; /* 13px */
+    border-radius:var(--st-radius-control);
+    background:var(--st-ev-attendance-soft);
+    color:var(--st-ev-attendance-ink);
+    font-size:var(--st-font-size-caption);
 }
 
 body[data-page="Profile Settings"] .st-settings-info-box p{
@@ -537,11 +504,6 @@ body[data-page="Profile Settings"] .st-settings-info-box p{
 
 body[data-page="Profile Settings"] .st-settings-info-box .material-symbols-outlined{
     font-size:19px;
-}
-
-body[data-page="Profile Settings"] .st-settings-prefs{
-    margin-top:18px!important;
-    border-top:1px solid var(--st-line, var(--st-outline-variant));
 }
 
 /* ---------- Danger zone ---------- */
@@ -635,9 +597,7 @@ body[data-page="Profile Settings"] [data-animate-cards].is-inview > *{
     }
     body[data-page="Profile Settings"] .st-profile-left{
         position:static;
-        display:grid;
-        grid-template-columns:1fr 1fr;
-        align-items:stretch;
+        display:block;
     }
 }
 
@@ -652,9 +612,20 @@ body[data-page="Profile Settings"] [data-animate-cards].is-inview > *{
     body[data-page="Profile Settings"] .st-settings-section-header{
         padding:14px 16px;
     }
+
+    body[data-page="Profile Settings"] .st-settings-section-header--static{
+        align-items:flex-start;
+    }
+    body[data-page="Profile Settings"] .st-profile-edit-button{
+        min-width:max-content;
+    }
     body[data-page="Profile Settings"] .st-settings-section-body-inner > *{
         margin-left:16px;
         margin-right:16px;
+    }
+    body[data-page="Profile Settings"] .st-settings-form-footer{
+        flex-direction:column-reverse;
+        align-items:stretch;
     }
     body[data-page="Profile Settings"] .st-settings-form-footer .st-btn{
         width:100%;

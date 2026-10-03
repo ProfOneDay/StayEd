@@ -3,8 +3,6 @@ const PROFILE_SETTINGS_REDUCE_MOTION = matchMedia(
 ).matches;
 
 class ProfileSettingsPage {
-  static preferences = {};
-
   static async init() {
     if (window.Guards) Guards.teacher();
 
@@ -16,50 +14,23 @@ class ProfileSettingsPage {
 
     this.bindAvatarUpload();
 
-    this.bindToggles();
+    this.bindProfileEditing();
 
     this.bindDangerZone();
 
     this.playEntrance();
 
-    await this.restorePreferences();
+    await this.restoreAccountSettings();
   }
 
-  // Cards/sections settle in once on load, staggered via each element's own
-  // --i (see profile-settings.css); the Quick stats "Active learners" count
-  // animates up to its static HTML value the same way CLC Overview's cards
-  // do. Both [data-animate-cards] groups (left column, right column) are
-  // always above the fold, so this fires directly rather than watching
-  // scroll position.
+  // Cards/sections settle in once on load using the page's shared motion
+  // tokens. Profile Settings no longer includes the old Quick Stats counter.
   static playEntrance() {
     document.querySelectorAll("[data-animate-cards]").forEach((group) => {
       requestAnimationFrame(() =>
         requestAnimationFrame(() => group.classList.add("is-inview")),
       );
     });
-
-    document
-      .querySelectorAll("[data-countup]")
-      .forEach((el) => this.countTo(el));
-  }
-
-  static countTo(el, value) {
-    if (!el) return;
-    const end = Number(value ?? el.dataset.final ?? el.textContent);
-    el.dataset.final = Number.isFinite(end) ? end : (value ?? "");
-    if (PROFILE_SETTINGS_REDUCE_MOTION || !Number.isFinite(end)) {
-      el.textContent = value ?? el.dataset.final;
-      return;
-    }
-    const t0 = performance.now();
-    const dur = 800;
-    const tick = (t) => {
-      const k = Math.min(1, (t - t0) / dur);
-      const eased = 1 - Math.pow(1 - k, 3);
-      el.textContent = Math.round(end * eased);
-      if (k < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
   }
 
   static populateFromUser() {
@@ -271,6 +242,60 @@ class ProfileSettingsPage {
     });
   }
 
+  static bindProfileEditing() {
+    const form = document.getElementById("profileInfoForm");
+    const editButton = document.querySelector("[data-profile-edit]");
+    const cancelButton = document.querySelector("[data-profile-cancel]");
+    if (!form || !editButton) return;
+
+    editButton.addEventListener("click", () => this.setProfileEditMode(true));
+    cancelButton?.addEventListener("click", () => this.cancelProfileEditing());
+  }
+
+  static setProfileEditMode(editing) {
+    const form = document.getElementById("profileInfoForm");
+    const editButton = document.querySelector("[data-profile-edit]");
+    const actions = document.querySelector("[data-profile-edit-actions]");
+    const editableFields = Array.from(
+      document.querySelectorAll("[data-profile-editable]"),
+    );
+    if (!form) return;
+
+    if (editing) {
+      this.profileEditSnapshot = Object.fromEntries(
+        editableFields.map((field) => [field.id, field.value]),
+      );
+    }
+
+    form.classList.toggle("is-editing", editing);
+    editableFields.forEach((field) => {
+      field.readOnly = !editing;
+      field.setAttribute("aria-readonly", editing ? "false" : "true");
+    });
+
+    if (editButton) editButton.hidden = editing;
+    if (actions) actions.hidden = !editing;
+
+    if (editing) {
+      editableFields[0]?.focus();
+      editableFields[0]?.select?.();
+    }
+  }
+
+  static cancelProfileEditing() {
+    const form = document.getElementById("profileInfoForm");
+    const snapshot = this.profileEditSnapshot || {};
+
+    Object.entries(snapshot).forEach(([id, value]) => {
+      const field = document.getElementById(id);
+      if (field) field.value = value;
+    });
+
+    window.UnsavedChanges?.clear(form);
+    this.setProfileEditMode(false);
+    this.profileEditSnapshot = null;
+  }
+
   static bindForms() {
     const profileForm = document.getElementById("profileInfoForm");
 
@@ -278,25 +303,29 @@ class ProfileSettingsPage {
 
     profileForm?.addEventListener("submit", async (event) => {
       event.preventDefault();
+      if (!profileForm.classList.contains("is-editing")) return;
 
-      const email = document.getElementById("settingsEmail")?.value.trim();
+      const firstName = document.getElementById("settingsFirstName")?.value.trim();
+      const lastName = document.getElementById("settingsLastName")?.value.trim();
 
-      if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-        Toast?.error("Enter a valid email address.");
-
+      if (!firstName || !lastName) {
+        Toast?.error("First Name and Last Name are required.");
         return;
       }
 
       try {
         await Auth.updateProfile({
-          first_name: document.getElementById("settingsFirstName")?.value.trim(),
-          last_name: document.getElementById("settingsLastName")?.value.trim(),
-          email,
+          first_name: firstName,
+          last_name: lastName,
           phone: document.getElementById("settingsMobile")?.value.trim(),
         });
 
         window.UnsavedChanges?.clear(profileForm);
         this.populateFromUser();
+        this.setProfileEditMode(false);
+        this.profileEditSnapshot = null;
+        Layout?.restoreUser?.();
+        App?.restoreUser?.();
         Toast?.success("Profile information saved.");
       } catch (error) {
         console.error(error);
@@ -349,26 +378,6 @@ class ProfileSettingsPage {
     });
   }
 
-  static bindToggles() {
-    document
-      .querySelectorAll("[data-settings-toggle-pref]")
-      .forEach((toggle) => {
-        toggle.addEventListener("change", async () => {
-          const key = toggle.dataset.settingsTogglePref;
-
-          try {
-            const result = await API.updateSettings({ [key]: toggle.checked });
-            this.preferences = result.preferences || this.preferences;
-            Toast?.success("Preference updated.");
-          } catch (error) {
-            console.error("[ProfileSettings] Unable to save preference", error);
-            Toast?.error("Unable to save this preference.");
-            toggle.checked = !toggle.checked;
-          }
-        });
-      });
-  }
-
   static bindDangerZone() {
     document
       .querySelector("[data-deactivate-account]")
@@ -388,27 +397,29 @@ class ProfileSettingsPage {
       });
   }
 
-  static async restorePreferences() {
+  static async restoreAccountSettings() {
     try {
       const settings = await API.getSettings();
-      this.preferences = settings.preferences || {};
       if (Object.prototype.hasOwnProperty.call(settings, "avatar")) {
         Auth.updateUser({ avatar: settings.avatar || "" });
         const user = Auth.user() || {};
-        const name = user.full_name || [user.first_name, user.last_name].filter(Boolean).join(" ") || "Teacher";
-        const initials = name.split(" ").filter(Boolean).map((part) => part[0]).slice(0, 2).join("").toUpperCase();
+        const name =
+          user.full_name ||
+          [user.first_name, user.last_name].filter(Boolean).join(" ") ||
+          "Teacher";
+        const initials = name
+          .split(" ")
+          .filter(Boolean)
+          .map((part) => part[0])
+          .slice(0, 2)
+          .join("")
+          .toUpperCase();
         this.renderAvatar(settings.avatar || "", initials);
         Layout?.restoreUser?.();
       }
     } catch (error) {
-      console.error("[ProfileSettings] Unable to load settings", error);
-      return;
+      console.error("[ProfileSettings] Unable to load account settings", error);
     }
-
-    document.querySelectorAll("[data-settings-toggle-pref]").forEach((toggle) => {
-      const key = toggle.dataset.settingsTogglePref;
-      toggle.checked = Boolean(this.preferences[key]);
-    });
   }
 
   static set(selector, value) {

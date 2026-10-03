@@ -334,19 +334,6 @@ body[data-page="Assessment Scores"] .st-badge-info {
   text-align: center;
 }
 
-.st-assessment-status-select {
-  width: 100%;
-  min-width: 170px;
-  max-width: 220px;
-  height: 36px;
-  padding: 0 34px 0 10px;
-  border: 1px solid var(--st-outline-variant);
-  border-radius: var(--st-radius-sm);
-  background: #fff;
-  color: var(--st-on-surface);
-  font: inherit;
-  font-size: var(--st-font-size-caption);
-}
 
 .st-assessment-rating-banner {
   display: flex;
@@ -373,57 +360,23 @@ body[data-page="Assessment Scores"] .st-badge-info {
 }
 
 /* Computed A&E passing-likelihood summary. */
-.st-assessment-likelihood-summary {
-  margin-top: 16px;
-  padding: 16px 18px;
-  border: 1px solid rgba(18, 53, 91, .14);
-  border-radius: var(--st-radius-lg);
-  background: rgba(211, 227, 255, .24);
-}
 
-.st-assessment-likelihood-summary > div {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
 
-.st-assessment-likelihood-summary .material-symbols-outlined {
-  color: var(--st-primary);
-}
 
-.st-assessment-likelihood-kicker {
-  margin: 0;
-  font-size: var(--st-font-size-micro);
-  font-weight: 700;
-  letter-spacing: .03em;
-  color: var(--st-on-surface-variant);
-}
 
-.st-assessment-likelihood-summary strong[data-overall-likelihood-preview] {
-  display: block;
-  margin-top: 2px;
-  font-size: var(--st-font-size-body-lg);
-  color: var(--st-primary);
-}
 
-.st-assessment-likelihood-summary strong[data-overall-likelihood-preview][data-level="high"] {
-  color: var(--st-risk-low);
-}
 
-.st-assessment-likelihood-summary strong[data-overall-likelihood-preview][data-level="low"] {
-  color: var(--st-risk-high);
-}
 
-.st-assessment-likelihood-summary strong[data-overall-likelihood-preview][data-level="neutral"] {
-  color: var(--st-on-surface-variant);
-}
 
-.st-assessment-likelihood-summary > p {
-  margin-top: 12px;
-  font-size: var(--st-font-size-caption);
-  line-height: 1.6;
-  color: var(--st-on-surface-variant);
-}
+
+
+
+
+
+
+
+
+
 
 .st-assessment-result-cell {
   text-align: center;
@@ -924,9 +877,6 @@ body[data-page="Assessment Scores"] .st-badge-info {
   box-shadow: 0 0 0 2px rgba(214, 69, 69, 0.12);
 }
 
-.st-assessment-status-select {
-  margin-inline: auto;
-}
 
 .st-assessment-total-row td {
   padding-top: 14px;
@@ -995,64 +945,19 @@ body[data-page="Assessment Scores"] .st-badge-info {
 }
 
 /* Readiness estimate */
-.st-assessment-likelihood-summary {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 0;
-  padding: 16px 18px;
-  border: 0;
-  border-radius: 0;
-  background: none;
-}
 
-.st-assessment-likelihood-summary > div {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
 
-.st-assessment-likelihood-summary .material-symbols-outlined {
-  width: 40px;
-  height: 40px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 40px;
-  border-radius: 11px;
-  background: var(--st-background, #f3f5f8);
-  color: var(--st-on-surface-variant);
-}
 
-.st-assessment-likelihood-kicker {
-  margin: 0;
-  color: var(--st-on-surface-variant);
-  font-size: 0.781rem; /* 12.5px */
-  font-weight: 600;
-  letter-spacing: normal;
-}
 
-.st-assessment-likelihood-summary strong[data-overall-likelihood-preview] {
-  display: block;
-  margin: 0;
-  font-family: var(--st-font-heading);
-  color: var(--st-on-surface-variant);
-  font-size: 1.125rem; /* 18px */
-  font-weight: 800;
-  line-height: 1.2;
-}
 
-.st-assessment-likelihood-summary strong[data-overall-likelihood-preview][data-level="neutral"] {
-  color: var(--st-on-surface-variant);
-}
 
-.st-assessment-likelihood-summary > p {
-  margin: 0;
-  color: var(--st-on-surface-variant);
-  font-size: 0.781rem; /* 12.5px */
-  line-height: 1.55;
-}
+
+
+
+
+
+
+
 
 @media (max-width: 1100px) {
   [data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-table {
@@ -1065,10 +970,6 @@ body[data-page="Assessment Scores"] .st-badge-info {
   .st-assessment-input--rating {
     width: 190px;
     min-width: 190px;
-  }
-
-  .st-assessment-status-select {
-    min-width: 150px;
   }
 }
 
@@ -1605,5 +1506,359 @@ body[data-page="Assessment Scores"] .st-badge-info {
 
   .st-assessment-learner-row.is-active {
     box-shadow: inset 0 -3px 0 var(--st-secondary);
+  }
+}
+
+/* ============================================================
+   2026-10-03 — Clean, consistent spacing for all assessment records
+   Keeps the existing visual language while tightening row rhythm,
+   aligning controls, and making computed results easier to scan.
+   ============================================================ */
+
+[data-assessment-form] {
+  gap: 20px;
+}
+
+[data-assessment-form] .st-assessment-table-card {
+  border-radius: var(--st-radius-lg);
+}
+
+[data-assessment-form] .st-assessment-table-head {
+  min-height: 46px;
+  padding: 12px 18px;
+  box-sizing: border-box;
+}
+
+[data-assessment-form] .st-assessment-table-head h3 {
+  line-height: 1.25;
+}
+
+[data-assessment-form] .st-assessment-table-head-subtitle {
+  line-height: 1.35;
+}
+
+[data-assessment-form] .st-assessment-table thead th {
+  padding: 10px 16px;
+  line-height: 1.3;
+}
+
+[data-assessment-form] .st-assessment-table tbody td {
+  padding-top: 9px;
+  padding-bottom: 9px;
+  line-height: 1.35;
+}
+
+[data-assessment-form] .st-assessment-section-row td {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+[data-assessment-form] .st-assessment-subsection-row td,
+[data-assessment-form] .st-assessment-total-row td {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+[data-assessment-form] .st-assessment-indent {
+  padding-left: 28px !important;
+}
+
+/* Keep all editable score boxes compact and visually consistent. */
+[data-assessment-form] .st-assessment-input,
+[data-assessment-form] .st-assessment-readonly-score-box,
+[data-assessment-form] .st-assessment-overall-value-box {
+  min-height: 34px;
+}
+
+/* Portfolio column: enough room to breathe, without the oversized empty area. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table th:last-child,
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child {
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: 200px !important;
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+  text-align: center !important;
+}
+
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child > .st-assessment-input,
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child > [data-portfolio-total] {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Work-sample and Revalida entries use the same compact score-box footprint. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  input[data-portfolio-field] {
+  width: 62px !important;
+  min-width: 62px !important;
+  max-width: 62px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+}
+
+/* Computed portfolio totals are slightly wider so two-digit totals read cleanly. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  [data-portfolio-total],
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  [data-revalida-total],
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  [data-portfolio-raw-total] {
+  width: 78px !important;
+  min-width: 78px !important;
+  max-width: 78px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  padding: 0 8px !important;
+  font-weight: 700 !important;
+}
+
+/* Final percentage/rating boxes need enough room for values such as 98.55. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-input--rating {
+  width: 96px !important;
+  min-width: 96px !important;
+  max-width: 96px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  padding: 0 8px !important;
+}
+
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-input--rating::placeholder {
+  font-size: 0.72rem;
+}
+
+/* Date remains compact but readable. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-input--date {
+  width: 150px !important;
+  min-width: 150px !important;
+  max-width: 150px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+}
+
+/* A&E readiness summary: larger and easier to notice/read without changing colors. */
+
+
+
+
+
+
+
+
+
+
+
+
+@media (max-width: 900px) {
+  [data-assessment-form] > .st-assessment-table-card:nth-child(2)
+    .st-assessment-table th:last-child,
+  [data-assessment-form] > .st-assessment-table-card:nth-child(2)
+    .st-assessment-table td:last-child {
+    width: 180px !important;
+    min-width: 180px !important;
+    max-width: 180px !important;
+  }
+}
+
+/* ============================================================
+   2026-10-03 — Consistent Portfolio score boxes + A&E summary layout
+   Keeps the current visual design while aligning all numeric controls
+   and placing the readiness explanation beside the main percentage.
+   ============================================================ */
+
+/* Every numeric field in the Presentation Portfolio Assessment uses
+   one consistent footprint. The date control remains wider by design. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child > .st-assessment-input:not(.st-assessment-input--date),
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child > [data-portfolio-total],
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child > [data-revalida-total],
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child > [data-portfolio-raw-total] {
+  display: block !important;
+  box-sizing: border-box !important;
+  width: 96px !important;
+  min-width: 96px !important;
+  max-width: 96px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: 0 8px !important;
+  text-align: center !important;
+  line-height: 1 !important;
+}
+
+/* Keep computed values visually consistent with editable score boxes. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  [data-portfolio-total],
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  [data-revalida-total],
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  [data-portfolio-raw-total],
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  [data-final-grade] {
+  font-weight: 700 !important;
+}
+
+/* A&E readiness: result on the left, explanation in the open space on the right. */
+
+
+
+
+
+
+
+
+
+
+
+
+@media (max-width: 900px) {
+  
+
+  
+}
+
+/* ============================================================
+   A&E readiness summary — aligned with the StayEd design family.
+   Uses shared CSS tokens for color, typography, spacing, borders,
+   radius, and elevation. Keep this as the single authoritative block.
+   ============================================================ */
+.st-assessment-likelihood-summary {
+  display: grid;
+  grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0;
+  margin: var(--st-space-16);
+  overflow: hidden;
+  border: var(--st-card-border);
+  border-radius: var(--st-card-radius);
+  background: var(--st-card-background);
+  box-shadow: var(--st-shadow-xs);
+  color: var(--st-on-surface);
+  font-family: var(--st-font-body);
+}
+
+.st-assessment-likelihood-main {
+  display: flex;
+  align-items: center;
+  gap: var(--st-space-16);
+  min-width: 0;
+  padding: var(--st-space-20) var(--st-space-24);
+}
+
+.st-assessment-likelihood-main .material-symbols-outlined {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 var(--st-avatar-lg);
+  width: var(--st-avatar-lg);
+  height: var(--st-avatar-lg);
+  border-radius: var(--st-radius-xl);
+  background: var(--st-surface-container-low);
+  color: var(--st-primary);
+  font-size: var(--st-icon-lg);
+}
+
+.st-assessment-likelihood-result {
+  min-width: 0;
+}
+
+.st-assessment-likelihood-kicker {
+  margin: 0 0 var(--st-space-4);
+  color: var(--st-on-surface);
+  font-family: var(--st-font-heading);
+  font-size: var(--st-font-size-label);
+  font-weight: var(--st-font-weight-semibold);
+  line-height: var(--st-line-height-heading);
+}
+
+.st-assessment-likelihood-summary strong[data-overall-likelihood-preview] {
+  display: block;
+  margin: 0;
+  color: var(--st-primary);
+  font-family: var(--st-font-heading);
+  font-size: var(--st-font-size-display);
+  font-weight: var(--st-font-weight-bold);
+  line-height: var(--st-line-height-display);
+  letter-spacing: -0.02em;
+}
+
+.st-assessment-likelihood-summary strong[data-overall-likelihood-preview][data-level="neutral"] {
+  color: var(--st-on-surface-variant);
+  font-size: var(--st-font-size-body-lg);
+  letter-spacing: 0;
+}
+
+.st-assessment-likelihood-note {
+  display: block;
+  align-self: stretch;
+  min-width: 0;
+  margin: 0;
+  padding: var(--st-space-20) var(--st-space-24);
+  border-left: 1px solid var(--st-outline-variant);
+  color: var(--st-on-surface-variant);
+  font-family: var(--st-font-body);
+  font-size: var(--st-font-size-small);
+  font-weight: var(--st-font-weight-regular);
+  line-height: var(--st-line-height-body);
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.st-assessment-likelihood-note strong {
+  color: var(--st-on-surface);
+  font-weight: var(--st-font-weight-semibold);
+}
+
+@media (max-width: 900px) {
+  .st-assessment-likelihood-summary {
+    grid-template-columns: 1fr;
+    margin: var(--st-space-12);
+  }
+
+  .st-assessment-likelihood-main {
+    padding: var(--st-space-16) var(--st-space-20);
+  }
+
+  .st-assessment-likelihood-note {
+    padding: var(--st-space-16) var(--st-space-20);
+    border-left: 0;
+    border-top: 1px solid var(--st-outline-variant);
+  }
+}
+
+@media (max-width: 576px) {
+  .st-assessment-likelihood-main {
+    align-items: flex-start;
+  }
+
+  .st-assessment-likelihood-main .material-symbols-outlined {
+    flex-basis: var(--st-avatar-md);
+    width: var(--st-avatar-md);
+    height: var(--st-avatar-md);
+    font-size: var(--st-icon-md);
+  }
+
+  .st-assessment-likelihood-summary strong[data-overall-likelihood-preview] {
+    font-size: var(--st-font-size-title);
+  }
+
+  .st-assessment-likelihood-note {
+    font-size: var(--st-font-size-label);
   }
 }
