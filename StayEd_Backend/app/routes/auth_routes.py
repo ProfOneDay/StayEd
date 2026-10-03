@@ -139,16 +139,12 @@ def register():
     if fetch_one("SELECT user_id FROM users WHERE LOWER(email) = LOWER(%s)", (email,)):
         return error("Email already exists.", 409)
 
-    # Panel requirement: only names on the division's official ALS Teachers
-    # roster may self-register. Checked here, before any account is
-    # created, so an unlisted name is rejected outright rather than merely
-    # flagged for admin review.
-    if not is_on_teacher_roster(full_name):
-        return error(
-            "This name was not found in the official ALS Teachers roster for this division. "
-            "Please contact your school administrator if you believe this is an error.",
-            403,
-        )
+    # A name not on the division's official ALS Teachers roster no longer
+    # blocks registration outright -- it still goes through, but flagged
+    # (isOnRoster, surfaced in the admin review screen same as isDepedVerified)
+    # so an admin manually verifies it before approving, instead of nobody
+    # ever checking.
+    on_roster = is_on_teacher_roster(full_name)
 
     first_name, last_name = split_name(full_name)
     username_base = email.split("@", 1)[0][:80] or "teacher"
@@ -210,9 +206,10 @@ def register():
                     (
                         admin["user_id"],
                         "New Teacher Registration",
-                        f"{full_name} ({email}) has registered and is awaiting approval.",
+                        f"{full_name} ({email}) has registered and is awaiting approval."
+                        + ("" if on_roster else " Not found on the official ALS Teachers roster -- verify manually."),
                         "user-management.html",
-                        "Pending",
+                        "Pending" if on_roster else "Not on Roster",
                         f"registration:{user_id}",
                     ),
                 )
