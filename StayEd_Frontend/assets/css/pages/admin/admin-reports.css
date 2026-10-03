@@ -1,221 +1,130 @@
-.st-report-panel-head {
-  padding-top: 20px;
-  padding-bottom: 16px;
-  padding-left: 24px;
-  padding-right: 24px;
-  margin-bottom: 0;
+/* ============================================================
+   Admin Reports. Shares data-page="Reports" with the teacher Reports
+   page, so every rule below is scoped under body.st-admin[data-page="Reports"]
+   (or just body.st-admin for the generic admin "table card" shell, which
+   only this page currently uses but isn't page-specific in nature) to keep
+   it from affecting -- or being affected by -- the teacher page's own
+   reports.css, which uses an entirely different class vocabulary
+   (.st-report-grid/.st-report-card/...) for its own layout.
+   .chart-type-toggle/.chart-type-btn stay untouched here -- they're the
+   already-shared, unscoped component (dashboard.css) used by the teacher
+   dashboard, admin dashboard, and this page's Learners/Teachers toggle.
+   ============================================================ */
+
+/* ---- Generic admin "table card" shell (st-table-card/-head/-title) ----
+   Reused on top of the existing global .st-panel (white card shell) --
+   only this page uses it today, but it isn't Reports-specific by nature. */
+body.st-admin [hidden]{display:none!important}
+body.st-admin .st-table-card{display:flex;flex-direction:column;overflow:hidden}
+body.st-admin .st-table-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:18px 20px 14px}
+body.st-admin .st-table-card-title{margin:0;font-family:var(--st-font-heading);font-weight:700;font-size:1.125rem;color:var(--st-on-surface)}
+
+/* ---- Reports page ---- */
+body.st-admin[data-page="Reports"] .st-adm-report-head{align-items:flex-start;gap:16px;flex-wrap:wrap}
+body.st-admin[data-page="Reports"] .st-adm-report-head .chart-type-btn{display:inline-flex;align-items:center;gap:6px}
+body.st-admin[data-page="Reports"] .st-adm-report-head .chart-type-btn .material-symbols-outlined{font-size:17px}
+body.st-admin[data-page="Reports"] .st-adm-report-head > .st-btn{flex:none}
+body.st-admin[data-page="Reports"] .st-adm-card-sub{margin:3px 0 0;font-size:.844rem;color:var(--st-ink-muted,#5a6275);max-width:720px}
+
+/* Count badge on "Reports from Teachers" */
+body.st-admin[data-page="Reports"] .st-adm-count-badge{display:inline-flex;align-items:center;margin-left:8px;padding:2px 9px;border-radius:999px;background:#fef3e4;color:#8f5200;font-family:var(--st-font-body,Inter);font-size:.75rem;font-weight:700;vertical-align:3px}
+
+/* Toolbar shared with admin-list-pages' .st-adm-toolbar; just widen it
+   to this page's usual search/select proportions. */
+body.st-admin[data-page="Reports"] .st-adm-toolbar .st-select{width:220px;flex:none}
+body.st-admin[data-page="Reports"] .st-adm-toolbar .st-search{flex:1 1 280px;max-width:420px}
+
+/* Filter grid: search + up to 6 labelled selects. 6 columns desktop,
+   3 under 1280px, 2 on mobile. */
+body.st-admin[data-page="Reports"] .st-adm-report-filters{display:grid;grid-template-columns:minmax(240px,1.6fr) repeat(5,minmax(140px,1fr));gap:12px;align-items:end;padding:0 20px 14px}
+body.st-admin[data-page="Reports"] .st-adm-report-filters .st-search{height:40px}
+body.st-admin[data-page="Reports"] .st-adm-filter-field{display:flex;flex-direction:column;gap:6px;min-width:0}
+body.st-admin[data-page="Reports"] .st-adm-filter-field label{font-size:.781rem;font-weight:600;color:var(--st-ink-muted,#5a6275)}
+body.st-admin[data-page="Reports"] .st-adm-filter-field .st-select{width:100%}
+
+@media (max-width:1279px){
+  body.st-admin[data-page="Reports"] .st-adm-report-filters{grid-template-columns:repeat(3,minmax(0,1fr))}
+  body.st-admin[data-page="Reports"] .st-adm-report-filters .st-search{grid-column:1/-1}
 }
 
-/* "Reports from Teachers" and "Master Enrollment Listing" titles specifically
-   -- not every .st-panel-title site-wide. */
-.st-report-panel-head .st-panel-title {
-  font-size: calc(var(--st-font-size-body-lg) + 2px);
-  margin-top: 6px;
+/* Gray action bar: count line on the left, CSV chip + export button right. */
+body.st-admin[data-page="Reports"] .st-adm-report-actionbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 20px 14px;padding:10px 12px 10px 14px;border-radius:10px;background:var(--st-background)}
+body.st-admin[data-page="Reports"] .st-adm-report-actions{display:flex;align-items:center;gap:12px}
+body.st-admin[data-page="Reports"] .st-report-preview-count{display:flex;align-items:center;gap:8px;margin:0;font-size:.844rem;color:var(--st-ink-muted,#5a6275)}
+body.st-admin[data-page="Reports"] .st-report-preview-count b{color:var(--st-primary);font-family:var(--st-font-heading);font-size:1rem}
+body.st-admin[data-page="Reports"] .st-report-preview-count .material-symbols-outlined{font-size:18px;color:var(--st-ink-faint,#8a91a0)}
+body.st-admin[data-page="Reports"] .st-adm-count-line{padding:0 20px 10px}
+
+/* Search clear (x) button -- the input itself reuses the shared .st-search
+   component; this just adds the inline clear control. */
+body.st-admin[data-page="Reports"] .st-report-search{position:relative}
+body.st-admin[data-page="Reports"] .st-report-search input{padding-right:34px!important}
+body.st-admin[data-page="Reports"] .st-report-search-clear{appearance:none;border:0;background:none;position:absolute;right:6px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:6px;display:grid;place-items:center;color:var(--st-ink-muted,#5a6275);cursor:pointer;transition:background-color var(--st-t-hover,150ms),color var(--st-t-hover,150ms)}
+body.st-admin[data-page="Reports"] .st-report-search-clear:hover{background:var(--st-background);color:var(--st-on-surface)}
+body.st-admin[data-page="Reports"] .st-report-search-clear .material-symbols-outlined{font-size:17px}
+
+/* Preview table: scrolls inside its card with a sticky header, max-height
+   520px (narrower than the shared .st-table-scroll--sticky default of
+   640px, to leave room for the action bar above it). */
+body.st-admin[data-page="Reports"] .st-report-table-wrap{margin:0 20px 20px}
+body.st-admin[data-page="Reports"] .st-report-table-wrap.st-table-scroll--sticky{max-height:520px}
+body.st-admin[data-page="Reports"] .st-adm-report-table td{font-size:.844rem;white-space:nowrap}
+body.st-admin[data-page="Reports"] .st-adm-report-table td.num{font-variant-numeric:tabular-nums;color:var(--st-ink-muted,#5a6275)}
+body.st-admin[data-page="Reports"] .st-adm-learner{font-weight:600;color:var(--st-on-surface)}
+body.st-admin[data-page="Reports"] .st-adm-level-chip{display:inline-flex;padding:2px 8px;border-radius:6px;background:var(--st-navy-soft,#e8eef6);color:var(--st-primary);font-size:.75rem;font-weight:700}
+body.st-admin[data-page="Reports"] .st-report-sub{display:block;margin-top:2px;font-size:.75rem;color:var(--st-ink-faint,#8a91a0);white-space:normal}
+
+/* "Mark reviewed" -- teal text button (distinct from the gray .st-btn-text
+   used elsewhere in the app). */
+body.st-admin[data-page="Reports"] .st-text-link-btn{appearance:none;border:0;background:none;padding:0 8px;height:32px;border-radius:8px;font:inherit;font-size:.8125rem;font-weight:600;color:var(--st-secondary);cursor:pointer}
+body.st-admin[data-page="Reports"] .st-text-link-btn:hover{background:#e3f4f3}
+
+/* Keep the existing DOM order (Reports-from-Teachers panel first, Master
+   Enrollment Listing second) but display Master Enrollment Listing first. */
+body.st-admin[data-page="Reports"] .st-content:has([data-submitted-reports-panel]) .st-report-master-panel{order:1}
+body.st-admin[data-page="Reports"] .st-content:has([data-submitted-reports-panel]) .st-report-submitted-panel{order:2}
+
+/* ---- Motion: cards settle in once on load, rows fade in staggered after
+   each render (load, filter, mode change). ---- */
+body.st-admin[data-page="Reports"] .st-report-master-panel[data-animate],
+body.st-admin[data-page="Reports"] .st-report-submitted-panel[data-animate]{
+  opacity:0;transform:translateY(8px);
+}
+body.st-admin[data-page="Reports"] .st-report-master-panel[data-animate].is-inview,
+body.st-admin[data-page="Reports"] .st-report-submitted-panel[data-animate].is-inview{
+  opacity:1;transform:none;
+  transition:opacity 400ms ease,transform 500ms var(--st-ease-out,ease);
+  transition-delay:calc(var(--i,0) * 60ms);
 }
 
-.st-report-toolbar > [data-notify-teachers-btn].st-btn-primary {
-  background: var(--st-primary);
-  color: #fff;
-}
-
-.st-report-toolbar > [data-notify-teachers-btn].st-btn-primary:hover {
-  background: var(--st-primary-dark);
-}
-
-body[data-page="Reports"] .st-content:has([data-submitted-reports-panel]) .st-report-master-panel {
-  order: 1;
-}
-
-body[data-page="Reports"] .st-content:has([data-submitted-reports-panel]) .st-report-submitted-panel {
-  order: 2;
-}
-
-.st-report-listing-actions {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 16px 24px;
-  margin-bottom: 4px;
-  flex-wrap: wrap;
-}
-
-.st-report-groupby {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: var(--st-font-size-caption);
-  font-weight: 600;
-  color: var(--st-text-secondary);
-}
-
-.st-report-groupby select {
-  min-width: 220px;
-  height: 40px;
-  padding: 0 12px;
-  border: 1px solid var(--st-outline-variant);
-  border-radius: var(--st-button-radius);
-  background: #fff;
-  font-family: var(--st-font-body);
-  font-size: var(--st-font-size-caption);
-  font-weight: 400;
-  color: var(--st-on-surface);
-}
-
-.st-report-groupby select:focus {
-  outline: none;
-  border-color: var(--st-secondary);
-  box-shadow: var(--st-focus-ring);
-}
-
-.st-report-action-buttons {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.st-report-listing-actions .st-btn {
-  height: 40px;
-}
-
-.st-report-preview-count {
-  padding: 0 24px;
-  margin: 4px 0 14px;
-}
-
-.st-report-search {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.st-report-search input {
-  padding-right: 36px !important;
-}
-
-.st-report-search-clear {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 28px;
-  height: 28px;
-  background: transparent;
-  border: none;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
-  color: var(--st-text-secondary, #5f6368);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  z-index: 10;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.st-report-search-clear:hover {
-  background: rgba(0, 0, 0, 0.08);
-  color: var(--st-text-primary, #202124);
-}
-
-.st-report-search-clear.st-hidden {
-  display: none !important;
-}
-
-.st-search .st-report-search-clear .material-symbols-outlined,
-.st-report-search .st-report-search-clear .material-symbols-outlined,
-.st-report-search-clear .material-symbols-outlined {
-  position: static !important;
-  left: auto !important;
-  top: auto !important;
-  transform: none !important;
-  font-size:1.125rem !important;
-  line-height: 1 !important;
-  color: inherit !important;
-  display: inline-block !important;
-  pointer-events: none !important;
-}
-
-/* Adviser revision: make the Master Enrollment Listing easier to scan. */
-.st-report-master-panel{
-  overflow:hidden;
-}
-
-.st-report-toolbar{
-  align-items:flex-end;
-  gap:16px;
-  padding:18px 24px 20px;
-  border-top:1px solid rgba(195,198,207,.18);
-  border-bottom:1px solid rgba(195,198,207,.22);
-  background:var(--st-surface-container-lowest);
-}
-
-.st-report-filter-grid{
-  flex:1 1 760px;
-  display:grid;
-  grid-template-columns:minmax(280px,2fr) repeat(5,minmax(145px,1fr));
-  gap:10px;
-  align-items:center;
-}
-
-.st-report-filter-grid .st-search,
-.st-report-filter-grid select{
-  width:100%;
-  min-width:0 !important;
-  height:42px;
-}
-
-.st-report-toolbar > .st-btn{
-  height:42px;
-  padding-inline:18px;
-  white-space:nowrap;
-  flex:none;
-}
-
-.st-report-preview-count{
-  padding:14px 24px 8px;
-  margin:0;
-  color:var(--st-on-surface-variant);
-}
-
-.st-report-table-wrap{
-  margin:0 24px 24px;
-  border:1px solid rgba(195,198,207,.28);
-  border-radius:var(--st-radius-lg);
-}
-
-.st-report-table-wrap .st-data-table th,
-.st-report-table-wrap .st-data-table td{
-  padding:13px 16px;
-  vertical-align:middle;
-  line-height:1.35;
-}
-
-.st-report-table-wrap .st-data-table th{ font-size: 0.781rem; /* 12.5px */ }
-.st-report-table-wrap .st-data-table td{ font-size: 0.875rem; /* 14px */ }
-
-.st-report-table-wrap .st-data-table th{
-  white-space:nowrap;
-}
-
-@media (max-width:1400px){
-  .st-report-filter-grid{
-    grid-template-columns:minmax(260px,2fr) repeat(3,minmax(150px,1fr));
-  }
+body.st-admin[data-page="Reports"] [data-animate-rows] tr{opacity:0;transform:translateY(4px)}
+body.st-admin[data-page="Reports"] [data-animate-rows].is-inview tr{
+  opacity:1;transform:none;
+  transition:opacity 300ms ease,transform 400ms var(--st-ease-out,ease);
+  transition-delay:calc(var(--i,0) * 30ms);
 }
 
 @media (max-width:900px){
-  .st-report-toolbar{align-items:stretch;}
-  .st-report-filter-grid{grid-template-columns:1fr 1fr;}
-  .st-report-filter-grid .st-report-search{grid-column:1 / -1;}
-  .st-report-toolbar > .st-btn{width:100%;justify-content:center;}
+  body.st-admin[data-page="Reports"] .st-adm-report-filters{grid-template-columns:1fr 1fr}
+  body.st-admin[data-page="Reports"] .st-adm-report-filters .st-search{grid-column:1/-1}
+  body.st-admin[data-page="Reports"] .st-adm-report-actionbar{flex-direction:column;align-items:stretch}
+  body.st-admin[data-page="Reports"] .st-adm-report-actions{justify-content:space-between}
+  body.st-admin[data-page="Reports"] .st-adm-report-head .chart-type-toggle{width:100%}
+  body.st-admin[data-page="Reports"] .st-adm-report-head .chart-type-btn{flex:1;justify-content:center}
+  body.st-admin[data-page="Reports"] .st-adm-report-head > .st-btn{width:100%}
 }
 
-@media (max-width:600px){
-  .st-report-toolbar{padding:16px;}
-  .st-report-filter-grid{grid-template-columns:1fr;}
-  .st-report-filter-grid .st-report-search{grid-column:auto;}
-  .st-report-preview-count{padding-inline:16px;}
-  .st-report-table-wrap{margin:0 16px 16px;}
+@media (max-width:767px){
+  body.st-admin[data-page="Reports"] .st-adm-toolbar .st-select{width:100%;flex:1 1 100%}
+  body.st-admin[data-page="Reports"] .st-adm-report-filters{padding:0 16px 14px}
+  body.st-admin[data-page="Reports"] .st-adm-report-actionbar{margin:0 16px 14px}
+  body.st-admin[data-page="Reports"] .st-report-table-wrap{margin:0 16px 16px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  body.st-admin[data-page="Reports"] .st-report-master-panel[data-animate],
+  body.st-admin[data-page="Reports"] .st-report-submitted-panel[data-animate],
+  body.st-admin[data-page="Reports"] [data-animate-rows] tr{
+    opacity:1;transform:none;
+  }
 }

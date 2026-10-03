@@ -146,7 +146,7 @@ class Router {
     ],
     "admin/settings.html": [
       { label: "Dashboard", href: "dashboard.html" },
-      { label: "Settings" },
+      { label: "System Settings" },
     ],
   };
 

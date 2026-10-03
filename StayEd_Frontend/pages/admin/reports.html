@@ -33,7 +33,7 @@
       href="../../assets/img/brand/apple-touch-icon.png"
     />
   </head>
-  <body class="st-app" data-page="Reports">
+  <body class="st-app st-admin" data-page="Reports">
     <div data-component="layout/sidebar-admin"></div>
 
     <div class="st-main">
@@ -50,66 +50,61 @@
           </div>
         </div>
 
-        <div class="st-panel col-12 st-report-master-panel st-report-submitted-panel" data-submitted-reports-panel>
-          <div class="st-panel-head st-report-panel-head">
+        <div class="st-panel st-table-card st-report-master-panel st-report-submitted-panel" data-submitted-reports-panel data-animate style="--i:1">
+          <div class="st-table-card-head st-adm-report-head">
             <div>
-              <h3 class="st-panel-title">
+              <h2 class="st-table-card-title">
                 Reports from Teachers
-                <span class="st-badge st-badge-warning st-hidden" data-submitted-reports-unread-badge></span>
-              </h3>
-              <p class="st-panel-subtitle">
+                <span class="st-adm-count-badge st-hidden" data-submitted-reports-unread-badge></span>
+              </h2>
+              <p class="st-adm-card-sub">
                 At-risk, intervention, class list, attendance, and individual
                 learner progress reports teachers have sent up for review.
               </p>
             </div>
-          </div>
-
-          <div class="st-records-toolbar st-report-toolbar">
-            <div
-              class="st-records-toolbar-filters st-report-filter-grid"
-              style="grid-template-columns: minmax(220px, 2fr) repeat(2, minmax(170px, 1fr));"
-            >
-              <div class="st-search st-report-search">
-                <span class="material-symbols-outlined">search</span>
-                <input
-                  type="text"
-                  data-submitted-reports-search
-                  placeholder="Search title or teacher…"
-                  aria-label="Search reports from teachers"
-                />
-                <button
-                  type="button"
-                  class="st-report-search-clear st-hidden"
-                  data-submitted-reports-search-clear
-                  aria-label="Clear search"
-                >
-                  <span class="material-symbols-outlined">close</span>
-                </button>
-              </div>
-              <select data-submitted-reports-type-filter aria-label="Filter by report type">
-                <option value="">All Report Types</option>
-                <option value="AT_RISK">At-Risk Learners List</option>
-                <option value="INTERVENTION">Intervention Tracking Report</option>
-                <option value="LEARNER_PROGRESS">Individual Learner Progress</option>
-                <option value="CLASS_LIST">Class List Report</option>
-                <option value="ATTENDANCE">Attendance List Report</option>
-              </select>
-              <select data-submitted-reports-status-filter aria-label="Filter by status">
-                <option value="">All Statuses</option>
-                <option value="UNREVIEWED">New</option>
-                <option value="REVIEWED">Reviewed</option>
-              </select>
-            </div>
             <button type="button" class="st-btn st-btn-primary" data-notify-teachers-btn>
               <span class="material-symbols-outlined">campaign</span>
-              Notify Teachers
+              Notify teachers
             </button>
           </div>
 
-          <p class="st-report-preview-count" data-submitted-reports-count></p>
+          <div class="st-adm-toolbar">
+            <div class="st-search st-report-search">
+              <span class="material-symbols-outlined">search</span>
+              <input
+                type="text"
+                data-submitted-reports-search
+                placeholder="Search title or teacher"
+                aria-label="Search reports from teachers"
+              />
+              <button
+                type="button"
+                class="st-report-search-clear st-hidden"
+                data-submitted-reports-search-clear
+                aria-label="Clear search"
+              >
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <select class="st-select" data-submitted-reports-type-filter aria-label="Filter by report type">
+              <option value="">All report types</option>
+              <option value="AT_RISK">At-Risk Learners List</option>
+              <option value="INTERVENTION">Intervention Tracking Report</option>
+              <option value="LEARNER_PROGRESS">Individual Learner Progress</option>
+              <option value="CLASS_LIST">Class List Report</option>
+              <option value="ATTENDANCE">Attendance List Report</option>
+            </select>
+            <select class="st-select" data-submitted-reports-status-filter aria-label="Filter by status">
+              <option value="">All statuses</option>
+              <option value="UNREVIEWED">New</option>
+              <option value="REVIEWED">Reviewed</option>
+            </select>
+          </div>
+
+          <p class="st-report-preview-count st-adm-count-line" data-submitted-reports-count></p>
 
           <div class="st-table-scroll st-table-scroll--sticky st-report-table-wrap">
-            <table class="st-data-table">
+            <table class="st-data-table st-adm-report-table">
               <thead>
                 <tr>
                   <th>Report</th>
@@ -117,10 +112,10 @@
                   <th>Submitted By</th>
                   <th>Submitted</th>
                   <th>Status</th>
-                  <th>Action</th>
+                  <th class="is-right">Action</th>
                 </tr>
               </thead>
-              <tbody data-submitted-reports-body>
+              <tbody data-submitted-reports-body data-animate-rows>
                 <tr>
                   <td colspan="6" class="st-table-empty-cell">Loading…</td>
                 </tr>
@@ -129,105 +124,101 @@
           </div>
         </div>
 
-        <div class="st-panel col-12 st-report-master-panel">
-          <div class="st-panel-head st-report-panel-head">
+        <div class="st-panel st-table-card st-report-master-panel" data-animate style="--i:0">
+          <div class="st-table-card-head st-adm-report-head">
             <div>
-              <h3 class="st-panel-title" data-report-mode-title>Master Enrollment Listing</h3>
-              <p class="st-panel-subtitle" data-report-mode-subtitle>
+              <h2 class="st-table-card-title" data-report-mode-title>Master Enrollment Listing</h2>
+              <p class="st-adm-card-sub" data-report-mode-subtitle>
                 Export the Master Enrollment Listing CSV across every learning
                 center, filtered the way you need.
               </p>
             </div>
             <div class="chart-type-toggle" role="group" aria-label="Choose report subject" id="reportModeToggle">
-              <button type="button" class="chart-type-btn is-active" data-report-mode="learners">Learners</button>
-              <button type="button" class="chart-type-btn" data-report-mode="teachers">Teachers</button>
+              <button type="button" class="chart-type-btn is-active" data-report-mode="learners">
+                <span class="material-symbols-outlined">school</span>Learners
+              </button>
+              <button type="button" class="chart-type-btn" data-report-mode="teachers">
+                <span class="material-symbols-outlined">badge</span>Teachers
+              </button>
             </div>
           </div>
 
-          <div class="st-records-toolbar st-report-toolbar">
-            <div class="st-records-toolbar-filters st-report-filter-grid">
-              <div class="st-search st-report-search" style="min-width: 260px;">
-                <span class="material-symbols-outlined">search</span>
-                <input
-                  type="text"
-                  data-report-filter-search
-                  placeholder="Search name, LRN, CLC, or teacher…"
-                  aria-label="Search enrollment records"
-                />
-                <button
-                  type="button"
-                  class="st-report-search-clear st-hidden"
-                  data-report-filter-clear
-                  aria-label="Clear search"
-                >
-                  <span class="material-symbols-outlined">close</span>
-                </button>
-              </div>
-              <select
-                data-report-filter-clc
-                aria-label="Filter by learning center"
+          <div class="st-adm-report-filters">
+            <div class="st-search st-report-search">
+              <span class="material-symbols-outlined">search</span>
+              <input
+                type="text"
+                data-report-filter-search
+                placeholder="Search name, LRN, CLC, or teacher"
+                aria-label="Search enrollment records"
+              />
+              <button
+                type="button"
+                class="st-report-search-clear st-hidden"
+                data-report-filter-clear
+                aria-label="Clear search"
               >
-                <option value="">All Learning Centers</option>
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div class="st-adm-filter-field">
+              <label for="reportFilterClc">Learning center</label>
+              <select class="st-select" id="reportFilterClc" data-report-filter-clc aria-label="Filter by learning center">
+                <option value="">All learning centers</option>
               </select>
-              <select
-                data-report-filter-year
-                data-mode-only="learners"
-                aria-label="Filter by school year"
-              >
-                <option value="">All School Years</option>
+            </div>
+            <div class="st-adm-filter-field">
+              <label for="reportFilterYear">School year</label>
+              <select class="st-select" id="reportFilterYear" data-report-filter-year data-mode-only="learners" aria-label="Filter by school year">
+                <option value="">All school years</option>
               </select>
-              <select
-                data-report-filter-semester
-                data-mode-only="learners"
-                aria-label="Filter by academic semester"
-              >
-                <option value="">All Semesters</option>
+            </div>
+            <div class="st-adm-filter-field">
+              <label for="reportFilterSemester">Semester</label>
+              <select class="st-select" id="reportFilterSemester" data-report-filter-semester data-mode-only="learners" aria-label="Filter by academic semester">
+                <option value="">All semesters</option>
               </select>
-              <select
-                data-report-filter-teacher
-                data-mode-only="learners"
-                aria-label="Filter by assigned teacher"
-              >
-                <option value="">All Teachers</option>
+            </div>
+            <div class="st-adm-filter-field">
+              <label for="reportFilterTeacher">Teacher</label>
+              <select class="st-select" id="reportFilterTeacher" data-report-filter-teacher data-mode-only="learners" aria-label="Filter by assigned teacher">
+                <option value="">All teachers</option>
               </select>
-              <select
-                data-report-filter-modality
-                data-mode-only="learners"
-                aria-label="Filter by learning delivery mode"
-              >
-                <option value="">All Modalities</option>
+            </div>
+            <div class="st-adm-filter-field">
+              <label for="reportFilterModality">Modality</label>
+              <select class="st-select" id="reportFilterModality" data-report-filter-modality data-mode-only="learners" aria-label="Filter by learning delivery mode">
+                <option value="">All modalities</option>
               </select>
-              <select
-                data-report-filter-teacher-status
-                data-mode-only="teachers"
-                aria-label="Filter by account status"
-                style="display: none"
-              >
-                <option value="">All Statuses</option>
+            </div>
+            <div class="st-adm-filter-field" hidden>
+              <label for="reportFilterTeacherStatus">Account status</label>
+              <select class="st-select" id="reportFilterTeacherStatus" data-report-filter-teacher-status data-mode-only="teachers" aria-label="Filter by account status">
+                <option value="">All statuses</option>
                 <option value="active">Active</option>
                 <option value="pending">Pending</option>
                 <option value="deactivated">Deactivated</option>
               </select>
             </div>
-            <button
-              type="button"
-              class="st-btn st-btn-primary"
-              data-preview-enrollment-report
-            >
-              <span class="material-symbols-outlined">preview</span>
-              Preview &amp; Export
-            </button>
           </div>
 
-          <p
-            class="st-pagination-info st-report-preview-count"
-            data-report-preview-count
-          >
-            Loading enrollment records…
-          </p>
+          <div class="st-adm-report-actionbar">
+            <p class="st-report-preview-count" data-report-preview-count>Loading enrollment records…</p>
+            <div class="st-adm-report-actions">
+              <span class="st-format-chip"><span class="material-symbols-outlined">table</span>CSV</span>
+              <button
+                type="button"
+                class="st-btn st-btn-primary"
+                data-preview-enrollment-report
+              >
+                <span class="material-symbols-outlined">preview</span>
+                Preview &amp; export
+              </button>
+            </div>
+          </div>
 
           <div class="st-table-scroll st-table-scroll--sticky st-report-table-wrap">
-            <table class="st-data-table">
+            <table class="st-data-table st-adm-report-table">
               <thead>
                 <tr data-report-preview-head>
                   <th>LRN</th>
@@ -241,7 +232,7 @@
                   <th>Status</th>
                 </tr>
               </thead>
-              <tbody data-report-preview-body>
+              <tbody data-report-preview-body data-animate-rows>
                 <tr>
                   <td colspan="9" class="st-table-empty-cell">Loading…</td>
                 </tr>

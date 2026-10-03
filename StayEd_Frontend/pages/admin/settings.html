@@ -25,94 +25,68 @@
   rel="apple-touch-icon"
   href="../../assets/img/brand/apple-touch-icon.png"
 />
-<title>StayEd Admin — Settings</title>
+<title>StayEd Admin — System Settings</title>
 </head>
-<body class="st-app" data-page="Settings">
+<body class="st-app st-admin" data-page="System Settings">
 <div data-component="layout/sidebar-admin"></div>
 <div class="st-main">
 <div data-component="layout/navbar"></div>
-<main class="st-content"><div class="st-page-header"><h1 class="st-page-header-title">Settings</h1><p class="st-page-header-subtitle">Manage your profile, security, and learning strands.</p></div>
-
-  <div class="settings-tabs" id="settingsTabs">
-    <button class="active" data-section="profile">Profile</button>
-    <button data-section="security">Security</button>
-    <button data-section="academic">Academic Year</button>
-  </div>
-
-  <!-- Profile -->
-  <div class="section active" id="section-profile">
-   <div class="profile-grid">
-    <div class="card profile-card">
-      <h2><span class="section-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2"/></svg></span>Account Settings</h2>
-      <div class="card-sub">Your profile as it appears across the admin dashboard.</div>
-      <div class="profile-avatar-wrap">
-        <div class="avatar-xl" id="profileAvatarInitials">LF</div>
-        <div class="profile-name" id="profileDisplayName">Liza Fernandez</div>
-        <div class="profile-role">ALS Coordinator</div>
-      </div>
-      <hr class="divider"/>
-      <div class="detail-grid">
-        <div><small>Status</small><b style="color:var(--success)">● Active</b></div>
-        <div><small>Last Login</small><b>Today</b></div>
-        <div><small>DepEd Email</small><b id="profileEmailDisplay">liza.fernandez@deped.gov.ph</b></div>
-        <div><small>Contact Number</small><b id="profilePhoneDisplay">+63 917 800 2214</b></div>
-        <div><small>Employee ID</small><b id="profileEmpIdDisplay">ED-ALS-2024-0031</b></div>
-        <div><small>Join Date</small><b>June 3, 2023</b></div>
-      </div>
-      <div class="actions-row" style="justify-content:flex-start;margin-top:16px">
-        <button class="btn" id="openEditProfileBtn">Edit Profile</button>
-      </div>
-    </div>
-    <div class="card danger-zone profile-card">
-      <h2><span class="section-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M10.29 3.86l-8.18 14A2 2 0 0 0 3.82 21h16.36a2 2 0 0 0 1.71-3.14l-8.18-14a2 2 0 0 0-3.42 0Z"/></svg></span>Danger Zone</h2>
-      <div class="card-sub">Actions here affect your own account access.</div>
-      <div class="settings-row" style="flex-wrap:wrap">
-        <div><b>Sign Out from System</b><small>End your current session across all devices.</small></div>
-        <button class="btn" id="logoutBtn">Log Out</button>
-      </div>
-      <div class="settings-row" style="flex-wrap:wrap">
-        <div><b style="color:#A83030">Deactivate Account</b><small>You'll immediately lose access to administrative tools.</small></div>
-        <button class="btn danger" id="deactivateSelfBtn">Deactivate</button>
-      </div>
-    </div>
-   </div>
-  </div>
-
-  <!-- Security -->
-  <div class="section" id="section-security">
-    <div class="card">
-      <h2><span class="section-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>Security Settings</h2>
-      <div class="card-sub">Manage how you sign in and keep your account secure.</div>
-      <div class="settings-row">
-        <div><b>Account Password</b><small>Last changed 3 months ago</small></div>
-        <button class="btn" id="openChangePasswordBtn2">Change Password</button>
-      </div>
-      <div class="settings-row">
-        <div><b>Two-Factor Authentication</b><small>Preference saved — verification at sign-in is not yet enforced</small></div>
-        <label class="switch"><input type="checkbox" id="twoFactorToggle"/><span class="slider"></span></label>
-      </div>
+<main class="st-content">
+  <div class="st-page-header">
+    <div>
+      <h1 class="st-page-header-title">System Settings</h1>
+      <p class="st-page-header-subtitle">Manage division-wide defaults that apply to every CLC.</p>
     </div>
   </div>
 
-  <!-- Academic Year -->
-  <div class="section" id="section-academic">
-    <div class="card">
-      <h2><span class="section-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>Academic Year</h2>
-      <div class="card-sub">This is the school year every teacher, class, learner enrollment, and report across StayEd currently follows.</div>
-      <div class="settings-row">
-        <div><b>Active School Year</b><small id="activeSchoolYearDisplay">—</small></div>
-        <button class="btn" id="openEditSchoolYearBtn">Change</button>
+  <div class="st-settings-bento" data-animate-cards>
+    <!-- Academic Year -->
+    <section class="st-bento-card" style="--i:0">
+      <div class="st-bento-card-head">
+        <span class="st-icon-tile st-icon-tile--teal"><span class="material-symbols-outlined">calendar_today</span></span>
+        <div>
+          <h3 class="st-bento-card-title">Academic year</h3>
+          <p class="st-bento-card-sub">The school year currently in effect division-wide. Changing it updates which school year new enrollments, classes, and reports are recorded under.</p>
+        </div>
       </div>
-    </div>
+      <div class="st-setting-row">
+        <div>
+          <p class="st-toggle-row-title">Active school year</p>
+          <p class="st-toggle-row-sub">Applies to all CLCs and teachers immediately.</p>
+        </div>
+        <div class="st-adm-value-action">
+          <span class="st-adm-value" id="activeSchoolYearDisplay">—</span>
+          <button type="button" class="st-btn st-btn-outline st-btn-sm" id="openEditSchoolYearBtn"><span class="material-symbols-outlined">edit</span>Change</button>
+        </div>
+      </div>
+    </section>
 
-    <div class="card">
-      <h2><span class="section-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>Module Return Default</h2>
-      <div class="card-sub">Default number of days after release a module is expected back. Used to auto-suggest each module's planned return date; teachers can still override it per module.</div>
-      <div class="settings-row">
-        <div><b>Default Duration</b><small id="moduleDurationDisplay">— days</small></div>
-        <button class="btn" id="openEditModuleDurationBtn">Change</button>
+    <!-- Module Return Default -->
+    <section class="st-bento-card" style="--i:1">
+      <div class="st-bento-card-head">
+        <span class="st-icon-tile st-icon-tile--teal"><span class="material-symbols-outlined">timer</span></span>
+        <div>
+          <h3 class="st-bento-card-title">Module return default</h3>
+          <p class="st-bento-card-sub">The default number of days a learner has to return a borrowed module before it's flagged overdue. Teachers can still set a different duration per module.</p>
+        </div>
       </div>
-    </div>
+      <div class="st-setting-row">
+        <div>
+          <p class="st-toggle-row-title">Default return window</p>
+          <p class="st-toggle-row-sub">Used whenever a teacher doesn't set a custom duration.</p>
+        </div>
+        <div class="st-adm-value-action">
+          <span class="st-adm-value" id="moduleDurationDisplay">—</span>
+          <button type="button" class="st-btn st-btn-outline st-btn-sm" id="openEditModuleDurationBtn"><span class="material-symbols-outlined">edit</span>Change</button>
+        </div>
+      </div>
+    </section>
+
+    <p class="st-settings-profile-hint">
+      <span class="material-symbols-outlined">manage_accounts</span>
+      Need to change your password or update your profile information? Visit
+      <a href="profile.html">Profile Settings</a>.
+    </p>
   </div>
 </main>
 <div data-component="layout/footer"></div>
@@ -120,149 +94,40 @@
 <div data-component="layout/toast"></div>
 <div data-component="layout/modal"></div>
 
-<!-- Confirmation Modal -->
-<div class="overlay" id="modal-confirm">
-  <div class="modal">
-    <div class="icon-circle success" id="confirm-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div>
-    <h2 id="confirm-title">Save these changes?</h2>
-    <div class="modal-sub" id="confirm-sub">You can update this again anytime.</div>
-    <div class="modal-actions">
-      <button class="btn ghost" onclick="closeModal('modal-confirm')">Cancel</button>
-      <button class="btn primary" id="confirm-btn">Confirm</button>
-    </div>
-  </div>
-</div>
-
-<!-- Change Password Modal -->
-<div class="overlay" id="modal-password">
-  <div class="modal">
-    <h2>Change Password</h2>
-    <div class="modal-sub">Use a strong password you don't use elsewhere.</div>
-    <div id="cp-main-view">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 20px">
-        <div>
-          <div class="field">
-            <label for="cp-current">Current Password</label>
-            <div class="password-field">
-              <input id="cp-current" type="password" placeholder="Enter current password"/>
-              <button class="toggle-eye" type="button" data-target="cp-current" aria-label="Show or hide password">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
-            </div>
-            <div style="text-align:right;margin-top:6px">
-              <a href="#" id="forgotPasswordLink" style="font-size:0.9375rem;color:var(--charcoal);font-weight:700;text-decoration:none">Forgot password?</a>
-            </div>
-          </div>
-          <div class="field">
-            <label for="cp-new">New Password</label>
-            <div class="password-field">
-              <input id="cp-new" type="password" placeholder="Enter new password" oninput="checkPasswordStrength()"/>
-              <button class="toggle-eye" type="button" data-target="cp-new" aria-label="Show or hide password">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
-            </div>
-          </div>
-          <div class="field">
-            <label for="cp-confirm">Confirm New Password</label>
-            <div class="password-field">
-              <input id="cp-confirm" type="password" placeholder="Confirm new password"/>
-              <button class="toggle-eye" type="button" data-target="cp-confirm" aria-label="Show or hide password">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="requirements-box" style="max-width:none;margin-top:0">
-          <div class="req-title">Password Requirements</div>
-          <div class="req-item" id="req-length"><span class="req-dot"></span>Minimum 8 characters</div>
-          <div class="req-item" id="req-upper"><span class="req-dot"></span>At least one uppercase letter</div>
-          <div class="req-item" id="req-lower"><span class="req-dot"></span>At least one lowercase letter</div>
-          <div class="req-item" id="req-number"><span class="req-dot"></span>At least one number</div>
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button class="btn ghost" onclick="closeModal('modal-password')">Cancel</button>
-        <button class="btn primary" id="cp-update-btn">Update Password</button>
-      </div>
-    </div>
-    <div id="cp-forgot-view" style="display:none">
-      <div class="info-banner">We'll send a password reset link to your registered DepEd email, <b id="forgot-email-display">liza.fernandez@deped.gov.ph</b>. The link expires in 30 minutes.</div>
-      <div class="modal-actions">
-        <button class="btn ghost" id="forgotBackBtn">Back</button>
-        <button class="btn primary" id="sendResetLinkBtn">Send Reset Link</button>
-      </div>
-    </div>
-    <div id="cp-forgot-sent-view" style="display:none;text-align:center">
-      <div class="icon-circle success" style="margin:4px auto 14px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div>
-      <div style="font-weight:800;font-size:1.125rem;margin-bottom:4px">Reset link sent</div>
-      <div class="modal-sub" style="margin-bottom:0">Check your inbox for instructions to reset your password.</div>
-      <div class="modal-actions" style="justify-content:center">
-        <button class="btn primary" onclick="closeModal('modal-password')">Done</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Edit Profile Information Modal -->
-<div class="overlay" id="modal-edit-profile">
-  <div class="modal">
-    <h2>Edit Profile Information</h2>
-    <div class="modal-sub">Update how you appear across the admin dashboard.</div>
-    <div style="text-align:center">
-      <div class="avatar-upload">
-        <span id="editAvatarInitials">LF</span>
-        <button class="cam-btn" type="button" title="Change photo" aria-label="Change photo" id="cam-upload-btn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z"/><circle cx="12" cy="13" r="4"/></svg>
-        </button>
-        <input type="file" id="avatar-file-input" accept="image/png,image/jpeg" style="display:none"/>
-      </div>
-      <div class="upload-hint">Recommended: Square JPG or PNG, max 2MB</div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px">
-      <div>
-        <div class="field"><label for="ep-name">Full Name</label><input id="ep-name" type="text"/></div>
-        <div class="field"><label for="ep-empid">Employee ID</label><input id="ep-empid" type="text"/></div>
-      </div>
-      <div>
-        <div class="field"><label for="ep-phone">Contact Number</label><input id="ep-phone" type="text"/></div>
-        <div class="field">
-          <label for="ep-email">DepEd Email</label>
-          <input id="ep-email" type="email"/>
-        </div>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn ghost" onclick="closeModal('modal-edit-profile')">Cancel</button>
-      <button class="btn primary" id="ep-save-btn">Save Changes</button>
-    </div>
-  </div>
-</div>
-
+<!-- Academic Year Modal -->
 <div class="overlay" id="modal-academic-year">
-  <div class="modal">
-    <h2>Change Active School Year</h2>
-    <div class="modal-sub">This immediately becomes the school year every teacher's classes, learner enrollments, and reports follow.</div>
-    <div class="field"><label for="ay-school-year">School Year</label><input id="ay-school-year" type="text" placeholder="e.g. 2027-2028"/></div>
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="icon-circle st-icon-circle--navy"><span class="material-symbols-outlined">calendar_today</span></div>
+    <h2>Change active school year</h2>
+    <div class="modal-sub">This affects every CLC, teacher, and report division-wide.</div>
+    <div class="field">
+      <label for="ay-school-year">School year</label>
+      <input id="ay-school-year" type="text" placeholder="e.g. 2025-2026">
+    </div>
+    <div class="warning-banner">Changing this will not move existing enrollments or classes — it only sets which school year new records are created under.</div>
     <div class="modal-actions">
-      <button class="btn ghost" onclick="closeModal('modal-academic-year')">Cancel</button>
-      <button class="btn primary" id="ay-save-btn">Save Changes</button>
+      <button class="st-btn st-btn-outline" onclick="closeModal('modal-academic-year')">Cancel</button>
+      <button class="st-btn st-btn-primary" id="ay-save-btn">Save changes</button>
     </div>
   </div>
 </div>
 
+<!-- Module Duration Modal -->
 <div class="overlay" id="modal-module-duration">
-  <div class="modal">
-    <h2>Change Module Return Default</h2>
-    <div class="modal-sub">Used only to pre-fill a module's planned return date at release time (release date + this many days). Teachers can still override it per module.</div>
-    <div class="field"><label for="md-duration-days">Default Duration (days)</label><input id="md-duration-days" type="number" min="1" max="180" placeholder="e.g. 21"/></div>
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="icon-circle st-icon-circle--navy"><span class="material-symbols-outlined">timer</span></div>
+    <h2>Change module return default</h2>
+    <div class="modal-sub">Teachers who haven't set a custom duration will use this value.</div>
+    <div class="field">
+      <label for="md-duration-days">Default return window (days)</label>
+      <input id="md-duration-days" type="number" min="1" max="180" placeholder="e.g. 14">
+    </div>
     <div class="modal-actions">
-      <button class="btn ghost" onclick="closeModal('modal-module-duration')">Cancel</button>
-      <button class="btn primary" id="md-save-btn">Save Changes</button>
+      <button class="st-btn st-btn-outline" onclick="closeModal('modal-module-duration')">Cancel</button>
+      <button class="st-btn st-btn-primary" id="md-save-btn">Save changes</button>
     </div>
   </div>
 </div>
-
-<div class="toast" id="toast"></div>
 
 <script src="../../assets/js/config.js"></script>
 <script src="../../assets/js/core/utils.js"></script>
@@ -275,6 +140,6 @@
 <script src="../../assets/js/components/component-loader.js"></script>
 <script src="../../assets/js/components/toast.js"></script>
 <script src="../../assets/js/components/modal.js"></script>
-<script src="../../assets/js/admin/settings.js"></script>
+<script src="../../assets/js/admin/system-settings.js"></script>
 </body>
 </html>

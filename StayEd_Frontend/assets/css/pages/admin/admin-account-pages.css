@@ -1,0 +1,108 @@
+/* ============================================================
+   Admin Profile Settings + System Settings.
+   These two pages deliberately reuse the teacher pages' data-page
+   values ("Profile Settings" / "System Settings") so they inherit
+   profile-settings.css/system-settings.css directly (.st-profile-*,
+   .st-settings-section*, .st-bento-*, .st-toggle*, .st-danger-*, etc.).
+   Everything below is the admin-only layer on top of that: the old
+   .overlay/.modal dialog system (same visual language as the
+   User Management/CLC Management modals -- see admin-list-pages.css),
+   plus a handful of new admin-only components not present on the
+   teacher pages (read-only detail tiles, the password requirements
+   checklist, the avatar-edit row, and the value-chip used by System
+   Settings). Scoped under body.st-admin so none of it can leak onto
+   the teacher pages, which share these data-page values.
+   ============================================================ */
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) [hidden]{display:none!important}
+
+/* ---- Modal/dialog system (ported from admin-list-pages.css) ---- */
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .overlay{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(17,26,54,.45);backdrop-filter:blur(4px)}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .overlay.show{display:flex;animation:st-adm-acct-fade .18s ease}
+@keyframes st-adm-acct-fade{from{opacity:0}to{opacity:1}}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .overlay .modal{position:relative;box-sizing:border-box;width:min(480px,100%);max-height:88vh;overflow:auto;background:#fff;border-radius:16px;box-shadow:0 24px 60px rgba(17,26,54,.25);padding:24px;animation:st-adm-acct-modal-in .22s var(--st-ease-out,ease)}
+@keyframes st-adm-acct-modal-in{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .overlay .modal h2{margin:0;font-family:var(--st-font-heading);font-weight:700;font-size:1.25rem;color:var(--st-primary);letter-spacing:-.01em}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .overlay .modal-sub{margin:4px 0 18px;font-size:.875rem;color:var(--st-ink-muted,#5a6275)}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .modal-actions{display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid var(--st-line)}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .icon-circle{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;margin-bottom:12px}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .icon-circle .material-symbols-outlined{font-size:28px}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .icon-circle.success{background:var(--st-success-light,#e3f4f3);color:var(--st-secondary)}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .icon-circle.warn{background:var(--st-warning-light,#fef3e4);color:var(--st-warning,#f39422)}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .icon-circle.danger{background:#fdecea;color:#ba1a1a}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .st-icon-circle--navy{background:var(--st-navy-soft,#e8eef6);color:var(--st-primary)}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .st-icon-circle--teal{background:#e3f4f3;color:var(--st-secondary)}
+body.st-admin[data-page="Profile Settings"] .avatar-lg{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--st-primary);color:#fff;font-weight:700;font-size:1.0625rem;flex:none}
+
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .field{margin-bottom:14px}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .field label{display:block;margin-bottom:6px;font-size:.8125rem;font-weight:600;color:var(--st-on-surface)}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .field input,
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .field select{width:100%;max-width:none;box-sizing:border-box;height:40px;padding:0 12px;border:1px solid var(--st-line-strong,#cfd5de);border-radius:8px;background:#fff;font:inherit;font-size:.875rem;color:var(--st-on-surface);transition:border-color var(--st-t-hover,150ms),box-shadow var(--st-t-hover,150ms)}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .field input:hover{border-color:var(--st-primary)}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .field input:focus{outline:none;border-color:var(--st-secondary);box-shadow:0 0 0 3px rgba(0,106,104,.12)}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .field input:disabled{background:#f8f9fb;color:var(--st-ink-muted,#5a6275)}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .st-field-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .info-banner,
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .warning-banner{display:flex;gap:8px;padding:10px 12px;border-radius:10px;font-size:.8125rem;line-height:1.45;margin:4px 0 6px}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .info-banner{background:#e3f4f3;color:#00504e}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .info-banner::before{content:"info";font-family:"Material Symbols Outlined";font-size:18px}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .warning-banner{background:#fef3e4;color:#8f5200}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .warning-banner::before{content:"warning";font-family:"Material Symbols Outlined";font-size:18px}
+
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .password-field{position:relative}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .password-field input{padding-right:42px!important}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .password-field .toggle-eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--st-ink-muted,#5a6275);cursor:pointer;padding:5px;display:flex;border-radius:6px}
+body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .password-field .toggle-eye:hover{color:var(--st-on-surface);background:var(--st-background)}
+
+@media (max-width:767px){
+  body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .overlay{align-items:flex-end;padding:0}
+  body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .overlay .modal{width:100%;border-radius:16px 16px 0 0;max-height:92vh;padding:20px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+  body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .st-field-grid-2{grid-template-columns:1fr}
+  body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .modal-actions{flex-direction:column-reverse;align-items:stretch}
+  body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .modal-actions .st-btn{width:100%}
+}
+
+/* ---- Profile Settings: read-only account info tiles ---- */
+body.st-admin[data-page="Profile Settings"] .st-adm-detail-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0}
+body.st-admin[data-page="Profile Settings"] .st-adm-detail-list > div{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:10px;background:var(--st-background)}
+body.st-admin[data-page="Profile Settings"] .st-adm-detail-list dt{font-size:.75rem;color:var(--st-ink-faint,#8a91a0)}
+body.st-admin[data-page="Profile Settings"] .st-adm-detail-list dd{margin:0;font-size:.875rem;font-weight:600;overflow-wrap:anywhere}
+
+/* Danger zone header's helper line, positioned at the end of the row
+   next to the warning icon/title (teacher's danger zone has no header
+   row at all -- the admin version keeps the old page's helper copy). */
+body.st-admin[data-page="Profile Settings"] .st-adm-danger-sub{margin-left:auto;font-size:.8125rem;color:#a01414;opacity:.8}
+
+/* Edit Profile modal: avatar + upload button row */
+body.st-admin[data-page="Profile Settings"] .st-adm-avatar-edit{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:12px;background:var(--st-background);margin-bottom:14px}
+
+/* Change Password modal: "Forgot your password?" link + the 2-column
+   requirements checklist (teal check once a rule is met). */
+body.st-admin[data-page="Profile Settings"] .st-adm-link{display:inline-block;font-size:.8125rem;font-weight:600;color:var(--st-secondary);text-decoration:none;margin-top:-6px}
+body.st-admin[data-page="Profile Settings"] .st-adm-link:hover{text-decoration:underline}
+body.st-admin[data-page="Profile Settings"] .st-pw-reqs{list-style:none;margin:4px 0 0;padding:10px 12px;border-radius:10px;background:var(--st-background);display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}
+body.st-admin[data-page="Profile Settings"] .st-pw-reqs li{display:flex;align-items:center;gap:6px;font-size:.8125rem;color:var(--st-ink-muted,#5a6275)}
+body.st-admin[data-page="Profile Settings"] .st-pw-reqs li::before{content:"radio_button_unchecked";font-family:"Material Symbols Outlined";font-size:16px;color:#b3b8c2}
+body.st-admin[data-page="Profile Settings"] .st-pw-reqs li.is-met{color:#00504e}
+body.st-admin[data-page="Profile Settings"] .st-pw-reqs li.is-met::before{content:"check_circle";color:var(--st-secondary);font-variation-settings:"FILL" 1}
+
+@media (max-width:767px){
+  body.st-admin[data-page="Profile Settings"] .st-adm-detail-list{grid-template-columns:1fr}
+  body.st-admin[data-page="Profile Settings"] .st-adm-danger-sub{display:none}
+  body.st-admin[data-page="Profile Settings"] .st-pw-reqs{grid-template-columns:1fr}
+}
+
+/* ---- System Settings: bento cards get a description under the title,
+   and each setting row shows its current value as a chip next to the
+   Change button (teacher's bento rows show a locked read-only input
+   instead -- not used by the admin version). ---- */
+body.st-admin[data-page="System Settings"] .st-bento-card-head{align-items:flex-start}
+body.st-admin[data-page="System Settings"] .st-bento-card-sub{margin:3px 0 0;font-size:.844rem;color:var(--st-ink-muted,#5a6275);line-height:1.5;max-width:820px}
+body.st-admin[data-page="System Settings"] .st-icon-tile--teal{background:#e3f4f3;color:var(--st-secondary)}
+body.st-admin[data-page="System Settings"] .st-adm-value-action{display:flex;align-items:center;gap:12px;flex:none}
+body.st-admin[data-page="System Settings"] .st-adm-value{display:inline-flex;align-items:center;height:38px;padding:0 14px;border-radius:8px;background:var(--st-navy-soft,#e8eef6);color:var(--st-primary);font-weight:700;font-size:.9375rem;font-variant-numeric:tabular-nums}
+
+@media (max-width:767px){
+  body.st-admin[data-page="System Settings"] .st-setting-row{flex-direction:column;align-items:stretch;gap:10px}
+  body.st-admin[data-page="System Settings"] .st-adm-value-action{justify-content:space-between}
+}

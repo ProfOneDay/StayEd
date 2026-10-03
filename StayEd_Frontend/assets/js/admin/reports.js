@@ -24,6 +24,22 @@ const TEACHER_STATUS_LABELS = {
   deactivated: "Deactivated",
 };
 
+const ST_REDUCE_MOTION = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function replay(el) {
+  if (!el) return;
+  el.classList.remove("is-inview");
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("is-inview")));
+}
+
+function reportStatusPillClass(status) {
+  const s = String(status || "").toLowerCase();
+  if (s.includes("active")) return "st-pill--active";
+  if (s.includes("pending")) return "st-pill--pending";
+  if (s.includes("deactivat") || s.includes("archiv") || s.includes("inactive") || s.includes("drop")) return "st-pill--archived";
+  return "";
+}
+
 class AdminReports {
   static state = {
     mode: "learners", // "learners" | "teachers"
@@ -53,6 +69,8 @@ class AdminReports {
     this.bindSubmissionFilters();
 
     await Promise.all([this.load(), this.loadSubmittedReports()]);
+
+    document.querySelectorAll(".st-report-master-panel[data-animate], .st-report-submitted-panel[data-animate]").forEach(replay);
 
     const submissionId = new URLSearchParams(window.location.search).get("submission");
     if (submissionId) this.viewSubmittedReport(Number(submissionId));
@@ -94,10 +112,12 @@ class AdminReports {
     document.querySelector("[data-report-filter-clear]")?.classList.add("st-hidden");
 
     document.querySelectorAll('[data-mode-only="learners"]').forEach((el) => {
-      el.style.display = isTeachers ? "none" : "";
+      const field = el.closest(".st-adm-filter-field") || el;
+      field.hidden = isTeachers;
     });
     document.querySelectorAll('[data-mode-only="teachers"]').forEach((el) => {
-      el.style.display = isTeachers ? "" : "none";
+      const field = el.closest(".st-adm-filter-field") || el;
+      field.hidden = !isTeachers;
     });
 
     this.set(
@@ -114,8 +134,8 @@ class AdminReports {
     const searchInput = document.querySelector("[data-report-filter-search]");
     if (searchInput) {
       searchInput.placeholder = isTeachers
-        ? "Search name, employee ID, email, or CLC…"
-        : "Search name, LRN, CLC, or teacher…";
+        ? "Search name, employee ID, email, or CLC"
+        : "Search name, LRN, CLC, or teacher";
     }
 
     this.populateFilters();
@@ -219,22 +239,23 @@ class AdminReports {
           ? "No reports match these filters."
           : "No reports have been sent by teachers yet."
       }</td></tr>`;
+      replay(body);
       return;
     }
 
     body.innerHTML = rows
       .map(
-        (s) => `
-          <tr>
-            <td><strong>${s.title}</strong>${s.subtitle ? `<div style="font-size:var(--st-font-size-caption);color:var(--st-on-surface-variant, var(--muted));margin-top:2px;">${s.subtitle}</div>` : ""}</td>
+        (s, i) => `
+          <tr style="--i:${i}">
+            <td><strong>${s.title}</strong>${s.subtitle ? `<span class="st-report-sub">${s.subtitle}</span>` : ""}</td>
             <td>${s.reportTypeLabel}</td>
             <td>${s.teacherName || "—"}</td>
             <td>${s.submittedAt}</td>
-            <td><span class="st-badge st-badge-${s.status === "REVIEWED" ? "success" : "warning"}">${s.status === "REVIEWED" ? "Reviewed" : "New"}</span></td>
-            <td>
+            <td><span class="st-pill st-pill--status ${s.status === "REVIEWED" ? "st-pill--active" : "st-pill--pending"}">${s.status === "REVIEWED" ? "Reviewed" : "New"}</span></td>
+            <td class="is-right">
               <div class="st-table-actions">
                 <button type="button" class="st-btn st-btn-outline st-btn-xs" data-view-submission="${s.id}">View</button>
-                ${s.status === "REVIEWED" ? "" : `<button type="button" class="st-btn-text" data-review-submission="${s.id}">Mark Reviewed</button>`}
+                ${s.status === "REVIEWED" ? "" : `<button type="button" class="st-text-link-btn" data-review-submission="${s.id}">Mark reviewed</button>`}
               </div>
             </td>
           </tr>
@@ -248,6 +269,8 @@ class AdminReports {
     body.querySelectorAll("[data-review-submission]").forEach((btn) => {
       btn.addEventListener("click", () => this.markSubmissionReviewed(Number(btn.dataset.reviewSubmission)));
     });
+
+    replay(body);
   }
 
   static async viewSubmittedReport(id) {
@@ -436,7 +459,7 @@ class AdminReports {
       this.fillSelect(
         "[data-report-filter-clc]",
         [...new Set(this.state.teachersAll.map((t) => t.clc).filter(Boolean))].sort(),
-        "All Learning Centers",
+        "All learning centers",
         (v) => v,
       );
       return;
@@ -445,35 +468,35 @@ class AdminReports {
     this.fillSelect(
       "[data-report-filter-clc]",
       this.uniqueValues("clc_name"),
-      "All Learning Centers",
+      "All learning centers",
       (v) => v,
     );
 
     this.fillSelect(
       "[data-report-filter-year]",
       this.uniqueValues("school_year").sort().reverse(),
-      "All School Years",
+      "All school years",
       (v) => v,
     );
 
     this.fillSelect(
       "[data-report-filter-teacher]",
       this.uniqueValues("teacher_name"),
-      "All Teachers",
+      "All teachers",
       (v) => v,
     );
 
     this.fillSelect(
       "[data-report-filter-semester]",
       this.uniqueValues("semester"),
-      "All Semesters",
+      "All semesters",
       (v) => REPORT_SEMESTER_LABELS[v] || v,
     );
 
     this.fillSelect(
       "[data-report-filter-modality]",
       this.uniqueValues("learning_modality"),
-      "All Modalities",
+      "All modalities",
       (v) => REPORT_MODALITY_LABELS[v] || v,
     );
   }
@@ -718,13 +741,15 @@ class AdminReports {
 
     const rows = this.state.filteredTeachers;
 
-    this.set(
+    this.setCount(
       "[data-report-preview-count]",
-      `${rows.length} teacher(s) match the current filters.`,
+      rows.length,
+      `teacher(s) match the current filters.`,
     );
 
     if (!rows.length) {
       body.innerHTML = `<tr><td colspan="${columns.length}" class="st-table-empty-cell">No teachers match these filters.</td></tr>`;
+      replay(body);
       return;
     }
 
@@ -732,15 +757,15 @@ class AdminReports {
 
     body.innerHTML = preview
       .map(
-        (t) => `
-      <tr>
+        (t, i) => `
+      <tr style="--i:${i}">
         <td>${t.employeeId || "—"}</td>
-        <td>${t.name || "—"}</td>
+        <td><span class="st-adm-learner">${t.name || "—"}</span></td>
         <td>${t.email || "—"}</td>
         <td>${t.phone || "—"}</td>
         <td>${(t.clcs && t.clcs.length ? t.clcs.join(", ") : t.clc) || "—"}</td>
         <td>${t.municipality || "—"}</td>
-        <td>${TEACHER_STATUS_LABELS[t.status] || t.status || "—"}</td>
+        <td><span class="st-pill st-pill--status ${reportStatusPillClass(t.status)}">${TEACHER_STATUS_LABELS[t.status] || t.status || "—"}</span></td>
         <td>${t.date || "—"}</td>
       </tr>`,
       )
@@ -749,6 +774,8 @@ class AdminReports {
     if (rows.length > preview.length) {
       body.innerHTML += `<tr><td colspan="${columns.length}" class="st-table-empty-cell">…and ${rows.length - preview.length} more. Export the CSV report to see the full listing.</td></tr>`;
     }
+
+    replay(body);
   }
 
   static renderLearnerPreview() {
@@ -761,13 +788,15 @@ class AdminReports {
 
     const rows = this.state.filtered;
 
-    this.set(
+    this.setCount(
       "[data-report-preview-count]",
-      `${rows.length} enrollment record(s) match the current filters.`,
+      rows.length,
+      `enrollment record(s) match the current filters.`,
     );
 
     if (!rows.length) {
       body.innerHTML = `<tr><td colspan="${columns.length}" class="st-table-empty-cell">No enrollment records match these filters.</td></tr>`;
+      replay(body);
       return;
     }
 
@@ -775,17 +804,17 @@ class AdminReports {
 
     body.innerHTML = preview
       .map(
-        (r) => `
-      <tr>
+        (r, i) => `
+      <tr style="--i:${i}">
         <td>${r.lrn}</td>
-        <td>${r.first_name} ${r.last_name}</td>
+        <td><span class="st-adm-learner">${r.first_name} ${r.last_name}</span></td>
         <td>${r.sex || "—"}</td>
-        <td>${r.learning_level || "—"}</td>
+        <td><span class="st-adm-level-chip">${r.learning_level || "—"}</span></td>
         <td>${r.clc_name || "—"}</td>
         <td>${r.teacher_name || "—"}</td>
         <td>${r.school_year || "—"} · ${REPORT_SEMESTER_LABELS[r.semester] || r.semester || "—"}</td>
         <td>${REPORT_MODALITY_LABELS[r.learning_modality] || r.learning_modality || "—"}</td>
-        <td>${r.enrollment_status || "—"}</td>
+        <td><span class="st-pill st-pill--status ${reportStatusPillClass(r.enrollment_status)}">${r.enrollment_status || "—"}</span></td>
       </tr>`,
       )
       .join("");
@@ -793,6 +822,8 @@ class AdminReports {
     if (rows.length > preview.length) {
       body.innerHTML += `<tr><td colspan="${columns.length}" class="st-table-empty-cell">…and ${rows.length - preview.length} more. Export the CSV report to see the full listing.</td></tr>`;
     }
+
+    replay(body);
   }
 
   static set(selector, value) {
@@ -800,6 +831,12 @@ class AdminReports {
     if (el && value !== undefined && value !== null) {
       el.textContent = value;
     }
+  }
+
+  static setCount(selector, count, label) {
+    const el = document.querySelector(selector);
+    if (!el) return;
+    el.innerHTML = `<span class="material-symbols-outlined">table_rows</span><b>${count}</b> ${label}`;
   }
 }
 

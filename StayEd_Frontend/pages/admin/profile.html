@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script data-stayed-font-scale-bootstrap>
+    (function () {
+      try {
+        var v = localStorage.getItem("stayed_font_scale");
+        if (v) document.documentElement.setAttribute("data-font-scale", v);
+      } catch (e) {}
+    })();
+  </script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Libre+Franklin:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/main.css" />
+<link
+  rel="icon"
+  type="image/x-icon"
+  href="../../assets/img/brand/favicon.ico"
+/>
+<link
+  rel="apple-touch-icon"
+  href="../../assets/img/brand/apple-touch-icon.png"
+/>
+<title>StayEd Admin — Profile Settings</title>
+</head>
+<body class="st-app st-admin" data-page="Profile Settings">
+<div data-component="layout/sidebar-admin"></div>
+<div class="st-main">
+<div data-component="layout/navbar"></div>
+<main class="st-content">
+  <div class="st-page-header">
+    <div>
+      <h1 class="st-page-header-title">Profile Settings</h1>
+      <p class="st-page-header-subtitle">Manage your account, preferences, and security.</p>
+    </div>
+  </div>
+
+  <div class="st-profile-layout">
+    <div class="st-profile-left" data-animate-cards>
+      <aside class="st-panel st-profile-summary-card" style="--i:0">
+        <div class="st-profile-photo-wrap">
+          <div class="st-profile-photo" id="profileAvatarInitials">AD</div>
+          <button type="button" class="st-profile-photo-edit" data-open-edit-profile aria-label="Change profile photo" title="Change photo">
+            <span class="material-symbols-outlined">photo_camera</span>
+          </button>
+        </div>
+        <p class="st-profile-photo-help">JPG, PNG, or WEBP · max 2 MB</p>
+        <h2 class="st-profile-summary-name" id="profileDisplayName">Admin</h2>
+        <p class="st-profile-summary-role">ALS Coordinator</p>
+        <span class="st-profile-status-chip">Active</span>
+        <dl class="st-profile-summary-details">
+          <div><dt>Employee ID</dt><dd data-profile-empid-echo>—</dd></div>
+          <div><dt>Last login</dt><dd>Today</dd></div>
+          <div><dt>Join date</dt><dd data-profile-joindate-echo>—</dd></div>
+        </dl>
+      </aside>
+    </div>
+
+    <div class="st-profile-sections" data-animate-cards>
+      <!-- Account information -->
+      <section class="st-settings-section is-open" data-settings-section="account" style="--i:0">
+        <button type="button" class="st-settings-section-header" data-settings-toggle>
+          <span class="st-settings-section-header-left">
+            <span class="st-icon-tile"><span class="material-symbols-outlined">person</span></span>
+            <span>
+              <h3 class="st-settings-section-title">Account information</h3>
+              <span class="st-settings-section-sub">Your profile as it appears across the admin dashboard</span>
+            </span>
+          </span>
+          <span class="material-symbols-outlined st-settings-section-caret">expand_more</span>
+        </button>
+        <div class="st-settings-section-body">
+          <div class="st-settings-section-body-inner">
+            <dl class="st-adm-detail-list">
+              <div><dt>DepEd email</dt><dd id="profileEmailDisplay">—</dd></div>
+              <div><dt>Contact number</dt><dd id="profilePhoneDisplay">—</dd></div>
+              <div><dt>Employee ID</dt><dd id="profileEmpIdDisplay">—</dd></div>
+              <div><dt>Join date</dt><dd data-profile-joindate>—</dd></div>
+              <div><dt>Last login</dt><dd>Today</dd></div>
+              <div><dt>Status</dt><dd><span class="st-profile-status-chip">Active</span></dd></div>
+            </dl>
+            <div class="st-settings-form-footer">
+              <button class="st-btn st-btn-primary" id="openEditProfileBtn"><span class="material-symbols-outlined">edit</span>Edit profile</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Security -->
+      <section class="st-settings-section is-open" data-settings-section="security" style="--i:1">
+        <button type="button" class="st-settings-section-header" data-settings-toggle>
+          <span class="st-settings-section-header-left">
+            <span class="st-icon-tile"><span class="material-symbols-outlined">shield_person</span></span>
+            <span>
+              <h3 class="st-settings-section-title">Security</h3>
+              <span class="st-settings-section-sub">Manage how you sign in and keep your account secure</span>
+            </span>
+          </span>
+          <span class="material-symbols-outlined st-settings-section-caret">expand_more</span>
+        </button>
+        <div class="st-settings-section-body">
+          <div class="st-settings-section-body-inner">
+            <div class="st-toggle-row">
+              <div>
+                <p class="st-toggle-row-title">Account password</p>
+                <p class="st-toggle-row-sub">Last changed 3 months ago</p>
+              </div>
+              <button class="st-btn st-btn-outline st-btn-sm" id="openChangePasswordBtn2"><span class="material-symbols-outlined">lock_reset</span>Change password</button>
+            </div>
+            <div class="st-toggle-row">
+              <div>
+                <p class="st-toggle-row-title">Two-factor authentication</p>
+                <p class="st-toggle-row-sub">Preference saved — verification at sign-in is not yet enforced</p>
+              </div>
+              <label class="st-toggle"><input type="checkbox" id="twoFactorToggle" aria-label="Two-factor authentication"><span class="st-toggle-track"><span class="st-toggle-thumb"></span></span></label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Danger zone -->
+      <section class="st-settings-section st-settings-section--danger is-open" data-settings-section="danger" style="--i:2">
+        <div class="st-danger-head"><span class="material-symbols-outlined">warning</span><h3 class="st-settings-section-title">Danger zone</h3><span class="st-adm-danger-sub">Actions here affect your own account access.</span></div>
+        <div class="st-danger-row">
+          <div><p class="st-toggle-row-title">Sign out from system</p><p class="st-toggle-row-sub">End your current session across all devices.</p></div>
+          <button type="button" class="st-btn st-btn-outline st-btn-sm" id="logoutBtn"><span class="material-symbols-outlined">logout</span>Log out</button>
+        </div>
+        <div class="st-danger-row">
+          <div><p class="st-toggle-row-title st-danger-title">Deactivate account</p><p class="st-toggle-row-sub">You'll immediately lose access to administrative tools.</p></div>
+          <button type="button" class="st-btn st-btn-danger st-btn-sm" id="deactivateSelfBtn">Deactivate</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+<div data-component="layout/footer"></div>
+</div>
+<div data-component="layout/toast"></div>
+<div data-component="layout/modal"></div>
+
+<!-- Confirmation Modal (logout / deactivate) -->
+<div class="overlay" id="modal-confirm">
+  <div class="modal">
+    <div class="icon-circle success" id="confirm-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div>
+    <h2 id="confirm-title">Save these changes?</h2>
+    <div class="modal-sub" id="confirm-sub">You can update this again anytime.</div>
+    <div class="modal-actions">
+      <button class="st-btn st-btn-ghost" onclick="closeModal('modal-confirm')">Cancel</button>
+      <button class="st-btn st-btn-primary" id="confirm-btn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Profile Information Modal -->
+<div class="overlay" id="modal-edit-profile">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h2>Edit Profile Information</h2>
+    <div class="modal-sub">Update how your details appear across the admin dashboard.</div>
+    <div class="st-adm-avatar-edit">
+      <div class="avatar-lg" id="editAvatarInitials">AD</div>
+      <div>
+        <button class="st-btn st-btn-outline st-btn-sm" id="cam-upload-btn" type="button"><span class="material-symbols-outlined">photo_camera</span>Upload photo</button>
+        <p class="st-profile-photo-help" style="margin:6px 0 0">JPG, PNG, or WEBP · max 2 MB</p>
+      </div>
+      <input type="file" id="avatar-file-input" accept="image/png,image/jpeg,image/webp" hidden>
+    </div>
+    <div class="st-field-grid-2">
+      <div class="field"><label for="ep-name">Full name</label><input id="ep-name" type="text"></div>
+      <div class="field"><label for="ep-empid">Employee ID</label><input id="ep-empid" type="text"></div>
+      <div class="field"><label for="ep-phone">Contact number</label><input id="ep-phone" type="text" placeholder="+63 9XX XXX XXXX"></div>
+      <div class="field"><label for="ep-email">DepEd email</label><input id="ep-email" type="email"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="st-btn st-btn-outline" onclick="closeModal('modal-edit-profile')">Cancel</button>
+      <button class="st-btn st-btn-primary" id="ep-save-btn">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="overlay" id="modal-password">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div id="cp-main-view">
+      <div class="icon-circle st-icon-circle--navy"><span class="material-symbols-outlined">lock_reset</span></div>
+      <h2>Change Password</h2>
+      <div class="modal-sub">Use a strong password you don't use anywhere else.</div>
+      <div class="field">
+        <label for="cp-current">Current password</label>
+        <div class="password-field">
+          <input id="cp-current" type="password" placeholder="Enter current password">
+          <button class="toggle-eye" type="button" data-target="cp-current" aria-label="Show or hide password">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <a href="#" id="forgotPasswordLink" class="st-adm-link">Forgot your password?</a>
+      <div class="field" style="margin-top:12px">
+        <label for="cp-new">New password</label>
+        <div class="password-field">
+          <input id="cp-new" type="password" placeholder="Enter new password" oninput="checkPasswordStrength()">
+          <button class="toggle-eye" type="button" data-target="cp-new" aria-label="Show or hide password">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="cp-confirm">Confirm new password</label>
+        <div class="password-field">
+          <input id="cp-confirm" type="password" placeholder="Confirm new password">
+          <button class="toggle-eye" type="button" data-target="cp-confirm" aria-label="Show or hide password">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <ul class="st-pw-reqs">
+        <li id="req-length">At least 8 characters</li>
+        <li id="req-upper">One uppercase letter</li>
+        <li id="req-lower">One lowercase letter</li>
+        <li id="req-number">One number</li>
+      </ul>
+      <div class="modal-actions">
+        <button class="st-btn st-btn-outline" onclick="closeModal('modal-password')">Cancel</button>
+        <button class="st-btn st-btn-primary" id="cp-update-btn">Update password</button>
+      </div>
+    </div>
+    <div id="cp-forgot-view" style="display:none">
+      <div class="icon-circle st-icon-circle--navy"><span class="material-symbols-outlined">mail</span></div>
+      <h2>Reset your password</h2>
+      <div class="info-banner">We'll send a password reset link to your registered DepEd email, <b id="forgot-email-display">—</b>. The link expires in 30 minutes.</div>
+      <div class="modal-actions">
+        <button class="st-btn st-btn-ghost" id="forgotBackBtn">Back</button>
+        <button class="st-btn st-btn-primary" id="sendResetLinkBtn">Send reset link</button>
+      </div>
+    </div>
+    <div id="cp-forgot-sent-view" style="display:none;text-align:center">
+      <div class="icon-circle success" style="margin:4px auto 14px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <h2>Reset link sent</h2>
+      <div class="modal-sub">Check your inbox for instructions to reset your password.</div>
+      <div class="modal-actions" style="justify-content:center">
+        <button class="st-btn st-btn-primary" onclick="closeModal('modal-password')">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../../assets/js/config.js"></script>
+<script src="../../assets/js/core/utils.js"></script>
+<script src="../../assets/js/core/api.js"></script>
+<script src="../../assets/js/core/auth.js"></script>
+<script src="../../assets/js/core/guards.js"></script>
+<script src="../../assets/js/core/router.js"></script>
+<script src="../../assets/js/core/layout.js"></script>
+<script src="../../assets/js/core/app.js"></script>
+<script src="../../assets/js/components/component-loader.js"></script>
+<script src="../../assets/js/components/toast.js"></script>
+<script src="../../assets/js/components/modal.js"></script>
+<script src="../../assets/js/admin/profile-settings.js"></script>
+</body>
+</html>

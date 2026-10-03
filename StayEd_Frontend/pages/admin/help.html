@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script data-stayed-font-scale-bootstrap>
+      (function () {
+        try {
+          var v = localStorage.getItem("stayed_font_scale");
+          if (v) document.documentElement.setAttribute("data-font-scale", v);
+        } catch (e) {}
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StayEd Admin | Help &amp; User Manual</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/css/main.css" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="../../assets/img/brand/favicon.ico"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="../../assets/img/brand/apple-touch-icon.png"
+    />
+  </head>
+  <body class="st-app st-admin" data-page="Help &amp; User Manual">
+    <div data-component="layout/sidebar-admin"></div>
+
+    <div class="st-main">
+      <div data-component="layout/navbar"></div>
+
+      <main class="st-content">
+        <div class="st-page-header">
+          <div>
+            <h1 class="st-page-header-title">Help &amp; User Manual</h1>
+            <p class="st-page-header-subtitle">
+              Answers to common questions about administering StayEd.
+            </p>
+          </div>
+        </div>
+
+        <section class="st-help-section">
+          <h2 class="st-section-title">Frequently asked questions</h2>
+          <div class="st-faq-list" data-animate-cards>
+            <article class="st-faq-item" style="--i:0">
+              <span class="st-icon-tile"
+                ><span class="material-symbols-outlined"
+                  >how_to_reg</span
+                ></span
+              >
+              <div>
+                <h3 class="st-faq-question">
+                  How do I approve a new teacher registration?
+                </h3>
+                <p class="st-faq-answer">
+                  Go to User Management, open the Pending tab, and review the
+                  teacher's submitted details. Approving the account sends
+                  them a notification and grants immediate access; rejecting
+                  it lets you leave a reason they'll see on their end.
+                </p>
+              </div>
+            </article>
+            <article class="st-faq-item" style="--i:1">
+              <span class="st-icon-tile"
+                ><span class="material-symbols-outlined"
+                  >domain_add</span
+                ></span
+              >
+              <div>
+                <h3 class="st-faq-question">
+                  How do I add a new CLC?
+                </h3>
+                <p class="st-faq-answer">
+                  Go to CLC Management and select Add CLC. Fill in the
+                  center's name, address, and assigned coordinator — it
+                  becomes available immediately for teacher assignment and
+                  class creation.
+                </p>
+              </div>
+            </article>
+            <article class="st-faq-item" style="--i:2">
+              <span class="st-icon-tile"
+                ><span class="material-symbols-outlined"
+                  >file_download</span
+                ></span
+              >
+              <div>
+                <h3 class="st-faq-question">
+                  How do I export the Master Enrollment Listing?
+                </h3>
+                <p class="st-faq-answer">
+                  Go to Reports, select the Master Enrollment Listing, choose
+                  a school year and CLC scope, then export. The file
+                  downloads in the same format DepEd expects for submission.
+                </p>
+              </div>
+            </article>
+            <article class="st-faq-item" style="--i:3">
+              <span class="st-icon-tile st-icon-tile--risk"
+                ><span class="material-symbols-outlined">calendar_today</span></span
+              >
+              <div>
+                <h3 class="st-faq-question">
+                  How do I change the active school year?
+                </h3>
+                <p class="st-faq-answer">
+                  Go to System Settings and select Change next to Academic
+                  year. This updates which school year new enrollments,
+                  classes, and reports are recorded under division-wide —
+                  existing records keep the school year they were created
+                  under.
+                </p>
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <div data-component="layout/footer"></div>
+    </div>
+
+    <div data-component="layout/toast"></div>
+    <div data-component="layout/modal"></div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/core/utils.js"></script>
+    <script src="../../assets/js/core/router.js"></script>
+    <script src="../../assets/js/core/api.js"></script>
+    <script src="../../assets/js/core/auth.js"></script>
+    <script src="../../assets/js/core/guards.js"></script>
+    <script src="../../assets/js/core/layout.js"></script>
+    <script src="../../assets/js/core/app.js"></script>
+    <script src="../../assets/js/components/component-loader.js"></script>
+    <script src="../../assets/js/components/toast.js"></script>
+    <script src="../../assets/js/components/modal.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => Guards?.admin?.());
+      (function playHelpEntrance() {
+        const start = () => {
+          const list = document.querySelector("[data-animate-cards]");
+          if (!list) return;
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => list.classList.add("is-inview")),
+          );
+        };
+        document.addEventListener("components:loaded", start);
+        document.addEventListener("DOMContentLoaded", () => setTimeout(start, 400));
+      })();
+    </script>
+  </body>
+</html>
