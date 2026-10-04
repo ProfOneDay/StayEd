@@ -43,9 +43,7 @@
         <div class="st-page-header">
           <div>
             <h1 class="st-page-header-title">About StayEd</h1>
-            <p class="st-page-header-subtitle">
-              Early Dropout Risk Decision Support System
-            </p>
+            <p class="st-page-header-subtitle">Early Dropout Risk Decision Support System</p>
           </div>
         </div>
 
@@ -63,10 +61,13 @@
             </div>
           </div>
           <p class="st-about-text" style="--i:1">
-            StayEd is a predictive analytics system built for the Philippine
-            Alternative Learning System (ALS). It helps teachers and
-            administrators identify learners at risk of dropping out early,
-            so timely interventions can be provided.
+            StayEd is a decision support system for the Alternative Learning
+            System (ALS) of the Department of Education. It brings learner
+            records, attendance, module progress, and assessment results into
+            one place and applies a predictive model to flag learners who may
+            be at risk of leaving the program early, so that ALS teachers and
+            division personnel can respond with timely, well-documented
+            interventions.
           </p>
           <div class="st-about-facts" style="--i:2">
             <div>
@@ -77,13 +78,48 @@
             <div>
               <span class="material-symbols-outlined">account_balance</span>
               <small>Organization</small>
-              <strong>Department of Education</strong>
+              <strong>Department of Education &middot; Schools Division of Pangasinan II</strong>
             </div>
             <div>
               <span class="material-symbols-outlined">hub</span>
               <small>Built for</small>
-              <strong>Community Learning Centers nationwide</strong>
+              <strong>ALS Community Learning Centers</strong>
             </div>
+          </div>
+        </section>
+
+        <section class="st-panel st-panel-pad st-legal" data-animate-cards>
+          <h2 class="st-panel-title" style="--i:0">What StayEd Does</h2>
+          <div class="st-about-capabilities" style="--i:1">
+            <div>
+              <span class="material-symbols-outlined">folder_shared</span>
+              <strong>Learner records</strong>
+              <p>Enrollment, attendance, modules, and assessment results for every learner, organized by Community Learning Center.</p>
+            </div>
+            <div>
+              <span class="material-symbols-outlined">monitoring</span>
+              <strong>Early risk detection</strong>
+              <p>A predictive model estimates each learner's dropout risk and highlights the factors behind it.</p>
+            </div>
+            <div>
+              <span class="material-symbols-outlined">volunteer_activism</span>
+              <strong>Intervention tracking</strong>
+              <p>Teachers plan, record, and follow up on interventions, with suggested next steps to guide support.</p>
+            </div>
+            <div>
+              <span class="material-symbols-outlined">summarize</span>
+              <strong>Division reporting</strong>
+              <p>Consolidated dashboards and reports give the division a clear view of risk across municipalities and centers.</p>
+            </div>
+          </div>
+          <div class="st-legal-callout" style="--i:2">
+            <span class="material-symbols-outlined">info</span>
+            <p>
+              Risk results are estimates meant to support, not replace, the
+              professional judgment of ALS teachers and division personnel.
+              Decisions about a learner should always consider the full
+              context of that learner's situation.
+            </p>
           </div>
         </section>
       </main>
@@ -109,10 +145,10 @@
       document.addEventListener("DOMContentLoaded", () => Guards?.teacher?.());
       (function playAboutEntrance() {
         const start = () => {
-          const hero = document.querySelector("[data-animate-cards]");
-          if (!hero) return;
-          requestAnimationFrame(() =>
-            requestAnimationFrame(() => hero.classList.add("is-inview")),
+          document.querySelectorAll("[data-animate-cards]").forEach((el) =>
+            requestAnimationFrame(() =>
+              requestAnimationFrame(() => el.classList.add("is-inview")),
+            ),
           );
         };
         document.addEventListener("components:loaded", start);

@@ -208,32 +208,93 @@ function openReview(id){
   document.getElementById('rv-empid').textContent=t.employeeId;
   document.getElementById('rv-phone').textContent=t.phone;
   document.getElementById('rv-date').textContent=t.date;
-  document.getElementById('rv-muni').textContent=t.municipality;
-  document.getElementById('rv-clc').textContent=t.clc||'Unassigned';
+  initReviewAssignment(t);
   openModal('modal-review');
 }
-document.getElementById('rv-approve-btn').addEventListener('click',()=>{closeModal('modal-review');openApprove(activeTeacherId)});
+
+// Municipality + CLC on the review screen: prefilled from the teacher's record
+// (what registration saved), else from the ALS roster, else left blank for the
+// admin to pick. Whatever is selected here is what approval saves.
+let reviewDraft={municipality:'',clc:'',source:{municipality:'',clc:''}};
+const isUnassigned=v=>!v||String(v).trim().toLowerCase()==='unassigned';
+function initReviewAssignment(t){
+  let municipality='',clc='',muniSource='',clcSource='';
+  if(!isUnassigned(t.municipality)){municipality=t.municipality;muniSource='record';}
+  else if(t.rosterMunicipality){municipality=t.rosterMunicipality;muniSource='roster';}
+  if(t.clc){clc=t.clc;clcSource='record';}
+  else if(t.rosterClc&&municipality===t.rosterMunicipality){clc=t.rosterClc;clcSource='roster';}
+  reviewDraft={municipality,clc,source:{municipality:muniSource,clc:clcSource}};
+  const muniSel=document.getElementById('rv-muni');
+  const muniOptions=DIVISION_II_MUNICIPALITIES.map(m=>m.name);
+  if(municipality&&!muniOptions.includes(municipality)) muniOptions.unshift(municipality);
+  muniSel.innerHTML='<option value="" disabled hidden>Select municipality…</option>'+muniOptions.map(m=>`<option value="${m}">${m}</option>`).join('');
+  muniSel.value=municipality;
+  renderReviewClcOptions();
+}
+function renderReviewClcOptions(){
+  const {municipality,clc}=reviewDraft;
+  const clcSel=document.getElementById('rv-clc');
+  const names=allClcs.filter(c=>c.municipality===municipality&&c.status==='active').map(c=>c.name).sort((a,b)=>a.localeCompare(b));
+  if(clc&&!names.includes(clc)) names.unshift(clc);
+  const placeholder=!municipality?'Select a municipality first':names.length?'Select CLC…':'No CLCs in this municipality';
+  clcSel.innerHTML=`<option value="" disabled hidden>${placeholder}</option>`+names.map(n=>`<option value="${n}">${n}</option>`).join('');
+  clcSel.disabled=!municipality||!names.length;
+  clcSel.value=clc;
+  renderReviewAssignmentNote();
+}
+function renderReviewAssignmentNote(){
+  const note=document.getElementById('rv-assign-note');
+  const {municipality,clc,source}=reviewDraft;
+  const missing=!municipality||!clc;
+  let text;
+  if(!municipality) text='No municipality or CLC on record for this teacher — select both.';
+  else if(!clc) text=source.municipality==='edited'?'Select a CLC in this municipality before approving.':'No CLC on record for this teacher — select one before approving.';
+  else if(source.municipality==='roster'||source.clc==='roster') text='Filled in from the ALS teachers roster. Change it if needed.';
+  else if(source.municipality==='record'&&source.clc==='record') text="Taken from the teacher's record. Change it if needed.";
+  else text='Changes are saved when you approve the account.';
+  note.textContent=text;
+  note.classList.toggle('is-missing',missing);
+}
+document.getElementById('rv-muni').addEventListener('change',e=>{
+  reviewDraft.municipality=e.target.value;
+  reviewDraft.source.municipality='edited';
+  // Keep the CLC only if it belongs to the newly picked municipality
+  if(!allClcs.some(c=>c.name===reviewDraft.clc&&c.municipality===reviewDraft.municipality)){reviewDraft.clc='';reviewDraft.source.clc='';}
+  renderReviewClcOptions();
+});
+document.getElementById('rv-clc').addEventListener('change',e=>{
+  reviewDraft.clc=e.target.value;
+  reviewDraft.source.clc='edited';
+  renderReviewAssignmentNote();
+});
+document.getElementById('rv-approve-btn').addEventListener('click',()=>{
+  if(!reviewDraft.municipality||!reviewDraft.clc){
+    showToast('Please select a municipality and assign a CLC','warning');
+    return;
+  }
+  closeModal('modal-review');openApprove(activeTeacherId);
+});
 document.getElementById('rv-reject-btn').addEventListener('click',()=>{closeModal('modal-review');openReject(activeTeacherId)});
 
 function openApprove(id){
   activeTeacherId=id; const t=teachers.find(x=>x.id===id);
   document.getElementById('ap-name').textContent=t.name;
   document.getElementById('ap-email').textContent=t.email;
-  document.getElementById('ap-muni').value=t.municipality;
-  document.getElementById('ap-clc').value=t.clc||'Unassigned';
+  document.getElementById('ap-muni').value=reviewDraft.municipality;
+  document.getElementById('ap-clc').value=reviewDraft.clc;
   openModal('modal-approve');
 }
 document.getElementById('ap-confirm-btn').addEventListener('click',async()=>{
   const t=teachers.find(x=>x.id===activeTeacherId);
   const name=t.name;
   try{
-    await API.post(`/admin/users/${activeTeacherId}/approve`,{});
+    await API.post(`/admin/users/${activeTeacherId}/approve`,{municipality:reviewDraft.municipality,clc:reviewDraft.clc});
     closeModal('modal-approve');
     await loadTeachers();
     showToast(`${name} approved`);
   }catch(error){
     console.error('[UserManagement] Approve failed',error);
-    showToast('Unable to approve this account.','error');
+    showToast(error?.data?.message||'Unable to approve this account.','error');
   }
 });
 

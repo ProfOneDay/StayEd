@@ -10,7 +10,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from ..authz import current_user_id
 from ..db import execute, fetch_all, fetch_one, get_db
 from ..helpers import EMAIL_RE, error, split_name
-from ..services.roster_service import find_roster_clc, is_on_teacher_roster
+from ..services.roster_service import find_roster_assignment, is_on_teacher_roster
 from ..services.settings_service import get_active_school_year
 
 bp = Blueprint("auth", __name__)
@@ -158,9 +158,12 @@ def register():
     # teacher -- it doesn't guarantee their listed station school has a
     # matching clc row yet, so this can legitimately come back empty. That's
     # not an error: the teacher still registers, just as "Unassigned" for an
-    # admin to assign manually later, same as before this existed.
-    roster_clc = find_roster_clc(full_name)
-    municipality = roster_clc["municipality"] if roster_clc else "Unassigned"
+    # admin to assign manually later, same as before this existed. The
+    # municipality still comes from the roster's ALS district when the station
+    # school has no clc row, so the admin only has to pick the CLC.
+    roster = find_roster_assignment(full_name)
+    roster_clc = roster if roster and roster["clc_id"] else None
+    municipality = (roster or {}).get("municipality") or "Unassigned"
 
     db = get_db()
     try:

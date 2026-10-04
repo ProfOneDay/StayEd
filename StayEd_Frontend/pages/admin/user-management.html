@@ -89,10 +89,11 @@
       <div><small>Contact Number</small><b id="rv-phone">—</b></div>
       <div><small>Registration Date</small><b id="rv-date">—</b></div>
     </div>
-    <div class="info-card">
-      <div><small>Municipality</small><b id="rv-muni">—</b></div>
-      <div><small>Community Learning Center</small><b id="rv-clc">—</b></div>
+    <div class="rv-assign">
+      <div class="field"><label for="rv-muni">Municipality</label><select id="rv-muni"></select></div>
+      <div class="field"><label for="rv-clc">Community Learning Center</label><select id="rv-clc"></select></div>
     </div>
+    <p class="rv-assign-note" id="rv-assign-note"></p>
     <div class="modal-actions modal-actions--split">
       <button class="st-btn st-btn-ghost" onclick="closeModal('modal-review')">Close</button>
       <div class="st-modal-actions-right">
@@ -315,6 +316,6 @@
 <script src="../../assets/js/components/toast.js"></script>
 <script src="../../assets/js/components/modal.js"></script>
 <script src="../../assets/js/admin/division-ii-municipalities.js?v=2"></script>
-<script src="../../assets/js/admin/user-management.js?v=5"></script>
+<script src="../../assets/js/admin/user-management.js?v=6"></script>
 </body>
 </html>

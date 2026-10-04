@@ -110,6 +110,14 @@ body:is([data-page="User Management"],[data-page="CLC Management"]) .info-card s
 body:is([data-page="User Management"],[data-page="CLC Management"]) .detail-grid b,
 body:is([data-page="User Management"],[data-page="CLC Management"]) .info-card b{font-size:.875rem;font-weight:600;overflow-wrap:anywhere}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .field{margin-bottom:14px}
+/* Review registration: municipality + CLC are editable, prefilled from the record or the roster */
+body[data-page="User Management"] .rv-assign{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+body[data-page="User Management"] .rv-assign .field{margin-bottom:0;min-width:0}
+body[data-page="User Management"] .rv-assign-note{display:flex;align-items:center;gap:6px;margin:8px 0 14px;font-size:.75rem;color:var(--st-ink-faint,#8a91a0)}
+body[data-page="User Management"] .rv-assign-note::before{font-family:"Material Symbols Outlined";font-size:15px;content:"info"}
+body[data-page="User Management"] .rv-assign-note.is-missing{color:#8f5200}
+body[data-page="User Management"] .rv-assign-note.is-missing::before{content:"error"}
+@media (max-width:560px){body[data-page="User Management"] .rv-assign{grid-template-columns:1fr}}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .field label{display:block;margin-bottom:6px;font-size:.8125rem;font-weight:600;color:var(--st-on-surface)}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .field input,
 body:is([data-page="User Management"],[data-page="CLC Management"]) .field select,

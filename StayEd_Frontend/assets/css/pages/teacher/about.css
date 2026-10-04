@@ -110,3 +110,235 @@ body[data-page="About StayEd"] [data-animate-cards].is-inview > *{
         transform:none;
     }
 }
+
+/* ============================================================
+   About / Privacy Policy / Terms of Service / Contact Us
+   Shared document styling for both portals (.st-legal panels).
+   ============================================================ */
+
+.st-legal{
+    color:#2b3346;
+    font-size:0.938rem; /* 15px */
+    line-height:1.7;
+}
+
+.st-legal p{
+    margin:0 0 12px;
+}
+
+.st-legal ul{
+    margin:0 0 12px;
+    padding-left:22px;
+}
+
+.st-legal li{
+    margin:0 0 6px;
+}
+
+.st-legal li::marker{
+    color:var(--st-primary);
+}
+
+.st-legal a{
+    color:var(--st-primary);
+    font-weight:600;
+    text-decoration:underline;
+    text-underline-offset:2px;
+}
+
+.st-legal .st-panel-title{
+    margin:0 0 14px;
+}
+
+.st-legal-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px 18px;
+    margin-bottom:18px;
+    padding-bottom:16px;
+    border-bottom:1px solid var(--st-line, var(--st-outline-variant));
+    font-size:0.813rem; /* 13px */
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+.st-legal-meta > span{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+}
+
+.st-legal-meta .material-symbols-outlined{
+    font-size:17px;
+    color:var(--st-primary);
+}
+
+.st-legal-lead{
+    font-size:1rem;
+    color:var(--st-on-surface, #111a36);
+}
+
+.st-legal-section{
+    padding-top:18px;
+    margin-top:16px;
+    border-top:1px solid var(--st-line, var(--st-outline-variant));
+}
+
+.st-legal-section > :last-child{
+    margin-bottom:0;
+}
+
+.st-legal-heading{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    margin:0 0 10px;
+    font-family:var(--st-font-heading);
+    font-size:1.063rem; /* 17px */
+    font-weight:700;
+    color:var(--st-primary-dark, var(--st-primary));
+}
+
+.st-legal-num{
+    min-width:1.6em;
+    color:var(--st-primary);
+    font-variant-numeric:tabular-nums;
+}
+
+.st-legal-callout{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    margin-top:16px;
+    padding:14px 16px;
+    border-radius:10px;
+    background:var(--st-navy-soft, #e8eef6);
+    color:var(--st-primary-dark, var(--st-primary));
+}
+
+.st-legal-callout p{
+    margin:0;
+}
+
+.st-legal-callout .material-symbols-outlined{
+    font-size:20px;
+    color:var(--st-primary);
+    flex-shrink:0;
+    margin-top:2px;
+}
+
+/* About: capability cards */
+.st-about-capabilities{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:12px;
+}
+
+.st-about-capabilities > div{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    padding:16px;
+    border-radius:10px;
+    background:var(--st-background, var(--st-surface-container-low));
+}
+
+.st-about-capabilities .material-symbols-outlined{
+    font-size:22px;
+    color:var(--st-primary);
+    margin-bottom:6px;
+}
+
+.st-about-capabilities strong{
+    font-size:0.938rem;
+    font-weight:700;
+    color:var(--st-on-surface, #111a36);
+}
+
+.st-about-capabilities p{
+    margin:0;
+    font-size:0.844rem; /* 13.5px */
+    line-height:1.55;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+/* Contact Us */
+.st-contact-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+    margin-top:6px;
+}
+
+.st-contact-grid > div{
+    display:grid;
+    grid-template-columns:auto 1fr;
+    column-gap:12px;
+    align-items:center;
+    padding:14px 16px;
+    border:1px solid var(--st-line, var(--st-outline-variant));
+    border-radius:10px;
+    background:#fff;
+}
+
+.st-contact-grid .material-symbols-outlined{
+    grid-row:span 2;
+    display:grid;
+    place-items:center;
+    width:38px;
+    height:38px;
+    border-radius:10px;
+    background:var(--st-navy-soft, #e8eef6);
+    color:var(--st-primary);
+    font-size:20px;
+}
+
+.st-contact-grid small{
+    font-size:0.75rem;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+.st-contact-grid b{
+    font-size:0.938rem;
+    font-weight:600;
+}
+
+.st-contact-empty{
+    color:var(--st-ink-faint, #8a91a0);
+    font-style:italic;
+    font-weight:500 !important;
+}
+
+.st-contact-pending{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin:14px 0 0 !important;
+    font-size:0.813rem;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+.st-contact-pending .material-symbols-outlined{
+    font-size:17px;
+}
+
+.st-contact-escalate{
+    margin:16px 0 0 !important;
+    font-size:0.875rem;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+@media (max-width:1023px){
+    .st-about-capabilities{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+}
+
+@media (max-width:767px){
+    .st-about-capabilities,
+    .st-contact-grid{
+        grid-template-columns:1fr;
+    }
+    .st-legal{
+        font-size:0.906rem;
+    }
+}

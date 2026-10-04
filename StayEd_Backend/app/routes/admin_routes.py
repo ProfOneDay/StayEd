@@ -10,7 +10,7 @@ from ..authz import current_user_id, role_required
 from ..db import execute, fetch_all, fetch_one, get_db
 from ..helpers import error, is_deped_email, split_name
 from ..services.mailer import send_email
-from ..services.roster_service import is_on_teacher_roster
+from ..services.roster_service import find_roster_assignment
 from ..services.settings_service import (
     get_active_school_year,
     get_default_module_duration_days,
@@ -46,6 +46,15 @@ def _admin_teacher_row(row):
     )
     clcs = row.get("clcs") or []
     email = row.get("email") or ""
+    status = _ACCOUNT_STATUS_TO_UI.get(row["account_status"], "pending")
+    roster = find_roster_assignment(full_name)
+    # Pending registrations also carry what the roster says, so the review
+    # screen can fill in a municipality/CLC the registration couldn't (e.g. it
+    # was saved before the roster lookup filled municipality on its own).
+    roster_fields = {
+        "rosterMunicipality": (roster or {}).get("municipality") or "",
+        "rosterClc": (roster or {}).get("clc_name") or "",
+    } if status == "pending" else {}
     return {
         "id": row["id"],
         "firstName": row.get("first_name") or "",
@@ -54,14 +63,15 @@ def _admin_teacher_row(row):
         "name": full_name,
         "email": email,
         "isDepedVerified": is_deped_email(email),
-        "isOnRoster": is_on_teacher_roster(full_name),
+        "isOnRoster": roster is not None,
         "phone": row.get("contact_number") or "",
         "employeeId": row.get("employee_id") or "",
         "clc": clcs[0] if clcs else "",
         "clcs": clcs,
         "municipality": row.get("municipality") or "",
-        "status": _ACCOUNT_STATUS_TO_UI.get(row["account_status"], "pending"),
+        "status": status,
         "date": row["created_at"].strftime("%b %d, %Y") if row.get("created_at") else "",
+        **roster_fields,
     }
 
 
@@ -151,6 +161,11 @@ def pending_users():
 def approve_user(user_id: int):
     data = request.get_json(silent=True) or {}
     employee_id = str(data.get("employee_id") or "").strip()
+    # Optional: the municipality/CLC as confirmed or edited on the review screen.
+    municipality = str(data.get("municipality") or "").strip()
+    clc_name = str(data.get("clc") or "").strip()
+    if clc_name and not municipality:
+        return error("Select a municipality for this CLC.", 422)
 
     row = fetch_one(
         """
@@ -164,6 +179,17 @@ def approve_user(user_id: int):
     if not row:
         return error("Teacher account not found.", 404)
 
+    clc_id = None
+    if clc_name:
+        clc = fetch_one(
+            "SELECT clc_id FROM clc WHERE LOWER(BTRIM(clc_name)) = LOWER(BTRIM(%s)) "
+            "AND LOWER(BTRIM(municipality)) = LOWER(BTRIM(%s)) AND status = 'ACTIVE' LIMIT 1",
+            (clc_name, municipality),
+        )
+        if not clc:
+            return error("That CLC isn't an active CLC in the selected municipality.", 422)
+        clc_id = clc["clc_id"]
+
     db = get_db()
     try:
         with db.cursor() as cur:
@@ -171,6 +197,26 @@ def approve_user(user_id: int):
                 "UPDATE users SET account_status='ACTIVE' WHERE user_id=%s",
                 (user_id,),
             )
+            if municipality:
+                cur.execute("UPDATE teacher SET municipality=%s WHERE user_id=%s", (municipality, user_id))
+            if clc_id:
+                # The reviewed CLC replaces whatever registration auto-assigned.
+                cur.execute(
+                    """
+                    UPDATE teacher_clc SET assignment_status='INACTIVE'
+                    WHERE teacher_id=%s AND clc_id<>%s AND assignment_status='ACTIVE'
+                    """,
+                    (row["teacher_id"], clc_id),
+                )
+                cur.execute(
+                    """
+                    INSERT INTO teacher_clc (teacher_id, clc_id, school_year, assignment_status)
+                    VALUES (%s, %s, %s, 'ACTIVE')
+                    ON CONFLICT (teacher_id, clc_id, school_year)
+                    DO UPDATE SET assignment_status='ACTIVE', assigned_at=CURRENT_DATE
+                    """,
+                    (row["teacher_id"], clc_id, get_active_school_year()),
+                )
             if employee_id:
                 cur.execute(
                     "UPDATE teacher SET status='ACTIVE', employee_id=%s WHERE user_id=%s",

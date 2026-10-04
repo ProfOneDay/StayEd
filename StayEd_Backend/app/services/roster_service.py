@@ -75,26 +75,31 @@ def is_on_teacher_roster(full_name: str) -> bool:
     return _match_roster_row(full_name) is not None
 
 
-def find_roster_clc(full_name: str) -> dict | None:
-    """Resolves a roster-matched teacher's station school to a real clc row.
+def find_roster_assignment(full_name: str) -> dict | None:
+    """What the roster says about a teacher's municipality and CLC.
 
-    Returns {"municipality": ..., "clc_id": ..., "clc_name": ...} on a clean
-    match, or None if the name isn't on the roster, or its station school
-    doesn't (yet) match a seeded clc row -- callers should treat that as
-    "couldn't auto-assign" and fall back to leaving it for an admin, never as
-    a reason to fail registration outright.
+    Returns None if the name isn't on the roster. Otherwise returns
+    {"municipality": ..., "clc_id": ..., "clc_name": ...}, where municipality
+    comes from the roster's ALS district and is filled whenever the district
+    is, and clc_id/clc_name are None unless the station school matches an
+    active clc row in that municipality. A roster match with no CLC match
+    still gives the admin the municipality to start from.
     """
     row = _match_roster_row(full_name)
-    if not row or not row.get("station_school"):
+    if not row:
         return None
 
-    municipality = _district_to_municipality(row["als_district"])
-    clc = fetch_one(
-        "SELECT clc_id, clc_name FROM clc WHERE LOWER(BTRIM(clc_name)) = LOWER(BTRIM(%s)) "
-        "AND LOWER(BTRIM(municipality)) = LOWER(BTRIM(%s)) AND status = 'ACTIVE' LIMIT 1",
-        (row["station_school"], municipality),
-    )
-    if not clc:
-        return None
+    municipality = _district_to_municipality(row.get("als_district") or "") or None
+    clc = None
+    if municipality and row.get("station_school"):
+        clc = fetch_one(
+            "SELECT clc_id, clc_name FROM clc WHERE LOWER(BTRIM(clc_name)) = LOWER(BTRIM(%s)) "
+            "AND LOWER(BTRIM(municipality)) = LOWER(BTRIM(%s)) AND status = 'ACTIVE' LIMIT 1",
+            (row["station_school"], municipality),
+        )
 
-    return {"municipality": municipality, "clc_id": clc["clc_id"], "clc_name": clc["clc_name"]}
+    return {
+        "municipality": municipality,
+        "clc_id": clc["clc_id"] if clc else None,
+        "clc_name": clc["clc_name"] if clc else None,
+    }
