@@ -41,27 +41,38 @@ body[data-page="Admin Dashboard"] .st-adm-clc-card .hint{margin:0;font-size:.781
 /* Map card */
 body[data-page="Admin Dashboard"] .st-adm-map-card{display:flex;flex-direction:column;gap:14px}
 body[data-page="Admin Dashboard"] .st-adm-map-card .st-panel-head{margin-bottom:0}
-body[data-page="Admin Dashboard"] .mapwrap{position:relative;aspect-ratio:800/565;min-height:280px;border-radius:12px;border:1px solid var(--st-line);background:#e8f7f6;overflow:hidden;cursor:grab}
-body[data-page="Admin Dashboard"] .mapwrap > svg{position:absolute;inset:0;width:100%;height:100%}
+body[data-page="Admin Dashboard"] .mapwrap{position:relative;aspect-ratio:800/565;min-height:280px;border-radius:12px;border:1px solid var(--st-line);background:#e8f7f6;overflow:hidden}
+/* Leaflet map: fills the frame; tiles load over the teal background */
+body[data-page="Admin Dashboard"] .st-adm-leaflet{position:absolute;inset:0;background:#e8f7f6;font:inherit}
+body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-control-attribution{font-size:.6875rem;background:rgba(255,255,255,.8)}
+body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-control-attribution a{color:var(--st-ink-muted,#5a6275)}
 
 /* KEEP the original map behaviour: navy outline on hover, navy fill when selected */
 body[data-page="Admin Dashboard"] .municipality{stroke:#fff;stroke-width:1.15;vector-effect:non-scaling-stroke;transform-box:fill-box;transform-origin:center;transition:transform .22s ease,fill .18s ease,stroke .18s ease,filter .22s ease,opacity .3s ease}
 body[data-page="Admin Dashboard"] .municipality.division-ii{cursor:pointer}
+body[data-page="Admin Dashboard"] .municipality:focus{outline:none} /* keyboard focus shows as the navy outline below */
 body[data-page="Admin Dashboard"] .municipality.division-ii:hover,body[data-page="Admin Dashboard"] .municipality.division-ii:focus-visible{outline:none;stroke:var(--st-primary-dark,#0d2846);stroke-width:2.2;filter:brightness(1.06)}
 body[data-page="Admin Dashboard"] .municipality.selected{fill:var(--st-primary-dark,#0d2846)!important;stroke:var(--st-primary-dark,#0d2846);stroke-width:2.8;transform:translateY(-3px) scale(1.025);filter:drop-shadow(0 5px 5px rgba(5,43,79,.32))}
-body[data-page="Admin Dashboard"] .municipality.outside-division{fill:#d9dee7!important;opacity:.72;cursor:not-allowed}
+/* Division II municipality with no learner records yet: soft blue, so it reads as part of the division but not as a risk level */
+body[data-page="Admin Dashboard"] .municipality.no-data{fill:#7f9fc6;fill-opacity:.6}
+body[data-page="Admin Dashboard"] .municipality.no-data:hover,body[data-page="Admin Dashboard"] .municipality.no-data:focus-visible{fill-opacity:.75}
+body[data-page="Admin Dashboard"] .municipality.selected,body[data-page="Admin Dashboard"] .municipality.selected:hover{fill-opacity:1}
 body[data-page="Admin Dashboard"] .municipality.dim{opacity:.18}
 body[data-page="Admin Dashboard"] [data-animate] .municipality.division-ii{opacity:0}
 body[data-page="Admin Dashboard"] [data-animate].is-inview .municipality.division-ii{opacity:1;transition-delay:0s,0s,0s,0s,calc(var(--i,0) * 25ms)}
 body[data-page="Admin Dashboard"] [data-animate].is-inview .municipality.division-ii.dim{opacity:.18}
-body[data-page="Admin Dashboard"] .map-tooltip{position:absolute;z-index:20;pointer-events:none;padding:6px 12px;border-radius:999px;background:var(--st-primary-dark,#0d2846);color:#fff;box-shadow:0 6px 16px rgba(13,40,70,.3);font-size:.8125rem;font-weight:700;white-space:nowrap;opacity:0;transform:translate(-50%,-140%) translateY(4px);transition:opacity .15s ease,transform .15s ease}
+body[data-page="Admin Dashboard"] .map-tooltip{position:absolute;z-index:1100;pointer-events:none;padding:6px 12px;border-radius:999px;background:var(--st-primary-dark,#0d2846);color:#fff;box-shadow:0 6px 16px rgba(13,40,70,.3);font-size:.8125rem;font-weight:700;white-space:nowrap;opacity:0;transform:translate(-50%,-140%) translateY(4px);transition:opacity .15s ease,transform .15s ease}
 body[data-page="Admin Dashboard"] .map-tooltip.show{opacity:1;transform:translate(-50%,-140%)}
-body[data-page="Admin Dashboard"] .zoom-controls{position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;background:#fff;border:1px solid var(--st-line);border-radius:10px;box-shadow:0 4px 12px rgba(17,26,54,.1);overflow:hidden}
-body[data-page="Admin Dashboard"] .zoom-controls button{width:36px;height:36px;border:0;background:none;display:grid;place-items:center;color:var(--st-on-surface);cursor:pointer;transition:background-color var(--st-t-hover,150ms),transform var(--st-t-press,90ms)}
-body[data-page="Admin Dashboard"] .zoom-controls button + button{border-top:1px solid var(--st-line)}
-body[data-page="Admin Dashboard"] .zoom-controls button:hover{background:var(--st-navy-soft,#e8eef6);color:var(--st-primary)}
-body[data-page="Admin Dashboard"] .zoom-controls button:active{transform:scale(.9)}
-body[data-page="Admin Dashboard"] .zoom-controls .material-symbols-outlined{font-size:20px}
+/* Leaflet zoom + reset controls, styled as the white rounded buttons the map had before */
+body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-bottom.leaflet-right .leaflet-control{margin:0 12px 8px 0}
+body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-bottom.leaflet-right .leaflet-control:last-child{margin-bottom:12px}
+body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-bar{border:1px solid var(--st-line);border-radius:10px;background:#fff;box-shadow:0 4px 12px rgba(17,26,54,.1);overflow:hidden}
+body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-bar a{width:36px;height:36px;line-height:36px;display:grid;place-items:center;border:0;border-radius:0;background:none;color:var(--st-on-surface);font:600 20px/1 Inter,system-ui,sans-serif;text-decoration:none;transition:background-color var(--st-t-hover,150ms),transform var(--st-t-press,90ms)}
+body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-bar a + a{border-top:1px solid var(--st-line)}
+body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-bar a:hover{background:var(--st-navy-soft,#e8eef6);color:var(--st-primary)}
+body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-bar a:active{transform:scale(.9)}
+body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-bar a.leaflet-disabled{background:none;color:var(--st-ink-faint,#8a91a0);opacity:.5;cursor:default}
+body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-bar .material-symbols-outlined{font-size:20px}
 body[data-page="Admin Dashboard"] .map-legend-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:.781rem;color:var(--st-ink-muted)}
 body[data-page="Admin Dashboard"] .map-legend-head strong{color:var(--st-on-surface);font-size:.844rem}
 body[data-page="Admin Dashboard"] .legend{display:flex;gap:8px;flex-wrap:wrap}
@@ -70,7 +81,7 @@ body[data-page="Admin Dashboard"] .legend-item:hover{border-color:var(--st-line-
 body[data-page="Admin Dashboard"] .legend-item:active{transform:scale(.96)}
 body[data-page="Admin Dashboard"] .legend-item.active{border-color:var(--st-primary);background:var(--st-navy-soft,#e8eef6);color:var(--st-primary);font-weight:600}
 body[data-page="Admin Dashboard"] .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
-body[data-page="Admin Dashboard"] .dot--low{background:#6BBF59}body[data-page="Admin Dashboard"] .dot--moderate{background:#F39422}body[data-page="Admin Dashboard"] .dot--high{background:#D64545}body[data-page="Admin Dashboard"] .dot--outside{background:#d9dee7}
+body[data-page="Admin Dashboard"] .dot--low{background:#6BBF59}body[data-page="Admin Dashboard"] .dot--moderate{background:#F39422}body[data-page="Admin Dashboard"] .dot--high{background:#D64545}body[data-page="Admin Dashboard"] .dot--nodata{background:#7f9fc6}
 body[data-page="Admin Dashboard"] .legend-count{min-width:22px;height:20px;padding:0 6px;border-radius:999px;background:var(--st-background);font-size:.719rem;font-weight:700;display:inline-grid;place-items:center;color:var(--st-ink-muted)}
 
 /* Bar rows: teacher st-hbar rows with a count sub-label */

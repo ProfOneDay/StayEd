@@ -3,9 +3,8 @@ Guards.admin();
 
 // DIVISION_II_MUNICIPALITIES / DIVISION_II_IDS / slugifyMunicipality come from
 // division-ii-municipalities.js (loaded before this file). This dashboard is
-// scoped to Division II only -- the rest of the province is shown on the map
-// for geographic context but stays non-interactive (see .outside-division in
-// admin-dashboard.css).
+// scoped to Division II only: the map draws just those municipalities over a
+// grey basemap.
 function emptyGenderBucket(){return {total:0,high:0,moderate:0,low:0,highRiskRate:0}}
 function emptyBucket(name){return {name,total:0,high:0,moderate:0,low:0,levels:{BLP:0,Elementary:0,JHS:0,SHS:0},clcs:0,genderRisk:{male:emptyGenderBucket(),female:emptyGenderBucket(),higherRiskGender:null}}}
 
@@ -23,87 +22,117 @@ let genderChartType='bar';
 let riskChartInstance=null;
 let levelChartInstance=null;
 let genderChartInstance=null;
-const map=document.querySelector('.mapwrap svg');
-const zoomGroup=document.getElementById('zoomGroup');
 const wrap=document.querySelector('.mapwrap');
-const VB_CENTER={x:400,y:266.5};
-const MIN_SCALE=0.8,MAX_SCALE=5,DEFAULT_SCALE=1.2;
-let mapScaleState=DEFAULT_SCALE;
-let mapTx=VB_CENTER.x*(1-DEFAULT_SCALE), mapTy=VB_CENTER.y*(1-DEFAULT_SCALE);
-function applyMapTransform(){
-  zoomGroup.setAttribute('transform',`translate(${mapTx} ${mapTy}) scale(${mapScaleState})`);
-}
-function clientToViewBox(clientX,clientY){
-  const pt=map.createSVGPoint(); pt.x=clientX; pt.y=clientY;
-  const ctm=map.getScreenCTM();
-  if(!ctm) return {x:VB_CENTER.x,y:VB_CENTER.y};
-  const p=pt.matrixTransform(ctm.inverse());
-  return {x:p.x,y:p.y};
-}
-function zoomAtViewBoxPoint(Rx,Ry,factor){
-  const newScale=Math.min(MAX_SCALE,Math.max(MIN_SCALE,mapScaleState*factor));
-  if(newScale===mapScaleState) return;
-  const Cx=(Rx-mapTx)/mapScaleState, Cy=(Ry-mapTy)/mapScaleState;
-  mapTx=Rx-newScale*Cx; mapTy=Ry-newScale*Cy; mapScaleState=newScale;
-  applyMapTransform();
-}
-document.getElementById('zoomInBtn').addEventListener('click',()=>zoomAtViewBoxPoint(VB_CENTER.x,VB_CENTER.y,1.25));
-document.getElementById('zoomOutBtn').addEventListener('click',()=>zoomAtViewBoxPoint(VB_CENTER.x,VB_CENTER.y,0.8));
-document.getElementById('zoomResetBtn').addEventListener('click',()=>{mapScaleState=DEFAULT_SCALE;mapTx=VB_CENTER.x*(1-DEFAULT_SCALE);mapTy=VB_CENTER.y*(1-DEFAULT_SCALE);applyMapTransform()});
-applyMapTransform();
 
-// Mouse-wheel zoom, centered on the cursor position
-wrap.addEventListener('wheel',e=>{
-  e.preventDefault();
-  const factor=Math.exp(-e.deltaY*0.0016);
-  const R=clientToViewBox(e.clientX,e.clientY);
-  zoomAtViewBoxPoint(R.x,R.y,factor);
-},{passive:false});
+// Leaflet map on a grey OpenStreetMap basemap. Each Division II municipality
+// is drawn from real boundaries (pangasinan-municipalities-geo.js) as an SVG
+// path with id = its slug and classes "municipality division-ii", so the
+// hover/click/keyboard handlers, selection lift and legend filter work on it
+// the way they did on the original static map. Municipalities with no learner
+// records also get "no-data" and stay uncolored (see recolorMap).
+const leafletMap=L.map('adminLeafletMap',{
+  zoomControl:false,
+  zoomSnap:0.25,
+  zoomDelta:0.5,
+  wheelPxPerZoomLevel:120,
+});
+// Standard OpenStreetMap tiles (no API key), shown in full color. Heavy
+// production traffic should move to a hosted tile provider:
+// https://operations.osmfoundation.org/policies/tiles/
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  maxZoom:19,
+  attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+}).addTo(leafletMap);
+const municipalityLayer=L.geoJSON(window.PANGASINAN_MUNICIPALITIES_GEOJSON,{
+  filter:(f)=>DIVISION_II_IDS.has(f.properties.id),
+  style:()=>({className:'municipality division-ii no-data',color:'#fff',weight:1.15,fillColor:'#d9dee7',fillOpacity:.85}),
+});
 
-// Click-and-drag panning (mouse + touch)
-let isPanning=false,panLast=null,panMoved=false,justPanned=false;
-function panStart(clientX,clientY){isPanning=true;panMoved=false;panLast=clientToViewBox(clientX,clientY);wrap.classList.add('dragging');hideTooltip()}
-function panMove(clientX,clientY){
-  if(!isPanning)return;
-  const R=clientToViewBox(clientX,clientY);
-  const dx=R.x-panLast.x, dy=R.y-panLast.y;
-  if(Math.abs(dx)>0.6||Math.abs(dy)>0.6)panMoved=true;
-  mapTx+=dx; mapTy+=dy; panLast=R;
-  applyMapTransform();
+const DIVISION_BOUNDS=municipalityLayer.getBounds();
+leafletMap.setMaxBounds(DIVISION_BOUNDS.pad(0.35));
+let viewTouched=false; // set once the user zooms or drags; until then resizes re-fit the view
+const MAX_ZOOM=14;
+leafletMap.setMaxZoom(MAX_ZOOM);
+function fitDefaultView(){
+  leafletMap.invalidateSize();
+  // While the card is still hidden (0x0) there is nothing to fit to: park the
+  // view on the division; the ResizeObserver below re-fits once it has a size.
+  if(!wrap.clientWidth||!wrap.clientHeight){
+    leafletMap.setView(DIVISION_BOUNDS.getCenter(),9,{animate:false});
+    return;
+  }
+  leafletMap.setMinZoom(0);
+  leafletMap.fitBounds(DIVISION_BOUNDS,{padding:[12,12],animate:false});
+  leafletMap.setMinZoom(leafletMap.getZoom()-0.5);
 }
-function panEnd(){
-  if(isPanning&&panMoved){justPanned=true;setTimeout(()=>{justPanned=false},50)}
-  isPanning=false; wrap.classList.remove('dragging');
-}
-wrap.addEventListener('mousedown',e=>{if(e.button!==0)return;panStart(e.clientX,e.clientY)});
-window.addEventListener('mousemove',e=>panMove(e.clientX,e.clientY));
-window.addEventListener('mouseup',panEnd);
-wrap.addEventListener('touchstart',e=>{const t=e.touches[0];panStart(t.clientX,t.clientY)},{passive:true});
-wrap.addEventListener('touchmove',e=>{if(!isPanning)return;e.preventDefault();const t=e.touches[0];panMove(t.clientX,t.clientY)},{passive:false});
-wrap.addEventListener('touchend',panEnd);
-// Swallow the click-to-select that would otherwise fire right after a drag
+// Leaflet only draws a layer once the map has a view, so set it before adding
+fitDefaultView();
+municipalityLayer.addTo(leafletMap);
+municipalityLayer.eachLayer(layer=>{
+  const {id,name}=layer.feature.properties;
+  const el=layer.getElement();
+  el.id=id;
+  el.dataset.name=name;
+  el.setAttribute('aria-label',name);
+  el.dataset.divisionIi='true';
+  el.setAttribute('tabindex','0');
+  el.setAttribute('role','button');
+});
+const map=leafletMap.getContainer();
+const zoomControl=L.control.zoom({position:'bottomright',zoomInTitle:'Zoom in',zoomOutTitle:'Zoom out'}).addTo(leafletMap);
+zoomControl.getContainer().addEventListener('click',()=>{viewTouched=true});
+const ResetViewControl=L.Control.extend({
+  options:{position:'bottomright'},
+  onAdd(){
+    const bar=L.DomUtil.create('div','leaflet-bar leaflet-control st-map-reset');
+    const btn=L.DomUtil.create('a','',bar);
+    btn.href='#'; btn.setAttribute('role','button'); btn.title='Reset view'; btn.setAttribute('aria-label','Reset view');
+    btn.innerHTML='<span class="material-symbols-outlined">restart_alt</span>';
+    L.DomEvent.disableClickPropagation(bar);
+    L.DomEvent.on(btn,'click',e=>{L.DomEvent.preventDefault(e);viewTouched=false;fitDefaultView()});
+    return bar;
+  },
+});
+leafletMap.addControl(new ResetViewControl());
+leafletMap.attributionControl.setPosition('bottomleft');
+// The dashboard grid is hidden until data loads, so the map often starts at
+// 0x0: keep Leaflet's size in sync and re-fit until the user has moved it.
+map.addEventListener('wheel',()=>{viewTouched=true},{passive:true});
+leafletMap.on('dragstart',()=>{viewTouched=true});
+new ResizeObserver(()=>{
+  if(!wrap.clientWidth||!wrap.clientHeight) return;
+  if(viewTouched) leafletMap.invalidateSize({pan:false});
+  else fitDefaultView();
+}).observe(wrap);
+
+// A drag that ends over a municipality would otherwise also select it
+let justPanned=false;
+leafletMap.on('dragstart zoomstart',()=>hideTooltip());
+leafletMap.on('dragend',()=>{justPanned=true;setTimeout(()=>{justPanned=false},50)});
 map.addEventListener('click',e=>{if(justPanned){e.stopPropagation();justPanned=false}},true);
 
 function riskLevel(d){if(!d.total)return 'low';const rate=d.high/d.total; return rate>=.20?'high':rate>=.10?'moderate':'low'}
+function hasLearnerData(d){return !!(d&&d.total>0)}
 function riskColor(d){return {high:'#D64545',moderate:'#F39422',low:'#6BBF59'}[riskLevel(d)]}
 const levelKeys=['BLP','Elementary','JHS','SHS'];
 const levelLabels={BLP:'Basic Literacy',Elementary:'Elementary',JHS:'Junior High',SHS:'Senior High'};
 function recolorMap(){
-  // Every Division II municipality gets a risk color, whether or not it has
-  // a CLC registered yet -- riskLevel() defaults an empty bucket to "low"
-  // (green), so an as-yet-unregistered Division II municipality still reads
-  // as in-scope rather than "no data" gray. Only municipalities outside the
-  // division (forced gray via .outside-division in CSS) stay ungraded.
+  // Only municipalities with learner records in the database get a risk
+  // color; the rest are shaded a neutral blue (.no-data in the CSS)
+  // but still hover, select and filter like every other municipality.
+  const riskCounts={low:0,moderate:0,high:0,nodata:0};
   Object.entries(municipalityData).forEach(([id,d])=>{
+    const hasData=hasLearnerData(d);
+    if(hasData) riskCounts[riskLevel(d)]++; else riskCounts.nodata++;
     const el=map.querySelector('#'+CSS.escape(id));
     if(!el)return;
-    el.style.fill=riskColor(d);
+    el.classList.toggle('no-data',!hasData);
+    el.style.fill=hasData?riskColor(d):'';
   });
-  const riskCounts={low:0,moderate:0,high:0};
-  Object.values(municipalityData).forEach(d=>{riskCounts[riskLevel(d)]++});
   document.getElementById('countLow').textContent=riskCounts.low;
   document.getElementById('countModerate').textContent=riskCounts.moderate;
   document.getElementById('countHigh').textContent=riskCounts.high;
+  document.getElementById('countNoData').textContent=riskCounts.nodata;
   levelAverages=Object.fromEntries(levelKeys.map(k=>{
     const municipalities=Object.values(municipalityData);
     return [k,municipalities.length?municipalities.reduce((s,d)=>s+d.levels[k],0)/municipalities.length:0];
@@ -517,17 +546,6 @@ const motionObserver=new IntersectionObserver((entries)=>{
 },{threshold:.2});
 document.querySelectorAll('[data-animate]').forEach(el=>motionObserver.observe(el));
 
-// Normalize the SVG asset against the canonical list. The map contains other
-// province areas for context, but only the requested municipalities are
-// selectable and included in the dashboard scope.
-map.querySelectorAll('.division-ii').forEach(el=>{
-  if(DIVISION_II_IDS.has(el.id))return;
-  el.classList.remove('division-ii');
-  el.classList.add('outside-division');
-  el.dataset.divisionIi='false';
-  el.tabIndex=-1;
-});
-
 // Only canonical Division II municipalities are interactive -- the rest of the
 // province renders for geographic context but is not part of this scope.
 map.querySelectorAll('.division-ii').forEach(el=>{
@@ -606,9 +624,8 @@ document.querySelectorAll('.legend-item').forEach(btn=>{
     document.querySelectorAll('.legend-item').forEach(b=>b.classList.toggle('active',b.dataset.level===activeFilter));
     map.querySelectorAll('.municipality').forEach(el=>{
       if(!activeFilter){el.classList.remove('dim');return}
-      const isOutside=el.classList.contains('outside-division');
       const d=municipalityData[el.id];
-      const matches=activeFilter==='outside'?isOutside:(d&&riskLevel(d)===activeFilter);
+      const matches=activeFilter==='nodata'?!hasLearnerData(d):(hasLearnerData(d)&&riskLevel(d)===activeFilter);
       el.classList.toggle('dim',!matches);
     });
   });
