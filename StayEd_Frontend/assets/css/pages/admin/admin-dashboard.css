@@ -41,7 +41,7 @@ body[data-page="Admin Dashboard"] .st-adm-clc-card .hint{margin:0;font-size:.781
 /* Map card */
 body[data-page="Admin Dashboard"] .st-adm-map-card{display:flex;flex-direction:column;gap:14px}
 body[data-page="Admin Dashboard"] .st-adm-map-card .st-panel-head{margin-bottom:0}
-body[data-page="Admin Dashboard"] .mapwrap{position:relative;aspect-ratio:800/500;min-height:280px;border-radius:12px;border:1px solid var(--st-line);background:#e8f7f6;overflow:hidden;cursor:grab}
+body[data-page="Admin Dashboard"] .mapwrap{position:relative;aspect-ratio:800/565;min-height:280px;border-radius:12px;border:1px solid var(--st-line);background:#e8f7f6;overflow:hidden;cursor:grab}
 body[data-page="Admin Dashboard"] .mapwrap > svg{position:absolute;inset:0;width:100%;height:100%}
 
 /* KEEP the original map behaviour: navy outline on hover, navy fill when selected */
@@ -128,6 +128,20 @@ body[data-page="Admin Dashboard"] .st-adm-clc-card .st-adm-clc-figure{flex-direc
 body[data-page="Admin Dashboard"] .st-adm-side{display:flex;flex-direction:column;gap:20px;min-width:0}
 body[data-page="Admin Dashboard"] .st-dash-grid:has(#clcListSection[hidden]) .st-adm-level-card{grid-column:span 12}
 body[data-page="Admin Dashboard"] .clc-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+/* Side by side with the map: the map card sets the row height and the side stack never stretches it.
+   contain:size drops the stack's content from the row sizing; the two panels split that height and the charts fill what's left. */
+@media (min-width:1280px){
+  body[data-page="Admin Dashboard"] .st-adm-side{contain:size}
+  body[data-page="Admin Dashboard"] .st-adm-side > .st-panel{flex:1 1 0;min-height:0;overflow:hidden}
+  body[data-page="Admin Dashboard"] .st-adm-side #riskChartView.chart-canvas-wrap,
+  body[data-page="Admin Dashboard"] .st-adm-side #genderChartView.chart-canvas-wrap{flex:1 1 0;height:auto;min-height:0}
+}
+/* Bar view is shorter than the card: let it fill the free space below the header and spread the rows across it */
+body[data-page="Admin Dashboard"] .st-adm-side #riskBarView,
+body[data-page="Admin Dashboard"] .st-adm-side #genderBarView{flex:1 1 auto;justify-content:space-evenly}
+/* Caption under the bars; the chart views carry their own note, so it hides with the bar view */
+body[data-page="Admin Dashboard"] .st-adm-bar-note{flex-shrink:0}
+body[data-page="Admin Dashboard"] [hidden] + .st-adm-bar-note{display:none}
 @media (max-width:1279px){body[data-page="Admin Dashboard"] .st-adm-side{display:grid;grid-template-columns:1fr 1fr}}
 @media (max-width:1023px){body[data-page="Admin Dashboard"] .st-adm-side{grid-template-columns:1fr}}
 @media (max-width:767px){body[data-page="Admin Dashboard"] .clc-list{grid-template-columns:1fr}}

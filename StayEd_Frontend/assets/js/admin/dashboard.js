@@ -171,6 +171,12 @@ function renderClcList(id){
 const ST_REDUCE_MOTION = matchMedia('(prefers-reduced-motion: reduce)').matches;
 Chart.defaults.font.family = "Inter, system-ui, sans-serif";
 Chart.defaults.color = '#5a6275';
+// The side charts fill a flex box capped at the map card's height, so their
+// height is often fractional (e.g. 328.6px). Chart.js floors the canvas to
+// whole pixels and immediately resizes once more; with the default 0ms resize
+// transition that resize snaps every element to its final value and the entry
+// animation is never seen. A non-zero resize transition lets it play out.
+if(!ST_REDUCE_MOTION) Chart.defaults.transitions.resize.animation.duration = 600;
 const ST_LEGEND_BOTTOM = { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 8, boxHeight: 8, padding: 16, color: '#5a6275' } };
 const ST_TOOLTIP = { backgroundColor: '#111a36', padding: 10, cornerRadius: 8, displayColors: true, boxPadding: 4 };
 const ST_TOOLTIP_SHARE = { ...ST_TOOLTIP, callbacks: { label(ctx){ const total=ctx.dataset.data.reduce((a,b)=>a+b,0); const pct=total?Math.round(ctx.parsed/total*100):0; return ` ${ctx.label}: ${ctx.parsed} (${pct}%)`; } } };
@@ -480,9 +486,19 @@ function bindChartToggle(toggleId,onChange){
   });
 }
 
-bindChartToggle('riskChartToggle',(type)=>{riskChartType=type;renderRiskChart();});
+// Switching back to Bar un-hides bars that already sit at their final width, and
+// a transition can't run out of display:none -- so replay the fill from 0 here.
+// Only on a toggle, never on a data change (see the motion note below).
+function replayBars(view){
+  const panel=view&&view.closest('[data-animate]');
+  if(!panel||ST_REDUCE_MOTION) return;
+  panel.classList.remove('is-inview');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>panel.classList.add('is-inview')));
+}
+
+bindChartToggle('riskChartToggle',(type)=>{riskChartType=type;renderRiskChart();if(type==='bar')replayBars(document.getElementById('riskBarView'));});
 bindChartToggle('levelChartToggle',(type)=>{levelChartType=type;renderLevelChart();});
-bindChartToggle('genderChartToggle',(type)=>{genderChartType=type;renderGenderChart();});
+bindChartToggle('genderChartToggle',(type)=>{genderChartType=type;renderGenderChart();if(type==='bar')replayBars(document.getElementById('genderBarView'));});
 
 // ── Motion: [data-animate] panels fill in once they scroll into view (same
 // pattern as the teacher dashboard's own IntersectionObserver). Once a panel
