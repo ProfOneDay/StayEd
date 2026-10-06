@@ -320,9 +320,11 @@ class LearnerProfilePage {
 
     const riskHelper = document.querySelector("[data-profile-risk-helper]");
     if (riskHelper) {
+      const recList = (this.profile.interventions && this.profile.interventions.recommended) || [];
+      const topRec = recList.slice().sort((a, b) => (a.rank || 999) - (b.rank || 999))[0];
       riskHelper.textContent =
         p.risk === "High"
-          ? "Prioritize follow-up and intervention."
+          ? (topRec ? topRec.title : "Prioritize follow-up and intervention.")
           : p.risk === "Moderate"
             ? "Needs regular monitoring."
             : p.risk === "Low"

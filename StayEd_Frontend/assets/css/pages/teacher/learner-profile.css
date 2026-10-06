@@ -2291,3 +2291,7 @@ body[data-page="Learner Profile"] #ivNotesRich ol {
 body[data-page="Learner Profile"] #ivNotesRich li {
   margin-bottom: 2px;
 }
+body[data-page="Learner Profile"] .st-profile-fullwidth {
+  margin-top: var(--st-card-gap);
+  width: 100%;
+}

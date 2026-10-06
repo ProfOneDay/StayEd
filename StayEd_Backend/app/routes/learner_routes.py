@@ -1448,7 +1448,7 @@ def learner_profile(learner_id: int):
             {"priority": "medium", "title": "Contact learner", "text": "Check in about emerging module-return or engagement barriers."},
             {"priority": "medium", "title": "Monitor for 2 weeks", "text": "Watch for repeated delays before risk increases."},
         ]
-    else:
+    elif current_risk == "Low":
         recommendation = [{"priority": "low", "title": "Continue monitoring", "text": "Maintain regular module tracking and consultation contact."}]
 
     release_batches = fetch_all(
