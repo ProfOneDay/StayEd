@@ -219,7 +219,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
 /* Small info icon next to a column header, for columns whose meaning
    isn't obvious at a glance (LRN, Risk, Modules, Alert). Reuses the
    [data-tip] tooltip component already used on icon-only row buttons. */
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-th-info{
+body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-th-info{
     display:inline-flex;
     vertical-align:middle;
     margin-left:3px;
@@ -229,15 +229,15 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     border-radius:50%;
 }
 
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-th-info:hover,
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-th-info:focus-visible{
+body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-th-info:hover,
+body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-th-info:focus-visible{
     color:var(--st-primary);
 }
 
 /* Header tooltips open downward, not upward like the row-button ones --
    they sit right at the top edge of .st-table-card (overflow:hidden, for
    its rounded corners), so an upward-opening tooltip gets clipped there. */
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-th-info[data-tip]::after{
+body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-th-info[data-tip]::after{
     top:calc(100% + 8px);
     bottom:auto;
     left:0;
@@ -248,8 +248,8 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     transform:translate(0,-4px);
 }
 
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-th-info[data-tip]:hover::after,
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-th-info[data-tip]:focus-visible::after{
+body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-th-info[data-tip]:hover::after,
+body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-th-info[data-tip]:focus-visible::after{
     transform:translate(0,0);
 }
 
@@ -344,35 +344,10 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-learner-cell .st-avatar-initials--high{ background:var(--st-risk-high-soft); color:var(--st-risk-high); border-color:transparent; }
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-learner-cell .st-avatar-initials--moderate{ background:var(--st-risk-moderate-soft); color:var(--st-risk-moderate); border-color:transparent; }
 
-/* Visible tooltip for icon-only buttons */
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) [data-tip]{
-    position:relative;
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) [data-tip]::after{
-    content:attr(data-tip);
-    position:absolute;
-    bottom:calc(100% + 6px);
-    left:50%;
-    transform:translate(-50%,4px);
-    padding:5px 8px;
-    border-radius:6px;
-    background:#111a36;
-    color:#fff;
-    font-size:12px;
-    font-weight:500;
-    white-space:nowrap;
-    pointer-events:none;
-    opacity:0;
-    transition:opacity 120ms ease,transform 120ms ease;
-    z-index:5;
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) [data-tip]:hover::after,
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) [data-tip]:focus-visible::after{
-    opacity:1;
-    transform:translate(-50%,0);
-}
+/* Visible tooltip for icon-only buttons -- look/content/reveal comes
+   entirely from the shared [data-tip] component (components.css); only
+   the downward-opening header-icon variant below needs a position
+   override here. */
 
 /* Row entrance: fade in + rise, staggered per row */
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) [data-animate-rows] tr{
@@ -1204,7 +1179,8 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     display:block;
 }
 
-.st-learner-name-link:hover,
-.st-avatar-btn:hover{
-    text-decoration:underline;
+.st-learner-name-link:hover{
+    font-weight:700;
 }
+/* .st-avatar-btn already gets a ring-glow hover from the shared
+   .st-avatar-initials:hover rule (layout.css) -- no underline needed. */

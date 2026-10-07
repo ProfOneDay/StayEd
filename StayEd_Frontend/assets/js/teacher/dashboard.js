@@ -10,12 +10,13 @@
 const ST_REDUCE_MOTION = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 // Same mapping used by the Student Registry page (student-registry.js) so a
-// learner's avatar color is consistent between the two tables.
-const LEVEL_AVATAR_THEMES = {
-  "Basic Literacy": "",
-  "Elementary": " st-avatar-initials--teal",
-  "Junior High": " st-avatar-initials--blue",
-  "Senior High": " st-avatar-initials--slate",
+// learner's avatar color is consistent between the two tables. Keyed by
+// modality (not learning level) so it also lines up with the modality pill
+// colors shown in its own column (.st-modality-pill--f2f/--modular/--blended).
+const MODALITY_AVATAR_THEMES = {
+  "Face-to-Face": "",
+  "Modular": " st-avatar-initials--teal",
+  "Blended": " st-avatar-initials--slate",
 };
 if (typeof Chart !== "undefined") {
   Chart.defaults.font.family = "Inter, system-ui, sans-serif";
@@ -841,7 +842,7 @@ class TeacherDashboard {
   }
 
   static registryRow(l, index) {
-    const initialsTheme = LEVEL_AVATAR_THEMES[l.level] || "";
+    const initialsTheme = MODALITY_AVATAR_THEMES[l.modality] || "";
 
     const initials = (l.name || "?")
       .split(" ")

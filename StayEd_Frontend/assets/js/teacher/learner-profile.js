@@ -542,6 +542,9 @@ class LearnerProfilePage {
       "[data-metric-module-rate]",
       m.moduleRate == null ? "Not Yet Available" : `${m.moduleRate}%`,
     );
+    document
+      .querySelector("[data-metric-module-rate]")
+      ?.classList.toggle("is-unavailable", m.moduleRate == null);
     this.set("[data-metric-module-rate-text]", m.moduleRate == null ? "" : m.moduleRateText);
     const moduleRateBar = document.querySelector("[data-metric-module-rate-bar]");
     if (moduleRateBar) {
@@ -596,7 +599,10 @@ class LearnerProfilePage {
     if (!chart) return;
 
     if (!progress.length) {
-      if (current) current.textContent = "Not Yet Available";
+      if (current) {
+        current.textContent = "Not Yet Available";
+        current.classList.add("is-unavailable");
+      }
       chart.innerHTML = `
         <div class="st-performance-progress-empty">
           Performance progress will appear after modules are released and returned.
@@ -606,7 +612,10 @@ class LearnerProfilePage {
     }
 
     const latest = progress[progress.length - 1];
-    if (current) current.textContent = `${latest.rate}%`;
+    if (current) {
+      current.textContent = `${latest.rate}%`;
+      current.classList.remove("is-unavailable");
+    }
 
     // Coordinates are relative to the inset .st-performance-progress-plot
     // box (see CSS: left:40px; right:8px; top:8px; bottom:28px), matching
@@ -792,7 +801,12 @@ class LearnerProfilePage {
     const dots = coords
       .map(({ x, y, pt }, i) => {
         const tip = `${pt.date}: ${pt.level} Risk${pt.probability != null ? ` (${pt.probability}%)` : ""}`;
-        return `<span class="st-risk-trend-point st-risk-trend-point--${pt.level.toLowerCase()}" style="left:${x}%;top:${y}%;--d:${500 + i * 150}" data-tooltip="${this.escAttr(tip)}" aria-label="${this.escAttr(tip)}" tabindex="0"></span>`;
+        // A tooltip centered over a point near the chart's left/right edge
+        // would spill past that edge (same fix as the performance progress
+        // chart's first/last points) -- anchor it to the point's own side
+        // instead of centering, for the first/last dots.
+        const edgeClass = i === coords.length - 1 ? " is-last" : i === 0 ? " is-first" : "";
+        return `<span class="st-risk-trend-point st-risk-trend-point--${pt.level.toLowerCase()}${edgeClass}" style="left:${x}%;top:${y}%;--d:${500 + i * 150}" data-tooltip="${this.escAttr(tip)}" aria-label="${this.escAttr(tip)}" tabindex="0"></span>`;
       })
       .join("");
 
@@ -928,12 +942,14 @@ class LearnerProfilePage {
 
         const all = this.allTimelineItems || [];
 
-        const filtered = filter === "all" ? all : all.slice(-3);
+        const filtered = this.filterTimelineByRange(all, filter);
 
         this.renderTimeline(
           document.querySelector("[data-monitoring-timeline]"),
           filtered,
-          "No monitoring records yet.",
+          filter === "all"
+            ? "No monitoring records yet."
+            : "No monitoring records in this period.",
         );
       });
     });
@@ -959,6 +975,33 @@ class LearnerProfilePage {
           "No monitoring records yet.",
         );
       });
+  }
+
+  // "This month" is the current calendar month; "This semester" is the
+  // current calendar half-year (Jan-Jun / Jul-Dec) -- the app has no
+  // DepEd-specific semester date boundaries to key off, so this uses the
+  // standard definition of "semester" (half a year) rather than guessing
+  // at academic-term dates. Relies on each item's dateIso (added by the
+  // backend alongside the display-formatted "date" string) rather than
+  // re-parsing that display string.
+  static filterTimelineByRange(items, range) {
+    if (range === "all") return items;
+
+    const now = new Date();
+    const half = (month) => (month < 6 ? 0 : 1);
+
+    return items.filter((item) => {
+      if (!item.dateIso) return false;
+      const d = new Date(item.dateIso);
+      if (Number.isNaN(d.getTime())) return false;
+
+      if (d.getFullYear() !== now.getFullYear()) return false;
+
+      if (range === "month") return d.getMonth() === now.getMonth();
+      if (range === "semester") return half(d.getMonth()) === half(now.getMonth());
+
+      return true;
+    });
   }
 
   static renderRiskExplanation() {

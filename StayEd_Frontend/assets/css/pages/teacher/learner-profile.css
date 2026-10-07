@@ -651,6 +651,22 @@ body[data-page="Learner Profile"] .st-metric-card--hero .st-metric-card-value {
   color: var(--st-primary);
   font-size: 2rem;
 }
+/* "Not Yet Available" placeholder: a pill badge (same visual language as
+   the "Not assessed" status badge on Assessment Scores) instead of the
+   same oversized heading treatment as a real percentage -- it isn't a
+   number, so it shouldn't read like one. */
+body[data-page="Learner Profile"] .st-metric-card-value.is-unavailable {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--st-font-body);
+  font-weight: 600;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--st-info-light);
+  color: var(--st-info);
+}
 body[data-page="Learner Profile"] .st-metric-card-value--sm {
   font-size: 1rem;
   font-weight: 700;
@@ -734,6 +750,19 @@ body[data-page="Learner Profile"] .st-performance-progress-current strong {
   font-size: 1.5rem;
   color: var(--st-primary);
 }
+/* Same "Not Yet Available" pill badge treatment as the module rate card. */
+body[data-page="Learner Profile"] .st-performance-progress-current strong.is-unavailable {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--st-font-body);
+  font-weight: 600;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--st-info-light);
+  color: var(--st-info);
+}
 body[data-page="Learner Profile"] .st-performance-progress-chart {
   position: relative;
   height: 250px;
@@ -809,33 +838,10 @@ body[data-page="Learner Profile"] .st-performance-progress-point:focus-visible {
   transform: translate(-50%, -50%) scale(1.25) !important;
   outline: none;
 }
-/* Dark tooltip bubble, matching the dashboard's chart hover tooltip. */
-body[data-page="Learner Profile"] .st-performance-progress-point[data-tooltip]::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 10px);
-  transform: translateX(-50%) translateY(4px);
-  width: max-content;
-  max-width: 260px;
-  padding: 6px 10px;
-  border-radius: 8px;
-  background: #111a36;
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 1.3;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--st-t-hover) ease, transform var(--st-t-hover) ease;
-  z-index: 20;
-}
-body[data-page="Learner Profile"] .st-performance-progress-point:hover[data-tooltip]::after,
-body[data-page="Learner Profile"] .st-performance-progress-point:focus-visible[data-tooltip]::after {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
+/* Tooltip look/content comes entirely from the shared [data-tooltip]
+   component (components.css) -- only the edge-case position overrides
+   below (first/last point, near the plot's left/right border) belong
+   here. */
 body[data-page="Learner Profile"] .st-performance-progress-point.is-last[data-tooltip]::after {
   left: auto;
   right: -6px;
@@ -1176,9 +1182,12 @@ body[data-page="Learner Profile"] .st-risk-trend-body {
 body[data-page="Learner Profile"] .st-risk-trend-chart {
   position: relative;
   height: 200px;
-  border-radius: 10px;
-  overflow: hidden;
   margin: 0 6px;
+  /* Not overflow:hidden -- a point near the top (High risk zone) needs
+     its tooltip to open upward past the chart's own top edge without
+     being clipped there. The rounded-corner look instead comes from
+     rounding the top/bottom risk zones directly (below), which already
+     exactly fill the box's height. */
 }
 body[data-page="Learner Profile"] .st-risk-trend-zone {
   position: absolute;
@@ -1197,6 +1206,7 @@ body[data-page="Learner Profile"] .st-risk-trend-zone span {
 body[data-page="Learner Profile"] .st-risk-trend-zone--high {
   top: 0;
   height: 30%;
+  border-radius: 10px 10px 0 0;
   background: var(--st-risk-high-soft-2, #fdf1f0);
 }
 body[data-page="Learner Profile"] .st-risk-trend-zone--high span {
@@ -1213,6 +1223,7 @@ body[data-page="Learner Profile"] .st-risk-trend-zone--moderate span {
 body[data-page="Learner Profile"] .st-risk-trend-zone--low {
   top: 70%;
   height: 30%;
+  border-radius: 0 0 10px 10px;
   background: var(--st-risk-low-soft-2, #f2f9f0);
 }
 body[data-page="Learner Profile"] .st-risk-trend-zone--low span {
@@ -1270,30 +1281,26 @@ body[data-page="Learner Profile"] .st-risk-trend-point--single {
   width: 16px;
   height: 16px;
 }
-body[data-page="Learner Profile"] .st-risk-trend-point[data-tooltip]::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 10px);
-  transform: translateX(-50%) translateY(4px);
-  width: max-content;
-  max-width: 240px;
-  padding: 6px 10px;
-  border-radius: 8px;
-  background: #111a36;
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 600;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--st-t-hover) ease, transform var(--st-t-hover) ease;
-  z-index: 20;
+/* Tooltip look/content comes entirely from the shared [data-tooltip]
+   component (components.css) -- only the edge-case position overrides
+   below (first/last point, near the chart's left/right border) belong
+   here, same fix as the performance progress chart above. */
+body[data-page="Learner Profile"] .st-risk-trend-point.is-last[data-tooltip]::after {
+  left: auto;
+  right: -6px;
+  transform: translateY(4px);
 }
-body[data-page="Learner Profile"] .st-risk-trend-point:hover[data-tooltip]::after,
-body[data-page="Learner Profile"] .st-risk-trend-point:focus-visible[data-tooltip]::after {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
+body[data-page="Learner Profile"] .st-risk-trend-point.is-last:hover[data-tooltip]::after,
+body[data-page="Learner Profile"] .st-risk-trend-point.is-last:focus-visible[data-tooltip]::after {
+  transform: none;
+}
+body[data-page="Learner Profile"] .st-risk-trend-point.is-first[data-tooltip]::after {
+  left: -6px;
+  transform: translateY(4px);
+}
+body[data-page="Learner Profile"] .st-risk-trend-point.is-first:hover[data-tooltip]::after,
+body[data-page="Learner Profile"] .st-risk-trend-point.is-first:focus-visible[data-tooltip]::after {
+  transform: none;
 }
 body[data-page="Learner Profile"] .st-risk-trend-date-label {
   position: absolute;
@@ -1353,32 +1360,9 @@ body[data-page="Learner Profile"] .st-panel-head--flush {
 body[data-page="Learner Profile"] .st-panel-head--flush .st-card-title {
   font-size: 1.0625rem;
 }
-body[data-page="Learner Profile"] .st-panel-link {
-  appearance: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  border: 0;
-  background: none;
-  padding: 6px 8px;
-  border-radius: 8px;
-  font: inherit;
-  font-size: 0.844rem;
-  font-weight: 600;
-  color: var(--st-secondary);
-  cursor: pointer;
-  transition: background-color var(--st-t-hover);
-}
-body[data-page="Learner Profile"] .st-panel-link:hover {
-  background: #e3f4f3;
-}
-body[data-page="Learner Profile"] .st-panel-link .material-symbols-outlined {
-  font-size: 1.0625rem;
-  transition: transform var(--st-t-hover) var(--st-ease-out);
-}
-body[data-page="Learner Profile"] .st-panel-link:hover .material-symbols-outlined {
-  transform: translateX(3px);
-}
+/* .st-panel-link's look/hover is now the global shared pattern
+   (dashboard.css) + the shared icon-slide motion (layout.css) -- nothing
+   page-specific left to override here. */
 body[data-page="Learner Profile"] .st-cat-chip {
   display: inline-flex;
   align-items: center;
@@ -1759,22 +1743,27 @@ body[data-page="Learner Profile"] .st-info-tooltip .material-symbols-outlined {
   font-size: 1.125rem;
 }
 body[data-page="Learner Profile"] .st-info-tooltip::after {
+  /* Same dark bubble as the shared [data-tooltip] component (same bg/
+     color/radius/shadow tokens), just wider and left-aligned since this
+     one holds a full explanatory sentence rather than a short label. */
   content: attr(data-tooltip-text);
   position: absolute;
   left: 50%;
-  bottom: calc(100% + 8px);
+  bottom: calc(100% + var(--st-tooltip-gap));
   transform: translate(-50%, 4px);
   width: 260px;
   padding: 8px 10px;
-  border-radius: 8px;
-  background: #111a36;
-  color: #fff;
+  border-radius: var(--st-tooltip-radius);
+  background: var(--st-tooltip-bg);
+  color: var(--st-tooltip-color);
+  box-shadow: var(--st-tooltip-shadow);
+  text-align: left;
   font-size: 0.781rem;
   line-height: 1.45;
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--st-t-hover), transform var(--st-t-hover);
-  z-index: 5;
+  z-index: var(--st-tooltip-z);
 }
 body[data-page="Learner Profile"] .st-info-tooltip:hover::after,
 body[data-page="Learner Profile"] .st-info-tooltip:focus-visible::after {
@@ -2130,7 +2119,7 @@ body[data-page="Learner Profile"] .st-history-link {
   text-align: left;
 }
 body[data-page="Learner Profile"] .st-history-link:hover {
-  text-decoration: underline;
+  font-weight: 700;
 }
 body[data-page="Learner Profile"] .st-row-actions {
   display: flex;

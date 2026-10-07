@@ -964,7 +964,7 @@ body {
 .st-footer-right a:hover {
   color: var(--st-primary);
 
-  text-decoration: underline;
+  font-weight: 600;
 }
 
 ::-webkit-scrollbar {

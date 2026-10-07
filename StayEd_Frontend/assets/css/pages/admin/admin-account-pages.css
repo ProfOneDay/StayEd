@@ -79,7 +79,7 @@ body.st-admin[data-page="Profile Settings"] .st-adm-avatar-edit{display:flex;ali
 /* Change Password modal: "Forgot your password?" link + the 2-column
    requirements checklist (teal check once a rule is met). */
 body.st-admin[data-page="Profile Settings"] .st-adm-link{display:inline-block;font-size:.8125rem;font-weight:600;color:var(--st-secondary);text-decoration:none;margin-top:-6px}
-body.st-admin[data-page="Profile Settings"] .st-adm-link:hover{text-decoration:underline}
+body.st-admin[data-page="Profile Settings"] .st-adm-link:hover{font-weight:700}
 body.st-admin[data-page="Profile Settings"] .st-pw-reqs{list-style:none;margin:4px 0 0;padding:10px 12px;border-radius:10px;background:var(--st-background);display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}
 body.st-admin[data-page="Profile Settings"] .st-pw-reqs li{display:flex;align-items:center;gap:6px;font-size:.8125rem;color:var(--st-ink-muted,#5a6275)}
 body.st-admin[data-page="Profile Settings"] .st-pw-reqs li::before{content:"radio_button_unchecked";font-family:"Material Symbols Outlined";font-size:16px;color:#b3b8c2}

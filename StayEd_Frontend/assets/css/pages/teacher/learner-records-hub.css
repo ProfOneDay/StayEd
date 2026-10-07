@@ -415,7 +415,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
 }
 
 .st-progress-link:hover{
-    text-decoration:underline;
+    font-weight:800;
 }
 
 .st-consult-dot{
@@ -1503,7 +1503,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
 }
 
 .st-class-context-banner-switch:hover{
-    text-decoration:underline;
+    font-weight:800;
 }
 
 .st-class-context-banner-switch .material-symbols-outlined{

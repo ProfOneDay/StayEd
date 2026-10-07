@@ -1170,7 +1170,7 @@ body[data-page="Calendar"] .st-cal-event-detail-title-link {
 }
 
 body[data-page="Calendar"] .st-cal-event-detail-title-link:hover {
-  text-decoration: underline;
+  font-weight: 800;
 }
 
 body[data-page="Calendar"] .st-cal-event-detail-title-link .material-symbols-outlined {

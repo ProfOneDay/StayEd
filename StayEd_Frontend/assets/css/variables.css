@@ -361,6 +361,23 @@
   --st-ev-return: #6d4aa8;
   --st-ev-return-soft: #f1ecf9;
   --st-ev-return-ink: #4f2f86;
+
+  /* Single shared tooltip design, inherited by every hover/focus tooltip
+     site-wide (chart data points, table row icon buttons, composition
+     bars, the admin dashboard map) -- see the [data-tooltip]/[data-tip]
+     rule in components.css. Defined as tokens, not hardcoded in that rule,
+     so the few call sites that can't be plain CSS (e.g. the Leaflet map's
+     JS-positioned .map-tooltip) can still match it exactly. */
+  --st-tooltip-bg: #111a36;
+  --st-tooltip-color: #fff;
+  --st-tooltip-radius: 8px;
+  --st-tooltip-font-size: 0.75rem;
+  --st-tooltip-font-weight: 600;
+  --st-tooltip-padding: 6px 10px;
+  --st-tooltip-shadow: 0 6px 16px rgba(17, 26, 54, 0.22);
+  --st-tooltip-gap: 8px;
+  --st-tooltip-max-width: 240px;
+  --st-tooltip-z: 1000;
 }
 
 /* Accessibility text-size preference (Settings -> Accessibility). One

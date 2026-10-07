@@ -339,21 +339,30 @@
   margin-top: 4px;
 }
 
+/* "View all" / "View logbook" / "View details" -- the one shared pattern
+   for this kind of link-button, inherited by every page (not just this
+   one): a colored pill on hover, never an underline. See components.css'
+   shared motion section for the icon's hover slide. */
 .st-panel-link {
+  appearance: none;
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  font: inherit;
   font-size: 0.844rem; /* 13.5px */
   font-weight: 600;
   color: var(--st-secondary);
-  background: transparent;
-  border: none;
   cursor: pointer;
   text-decoration: none;
+  transition: background-color var(--st-t-hover, 150ms) ease;
 }
 
 .st-panel-link:hover {
-  text-decoration: underline;
+  background: #e3f4f3;
 }
 
 .st-panel-link .material-symbols-outlined {
@@ -640,31 +649,9 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
   width: var(--w, 0%);
 }
 
-/* Composition tooltip on hover, matching the dark Chart.js tooltip styling
-   used elsewhere on this page -- the CSS-drawn bars here aren't Chart.js,
-   so they need their own hover affordance. */
-.st-hbar-track[data-tooltip]::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: #111a36;
-  color: #fff;
-  padding: 6px 10px;
-  border-radius: 8px;
-  font-size: 0.75rem; /* 12px */
-  font-weight: 600;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--st-t-hover, 150ms) ease;
-  z-index: 5;
-}
-
-.st-hbar-track[data-tooltip]:hover::after {
-  opacity: 1;
-}
+/* Composition tooltip on hover: the CSS-drawn bars here aren't Chart.js,
+   so they need their own hover affordance -- but the look/content comes
+   entirely from the shared [data-tooltip] component (components.css). */
 
 .st-hbar--high { background: var(--st-risk-high); }
 .st-hbar--moderate { background: var(--st-risk-moderate); }
@@ -1150,7 +1137,7 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
 
 .st-learner-name:hover {
   color: var(--st-primary);
-  text-decoration: underline;
+  font-weight: 700;
 }
 
 .st-learner-id {

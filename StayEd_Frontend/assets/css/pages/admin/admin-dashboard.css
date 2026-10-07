@@ -61,7 +61,11 @@ body[data-page="Admin Dashboard"] .municipality.dim{opacity:.18}
 body[data-page="Admin Dashboard"] [data-animate] .municipality.division-ii{opacity:0}
 body[data-page="Admin Dashboard"] [data-animate].is-inview .municipality.division-ii{opacity:1;transition-delay:0s,0s,0s,0s,calc(var(--i,0) * 25ms)}
 body[data-page="Admin Dashboard"] [data-animate].is-inview .municipality.division-ii.dim{opacity:.18}
-body[data-page="Admin Dashboard"] .map-tooltip{position:absolute;z-index:1100;pointer-events:none;padding:6px 12px;border-radius:999px;background:var(--st-primary-dark,#0d2846);color:#fff;box-shadow:0 6px 16px rgba(13,40,70,.3);font-size:.8125rem;font-weight:700;white-space:nowrap;opacity:0;transform:translate(-50%,-140%) translateY(4px);transition:opacity .15s ease,transform .15s ease}
+/* Same shared tooltip tokens as [data-tooltip]/[data-tip] everywhere else
+   (components.css) -- this one just can't use that rule directly since
+   Leaflet markers move on pan/zoom, so its position is computed in JS
+   (map-leaflet.js or similar) instead of anchored via ::after. */
+body[data-page="Admin Dashboard"] .map-tooltip{position:absolute;z-index:1100;pointer-events:none;padding:var(--st-tooltip-padding);border-radius:var(--st-tooltip-radius);background:var(--st-tooltip-bg);color:var(--st-tooltip-color);box-shadow:var(--st-tooltip-shadow);font-family:var(--st-font-body);font-size:var(--st-tooltip-font-size);font-weight:var(--st-tooltip-font-weight);white-space:nowrap;opacity:0;transform:translate(-50%,-140%) translateY(4px);transition:opacity .15s ease,transform .15s ease}
 body[data-page="Admin Dashboard"] .map-tooltip.show{opacity:1;transform:translate(-50%,-140%)}
 /* Leaflet zoom + reset controls, styled as the white rounded buttons the map had before */
 body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-bottom.leaflet-right .leaflet-control{margin:0 12px 8px 0}

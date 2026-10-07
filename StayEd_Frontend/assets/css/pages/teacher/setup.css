@@ -554,7 +554,7 @@
     text-decoration:none;
 }
 
-.setup-template-link:hover{ text-decoration:underline; }
+.setup-template-link:hover{ font-weight:700; }
 
 .setup-import-stats{
     width:100%;

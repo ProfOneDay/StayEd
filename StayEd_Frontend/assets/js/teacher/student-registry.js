@@ -2,11 +2,12 @@ const ST_REGISTRY_REDUCE_MOTION = matchMedia("(prefers-reduced-motion: reduce)")
 
 // Same mapping used by the Dashboard's Student Registry Summary widget
 // (dashboard.js) so a learner's avatar color is consistent between the two.
-const LEVEL_AVATAR_THEMES = {
-  "Basic Literacy": "",
-  "Elementary": " st-avatar-initials--teal",
-  "Junior High": " st-avatar-initials--blue",
-  "Senior High": " st-avatar-initials--slate",
+// Keyed by modality (not learning level) so it also lines up with the
+// modality pill colors shown in its own column.
+const MODALITY_AVATAR_THEMES = {
+  "Face-to-Face": "",
+  "Modular": " st-avatar-initials--teal",
+  "Blended": " st-avatar-initials--slate",
 };
 
 class StudentRegistry {
@@ -482,10 +483,10 @@ class StudentRegistry {
         `;
   }
 
-  // Colored by Learning Level (not risk) so a learner's avatar reads the
-  // same way here and in the Dashboard's Student Registry Summary widget.
+  // Colored by Modality (not risk) so a learner's avatar reads the same
+  // way here and in the Dashboard's Student Registry Summary widget.
   static avatar(l, initials) {
-    const cls = LEVEL_AVATAR_THEMES[l.level] || "";
+    const cls = MODALITY_AVATAR_THEMES[l.modality] || "";
     return `<span class="st-avatar-initials${cls}">${initials}</span>`;
   }
 

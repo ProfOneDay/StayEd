@@ -1544,7 +1544,11 @@ def learner_profile(learner_id: int):
 
     timeline.sort(key=lambda t: t["_sort"], reverse=True)
     for item in timeline:
-        item.pop("_sort", None)
+        sort_value = item.pop("_sort", None)
+        # ISO date alongside the display-formatted "date" string, so the
+        # frontend's This month/This semester filters can parse a real date
+        # instead of re-parsing "Oct 07, 2026" back out of the display text.
+        item["dateIso"] = sort_value.isoformat() if sort_value else None
 
     response = {
         **shaped,

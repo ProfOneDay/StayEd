@@ -1636,3 +1636,78 @@ input[type="radio"]:focus-visible {
 
   outline-offset: 1px;
 }
+
+/* ============================================================
+   Shared tooltip component -- the ONE hover/focus tooltip design used
+   everywhere: chart data points, table row icon buttons, composition
+   bars, column-header info icons, and anywhere else a short "what is
+   this" label appears on hover. Two trigger attributes are supported so
+   existing markup didn't need a mass rename: data-tooltip (charts, info
+   icons) and data-tip (table row buttons) render identically from here.
+
+   Page-specific CSS must only override POSITION (top/bottom/left/right/
+   transform, for edge cases like a chart point near the plot's border or
+   a header icon that has to open downward instead of up) -- never the
+   look (color/padding/radius/font/shadow), which lives only here via the
+   --st-tooltip-* tokens in variables.css so the whole app can't drift
+   out of sync one page at a time again.
+
+   white-space is deliberately `normal` with a max-width (not `nowrap`):
+   a `nowrap` tooltip whose text is longer than its max-width just
+   overflows past its own background, unreadable -- this one wraps
+   instead, same as every other tooltip here.
+
+   Excludes two pre-existing, differently-designed components that also
+   happen to read a data-tooltip attribute: the collapsed sidebar's
+   flyout nav labels (.st-sidebar *, an always-shown label substitute for
+   a hidden icon caption, not a hover "what is this" tooltip) and the
+   student portal's own tooltip-with-arrow-caret
+   (.st-student-progress-point, student-side and out of scope for this
+   admin/teacher-side unification). */
+:is([data-tooltip], [data-tip]):not(.st-sidebar *, .st-student-progress-point) {
+  position: relative;
+}
+
+:is([data-tooltip], [data-tip]):not(.st-sidebar *, .st-student-progress-point)::after {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + var(--st-tooltip-gap));
+  transform: translate(-50%, 4px);
+  z-index: var(--st-tooltip-z);
+  width: max-content;
+  max-width: var(--st-tooltip-max-width);
+  padding: var(--st-tooltip-padding);
+  border-radius: var(--st-tooltip-radius);
+  background: var(--st-tooltip-bg);
+  color: var(--st-tooltip-color);
+  box-shadow: var(--st-tooltip-shadow);
+  font-family: var(--st-font-body);
+  font-size: var(--st-tooltip-font-size);
+  font-weight: var(--st-tooltip-font-weight);
+  line-height: 1.4;
+  text-align: center;
+  white-space: normal;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--st-t-hover, 150ms) ease, transform var(--st-t-hover, 150ms) ease;
+}
+
+[data-tooltip]:not(.st-sidebar *, .st-student-progress-point)::after {
+  content: attr(data-tooltip);
+}
+
+[data-tip]:not(.st-sidebar *, .st-student-progress-point)::after {
+  content: attr(data-tip);
+}
+
+:is([data-tooltip], [data-tip]):not(.st-sidebar *, .st-student-progress-point):hover::after,
+:is([data-tooltip], [data-tip]):not(.st-sidebar *, .st-student-progress-point):focus-visible::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is([data-tooltip], [data-tip]):not(.st-sidebar *, .st-student-progress-point)::after {
+    transition: none;
+  }
+}
