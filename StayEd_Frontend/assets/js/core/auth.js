@@ -165,11 +165,14 @@ class Auth {
   static async redirectAfterLogin() {
     const role = this.role();
 
-    // A teacher with no active CLC assignment yet hasn't been through the
-    // setup wizard (class creation + learner import) -- send them there
-    // instead of an empty dashboard. GET /clcs/current is the backend's
-    // own signal for this: 404 means "no CLC yet", nothing else to add.
-    if (role === "teacher" && !(await this.hasCompletedOnboarding())) {
+    // A teacher who hasn't been through the setup wizard yet (class
+    // creation + learner import) gets sent there instead of an empty
+    // dashboard. This is an explicit flag set by the wizard itself (see
+    // API.completeSetup(), called from setup.js) rather than inferred from
+    // whether a CLC assignment exists -- admin approval can already assign
+    // a CLC on its own, which isn't the same thing as the teacher having
+    // walked through the wizard.
+    if (role === "teacher" && !this.hasCompletedOnboarding()) {
       window.location.href = "/pages/setup/setup-wizard-1.html";
 
       return;
@@ -191,21 +194,13 @@ class Auth {
     }
   }
 
-  static async hasCompletedOnboarding() {
-    try {
-      await API.get("/clcs/current");
+  static hasCompletedOnboarding() {
+    const user = this.user();
 
-      return true;
-    } catch (error) {
-      if (error?.status === 404) {
-        return false;
-      }
-
-      // Any other failure (network blip, 500, etc.) fails open -- a
-      // transient error shouldn't strand an already-onboarded teacher on
-      // the setup wizard instead of their actual dashboard.
-      return true;
-    }
+    // Demo sessions (seedDemoSession) have no setup_completed field at
+    // all -- treat that as "nothing to complete" rather than stranding a
+    // demo account on the wizard.
+    return user?.setup_completed !== false;
   }
 
   static requireAuth() {

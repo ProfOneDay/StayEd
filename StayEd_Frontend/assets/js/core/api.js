@@ -952,6 +952,10 @@ class API {
     return this.put("/users/settings/avatar", { avatar });
   }
 
+  static completeSetup() {
+    return this.post("/users/setup/complete");
+  }
+
   static getAdminClcs() {
     return this.get("/admin/clcs");
   }

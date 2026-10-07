@@ -97,6 +97,19 @@ def update_settings():
     return {"preferences": merged}
 
 
+@bp.post("/users/setup/complete")
+@jwt_required()
+def complete_setup():
+    user_id = current_user_id()
+    teacher = teacher_for_user(user_id)
+    if not teacher:
+        return error("Teacher profile not found.", 404)
+
+    execute("UPDATE teacher SET setup_completed = TRUE WHERE user_id = %s", (user_id,))
+
+    return {"setup_completed": True}
+
+
 @bp.put("/users/settings/avatar")
 @jwt_required()
 def update_avatar():

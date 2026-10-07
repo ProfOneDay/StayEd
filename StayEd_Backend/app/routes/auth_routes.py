@@ -40,6 +40,10 @@ def _safe_user(row):
         "avatar": row.get("avatar") or "",
         "employee_id": row.get("employee_id") or "",
         "join_date": row["created_at"].date().isoformat() if row.get("created_at") else "",
+        # Only meaningful for teachers (see sql/34_teacher_setup_wizard_flag.sql);
+        # admins have no teacher row, so this is None -- treat that as "nothing
+        # to complete" rather than "not completed".
+        "setup_completed": True if row.get("setup_completed") is None else bool(row["setup_completed"]),
     }
 
 
@@ -59,7 +63,7 @@ def _user_by_email(email: str):
         f"""
         SELECT
             u.user_id, u.username, u.password_hash, u.email, u.role, u.account_status, u.avatar,
-            t.teacher_id, t.middle_name, t.municipality, t.employee_id, t.created_at,
+            t.teacher_id, t.middle_name, t.municipality, t.employee_id, t.created_at, t.setup_completed,
             COALESCE(t.first_name, u.first_name) AS first_name,
             COALESCE(t.last_name, u.last_name) AS last_name,
             COALESCE(t.contact_number, u.contact_number) AS contact_number,
@@ -108,7 +112,7 @@ def me():
         f"""
         SELECT
             u.user_id, u.username, u.email, u.role, u.account_status, u.avatar,
-            t.middle_name, t.municipality, t.employee_id, t.created_at,
+            t.middle_name, t.municipality, t.employee_id, t.created_at, t.setup_completed,
             COALESCE(t.first_name, u.first_name) AS first_name,
             COALESCE(t.last_name, u.last_name) AS last_name,
             COALESCE(t.contact_number, u.contact_number) AS contact_number,

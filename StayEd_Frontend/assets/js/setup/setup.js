@@ -9,6 +9,24 @@ class SetupWizard {
     Auth.seedDemoSession?.(DemoAuthService.getSession().account);
   }
 
+  // Called from both the step 3 "Skip" and step 5 "Finish" exits -- either
+  // one is a legitimate way to leave the wizard, so both must mark setup
+  // complete (not just "Finish"), or a teacher who skips the learner
+  // import would be sent straight back to the wizard on their next login.
+  static async completeSetup() {
+    if (window.DemoAuthService && DemoAuthService.isEnabled()) {
+      await this.completeDemoSession();
+      return;
+    }
+
+    try {
+      await API.completeSetup();
+      Auth.updateUser({ setup_completed: true });
+    } catch (error) {
+      console.error("[SetupWizard] Unable to mark setup complete", error);
+    }
+  }
+
   static init() {
     const step = document.body.dataset.wizard;
 
@@ -474,7 +492,7 @@ class SetupWizard {
         "click",
 
         async () => {
-          await SetupWizard.completeDemoSession();
+          await SetupWizard.completeSetup();
 
           Router.go("/dashboard");
         },
@@ -677,7 +695,7 @@ Imported
       "click",
 
       async () => {
-        await SetupWizard.completeDemoSession();
+        await SetupWizard.completeSetup();
 
         Utils.toast(
           "Setup completed successfully.",

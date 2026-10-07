@@ -537,22 +537,6 @@ img.auth-brand-icon{
     color:var(--st-on-surface-variant);
 }
 
-.auth-notice--teal{
-    background:rgba(141,240,238,.18);
-    border-color:var(--st-secondary-container);
-}
-
-.auth-notice--teal .auth-notice-icon{
-    color:var(--st-secondary);
-}
-
-.auth-notice--teal strong{
-    display:block;
-    font-weight:600;
-    color:var(--st-on-secondary-container);
-    margin-bottom:2px;
-}
-
 .auth-status{
     margin-top:24px;
     display:flex;
