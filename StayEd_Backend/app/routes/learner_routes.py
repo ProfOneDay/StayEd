@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import secrets
 import threading
+import time
 from datetime import date, datetime, timedelta
 from io import BytesIO
 
@@ -2887,51 +2888,74 @@ def import_summary():
 
 # ---------------------------------------------------------------------------
 # Student portal link sharing (Google-Drive-style "anyone with the link").
-# No student accounts, no login -- the token in the URL is the only access
-# control, gated by this per-learner toggle plus the teacher's own global
-# kill-switch in Settings (users.preferences["student-portal-enabled"]).
+# No student accounts, no login. Visibility is gated per CLASS (one switch
+# covers every learner currently enrolled in it) plus the teacher's own
+# global kill-switch in Settings (users.preferences["student-portal-enabled"]).
+# Each learner still has their own portal_share_token (see
+# _ensure_portal_token) -- that's what a direct view.html?token= link or a
+# successful LRN+birthdate lookup (see public_student_lookup) resolves to.
 # ---------------------------------------------------------------------------
 
-@bp.get("/learners/<int:learner_id>/portal-share")
+def _ensure_portal_token(learner_id: int) -> str:
+    row = fetch_one("SELECT portal_share_token FROM learner WHERE learner_id = %s", (learner_id,))
+    token = row["portal_share_token"] if row else None
+    if not token:
+        token = secrets.token_urlsafe(24)
+        execute("UPDATE learner SET portal_share_token = %s WHERE learner_id = %s", (token, learner_id))
+    return token
+
+
+@bp.get("/classes/<int:class_id>/portal-share")
 @role_required("teacher")
-def get_portal_share(learner_id: int):
-    base = _profile_base(learner_id)
-    if not base:
-        return error("Learner not found.", 404)
+def get_class_portal_share(class_id: int):
+    teacher = _teacher_scope()
+    if not teacher:
+        return error("Teacher profile not found.", 404)
+
     row = fetch_one(
-        "SELECT portal_share_token, portal_share_enabled FROM learner WHERE learner_id = %s",
-        (learner_id,),
+        "SELECT portal_share_enabled FROM learning_class WHERE class_id = %s AND teacher_id = %s",
+        (class_id, teacher["teacher_id"]),
     )
-    return {
-        "enabled": bool(row["portal_share_enabled"]),
-        "token": row["portal_share_token"],
-    }
+    if not row:
+        return error("Class not found.", 404)
+
+    return {"enabled": bool(row["portal_share_enabled"])}
 
 
-@bp.put("/learners/<int:learner_id>/portal-share")
+@bp.put("/classes/<int:class_id>/portal-share")
 @role_required("teacher")
-def update_portal_share(learner_id: int):
-    base = _profile_base(learner_id)
-    if not base:
-        return error("Learner not found.", 404)
+def update_class_portal_share(class_id: int):
+    teacher = _teacher_scope()
+    if not teacher:
+        return error("Teacher profile not found.", 404)
+
+    owns_class = fetch_one(
+        "SELECT class_id FROM learning_class WHERE class_id = %s AND teacher_id = %s",
+        (class_id, teacher["teacher_id"]),
+    )
+    if not owns_class:
+        return error("Class not found.", 404)
 
     data = request.get_json(silent=True) or {}
     enabled = bool(data.get("enabled"))
 
-    row = fetch_one(
-        "SELECT portal_share_token FROM learner WHERE learner_id = %s",
-        (learner_id,),
-    )
-    token = row["portal_share_token"]
-    if enabled and not token:
-        token = secrets.token_urlsafe(24)
-
     execute(
-        "UPDATE learner SET portal_share_token = %s, portal_share_enabled = %s WHERE learner_id = %s",
-        (token, enabled, learner_id),
+        "UPDATE learning_class SET portal_share_enabled = %s WHERE class_id = %s",
+        (enabled, class_id),
     )
 
-    return {"enabled": enabled, "token": token}
+    if enabled:
+        # Backfill a token for every currently-enrolled learner so their
+        # view is reachable the moment the class switch turns on, instead
+        # of waiting for a first LRN lookup to generate it lazily.
+        enrolled = fetch_all(
+            "SELECT learner_id FROM class_enrollment WHERE class_id = %s AND enrollment_status = 'ENROLLED'",
+            (class_id,),
+        )
+        for learner in enrolled:
+            _ensure_portal_token(learner["learner_id"])
+
+    return {"enabled": enabled}
 
 
 def _student_performance_progress(enrollment_id: int) -> list[dict]:
@@ -2979,12 +3003,37 @@ def _student_performance_progress(enrollment_id: int) -> list[dict]:
     return progress
 
 
+def _portal_sharing_allowed(teacher_id: int) -> bool:
+    """The teacher's own global kill-switch in Settings
+    (users.preferences["student-portal-enabled"]) -- independent of, and
+    checked in addition to, the per-class share switch."""
+    teacher_user = fetch_one("SELECT user_id FROM teacher WHERE teacher_id = %s", (teacher_id,))
+    prefs_row = (
+        fetch_one("SELECT preferences FROM users WHERE user_id = %s", (teacher_user["user_id"],))
+        if teacher_user
+        else None
+    )
+    prefs = (prefs_row or {}).get("preferences") or {}
+    return prefs.get("student-portal-enabled") is not False
+
+
 @bp.get("/public/student-view/<token>")
 def public_student_view(token: str):
     unavailable = ("This link isn't available. Ask your teacher for an updated link.", 404)
 
+    # Gated by the learner's current (most recent) class's share switch, not
+    # a per-learner flag -- see sql/35_class_portal_share.sql.
     gate = fetch_one(
-        "SELECT learner_id FROM learner WHERE portal_share_token = %s AND portal_share_enabled = TRUE",
+        """
+        SELECT l.learner_id
+        FROM learner l
+        JOIN class_enrollment ce ON ce.learner_id = l.learner_id
+        JOIN learning_class lc ON lc.class_id = ce.class_id
+        WHERE l.portal_share_token = %s
+          AND lc.portal_share_enabled = TRUE
+        ORDER BY ce.enrollment_date DESC, ce.enrollment_id DESC
+        LIMIT 1
+        """,
         (token,),
     )
     if not gate:
@@ -2997,17 +3046,7 @@ def public_student_view(token: str):
     if not row:
         return error(*unavailable)
 
-    teacher_user = fetch_one(
-        "SELECT user_id FROM teacher WHERE teacher_id = %s",
-        (row["teacher_id"],),
-    )
-    prefs_row = (
-        fetch_one("SELECT preferences FROM users WHERE user_id = %s", (teacher_user["user_id"],))
-        if teacher_user
-        else None
-    )
-    prefs = (prefs_row or {}).get("preferences") or {}
-    if prefs.get("student-portal-enabled") is False:
+    if not _portal_sharing_allowed(row["teacher_id"]):
         return error(*unavailable)
 
     shaped = _shape_learner(row)
@@ -3030,6 +3069,80 @@ def public_student_view(token: str):
         "performanceProgress": _student_performance_progress(row["enrollment_id"]),
         **_logbook(row["enrollment_id"], _learner_activity_info(row)),
     }
+
+
+# In-process sliding-window limiter for the public lookup endpoint below.
+# Resets on restart and isn't shared across worker processes -- acceptable
+# for this app's current single-process deployment; swap for a shared store
+# (e.g. Redis) if that ever changes.
+_LOOKUP_ATTEMPTS: dict[str, list[float]] = {}
+_LOOKUP_RATE_LIMIT = 5
+_LOOKUP_RATE_WINDOW_SECONDS = 10 * 60
+
+
+def _lookup_rate_limited(ip: str) -> bool:
+    now = time.time()
+    attempts = [t for t in _LOOKUP_ATTEMPTS.get(ip, []) if now - t < _LOOKUP_RATE_WINDOW_SECONDS]
+    attempts.append(now)
+    _LOOKUP_ATTEMPTS[ip] = attempts
+    return len(attempts) > _LOOKUP_RATE_LIMIT
+
+
+@bp.post("/public/student-lookup")
+def public_student_lookup():
+    # One generic message for every failure case (malformed input, no match,
+    # wrong birthdate, sharing off) -- the page must never reveal which one
+    # applies, so a wrong guess can't be used to confirm an LRN exists.
+    unavailable = (
+        "We couldn't open a report for this LRN. Check the number, or ask your teacher to turn on your student view.",
+        404,
+    )
+
+    ip = request.remote_addr or "unknown"
+    if _lookup_rate_limited(ip):
+        current_app.logger.warning("[student-lookup] Rate limit hit for %s", ip)
+        return error("Too many attempts. Please wait a few minutes and try again.", 429)
+
+    data = request.get_json(silent=True) or {}
+    lrn = str(data.get("lrn", "")).strip()
+    birthdate_raw = str(data.get("dateOfBirth") or "").strip()
+
+    if not LRN_RE.match(lrn) or not birthdate_raw:
+        current_app.logger.warning("[student-lookup] Malformed request from %s", ip)
+        return error(*unavailable)
+
+    try:
+        birthdate = datetime.strptime(birthdate_raw, "%Y-%m-%d").date()
+    except ValueError:
+        current_app.logger.warning("[student-lookup] Unparseable date from %s", ip)
+        return error(*unavailable)
+
+    # Same per-class gate as public_student_view, keyed by LRN + birthdate
+    # instead of a token.
+    gate = fetch_one(
+        """
+        SELECT l.learner_id
+        FROM learner l
+        JOIN class_enrollment ce ON ce.learner_id = l.learner_id
+        JOIN learning_class lc ON lc.class_id = ce.class_id
+        WHERE l.lrn = %s
+          AND l.date_of_birth = %s
+          AND lc.portal_share_enabled = TRUE
+        ORDER BY ce.enrollment_date DESC, ce.enrollment_id DESC
+        LIMIT 1
+        """,
+        (lrn, birthdate),
+    )
+    if not gate:
+        current_app.logger.warning("[student-lookup] No match for %s from %s", lrn, ip)
+        return error(*unavailable)
+
+    row = fetch_one(_learner_query("WHERE l.learner_id = %s") + " LIMIT 1", (gate["learner_id"],))
+    if not row or not _portal_sharing_allowed(row["teacher_id"]):
+        current_app.logger.warning("[student-lookup] Sharing disabled for %s from %s", lrn, ip)
+        return error(*unavailable)
+
+    return {"token": _ensure_portal_token(gate["learner_id"])}
 
 
 # ---------------------------------------------------------------------------

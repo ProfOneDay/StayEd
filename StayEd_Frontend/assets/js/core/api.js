@@ -856,12 +856,12 @@ class API {
     return this.get(`/learners/${id}/profile`);
   }
 
-  static getPortalShare(id) {
-    return this.get(`/learners/${id}/portal-share`);
+  static getClassPortalShare(classId) {
+    return this.get(`/classes/${classId}/portal-share`);
   }
 
-  static updatePortalShare(id, enabled) {
-    return this.put(`/learners/${id}/portal-share`, { enabled });
+  static updateClassPortalShare(classId, enabled) {
+    return this.put(`/classes/${classId}/portal-share`, { enabled });
   }
 
   static getAssessmentScores(learnerId) {

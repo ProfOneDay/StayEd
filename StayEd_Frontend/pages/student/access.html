@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StayEd | View My Report</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/css/variables.css" />
+    <link rel="stylesheet" href="../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../assets/css/pages/student/student-access.css" />
+    <link rel="icon" type="image/x-icon" href="../../assets/img/brand/favicon.ico" />
+    <link rel="apple-touch-icon" href="../../assets/img/brand/apple-touch-icon.png" />
+  </head>
+  <body>
+    <div class="st-sa">
+      <section class="st-sa-side">
+        <a class="st-sa-brand" href="#">
+          <img src="../../assets/img/brand/logo-white.png" alt="" />
+          <b>StayEd</b>
+        </a>
+        <div class="st-sa-pitch">
+          <span class="st-sa-pill">Student view &middot; read-only</span>
+          <h1>See your own progress, anytime.</h1>
+          <p>
+            Enter your LRN and birthdate to view your modules, due dates, and
+            risk status &mdash; shared with you by your ALS teacher.
+          </p>
+          <ul class="st-sa-points">
+            <li><span class="material-symbols-outlined">task_alt</span> Track returned, due, and pending modules</li>
+            <li><span class="material-symbols-outlined">trending_up</span> Follow your performance over time</li>
+            <li><span class="material-symbols-outlined">lock</span> No account or password needed</li>
+          </ul>
+        </div>
+        <small>&copy; 2026 Department of Education - Alternative Learning System</small>
+      </section>
+
+      <div class="st-sa-form-wrap">
+        <form class="st-sa-card" data-access-form novalidate>
+          <div class="st-sa-icon"><span class="material-symbols-outlined">fact_check</span></div>
+          <h2>View my report</h2>
+          <p class="sub">Enter your LRN and birthdate exactly as your teacher recorded them.</p>
+
+          <div class="st-sa-field">
+            <label for="accessLrn">Learner Reference Number (LRN)</label>
+            <div class="st-sa-input" data-lrn-wrap>
+              <span class="material-symbols-outlined">badge</span>
+              <input
+                id="accessLrn"
+                type="text"
+                inputmode="numeric"
+                autocomplete="off"
+                placeholder="0000 0000 0000"
+                maxlength="14"
+                data-access-lrn
+              />
+              <span class="st-sa-count" data-lrn-count>0/12</span>
+            </div>
+            <p class="st-sa-hint">Your 12-digit LRN, found on your school ID or report card.</p>
+          </div>
+
+          <div class="st-sa-field">
+            <label for="accessDob">Date of birth</label>
+            <div class="st-sa-input" data-dob-wrap>
+              <span class="material-symbols-outlined">calendar_month</span>
+              <input id="accessDob" type="date" data-access-dob />
+            </div>
+          </div>
+
+          <div class="st-sa-error" data-access-error role="alert" hidden>
+            <span class="material-symbols-outlined">error</span>
+            <span data-access-error-text></span>
+          </div>
+
+          <button type="submit" class="st-sa-btn" data-access-submit disabled>
+            <span data-access-submit-label>View my report</span>
+          </button>
+
+          <p class="st-sa-note">
+            <span class="material-symbols-outlined">info</span>
+            <span>
+              Nothing will show up if your teacher hasn't turned on student
+              view for your class yet. Ask your teacher if you're not sure.
+            </span>
+          </p>
+
+          <span class="st-sa-teacher">
+            Are you a teacher or admin?
+            <a href="../auth/login.html">Sign in here</a>
+          </span>
+        </form>
+      </div>
+    </div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/student/access.js"></script>
+  </body>
+</html>

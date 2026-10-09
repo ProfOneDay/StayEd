@@ -1661,14 +1661,13 @@ input[type="radio"]:focus-visible {
    happen to read a data-tooltip attribute: the collapsed sidebar's
    flyout nav labels (.st-sidebar *, an always-shown label substitute for
    a hidden icon caption, not a hover "what is this" tooltip) and the
-   student portal's own tooltip-with-arrow-caret
-   (.st-student-progress-point, student-side and out of scope for this
-   admin/teacher-side unification). */
-:is([data-tooltip], [data-tip]):not(.st-sidebar *, .st-student-progress-point) {
+   public Student View's own chart-point tooltip (.st-sv-pt, student-side
+   and out of scope for this admin/teacher-side unification). */
+:is([data-tooltip], [data-tip]):not(.st-sidebar *, .st-sv-pt) {
   position: relative;
 }
 
-:is([data-tooltip], [data-tip]):not(.st-sidebar *, .st-student-progress-point)::after {
+:is([data-tooltip], [data-tip]):not(.st-sidebar *, .st-sv-pt)::after {
   position: absolute;
   left: 50%;
   bottom: calc(100% + var(--st-tooltip-gap));
@@ -1692,22 +1691,22 @@ input[type="radio"]:focus-visible {
   transition: opacity var(--st-t-hover, 150ms) ease, transform var(--st-t-hover, 150ms) ease;
 }
 
-[data-tooltip]:not(.st-sidebar *, .st-student-progress-point)::after {
+[data-tooltip]:not(.st-sidebar *, .st-sv-pt)::after {
   content: attr(data-tooltip);
 }
 
-[data-tip]:not(.st-sidebar *, .st-student-progress-point)::after {
+[data-tip]:not(.st-sidebar *, .st-sv-pt)::after {
   content: attr(data-tip);
 }
 
-:is([data-tooltip], [data-tip]):not(.st-sidebar *, .st-student-progress-point):hover::after,
-:is([data-tooltip], [data-tip]):not(.st-sidebar *, .st-student-progress-point):focus-visible::after {
+:is([data-tooltip], [data-tip]):not(.st-sidebar *, .st-sv-pt):hover::after,
+:is([data-tooltip], [data-tip]):not(.st-sidebar *, .st-sv-pt):focus-visible::after {
   opacity: 1;
   transform: translate(-50%, 0);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :is([data-tooltip], [data-tip]):not(.st-sidebar *, .st-student-progress-point)::after {
+  :is([data-tooltip], [data-tip]):not(.st-sidebar *, .st-sv-pt)::after {
     transition: none;
   }
 }

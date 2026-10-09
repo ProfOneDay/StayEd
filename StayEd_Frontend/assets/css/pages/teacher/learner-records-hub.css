@@ -1527,3 +1527,93 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
         margin-left:auto;
     }
 }
+
+/* ==========================================================================
+   Student view link -- moved here from the Learner Profile page (now
+   per-class, not per-learner; see sql/35_class_portal_share.sql).
+   ========================================================================== */
+body[data-page="Learner Records"] .st-portal-share-card{
+    background:#fff;
+    border:1px solid var(--st-line);
+    border-radius:var(--st-radius-card);
+    box-shadow:var(--st-shadow-card);
+    padding:16px 20px;
+}
+
+body[data-page="Learner Records"] .st-portal-share-head{
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+
+body[data-page="Learner Records"] .st-portal-share-head-text{
+    flex:1;
+    min-width:0;
+}
+
+body[data-page="Learner Records"] .st-portal-share-title{
+    margin:0;
+    font-family:var(--st-font-heading);
+    font-weight:700;
+    font-size:1.03rem;
+    color:var(--st-on-surface);
+}
+
+body[data-page="Learner Records"] .st-portal-share-sub{
+    margin:2px 0 0;
+    font-size:0.844rem;
+    color:var(--st-on-surface-variant);
+    line-height:1.5;
+}
+
+body[data-page="Learner Records"] .st-portal-share-link-row:not([hidden]){
+    display:flex;
+    gap:10px;
+    margin-top:14px;
+    padding-top:14px;
+    border-top:1px solid var(--st-line);
+    flex-wrap:wrap;
+    animation:st-lr-portal-link-pop 200ms var(--st-ease-out);
+}
+
+@keyframes st-lr-portal-link-pop{
+    from{opacity:0;transform:translateY(-4px);}
+    to{opacity:1;transform:none;}
+}
+
+body[data-page="Learner Records"] .st-portal-share-link{
+    flex:1 1 240px;
+    min-width:0;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    height:40px;
+    padding:0 12px;
+    border:1px solid var(--st-line);
+    border-radius:var(--st-radius-control);
+    background:var(--st-background);
+    color:var(--st-ink-faint);
+}
+
+body[data-page="Learner Records"] .st-portal-share-link input{
+    flex:1;
+    min-width:0;
+    border:0;
+    background:none;
+    font:inherit;
+    font-size:0.875rem;
+    color:var(--st-on-surface);
+    outline:0;
+}
+
+@media (max-width:767px){
+    body[data-page="Learner Records"] .st-portal-share-card{
+        padding:14px 16px;
+    }
+    body[data-page="Learner Records"] .st-portal-share-head .st-icon-tile{
+        display:none;
+    }
+    body[data-page="Learner Records"] .st-portal-share-link-row:not([hidden]){
+        flex-direction:column;
+    }
+}

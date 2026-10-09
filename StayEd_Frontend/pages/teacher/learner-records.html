@@ -315,6 +315,56 @@
             </div>
           </div>
         </section>
+
+        <!-- Student view link -- Google-Drive-style link sharing, no
+             student account. One switch for the whole class; the link is
+             the public access page (same URL for every class), where each
+             learner opens their own report by entering their LRN and
+             birthdate. Hidden until a class is selected (see
+             learner-records-hub.js loadClassContext()), same gating as the
+             banner above. -->
+        <div
+          class="st-portal-share-card st-hidden"
+          data-class-portal-share-card
+        >
+          <div class="st-portal-share-head">
+            <span class="st-icon-tile"><span class="material-symbols-outlined">visibility</span></span>
+            <div class="st-portal-share-head-text">
+              <p class="st-portal-share-title">Student view link</p>
+              <p class="st-portal-share-sub">
+                Turn this on and every learner enrolled in this class can
+                view their own modules and risk tag by entering their LRN
+                &mdash; no login needed. Turn off any time to disable it for
+                the whole class instantly.
+              </p>
+            </div>
+            <label class="st-toggle">
+              <input type="checkbox" data-class-portal-share-toggle />
+              <span class="st-toggle-track"
+                ><span class="st-toggle-thumb"></span
+              ></span>
+            </label>
+          </div>
+          <div class="st-portal-share-link-row" data-class-portal-share-link-row hidden>
+            <div class="st-portal-share-link">
+              <span class="material-symbols-outlined">link</span>
+              <input
+                type="text"
+                readonly
+                data-class-portal-share-link-input
+                aria-label="Student view link"
+              />
+            </div>
+            <button
+              type="button"
+              class="st-btn st-btn-outline"
+              data-class-portal-share-copy-btn
+            >
+              <span class="material-symbols-outlined">content_copy</span>
+              Copy link
+            </button>
+          </div>
+        </div>
       </main>
 
       <div data-component="layout/footer"></div>

@@ -1,0 +1,425 @@
+/* Public "look up my report by LRN" page (pages/student/access.html) -- a
+   standalone page, not part of the main app's CSS bundle. Matches
+   design/student/student-login-prototype.html, extended with one extra
+   birthdate field (LRN alone is printed on school documents and known to
+   classmates/relatives; LRN + birthdate is the agreed-on minimum bar for a
+   minor's name and risk status). */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.st-sa {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  background: #fff;
+  font-family: var(--st-font-body);
+  color: var(--st-on-surface);
+}
+
+/* ---------- Side panel ---------- */
+.st-sa-side {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px 48px;
+  background: linear-gradient(160deg, var(--st-primary) 0%, var(--st-primary-dark) 100%);
+  color: #fff;
+  overflow: hidden;
+}
+
+.st-sa-side::after {
+  content: "";
+  position: absolute;
+  right: -120px;
+  bottom: -120px;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 106, 104, 0.45), transparent 70%);
+}
+
+.st-sa-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+  color: #fff;
+  text-decoration: none;
+}
+
+.st-sa-brand:visited {
+  color: #fff;
+}
+
+.st-sa-brand img {
+  width: 36px;
+  height: 36px;
+}
+
+.st-sa-brand b {
+  font-family: var(--st-font-heading);
+  font-weight: 800;
+  font-size: 1.5rem;
+}
+
+.st-sa-pitch {
+  position: relative;
+  z-index: 1;
+  max-width: 460px;
+}
+
+.st-sa-pill {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.st-sa-pitch h1 {
+  margin: 18px 0 12px;
+  font-family: var(--st-font-heading);
+  font-weight: 800;
+  font-size: 2.5rem;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.st-sa-pitch p {
+  margin: 0;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.st-sa-points {
+  list-style: none;
+  margin: 22px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.st-sa-points li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.st-sa-points .material-symbols-outlined {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 18px;
+}
+
+.st-sa-side small {
+  position: relative;
+  z-index: 1;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8125rem;
+}
+
+/* ---------- Form ---------- */
+.st-sa-form-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  background: var(--st-background);
+}
+
+.st-sa-card {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 480px;
+  background: #fff;
+  border: 1px solid var(--st-line, var(--st-outline-variant));
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(17, 26, 54, 0.08);
+  padding: 32px;
+  animation: stSaIn 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@keyframes stSaIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.st-sa-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: var(--st-navy-soft, var(--st-primary-fixed));
+  color: var(--st-primary);
+  margin-bottom: 16px;
+}
+
+.st-sa-icon .material-symbols-outlined {
+  font-size: 30px;
+}
+
+.st-sa-card h2 {
+  margin: 0;
+  font-family: var(--st-font-heading);
+  font-weight: 800;
+  font-size: 1.625rem;
+  letter-spacing: -0.01em;
+}
+
+.st-sa-card .sub {
+  margin: 6px 0 22px;
+  font-size: 0.9375rem;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  line-height: 1.5;
+}
+
+.st-sa-field {
+  margin-bottom: 18px;
+}
+
+.st-sa-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.st-sa-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 52px;
+  padding: 0 14px;
+  border: 1.5px solid var(--st-line-strong, #cfd5de);
+  border-radius: 12px;
+  background: #fff;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+
+.st-sa-input:hover {
+  border-color: var(--st-primary);
+}
+
+.st-sa-input:focus-within {
+  border-color: var(--st-secondary);
+  box-shadow: 0 0 0 4px rgba(0, 106, 104, 0.12);
+}
+
+.st-sa-input .material-symbols-outlined {
+  color: var(--st-ink-faint, #8a91a0);
+}
+
+.st-sa-input input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: none;
+  font: inherit;
+  color: var(--st-on-surface);
+}
+
+.st-sa-input input[inputmode="numeric"] {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+}
+
+.st-sa-input input::placeholder {
+  letter-spacing: 0.04em;
+  font-weight: 500;
+  font-size: 1rem;
+  color: var(--st-ink-faint, #9aa3b2);
+}
+
+.st-sa-count {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--st-ink-faint, #8a91a0);
+  font-variant-numeric: tabular-nums;
+}
+
+.st-sa-count.is-done {
+  color: var(--st-secondary);
+}
+
+.st-sa-hint {
+  margin: 8px 0 0;
+  font-size: 0.8125rem;
+  color: var(--st-ink-faint, #8a91a0);
+}
+
+.st-sa-error {
+  display: none;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--st-risk-high-soft-2, #fdecea);
+  color: var(--st-risk-high-ink, #a01414);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.st-sa-error:not([hidden]) {
+  display: flex;
+  animation: stSaShake 0.35s;
+}
+
+@keyframes stSaShake {
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.st-sa-error .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.st-sa-input.is-error {
+  border-color: var(--st-risk-high);
+}
+
+.st-sa-btn {
+  margin-top: 4px;
+  width: 100%;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--st-primary);
+  color: #fff;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 150ms, box-shadow 150ms, transform 90ms;
+}
+
+.st-sa-btn:hover:not(:disabled) {
+  background: var(--st-primary-dark);
+  box-shadow: 0 6px 16px rgba(18, 53, 91, 0.25);
+}
+
+.st-sa-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.st-sa-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.st-sa-btn .st-sa-spin {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: stSaSpin 0.8s linear infinite;
+}
+
+@keyframes stSaSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.st-sa-note {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--st-line, var(--st-outline-variant));
+  font-size: 0.8125rem;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  line-height: 1.5;
+}
+
+.st-sa-note .material-symbols-outlined {
+  font-size: 18px;
+  color: var(--st-ink-faint, #8a91a0);
+}
+
+.st-sa-teacher {
+  display: block;
+  margin-top: 14px;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+.st-sa-teacher a {
+  color: var(--st-secondary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.st-sa-teacher a:hover {
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .st-sa {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .st-sa-side {
+    padding: 24px 20px 28px;
+  }
+  .st-sa-pitch h1 {
+    font-size: 1.75rem;
+    margin: 12px 0 8px;
+  }
+  .st-sa-pitch p {
+    font-size: 0.9375rem;
+  }
+  .st-sa-points,
+  .st-sa-side small {
+    display: none;
+  }
+  .st-sa-form-wrap {
+    padding: 20px 16px 32px;
+    align-items: flex-start;
+  }
+  .st-sa-card {
+    padding: 22px 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .st-sa * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

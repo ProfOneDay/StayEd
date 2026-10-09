@@ -2,12 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>StayEd | My Progress</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Libre+Franklin:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
     <link
@@ -23,16 +23,33 @@
       href="../../assets/img/brand/favicon.ico"
     />
   </head>
-  <body>
-    <div class="st-student-portal">
-      <div class="st-student-header">
-        <span class="material-symbols-outlined" style="color:var(--st-primary);font-size:1.75rem;">school</span>
-        <h1>StayEd</h1>
-      </div>
+  <body class="st-sv-body">
+    <div class="st-sv">
+      <header class="st-sv-topbar">
+        <a class="st-sv-brand" href="#">
+          <img src="../../assets/img/brand/logo-dark.png" alt="" />
+          <h1>StayEd</h1>
+        </a>
+        <div class="st-sv-topbar-right">
+          <span class="st-sv-chip">
+            <span class="material-symbols-outlined">visibility</span>
+            <span>Student view &middot; read-only</span>
+          </span>
+          <a class="st-sv-exit" href="access.html">
+            <span class="material-symbols-outlined">logout</span>
+            <span>Log out</span>
+          </a>
+        </div>
+      </header>
 
-      <div class="st-student-body" data-student-body>
-        <div class="st-student-loading" data-student-loading>Loading your progress…</div>
-      </div>
+      <main class="st-sv-main st-student-body" data-student-body>
+        <p class="st-sv-loading" data-student-loading>Loading your progress&hellip;</p>
+      </main>
+
+      <footer class="st-sv-foot">
+        <span>&copy; 2026 Department of Education - Alternative Learning System</span>
+        <span>Shared with you by your ALS teacher</span>
+      </footer>
     </div>
 
     <script src="../../assets/js/config.js"></script>

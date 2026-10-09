@@ -16,6 +16,8 @@ class LearnerRecordsHub {
   static async init() {
     if (window.Guards) Guards.teacher();
 
+    this.bindClassPortalShare();
+
     await this.loadClassContext();
 
     this.bindTabs();
@@ -23,6 +25,85 @@ class LearnerRecordsHub {
     this.bindFilters();
 
     await this.load();
+  }
+
+  static bindClassPortalShare() {
+    const toggle = document.querySelector("[data-class-portal-share-toggle]");
+    const copyBtn = document.querySelector("[data-class-portal-share-copy-btn]");
+
+    toggle?.addEventListener("change", async () => {
+      const classId = this.state.classId;
+      if (!classId) return;
+
+      const enabled = toggle.checked;
+      toggle.disabled = true;
+
+      try {
+        const result = await API.updateClassPortalShare(classId, enabled);
+        const isEnabled = Boolean(result.enabled);
+        toggle.checked = isEnabled;
+        this.renderClassPortalShareLink(isEnabled);
+
+        Toast?.success(
+          enabled ? "Student view link is now on for this class." : "Student view link is now off for this class.",
+        );
+      } catch (error) {
+        console.error("[LearnerRecordsHub] Unable to update class portal share", error);
+
+        toggle.checked = !enabled;
+
+        Toast?.error("Unable to update the student view link.");
+      } finally {
+        toggle.disabled = false;
+      }
+    });
+
+    copyBtn?.addEventListener("click", async () => {
+      const input = document.querySelector("[data-class-portal-share-link-input]");
+      if (!input?.value) return;
+
+      try {
+        await navigator.clipboard.writeText(input.value);
+
+        Toast?.success("Link copied.");
+      } catch (error) {
+        console.error("[LearnerRecordsHub] Unable to copy link", error);
+
+        input.select();
+
+        Toast?.error("Couldn't copy automatically -- link is selected, copy it manually.");
+      }
+    });
+  }
+
+  static renderClassPortalShareLink(enabled) {
+    const linkRow = document.querySelector("[data-class-portal-share-link-row]");
+    const linkInput = document.querySelector("[data-class-portal-share-link-input]");
+    if (!linkRow || !linkInput) return;
+
+    if (enabled) {
+      linkInput.value = new URL("../student/access.html", window.location.href).href;
+      linkRow.hidden = false;
+    } else {
+      linkRow.hidden = true;
+    }
+  }
+
+  static async loadClassPortalShare(classId) {
+    const card = document.querySelector("[data-class-portal-share-card]");
+    const toggle = document.querySelector("[data-class-portal-share-toggle]");
+    if (!card || !toggle) return;
+
+    card.classList.remove("st-hidden");
+
+    try {
+      const result = await API.getClassPortalShare(classId);
+      const enabled = Boolean(result.enabled);
+      toggle.checked = enabled;
+      this.renderClassPortalShareLink(enabled);
+    } catch (error) {
+      console.error("[LearnerRecordsHub] Unable to load class portal share state", error);
+    }
   }
 
   static async loadClassContext() {
@@ -97,6 +178,8 @@ class LearnerRecordsHub {
       "[data-records-subtitle]",
       `Viewing records for ${match.clc}, ${match.level} (SY ${match.schoolYear}).`,
     );
+
+    await this.loadClassPortalShare(classId);
   }
 
   static async load() {
