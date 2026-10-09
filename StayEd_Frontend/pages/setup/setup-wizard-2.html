@@ -40,28 +40,33 @@
           <img src="../../assets/img/brand/logo-dark.png" alt="StayEd logo" />
           <h1>StayEd</h1>
         </div>
-        <div class="setup-progress">
-          <div class="setup-progress-track">
-            <div class="setup-progress-fill" style="width: 40%"></div>
-          </div>
-          <div class="setup-progress-steps">
-            <span class="is-done">1. Welcome</span>
-            <span class="is-active">2. Create Class</span>
-            <span>3. Upload</span>
-            <span>4. Preview</span>
-            <span>5. Complete</span>
-          </div>
+
+        <ol class="setup-stepper" aria-label="Setup progress">
+          <li class="is-done"><span class="dot">1</span><span class="lbl">Welcome</span></li>
+          <li class="is-active"><span class="dot">2</span><span class="lbl">Create Class</span></li>
+          <li><span class="dot">3</span><span class="lbl">Upload</span></li>
+          <li><span class="dot">4</span><span class="lbl">Preview</span></li>
+          <li><span class="dot">5</span><span class="lbl">Complete</span></li>
+        </ol>
+        <div class="setup-mobile-progress" data-step="2">
+          <span>Step <b>2</b> of 5 &middot; Create Class</span>
+          <i></i>
         </div>
+
         <button type="button" class="setup-topbar-support">
           <span class="material-symbols-outlined">help</span>
-          Support
+          <span class="lbl">Support</span>
         </button>
       </div>
     </header>
 
     <main class="setup-main">
-      <div class="setup-shell">
+      <div class="setup-step">
         <div class="setup-heading">
+          <span class="setup-kicker">
+            <span class="material-symbols-outlined setup-kicker-icon">school</span>
+            Step 2 of 5
+          </span>
           <h1>Create Your First Class</h1>
           <p>
             Define the learning cohort information before importing learner
@@ -69,71 +74,104 @@
           </p>
         </div>
 
-        <form class="setup-form" id="classForm">
-          <div class="setup-field-row">
-            <div class="setup-field">
-              <label for="municipality">Municipality</label>
-              <select id="municipality">
-                <option value="">Select Municipality</option>
-              </select>
+        <div class="setup-class-grid">
+          <form class="setup-card setup-form-card" id="classForm">
+            <h2 class="setup-card-title">
+              <span class="material-symbols-outlined">edit_note</span>
+              Class details
+            </h2>
+
+            <div class="setup-field-row">
+              <div class="setup-field">
+                <label for="municipality">Municipality <span class="req">*</span></label>
+                <div class="setup-select">
+                  <span class="material-symbols-outlined">location_on</span>
+                  <select id="municipality">
+                    <option value="">Select Municipality</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="setup-field">
+                <label for="clc">Community Learning Center (CLC) <span class="req">*</span></label>
+                <div class="setup-select">
+                  <span class="material-symbols-outlined">hub</span>
+                  <select id="clc" disabled>
+                    <option value="">Select Municipality first</option>
+                  </select>
+                </div>
+                <p class="setup-field-hint">Choose a municipality to see its CLCs.</p>
+              </div>
             </div>
 
-            <div class="setup-field">
-              <label for="clc">Community Learning Center (CLC)</label>
-              <select id="clc" disabled>
-                <option value="">Select Municipality first</option>
-              </select>
-            </div>
-          </div>
+            <div class="setup-field-row">
+              <div class="setup-field">
+                <label for="learningLevel">Learning Level <span class="req">*</span></label>
+                <div class="setup-select">
+                  <span class="material-symbols-outlined">stairs</span>
+                  <select id="learningLevel">
+                    <option value="">Select Level</option>
+                    <option value="Basic Literacy Program">Basic Literacy Program (BLP)</option>
+                    <option value="Elementary A&amp;E">Elementary A&amp;E</option>
+                    <option value="Junior High School A&amp;E">Junior High School A&amp;E</option>
+                    <option value="Senior High School A&amp;E">Senior High School A&amp;E</option>
+                  </select>
+                </div>
+              </div>
 
-          <div class="setup-field-row">
-            <div class="setup-field">
-              <label for="learningLevel">Learning Level</label>
-              <select id="learningLevel">
-                <option value="">Select Level</option>
-                <option value="Basic Literacy Program">Basic Literacy Program (BLP)</option>
-                <option value="Elementary A&amp;E">Elementary A&amp;E</option>
-                <option value="Junior High School A&amp;E">Junior High School A&amp;E</option>
-                <option value="Senior High School A&amp;E">Senior High School A&amp;E</option>
-              </select>
+              <div class="setup-field">
+                <label for="schoolYear">School Year <span class="req">*</span></label>
+                <div class="setup-select">
+                  <span class="material-symbols-outlined">calendar_today</span>
+                  <select id="schoolYear">
+                    <option value="2025-2026">2025-2026</option>
+                    <option value="2026-2027" selected>2026-2027</option>
+                  </select>
+                </div>
+              </div>
             </div>
-
-            <div class="setup-field">
-              <label for="schoolYear">School Year</label>
-              <select id="schoolYear">
-                <option value="2025-2026">2025-2026</option>
-                <option value="2026-2027" selected>2026-2027</option>
-              </select>
-            </div>
-          </div>
+          </form>
 
           <!-- Class summary -->
-          <div class="setup-summary">
+          <aside class="setup-card setup-summary-card">
             <h3>Class Summary</h3>
-            <div class="setup-summary-grid">
-              <div class="setup-summary-item">
-                <p>Municipality</p>
-                <p id="summaryMunicipality">—</p>
-              </div>
-              <div class="setup-summary-item">
-                <p id="summaryCLCLabel">Community Learning Center</p>
-                <p id="summaryCLC">—</p>
-              </div>
-              <div class="setup-summary-item">
-                <p>Learning Level</p>
-                <p id="summaryLevel">—</p>
-              </div>
-              <div class="setup-summary-item">
-                <p>School Year</p>
-                <p id="summaryYear">2026-2027</p>
+            <p>Updates as you fill in the details.</p>
+
+            <div class="setup-summary-row" data-summary-row="municipality">
+              <span class="material-symbols-outlined">location_on</span>
+              <div>
+                <small>Municipality</small>
+                <b id="summaryMunicipality">Not selected</b>
               </div>
             </div>
-            <div class="setup-summary-status">
-              <span class="dot"></span>
-              Status: Ready for learner import
+            <div class="setup-summary-row" data-summary-row="clc">
+              <span class="material-symbols-outlined">hub</span>
+              <div>
+                <small id="summaryCLCLabel">Community Learning Center</small>
+                <b id="summaryCLC">Not selected</b>
+              </div>
             </div>
-          </div>
-        </form>
+            <div class="setup-summary-row" data-summary-row="level">
+              <span class="material-symbols-outlined">stairs</span>
+              <div>
+                <small>Learning Level</small>
+                <b id="summaryLevel">Not selected</b>
+              </div>
+            </div>
+            <div class="setup-summary-row is-set" data-summary-row="year">
+              <span class="material-symbols-outlined">calendar_today</span>
+              <div>
+                <small>School Year</small>
+                <b id="summaryYear">2026-2027</b>
+              </div>
+            </div>
+
+            <div class="setup-summary-status is-wait" data-summary-status>
+              <span class="material-symbols-outlined">pending</span>
+              Status: Complete all fields to continue
+            </div>
+          </aside>
+        </div>
       </div>
     </main>
 
@@ -144,9 +182,10 @@
           Back
         </button>
         <div class="setup-footer-right">
-          <span class="setup-footer-note"
-            >All changes are saved automatically</span
-          >
+          <span class="setup-autosave">
+            <span class="material-symbols-outlined">cloud_done</span>
+            All changes are saved automatically
+          </span>
           <button type="button" id="nextBtn" class="st-btn st-btn-primary">
             Continue
             <span class="material-symbols-outlined">arrow_forward</span>
@@ -167,6 +206,7 @@
     <script src="../../assets/js/core/auth.js"></script>
     <script src="../../assets/js/components/component-loader.js"></script>
     <script src="../../assets/js/components/toast.js"></script>
+    <script src="../../assets/js/core/learner-import-core.js"></script>
     <script src="../../assets/js/setup/setup.js"></script>
   </body>
 </html>

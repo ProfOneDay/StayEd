@@ -721,66 +721,229 @@ img.auth-brand-icon{
     opacity:.7;
 }
 
+/* Pending-approval-only background: a plain navy-to-teal gradient with a
+   bottom-right glow, overriding the classroom-photo background every other
+   .auth-page (login/register/forgot/reset) keeps. */
+body.auth-page[data-page="Pending"]::before{
+    background-image:
+        linear-gradient(150deg, var(--st-primary) 0%, #1d4670 55%, #2a5b7d 100%);
+}
+
+body.auth-page[data-page="Pending"]::after{
+    background:
+        radial-gradient(
+            1200px 600px at 85% 110%,
+            rgba(0,106,104,.55),
+            transparent 60%
+        );
+}
+
 .auth-pending-icon{
-    width:72px;
-    height:72px;
+    position:relative;
+    width:76px;
+    height:76px;
     margin:0 auto 20px;
     border-radius:50%;
     display:flex;
     align-items:center;
     justify-content:center;
-    background:rgba(243,148,34,.12);
-    border:1px solid rgba(243,148,34,.25);
+    background:var(--st-risk-moderate-soft-2, #fef3e4);
+    color:#c46b00;
+}
+
+.auth-pending-icon::after{
+    content:"";
+    position:absolute;
+    inset:-6px;
+    border-radius:50%;
+    border:2px solid rgba(243,148,34,.35);
+    animation:auth-pending-ring 1.4s var(--st-ease-out, cubic-bezier(.2,.7,.2,1)) 1;
+}
+
+@keyframes auth-pending-ring{
+    from{ transform:scale(.85); opacity:1; }
+    to{ transform:scale(1.15); opacity:0; }
 }
 
 .auth-pending-icon .material-symbols-outlined{
     font-size:2.5rem;
-    color:var(--st-risk-moderate);
     font-variation-settings:"FILL" 1;
+    animation:auth-pending-flip 1s var(--st-ease-out, cubic-bezier(.2,.7,.2,1)) .4s 1;
+}
+
+@keyframes auth-pending-flip{
+    from{ transform:rotate(0); }
+    to{ transform:rotate(180deg); }
+}
+
+.auth-status-chip{
+    display:flex;
+    justify-content:center;
+    margin-top:14px;
+}
+
+.auth-status-chip span{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:4px 12px;
+    border-radius:999px;
+    background:var(--st-risk-moderate-soft-2, #fef3e4);
+    color:var(--st-risk-moderate-ink, #8f5200);
+    font-size: var(--st-font-size-caption);
+    font-weight:700;
+}
+
+.auth-status-chip span::before{
+    content:"";
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:currentColor;
 }
 
 .auth-steps{
+    position:relative;
     margin-top:24px;
     display:flex;
     flex-direction:column;
-    gap:12px;
+    gap:0;
+    padding:4px 0;
 }
 
 .auth-step{
-    display:flex;
-    gap:12px;
-    align-items:flex-start;
-    padding:12px;
-    border-radius:var(--st-radius-sm);
-    background:var(--st-surface-container-low);
-    border:1px solid rgba(195,198,207,.30);
+    position:relative;
+    display:grid;
+    grid-template-columns:36px 1fr;
+    gap:14px;
+    padding:10px 0;
+    opacity:0;
+    animation:auth-card-in .45s var(--st-ease-out, cubic-bezier(.2,.7,.2,1)) forwards;
+    animation-delay:calc(var(--i, 0) * 120ms + 250ms);
+}
+
+.auth-step:not(:last-child)::before{
+    content:"";
+    position:absolute;
+    left:17px;
+    top:46px;
+    bottom:-10px;
+    width:2px;
+    background:var(--st-line, var(--st-outline-variant));
+}
+
+.auth-step.is-done:not(:last-child)::before{
+    background:var(--st-secondary);
 }
 
 .auth-step-num{
-    width:24px;
-    height:24px;
+    width:36px;
+    height:36px;
     border-radius:50%;
-    background:var(--st-primary);
-    color:#fff;
-    font-size: var(--st-font-size-caption);
-    font-weight:700;
     display:flex;
     align-items:center;
     justify-content:center;
+    border:2px solid var(--st-line-strong, #cfd5de);
+    background:#fff;
+    color:var(--st-ink-faint, #8a91a0);
+    font-size: var(--st-font-size-label);
+    font-weight:700;
     flex-shrink:0;
+    z-index:1;
+}
+
+.auth-step.is-done .auth-step-num{
+    background:var(--st-secondary);
+    border-color:var(--st-secondary);
+    color:transparent;
+    position:relative;
+}
+
+.auth-step.is-done .auth-step-num::after{
+    content:"check";
+    position:absolute;
+    font-family:"Material Symbols Outlined";
+    font-size:20px;
+    color:#fff;
+}
+
+.auth-step.is-current .auth-step-num{
+    border-color:var(--st-risk-moderate);
+    background:var(--st-risk-moderate-soft-2, #fef3e4);
+    color:var(--st-risk-moderate-ink, #8f5200);
+    box-shadow:0 0 0 4px rgba(243,148,34,.15);
 }
 
 .auth-step-body h4{
+    margin:6px 0 0;
+    display:flex;
+    align-items:center;
+    gap:8px;
     font-size: var(--st-font-size-label);
-    font-weight:600;
+    font-weight:700;
     color:var(--st-on-surface);
-    margin-bottom:2px;
+}
+
+.auth-step:not(.is-done):not(.is-current) .auth-step-body h4{
+    color:var(--st-ink-muted, #5a6275);
+    font-weight:600;
 }
 
 .auth-step-body p{
+    margin:3px 0 0;
     font-size: var(--st-font-size-caption);
     line-height:1.5;
     color:var(--st-on-surface-variant);
+}
+
+.auth-step-tag{
+    padding:1px 8px;
+    border-radius:999px;
+    font-size: var(--st-font-size-micro);
+    font-weight:700;
+    background:var(--st-risk-moderate-soft-2, #fef3e4);
+    color:var(--st-risk-moderate-ink, #8f5200);
+}
+
+.auth-step.is-done .auth-step-tag{
+    background:var(--st-secondary-container, #e3f4f3);
+    color:#00504e;
+}
+
+/* Scoped to the pending page's own anchor class so the rest of the shared
+   .auth-switch footer (plain centered text link, reused by register/
+   forgot-password/reset-password) stays untouched. */
+.auth-switch .auth-pending-back{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    height:46px;
+    padding:0 22px;
+    border-radius:var(--st-radius-xl, 12px);
+    background:var(--st-primary);
+    color:#fff;
+    font-weight:700;
+    text-decoration:none;
+    transition:background-color 150ms, box-shadow 150ms, transform 90ms;
+}
+
+.auth-switch .auth-pending-back:hover{
+    background:var(--st-primary-dark);
+    box-shadow:0 6px 16px rgba(18,53,91,.25);
+    text-decoration:none;
+}
+
+.auth-switch .auth-pending-back:active{
+    transform:scale(.98);
+}
+
+.auth-switch .auth-pending-back .material-symbols-outlined{
+    font-size:19px;
+    transition:transform 150ms var(--st-ease-out, cubic-bezier(.2,.7,.2,1));
+}
+
+.auth-switch .auth-pending-back:hover .material-symbols-outlined{
+    transform:translateX(-3px);
 }
 
 @media (max-width:520px){
@@ -789,5 +952,15 @@ img.auth-brand-icon{
     }
     .auth-password-rules ul{
         grid-template-columns:1fr;
+    }
+}
+
+@media (prefers-reduced-motion:reduce){
+    .auth-page *{
+        animation:none !important;
+        transition:none !important;
+    }
+    .auth-step{
+        opacity:1;
     }
 }

@@ -40,32 +40,33 @@
           <img src="../../assets/img/brand/logo-dark.png" alt="StayEd logo" />
           <h1>StayEd</h1>
         </div>
-        <div class="setup-progress">
-          <div class="setup-progress-track">
-            <div class="setup-progress-fill" style="width: 100%"></div>
-          </div>
-          <div class="setup-progress-steps">
-            <span class="is-done">1. Welcome</span>
-            <span class="is-done">2. Create Class</span>
-            <span class="is-done">3. Upload</span>
-            <span class="is-done">4. Preview</span>
-            <span class="is-active">5. Complete</span>
-          </div>
+
+        <ol class="setup-stepper" aria-label="Setup progress">
+          <li class="is-done"><span class="dot">1</span><span class="lbl">Welcome</span></li>
+          <li class="is-done"><span class="dot">2</span><span class="lbl">Create Class</span></li>
+          <li class="is-done"><span class="dot">3</span><span class="lbl">Upload</span></li>
+          <li class="is-done"><span class="dot">4</span><span class="lbl">Preview</span></li>
+          <li class="is-active"><span class="dot">5</span><span class="lbl">Complete</span></li>
+        </ol>
+        <div class="setup-mobile-progress" data-step="5">
+          <span>Step <b>5</b> of 5 &middot; Complete</span>
+          <i></i>
         </div>
+
         <button type="button" class="setup-topbar-support">
           <span class="material-symbols-outlined">help</span>
-          Support
+          <span class="lbl">Support</span>
         </button>
       </div>
     </header>
 
     <main class="setup-main">
-      <div class="setup-complete">
-        <div class="setup-complete-icon" id="successIcon">
-          <span class="material-symbols-outlined">check_circle</span>
+      <div class="setup-step setup-success">
+        <div class="setup-success-icon" id="successIcon">
+          <span class="material-symbols-outlined">check</span>
         </div>
 
-        <div>
+        <div class="setup-heading">
           <h1>Your Class is Ready!</h1>
           <p>
             Setup is complete. Your class and learner records are configured.
@@ -75,43 +76,58 @@
 
         <!-- Import stats recap -->
         <div class="setup-import-stats setup-import-stats--narrow">
-          <div class="setup-import-stat">
-            <p class="setup-import-stat-value" id="statTotal">0</p>
-            <p class="setup-import-stat-label">Total Rows</p>
+          <div class="setup-import-stat setup-import-stat--total" style="--i: 0">
+            <span class="material-symbols-outlined">table_rows</span>
+            <div>
+              <p class="setup-import-stat-value" id="statTotal">0</p>
+              <p class="setup-import-stat-label">Total Rows</p>
+            </div>
           </div>
-          <div class="setup-import-stat setup-import-stat--ok">
-            <p class="setup-import-stat-value" id="statImported">0</p>
-            <p class="setup-import-stat-label">Imported</p>
+          <div class="setup-import-stat setup-import-stat--ok" style="--i: 1">
+            <span class="material-symbols-outlined">check_circle</span>
+            <div>
+              <p class="setup-import-stat-value" id="statImported">0</p>
+              <p class="setup-import-stat-label">Imported</p>
+            </div>
           </div>
-          <div class="setup-import-stat setup-import-stat--warn">
-            <p class="setup-import-stat-value" id="statDuplicates">0</p>
-            <p class="setup-import-stat-label">Duplicates</p>
+          <div class="setup-import-stat setup-import-stat--warn" style="--i: 2">
+            <span class="material-symbols-outlined">content_copy</span>
+            <div>
+              <p class="setup-import-stat-value" id="statDuplicates">0</p>
+              <p class="setup-import-stat-label">Duplicates</p>
+            </div>
           </div>
-          <div class="setup-import-stat setup-import-stat--err">
-            <p class="setup-import-stat-value" id="statInvalid">0</p>
-            <p class="setup-import-stat-label">Invalid</p>
+          <div class="setup-import-stat setup-import-stat--err" style="--i: 3">
+            <span class="material-symbols-outlined">error</span>
+            <div>
+              <p class="setup-import-stat-value" id="statInvalid">0</p>
+              <p class="setup-import-stat-label">Invalid</p>
+            </div>
           </div>
         </div>
 
         <!-- Class summary -->
-        <div class="setup-summary setup-complete-summary">
-          <h3>Class Configuration</h3>
-          <div class="setup-summary-grid">
-            <div class="setup-summary-item">
-              <p>Municipality</p>
-              <p id="summaryMunicipality">—</p>
+        <div class="setup-card setup-config-card">
+          <h2 class="setup-card-title">
+            <span class="material-symbols-outlined">tune</span>
+            Class Configuration
+          </h2>
+          <div class="setup-config-grid">
+            <div>
+              <small>Municipality</small>
+              <b id="summaryMunicipality">—</b>
             </div>
-            <div class="setup-summary-item">
-              <p>Community Learning Center</p>
-              <p id="summaryCLC">—</p>
+            <div>
+              <small>Community Learning Center</small>
+              <b id="summaryCLC">—</b>
             </div>
-            <div class="setup-summary-item">
-              <p>Learning Level</p>
-              <p id="summaryLevel">—</p>
+            <div>
+              <small>Learning Level</small>
+              <b id="summaryLevel">—</b>
             </div>
-            <div class="setup-summary-item">
-              <p>School Year</p>
-              <p id="summaryYear">—</p>
+            <div>
+              <small>School Year</small>
+              <b id="summaryYear">—</b>
             </div>
           </div>
         </div>
@@ -144,6 +160,7 @@
     <script src="../../assets/js/core/auth.js"></script>
     <script src="../../assets/js/components/component-loader.js"></script>
     <script src="../../assets/js/components/toast.js"></script>
+    <script src="../../assets/js/core/learner-import-core.js"></script>
     <script src="../../assets/js/setup/setup.js"></script>
   </body>
 </html>

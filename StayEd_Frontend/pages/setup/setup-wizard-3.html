@@ -40,28 +40,30 @@
           <img src="../../assets/img/brand/logo-dark.png" alt="StayEd logo" />
           <h1>StayEd</h1>
         </div>
-        <div class="setup-progress">
-          <div class="setup-progress-track">
-            <div class="setup-progress-fill" style="width: 60%"></div>
-          </div>
-          <div class="setup-progress-steps">
-            <span class="is-done">1. Welcome</span>
-            <span class="is-done">2. Create Class</span>
-            <span class="is-active">3. Upload</span>
-            <span>4. Preview</span>
-            <span>5. Complete</span>
-          </div>
+
+        <ol class="setup-stepper" aria-label="Setup progress">
+          <li class="is-done"><span class="dot">1</span><span class="lbl">Welcome</span></li>
+          <li class="is-done"><span class="dot">2</span><span class="lbl">Create Class</span></li>
+          <li class="is-active"><span class="dot">3</span><span class="lbl">Upload</span></li>
+          <li><span class="dot">4</span><span class="lbl">Preview</span></li>
+          <li><span class="dot">5</span><span class="lbl">Complete</span></li>
+        </ol>
+        <div class="setup-mobile-progress" data-step="3">
+          <span>Step <b>3</b> of 5 &middot; Upload</span>
+          <i></i>
         </div>
+
         <button type="button" class="setup-topbar-support">
           <span class="material-symbols-outlined">help</span>
-          Support
+          <span class="lbl">Support</span>
         </button>
       </div>
     </header>
 
     <main class="setup-main">
-      <div class="setup-shell">
+      <div class="setup-step">
         <div class="setup-heading">
+          <span class="setup-kicker">Step 3 of 5</span>
           <h1>Upload Learner Records</h1>
           <p>
             Import your learner masterlist using a CSV or Excel file. We'll
@@ -69,30 +71,26 @@
           </p>
         </div>
 
-        <!-- Drop zone -->
-        <div class="setup-dropzone" id="dropZone">
-          <div class="setup-dropzone-icon">
-            <span class="material-symbols-outlined">cloud_upload</span>
+        <div class="setup-card setup-upload-card">
+          <!-- Drop zone -->
+          <div class="setup-dropzone" id="dropZone">
+            <div class="setup-dropzone-icon">
+              <span class="material-symbols-outlined">cloud_upload</span>
+            </div>
+            <h3>Drag &amp; drop your file here</h3>
+            <p>or click browse to select a file from your computer</p>
+            <button type="button" id="browseBtn" class="st-btn st-btn-outline">
+              <span class="material-symbols-outlined">folder_open</span>
+              Browse Files
+            </button>
+            <span class="setup-dropzone-hint"
+              >Supported formats: .csv, .xlsx (max 5MB)</span
+            >
+            <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" hidden />
           </div>
-          <h3>Drag &amp; drop your file here</h3>
-          <p>or click browse to select a file from your computer</p>
-          <span class="setup-dropzone-hint"
-            >Supported formats: .csv, .xlsx (max 5MB)</span
-          >
-          <button
-            type="button"
-            id="browseBtn"
-            class="st-btn st-btn-outline setup-mt-sm"
-          >
-            <span class="material-symbols-outlined">folder_open</span>
-            Browse Files
-          </button>
-          <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" hidden />
-        </div>
 
-        <!-- Selected file (hidden until chosen) -->
-        <div class="setup-file-card st-hidden setup-mt-lg" id="uploadPreview">
-          <div class="setup-file-card-body">
+          <!-- Selected file (hidden until chosen) -->
+          <div class="setup-file-card" id="uploadPreview" hidden>
             <div class="setup-file-info">
               <div class="setup-file-icon">
                 <span class="material-symbols-outlined">description</span>
@@ -100,31 +98,33 @@
               <div class="setup-file-meta">
                 <h4 id="fileName">filename.csv</h4>
                 <p id="fileSize">0 KB</p>
+                <div class="setup-upload-progress">
+                  <div class="setup-upload-progress-track">
+                    <div class="setup-upload-progress-fill" id="uploadProgress"></div>
+                  </div>
+                  <p class="setup-upload-status" id="uploadStatus">
+                    <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+                    <span data-status-text>Ready to import.</span>
+                  </p>
+                </div>
               </div>
-            </div>
-            <div class="setup-upload-progress">
-              <div class="setup-upload-progress-track">
-                <div
-                  class="setup-upload-progress-fill"
-                  id="uploadProgress"
-                ></div>
-              </div>
-              <p class="setup-upload-status" id="uploadStatus">
-                Ready to import
-              </p>
             </div>
           </div>
-        </div>
 
-        <div class="setup-template-link-row">
-          <a
-            href="#"
-            class="setup-template-link"
-            id="setupDownloadTemplateLink"
-          >
-            <span class="material-symbols-outlined">download</span>
-            Download CSV template
-          </a>
+          <div class="setup-template-link-row">
+            <a
+              href="#"
+              class="setup-template-link"
+              id="setupDownloadTemplateLink"
+            >
+              <span class="material-symbols-outlined">download</span>
+              Download CSV template
+            </a>
+            <p class="setup-upload-foot-note">
+              <span class="material-symbols-outlined">info</span>
+              You can skip this and import learners later from Learner Records.
+            </p>
+          </div>
         </div>
       </div>
     </main>
@@ -136,7 +136,7 @@
           Back
         </button>
         <div class="setup-footer-right">
-          <button type="button" id="skipBtn" class="setup-footer-back">
+          <button type="button" id="skipBtn" class="setup-ghost">
             Skip for now
           </button>
           <button type="button" id="importBtn" class="st-btn st-btn-primary">
@@ -158,6 +158,7 @@
     <script src="../../assets/js/core/auth.js"></script>
     <script src="../../assets/js/components/component-loader.js"></script>
     <script src="../../assets/js/components/toast.js"></script>
+    <script src="../../assets/js/core/learner-import-core.js"></script>
     <script src="../../assets/js/setup/setup.js"></script>
   </body>
 </html>

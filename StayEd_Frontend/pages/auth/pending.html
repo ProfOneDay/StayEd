@@ -33,7 +33,7 @@
       href="../../assets/img/brand/apple-touch-icon.png"
     />
   </head>
-  <body class="auth-page">
+  <body class="auth-page" data-page="Pending">
     <main class="auth-main">
       <section class="auth-card">
         <div class="auth-brand auth-brand--center">
@@ -54,6 +54,10 @@
           <span class="material-symbols-outlined">hourglass_top</span>
         </div>
 
+        <div class="auth-status-chip">
+          <span>Pending review</span>
+        </div>
+
         <div class="auth-header auth-header--center">
           <h2>Account Pending Approval</h2>
           <p>
@@ -64,23 +68,23 @@
         </div>
 
         <div class="auth-steps">
-          <div class="auth-step">
+          <div class="auth-step is-done" style="--i: 0">
             <span class="auth-step-num">1</span>
             <div class="auth-step-body">
-              <h4>Registration received</h4>
+              <h4>Registration received <span class="auth-step-tag">Done</span></h4>
               <p>Your details have been submitted successfully.</p>
             </div>
           </div>
 
-          <div class="auth-step">
+          <div class="auth-step is-current" style="--i: 1">
             <span class="auth-step-num">2</span>
             <div class="auth-step-body">
-              <h4>Administrator review</h4>
+              <h4>Administrator review <span class="auth-step-tag">In progress</span></h4>
               <p>A Division Administrator verifies your ALS teaching role.</p>
             </div>
           </div>
 
-          <div class="auth-step">
+          <div class="auth-step" style="--i: 2">
             <span class="auth-step-num">3</span>
             <div class="auth-step-body">
               <h4>Access granted</h4>
@@ -90,7 +94,10 @@
         </div>
 
         <div class="auth-switch">
-          <a href="/index.html">Back to Login</a>
+          <a href="/index.html" class="auth-pending-back">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Back to Login
+          </a>
         </div>
       </section>
     </main>

@@ -172,6 +172,15 @@ body[data-page="Learner Profile"] .st-profile-hero-lrn span {
   color: var(--st-on-surface);
   font-variant-numeric: tabular-nums;
 }
+body[data-page="Learner Profile"] .st-profile-hero-birthdate {
+  margin: 2px 0 0;
+  font-size: 0.844rem;
+  color: var(--st-on-surface-variant);
+}
+body[data-page="Learner Profile"] .st-profile-hero-birthdate span {
+  font-weight: 700;
+  color: var(--st-on-surface);
+}
 body[data-page="Learner Profile"] .st-profile-chip-row {
   margin-top: 8px;
 }

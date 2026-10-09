@@ -210,6 +210,7 @@ class LearnerProfilePage {
     this.set("[data-profile-avatar]", initials);
     this.set("[data-profile-name]", p.name);
     this.set("[data-profile-lrn]", p.lrn);
+    this.set("[data-profile-birthdate]", p.birthdate ? Utils.formatDate(p.birthdate) : "—");
     this.set("[data-profile-clc]", p.clc || "—");
     this.set("[data-profile-level]", p.level);
     this.set("[data-profile-modality]", p.modality);

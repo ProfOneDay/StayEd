@@ -34,79 +34,95 @@
     />
   </head>
   <body class="setup-page" data-wizard="1">
-    <!-- Progress header -->
     <header class="setup-topbar">
       <div class="setup-topbar-inner">
         <div class="setup-topbar-brand">
           <img src="../../assets/img/brand/logo-dark.png" alt="StayEd logo" />
           <h1>StayEd</h1>
         </div>
-        <div class="setup-progress">
-          <div class="setup-progress-track">
-            <div class="setup-progress-fill" style="width: 20%"></div>
-          </div>
-          <div class="setup-progress-steps">
-            <span class="is-active">1. Welcome</span>
-            <span>2. Create Class</span>
-            <span>3. Upload</span>
-            <span>4. Preview</span>
-            <span>5. Complete</span>
-          </div>
+
+        <ol class="setup-stepper" aria-label="Setup progress">
+          <li class="is-active"><span class="dot">1</span><span class="lbl">Welcome</span></li>
+          <li><span class="dot">2</span><span class="lbl">Create Class</span></li>
+          <li><span class="dot">3</span><span class="lbl">Upload</span></li>
+          <li><span class="dot">4</span><span class="lbl">Preview</span></li>
+          <li><span class="dot">5</span><span class="lbl">Complete</span></li>
+        </ol>
+        <div class="setup-mobile-progress" data-step="1">
+          <span>Step <b>1</b> of 5 &middot; Welcome</span>
+          <i></i>
         </div>
+
         <button type="button" class="setup-topbar-support">
           <span class="material-symbols-outlined">help</span>
-          Support
+          <span class="lbl">Support</span>
         </button>
       </div>
     </header>
 
-    <main class="setup-main setup-main--center">
-      <div class="setup-welcome-card">
-        <!-- Illustration aside -->
-        <aside class="setup-welcome-aside">
-          <div class="setup-welcome-aside-grid"></div>
-          <div class="setup-welcome-aside-content">
-            <img
-              class="setup-welcome-logo"
-              src="../../assets/img/brand/logo-light.png"
-              alt="StayEd logo"
-            />
-            <p class="setup-welcome-aside-label">Setup Guide</p>
-            <h2>First-Time Configuration</h2>
-          </div>
-        </aside>
+    <main class="setup-main">
+      <div class="setup-step">
+        <div class="setup-card setup-welcome-card">
+          <!-- Illustration aside -->
+          <aside class="setup-welcome-aside">
+            <div class="setup-welcome-aside-grid"></div>
+            <div class="setup-welcome-aside-content">
+              <img
+                class="setup-welcome-logo"
+                src="../../assets/img/brand/logo-light.png"
+                alt="StayEd logo"
+              />
+              <p class="setup-welcome-aside-label">Setup Guide</p>
+              <h2>First-Time Configuration</h2>
+              <span class="setup-welcome-aside-eta">
+                <span class="material-symbols-outlined">schedule</span>
+                Takes only a few minutes
+              </span>
+            </div>
+          </aside>
 
-        <!-- Content -->
-        <div class="setup-welcome-body">
-          <h1>Welcome to StayEd!</h1>
+          <!-- Content -->
+          <div class="setup-welcome-body">
+            <h1>Welcome to StayEd!</h1>
 
-          <p>
-            Before you begin monitoring learners, let's set up your first class.
-            This only takes a few minutes and helps personalize your workspace
-            for the Philippine Alternative Learning System.
-          </p>
+            <p>
+              Before you begin monitoring learners, let's set up your first class.
+              This only takes a few minutes and helps personalize your workspace
+              for the Philippine Alternative Learning System.
+            </p>
 
-          <div class="setup-benefits">
-            <div class="setup-benefit">
-              <div class="setup-benefit-check">
-                <span class="material-symbols-outlined">check</span>
+            <div class="setup-benefits">
+              <div class="setup-benefit" style="--i: 0">
+                <div class="setup-benefit-check">
+                  <span class="material-symbols-outlined">groups</span>
+                </div>
+                <div class="setup-benefit-text">
+                  <h4>Centralized Learner Tracking</h4>
+                  <p>Consolidate records across modules and attendance logs.</p>
+                </div>
               </div>
-              <div class="setup-benefit-text">
-                <h4>Centralized Learner Tracking</h4>
-                <p>Consolidate records across modules and attendance logs.</p>
+
+              <div class="setup-benefit" style="--i: 1">
+                <div class="setup-benefit-check">
+                  <span class="material-symbols-outlined">insights</span>
+                </div>
+                <div class="setup-benefit-text">
+                  <h4>Data-Driven Interventions</h4>
+                  <p>
+                    Identify students at risk of dropping out with early alerts.
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div class="setup-benefit">
-              <div class="setup-benefit-check">
-                <span class="material-symbols-outlined">check</span>
-              </div>
-              <div class="setup-benefit-text">
-                <h4>Data-Driven Interventions</h4>
-                <p>
-                  Identify students at risk of dropping out with early alerts.
-                </p>
-              </div>
+            <div class="setup-roadmap">
+              <p>What you'll do</p>
+              <ol>
+                <li><span>2</span>Create your class</li>
+                <li><span>3</span>Upload learners</li>
+                <li><span>4</span>Review the import</li>
+                <li><span>5</span>Start monitoring</li>
+              </ol>
             </div>
           </div>
         </div>
@@ -140,6 +156,7 @@
     <script src="../../assets/js/core/auth.js"></script>
     <script src="../../assets/js/components/component-loader.js"></script>
     <script src="../../assets/js/components/toast.js"></script>
+    <script src="../../assets/js/core/learner-import-core.js"></script>
     <script src="../../assets/js/setup/setup.js"></script>
   </body>
 </html>

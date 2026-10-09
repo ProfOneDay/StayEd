@@ -52,7 +52,7 @@ class LearnerImportPage {
   }
 
   static downloadTemplate() {
-    Utils.downloadLearnerImportTemplate();
+    LearnerImportCore.downloadTemplate();
 
     Toast?.success("Template downloaded.");
   }
@@ -63,67 +63,21 @@ class LearnerImportPage {
     const browseBtn = document.getElementById("importBrowseBtn");
     const previewBtn = document.getElementById("importPreviewBtn");
 
-    if (!zone || !input) return;
-
-    browseBtn?.addEventListener("click", () => input.click());
-
-    zone.addEventListener("click", (e) => {
-      if (!e.target.closest("button")) input.click();
-    });
-
-    input.addEventListener("change", () => {
-      if (input.files?.[0]) this.selectFile(input.files[0]);
-    });
-
-    ["dragenter", "dragover"].forEach((evt) => {
-      zone.addEventListener(evt, (e) => {
-        e.preventDefault();
-        if (e.dataTransfer) e.dataTransfer.dropEffect = "copy";
-        zone.classList.add("is-dragover");
-      });
-    });
-
-    ["dragleave", "drop"].forEach((evt) => {
-      zone.addEventListener(evt, (e) => {
-        e.preventDefault();
-        zone.classList.remove("is-dragover");
-      });
-    });
-
-    zone.addEventListener("drop", (e) => {
-      const dropped = e.dataTransfer?.files?.[0];
-      if (dropped) this.selectFile(dropped);
+    LearnerImportCore.bindDropzone({
+      zone,
+      input,
+      browseBtn,
+      onFile: (file) => this.selectFile(file),
     });
 
     previewBtn?.addEventListener("click", () => this.runPreview());
-
-    // Without this, a drop that lands just outside the dashed zone (e.g. on
-    // the surrounding card's own padding, which a user can easily aim for)
-    // falls through to the browser's default behavior: navigating the whole
-    // page to the raw dropped file. That reads exactly like "drag and drop
-    // doesn't work" -- nothing visibly happens in the zone, the page just
-    // seems to do nothing (or blanks out) instead of accepting the file.
-    // Swallowing dragover/drop anywhere outside the zone turns that missed
-    // drop into a harmless no-op instead.
-    ["dragover", "drop"].forEach((evt) => {
-      document.addEventListener(evt, (e) => {
-        if (!zone.contains(e.target)) e.preventDefault();
-      });
-    });
   }
 
   static selectFile(file) {
-    const validExt = [".csv", ".xlsx", ".xls"];
+    const validationError = LearnerImportCore.validateFile(file);
 
-    const ext = "." + file.name.split(".").pop().toLowerCase();
-
-    if (!validExt.includes(ext)) {
-      Toast?.error("Please select a CSV or Excel file.");
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      Toast?.error("Maximum upload size is 5MB.");
+    if (validationError) {
+      Toast?.error(validationError);
       return;
     }
 
@@ -140,33 +94,14 @@ class LearnerImportPage {
     size.textContent = this.formatBytes(file.size);
     card.classList.remove("st-hidden");
 
-    this.animateProgress(fill, status, () => {
+    LearnerImportCore.animateProgress(fill, status, "Ready to preview.", () => {
       previewBtn.disabled = false;
     });
   }
 
-  static async animateProgress(fill, status, done) {
-    const steps = [25, 55, 80, 100];
-
-    for (const pct of steps) {
-      await Utils.sleep(200);
-      fill.style.width = `${pct}%`;
-      status.textContent =
-        pct < 100
-          ? `Uploading… ${pct}%`
-          : "Scanning for duplicates and errors…";
-    }
-
-    await Utils.sleep(300);
-
-    status.textContent = "Ready to preview.";
-
-    done();
-  }
-
   static async runPreview() {
     try {
-      this.preview = await API.getImportPreview(this.file);
+      this.preview = await LearnerImportCore.preview(this.file);
 
       document
         .getElementById("importUploadSection")
@@ -186,16 +121,11 @@ class LearnerImportPage {
   }
 
   static cell(value) {
-    return value === undefined || value === null || value === ""
-      ? "\u2014"
-      : String(value);
+    return LearnerImportCore.cell(value);
   }
 
   static titleCase(value) {
-    if (!value) return "\u2014";
-    return String(value)
-      .toLowerCase()
-      .replace(/(^|[\s/-])\S/g, (m) => m.toUpperCase());
+    return LearnerImportCore.titleCase(value);
   }
 
   static renderPreview() {
@@ -276,7 +206,7 @@ class LearnerImportPage {
 
   static async revalidateAndRerender() {
     try {
-      this.preview = await API.revalidateImportRows(this.preview.rows);
+      this.preview = await LearnerImportCore.revalidate(this.preview.rows);
       this.renderPreview();
     } catch (error) {
       console.error("[LearnerImport] Unable to revalidate rows", error);
@@ -418,10 +348,7 @@ class LearnerImportPage {
           // left out of the submission.
           const classId = this.getClassId();
 
-          const result = await API.importLearners({
-            learners: this.preview.rows.filter((r) => r.status !== "error"),
-            ...(classId ? { class_id: classId } : {}),
-          });
+          const result = await LearnerImportCore.confirm(this.preview.rows, classId);
 
           document
             .getElementById("importPreviewSection")
@@ -492,7 +419,7 @@ class LearnerImportPage {
   }
 
   static formatBytes(bytes) {
-    return Utils.formatFileSize(bytes);
+    return LearnerImportCore.formatBytes(bytes);
   }
 
   static set(selector, value) {

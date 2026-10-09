@@ -197,15 +197,44 @@ class SetupWizard {
       refreshSummary();
     });
 
+    const nextBtn = document.getElementById("nextBtn");
+
     function refreshSummary() {
+      const vals = {
+        municipality: municipality?.value || "",
+        clc: clc?.value || "",
+        level: learningLevel?.value || "",
+        year: schoolYear?.value || "",
+      };
+
       if (summaryMunicipality)
-        summaryMunicipality.textContent = municipality?.value || "—";
+        summaryMunicipality.textContent = vals.municipality || "Not selected";
 
-      if (summaryCLC) summaryCLC.textContent = clc.value || "—";
+      if (summaryCLC) summaryCLC.textContent = vals.clc || "Not selected";
 
-      if (summaryYear) summaryYear.textContent = schoolYear.value;
+      if (summaryYear) summaryYear.textContent = vals.year || "Not selected";
 
-      if (summaryLevel) summaryLevel.textContent = learningLevel.value || "—";
+      if (summaryLevel) summaryLevel.textContent = vals.level || "Not selected";
+
+      document.querySelectorAll("[data-summary-row]").forEach((row) => {
+        row.classList.toggle("is-set", Boolean(vals[row.dataset.summaryRow]));
+      });
+
+      const ready = Boolean(
+        vals.municipality && vals.clc && vals.level && vals.year,
+      );
+
+      const statusBox = document.querySelector("[data-summary-status]");
+
+      if (statusBox) {
+        statusBox.classList.toggle("is-ready", ready);
+        statusBox.classList.toggle("is-wait", !ready);
+        statusBox.innerHTML = ready
+          ? '<span class="material-symbols-outlined">check_circle</span>Status: Ready for learner import'
+          : '<span class="material-symbols-outlined">pending</span>Status: Complete all fields to continue';
+      }
+
+      if (nextBtn) nextBtn.disabled = !ready;
     }
 
     [clc, schoolYear, learningLevel].forEach((element) => {
@@ -220,10 +249,8 @@ class SetupWizard {
 
     refreshSummary();
 
-    const submitBtn = document.getElementById("nextBtn");
-
-    if (submitBtn) {
-      submitBtn.addEventListener(
+    if (nextBtn) {
+      nextBtn.addEventListener(
         "click",
 
         (event) => {
@@ -280,6 +307,15 @@ class SetupWizard {
     }
   }
 
+  // Steps 3 (Upload) and 4 (Preview) share their actual validate/import
+  // calls with the Class Management "Import Learners" feature via
+  // LearnerImportCore (assets/js/core/learner-import-core.js) -- one
+  // source for /learners/import* instead of two. Since the wizard is a
+  // separate page per step, the parsed preview (not the File object,
+  // which can't survive a navigation) is handed from step 3 to step 4
+  // through sessionStorage.
+  static IMPORT_PREVIEW_KEY = "setupImportPreview";
+
   static initWizard3() {
     const browseBtn = document.getElementById("browseBtn");
 
@@ -308,7 +344,7 @@ class SetupWizard {
         (event) => {
           event.preventDefault();
 
-          Utils.downloadLearnerImportTemplate();
+          LearnerImportCore.downloadTemplate();
 
           if (window.Toast) {
             Toast.success("Template downloaded.");
@@ -323,113 +359,55 @@ class SetupWizard {
 
     const uploadStatus = document.getElementById("uploadStatus");
 
+    const uploadStatusText = uploadStatus?.querySelector("[data-status-text]") || uploadStatus;
+
     const uploadProgress = document.getElementById("uploadProgress");
 
     let selectedFile = null;
 
-    browseBtn.addEventListener(
-      "click",
-
-      () => fileInput.click(),
-    );
-
-    dropZone.addEventListener(
-      "click",
-
-      () => fileInput.click(),
-    );
-
-    ["dragenter", "dragover"].forEach((event) => {
-      dropZone.addEventListener(
-        event,
-
-        (e) => {
-          e.preventDefault();
-
-          e.stopPropagation();
-
-          dropZone.classList.add("is-dragover");
-        },
-      );
-    });
-
-    ["dragleave", "drop"].forEach((event) => {
-      dropZone.addEventListener(
-        event,
-
-        (e) => {
-          e.preventDefault();
-
-          e.stopPropagation();
-
-          dropZone.classList.remove("is-dragover");
-        },
-      );
-    });
-
-    dropZone.addEventListener(
-      "drop",
-
-      (e) => {
-        if (e.dataTransfer.files.length === 0) return;
-
-        handleFile(e.dataTransfer.files[0]);
-      },
-    );
-
-    fileInput.addEventListener(
-      "change",
-
-      () => {
-        if (!fileInput.files.length) return;
-
-        handleFile(fileInput.files[0]);
-      },
-    );
-
     function handleFile(file) {
-      const extension = file.name
+      const validationError = LearnerImportCore.validateFile(file);
 
-        .split(".")
-
-        .pop()
-
-        .toLowerCase();
-
-      if (extension !== "csv" && extension !== "xlsx") {
-        Utils.toast(
-          "Only CSV or XLSX files are allowed.",
-
-          "warning",
-        );
-
-        return;
-      }
-
-      if (file.size > 5 * 1024 * 1024) {
-        Utils.toast(
-          "Maximum upload size is 5MB.",
-
-          "warning",
-        );
+      if (validationError) {
+        Utils.toast(validationError, "warning");
 
         return;
       }
 
       selectedFile = file;
 
-      uploadPreview.classList.remove("st-hidden");
+      uploadPreview.hidden = false;
 
       fileName.textContent = file.name;
 
-      fileSize.textContent = Utils.formatFileSize(file.size);
+      fileSize.textContent = LearnerImportCore.formatBytes(file.size);
 
-      uploadStatus.textContent = "Ready to import.";
+      importBtn.disabled = true;
 
-      uploadProgress.style.width = "0%";
+      if (uploadProgress) uploadProgress.style.width = "0%";
 
-      importBtn.disabled = false;
+      LearnerImportCore.animateProgress(
+        uploadProgress,
+
+        uploadStatusText,
+
+        "Ready to import.",
+
+        () => {
+          importBtn.disabled = false;
+        },
+      );
     }
+
+    LearnerImportCore.bindDropzone({
+      zone: dropZone,
+
+      input: fileInput,
+
+      browseBtn,
+
+      onFile: handleFile,
+    });
 
     importBtn.addEventListener(
       "click",
@@ -441,41 +419,21 @@ class SetupWizard {
 
         browseBtn.disabled = true;
 
-        uploadStatus.textContent = "Uploading learner records...";
-
-        uploadProgress.style.width = "20%";
-
         try {
-          await API.importLearners(
-            selectedFile,
+          const preview = await LearnerImportCore.preview(selectedFile);
 
-            (progress) => {
-              uploadProgress.style.width = `${progress}%`;
-            },
+          sessionStorage.setItem(
+            SetupWizard.IMPORT_PREVIEW_KEY,
+
+            JSON.stringify(preview),
           );
 
-          uploadProgress.style.width = "100%";
-
-          uploadStatus.textContent = "Learners imported successfully.";
-
-          Utils.toast(
-            "Import completed.",
-
-            "success",
-          );
-
-          setTimeout(() => {
-            Router.go("/setup/wizard-4");
-          }, 700);
+          Router.go("/setup/wizard-4");
         } catch (error) {
           console.error(error);
 
-          uploadStatus.textContent = "Import failed.";
-
-          uploadProgress.style.width = "0%";
-
           Utils.toast(
-            "Unable to import learners.",
+            error?.message || "Unable to validate the file. Please try again.",
 
             "error",
           );
@@ -492,6 +450,8 @@ class SetupWizard {
         "click",
 
         async () => {
+          sessionStorage.removeItem(SetupWizard.IMPORT_PREVIEW_KEY);
+
           await SetupWizard.completeSetup();
 
           Router.go("/dashboard");
@@ -523,111 +483,83 @@ class SetupWizard {
 
     const statInvalid = document.getElementById("statInvalid");
 
+    const previewCount = document.querySelector("[data-preview-count]");
+
     const finishBtn = document.getElementById("finishBtn");
 
     const reuploadBtn = document.getElementById("reuploadBtn");
 
-    const backBtn = document.getElementById("backBtn");
+    const raw = sessionStorage.getItem(SetupWizard.IMPORT_PREVIEW_KEY);
+
+    if (!raw) {
+      // No parsed file in this tab (direct link, or a refresh lost the
+      // sessionStorage entry) -- there's nothing to preview, so send the
+      // teacher back to pick a file again rather than show an empty table.
+      Router.go("/setup/wizard-3");
+
+      return;
+    }
+
+    let preview;
 
     try {
-      const result = await API.getImportedLearners();
-
-      statTotal.textContent = result.total;
-
-      statImported.textContent = result.imported;
-
-      statDuplicates.textContent = result.duplicates;
-
-      statInvalid.textContent = result.invalid;
-
-      learnerTable.innerHTML = "";
-
-      (result.learners || []).forEach((learner) => {
-        learnerTable.insertAdjacentHTML(
-          "beforeend",
-
-          `
-<tr>
-
-<td class="px-4 py-3">
-
-${learner.lrn}
-
-</td>
-
-<td class="px-4 py-3">
-
-${learner.last_name || ""}
-
-</td>
-
-<td class="px-4 py-3">
-
-${learner.first_name || ""}
-
-</td>
-
-<td class="px-4 py-3">
-
-${learner.sex || ""}
-
-</td>
-
-<td class="px-4 py-3">
-
-${learner.level}
-
-</td>
-
-<td class="px-4 py-3">
-
-<span
-class="inline-flex
-items-center
-rounded-full
-bg-green-100
-text-green-700
-px-3
-py-1
-text-xs
-font-semibold">
-
-Imported
-
-</span>
-
-</td>
-
-</tr>
-
-`,
-        );
-      });
+      preview = JSON.parse(raw);
     } catch (error) {
-      console.error(error);
+      console.error("[SetupWizard] Unable to parse stored import preview", error);
 
-      Utils.toast(
-        "Unable to load imported learners.",
+      Router.go("/setup/wizard-3");
 
-        "error",
-      );
+      return;
     }
 
-    if (backBtn) {
-      backBtn.addEventListener(
-        "click",
+    const rows = preview.rows || [];
 
-        () => {
-          Router.go("/setup/wizard-3");
-        },
-      );
+    const stats = LearnerImportCore.stats(preview);
+
+    statTotal.textContent = stats.total;
+
+    statImported.textContent = stats.valid;
+
+    statDuplicates.textContent = stats.duplicates;
+
+    statInvalid.textContent = stats.invalid;
+
+    if (previewCount) {
+      previewCount.textContent = `Showing ${rows.length} of ${stats.total} row${stats.total === 1 ? "" : "s"}`;
     }
+
+    const PILL = {
+      valid: ["ok", "Valid"],
+      duplicate: ["warn", "Duplicate"],
+      error: ["err", "Invalid"],
+    };
+
+    learnerTable.innerHTML = rows.length
+      ? rows
+          .map((row) => {
+            const [cls, label] = PILL[row.status] || PILL.valid;
+
+            return `
+              <tr>
+                <td class="lrn">${LearnerImportCore.cell(row.lrn)}</td>
+                <td><b>${LearnerImportCore.cell(row.last_name)}</b></td>
+                <td>${LearnerImportCore.cell(row.first_name)}</td>
+                <td>${LearnerImportCore.titleCase(row.sex)}</td>
+                <td>${LearnerImportCore.cell(row.level)}</td>
+                <td><span class="setup-pill setup-pill--${cls}">${label}</span></td>
+              </tr>
+            `;
+          })
+          .join("")
+      : `<tr><td colspan="6" class="setup-preview-empty-cell">No rows to preview.</td></tr>`;
 
     if (reuploadBtn) {
       reuploadBtn.addEventListener(
         "click",
 
         () => {
+          sessionStorage.removeItem(SetupWizard.IMPORT_PREVIEW_KEY);
+
           Router.go("/setup/wizard-3");
         },
       );
@@ -637,8 +569,28 @@ Imported
       finishBtn.addEventListener(
         "click",
 
-        () => {
-          Router.go("/setup/wizard-5");
+        async () => {
+          const originalHtml = finishBtn.innerHTML;
+
+          finishBtn.disabled = true;
+
+          finishBtn.innerHTML = `<span class="material-symbols-outlined">progress_activity</span> Importing…`;
+
+          try {
+            await LearnerImportCore.confirm(rows, null);
+
+            sessionStorage.removeItem(SetupWizard.IMPORT_PREVIEW_KEY);
+
+            Router.go("/setup/wizard-5");
+          } catch (error) {
+            console.error(error);
+
+            Utils.toast("Import failed. Please try again.", "error");
+
+            finishBtn.disabled = false;
+
+            finishBtn.innerHTML = originalHtml;
+          }
         },
       );
     }
@@ -713,8 +665,8 @@ Imported
       },
     );
 
-    // The success icon (#successIcon / .setup-complete-icon) already gets
-    // a pop-in entrance via its own CSS "animation: setup-pop ..." rule
+    // The success icon (#successIcon / .setup-success-icon) already gets
+    // a pop-in entrance via its own CSS "animation: setup-check ..." rule
     // (setup.css) -- no JS-triggered class needed here.
   }
 }
