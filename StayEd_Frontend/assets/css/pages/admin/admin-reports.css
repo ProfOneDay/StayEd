@@ -29,8 +29,14 @@ body.st-admin[data-page="Reports"] .st-adm-card-sub{margin:3px 0 0;font-size:.84
 /* Count badge on "Reports from Teachers" */
 body.st-admin[data-page="Reports"] .st-adm-count-badge{display:inline-flex;align-items:center;margin-left:8px;padding:2px 9px;border-radius:999px;background:#fef3e4;color:#8f5200;font-family:var(--st-font-body,Inter);font-size:.75rem;font-weight:700;vertical-align:3px}
 
-/* Toolbar shared with admin-list-pages' .st-adm-toolbar; just widen it
-   to this page's usual search/select proportions. */
+/* Toolbar shared with admin-list-pages' .st-adm-toolbar -- that file's own
+   base .st-adm-toolbar rule (display/gap/padding) is scoped to
+   [data-page="User Management"]/[data-page="CLC Management"] only, so it
+   never actually reached this page; the search/select wrapped onto their
+   own line only by the browser's default inline flow, with no real gap or
+   padding, which is what made this row look cramped. Defined here in full
+   instead of just widening the children. */
+body.st-admin[data-page="Reports"] .st-adm-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:0 20px 16px}
 body.st-admin[data-page="Reports"] .st-adm-toolbar .st-select{width:220px;flex:none}
 body.st-admin[data-page="Reports"] .st-adm-toolbar .st-search{flex:1 1 280px;max-width:420px}
 
@@ -100,7 +106,7 @@ body.st-admin[data-page="Reports"] .st-adm-report-actions{display:flex;align-ite
 body.st-admin[data-page="Reports"] .st-report-preview-count{display:flex;align-items:center;gap:8px;margin:0;font-size:.844rem;color:var(--st-ink-muted,#5a6275)}
 body.st-admin[data-page="Reports"] .st-report-preview-count b{color:var(--st-primary);font-family:var(--st-font-heading);font-size:1rem}
 body.st-admin[data-page="Reports"] .st-report-preview-count .material-symbols-outlined{font-size:18px;color:var(--st-ink-faint,#8a91a0)}
-body.st-admin[data-page="Reports"] .st-adm-count-line{padding:0 20px 10px}
+body.st-admin[data-page="Reports"] .st-adm-count-line{padding:0 20px 14px}
 
 /* Search clear (x) button -- the input itself reuses the shared .st-search
    component; this just adds the inline clear control. */
