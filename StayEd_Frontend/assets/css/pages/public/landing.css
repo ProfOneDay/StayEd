@@ -779,3 +779,44 @@
     max-width: 100%;
   }
 }
+
+/* ==========================================================================
+   Public legal pages (pages/public/*) -- Privacy Policy, Terms of Service,
+   Contact Us for visitors who are not signed in. Reuses the landing nav
+   and the app's .st-legal content styles.
+   ========================================================================== */
+.st-public {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--st-font-body);
+  color: var(--st-on-surface);
+  background: var(--st-surface);
+}
+
+.st-public .st-landing-nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.st-public-content {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.st-public-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+}
+
+.st-public-back .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.st-public .st-footer-right {
+  flex-wrap: wrap;
+}
