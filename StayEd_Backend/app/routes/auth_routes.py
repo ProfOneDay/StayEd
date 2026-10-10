@@ -44,6 +44,12 @@ def _safe_user(row):
         # admins have no teacher row, so this is None -- treat that as "nothing
         # to complete" rather than "not completed".
         "setup_completed": True if row.get("setup_completed") is None else bool(row["setup_completed"]),
+        # Only meaningful for admins (see sql/36_admin_permissions.sql); a
+        # teacher row has none of these, so they're always falsy/None for one.
+        "isSuperAdmin": bool(row.get("is_super_admin")),
+        "canManageClcs": bool(row.get("can_manage_clcs")),
+        "canManageUsers": bool(row.get("can_manage_users")),
+        "adminTitle": row.get("admin_title") or "",
     }
 
 
@@ -63,6 +69,7 @@ def _user_by_email(email: str):
         f"""
         SELECT
             u.user_id, u.username, u.password_hash, u.email, u.role, u.account_status, u.avatar,
+            u.is_super_admin, u.can_manage_clcs, u.can_manage_users, u.admin_title,
             t.teacher_id, t.middle_name, t.municipality, t.employee_id, t.created_at, t.setup_completed,
             COALESCE(t.first_name, u.first_name) AS first_name,
             COALESCE(t.last_name, u.last_name) AS last_name,
@@ -92,7 +99,12 @@ def login():
 
     token = create_access_token(
         identity=str(user["user_id"]),
-        additional_claims={"role": str(user["role"]).lower()},
+        additional_claims={
+            "role": str(user["role"]).lower(),
+            "is_super_admin": bool(user.get("is_super_admin")),
+            "can_manage_clcs": bool(user.get("can_manage_clcs")),
+            "can_manage_users": bool(user.get("can_manage_users")),
+        },
     )
     return {"token": token, "user": _safe_user(user)}
 
@@ -112,6 +124,7 @@ def me():
         f"""
         SELECT
             u.user_id, u.username, u.email, u.role, u.account_status, u.avatar,
+            u.is_super_admin, u.can_manage_clcs, u.can_manage_users, u.admin_title,
             t.middle_name, t.municipality, t.employee_id, t.created_at, t.setup_completed,
             COALESCE(t.first_name, u.first_name) AS first_name,
             COALESCE(t.last_name, u.last_name) AS last_name,

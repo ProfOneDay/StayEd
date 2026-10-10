@@ -362,6 +362,22 @@ class Auth {
 
     return user?.municipality || "";
   }
+
+  static isSuperAdmin() {
+    return Boolean(this.user()?.isSuperAdmin);
+  }
+
+  static canManageClcs() {
+    const user = this.user();
+
+    return Boolean(user?.isSuperAdmin || user?.canManageClcs);
+  }
+
+  static canManageUsers() {
+    const user = this.user();
+
+    return Boolean(user?.isSuperAdmin || user?.canManageUsers);
+  }
 }
 
 window.Auth = Auth;

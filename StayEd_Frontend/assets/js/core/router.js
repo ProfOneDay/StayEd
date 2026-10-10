@@ -150,6 +150,10 @@ class Router {
       { label: "Dashboard", href: "dashboard.html" },
       { label: "System Settings" },
     ],
+    "admin/manage-admins.html": [
+      { label: "Dashboard", href: "dashboard.html" },
+      { label: "Manage Admins" },
+    ],
   };
 
   static breadcrumbFor(filename, fallbackTitle, sectionKey) {

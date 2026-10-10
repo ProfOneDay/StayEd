@@ -3082,7 +3082,17 @@ _LOOKUP_RATE_WINDOW_SECONDS = 10 * 60
 
 def _lookup_rate_limited(ip: str) -> bool:
     now = time.time()
-    attempts = [t for t in _LOOKUP_ATTEMPTS.get(ip, []) if now - t < _LOOKUP_RATE_WINDOW_SECONDS]
+    cutoff = now - _LOOKUP_RATE_WINDOW_SECONDS
+
+    # Opportunistic cleanup: an IP that only ever makes one attempt and never
+    # comes back would otherwise sit in this dict forever, since nothing else
+    # ever re-visits its entry to age it out. Sweeping the whole dict here
+    # bounds its size to "IPs active within the last window" instead of
+    # "every IP that has ever attempted a lookup".
+    for key in [k for k, times in _LOOKUP_ATTEMPTS.items() if all(t < cutoff for t in times)]:
+        del _LOOKUP_ATTEMPTS[key]
+
+    attempts = [t for t in _LOOKUP_ATTEMPTS.get(ip, []) if t >= cutoff]
     attempts.append(now)
     _LOOKUP_ATTEMPTS[ip] = attempts
     return len(attempts) > _LOOKUP_RATE_LIMIT

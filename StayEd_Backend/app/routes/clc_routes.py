@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from flask import Blueprint, request
 
-from ..authz import current_user_id, role_required, teacher_for_user
+from ..authz import admin_permission_required, current_user_id, role_required, teacher_for_user
 from ..db import execute, fetch_all, fetch_one, get_db
 from ..helpers import enum_level, error, title_enum
 from ..services.learner_service import _latest_risk_join_sql
@@ -487,6 +487,7 @@ def _admin_clc_row(row):
 
 @bp.get("/admin/clcs")
 @role_required("admin")
+@admin_permission_required("can_manage_clcs")
 def admin_list_clcs():
     rows = fetch_all(
         """
@@ -516,6 +517,7 @@ def admin_list_clcs():
 
 @bp.post("/admin/clcs")
 @role_required("admin")
+@admin_permission_required("can_manage_clcs")
 def admin_create_clc():
     data = request.get_json(silent=True) or {}
     name = str(data.get("name") or "").strip()
@@ -540,6 +542,7 @@ def admin_create_clc():
 
 @bp.put("/admin/clcs/<int:clc_id>")
 @role_required("admin")
+@admin_permission_required("can_manage_clcs")
 def admin_update_clc(clc_id: int):
     existing = fetch_one("SELECT * FROM clc WHERE clc_id = %s", (clc_id,))
     if not existing:
@@ -563,6 +566,7 @@ def admin_update_clc(clc_id: int):
 
 @bp.post("/admin/clcs/<int:clc_id>/archive")
 @role_required("admin")
+@admin_permission_required("can_manage_clcs")
 def admin_archive_clc(clc_id: int):
     existing = fetch_one("SELECT clc_id FROM clc WHERE clc_id = %s", (clc_id,))
     if not existing:
@@ -580,6 +584,7 @@ def admin_archive_clc(clc_id: int):
 
 @bp.post("/admin/clcs/<int:clc_id>/restore")
 @role_required("admin")
+@admin_permission_required("can_manage_clcs")
 def admin_restore_clc(clc_id: int):
     existing = fetch_one("SELECT clc_id FROM clc WHERE clc_id = %s", (clc_id,))
     if not existing:
@@ -594,6 +599,7 @@ def admin_restore_clc(clc_id: int):
 
 @bp.put("/admin/clcs/<int:clc_id>/teachers")
 @role_required("admin")
+@admin_permission_required("can_manage_clcs")
 def admin_assign_clc_teachers(clc_id: int):
     existing = fetch_one("SELECT clc_id FROM clc WHERE clc_id = %s", (clc_id,))
     if not existing:

@@ -4,9 +4,10 @@ import re
 import secrets
 
 from flask import Blueprint, request
+from flask_jwt_extended import get_jwt
 from werkzeug.security import generate_password_hash
 
-from ..authz import current_user_id, role_required
+from ..authz import admin_permission_required, current_user_id, role_required, super_admin_required
 from ..db import execute, fetch_all, fetch_one, get_db
 from ..helpers import error, is_deped_email, split_name
 from ..services.mailer import send_email
@@ -93,6 +94,7 @@ def _generate_temp_password() -> str:
 
 @bp.get("/admin/users")
 @role_required("admin")
+@admin_permission_required("can_manage_users")
 def list_users():
     rows = fetch_all(
         """
@@ -118,6 +120,7 @@ def list_users():
 
 @bp.get("/admin/users/pending")
 @role_required("admin")
+@admin_permission_required("can_manage_users")
 def pending_users():
     rows = fetch_all(
         """
@@ -158,6 +161,7 @@ def pending_users():
 
 @bp.post("/admin/users/<int:user_id>/approve")
 @role_required("admin")
+@admin_permission_required("can_manage_users")
 def approve_user(user_id: int):
     data = request.get_json(silent=True) or {}
     employee_id = str(data.get("employee_id") or "").strip()
@@ -250,6 +254,7 @@ def approve_user(user_id: int):
 
 @bp.post("/admin/users/<int:user_id>/suspend")
 @role_required("admin")
+@admin_permission_required("can_manage_users")
 def suspend_user(user_id: int):
     row = fetch_one(
         "SELECT user_id FROM users WHERE user_id=%s AND role='TEACHER'",
@@ -278,6 +283,7 @@ def suspend_user(user_id: int):
 
 @bp.delete("/admin/users/<int:user_id>")
 @role_required("admin")
+@admin_permission_required("can_manage_users")
 def delete_deactivated_user(user_id: int):
     row = fetch_one(
         """
@@ -308,6 +314,7 @@ def delete_deactivated_user(user_id: int):
 
 @bp.post("/admin/users/<int:user_id>/reject")
 @role_required("admin")
+@admin_permission_required("can_manage_users")
 def reject_user(user_id: int):
     data = request.get_json(silent=True) or {}
     reason = str(data.get("reason") or "").strip()
@@ -372,6 +379,7 @@ def reject_user(user_id: int):
 
 @bp.put("/admin/users/<int:user_id>")
 @role_required("admin")
+@admin_permission_required("can_manage_users")
 def update_user(user_id: int):
     existing = fetch_one(
         """
@@ -463,6 +471,7 @@ def update_user(user_id: int):
 
 @bp.post("/admin/users/<int:user_id>/reset-password")
 @role_required("admin")
+@admin_permission_required("can_manage_users")
 def reset_user_password(user_id: int):
     row = fetch_one(
         "SELECT user_id FROM users WHERE user_id=%s AND role='TEACHER'",
@@ -481,6 +490,7 @@ def reset_user_password(user_id: int):
 
 @bp.post("/admin/users")
 @role_required("admin")
+@admin_permission_required("can_manage_users")
 def create_user():
     data = request.get_json(silent=True) or {}
     first_name = str(data.get("firstName") or "").strip()
@@ -495,6 +505,12 @@ def create_user():
     account_role = str(data.get("role") or "teacher").strip().lower()
     if account_role not in {"teacher", "admin"}:
         return error("Role must be either 'teacher' or 'admin'.", 422)
+
+    # Creating a new admin account hands out admin power, which is reserved
+    # for a super admin -- can_manage_users (checked above) only covers the
+    # ordinary teacher-account case this same endpoint also handles.
+    if account_role == "admin" and not get_jwt().get("is_super_admin"):
+        return error("Only a super admin can create new admin accounts.", 403)
 
     middle_name = str(data.get("middleName") or "").strip() or None
     contact_number = str(data.get("phone") or "").strip() or None
@@ -601,6 +617,91 @@ def create_user():
         "data": _load_admin_user(user_id),
         "temp_password": temp_password,
     }, 201
+
+
+# ---------------------------------------------------------------------------
+# Super admin: assigning other admins' scoped permissions/title. Reserved
+# for is_super_admin accounts (see sql/36_admin_permissions.sql) -- a
+# regular admin, even one with both can_manage_clcs and can_manage_users,
+# cannot reach these.
+# ---------------------------------------------------------------------------
+
+def _shape_admin_row(row: dict) -> dict:
+    return {
+        "id": row["user_id"],
+        "name": f"{row.get('first_name') or ''} {row.get('last_name') or ''}".strip() or row.get("username"),
+        "email": row.get("email") or "",
+        "status": row.get("account_status"),
+        "isSuperAdmin": bool(row.get("is_super_admin")),
+        "canManageClcs": bool(row.get("can_manage_clcs")),
+        "canManageUsers": bool(row.get("can_manage_users")),
+        "adminTitle": row.get("admin_title") or "",
+    }
+
+
+@bp.get("/admin/admins")
+@super_admin_required
+def list_admins():
+    rows = fetch_all(
+        """
+        SELECT user_id, username, first_name, last_name, email, account_status,
+               is_super_admin, can_manage_clcs, can_manage_users, admin_title
+        FROM users
+        WHERE role = 'ADMIN'
+        ORDER BY is_super_admin DESC, last_name NULLS LAST, first_name NULLS LAST
+        """
+    )
+    return {"data": [_shape_admin_row(r) for r in rows]}
+
+
+@bp.put("/admin/admins/<int:user_id>/permissions")
+@super_admin_required
+def update_admin_permissions(user_id: int):
+    existing = fetch_one(
+        "SELECT user_id, is_super_admin FROM users WHERE user_id = %s AND role = 'ADMIN'",
+        (user_id,),
+    )
+    if not existing:
+        return error("Admin account not found.", 404)
+
+    data = request.get_json(silent=True) or {}
+    can_manage_clcs = bool(data.get("canManageClcs"))
+    can_manage_users = bool(data.get("canManageUsers"))
+    is_super_admin = bool(data.get("isSuperAdmin"))
+    admin_title = str(data.get("adminTitle") or "").strip() or None
+
+    # Never let the last super admin demote themselves (or be demoted) --
+    # that would permanently lock everyone out of this very screen, with no
+    # way back in except editing the database directly. Same guard shape as
+    # deactivate_self()'s "last active admin" check above.
+    if existing["is_super_admin"] and not is_super_admin:
+        other_super_admins = fetch_one(
+            "SELECT COUNT(*) AS n FROM users WHERE role='ADMIN' AND is_super_admin=TRUE AND user_id != %s",
+            (user_id,),
+        )["n"]
+        if other_super_admins == 0:
+            return error(
+                "This is the only super admin. Promote another admin to super admin before removing this one.",
+                409,
+            )
+
+    execute(
+        """
+        UPDATE users
+        SET can_manage_clcs = %s, can_manage_users = %s, is_super_admin = %s, admin_title = %s
+        WHERE user_id = %s
+        """,
+        (can_manage_clcs, can_manage_users, is_super_admin, admin_title, user_id),
+    )
+    updated = fetch_one(
+        """
+        SELECT user_id, username, first_name, last_name, email, account_status,
+               is_super_admin, can_manage_clcs, can_manage_users, admin_title
+        FROM users WHERE user_id = %s
+        """,
+        (user_id,),
+    )
+    return {"message": "Admin permissions updated.", "data": _shape_admin_row(updated)}
 
 
 @bp.put("/admin/profile")

@@ -58,6 +58,18 @@
     width:24px;
 }
 
+/* Added for Manage Admins' Super-Admin lock (the two scoped permission
+   toggles disable themselves once Super Admin is on, since it already
+   implies both) -- the first state this shared component has ever needed
+   to show as non-interactive, so there was no :disabled rule yet. */
+.st-toggle:has(input:disabled){
+    cursor:not-allowed;
+}
+
+.st-toggle input:disabled + .st-toggle-track{
+    opacity:.5;
+}
+
 .st-toggle-row{
     display:flex;
     align-items:center;

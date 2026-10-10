@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from flask import Flask, jsonify
 from werkzeug.exceptions import HTTPException
+from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from psycopg import errors as pg_errors
@@ -15,6 +16,18 @@ jwt = JWTManager()
 def create_app(config_object=Config):
     app = Flask(__name__)
     app.config.from_object(config_object)
+
+    trusted_proxy_count = app.config.get("TRUSTED_PROXY_COUNT", 0)
+    if trusted_proxy_count:
+        # Unwraps exactly that many hops of X-Forwarded-For/-Proto so
+        # request.remote_addr (used by e.g. the public student-lookup rate
+        # limiter) is the real visitor IP, not the proxy's. Only applied
+        # when actually deployed behind that many trusted proxies -- see
+        # TRUSTED_PROXY_COUNT's docstring in config.py for why this isn't
+        # unconditional.
+        app.wsgi_app = ProxyFix(
+            app.wsgi_app, x_for=trusted_proxy_count, x_proto=trusted_proxy_count
+        )
 
     CORS(
         app,
