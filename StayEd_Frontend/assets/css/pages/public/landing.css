@@ -802,7 +802,7 @@
 
 .st-public-content {
   width: 100%;
-  max-width: 960px;
+  max-width: var(--st-container-max);
   margin: 0 auto;
 }
 

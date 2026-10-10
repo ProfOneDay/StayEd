@@ -409,13 +409,13 @@ class LearnerRecordsHub {
 
     return `
             <td data-col="learner">
-                <div class="st-learner-cell">
+                <button type="button" class="st-qv-trigger st-learner-cell" data-learner-preview="${l.id}" aria-haspopup="dialog" aria-label="Preview ${this.formatDisplayName(l)}'s profile">
                     <span class="st-avatar-initials${avatarCls}">${initials}</span>
-                    <div style="min-width:0">
-                        <button type="button" class="st-learner-name" tabindex="-1">${this.formatDisplayName(l)}</button>
+                    <span style="min-width:0">
+                        <span class="st-learner-name">${this.formatDisplayName(l)}</span>
                         <p class="st-learner-id">LRN <span class="num">${l.lrn}</span></p>
-                    </div>
-                </div>
+                    </span>
+                </button>
             </td>
             <td data-col="modules">${this.modulesCell(l)}</td>
             <td data-col="activity">${this.activityCell(l)}</td>

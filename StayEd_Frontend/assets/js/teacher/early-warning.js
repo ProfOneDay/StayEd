@@ -317,13 +317,13 @@ class EarlyWarningPage {
     return `
             <tr style="--i:${i}">
                 <td data-col="learner">
-                    <div class="st-learner-cell">
+                    <button type="button" class="st-qv-trigger st-learner-cell" data-learner-preview="${l.id}" aria-haspopup="dialog" aria-label="Preview ${l.name}'s profile">
                         <span class="st-avatar-initials${avatarCls}">${initials}</span>
-                        <div style="min-width:0">
-                            <button type="button" class="st-learner-name" data-open-profile="${l.id}">${l.name}</button>
+                        <span style="min-width:0">
+                            <span class="st-learner-name">${l.name}</span>
                             <p class="st-learner-id">LRN <span class="num">${l.lrn}</span></p>
-                        </div>
-                    </div>
+                        </span>
+                    </button>
                 </td>
                 <td data-col="level">${l.program || "—"}</td>
                 <td data-col="clc">${l.clc || "—"}</td>

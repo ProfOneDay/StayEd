@@ -827,7 +827,7 @@ class ModuleManagement {
     return `
       <tr style="--i:${i}" class="${checked ? "is-selected" : ""}">
         <td class="checkbox-col" data-col="select">${stage === "Not Released" ? `<input type="checkbox" data-select-learner="${r.enrollmentId}" ${checked}>` : ""}</td>
-        <td data-col="learner"><div class="st-learner-cell"><span class="st-avatar-initials">${this.initials(r.name)}</span><span class="st-module-title">${r.name}</span></div></td>
+        <td data-col="learner"><button type="button" class="st-qv-trigger st-learner-cell" data-learner-preview="${r.learnerId}" aria-haspopup="dialog" aria-label="Preview ${r.name}'s profile"><span class="st-avatar-initials">${this.initials(r.name)}</span><span class="st-module-title">${r.name}</span></button></td>
         <td data-col="modality">${this.modalityPill(r.modality)}</td>
         <td data-col="stage"><span class="st-badge st-badge-${badgeClass}">${stage === "Not Released" ? "Not released" : stage}</span></td>
         <td data-col="dates"><div class="st-date-cell"><span>Released ${releaseDateHtml}</span><span class="st-muted">Returned ${r.returnDate || "—"}</span></div></td>
