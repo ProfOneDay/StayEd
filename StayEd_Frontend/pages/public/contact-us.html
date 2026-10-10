@@ -33,13 +33,31 @@
       href="../../assets/img/brand/apple-touch-icon.png"
     />
   </head>
-  <body class="st-app" data-page="Contact Us">
-    <div data-component="layout/sidebar"></div>
+  <body class="st-public">
+    <header class="st-landing-nav">
+      <div class="st-landing-nav-inner">
+        <a href="../../index.html" class="st-landing-brand">
+          <span class="st-landing-brand-mark">
+            <img src="../../assets/img/brand/logo-dark.png" alt="" />
+          </span>
+          <span class="st-landing-brand-name">StayEd</span>
+        </a>
 
-    <div class="st-main">
-      <div data-component="layout/navbar"></div>
+        <div class="st-landing-nav-actions">
+          <nav class="st-landing-nav-links" aria-label="Legal">
+            <a href="privacy-policy.html">Privacy Policy</a>
+            <a href="terms-of-service.html">Terms of Service</a>
+            <a href="contact-us.html">Contact Us</a>
+          </nav>
+          <a href="../../index.html" class="st-btn st-btn-outline st-public-back">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Back to home
+          </a>
+        </div>
+      </div>
+    </header>
 
-      <main class="st-content">
+    <main class="st-content st-public-content">
         <div class="st-page-header">
           <div>
             <h1 class="st-page-header-title">Contact Us</h1>
@@ -52,7 +70,7 @@
             For assistance with your account, to report a problem, or to share
             feedback about StayEd, contact the Division support team through
             the channels below. For step-by-step guidance on using the system,
-            see <a href="help.html">Help &amp; User Manual</a>.
+            see the Help &amp; User Manual available after you sign in.
           </p>
 
           <div class="st-contact-grid">
@@ -91,25 +109,16 @@
         </section>
       </main>
 
-      <div data-component="layout/footer"></div>
-    </div>
-
-    <div data-component="layout/toast"></div>
-    <div data-component="layout/modal"></div>
-
-    <script src="../../assets/js/config.js"></script>
-    <script src="../../assets/js/core/utils.js"></script>
-    <script src="../../assets/js/core/router.js"></script>
-    <script src="../../assets/js/core/api.js"></script>
-    <script src="../../assets/js/core/auth.js"></script>
-    <script src="../../assets/js/core/guards.js"></script>
-    <script src="../../assets/js/core/layout.js"></script>
-    <script src="../../assets/js/core/app.js"></script>
-    <script src="../../assets/js/components/component-loader.js"></script>
-    <script src="../../assets/js/components/toast.js"></script>
-    <script src="../../assets/js/components/modal.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", () => Guards?.teacher?.());
-    </script>
+    <footer class="st-footer">
+      <div class="st-footer-left">
+        <span>&copy; 2026 Department of Education - Alternative Learning System</span>
+      </div>
+      <div class="st-footer-right">
+        <a href="privacy-policy.html">Privacy Policy</a>
+        <a href="terms-of-service.html">Terms of Service</a>
+        <a href="contact-us.html">Contact Us</a>
+        <span class="st-footer-version">Version 1.0</span>
+      </div>
+    </footer>
   </body>
 </html>
