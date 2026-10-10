@@ -631,14 +631,18 @@ class TeacherDashboard {
         .join("") || "?";
       const isModerate = learner.risk === "Moderate";
       return `
-        <button type="button" class="st-attention-row${isModerate ? " is-moderate" : ""}" data-attention-learner="${learner.id}">
-          <span class="st-attention-avatar">${initials}</span>
-          <span class="st-attention-person">
-            <strong>${esc(learner.name || "Learner")}</strong>
-            <small>${esc(learner.lrn || "No LRN")}</small>
-          </span>
-          <span class="st-attention-risk" title="Predicted dropout probability">${pct}% risk<span class="meter"><i style="--w:${pct}%"></i></span></span>
-        </button>
+        <div class="st-attention-row${isModerate ? " is-moderate" : ""}">
+          <button type="button" class="st-qv-trigger st-attention-trigger" data-learner-preview="${learner.id}" aria-haspopup="dialog" aria-label="Preview ${esc(learner.name || "this learner")}'s profile">
+            <span class="st-attention-avatar">${initials}</span>
+            <span class="st-attention-person">
+              <strong>${esc(learner.name || "Learner")}</strong>
+              <small>${esc(learner.lrn || "No LRN")}</small>
+            </span>
+          </button>
+          <button type="button" class="st-attention-risk-btn" data-attention-learner="${learner.id}" aria-label="View ${esc(learner.name || "this learner")}'s full profile">
+            <span class="st-attention-risk" title="Predicted dropout probability">${pct}% risk<span class="meter"><i style="--w:${pct}%"></i></span></span>
+          </button>
+        </div>
       `;
     }).join("");
 
@@ -856,14 +860,13 @@ class TeacherDashboard {
     return `
             <tr tabindex="0">
                 <td data-col="learner">
-                    <div class="st-learner-cell">
-                        <button type="button" class="st-avatar-initials st-avatar-initials${initialsTheme} st-avatar-btn"
-                            data-view-learner="${l.id}" aria-label="View ${l.name}'s profile">${initials}</button>
-                        <div>
-                            <button type="button" class="st-learner-name st-learner-name-link" data-view-learner="${l.id}">${l.name}</button>
+                    <button type="button" class="st-qv-trigger st-learner-cell" data-learner-preview="${l.id}" aria-haspopup="dialog" aria-label="Preview ${l.name}'s profile">
+                        <span class="st-avatar-initials st-avatar-initials${initialsTheme}">${initials}</span>
+                        <span>
+                            <span class="st-learner-name">${l.name}</span>
                             <p class="st-learner-id">LRN ${l.lrn}</p>
-                        </div>
-                    </div>
+                        </span>
+                    </button>
                 </td>
                 <td data-col="level">${l.level}</td>
                 <td data-col="modality">${this.modalityPill(l.modality)}</td>

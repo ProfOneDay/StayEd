@@ -212,6 +212,12 @@ body[data-page="System Settings"] .st-font-size-ticks span{
 body[data-page="System Settings"] .st-font-size-ticks span:first-child{ text-align:left; }
 body[data-page="System Settings"] .st-font-size-ticks span:last-child{ text-align:right; }
 
+/* No explicit font-size/font-family here used to mean this inherited
+   straight from body's own font-size (--st-font-size-body, 18px) instead
+   of the ~14px size the rest of the app's actual text runs at -- so the
+   "preview" didn't match what text anywhere else in the system actually
+   looks like. Pinned to the same size/family most body copy already uses
+   (.st-toggle-row-sub, .st-input, etc.) so it's a true preview. */
 body[data-page="System Settings"] .st-font-size-preview{
     margin-top:14px;
     padding:14px 16px;
@@ -219,6 +225,8 @@ body[data-page="System Settings"] .st-font-size-preview{
     border-radius:10px;
     background:#fbfcfd;
     color:var(--st-ink, var(--st-on-surface));
+    font-family:var(--st-font-body);
+    font-size:var(--st-font-size-label, 0.875rem);
 }
 
 /* ---------- Profile hint ---------- */

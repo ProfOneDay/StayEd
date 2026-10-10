@@ -45,9 +45,9 @@
 
         <div class="st-landing-nav-actions">
           <div class="st-landing-nav-links">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-            <a href="#">Contact Us</a>
+            <a href="pages/public/privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a>
+            <a href="pages/public/terms-of-service.html" target="_blank" rel="noopener">Terms of Service</a>
+            <a href="pages/public/contact-us.html" target="_blank" rel="noopener">Contact Us</a>
           </div>
           <button type="button" class="st-btn st-btn-outline" data-open-signup>
             Sign up
@@ -76,9 +76,9 @@
           Log in
         </button>
         <div class="st-landing-nav-links st-landing-nav-links--mobile">
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Service</a>
-          <a href="#">Contact Us</a>
+          <a href="pages/public/privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a>
+          <a href="pages/public/terms-of-service.html" target="_blank" rel="noopener">Terms of Service</a>
+          <a href="pages/public/contact-us.html" target="_blank" rel="noopener">Contact Us</a>
         </div>
       </div>
     </header>
@@ -359,8 +359,8 @@
                     <input type="checkbox" name="agree" required />
                     <span>
                       I confirm that I am an authorized ALS teacher and agree
-                      to the <a href="#">Privacy Policy</a> and
-                      <a href="#">Terms of Use</a>.
+                      to the <a href="pages/public/privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a> and
+                      <a href="pages/public/terms-of-service.html" target="_blank" rel="noopener">Terms of Use</a>.
                     </span>
                   </label>
 
@@ -431,6 +431,70 @@
                     you don't receive an email, check your spam folder or
                     contact your Division Administrator.
                   </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pending panel -- shown in place of a redirect to
+                 pages/auth/pending.html right after a successful signup
+                 (see landing.js bindSignupForm()). That page stays as an
+                 unlinked fallback, same as register.html/forgot-password.html
+                 for the login/signup/forgot panels. -->
+            <div class="st-landing-hero-pending" data-hero-panel>
+              <div class="st-landing-login-panel">
+                <button type="button" class="st-landing-login-back" data-close-panel>
+                  Close
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+
+                <div class="auth-pending-icon">
+                  <span class="material-symbols-outlined">hourglass_top</span>
+                </div>
+
+                <div class="auth-status-chip">
+                  <span>Pending review</span>
+                </div>
+
+                <div class="auth-header auth-header--center">
+                  <h2>Account Pending Approval</h2>
+                  <p>
+                    Thanks for registering. Your teacher account is now
+                    waiting for review by a Division Administrator. You'll
+                    receive an email as soon as it's approved.
+                  </p>
+                </div>
+
+                <div class="auth-steps">
+                  <div class="auth-step is-done" style="--i: 0">
+                    <span class="auth-step-num">1</span>
+                    <div class="auth-step-body">
+                      <h4>Registration received <span class="auth-step-tag">Done</span></h4>
+                      <p>Your details have been submitted successfully.</p>
+                    </div>
+                  </div>
+
+                  <div class="auth-step is-current" style="--i: 1">
+                    <span class="auth-step-num">2</span>
+                    <div class="auth-step-body">
+                      <h4>Administrator review <span class="auth-step-tag">In progress</span></h4>
+                      <p>A Division Administrator verifies your ALS teaching role.</p>
+                    </div>
+                  </div>
+
+                  <div class="auth-step" style="--i: 2">
+                    <span class="auth-step-num">3</span>
+                    <div class="auth-step-body">
+                      <h4>Access granted</h4>
+                      <p>Once approved, sign in to begin monitoring learners.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="auth-switch">
+                  <button type="button" class="auth-pending-back" data-open-login>
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    Back to Login
+                  </button>
                 </div>
               </div>
             </div>

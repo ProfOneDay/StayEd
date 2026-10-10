@@ -133,6 +133,13 @@
         <!-- STATE 2: Validation preview -->
         <div id="importPreviewSection" class="st-hidden">
           <div class="st-import-preview-summary">
+            <div class="st-import-stat-card st-import-stat-card--total">
+              <span class="material-symbols-outlined">table_rows</span>
+              <div class="st-import-stat-card-body">
+                <p class="st-import-stat-card-count"><span data-preview-total-count>0</span></p>
+                <p class="st-import-stat-card-label">Total Rows</p>
+              </div>
+            </div>
             <div class="st-import-stat-card st-import-stat-card--valid">
               <span class="material-symbols-outlined">check_circle</span>
               <div class="st-import-stat-card-body">
@@ -157,6 +164,10 @@
           </div>
 
           <div class="st-panel">
+            <div class="st-import-table-head">
+              <h3>Learner rows</h3>
+              <span data-preview-count>Showing 0 of 0 rows</span>
+            </div>
             <div class="st-table-scroll">
               <table class="st-data-table st-import-preview-table">
                 <thead>
@@ -220,44 +231,56 @@
 
           <div class="st-import-success-stats">
             <div class="st-import-success-stat">
-              <p
-                class="st-import-success-stat-value"
-                data-success-total
-                data-countup
-              >
-                0
-              </p>
-              <p class="st-import-success-stat-label">Total rows</p>
+              <span class="material-symbols-outlined">table_rows</span>
+              <div>
+                <p
+                  class="st-import-success-stat-value"
+                  data-success-total
+                  data-countup
+                >
+                  0
+                </p>
+                <p class="st-import-success-stat-label">Total rows</p>
+              </div>
             </div>
             <div class="st-import-success-stat st-import-success-stat--imported">
-              <p
-                class="st-import-success-stat-value"
-                data-success-imported
-                data-countup
-              >
-                0
-              </p>
-              <p class="st-import-success-stat-label">Imported</p>
+              <span class="material-symbols-outlined">check_circle</span>
+              <div>
+                <p
+                  class="st-import-success-stat-value"
+                  data-success-imported
+                  data-countup
+                >
+                  0
+                </p>
+                <p class="st-import-success-stat-label">Imported</p>
+              </div>
             </div>
             <div class="st-import-success-stat st-import-success-stat--duplicates">
-              <p
-                class="st-import-success-stat-value"
-                data-success-duplicates
-                data-countup
-              >
-                0
-              </p>
-              <p class="st-import-success-stat-label">Duplicates merged into class</p>
+              <span class="material-symbols-outlined">content_copy</span>
+              <div>
+                <p
+                  class="st-import-success-stat-value"
+                  data-success-duplicates
+                  data-countup
+                >
+                  0
+                </p>
+                <p class="st-import-success-stat-label">Duplicates merged into class</p>
+              </div>
             </div>
             <div class="st-import-success-stat st-import-success-stat--errors">
-              <p
-                class="st-import-success-stat-value"
-                data-success-errors
-                data-countup
-              >
-                0
-              </p>
-              <p class="st-import-success-stat-label">Errors skipped</p>
+              <span class="material-symbols-outlined">error</span>
+              <div>
+                <p
+                  class="st-import-success-stat-value"
+                  data-success-errors
+                  data-countup
+                >
+                  0
+                </p>
+                <p class="st-import-success-stat-label">Errors skipped</p>
+              </div>
             </div>
           </div>
 

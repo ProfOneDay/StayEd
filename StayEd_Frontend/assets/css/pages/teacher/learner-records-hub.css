@@ -313,12 +313,17 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     }
 }
 
+/* Matches the shared .st-segment filter-pill treatment (dashboard.css, e.g.
+   the "All/Basic Literacy/.../Senior High" learning-level filter) -- same
+   track background/padding/gap and active-pill shadow -- instead of this
+   page's own slightly-off lavender track and softer shadow. Button padding
+   stays larger than .st-segment's since these tabs carry an icon. */
 .st-modality-tabs{
     display:flex;
-    gap:4px;
-    padding:4px;
-    background:var(--st-surface-container-low);
-    border-radius:var(--st-radius-lg);
+    gap:2px;
+    padding:3px;
+    background:var(--st-background);
+    border-radius:var(--st-radius-control, var(--st-radius-lg));
     width:fit-content;
     margin-bottom:24px;
 }
@@ -332,21 +337,22 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     background:transparent;
     border-radius:var(--st-radius-md);
     font-size: var(--st-font-size-label);
-    font-weight:600;
-    color:var(--st-on-surface-variant);
+    font-weight:500;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
     cursor:pointer;
     transition:var(--st-transition);
     white-space:nowrap;
 }
 
 .st-modality-tab:hover{
-    color:var(--st-primary);
+    color:var(--st-on-surface);
 }
 
 .st-modality-tab.is-active{
     background:#fff;
     color:var(--st-primary);
-    box-shadow:var(--st-shadow-xs);
+    font-weight:600;
+    box-shadow:0 1px 2px rgba(17, 26, 54, 0.12);
 }
 
 .st-modality-tab .material-symbols-outlined{

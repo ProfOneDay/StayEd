@@ -590,6 +590,165 @@ body[data-page="Profile Settings"] [data-animate-cards].is-inview > *{
     font-size:12px;
 }
 
+/* ---------- Change Password modal (Modal.showCustom content, shared by
+   both Profile Settings pages via assets/js/core/profile-security.js --
+   unscoped like the modal itself, same as the avatar dialog above). ---------- */
+.st-cp-icon{
+    width:52px;
+    height:52px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    margin-bottom:12px;
+    background:var(--st-navy-soft, var(--st-primary-fixed));
+    color:var(--st-primary);
+}
+
+.st-cp-icon .material-symbols-outlined{
+    font-size:28px;
+}
+
+.st-cp-icon--success{
+    background:var(--st-success-light, #e3f4f3);
+    color:var(--st-secondary);
+}
+
+.st-cp-view-title{
+    margin:0 0 4px;
+    font-family:var(--st-font-heading);
+    font-weight:700;
+    font-size:1.25rem;
+    color:var(--st-primary);
+    letter-spacing:-.01em;
+}
+
+.st-cp-sub{
+    margin:0 0 18px;
+    font-size:0.875rem;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+.st-cp-password-wrap{
+    position:relative;
+}
+
+.st-cp-password-wrap input{
+    padding-right:42px!important;
+}
+
+.st-cp-eye{
+    position:absolute;
+    right:8px;
+    top:50%;
+    transform:translateY(-50%);
+    background:none;
+    border:none;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    cursor:pointer;
+    padding:5px;
+    display:flex;
+    border-radius:6px;
+}
+
+.st-cp-eye:hover{
+    color:var(--st-on-surface);
+    background:var(--st-background);
+}
+
+.st-cp-link{
+    appearance:none;
+    display:inline-block;
+    border:0;
+    background:none;
+    padding:0;
+    margin-top:-6px;
+    font:inherit;
+    font-size:0.8125rem;
+    font-weight:600;
+    color:var(--st-secondary);
+    cursor:pointer;
+}
+
+.st-cp-link:hover{
+    font-weight:700;
+}
+
+.st-cp-reqs{
+    list-style:none;
+    margin:14px 0 0;
+    padding:10px 12px;
+    border-radius:10px;
+    background:var(--st-background);
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px 12px;
+}
+
+.st-cp-reqs li{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:0.8125rem;
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+.st-cp-reqs li::before{
+    content:"radio_button_unchecked";
+    font-family:"Material Symbols Outlined";
+    font-size:16px;
+    color:#b3b8c2;
+}
+
+.st-cp-reqs li.is-met{
+    color:#00504e;
+}
+
+.st-cp-reqs li.is-met::before{
+    content:"check_circle";
+    color:var(--st-secondary);
+    font-variation-settings:"FILL" 1;
+}
+
+.st-cp-banner{
+    display:flex;
+    gap:8px;
+    padding:10px 12px;
+    border-radius:10px;
+    font-size:0.8125rem;
+    line-height:1.45;
+    margin:4px 0 6px;
+    background:var(--st-success-light, #e3f4f3);
+    color:#00504e;
+}
+
+.st-cp-actions{
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:20px;
+    padding-top:16px;
+    border-top:1px solid var(--st-line, var(--st-outline-variant));
+}
+
+.st-cp-actions--center{
+    justify-content:center;
+}
+
+@media (max-width:767px){
+    .st-cp-actions{
+        flex-direction:column-reverse;
+        align-items:stretch;
+    }
+    .st-cp-actions .st-btn{
+        width:100%;
+    }
+    .st-cp-reqs{
+        grid-template-columns:1fr;
+    }
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width:1023px){
     body[data-page="Profile Settings"] .st-profile-layout{

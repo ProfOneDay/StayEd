@@ -28,7 +28,9 @@
 .setup-topbar-inner {
   max-width: var(--st-container-max);
   margin: 0 auto;
-  height: 72px;
+  /* Matches .st-navbar's height (layout.css, the teacher/admin app
+     navbar) -- one nav height across the whole site. */
+  height: 64px;
   padding: 0 var(--st-margin-desktop);
   display: grid;
   grid-template-columns: 200px 1fr 200px;
@@ -176,6 +178,21 @@
   box-sizing: border-box;
 }
 
+/* Step 1 (Welcome) only: its single card is short and fixed-height, so it
+   centers vertically between the top bar and footer instead of sitting at
+   the top with a large empty gap below it. The other steps keep their
+   normal top-down flow since their content varies in length (forms,
+   tables) and would look odd re-centering as it grows. */
+.setup-main--center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.setup-main--center .setup-step {
+  width: 100%;
+}
+
 .setup-step {
   animation: setup-in 380ms var(--st-ease-out);
 }
@@ -213,18 +230,23 @@
   font-weight: 700;
 }
 
+/* Matches the app's canonical page h1 (.st-page-header-title in
+   layout.css): 30px Libre Franklin 800, near-black ink -- not this file's
+   own navy/display-size pairing, so onboarding headings read the same as
+   every other page's title (Dashboard, Learner Records, etc.). */
 .setup-heading h1 {
   margin: 12px 0 8px;
   font-family: var(--st-font-heading);
   font-weight: 800;
-  font-size: var(--st-font-size-display);
+  font-size: 1.875rem;
   letter-spacing: -0.02em;
-  color: var(--st-primary);
+  line-height: 1.15;
+  color: var(--st-on-surface);
 }
 
 .setup-heading p {
   margin: 0;
-  font-size: var(--st-font-size-small);
+  font-size: 0.9375rem;
   line-height: 1.6;
   color: var(--st-ink-muted, var(--st-on-surface-variant));
 }
@@ -326,7 +348,7 @@
 .setup-welcome-aside h2 {
   margin: 0;
   font-family: var(--st-font-heading);
-  font-weight: 800;
+  font-weight: 700;
   font-size: var(--st-font-size-body-lg);
 }
 
@@ -353,9 +375,10 @@
   margin: 0 0 12px;
   font-family: var(--st-font-heading);
   font-weight: 800;
-  font-size: var(--st-font-size-display);
+  font-size: 1.875rem;
   letter-spacing: -0.02em;
-  color: var(--st-primary);
+  line-height: 1.15;
+  color: var(--st-on-surface);
 }
 
 .setup-welcome-body > p {
@@ -397,7 +420,10 @@
   border-radius: 10px;
   display: grid;
   place-items: center;
-  background: var(--st-secondary-container, #e3f4f3);
+  /* --st-secondary-container is a vivid #8df0ee turquoise -- the token is
+     defined, so the softer #e3f4f3 fallback after it never actually
+     applies. Used literally instead. */
+  background: #e3f4f3;
   color: var(--st-secondary);
 }
 
@@ -463,6 +489,16 @@
   grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr);
   gap: 20px;
   align-items: start;
+}
+
+/* Groups the Class Details card with the note below it into one grid cell,
+   so the note sits snug under the card instead of being pushed down by
+   whatever height the Class Summary card on the right happens to be
+   (which it would be as a separate 3rd grid item, since the implicit grid
+   row it'd fall into is sized by the tallest item sharing that row). */
+.setup-class-left {
+  display: flex;
+  flex-direction: column;
 }
 
 .setup-form-card {
@@ -562,6 +598,27 @@
   color: var(--st-ink-faint, var(--st-outline));
 }
 
+.setup-admin-assigned-note {
+  align-items: flex-start;
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--st-navy-soft, var(--st-primary-fixed));
+  color: var(--st-primary);
+  font-size: var(--st-font-size-caption);
+  line-height: 1.5;
+}
+
+.setup-admin-assigned-note:not([hidden]) {
+  display: flex;
+}
+
+.setup-admin-assigned-note .material-symbols-outlined {
+  flex: none;
+  font-size: 18px;
+}
+
 .setup-summary-card {
   position: sticky;
   top: 96px;
@@ -598,25 +655,38 @@
   place-items: center;
   background: var(--st-background);
   color: var(--st-ink-faint, var(--st-outline));
-  font-size: 19px;
+  font-size: 20px;
   transition: background-color 300ms, color 300ms;
 }
 
 .setup-summary-row.is-set .material-symbols-outlined {
-  background: var(--st-secondary-container, #e3f4f3);
+  background: #e3f4f3;
   color: var(--st-secondary);
+}
+
+/* min-width:0 on the text wrapper is needed for the ellipsis below to
+   actually apply -- a flex item defaults to min-width:auto (content's own
+   size), which blocks shrinking/truncation without it. */
+.setup-summary-row > div {
+  min-width: 0;
 }
 
 .setup-summary-row small {
   display: block;
   font-size: var(--st-font-size-caption);
   color: var(--st-ink-faint, var(--st-outline));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .setup-summary-row b {
   display: block;
   font-size: var(--st-font-size-small);
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .setup-summary-row:not(.is-set) b {
@@ -640,12 +710,12 @@
 }
 
 .setup-summary-status.is-ready {
-  background: var(--st-secondary-container, #e3f4f3);
+  background: #e3f4f3;
   color: #00504e;
 }
 
 .setup-summary-status .material-symbols-outlined {
-  font-size: 18px;
+  font-size: 17px;
 }
 
 /* ---------- Step 3: Upload ---------- */
@@ -653,6 +723,12 @@
   padding: 24px;
 }
 
+/* Colors here deliberately match Class Management's "Import Learners"
+   dropzone (body[data-page="Import Learners"] .st-upload-zone in
+   data-upload.css) pixel-for-pixel, not the app's --st-surface-container-low
+   token -- that token actually resolves to a pale lavender (#f2f3ff), which
+   reads as a different, mismatched background next to Class Management's
+   neutral near-white one. */
 .setup-dropzone {
   display: flex;
   flex-direction: column;
@@ -660,9 +736,9 @@
   text-align: center;
   gap: 6px;
   padding: 44px 20px;
-  border: 2px dashed var(--st-line-strong, #c9d2de);
+  border: 2px dashed #c9d2de;
   border-radius: 14px;
-  background: var(--st-surface-container-low, #fafbfd);
+  background: #fafbfd;
   cursor: pointer;
   transition: border-color 200ms, background-color 200ms, transform 200ms var(--st-ease-out);
 }
@@ -674,7 +750,7 @@
 
 .setup-dropzone.is-dragover {
   border-color: var(--st-secondary);
-  background: #eef8f7;
+  background: rgba(0, 106, 104, 0.06);
   transform: scale(1.01);
 }
 
@@ -698,11 +774,15 @@
   font-size: 36px;
 }
 
+/* Weight 600 / --st-font-size-body here (not this file's usual 700 /
+   body-lg section-heading pair) is deliberate: it matches Class
+   Management's .st-upload-zone h3 exactly, since this dropzone is meant to
+   look like that one, not like this file's other card titles. */
 .setup-dropzone h3 {
   margin: 0;
   font-family: var(--st-font-heading);
-  font-weight: 700;
-  font-size: var(--st-font-size-heading);
+  font-weight: 600;
+  font-size: var(--st-font-size-body);
   color: var(--st-primary);
 }
 
@@ -725,6 +805,7 @@
   padding: 14px 16px;
   border: 1px solid var(--st-line, var(--st-outline-variant));
   border-radius: 12px;
+  box-shadow: var(--st-shadow-card, var(--st-shadow-sm));
 }
 
 .setup-file-card:not([hidden]) {
@@ -738,6 +819,10 @@
   gap: 14px;
 }
 
+/* Solid --st-secondary + white icon, matching Class Management's
+   .st-upload-file-icon (body[data-page="Import Learners"] override) --
+   not --st-secondary-container, which is a vivid turquoise (#8df0ee) that
+   reads much brighter/more saturated than Class Management's dark teal tile. */
 .setup-file-icon {
   width: 44px;
   height: 44px;
@@ -745,8 +830,8 @@
   border-radius: 11px;
   display: grid;
   place-items: center;
-  background: var(--st-secondary-container, #e3f4f3);
-  color: var(--st-secondary);
+  background: var(--st-secondary);
+  color: #fff;
 }
 
 .setup-file-meta {
@@ -790,14 +875,12 @@
   transition: width 300ms var(--st-ease-out);
 }
 
+/* Plain caption text, no icon -- matches Class Management's
+   .st-upload-status-text exactly (components.css). */
 .setup-upload-status {
   margin: 6px 0 0;
-  display: flex;
-  align-items: center;
-  gap: 5px;
   font-size: var(--st-font-size-caption);
-  font-weight: 500;
-  color: #00504e;
+  color: var(--st-on-surface-variant);
 }
 
 .setup-template-link-row {
@@ -825,7 +908,7 @@
 }
 
 .setup-template-link:hover {
-  background: var(--st-secondary-container, #e3f4f3);
+  background: #e3f4f3;
 }
 
 .setup-upload-foot-note {
@@ -858,6 +941,7 @@
   background: #fff;
   border: 1px solid var(--st-line, var(--st-outline-variant));
   border-left: 4px solid var(--c, #cfd5de);
+  box-shadow: var(--st-shadow-card, var(--st-shadow-sm));
   opacity: 0;
   transform: translateY(8px);
   animation: setup-in 400ms var(--st-ease-out) forwards;
@@ -896,108 +980,28 @@
 .setup-import-stat--warn { --c: var(--st-risk-moderate, #f39422); --cs: var(--st-risk-moderate-soft-2, #fef3e4); --ci: var(--st-risk-moderate-ink, #8f5200); }
 .setup-import-stat--err { --c: var(--st-risk-high, #ba1a1a); --cs: var(--st-risk-high-soft-2, #fdecea); --ci: var(--st-risk-high-ink, #a01414); }
 
-.setup-import-stats--narrow {
-  max-width: 520px;
-  margin: 0 auto;
-}
-
 /* ---------- Step 4: Import Preview table ---------- */
 .setup-table-card {
   margin-top: 16px;
   overflow: hidden;
 }
 
-.setup-table-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--st-line, var(--st-outline-variant));
-}
+/* Preview table card header now uses the shared .st-import-table-head
+   (data-upload.css, unscoped) instead of its own copy.
 
-.setup-table-head h3 {
-  margin: 0;
-  font-family: var(--st-font-heading);
-  font-weight: 700;
-  font-size: var(--st-font-size-heading);
-}
-
-.setup-table-head span {
-  font-size: var(--st-font-size-caption);
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
-}
-
+   No max-height/sticky header: the preview table now shares Class
+   Management's own .st-import-preview-table (data-upload.css, unscoped),
+   which scrolls with the page rather than in an internal fixed-height
+   box, so this matches that behavior instead of clipping against a
+   header row that's no longer sticky. */
 .setup-table-scroll {
   overflow-x: auto;
-  max-height: 420px;
 }
 
-.setup-preview-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--st-font-size-small);
-}
-
-.setup-preview-table th {
-  position: sticky;
-  top: 0;
-  padding: 10px 16px;
-  background: var(--st-surface-container-low, #f8f9fb);
-  border-bottom: 1px solid var(--st-line, var(--st-outline-variant));
-  text-align: left;
-  font-size: var(--st-font-size-caption);
-  font-weight: 600;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
-}
-
-.setup-preview-table td {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--st-line, var(--st-outline-variant));
-  white-space: nowrap;
-}
-
-.setup-preview-table tbody tr {
-  transition: background-color 150ms;
-}
-
-.setup-preview-table tbody tr:hover {
-  background: var(--st-surface-container-low, #fafbfd);
-}
-
-.setup-preview-table td.lrn {
-  font-variant-numeric: tabular-nums;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
-}
-
-.setup-preview-empty-cell {
-  text-align: center;
-  padding: 24px;
-  color: var(--st-outline);
-  font-style: italic;
-}
-
-.setup-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: var(--st-font-size-micro);
-  font-weight: 700;
-}
-
-.setup-pill::before {
-  content: "";
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: currentColor;
-}
-
-.setup-pill--ok { background: var(--st-risk-low-soft-2, #edf7ea); color: var(--st-risk-low-ink, #2c7121); }
-.setup-pill--warn { background: var(--st-risk-moderate-soft-2, #fef3e4); color: var(--st-risk-moderate-ink, #8f5200); }
-.setup-pill--err { background: var(--st-risk-high-soft-2, #fdecea); color: var(--st-risk-high-ink, #a01414); }
+/* The preview table itself now renders with Class Management's own
+   .st-import-preview-table markup/classes (data-upload.css, unscoped) via
+   the shared LearnerImportCore renderer -- no page-specific table/pill
+   rules needed here anymore. */
 
 /* ---------- Step 5: Complete ---------- */
 .setup-success {
@@ -1013,7 +1017,7 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: var(--st-secondary-container, #e3f4f3);
+  background: #e3f4f3;
   color: var(--st-secondary);
   animation: setup-check 600ms var(--st-ease-out);
 }
@@ -1043,9 +1047,14 @@
   text-align: left;
 }
 
+/* 2x2, not 4-across: 4 equal columns left too little room for
+   "Community Learning Center" -- its label itself was getting truncated,
+   not just long values. 2 columns groups Municipality+CLC (location) and
+   Learning Level+School Year (program) into their own row and gives each
+   card roughly double the width. */
 .setup-config-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin-top: 14px;
 }
@@ -1054,12 +1063,20 @@
   padding: 12px;
   border-radius: 10px;
   background: var(--st-background);
+  min-width: 0;
 }
 
+/* A long real value (e.g. a CLC name with a disambiguating suffix) used
+   to wrap and stretch its own tile taller than its siblings, since grid
+   rows stretch to the tallest cell -- truncate with an ellipsis instead so
+   every tile in the row stays the same height regardless of content. */
 .setup-config-grid small {
   display: block;
   font-size: var(--st-font-size-caption);
   color: var(--st-ink-faint, var(--st-outline));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .setup-config-grid b {
@@ -1067,6 +1084,9 @@
   margin-top: 2px;
   font-size: var(--st-font-size-small);
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ---------- Footer ---------- */
@@ -1115,6 +1135,7 @@
 }
 
 .setup-footer-back .material-symbols-outlined {
+  font-size: 19px;
   transition: transform 150ms var(--st-ease-out);
 }
 
@@ -1200,14 +1221,11 @@
   .setup-summary-card {
     position: static;
   }
-  .setup-config-grid {
-    grid-template-columns: 1fr 1fr;
-  }
 }
 
 @media (max-width: 767px) {
   .setup-topbar-inner {
-    height: 60px;
+    height: 56px;
     padding: 0 16px;
     grid-template-columns: auto 1fr auto;
   }
@@ -1263,7 +1281,7 @@
   }
   .setup-heading h1,
   .setup-welcome-body h1 {
-    font-size: var(--st-font-size-title);
+    font-size: 1.5rem;
   }
   .setup-welcome-card {
     grid-template-columns: 1fr;
@@ -1294,9 +1312,6 @@
     padding: 28px 14px;
   }
   .setup-import-stats {
-    grid-template-columns: 1fr 1fr;
-  }
-  .setup-config-grid {
     grid-template-columns: 1fr 1fr;
   }
   .setup-footer-inner {

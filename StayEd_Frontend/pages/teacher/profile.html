@@ -122,7 +122,7 @@
                     ><span class="material-symbols-outlined">person</span></span
                   >
                   <span>
-                    <h3 class="st-settings-section-title">Profile Information</h3>
+                    <h3 class="st-settings-section-title">Account Information</h3>
                     <span class="st-settings-section-sub"
                       >Your name and contact details</span
                     >
@@ -236,10 +236,10 @@
               </div>
             </section>
 
-            <!-- Account Settings -->
+            <!-- Security -->
             <section
-              class="st-settings-section"
-              data-settings-section="account"
+              class="st-settings-section is-open"
+              data-settings-section="security"
               style="--i:1"
             >
               <button
@@ -254,11 +254,9 @@
                     ></span
                   >
                   <span>
-                    <h3 class="st-settings-section-title">
-                      Account Settings
-                    </h3>
+                    <h3 class="st-settings-section-title">Security</h3>
                     <span class="st-settings-section-sub"
-                      >Password and sign-in security</span
+                      >Manage how you sign in and keep your account secure</span
                     >
                   </span>
                 </span>
@@ -269,100 +267,47 @@
               </button>
               <div class="st-settings-section-body">
                 <div class="st-settings-section-body-inner">
-                  <form class="st-settings-form-grid" id="passwordForm">
-                    <div class="st-field st-field--full">
-                      <label for="currentPassword">Current Password</label>
-                      <input
-                        class="st-input"
-                        id="currentPassword"
-                        type="password"
-                        placeholder="••••••••"
-                      />
+                  <div class="st-toggle-row">
+                    <div>
+                      <p class="st-toggle-row-title">Account password</p>
+                      <p class="st-toggle-row-sub">Last changed 3 months ago</p>
                     </div>
-                    <div class="st-field">
-                      <label for="newPassword">New Password</label>
-                      <input
-                        class="st-input"
-                        id="newPassword"
-                        type="password"
-                        placeholder="••••••••"
-                      />
-                    </div>
-                    <div class="st-field">
-                      <label for="confirmNewPassword"
-                        >Confirm New Password</label
-                      >
-                      <input
-                        class="st-input"
-                        id="confirmNewPassword"
-                        type="password"
-                        placeholder="••••••••"
-                      />
-                    </div>
-                    <div class="st-settings-info-box st-field--full">
-                      <span class="material-symbols-outlined">info</span>
-                      <p>
-                        Password must be at least 12 characters and include a
-                        mix of letters, numbers, and symbols.
+                    <button
+                      type="button"
+                      class="st-btn st-btn-outline st-btn-sm"
+                      data-change-password
+                    >
+                      <span class="material-symbols-outlined">lock_reset</span>
+                      Change password
+                    </button>
+                  </div>
+                  <div class="st-toggle-row">
+                    <div>
+                      <p class="st-toggle-row-title">
+                        Two-factor authentication
+                      </p>
+                      <p class="st-toggle-row-sub">
+                        Preference saved — verification at sign-in is not yet
+                        enforced
                       </p>
                     </div>
-                    <div class="st-settings-form-footer">
-                      <button type="submit" class="st-btn st-btn-primary">
-                        Update Password
-                      </button>
-                    </div>
-                  </form>
-
-
+                    <label class="st-toggle">
+                      <input
+                        type="checkbox"
+                        data-mfa-toggle
+                        aria-label="Two-factor authentication"
+                      />
+                      <span class="st-toggle-track"
+                        ><span class="st-toggle-thumb"></span
+                      ></span>
+                    </label>
+                  </div>
                 </div>
               </div>
             </section>
 
-            <!-- Danger Zone -->
-            <section
-              class="st-settings-section st-settings-section--danger is-open"
-              data-settings-section="danger"
-              style="--i:2"
-            >
-              <div class="st-danger-head">
-                <span class="material-symbols-outlined">warning</span>
-                <h3 class="st-settings-section-title">Danger zone</h3>
-              </div>
-              <div class="st-danger-row">
-                <div>
-                  <p class="st-toggle-row-title">Sign out from system</p>
-                  <p class="st-toggle-row-sub">
-                    End your current session across all devices.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  class="st-btn st-btn-outline st-btn-sm"
-                  data-st-logout
-                >
-                  <span class="material-symbols-outlined">logout</span>
-                  Log out
-                </button>
-              </div>
-              <div class="st-danger-row">
-                <div>
-                  <p class="st-toggle-row-title st-danger-title">
-                    Deactivate account
-                  </p>
-                  <p class="st-toggle-row-sub">
-                    Once deactivated, you will lose access to administrative
-                    tools.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  class="st-btn st-btn-danger st-btn-sm"
-                  data-deactivate-account
-                >
-                  Deactivate
-                </button>
-              </div>
-            </section>
+            <!-- Danger Zone (shared with the admin Profile Settings page) -->
+            <div data-component="profile/danger-zone"></div>
           </div>
         </div>
       </main>
@@ -385,6 +330,8 @@
     <script src="../../assets/js/components/component-loader.js"></script>
     <script src="../../assets/js/components/toast.js"></script>
     <script src="../../assets/js/components/modal.js"></script>
+    <script src="../../assets/js/core/profile-avatar.js"></script>
+    <script src="../../assets/js/core/profile-security.js"></script>
     <script src="../../assets/js/teacher/profile-settings.js?v=20261003-profile-edit"></script>
   </body>
 </html>

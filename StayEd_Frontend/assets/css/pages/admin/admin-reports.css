@@ -38,6 +38,53 @@ body.st-admin[data-page="Reports"] .st-adm-toolbar .st-search{flex:1 1 280px;max
    3 under 1280px, 2 on mobile. */
 body.st-admin[data-page="Reports"] .st-adm-report-filters{display:grid;grid-template-columns:minmax(240px,1.6fr) repeat(5,minmax(140px,1fr));gap:12px;align-items:end;padding:0 20px 14px}
 body.st-admin[data-page="Reports"] .st-adm-report-filters .st-search{height:40px}
+
+/* Matches the canonical .st-toolbar .st-search treatment (learner-records.css)
+   -- border on the wrapper, 8px radius, line-strong border color, hover/focus
+   states -- instead of the shared component's 4px/border-on-input default.
+   Covers both .st-report-search instances on this page (the toolbar one and
+   the filter-grid one above). */
+body.st-admin[data-page="Reports"] .st-report-search{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:0 12px;
+    border:1px solid var(--st-line-strong, var(--st-outline-variant));
+    border-radius:var(--st-radius-control, var(--st-button-radius));
+    background:#fff;
+    color:var(--st-ink-faint, var(--st-outline));
+}
+body.st-admin[data-page="Reports"] .st-report-search:hover{
+    border-color:var(--st-primary);
+}
+body.st-admin[data-page="Reports"] .st-report-search:focus-within{
+    border-color:var(--st-secondary);
+    box-shadow:0 0 0 3px rgba(0,106,104,.12);
+}
+body.st-admin[data-page="Reports"] .st-report-search .material-symbols-outlined{
+    position:static;
+    top:auto;
+    left:auto;
+    transform:none;
+    flex:none;
+    color:inherit;
+}
+body.st-admin[data-page="Reports"] .st-report-search input{
+    height:100%;
+    border:0;
+    outline:0;
+    flex:1;
+    min-width:0;
+    padding:0;
+    font:inherit;
+    font-size:0.875rem;
+    background:none;
+    color:var(--st-on-surface);
+}
+body.st-admin[data-page="Reports"] .st-report-search input:focus{
+    outline:none;
+    box-shadow:none;
+}
 body.st-admin[data-page="Reports"] .st-adm-filter-field{display:flex;flex-direction:column;gap:6px;min-width:0}
 body.st-admin[data-page="Reports"] .st-adm-filter-field label{font-size:.781rem;font-weight:600;color:var(--st-ink-muted,#5a6275)}
 body.st-admin[data-page="Reports"] .st-adm-filter-field .st-select{width:100%}

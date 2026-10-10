@@ -56,7 +56,10 @@
 .st-landing-nav-inner {
   max-width: var(--st-container-max);
   margin: 0 auto;
-  height: 72px;
+  /* Matches .st-navbar's height (layout.css, the teacher/admin app
+     navbar) and .st-public-topbar's/.st-sv-topbar's -- one nav height
+     across the whole site instead of this page's own taller one. */
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -119,9 +122,10 @@
   text-decoration: none;
 }
 
-.st-landing-nav-links a:hover {
+.st-landing-nav-links a:hover,
+.st-landing-nav-links a:focus-visible {
   color: var(--st-primary);
-  text-decoration: underline;
+  font-weight: 800;
 }
 
 /* Only shown alongside the desktop Sign up/Log in buttons -- on narrower
@@ -387,7 +391,8 @@
 .st-landing-hero-intro,
 .st-landing-hero-login,
 .st-landing-hero-signup,
-.st-landing-hero-forgot {
+.st-landing-hero-forgot,
+.st-landing-hero-pending {
   opacity: 0;
   pointer-events: none;
   transition:
@@ -399,7 +404,8 @@
 .st-landing-hero-stage[data-stage="intro"] .st-landing-hero-intro,
 .st-landing-hero-stage[data-stage="login"] .st-landing-hero-login,
 .st-landing-hero-stage[data-stage="signup"] .st-landing-hero-signup,
-.st-landing-hero-stage[data-stage="forgot"] .st-landing-hero-forgot {
+.st-landing-hero-stage[data-stage="forgot"] .st-landing-hero-forgot,
+.st-landing-hero-stage[data-stage="pending"] .st-landing-hero-pending {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
@@ -425,7 +431,8 @@
 
 .st-landing-hero-login,
 .st-landing-hero-signup,
-.st-landing-hero-forgot {
+.st-landing-hero-forgot,
+.st-landing-hero-pending {
   max-width: 460px;
   /* Capped to the row's own height, not just centered -- otherwise a
      panel taller than the available space (signup, mainly) gets its top
@@ -681,7 +688,9 @@
 .st-landing-footer {
   position: relative;
   flex-shrink: 0;
-  padding: 10px var(--st-margin-mobile);
+  /* Matches .st-footer's own height (layout.css, the teacher/admin app
+     footer) -- this was a shorter, landing-only padding. */
+  padding: 12px var(--st-margin-mobile);
   min-height: 0;
   /* A real frosted-glass panel, not just a flat tint -- it sits on the
      same photo the hero uses (now living in the shared .st-landing-body
@@ -704,7 +713,7 @@
 
 @media (min-width: 768px) {
   .st-landing-footer {
-    padding: 10px var(--st-margin-desktop);
+    padding: 12px var(--st-margin-desktop);
   }
 }
 
@@ -760,7 +769,8 @@
 
   .st-landing-hero-login,
   .st-landing-hero-signup,
-  .st-landing-hero-forgot {
+  .st-landing-hero-forgot,
+  .st-landing-hero-pending {
     width: 100%;
     max-width: 100%;
   }

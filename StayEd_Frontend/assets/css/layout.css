@@ -8,6 +8,11 @@
 
 html {
   scroll-behavior: smooth;
+  /* Reserves the scrollbar's width whether or not a given page actually
+     overflows, so centered content (e.g. the nav logo) doesn't shift a
+     few pixels sideways when navigating from a non-scrolling page (the
+     landing page, which is locked to 100vh) to one that scrolls. */
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -785,6 +790,8 @@ body {
   align-items: center;
 
   gap: 10px;
+
+  cursor: pointer;
 }
 
 .st-user-details {
@@ -918,7 +925,7 @@ body {
 
   flex-wrap: wrap;
 
-  padding: 18px var(--st-margin-desktop);
+  padding: 12px var(--st-margin-desktop);
 
   margin-top: auto;
 }
@@ -939,6 +946,11 @@ body {
 
 .st-footer-version {
   color: var(--st-ink-faint, var(--st-outline));
+
+  font-size: 0.8125rem; /* 13px -- explicit, not inherited: it sits inside
+    .st-footer-right on the landing/public footers (no font-size of its
+    own there), so without this it fell back to the 16px browser default
+    instead of matching the rest of the footer's 13px text. */
 
   font-weight: 600;
 }

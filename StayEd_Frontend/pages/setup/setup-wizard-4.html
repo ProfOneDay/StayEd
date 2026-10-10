@@ -103,27 +103,38 @@
           </div>
         </div>
 
-        <!-- Preview table -->
+        <!-- Preview table -- same markup/classes as Class Management's
+             #importPreviewSection table (learner-import.html), rendered by
+             the same LearnerImportCore.renderPreviewRows()/edit/remove
+             functions, so the two "import learners" flows share one
+             implementation, edit and delete included. -->
         <div class="setup-card setup-table-card">
-          <div class="setup-table-head">
+          <div class="st-import-table-head">
             <h3>Learner rows</h3>
             <span data-preview-count>Showing 0 of 0 rows</span>
           </div>
           <div class="setup-table-scroll">
-            <table class="setup-preview-table">
+            <table class="st-data-table st-import-preview-table">
               <thead>
                 <tr>
-                  <th>LRN</th>
-                  <th>Last Name</th>
-                  <th>First Name</th>
+                  <th class="st-import-col-learner st-import-sticky-left">Learner</th>
+                  <th class="st-import-col-status">Status</th>
                   <th>Sex</th>
+                  <th>Date of birth</th>
+                  <th>Modality</th>
                   <th>Level</th>
-                  <th>Status</th>
+                  <th>Re-enrollee</th>
+                  <th>Employment</th>
+                  <th>Distance</th>
+                  <th>Civil status</th>
+                  <th>Contact</th>
+                  <th>Guardian contact</th>
+                  <th class="st-import-sticky-right">Actions</th>
                 </tr>
               </thead>
               <tbody id="learnerTable">
                 <tr>
-                  <td colspan="6" class="setup-preview-empty-cell">
+                  <td colspan="13" class="st-import-empty-cell">
                     Loading preview…
                   </td>
                 </tr>
@@ -150,6 +161,7 @@
     </footer>
 
     <div data-component="layout/toast"></div>
+    <div data-component="layout/modal"></div>
 
     <script src="../../assets/js/config.js"></script>
     <script src="../../assets/js/core/utils.js"></script>
@@ -160,6 +172,7 @@
     <script src="../../assets/js/core/auth.js"></script>
     <script src="../../assets/js/components/component-loader.js"></script>
     <script src="../../assets/js/components/toast.js"></script>
+    <script src="../../assets/js/components/modal.js"></script>
     <script src="../../assets/js/core/learner-import-core.js"></script>
     <script src="../../assets/js/setup/setup.js"></script>
   </body>

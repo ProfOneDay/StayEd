@@ -813,6 +813,37 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
   background: var(--st-background);
 }
 
+/* The row used to be one big button navigating straight to the profile;
+   now the avatar+name half opens the quick-view preview (.st-qv-trigger,
+   learner-quick-view.css) and only the risk/meter half still navigates
+   directly, so the row itself is a plain grid container around both. */
+.st-attention-trigger {
+  grid-column: 1 / 3;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.st-attention-risk-btn {
+  grid-column: 3;
+  border: 0;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  cursor: pointer;
+  text-align: right;
+}
+
 .st-attention-row:active {
   transform: scale(0.99);
 }
@@ -959,7 +990,12 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-searc
   padding: 0 12px;
   border: 1px solid var(--st-line-strong, var(--st-outline-variant));
   border-radius: var(--st-radius-control, 8px);
+  background: #fff;
   color: var(--st-ink-faint, var(--st-outline));
+}
+
+body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-search:hover {
+  border-color: var(--st-primary);
 }
 
 body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-search:focus-within {

@@ -76,10 +76,6 @@ body[data-page="Assessment Scores"] .st-badge-info {
   color: var(--st-primary);
 }
 
-.st-assessment-search input {
-  height: 40px;
-}
-
 .st-assessment-learner-list {
   overflow-y: auto;
   display: flex;
@@ -495,9 +491,50 @@ body[data-page="Assessment Scores"] .st-badge-info {
   font-weight: 700;
 }
 
-.st-assessment-search input {
+/* Matches the canonical .st-toolbar .st-search treatment (learner-records.css)
+   -- border on the wrapper, 8px radius, line-strong border color, hover/focus
+   states -- instead of the shared component's 4px/border-on-input default. */
+.st-assessment-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--st-line-strong, var(--st-outline-variant));
   border-radius: var(--st-radius-control, var(--st-button-radius));
+  background: #fff;
+  color: var(--st-ink-faint, var(--st-outline));
+}
+.st-assessment-search:hover {
+  border-color: var(--st-primary);
+}
+.st-assessment-search:focus-within {
+  border-color: var(--st-secondary);
+  box-shadow: 0 0 0 3px rgba(0, 106, 104, 0.12);
+}
+.st-assessment-search .material-symbols-outlined {
+  position: static;
+  top: auto;
+  left: auto;
+  transform: none;
+  flex: none;
+  color: inherit;
+}
+.st-assessment-search input {
+  height: 100%;
+  border: 0;
+  outline: 0;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 0.875rem;
+  background: none;
+  color: var(--st-on-surface);
+}
+.st-assessment-search input:focus {
+  outline: none;
+  box-shadow: none;
 }
 .st-assessment-learner-list { gap: 6px; padding-right: 2px; }
 

@@ -62,8 +62,14 @@ const Landing = {
     if (stage === "intro") return;
 
     const emailId =
-      stage === "login" ? "email" : stage === "signup" ? "signupEmail" : "forgotEmail";
-    const emailInput = document.getElementById(emailId);
+      stage === "login"
+        ? "email"
+        : stage === "signup"
+          ? "signupEmail"
+          : stage === "forgot"
+            ? "forgotEmail"
+            : null;
+    const emailInput = emailId && document.getElementById(emailId);
     if (emailInput) setTimeout(() => emailInput.focus(), 350);
   },
 
@@ -124,9 +130,9 @@ const Landing = {
           response?.message || "Registration submitted successfully.",
         );
 
-        setTimeout(() => {
-          window.location.href = "pages/auth/pending.html";
-        }, 1200);
+        form.reset();
+
+        this.setStage("pending");
       } catch (error) {
         console.error("Registration error:", error);
         Toast.error(

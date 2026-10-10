@@ -67,6 +67,7 @@
     border:1px solid var(--st-outline-variant);
     border-radius:var(--st-radius-lg);
     margin-top:16px;
+    box-shadow:var(--st-shadow-card, var(--st-shadow-sm));
 }
 
 .st-upload-file-icon{
@@ -145,6 +146,10 @@
    at the end of this section instead.
    ============================================================ */
 
+/* Matches the onboarding setup wizard's dot-stepper (.setup-stepper in
+   setup.css) -- same dot size, connector, checkmark-on-done treatment and
+   active-state ring, so the two "import learners" flows look like one
+   family instead of two different step-indicator styles. */
 body[data-page="Import Learners"] .st-import-steps{
     display:flex;
     align-items:center;
@@ -161,44 +166,59 @@ body[data-page="Import Learners"] .st-import-steps li{
     gap:8px;
     font-size: var(--st-font-size-caption);
     font-weight:600;
-    color:var(--st-on-surface-variant);
+    color:var(--st-ink-faint, var(--st-outline));
+    white-space:nowrap;
 }
 
-body[data-page="Import Learners"] .st-import-steps li:not(:last-child)::after{
+body[data-page="Import Learners"] .st-import-steps li + li::before{
     content:"";
-    width:40px;
+    width:36px;
     height:2px;
-    background:var(--st-outline-variant);
-    margin:0 12px;
+    margin:0 10px;
+    border-radius:2px;
+    background:var(--st-line, var(--st-outline-variant));
+    transition:background-color 400ms;
 }
 
-body[data-page="Import Learners"] .st-import-steps li:not(:last-child).is-done::after{
+body[data-page="Import Learners"] .st-import-steps li.is-done + li::before{
     background:var(--st-secondary);
 }
 
 body[data-page="Import Learners"] .st-import-steps li span{
-    width:24px;
-    height:24px;
+    width:28px;
+    height:28px;
     border-radius:50%;
     background:#fff;
-    border:2px solid var(--st-outline-variant);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size: var(--st-font-size-micro);
-    transition:var(--st-transition);
+    border:2px solid var(--st-line-strong, var(--st-outline-variant));
+    display:grid;
+    place-items:center;
+    font-size: var(--st-font-size-caption);
+    font-weight:700;
+    transition:all 300ms var(--st-ease-out);
 }
 
 body[data-page="Import Learners"] .st-import-steps li.is-active{ color:var(--st-primary); }
 body[data-page="Import Learners"] .st-import-steps li.is-active span{
-    border-color:var(--st-primary);
     background:var(--st-primary);
+    border-color:var(--st-primary);
     color:#fff;
+    box-shadow:0 0 0 4px var(--st-navy-soft, var(--st-primary-fixed));
+    transform:scale(1.06);
 }
 
+body[data-page="Import Learners"] .st-import-steps li.is-done{ color:var(--st-secondary); }
 body[data-page="Import Learners"] .st-import-steps li.is-done span{
-    border-color:var(--st-secondary);
     background:var(--st-secondary);
+    border-color:var(--st-secondary);
+    color:transparent;
+    position:relative;
+}
+
+body[data-page="Import Learners"] .st-import-steps li.is-done span::after{
+    content:"check";
+    position:absolute;
+    font-family:"Material Symbols Outlined";
+    font-size:17px;
     color:#fff;
 }
 
@@ -206,119 +226,195 @@ body[data-page="Import Learners"] .st-import-steps li.is-done span{
 
 body[data-page="Import Learners"] .st-import-preview-summary{
     display:grid;
-    grid-template-columns:repeat(3,1fr);
+    grid-template-columns:repeat(4,1fr);
     gap:12px;
     margin-bottom:16px;
 }
 
 @media (max-width:700px){
-    body[data-page="Import Learners"] .st-import-preview-summary{ grid-template-columns:1fr; }
+    body[data-page="Import Learners"] .st-import-preview-summary{ grid-template-columns:1fr 1fr; }
 }
 
+/* Matches the onboarding setup wizard's stat tiles (.setup-import-stat in
+   setup.css): icon in a tinted rounded tile instead of a bare colored
+   glyph, bold heading-font count. Each --valid/--duplicate/--error
+   modifier sets --c/--cs/--ci (border accent / tile background / ink)
+   the way setup.css's --ok/--warn/--err modifiers do. */
 body[data-page="Import Learners"] .st-import-stat-card{
     display:flex;
     align-items:center;
     gap:12px;
-    padding:14px 16px;
+    padding:16px;
     background:#fff;
-    border:1px solid var(--st-outline-variant);
-    border-left:4px solid var(--st-outline-variant);
-    border-radius:var(--st-radius-lg);
+    border:1px solid var(--st-line, var(--st-outline-variant));
+    border-left:4px solid var(--c, var(--st-outline-variant));
+    border-radius:12px;
+    box-shadow:var(--st-shadow-card, var(--st-shadow-sm));
 }
 
 body[data-page="Import Learners"] .st-import-stat-card .material-symbols-outlined{
-    font-size:1.5rem;
+    width:38px;
+    height:38px;
+    flex:none;
+    border-radius:10px;
+    display:grid;
+    place-items:center;
+    background:var(--cs, var(--st-background));
+    color:var(--ci, var(--st-ink-muted, #5a6275));
+    font-size:20px;
 }
 
 body[data-page="Import Learners"] .st-import-stat-card-count{
-    font-size: var(--st-font-size-heading);
-    font-weight:700;
-    line-height:1.1;
-    color:var(--st-on-surface);
+    font-family:var(--st-font-heading);
+    font-size: var(--st-font-size-title);
+    font-weight:800;
+    line-height:1.05;
+    color:var(--ci, var(--st-on-surface));
 }
 
 body[data-page="Import Learners"] .st-import-stat-card-label{
     font-size: var(--st-font-size-caption);
-    color:var(--st-on-surface-variant);
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
     margin-top:2px;
 }
 
-body[data-page="Import Learners"] .st-import-stat-card--valid{ border-left-color:var(--st-risk-low); }
-body[data-page="Import Learners"] .st-import-stat-card--valid .material-symbols-outlined{ color:var(--st-risk-low); }
+body[data-page="Import Learners"] .st-import-stat-card--total{
+    --c:var(--st-primary); --cs:var(--st-navy-soft, var(--st-primary-fixed)); --ci:var(--st-primary);
+}
 
-body[data-page="Import Learners"] .st-import-stat-card--duplicate{ border-left-color:var(--st-risk-moderate); }
-body[data-page="Import Learners"] .st-import-stat-card--duplicate .material-symbols-outlined{ color:var(--st-risk-moderate); }
+body[data-page="Import Learners"] .st-import-stat-card--valid{
+    --c:var(--st-risk-low, #6bbf59); --cs:var(--st-risk-low-soft-2, #edf7ea); --ci:var(--st-risk-low-ink, #2c7121);
+}
 
-body[data-page="Import Learners"] .st-import-stat-card--error{ border-left-color:var(--st-risk-high); }
-body[data-page="Import Learners"] .st-import-stat-card--error .material-symbols-outlined{ color:var(--st-risk-high); }
+body[data-page="Import Learners"] .st-import-stat-card--duplicate{
+    --c:var(--st-risk-moderate, #f39422); --cs:var(--st-risk-moderate-soft-2, #fef3e4); --ci:var(--st-risk-moderate-ink, #8f5200);
+}
 
-/* Preview table */
+body[data-page="Import Learners"] .st-import-stat-card--error{
+    --c:var(--st-risk-high, #ba1a1a); --cs:var(--st-risk-high-soft-2, #fdecea); --ci:var(--st-risk-high-ink, #a01414);
+}
 
-body[data-page="Import Learners"] .st-import-row--error{ background:rgba(186,26,26,.04); }
-body[data-page="Import Learners"] .st-import-row--duplicate{ background:rgba(255,171,0,.06); }
+/* Preview table card header ("Learner rows" + "Showing N of N rows") --
+   shared by both pages, same as the table itself below. Originally only
+   the setup wizard had this; added to Class Management too instead of
+   being a wizard-only extra. */
+.st-import-table-head {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    padding:16px 20px;
+    border-bottom:1px solid var(--st-line, var(--st-outline-variant));
+}
 
-body[data-page="Import Learners"] .st-import-status-badge{
+.st-import-table-head h3 {
+    margin:0;
+    font-family:var(--st-font-heading);
+    font-weight:700;
+    font-size: var(--st-font-size-body-lg);
+}
+
+.st-import-table-head span {
+    font-size: var(--st-font-size-caption);
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+/* Preview table -- deliberately UNSCOPED (not body[data-page="Import
+   Learners"]): the onboarding setup wizard's step 4 renders this exact
+   same markup via the shared LearnerImportCore.renderPreviewRow()
+   (learner-import-core.js), edit/remove row actions included, so both
+   pages need the identical styling, not a visually-matched copy. */
+.st-import-row--error{ background:rgba(186,26,26,.04); }
+.st-import-row--duplicate{ background:rgba(243,148,34,.06); }
+
+/* Sizing matches the app's standard in-table pill (.st-data-table .st-pill
+   / .st-risk-badge in dashboard.css: 0.781rem, weight 600) -- this was
+   smaller and bolder than every other status pill in the app. */
+.st-import-status-badge{
     display:inline-flex;
     align-items:center;
     gap:4px;
     padding:2px 10px;
     border-radius:999px;
-    font-size: var(--st-font-size-micro);
-    font-weight:700;
+    font-size:0.781rem;
+    font-weight:600;
 }
 
-body[data-page="Import Learners"] .st-import-status-badge--valid{ background:var(--st-risk-low-soft); color:var(--st-risk-low); }
-body[data-page="Import Learners"] .st-import-status-badge--duplicate{ background:var(--st-risk-moderate-soft); color:var(--st-risk-moderate); }
-body[data-page="Import Learners"] .st-import-status-badge--error{ background:var(--st-risk-high-soft); color:var(--st-risk-high); }
+.st-import-status-badge--valid{ background:var(--st-risk-low-soft); color:var(--st-risk-low); }
+.st-import-status-badge--duplicate{ background:var(--st-risk-moderate-soft); color:var(--st-risk-moderate); }
+.st-import-status-badge--error{ background:var(--st-risk-high-soft); color:var(--st-risk-high); }
 
-body[data-page="Import Learners"] .st-import-status-cell{
+.st-import-status-cell{
     display:flex;
     flex-direction:column;
     align-items:flex-start;
     gap:4px;
 }
 
-body[data-page="Import Learners"] .st-import-issue{
-    font-size: var(--st-font-size-micro);
-    color:var(--st-on-surface-variant);
+.st-import-issue{
+    font-size:0.781rem;
+    color:var(--st-ink-faint, var(--st-outline));
 }
 
-body[data-page="Import Learners"] .st-import-learner-cell{
+.st-import-learner-cell{
     display:flex;
     flex-direction:column;
     gap:2px;
 }
 
-body[data-page="Import Learners"] .st-import-learner-name{
+/* Matches .st-learner-name/.st-learner-id (dashboard.css) -- the system's
+   standard "bold name, faint id below" table-cell pattern, used everywhere
+   else a learner's name+LRN appears in a table. This cell previously set
+   its own smaller/monospace/darker styling instead of reusing it. */
+.st-import-learner-name{
+    font-size:0.906rem;
     font-weight:600;
     color:var(--st-on-surface);
     white-space:nowrap;
 }
 
-body[data-page="Import Learners"] .st-import-learner-lrn{
-    font-family:monospace;
-    font-size: var(--st-font-size-micro);
-    color:var(--st-on-surface-variant);
+.st-import-learner-lrn{
+    font-size:0.781rem;
+    color:var(--st-ink-faint, var(--st-outline));
 }
 
-body[data-page="Import Learners"] .st-import-preview-table{
+/* .st-panel has rounded corners but no overflow clipping of its own (unlike
+   .st-table-card elsewhere, e.g. learner-records.css/admin-reports.css,
+   which sets overflow:hidden for exactly this reason) -- without it, the
+   table's square header/cell backgrounds square off the card's corners. */
+body[data-page="Import Learners"] #importPreviewSection .st-panel{
+    overflow:hidden;
+}
+
+.st-import-empty-cell{
+    text-align:center;
+    padding:24px;
+    color:var(--st-outline);
+    font-style:italic;
+}
+
+.st-import-preview-table{
     min-width:1400px;
 }
 
-body[data-page="Import Learners"] .st-import-preview-table th,
-body[data-page="Import Learners"] .st-import-preview-table td{
+.st-import-preview-table th{
     white-space:nowrap;
-    padding:12px 16px;
+    padding:10px 22px;
 }
 
-body[data-page="Import Learners"] .st-import-sticky-left{
+.st-import-preview-table td{
+    white-space:nowrap;
+    padding:12px 22px;
+}
+
+.st-import-sticky-left{
     position:sticky;
     left:0;
     background:#fff;
     z-index:1;
 }
 
-body[data-page="Import Learners"] .st-import-sticky-right{
+.st-import-sticky-right{
     position:sticky;
     right:0;
     background:#fff;
@@ -326,13 +422,13 @@ body[data-page="Import Learners"] .st-import-sticky-right{
     white-space:normal;
 }
 
-body[data-page="Import Learners"] tr.st-import-row--duplicate .st-import-sticky-left,
-body[data-page="Import Learners"] tr.st-import-row--duplicate .st-import-sticky-right{
+tr.st-import-row--duplicate .st-import-sticky-left,
+tr.st-import-row--duplicate .st-import-sticky-right{
     background:#fffaf2;
 }
 
-body[data-page="Import Learners"] tr.st-import-row--error .st-import-sticky-left,
-body[data-page="Import Learners"] tr.st-import-row--error .st-import-sticky-right{
+tr.st-import-row--error .st-import-sticky-left,
+tr.st-import-row--error .st-import-sticky-right{
     background:#fdf5f5;
 }
 
@@ -351,11 +447,15 @@ body[data-page="Import Learners"] .st-import-footer-note .material-symbols-outli
 
 /* Success panel */
 
+/* Soft teal, not --st-secondary-container (a vivid #8df0ee turquoise --
+   same fallback-never-applies issue fixed elsewhere this session: the
+   token IS defined, so a "soft" fallback value after it never actually
+   applies). */
 body[data-page="Import Learners"] .st-clc-success-icon{
     width:72px;
     height:72px;
     border-radius:50%;
-    background:var(--st-secondary-container);
+    background:#e3f4f3;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -373,39 +473,73 @@ body[data-page="Import Learners"] .st-clc-success-icon .material-symbols-outline
     to{ transform:scale(1); opacity:1; }
 }
 
+/* Matches .st-import-stat-card (the preview step's stat tiles) and
+   .setup-import-stat (the onboarding wizard's) exactly: icon in a tinted
+   rounded tile, border-left accent, card shadow -- this was a flat
+   centered number/label with no icon and a single uniform background
+   regardless of category. */
 body[data-page="Import Learners"] .st-import-success-stats{
     display:grid;
     grid-template-columns:repeat(4,1fr);
-    gap:16px;
-    max-width:680px;
+    gap:12px;
+    max-width:900px;
     margin:24px auto;
 }
 
-@media (max-width:600px){
+@media (max-width:700px){
     body[data-page="Import Learners"] .st-import-success-stats{ grid-template-columns:1fr 1fr; }
 }
 
 body[data-page="Import Learners"] .st-import-success-stat{
-    background:var(--st-surface-container-low);
-    border-radius:var(--st-radius-lg);
+    display:flex;
+    align-items:center;
+    gap:12px;
+    text-align:left;
+    background:#fff;
+    border:1px solid var(--st-line, var(--st-outline-variant));
+    border-left:4px solid var(--c, var(--st-outline-variant));
+    border-radius:12px;
     padding:16px;
-    text-align:center;
+    box-shadow:var(--st-shadow-card, var(--st-shadow-sm));
+}
+
+body[data-page="Import Learners"] .st-import-success-stat .material-symbols-outlined{
+    width:38px;
+    height:38px;
+    flex:none;
+    border-radius:10px;
+    display:grid;
+    place-items:center;
+    background:var(--cs, var(--st-background));
+    color:var(--ci, var(--st-ink-muted, #5a6275));
+    font-size:20px;
 }
 
 body[data-page="Import Learners"] .st-import-success-stat-value{
-    font-size: var(--st-font-size-heading);
-    font-weight:700;
-    color:var(--st-primary);
+    font-family:var(--st-font-heading);
+    font-size: var(--st-font-size-title);
+    font-weight:800;
+    line-height:1.05;
+    color:var(--ci, var(--st-on-surface));
 }
 
-body[data-page="Import Learners"] .st-import-success-stat--imported .st-import-success-stat-value{ color:var(--st-risk-low); }
-body[data-page="Import Learners"] .st-import-success-stat--duplicates .st-import-success-stat-value{ color:var(--st-risk-moderate); }
-body[data-page="Import Learners"] .st-import-success-stat--errors .st-import-success-stat-value{ color:var(--st-risk-high); }
-
 body[data-page="Import Learners"] .st-import-success-stat-label{
-    font-size: var(--st-font-size-micro);
-    color:var(--st-on-surface-variant);
+    font-size: var(--st-font-size-caption);
+    color:var(--st-ink-muted, var(--st-on-surface-variant));
     margin-top:2px;
+}
+
+body[data-page="Import Learners"] .st-import-success-stat{
+    --c:var(--st-primary); --cs:var(--st-navy-soft, var(--st-primary-fixed)); --ci:var(--st-primary);
+}
+body[data-page="Import Learners"] .st-import-success-stat--imported{
+    --c:var(--st-risk-low, #6bbf59); --cs:var(--st-risk-low-soft-2, #edf7ea); --ci:var(--st-risk-low-ink, #2c7121);
+}
+body[data-page="Import Learners"] .st-import-success-stat--duplicates{
+    --c:var(--st-risk-moderate, #f39422); --cs:var(--st-risk-moderate-soft-2, #fef3e4); --ci:var(--st-risk-moderate-ink, #8f5200);
+}
+body[data-page="Import Learners"] .st-import-success-stat--errors{
+    --c:var(--st-risk-high, #ba1a1a); --cs:var(--st-risk-high-soft-2, #fdecea); --ci:var(--st-risk-high-ink, #a01414);
 }
 
 /* Scoped overrides on top of the shared upload-zone/browse-button base
@@ -1049,6 +1183,57 @@ body[data-page="Manual Enrollment"] .st-clc-success-icon .material-symbols-outli
 
 .st-enroll-gate-search-input{
     margin-bottom:12px;
+}
+
+/* Matches the canonical .st-toolbar .st-search treatment (learner-records.css)
+   -- border on the wrapper, 8px radius, line-strong border color, hover/focus
+   states -- instead of the shared component's 4px/border-on-input default. */
+.st-enroll-gate-search-input{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    height:40px;
+    padding:0 12px;
+    border:1px solid var(--st-line-strong, var(--st-outline-variant));
+    border-radius:var(--st-radius-control, var(--st-button-radius));
+    background:#fff;
+    color:var(--st-ink-faint, var(--st-outline));
+}
+
+.st-enroll-gate-search-input:hover{
+    border-color:var(--st-primary);
+}
+
+.st-enroll-gate-search-input:focus-within{
+    border-color:var(--st-secondary);
+    box-shadow:0 0 0 3px rgba(0,106,104,.12);
+}
+
+.st-enroll-gate-search-input .material-symbols-outlined{
+    position:static;
+    top:auto;
+    left:auto;
+    transform:none;
+    flex:none;
+    color:inherit;
+}
+
+.st-enroll-gate-search-input input{
+    height:100%;
+    border:0;
+    outline:0;
+    flex:1;
+    min-width:0;
+    padding:0;
+    font:inherit;
+    font-size:0.875rem;
+    background:none;
+    color:var(--st-on-surface);
+}
+
+.st-enroll-gate-search-input input:focus{
+    outline:none;
+    box-shadow:none;
 }
 
 .st-enroll-gate-results{

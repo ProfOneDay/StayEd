@@ -4,6 +4,8 @@
 
 @import url("./layout.css");
 
+@import url("./components/learner-quick-view.css");
+
 @import url("./pages/teacher/auth.css");
 @import url("./pages/teacher/dashboard.css");
 @import url("./pages/teacher/setup.css");
@@ -28,3 +30,4 @@
 @import url("./pages/admin/admin-user-management.css");
 @import url("./pages/admin/admin-reports.css");
 @import url("./pages/public/landing.css");
+@import url("./pages/public/legal.css");

@@ -501,6 +501,14 @@ img.auth-brand-icon{
     color:var(--st-on-surface-variant);
 }
 
+/* A bit more breathing room before the primary button, scoped to this
+   page only -- .auth-switch's base spacing is shared by the other auth
+   pages' plain text links, which aren't part of this review. */
+body.auth-page[data-page="Pending"] .auth-switch{
+    margin-top:28px;
+    padding-top:20px;
+}
+
 .auth-register a,
 .auth-switch a{
     color:var(--st-primary);
@@ -653,24 +661,28 @@ img.auth-brand-icon{
     text-decoration:none;
 }
 
-.auth-terms a:hover{
-    text-decoration:underline;
+.auth-terms a:hover,
+.auth-terms a:focus-visible{
+    font-weight:800;
 }
 
+/* Matches .st-landing-footer (landing.css) -- same frosted navy bar and
+   blur, and now the same height as .st-footer (layout.css, the teacher/
+   admin app footer) too, instead of its own shorter padding. */
 .auth-footer{
     position:relative;
     z-index:1;
     flex-shrink:0;
-    padding:16px var(--st-margin-mobile);
-    background:rgba(0,31,63,.35);
-    backdrop-filter:blur(8px);
-    -webkit-backdrop-filter:blur(8px);
+    padding:12px var(--st-margin-mobile);
+    background:rgba(18,53,91,.58);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
     border-top:1px solid rgba(255,255,255,.20);
 }
 
 @media (min-width:768px){
     .auth-footer{
-        padding:16px var(--st-margin-desktop);
+        padding:12px var(--st-margin-desktop);
     }
 }
 
@@ -776,10 +788,22 @@ body.auth-page[data-page="Pending"]::after{
     to{ transform:rotate(180deg); }
 }
 
+/* Matches the app's canonical page-title treatment (30px Libre Franklin
+   800, near-black ink -- see .st-page-header-title in layout.css, and the
+   same fix already applied across the onboarding wizard) rather than the
+   shared .auth-header h2's smaller/lighter default. Scoped to this page
+   only: .auth-header h2 is reused as-is by login/register/forgot-password/
+   reset-password. */
+body.auth-page[data-page="Pending"] .auth-header h2{
+    font-size: var(--st-font-size-title);
+    font-weight:800;
+    color:var(--st-on-surface);
+}
+
 .auth-status-chip{
     display:flex;
     justify-content:center;
-    margin-top:14px;
+    margin-top:18px;
 }
 
 .auth-status-chip span{
@@ -804,7 +828,7 @@ body.auth-page[data-page="Pending"]::after{
 
 .auth-steps{
     position:relative;
-    margin-top:24px;
+    margin-top:28px;
     display:flex;
     flex-direction:column;
     gap:0;
@@ -815,8 +839,8 @@ body.auth-page[data-page="Pending"]::after{
     position:relative;
     display:grid;
     grid-template-columns:36px 1fr;
-    gap:14px;
-    padding:10px 0;
+    gap:16px;
+    padding:12px 0;
     opacity:0;
     animation:auth-card-in .45s var(--st-ease-out, cubic-bezier(.2,.7,.2,1)) forwards;
     animation-delay:calc(var(--i, 0) * 120ms + 250ms);
@@ -826,8 +850,8 @@ body.auth-page[data-page="Pending"]::after{
     content:"";
     position:absolute;
     left:17px;
-    top:46px;
-    bottom:-10px;
+    top:48px;
+    bottom:-12px;
     width:2px;
     background:var(--st-line, var(--st-outline-variant));
 }
@@ -906,7 +930,10 @@ body.auth-page[data-page="Pending"]::after{
 }
 
 .auth-step.is-done .auth-step-tag{
-    background:var(--st-secondary-container, #e3f4f3);
+    /* --st-secondary-container is a vivid #8df0ee turquoise -- the token
+       is defined, so the softer #e3f4f3 fallback after it never actually
+       applies (same bug fixed across the onboarding wizard). */
+    background:#e3f4f3;
     color:#00504e;
 }
 

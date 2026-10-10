@@ -316,20 +316,12 @@ class Layout {
   static initializeUserMenu() {
     const trigger = document.querySelector("[data-st-user-menu]");
 
-    const menu = document.querySelector("[data-st-user-dropdown]");
-
-    if (!trigger || !menu) {
+    if (!trigger) {
       return;
     }
 
-    trigger.addEventListener("click", (event) => {
-      event.stopPropagation();
-
-      menu.classList.toggle("st-hidden");
-    });
-
-    document.addEventListener("click", () => {
-      menu.classList.add("st-hidden");
+    trigger.addEventListener("click", () => {
+      Router?.go("/profile") ?? (window.location.href = "profile.html");
     });
   }
 

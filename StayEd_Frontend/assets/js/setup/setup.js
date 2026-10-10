@@ -166,6 +166,35 @@ class SetupWizard {
       clc.disabled = matching.length === 0;
     }
 
+    // A Division Administrator assigns a municipality/CLC when approving a
+    // teacher's account (see approve_user() in admin_routes.py), stored on
+    // the user object the login response already returns (_safe_user() in
+    // auth_routes.py: "municipality" and "school"). Pre-fill the form with
+    // that assignment instead of leaving a teacher who was already told
+    // their CLC to re-pick it from scratch -- still fully editable.
+    function prefillAdminAssignment() {
+      const assignedMunicipality = Auth.user()?.municipality || "";
+      const assignedClc = Auth.user()?.school || "";
+      const note = document.querySelector("[data-admin-assigned-note]");
+
+      if (
+        !assignedMunicipality ||
+        !municipality ||
+        ![...municipality.options].some((o) => o.value === assignedMunicipality)
+      ) {
+        return;
+      }
+
+      municipality.value = assignedMunicipality;
+      populateClcsForMunicipality(assignedMunicipality);
+
+      if (assignedClc && clc && [...clc.options].some((o) => o.value === assignedClc)) {
+        clc.value = assignedClc;
+      }
+
+      if (note) note.hidden = false;
+    }
+
     async function loadAvailableClcs() {
       try {
         const response = await API.getClcs();
@@ -180,6 +209,7 @@ class SetupWizard {
 
       populateMunicipalities();
       populateClcsForMunicipality(municipality?.value);
+      prefillAdminAssignment();
 
       if (!availableClcs.length) {
         Utils.toast(
@@ -207,14 +237,18 @@ class SetupWizard {
         year: schoolYear?.value || "",
       };
 
-      if (summaryMunicipality)
-        summaryMunicipality.textContent = vals.municipality || "Not selected";
+      // title (not just textContent) so a long value truncated by the
+      // card's ellipsis (setup.css) is still readable on hover.
+      const setSummaryText = (el, text) => {
+        if (!el) return;
+        el.textContent = text;
+        el.title = text;
+      };
 
-      if (summaryCLC) summaryCLC.textContent = vals.clc || "Not selected";
-
-      if (summaryYear) summaryYear.textContent = vals.year || "Not selected";
-
-      if (summaryLevel) summaryLevel.textContent = vals.level || "Not selected";
+      setSummaryText(summaryMunicipality, vals.municipality || "Not selected");
+      setSummaryText(summaryCLC, vals.clc || "Not selected");
+      setSummaryText(summaryYear, vals.year || "Not selected");
+      setSummaryText(summaryLevel, vals.level || "Not selected");
 
       document.querySelectorAll("[data-summary-row]").forEach((row) => {
         row.classList.toggle("is-set", Boolean(vals[row.dataset.summaryRow]));
@@ -512,46 +546,38 @@ class SetupWizard {
       return;
     }
 
-    const rows = preview.rows || [];
+    const applyStats = (p) => {
+      const stats = LearnerImportCore.stats(p);
 
-    const stats = LearnerImportCore.stats(preview);
+      statTotal.textContent = stats.total;
+      statImported.textContent = stats.valid;
+      statDuplicates.textContent = stats.duplicates;
+      statInvalid.textContent = stats.invalid;
 
-    statTotal.textContent = stats.total;
-
-    statImported.textContent = stats.valid;
-
-    statDuplicates.textContent = stats.duplicates;
-
-    statInvalid.textContent = stats.invalid;
-
-    if (previewCount) {
-      previewCount.textContent = `Showing ${rows.length} of ${stats.total} row${stats.total === 1 ? "" : "s"}`;
-    }
-
-    const PILL = {
-      valid: ["ok", "Valid"],
-      duplicate: ["warn", "Duplicate"],
-      error: ["err", "Invalid"],
+      if (previewCount) {
+        previewCount.textContent = `Showing ${p.rows.length} of ${stats.total} row${stats.total === 1 ? "" : "s"}`;
+      }
     };
 
-    learnerTable.innerHTML = rows.length
-      ? rows
-          .map((row) => {
-            const [cls, label] = PILL[row.status] || PILL.valid;
+    applyStats(preview);
 
-            return `
-              <tr>
-                <td class="lrn">${LearnerImportCore.cell(row.lrn)}</td>
-                <td><b>${LearnerImportCore.cell(row.last_name)}</b></td>
-                <td>${LearnerImportCore.cell(row.first_name)}</td>
-                <td>${LearnerImportCore.titleCase(row.sex)}</td>
-                <td>${LearnerImportCore.cell(row.level)}</td>
-                <td><span class="setup-pill setup-pill--${cls}">${label}</span></td>
-              </tr>
-            `;
-          })
-          .join("")
-      : `<tr><td colspan="6" class="setup-preview-empty-cell">No rows to preview.</td></tr>`;
+    // Same shared renderer + edit/remove-row actions as Class Management's
+    // Import Learners preview (LearnerImportCore, learner-import-core.js) --
+    // not a simpler read-only copy. `state.rows` is mutated in place by
+    // edits/removals, and persisted back to sessionStorage on every change
+    // so "Confirm Import" always submits the latest edited rows and a
+    // refresh doesn't silently revert them.
+    const state = { rows: preview.rows || [] };
+
+    LearnerImportCore.renderPreviewRows(learnerTable, state.rows);
+
+    LearnerImportCore.bindPreviewRowActions(learnerTable, state, (updated) => {
+      preview = updated;
+
+      sessionStorage.setItem(SetupWizard.IMPORT_PREVIEW_KEY, JSON.stringify(updated));
+
+      applyStats(updated);
+    });
 
     if (reuploadBtn) {
       reuploadBtn.addEventListener(
@@ -577,7 +603,7 @@ class SetupWizard {
           finishBtn.innerHTML = `<span class="material-symbols-outlined">progress_activity</span> Importing…`;
 
           try {
-            await LearnerImportCore.confirm(rows, null);
+            await LearnerImportCore.confirm(state.rows, null);
 
             sessionStorage.removeItem(SetupWizard.IMPORT_PREVIEW_KEY);
 
@@ -605,17 +631,19 @@ class SetupWizard {
       const cls = await API.getCurrentClass();
 
       if (cls) {
-        document.getElementById("summaryMunicipality").textContent =
-          cls.municipality || "—";
+        // title (not just textContent) so a long value truncated by the
+        // card's ellipsis (setup.css) is still readable on hover.
+        const setConfigText = (id, text) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.textContent = text;
+          el.title = text;
+        };
 
-        document.getElementById("summaryCLC").textContent =
-          cls.communityLearningCenter || "—";
-
-        document.getElementById("summaryYear").textContent =
-          cls.schoolYear || "—";
-
-        document.getElementById("summaryLevel").textContent =
-          cls.learningLevel || "—";
+        setConfigText("summaryMunicipality", cls.municipality || "—");
+        setConfigText("summaryCLC", cls.communityLearningCenter || "—");
+        setConfigText("summaryYear", cls.schoolYear || "—");
+        setConfigText("summaryLevel", cls.learningLevel || "—");
       }
 
       const stats = await API.getImportedLearners();

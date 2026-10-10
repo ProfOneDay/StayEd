@@ -21,6 +21,8 @@ class Router {
     "/admin/notifications": "admin/notifications.html",
     "/settings": "teacher/settings.html",
     "/admin/settings": "admin/settings.html",
+    "/profile": "teacher/profile.html",
+    "/admin/profile": "admin/profile.html",
     "/admin/dashboard": "admin/dashboard.html",
   };
 
@@ -178,6 +180,10 @@ class Router {
 
     if (route === "/settings" && currentRole === "admin") {
       return this.toPagesRelative("admin/settings.html");
+    }
+
+    if (route === "/profile" && currentRole === "admin") {
+      return this.toPagesRelative("admin/profile.html");
     }
 
     if (route === "/dashboard" && currentRole === "admin") {

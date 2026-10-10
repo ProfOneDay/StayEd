@@ -131,11 +131,58 @@ body[data-page="Reports"] .st-report-search-wrap{
     position:relative;
 }
 
-/* .st-search is the shared component (components.css); this scoped
-   override keeps its 40px height while leaving room for the clear (x)
-   button on the right. */
+/* Matches the canonical .st-toolbar .st-search treatment (learner-records.css,
+   and this page's own .st-select above) -- border on the wrapper, 8px radius,
+   hover/focus states -- instead of the shared component's 4px/border-on-input
+   default, so the search bar matches this page's own select fields. */
+body[data-page="Reports"] .st-report-search{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    height:40px;
+    padding:0 12px;
+    border:1px solid var(--st-line-strong, var(--st-outline-variant));
+    border-radius:var(--st-radius-control, var(--st-button-radius));
+    background:#fff;
+    color:var(--st-ink-faint, var(--st-outline));
+}
+
+body[data-page="Reports"] .st-report-search:hover{
+    border-color:var(--st-primary);
+}
+
+body[data-page="Reports"] .st-report-search:focus-within{
+    border-color:var(--st-secondary);
+    box-shadow:0 0 0 3px rgba(0,106,104,.12);
+}
+
+body[data-page="Reports"] .st-report-search .material-symbols-outlined{
+    position:static;
+    top:auto;
+    left:auto;
+    transform:none;
+    flex:none;
+    color:inherit;
+}
+
+/* Keeps its 40px height while leaving room for the clear (x) button on
+   the right. */
 body[data-page="Reports"] .st-report-search input{
-    padding-right:28px;
+    height:100%;
+    border:0;
+    outline:0;
+    flex:1;
+    min-width:0;
+    padding:0 28px 0 0;
+    font:inherit;
+    font-size:0.875rem;
+    background:none;
+    color:var(--st-on-surface);
+}
+
+body[data-page="Reports"] .st-report-search input:focus{
+    outline:none;
+    box-shadow:none;
 }
 
 body[data-page="Reports"] .st-report-search-clear{

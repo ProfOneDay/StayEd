@@ -450,13 +450,13 @@ class StudentRegistry {
                         aria-label="Select ${l.name}">
                 </td>
                 <td data-col="learner">
-                    <div class="st-learner-cell">
+                    <button type="button" class="st-qv-trigger st-learner-cell" data-learner-preview="${l.id}" aria-haspopup="dialog" aria-label="Preview ${l.name}'s profile">
                         ${this.avatar(l, initials)}
-                        <div style="min-width:0">
-                            <button type="button" class="st-learner-name" data-view-learner="${l.id}">${this.formatDisplayName(l)}</button>
+                        <span style="min-width:0">
+                            <span class="st-learner-name">${this.formatDisplayName(l)}</span>
                             <p class="st-learner-id"><span class="num">${l.lrn}</span>${l.sex || l.age ? ` · ${l.sex || ""}${l.sex && l.age ? ", " : ""}${l.age || ""}` : ""}</p>
-                        </div>
-                    </div>
+                        </span>
+                    </button>
                 </td>
                 <td data-col="level">${l.level || "—"}</td>
                 <td data-col="modality">${this.modalityPill(l.modality)}</td>

@@ -1,0 +1,44 @@
+<!-- Shared Danger Zone section, used by both the teacher and admin Profile
+     Settings pages -- identical markup/wording on both sides (styled by
+     the unscoped .st-danger-*/.st-settings-section--danger rules in
+     profile-settings.css). Each page's own script still binds
+     [data-deactivate-account] itself, since what happens on confirm
+     differs per role (teacher: request stub; admin: real self-deactivate
+     call) -- [data-st-logout] is already handled globally by Layout. -->
+<section
+  class="st-settings-section st-settings-section--danger is-open"
+  data-settings-section="danger"
+  style="--i:2"
+>
+  <div class="st-danger-head">
+    <span class="material-symbols-outlined">warning</span>
+    <h3 class="st-settings-section-title">Danger zone</h3>
+  </div>
+  <div class="st-danger-row">
+    <div>
+      <p class="st-toggle-row-title">Sign out from system</p>
+      <p class="st-toggle-row-sub">
+        End your current session across all devices.
+      </p>
+    </div>
+    <button type="button" class="st-btn st-btn-outline st-btn-sm" data-st-logout>
+      <span class="material-symbols-outlined">logout</span>
+      Log out
+    </button>
+  </div>
+  <div class="st-danger-row">
+    <div>
+      <p class="st-toggle-row-title st-danger-title">Deactivate account</p>
+      <p class="st-toggle-row-sub">
+        You'll immediately lose access to administrative tools.
+      </p>
+    </div>
+    <button
+      type="button"
+      class="st-btn st-btn-danger st-btn-sm"
+      data-deactivate-account
+    >
+      Deactivate
+    </button>
+  </div>
+</section>

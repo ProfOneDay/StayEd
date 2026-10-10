@@ -120,12 +120,16 @@ class LearnerImportPage {
     }
   }
 
-  static cell(value) {
-    return LearnerImportCore.cell(value);
-  }
+  static applyPreviewStats(p) {
+    this.set("[data-preview-total-count]", p.total);
+    this.set("[data-preview-valid-count]", p.valid);
+    this.set("[data-preview-duplicate-count]", p.duplicates);
+    this.set("[data-preview-error-count]", p.errors);
 
-  static titleCase(value) {
-    return LearnerImportCore.titleCase(value);
+    const count = document.querySelector("[data-preview-count]");
+    if (count) {
+      count.textContent = `Showing ${p.rows.length} of ${p.total} row${p.total === 1 ? "" : "s"}`;
+    }
   }
 
   static renderPreview() {
@@ -133,184 +137,21 @@ class LearnerImportPage {
 
     if (!p) return;
 
-    this.set("[data-preview-valid-count]", p.valid);
-    this.set("[data-preview-duplicate-count]", p.duplicates);
-    this.set("[data-preview-error-count]", p.errors);
+    this.applyPreviewStats(p);
 
     const body = document.querySelector("[data-preview-body]");
 
     if (body) {
-      body.innerHTML = p.rows
-        .map((row, index) => {
-          const name =
-            `${this.cell(row.last_name)}, ${this.cell(row.first_name)} ${row.middle_name ? row.middle_name : ""}`.trim();
-          const rowClass =
-            row.status !== "valid" ? `st-import-row--${row.status}` : "";
+      LearnerImportCore.renderPreviewRows(body, p.rows);
 
-          return `
-                <tr class="${rowClass}">
-                    <td class="st-import-sticky-left">
-                        <div class="st-import-learner-cell">
-                            <span class="st-import-learner-name">${name}</span>
-                            <span class="st-import-learner-lrn">${this.cell(row.lrn)}</span>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="st-import-status-cell">
-                            ${this.statusBadge(row.status)}
-                            ${row.issue ? `<span class="st-import-issue">${this.cell(row.issue)}</span>` : ""}
-                        </div>
-                    </td>
-                    <td>${this.titleCase(row.sex)}</td>
-                    <td>${this.cell(row.birthdate)}</td>
-                    <td>${this.titleCase(row.modality)}</td>
-                    <td>${this.cell(row.level)}</td>
-                    <td>${this.titleCase(row.re_enrollee) === "\u2014" ? "No" : this.titleCase(row.re_enrollee)}</td>
-                    <td>${this.cell(row.employment_status)}</td>
-                    <td>${row.distance_from_clc_km != null && row.distance_from_clc_km !== "" ? `${row.distance_from_clc_km} km` : "\u2014"}</td>
-                    <td>${this.cell(row.civil_status)}</td>
-                    <td>${this.cell(row.contact_number)}</td>
-                    <td>${this.cell(row.guardian_contact_number)}</td>
-                    <td class="st-import-sticky-right">
-                        <div class="st-row-actions">
-                            <button type="button" class="st-icon-btn-sm" data-edit-row="${index}" aria-label="Edit row" title="Edit">
-                                <span class="material-symbols-outlined">edit</span>
-                            </button>
-                            <button type="button" class="st-icon-btn-sm" data-remove-row="${index}" aria-label="Remove row" title="Remove">
-                                <span class="material-symbols-outlined">delete</span>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        })
-        .join("");
+      this.previewState = { rows: p.rows };
 
-      this.bindRowActions(body);
-    }
-  }
+      LearnerImportCore.bindPreviewRowActions(body, this.previewState, (updated) => {
+        this.preview = updated;
 
-  static bindRowActions(body) {
-    body.querySelectorAll("[data-edit-row]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        this.openEditRowModal(Number(btn.dataset.editRow));
+        this.applyPreviewStats(updated);
       });
-    });
-
-    body.querySelectorAll("[data-remove-row]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        this.removeRow(Number(btn.dataset.removeRow));
-      });
-    });
-  }
-
-  static async revalidateAndRerender() {
-    try {
-      this.preview = await LearnerImportCore.revalidate(this.preview.rows);
-      this.renderPreview();
-    } catch (error) {
-      console.error("[LearnerImport] Unable to revalidate rows", error);
-      Toast?.error("Unable to revalidate the updated rows.");
     }
-  }
-
-  static async removeRow(index) {
-    this.preview.rows.splice(index, 1);
-    await this.revalidateAndRerender();
-    Toast?.success("Row removed.");
-  }
-
-  static openEditRowModal(index) {
-    if (!window.Modal) return;
-
-    const row = this.preview.rows[index];
-
-    const field = (id, label, value, type = "text") => `
-      <div class="st-schedule-modal-field">
-        <label for="${id}">${label}</label>
-        <input id="${id}" type="${type}" value="${value ?? ""}">
-      </div>
-    `;
-
-    Modal.show({
-      title: "Edit learner row",
-      size: "lg",
-      confirmLabel: "Save row",
-      message: `
-        <div class="st-schedule-modal-row">
-          ${field("editLrn", "LRN", row.lrn)}
-          ${field("editLastName", "Last name", row.last_name)}
-          ${field("editFirstName", "First name", row.first_name)}
-          ${field("editMiddleName", "Middle name", row.middle_name)}
-          <div class="st-schedule-modal-field">
-            <label for="editSex">Sex</label>
-            <select id="editSex">
-              <option value="Male" ${row.sex?.toUpperCase() === "MALE" ? "selected" : ""}>Male</option>
-              <option value="Female" ${row.sex?.toUpperCase() === "FEMALE" ? "selected" : ""}>Female</option>
-            </select>
-          </div>
-          ${field("editBirthdate", "Date of birth", row.birthdate, "date")}
-          <div class="st-schedule-modal-field">
-            <label for="editModality">Learning modality</label>
-            <select id="editModality">
-              <option ${row.modality === "Face-to-Face" ? "selected" : ""}>Face-to-Face</option>
-              <option ${row.modality === "Modular" ? "selected" : ""}>Modular</option>
-              <option ${row.modality === "Blended" ? "selected" : ""}>Blended</option>
-            </select>
-          </div>
-          <div class="st-schedule-modal-field">
-            <label for="editReenrollee">Re-enrollee</label>
-            <select id="editReenrollee">
-              <option value="No" ${String(row.re_enrollee).toLowerCase() !== "yes" ? "selected" : ""}>No</option>
-              <option value="Yes" ${String(row.re_enrollee).toLowerCase() === "yes" ? "selected" : ""}>Yes</option>
-            </select>
-          </div>
-          ${field("editEmployment", "Employment status", row.employment_status)}
-          ${field("editDistance", "Distance from CLC (km)", row.distance_from_clc_km, "number")}
-          ${field("editCivilStatus", "Civil status", row.civil_status)}
-          ${field("editContact", "Contact number", row.contact_number)}
-          ${field("editGuardianContact", "Guardian contact number", row.guardian_contact_number)}
-        </div>
-      `,
-      onConfirm: async () => {
-        const val = (id) => document.getElementById(id)?.value.trim() || "";
-
-        this.preview.rows[index] = {
-          ...row,
-          lrn: val("editLrn"),
-          last_name: val("editLastName"),
-          first_name: val("editFirstName"),
-          middle_name: val("editMiddleName"),
-          name: `${val("editFirstName")} ${val("editLastName")}`.trim(),
-          sex: val("editSex"),
-          birthdate: val("editBirthdate"),
-          modality: val("editModality"),
-          re_enrollee: val("editReenrollee"),
-          employment_status: val("editEmployment"),
-          distance_from_clc_km: val("editDistance"),
-          civil_status: val("editCivilStatus"),
-          contact_number: val("editContact"),
-          guardian_contact_number: val("editGuardianContact"),
-        };
-
-        await this.revalidateAndRerender();
-
-        Toast?.success("Row updated.");
-      },
-    });
-  }
-
-  static statusBadge(status) {
-    const map = {
-      valid:
-        '<span class="st-import-status-badge st-import-status-badge--valid">Valid</span>',
-      duplicate:
-        '<span class="st-import-status-badge st-import-status-badge--duplicate">Duplicate</span>',
-      error:
-        '<span class="st-import-status-badge st-import-status-badge--error">Error</span>',
-    };
-
-    return map[status] || map.valid;
   }
 
   static bindPreviewActions() {

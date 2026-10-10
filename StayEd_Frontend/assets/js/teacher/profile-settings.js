@@ -12,7 +12,7 @@ class ProfileSettingsPage {
 
     this.bindForms();
 
-    this.bindAvatarUpload();
+    ProfileAvatar.bindUpload("Teacher");
 
     this.bindProfileEditing();
 
@@ -50,7 +50,7 @@ class ProfileSettingsPage {
 
     this.set("[data-settings-name]", name);
 
-    this.renderAvatar(user.avatar || "", initials);
+    ProfileAvatar.render(user.avatar || "", initials, "Teacher");
 
     const first = document.getElementById("settingsFirstName");
     const last = document.getElementById("settingsLastName");
@@ -84,152 +84,6 @@ class ProfileSettingsPage {
           })
         : "—",
     );
-  }
-
-  static renderAvatar(avatar, initials = "T") {
-    const photo = document.querySelector("[data-profile-photo]");
-    if (!photo) return;
-
-    photo.innerHTML = "";
-    if (avatar) {
-      const image = document.createElement("img");
-      image.src = avatar;
-      image.alt = "Profile photo";
-      photo.appendChild(image);
-    } else {
-      photo.textContent = initials || "T";
-    }
-
-    const removeButton = document.querySelector("[data-remove-photo]");
-    if (removeButton) removeButton.hidden = !avatar;
-  }
-
-  static bindAvatarUpload() {
-    const input = document.querySelector("[data-profile-photo-input]");
-    const button = document.querySelector("[data-change-photo]");
-    const removeButton = document.querySelector("[data-remove-photo]");
-    if (!input || !button) return;
-
-    button.addEventListener("click", () => input.click());
-    removeButton?.addEventListener("click", () => this.confirmRemoveAvatar());
-
-    input.addEventListener("change", () => {
-      const file = input.files?.[0];
-      input.value = "";
-      if (!file) return;
-
-      const allowed = new Set(["image/jpeg", "image/png", "image/webp"]);
-      if (!allowed.has(file.type)) {
-        Toast?.error("Choose a JPG, PNG, or WEBP image.");
-        return;
-      }
-
-      const maxBytes = 2 * 1024 * 1024;
-      if (file.size > maxBytes) {
-        Toast?.error("Profile photo must be 2 MB or smaller.");
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onerror = () => Toast?.error("Unable to read that image.");
-      reader.onload = () => this.previewAvatar(String(reader.result || ""), file);
-      reader.readAsDataURL(file);
-    });
-  }
-
-  static previewAvatar(dataUrl, file) {
-    if (!dataUrl || !window.Modal) return;
-
-    const sizeKb = Math.max(1, Math.round(file.size / 1024));
-    Modal.show({
-      title: "Update Profile Photo",
-      size: "sm",
-      confirmLabel: "Save Photo",
-      asyncConfirm: true,
-      message: `
-        <div class="st-avatar-preview-dialog">
-          <img src="${dataUrl}" alt="Selected profile photo preview">
-          <div>
-            <strong>${this.escapeHtml(file.name)}</strong>
-            <p>${sizeKb} KB · Preview before saving</p>
-          </div>
-        </div>
-      `,
-      onConfirm: async () => {
-        try {
-          const result = await API.updateAvatar(dataUrl);
-          const avatar = result.avatar || dataUrl;
-          const user = Auth.updateUser({ avatar });
-          const name = user.full_name || [user.first_name, user.last_name].filter(Boolean).join(" ") || "Teacher";
-          const initials = name.split(" ").filter(Boolean).map((part) => part[0]).slice(0, 2).join("").toUpperCase();
-          this.renderAvatar(avatar, initials);
-          Layout?.restoreUser?.();
-          Toast?.success("Profile photo updated.");
-        } catch (error) {
-          console.error("[ProfileSettings] Avatar upload failed", error);
-          Toast?.error(error?.data?.message || error?.message || "Unable to update profile photo.");
-          throw error;
-        }
-      },
-    });
-  }
-
-  static confirmRemoveAvatar() {
-    const user = Auth.user() || {};
-    if (!user.avatar) return;
-
-    const remove = async () => {
-      try {
-        await API.updateAvatar(null);
-        const updatedUser = Auth.updateUser({ avatar: "" });
-        const name =
-          updatedUser.full_name ||
-          [updatedUser.first_name, updatedUser.last_name].filter(Boolean).join(" ") ||
-          "Teacher";
-        const initials = name
-          .split(" ")
-          .filter(Boolean)
-          .map((part) => part[0])
-          .slice(0, 2)
-          .join("")
-          .toUpperCase();
-
-        this.renderAvatar("", initials);
-        Layout?.restoreUser?.();
-        App?.restoreUser?.();
-        Toast?.success("Profile photo removed.");
-      } catch (error) {
-        console.error("[ProfileSettings] Avatar removal failed", error);
-        Toast?.error(
-          error?.data?.message || error?.message || "Unable to remove profile photo.",
-        );
-        throw error;
-      }
-    };
-
-    if (window.Modal) {
-      Modal.show({
-        title: "Remove Profile Photo",
-        size: "sm",
-        confirmLabel: "Remove Photo",
-        asyncConfirm: true,
-        message:
-          "Remove your current profile photo? Your initials will be shown instead.",
-        onConfirm: remove,
-      });
-      return;
-    }
-
-    if (window.confirm("Remove your current profile photo?")) remove();
-  }
-
-  static escapeHtml(value) {
-    return String(value ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
   }
 
   static bindSections() {
@@ -332,50 +186,6 @@ class ProfileSettingsPage {
         Toast?.error(error.message || "Unable to save profile information.");
       }
     });
-
-    const passwordForm = document.getElementById("passwordForm");
-
-    window.UnsavedChanges?.track(passwordForm);
-
-    passwordForm?.addEventListener("submit", async (event) => {
-      event.preventDefault();
-
-      const current = document.getElementById("currentPassword").value;
-      const next = document.getElementById("newPassword").value;
-      const confirm = document.getElementById("confirmNewPassword").value;
-
-      if (!current || !next) {
-        Toast?.error("Please fill in your current and new password.");
-
-        return;
-      }
-
-      if (next.length < 12) {
-        Toast?.error("New password must be at least 12 characters.");
-
-        return;
-      }
-
-      if (next !== confirm) {
-        Toast?.error("New password and confirmation do not match.");
-
-        return;
-      }
-
-      try {
-        await Auth.changePassword({
-          current_password: current,
-          password: next,
-        });
-
-        Toast?.success("Password updated successfully.");
-        event.target.reset();
-        window.UnsavedChanges?.clear(passwordForm);
-      } catch (error) {
-        console.error(error);
-        Toast?.error(error.message || "Unable to update password.");
-      }
-    });
   }
 
   static bindDangerZone() {
@@ -402,19 +212,11 @@ class ProfileSettingsPage {
       const settings = await API.getSettings();
       if (Object.prototype.hasOwnProperty.call(settings, "avatar")) {
         Auth.updateUser({ avatar: settings.avatar || "" });
-        const user = Auth.user() || {};
-        const name =
-          user.full_name ||
-          [user.first_name, user.last_name].filter(Boolean).join(" ") ||
-          "Teacher";
-        const initials = name
-          .split(" ")
-          .filter(Boolean)
-          .map((part) => part[0])
-          .slice(0, 2)
-          .join("")
-          .toUpperCase();
-        this.renderAvatar(settings.avatar || "", initials);
+        ProfileAvatar.render(
+          settings.avatar || "",
+          ProfileAvatar.currentInitials("Teacher"),
+          "Teacher",
+        );
         Layout?.restoreUser?.();
       }
     } catch (error) {

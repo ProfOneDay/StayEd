@@ -75,62 +75,76 @@
         </div>
 
         <div class="setup-class-grid">
-          <form class="setup-card setup-form-card" id="classForm">
-            <h2 class="setup-card-title">
-              <span class="material-symbols-outlined">edit_note</span>
-              Class details
-            </h2>
+          <div class="setup-class-left">
+            <form class="setup-card setup-form-card" id="classForm">
+              <h2 class="setup-card-title">
+                <span class="material-symbols-outlined">edit_note</span>
+                Class details
+              </h2>
 
-            <div class="setup-field-row">
-              <div class="setup-field">
-                <label for="municipality">Municipality <span class="req">*</span></label>
-                <div class="setup-select">
-                  <span class="material-symbols-outlined">location_on</span>
-                  <select id="municipality">
-                    <option value="">Select Municipality</option>
-                  </select>
+              <div class="setup-field-row">
+                <div class="setup-field">
+                  <label for="municipality">Municipality <span class="req">*</span></label>
+                  <div class="setup-select">
+                    <span class="material-symbols-outlined">location_on</span>
+                    <select id="municipality">
+                      <option value="">Select Municipality</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="setup-field">
+                  <label for="clc">Community Learning Center (CLC) <span class="req">*</span></label>
+                  <div class="setup-select">
+                    <span class="material-symbols-outlined">hub</span>
+                    <select id="clc" disabled>
+                      <option value="">Select Municipality first</option>
+                    </select>
+                  </div>
+                  <p class="setup-field-hint">Choose a municipality to see its CLCs.</p>
                 </div>
               </div>
 
-              <div class="setup-field">
-                <label for="clc">Community Learning Center (CLC) <span class="req">*</span></label>
-                <div class="setup-select">
-                  <span class="material-symbols-outlined">hub</span>
-                  <select id="clc" disabled>
-                    <option value="">Select Municipality first</option>
-                  </select>
+              <div class="setup-field-row">
+                <div class="setup-field">
+                  <label for="learningLevel">Learning Level <span class="req">*</span></label>
+                  <div class="setup-select">
+                    <span class="material-symbols-outlined">stairs</span>
+                    <select id="learningLevel">
+                      <option value="">Select Level</option>
+                      <option value="Basic Literacy Program">Basic Literacy Program (BLP)</option>
+                      <option value="Elementary A&amp;E">Elementary A&amp;E</option>
+                      <option value="Junior High School A&amp;E">Junior High School A&amp;E</option>
+                      <option value="Senior High School A&amp;E">Senior High School A&amp;E</option>
+                    </select>
+                  </div>
                 </div>
-                <p class="setup-field-hint">Choose a municipality to see its CLCs.</p>
-              </div>
-            </div>
 
-            <div class="setup-field-row">
-              <div class="setup-field">
-                <label for="learningLevel">Learning Level <span class="req">*</span></label>
-                <div class="setup-select">
-                  <span class="material-symbols-outlined">stairs</span>
-                  <select id="learningLevel">
-                    <option value="">Select Level</option>
-                    <option value="Basic Literacy Program">Basic Literacy Program (BLP)</option>
-                    <option value="Elementary A&amp;E">Elementary A&amp;E</option>
-                    <option value="Junior High School A&amp;E">Junior High School A&amp;E</option>
-                    <option value="Senior High School A&amp;E">Senior High School A&amp;E</option>
-                  </select>
+                <div class="setup-field">
+                  <label for="schoolYear">School Year <span class="req">*</span></label>
+                  <div class="setup-select">
+                    <span class="material-symbols-outlined">calendar_today</span>
+                    <select id="schoolYear">
+                      <option value="2025-2026">2025-2026</option>
+                      <option value="2026-2027" selected>2026-2027</option>
+                    </select>
+                  </div>
                 </div>
               </div>
+            </form>
 
-              <div class="setup-field">
-                <label for="schoolYear">School Year <span class="req">*</span></label>
-                <div class="setup-select">
-                  <span class="material-symbols-outlined">calendar_today</span>
-                  <select id="schoolYear">
-                    <option value="2025-2026">2025-2026</option>
-                    <option value="2026-2027" selected>2026-2027</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </form>
+            <!-- Shown only when the Municipality/CLC below were actually
+                 pre-filled from the teacher's admin-assigned CLC (see
+                 prefillAdminAssignment() in setup.js). -->
+            <p class="setup-admin-assigned-note" data-admin-assigned-note hidden>
+              <span class="material-symbols-outlined">verified_user</span>
+              <span>
+                Your Municipality and Community Learning Center were pre-filled
+                based on what your Division Administrator assigned when your
+                account was verified. You can change them below if needed.
+              </span>
+            </p>
+          </div>
 
           <!-- Class summary -->
           <aside class="setup-card setup-summary-card">

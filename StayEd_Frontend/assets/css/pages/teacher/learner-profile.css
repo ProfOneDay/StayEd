@@ -1495,8 +1495,52 @@ body[data-page="Learner Profile"] .st-history-chip.is-active {
   font-weight: 600;
   box-shadow: 0 1px 2px rgba(17, 26, 54, 0.12);
 }
+/* Matches the canonical .st-toolbar .st-search treatment (learner-records.css)
+   -- border on the wrapper (not the global pattern's 4px border-on-input),
+   8px radius, hover/focus states -- so this search bar isn't the odd one
+   out against Student Registry/Learner Records/CLC Overview/Calendar. */
 body[data-page="Learner Profile"] .st-history-filters .st-search {
   flex: 0 1 340px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--st-line-strong, var(--st-outline-variant));
+  border-radius: var(--st-radius-control, var(--st-button-radius));
+  background: #fff;
+  color: var(--st-ink-faint, var(--st-outline));
+}
+body[data-page="Learner Profile"] .st-history-filters .st-search:hover {
+  border-color: var(--st-primary);
+}
+body[data-page="Learner Profile"] .st-history-filters .st-search:focus-within {
+  border-color: var(--st-secondary);
+  box-shadow: 0 0 0 3px rgba(0, 106, 104, 0.12);
+}
+body[data-page="Learner Profile"] .st-history-filters .st-search .material-symbols-outlined {
+  position: static;
+  top: auto;
+  left: auto;
+  transform: none;
+  flex: none;
+  color: inherit;
+}
+body[data-page="Learner Profile"] .st-history-filters .st-search input {
+  height: 100%;
+  border: 0;
+  outline: 0;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 0.875rem;
+  background: none;
+  color: var(--st-on-surface);
+}
+body[data-page="Learner Profile"] .st-history-filters .st-search input:focus {
+  outline: none;
+  box-shadow: none;
 }
 @media (max-width: 767px) {
   body[data-page="Learner Profile"] .st-history-filters .st-search {

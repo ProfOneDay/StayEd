@@ -1,0 +1,780 @@
+/* Learner quick-view modal -- shared across every teacher page that lists
+   learners (see assets/js/core/learner-quick-view.js). One global overlay,
+   built once and reused. Class prefix is .st-qv-* throughout.
+
+   Risk tone variables (--rc/--rs/--ri) follow the exact same convention
+   already used by the student portal's risk card (.st-sv-risk.is-high etc.,
+   assets/css/pages/student/student-portal.css) -- sourced from the shared
+   --st-risk-* tokens in variables.css wherever one exists, so this reuses
+   the app's real risk colors instead of inventing new ones. */
+
+.st-qv-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(17, 26, 54, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+.st-qv-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.st-qv {
+  position: relative;
+  width: min(680px, 100%);
+  max-height: min(88vh, 860px);
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 30px 70px rgba(17, 26, 54, 0.3);
+  overflow: hidden;
+  transform: translateY(10px) scale(0.98);
+  transition: transform 260ms var(--st-ease-out, cubic-bezier(0.2, 0.7, 0.2, 1));
+}
+
+.st-qv:focus {
+  outline: none;
+}
+
+.st-qv-overlay.is-open .st-qv {
+  transform: none;
+}
+
+/* ---------- Header ---------- */
+.st-qv-head {
+  position: relative;
+  padding: 20px 24px 16px;
+  background: linear-gradient(180deg, var(--rs, var(--st-background)), #fff 92%);
+  border-bottom: 1px solid var(--st-line, var(--st-outline-variant));
+  flex: none;
+}
+
+.st-qv-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  display: grid;
+  place-items: center;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  cursor: pointer;
+  transition: background-color 150ms, color 150ms;
+}
+
+.st-qv-close:hover {
+  background: #fff;
+  color: var(--st-on-surface);
+}
+
+.st-qv-close:focus {
+  outline: none;
+}
+
+.st-qv-close:focus-visible {
+  outline: 2px solid var(--st-secondary);
+  outline-offset: 2px;
+}
+
+.st-qv-id {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-right: 40px;
+}
+
+.st-qv-avatar {
+  width: 64px;
+  height: 64px;
+  flex: none;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--st-primary);
+  color: #fff;
+  font-family: var(--st-font-heading);
+  font-weight: 800;
+  font-size: 1.375rem;
+  box-shadow: 0 0 0 4px #fff, 0 0 0 6px var(--ring, #dfe3ea);
+  overflow: hidden;
+}
+
+.st-qv-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.st-qv-name {
+  margin: 0;
+  font-family: var(--st-font-heading);
+  font-weight: 800;
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--st-on-surface);
+}
+
+.st-qv-lrn {
+  margin: 3px 0 0;
+  font-size: 0.8125rem;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+.st-qv-lrn b {
+  color: var(--st-on-surface);
+  font-variant-numeric: tabular-nums;
+}
+
+.st-qv-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.st-qv-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--st-navy-soft, var(--st-primary-fixed));
+  color: var(--st-primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* ---------- Risk box ---------- */
+.st-qv-risk {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 14px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid var(--st-line, var(--st-outline-variant));
+}
+
+.st-qv-risk-icon {
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--rs, #eef1f5);
+  color: var(--rc, var(--st-ink-muted));
+}
+
+.st-qv-risk-icon .material-symbols-outlined {
+  font-variation-settings: "FILL" 1;
+}
+
+.st-qv-risk-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.st-qv-risk-text small {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+.st-qv-risk-text p {
+  margin: 2px 0 0;
+  font-size: 0.8125rem;
+  color: var(--st-ink, var(--st-on-surface));
+}
+
+.st-qv-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  background: var(--rs, #eef1f5);
+  color: var(--ri, var(--st-ink-muted));
+}
+
+.st-qv-pill::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.st-qv-prob {
+  text-align: right;
+  flex: none;
+}
+
+.st-qv-prob b {
+  display: block;
+  font-family: var(--st-font-heading);
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--ri, var(--st-on-surface));
+}
+
+.st-qv-prob small {
+  font-size: 0.6875rem;
+  color: var(--st-ink-faint, var(--st-outline));
+}
+
+.st-qv-meter {
+  height: 5px;
+  border-radius: 999px;
+  background: #eef1f5;
+  margin-top: 4px;
+  overflow: hidden;
+  width: 90px;
+}
+
+.st-qv-meter i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--rc, var(--st-ink-muted));
+  width: 0;
+  transition: width 800ms var(--st-ease-out, cubic-bezier(0.2, 0.7, 0.2, 1)) 150ms;
+}
+
+.st-qv-overlay.is-open .st-qv-meter i {
+  width: var(--w);
+}
+
+/* Risk tone variables -- same pattern as .st-sv-risk.is-high etc.
+   (student-portal.css), sourced from the shared --st-risk-* tokens. */
+.st-qv.is-high {
+  --rc: var(--st-risk-high, #ba1a1a);
+  --rs: var(--st-risk-high-soft-2, #fdecea);
+  --ri: var(--st-risk-high-ink, #a01414);
+  --ring: #f6c9c6;
+}
+.st-qv.is-moderate {
+  --rc: #c46b00;
+  --rs: var(--st-risk-moderate-soft-2, #fef3e4);
+  --ri: var(--st-risk-moderate-ink, #8f5200);
+  --ring: #f8d9ac;
+}
+.st-qv.is-low {
+  --rc: var(--st-risk-low-ink, #2c7121);
+  --rs: var(--st-risk-low-soft-2, #edf7ea);
+  --ri: var(--st-risk-low-ink, #2c7121);
+  --ring: #c9e6c1;
+}
+.st-qv.is-preliminary {
+  --rc: var(--st-info, #0288d1);
+  --rs: #e6f2fb;
+  --ri: #1a6fb0;
+  --ring: #bcdcf3;
+}
+.st-qv.is-neutral {
+  --rc: var(--st-ink-faint, #8a91a0);
+  --rs: #eef1f5;
+  --ri: var(--st-ink-muted, #5a6275);
+  --ring: #dfe3ea;
+}
+
+/* ---------- Body ---------- */
+.st-qv-body {
+  flex: 1;
+  overflow: auto;
+  padding: 16px 24px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.st-qv-sec h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+.st-qv-sec h3 .material-symbols-outlined {
+  font-size: 18px;
+  color: var(--st-primary);
+}
+
+.st-qv-sec h3 a {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--st-secondary);
+  text-decoration: none;
+}
+
+.st-qv-sec h3 a:hover {
+  text-decoration: underline;
+}
+
+.st-qv-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.st-qv-facts div {
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: var(--st-background);
+  min-width: 0;
+}
+
+.st-qv-facts small {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--st-ink-faint, var(--st-outline));
+}
+
+.st-qv-facts b {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--st-on-surface);
+  overflow-wrap: anywhere;
+}
+
+.st-qv-stats {
+  display: grid;
+  grid-template-columns: 1.4fr repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.st-qv-stat {
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: var(--st-background);
+}
+
+.st-qv-stat b {
+  display: block;
+  font-family: var(--st-font-heading);
+  font-weight: 800;
+  font-size: 1.25rem;
+  line-height: 1.1;
+  color: var(--st-on-surface);
+  font-variant-numeric: tabular-nums;
+}
+
+.st-qv-stat small {
+  font-size: 0.6875rem;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+.st-qv-stat--hero {
+  background: var(--st-navy-soft, var(--st-primary-fixed));
+}
+
+.st-qv-stat--hero b {
+  color: var(--st-primary);
+}
+
+.st-qv-stat .bar {
+  height: 5px;
+  border-radius: 999px;
+  background: #fff;
+  margin: 5px 0 3px;
+  overflow: hidden;
+}
+
+.st-qv-stat .bar i {
+  display: block;
+  height: 100%;
+  background: var(--st-primary);
+  border-radius: 999px;
+  width: 0;
+  transition: width 800ms var(--st-ease-out, cubic-bezier(0.2, 0.7, 0.2, 1)) 200ms;
+}
+
+.st-qv-overlay.is-open .st-qv-stat .bar i {
+  width: var(--w);
+}
+
+.st-qv-stat--warn b {
+  color: var(--st-risk-high-ink, #a01414);
+}
+
+.st-qv-activity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 0.8125rem;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+.st-qv-activity .material-symbols-outlined {
+  font-size: 17px;
+  color: var(--st-ink-faint, var(--st-outline));
+}
+
+.st-qv-activity b {
+  color: var(--st-on-surface);
+  font-weight: 600;
+}
+
+.st-qv-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.st-qv-factors {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.st-qv-factor {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--st-line, var(--st-outline-variant));
+  border-left: 3px solid var(--c, var(--st-ink-faint));
+  border-radius: 0 10px 10px 0;
+  font-size: 0.8125rem;
+}
+
+.st-qv-factor b {
+  font-weight: 600;
+  color: var(--st-on-surface);
+  overflow-wrap: anywhere;
+}
+
+.st-qv-factor span {
+  margin-left: auto;
+  flex: none;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--cs, #eef1f5);
+  color: var(--ci, var(--st-ink-muted));
+  font-size: 0.6875rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.st-qv-factor.high {
+  --c: var(--st-risk-high, #ba1a1a);
+  --cs: var(--st-risk-high-soft-2, #fdecea);
+  --ci: var(--st-risk-high-ink, #a01414);
+}
+.st-qv-factor.moderate {
+  --c: var(--st-risk-moderate, #f39422);
+  --cs: var(--st-risk-moderate-soft-2, #fef3e4);
+  --ci: var(--st-risk-moderate-ink, #8f5200);
+}
+.st-qv-factor.low {
+  --c: var(--st-risk-low, #6bbf59);
+  --cs: var(--st-risk-low-soft-2, #edf7ea);
+  --ci: var(--st-risk-low-ink, #2c7121);
+}
+
+.st-qv-iv {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--st-line, var(--st-outline-variant));
+  border-left: 4px solid var(--st-secondary);
+  border-radius: 12px;
+}
+
+.st-qv-iv .material-symbols-outlined {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--st-success-light, #e3f4f3);
+  color: var(--st-secondary);
+  font-size: 19px;
+}
+
+.st-qv-iv b {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--st-on-surface);
+}
+
+.st-qv-iv small {
+  font-size: 0.75rem;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+.st-qv-iv .due {
+  flex: none;
+  margin-left: auto;
+}
+
+.st-qv-empty {
+  padding: 12px;
+  border: 1px dashed var(--st-line-strong, var(--st-outline-variant));
+  border-radius: 10px;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--st-ink-faint, var(--st-outline));
+}
+
+/* ---------- Error state ---------- */
+.st-qv-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 32px 16px;
+}
+
+.st-qv-error .material-symbols-outlined {
+  font-size: 32px;
+  color: var(--st-risk-high, #ba1a1a);
+}
+
+.st-qv-error p {
+  margin: 0;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  font-size: 0.9375rem;
+}
+
+.st-qv-error .st-qv-error-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+/* ---------- Footer ---------- */
+.st-qv-foot {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  border-top: 1px solid var(--st-line, var(--st-outline-variant));
+  background: #fff;
+  flex: none;
+}
+
+.st-qv-foot .r {
+  display: flex;
+  gap: 10px;
+}
+
+.st-qv-foot .st-qv-btn-ghost {
+  border-color: transparent;
+  background: none;
+  color: var(--st-ink-muted, var(--st-on-surface-variant));
+}
+
+.st-qv-foot .st-qv-btn-ghost:hover {
+  background: var(--st-background);
+  border-color: transparent;
+  color: var(--st-on-surface);
+}
+
+/* stagger body sections in */
+.st-qv-body > * {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.st-qv-overlay.is-open .st-qv-body > * {
+  opacity: 1;
+  transform: none;
+  transition: opacity 300ms ease, transform 400ms var(--st-ease-out, cubic-bezier(0.2, 0.7, 0.2, 1));
+  transition-delay: calc(var(--i, 0) * 60ms + 80ms);
+}
+
+/* ---------- Loading skeleton ---------- */
+.st-qv-sk {
+  border-radius: 8px;
+  background: linear-gradient(90deg, #eef1f5 25%, #f6f8fa 50%, #eef1f5 75%);
+  background-size: 200% 100%;
+  animation: st-qv-sk 1.2s linear infinite;
+}
+
+@keyframes st-qv-sk {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ---------- Trigger (avatar + name button) ---------- */
+.st-qv-trigger {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  margin: -4px -6px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  transition: background-color 150ms;
+}
+
+.st-qv-trigger:hover {
+  background: var(--st-background);
+}
+
+.st-qv-trigger:hover .st-learner-name {
+  color: var(--st-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.st-qv-trigger:hover .st-avatar-initials {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--st-navy-soft, var(--st-primary-fixed));
+}
+
+.st-qv-trigger:focus-visible {
+  outline: 2px solid var(--st-secondary);
+  outline-offset: 2px;
+}
+
+.st-qv-trigger:active {
+  transform: scale(0.98);
+}
+
+/* ---------- Mobile: bottom sheet ---------- */
+@media (max-width: 767px) {
+  .st-qv-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .st-qv {
+    width: 100%;
+    max-height: 92vh;
+    border-radius: 18px 18px 0 0;
+    transform: translateY(100%);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .st-qv::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 40px;
+    height: 4px;
+    margin-left: -20px;
+    border-radius: 4px;
+    background: rgba(17, 26, 54, 0.18);
+    z-index: 2;
+  }
+  .st-qv-head {
+    padding: 22px 16px 14px;
+  }
+  .st-qv-body {
+    padding: 14px 16px 6px;
+  }
+  .st-qv-avatar {
+    width: 52px;
+    height: 52px;
+    font-size: 1.125rem;
+  }
+  .st-qv-name {
+    font-size: 1.25rem;
+  }
+  .st-qv-facts {
+    grid-template-columns: 1fr;
+    gap: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--st-background);
+  }
+  .st-qv-facts div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    border-radius: 0;
+  }
+  .st-qv-facts div + div {
+    border-top: 1px solid var(--st-line, var(--st-outline-variant));
+  }
+  .st-qv-facts b {
+    margin: 0;
+    text-align: right;
+  }
+  .st-qv-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+  .st-qv-stat--hero {
+    grid-column: 1 / -1;
+  }
+  .st-qv-pair {
+    grid-template-columns: 1fr;
+  }
+  .st-qv-foot {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+  .st-qv-foot > [data-qv-close] {
+    display: none;
+  }
+  .st-qv-foot .r {
+    flex: 1;
+    flex-direction: row;
+  }
+  .st-qv-foot .r .st-btn {
+    flex: 1;
+    width: auto;
+    padding: 0 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .st-qv-overlay,
+  .st-qv,
+  .st-qv-meter i,
+  .st-qv-stat .bar i,
+  .st-qv-body > * {
+    transition: none !important;
+    animation: none !important;
+  }
+  .st-qv-body > * {
+    opacity: 1;
+    transform: none;
+  }
+  .st-qv-meter i,
+  .st-qv-stat .bar i {
+    width: var(--w);
+  }
+}

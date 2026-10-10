@@ -235,18 +235,59 @@ body[data-page="Manage Modules"] .st-module-toolbar {
   padding: 0 20px 16px;
 }
 
+/* Matches the canonical .st-toolbar .st-search treatment (learner-records.css)
+   -- border on the wrapper, 8px radius, line-strong border color, hover/focus
+   states -- instead of the shared component's 4px/border-on-input default.
+   Height/padding stay at 44px/14px to match this page's own .st-select
+   below, rather than the 40px other pages use. */
 body[data-page="Manage Modules"] .st-module-search {
   flex: 1 1 260px;
   max-width: 380px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--st-line-strong, var(--st-outline-variant));
+  border-radius: var(--st-radius-control, var(--st-button-radius));
+  background: #fff;
+  color: var(--st-ink-faint, var(--st-outline));
 }
 
-/* The global .st-search input (components.css) uses --st-button-radius
-   (4px) -- every page-scoped .st-search override in the app instead uses
-   --st-radius-control (8px), which is the actual standard controls like
-   selects/search bars are meant to share. Matching that here so this
-   page's search bar isn't the odd one out. */
+body[data-page="Manage Modules"] .st-module-search:hover {
+  border-color: var(--st-primary);
+}
+
+body[data-page="Manage Modules"] .st-module-search:focus-within {
+  border-color: var(--st-secondary);
+  box-shadow: 0 0 0 3px rgba(0, 106, 104, 0.12);
+}
+
+body[data-page="Manage Modules"] .st-module-search .material-symbols-outlined {
+  position: static;
+  top: auto;
+  left: auto;
+  transform: none;
+  flex: none;
+  color: inherit;
+}
+
 body[data-page="Manage Modules"] .st-module-search input {
-  border-radius: var(--st-radius-control, var(--st-button-radius));
+  height: 100%;
+  border: 0;
+  outline: 0;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 0.875rem;
+  background: none;
+  color: var(--st-on-surface);
+}
+
+body[data-page="Manage Modules"] .st-module-search input:focus {
+  outline: none;
+  box-shadow: none;
 }
 
 /* .st-select has no shared/unscoped definition anywhere in the app (each

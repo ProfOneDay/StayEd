@@ -43,7 +43,7 @@
     <!-- Academic Year -->
     <section class="st-bento-card" style="--i:0">
       <div class="st-bento-card-head">
-        <span class="st-icon-tile st-icon-tile--teal"><span class="material-symbols-outlined">calendar_today</span></span>
+        <span class="st-icon-tile"><span class="material-symbols-outlined">calendar_today</span></span>
         <div>
           <h3 class="st-bento-card-title">Academic year</h3>
           <p class="st-bento-card-sub">The school year currently in effect division-wide. Changing it updates which school year new enrollments, classes, and reports are recorded under.</p>
@@ -64,7 +64,7 @@
     <!-- Module Return Default -->
     <section class="st-bento-card" style="--i:1">
       <div class="st-bento-card-head">
-        <span class="st-icon-tile st-icon-tile--teal"><span class="material-symbols-outlined">timer</span></span>
+        <span class="st-icon-tile"><span class="material-symbols-outlined">timer</span></span>
         <div>
           <h3 class="st-bento-card-title">Module return default</h3>
           <p class="st-bento-card-sub">The default number of days a learner has to return a borrowed module before it's flagged overdue. Teachers can still set a different duration per module.</p>
@@ -78,6 +78,65 @@
         <div class="st-adm-value-action">
           <span class="st-adm-value" id="moduleDurationDisplay">—</span>
           <button type="button" class="st-btn st-btn-outline st-btn-sm" id="openEditModuleDurationBtn"><span class="material-symbols-outlined">edit</span>Change</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Notifications -->
+    <section class="st-bento-card" style="--i:2">
+      <div class="st-bento-card-head">
+        <span class="st-icon-tile"><span class="material-symbols-outlined">notifications_active</span></span>
+        <h3 class="st-bento-card-title">Notifications</h3>
+      </div>
+      <div class="st-toggle-row">
+        <div>
+          <p class="st-toggle-row-title">Enable account &amp; report alerts</p>
+          <p class="st-toggle-row-sub">Notify me about new teacher registrations and newly submitted reports.</p>
+        </div>
+        <label class="st-toggle">
+          <input type="checkbox" data-settings-toggle-pref="admin-alerts" aria-label="Enable account & report alerts">
+          <span class="st-toggle-track"><span class="st-toggle-thumb"></span></span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Accessibility -->
+    <section class="st-bento-card" style="--i:3">
+      <div class="st-bento-card-head">
+        <span class="st-icon-tile"><span class="material-symbols-outlined">accessibility_new</span></span>
+        <h3 class="st-bento-card-title">Accessibility</h3>
+      </div>
+      <div class="st-font-size-control">
+        <div class="st-font-size-control-head">
+          <div>
+            <p class="st-toggle-row-title">Font size</p>
+            <p class="st-toggle-row-sub">Adjust text size across StayEd to make it easier to read.</p>
+          </div>
+          <span class="st-font-size-current" data-font-size-label>Default</span>
+        </div>
+        <div class="st-font-size-slider-row">
+          <span class="st-font-size-endpoint st-font-size-endpoint--sm">A</span>
+          <div class="st-font-size-slider-wrap">
+            <input type="range" min="1" max="5" step="1" value="3" list="fontSizeTicks" class="st-font-size-slider" data-font-size-slider aria-label="Font size">
+            <datalist id="fontSizeTicks">
+              <option value="1"></option>
+              <option value="2"></option>
+              <option value="3"></option>
+              <option value="4"></option>
+              <option value="5"></option>
+            </datalist>
+            <div class="st-font-size-ticks" aria-hidden="true">
+              <span>Small</span>
+              <span></span>
+              <span>Default</span>
+              <span></span>
+              <span>Extra large</span>
+            </div>
+          </div>
+          <span class="st-font-size-endpoint st-font-size-endpoint--lg">A</span>
+        </div>
+        <div class="st-font-size-preview" data-font-size-preview>
+          This is a preview of how text will look.
         </div>
       </div>
     </section>
@@ -140,6 +199,7 @@
 <script src="../../assets/js/components/component-loader.js"></script>
 <script src="../../assets/js/components/toast.js"></script>
 <script src="../../assets/js/components/modal.js"></script>
+<script src="../../assets/js/core/settings-prefs.js"></script>
 <script src="../../assets/js/admin/system-settings.js"></script>
 </body>
 </html>

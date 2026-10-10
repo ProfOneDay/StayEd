@@ -5,6 +5,11 @@ function openModal(id){document.getElementById(id).classList.add('show')}
 function closeModal(id){document.getElementById(id).classList.remove('show')}
 document.querySelectorAll('.overlay').forEach(ov=>ov.addEventListener('click',e=>{if(e.target===ov)ov.classList.remove('show')}));
 
+// Notifications toggle + Accessibility font-size slider: shared with the
+// teacher System Settings page (see assets/js/core/settings-prefs.js).
+SettingsPrefs.bind();
+SettingsPrefs.load();
+
 (function playEntrance(){
   const REDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const start=()=>{
