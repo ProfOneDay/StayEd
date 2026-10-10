@@ -144,10 +144,15 @@ body[data-page="Admin Dashboard"] .st-adm-side{display:flex;flex-direction:colum
 body[data-page="Admin Dashboard"] .st-dash-grid:has(#clcListSection[hidden]) .st-adm-level-card{grid-column:span 12}
 body[data-page="Admin Dashboard"] .clc-list{grid-template-columns:repeat(2,minmax(0,1fr))}
 /* Side by side with the map: the map card sets the row height and the side stack never stretches it.
-   contain:size drops the stack's content from the row sizing; the two panels split that height and the charts fill what's left. */
+   contain:size drops the stack's content from the row sizing; the two panels split that height and the charts fill what's left.
+   overflow-y:auto (not hidden) -- the Gender card in particular has more
+   content than Risk Distribution (it also carries the insight callout), so
+   when that text wraps to extra lines it can be taller than its even half
+   of the map's height; scrolling that one card internally beats silently
+   clipping its bottom row off entirely. */
 @media (min-width:1280px){
   body[data-page="Admin Dashboard"] .st-adm-side{contain:size}
-  body[data-page="Admin Dashboard"] .st-adm-side > .st-panel{flex:1 1 0;min-height:0;overflow:hidden}
+  body[data-page="Admin Dashboard"] .st-adm-side > .st-panel{flex:1 1 0;min-height:0;overflow-y:auto;overflow-x:hidden}
   body[data-page="Admin Dashboard"] .st-adm-side #riskChartView.chart-canvas-wrap,
   body[data-page="Admin Dashboard"] .st-adm-side #genderChartView.chart-canvas-wrap{flex:1 1 0;height:auto;min-height:0}
 }
