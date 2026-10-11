@@ -369,6 +369,134 @@ field ids, `.kpi[data-filter]`, `data-clc`, `name="reject-reason"`, etc.) are un
 
 ---
 
+## 2026-10-03 — Admin Settings split into Profile Settings + System Settings, new Help & User Manual
+
+- **Sidebar**: "Settings" renamed to "System Settings"; added an "Account" divider with new
+  "Profile Settings" and "Help & User Manual" links beneath it.
+- **Profile Settings** (new admin page, shares the teacher page's `data-page` value so it inherits
+  `profile-settings.css` directly): profile summary card, three collapsible sections (Account
+  information, Security, Danger zone), Edit Profile / Change Password (3-view) / Confirm modals —
+  all content and hooks carried over from the old combined Settings page.
+- **System Settings** (rewritten, settings-only now): two cards (Academic year, Module return
+  default) plus their edit modals and a hint linking to Profile Settings — no confirm-modal step,
+  matching the old page's direct-save behavior.
+- **Help & User Manual** (new admin page, mirrors the teacher Help page's FAQ layout): FAQ content
+  is a first draft (approving teacher registration, adding a CLC, exporting the Master Enrollment
+  Listing, changing the school year) — flagged as needing review before treating it as final.
+- Added the shared `st-admin` body class across every admin page.
+
+## 2026-10-03 — Admin Reports redesign
+
+- Both panels (Master Enrollment Listing, Reports from Teachers) rebuilt on the shared
+  `.st-panel.st-table-card` shell; the filter row became a responsive labelled-field grid
+  (6/3/2 columns depending on width); both tables now scroll inside a sticky-header, 520px-max
+  `.st-report-table-wrap`.
+- Status values (enrollment/account/submission), learner/teacher names, and the Learning Level
+  column now render as pills/chips instead of plain text; the count line gained an icon; "Mark
+  Reviewed" restyled from plain gray text to a teal text-link button.
+- Card-entrance + row-stagger motion added, respecting `prefers-reduced-motion`.
+- CSS fully rewritten and scoped under `body.st-admin[data-page="Reports"]` — confirmed zero
+  changes to the separate teacher Reports page, which shares the same `data-page` value but an
+  entirely different, non-overlapping class vocabulary.
+
+## 2026-10-07 — Student View redesign + per-class LRN/birthdate access
+
+- **Student View** (public, read-only learner report page): rewritten around a sticky top bar
+  (dark logo + "read-only" chip), a centered 1200px content column, and a slim footer — loads only
+  `variables.css`/`components.css`/`student-portal.css`, no app chrome. Rebuilt hero (avatar +
+  risk-tinted ring + meta tiles), risk card, and performance-progress chart (dashed gridlines,
+  outside % labels, animated line draw-in on scroll into view).
+- **Sharing model changed from per-student to per-class**: the old per-learner copy-link toggle on
+  Learner Profile was removed entirely; a single "Student view" toggle now lives on Learner Records
+  (Class Management) and covers every learner in that class at once, since that's how teachers
+  actually used the per-student version in practice.
+- **New public lookup page** (`pages/student/access.html`): instead of being handed a link,
+  students open their own report by entering their LRN + birthdate — a two-column page (navy pitch
+  panel + form card, stacks on mobile) with an auto-grouped 12-digit LRN field, a disabled-until-
+  valid submit button, and a shake-animated generic error message (the endpoint never reveals
+  *which* part of the lookup failed — bad LRN, wrong birthdate, or sharing turned off all look
+  identical). Backed by a new rate-limited backend endpoint (5 attempts / 10 minutes per IP).
+- `renderUnavailable()` on the Student View page now includes a "Look up my report with my LRN"
+  link to the new access page.
+
+## 2026-10-09 — Setup Wizard + Account Pending Approval redesign
+
+- **5-step setup wizard**: sticky top bar with a dot-stepper (done steps teal + check, active step
+  navy with a soft ring; collapses to "Step N of 5 · {label}" + a progress bar under 768px), a
+  fixed footer (back left, primary action right), and a per-step layout rebuild (Welcome's
+  split navy/white roadmap card, Create Class + sticky Class Summary, Upload's dropzone + file
+  card, Preview's stat tiles + table, Complete's pop-in check + stats + configuration card).
+- **Behavior change, not just cosmetic**: Upload/Preview now go through a real preview-then-confirm
+  step — the file is validated and duplicate/invalid rows are flagged *before* anything is written
+  to the database, and the import only commits when "Confirm Import" is clicked on step 4. The old
+  wizard imported immediately on step 3 and just redisplayed the result as "Imported."
+  Step 4 redirects back to step 3 if opened with nothing to confirm (a direct link or a refresh).
+- Extracted a shared `LearnerImportCore` module (file validation, preview/confirm calls, template
+  download, dropzone drag/drop wiring, staged-progress animation) so the setup wizard and Class
+  Management's existing "Import Learners" page stop maintaining two separate copies of the same
+  logic; Import Learners' own page design/behavior is otherwise unchanged.
+- Step 2's Continue button is now disabled until municipality, CLC, level, and school year are all
+  set, with the Class Summary's status line and each row's icon toggling live between "Complete all
+  fields to continue" and "Ready for learner import."
+- **Account Pending Approval**: background, pending icon (ring-pulse + hourglass-flip once), the
+  "Pending review" chip, and a vertical step tracker (teal check "Done" / amber ring "In progress"
+  / gray upcoming) now match the approved design; "Back to Login" restyled as a navy primary button
+  with a back arrow.
+- `prefers-reduced-motion: reduce` added to the shared auth stylesheet (there wasn't one before),
+  disabling every `.auth-page` animation/transition app-wide.
+
+## 2026-10-10 — Learner Quick-View modal
+
+- Clicking a learner's avatar or name anywhere in the app now opens a quick-view preview modal
+  (profile summary, risk card, contributing factors, active intervention) instead of always
+  leaving the page for the full Learner Profile — wired into the Dashboard's Recent High-Risk list
+  and Student Registry Summary widget, the full Student Registry, Learner Records (class roster),
+  Early Warning Alerts, and the Module Management roster.
+- Every other existing control (standalone "View profile" buttons, row-menu items, Assign
+  Intervention, etc.) is untouched and still navigates straight to the full Learner Profile page as
+  before. Assessment Scores was deliberately left out — clicking a learner there selects them for
+  scoring instead of previewing their profile.
+- Desktop: centered 680px dialog. Mobile (<768px): bottom sheet. Risk styling (tone, ring color,
+  icon) reuses the same `--st-risk-*` tokens the rest of the app already uses, with focus-trap,
+  Escape, backdrop-click, and scroll-lock behavior.
+
+## 2026-10-11 — Three-phase CSS architecture cleanup
+
+A three-session refactor of `assets/css`, presentational/structural only — no content, flow, or
+JS-behavior changes, and every id, `data-*` hook, and JS-toggled class (`is-active`, `is-open`,
+`.selected`, etc.) was left in place throughout all three phases.
+
+- **Phase 1 — Foundation**: fixed a handful of real, previously-unnoticed bugs — a broken CSS
+  comment (a literal `*/` mid-sentence) was silently dropping every rule after it on 3 pages'
+  stylesheets; a duplicated `@keyframes` name; CSS double-loaded via both `main.css` and a direct
+  `<link>` on one page. Collapsed the radius/color/breakpoint/font-size scales each onto one
+  canonical token set (`--st-radius-*`, risk-color aliases, `--st-fs-*`, the 4-step breakpoint
+  scale), and removed 470 dead `var(--a, var(--b))` fallback chains where the fallback could never
+  actually fire.
+- **Phase 2 — Shared component library**: pulled every shared UI element (buttons, form fields,
+  pills/badges, panels/cards, avatars, data tables, charts/risk-viz, modals, tabs) into one
+  unscoped definition under `assets/css/components/`, inherited by every page instead of being
+  redefined per page. Settling on "the" canonical version of several long-duplicated components
+  produced a few small, intentional visual shifts (e.g. button active-state scale `.96`→`.97`,
+  icon-tile radius 12px→8px, pill height standardized to 24px, modal corner radius 12px→18px and
+  new size steps, a new grab-handle bar on mobile bottom-sheet modals).
+- **Phase 3 — Cleanup**: removed all 170 inline `style=""` attributes app-wide (replaced with
+  classes or, where a value is genuinely per-instance like a chart point's position, CSS custom
+  properties); consolidated 4 duplicated JS helpers (`initials`, `esc`, `countTo`, `riskPill`/
+  `riskBadge`) down to one implementation each in `core/utils.js`. Standardized risk-pill label
+  text to "High"/"Moderate"/"Low" (no "Risk" suffix) and the not-yet-assessed label to
+  "Not Yet Assessed" everywhere, resolving small wording disagreements between the 6 previously
+  separate copies. Removed 219 confirmed-dead CSS classes (verified against actual HTML/JS usage,
+  including dynamically-built class names, before deleting).
+- **Open item across all three phases**: none of them included a browser/screenshot verification
+  pass (no browser automation was available in those sessions) — every change was verified by
+  static checks only (brace balance, `node --check`, re-running the style-audit script, confirming
+  specific pages still parse their intended first CSS rule). A full click-through + 1440px/390px
+  screenshot comparison against the pre-refactor app is the single biggest remaining item before
+  fully trusting the visual result of this cleanup.
+
+---
+
 ## Recurring patterns worth knowing
 
 - **CSS leaks globally**: `main.css` `@import`s every page's stylesheet unscoped, so a class name
@@ -383,3 +511,8 @@ field ids, `.kpi[data-filter]`, `data-clc`, `name="reject-reason"`, etc.) are un
 - **Scroll-reveal needs a trigger**: any component using a `[data-animate]`/`.is-inview` reveal
   pattern does nothing until something adds that class — either a real `IntersectionObserver` for
   below-the-fold content, or a direct add-after-render for content that's always above the fold.
+- **No browser automation across most of this project's history**: nearly every session above
+  ends with "not verified visually, no browser tooling available" — static checks (brace/paren
+  balance, `node --check`, the style-audit script, hook/id cross-referencing) catch structural
+  mistakes but can't confirm the app actually *looks* right. Treat any unreviewed entry above as
+  code-complete, not visually confirmed, until someone has clicked through it.

@@ -229,5 +229,6 @@ from a `body:is([data-page=...])` list, a hard-coded color/radius/
 font-size instead of the shared token, or a duplicated JS helper
 (initials, esc, countTo, riskPill) instead of the one in
 assets/js/core/utils.js. See tools/style-audit/STYLE_AUDIT_REPORT.md
-and the three CHANGES_2026-10-11_style-phase*.md files in this folder
-for the full history of what it caught and why each number matters.
+and the "2026-10-11 -- Three-phase CSS architecture cleanup" entry in
+docs/CHANGES_UI_SUMMARY.md for the full history of what it caught and
+why each number matters.
