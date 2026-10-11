@@ -22,21 +22,21 @@ body[data-page="About StayEd"] .st-about-name{
     margin:0;
     font-family:var(--st-font-heading);
     font-weight:800;
-    font-size:1.75rem; /* 28px */
+    font-size: var(--st-fs-3xl); /* 28px */
     letter-spacing:-.02em;
     line-height:1.1;
 }
 
 body[data-page="About StayEd"] .st-about-tag{
     margin:2px 0 0;
-    font-size:0.875rem; /* 14px */
+    font-size: var(--st-fs-base); /* 14px */
     color:rgba(255,255,255,.75);
 }
 
 body[data-page="About StayEd"] .st-about-text{
     margin:0;
     padding:22px 24px 6px;
-    font-size:0.969rem; /* 15.5px */
+    font-size: var(--st-fs-md); /* 15.5px */
     line-height:1.7;
     color:#2b3346;
 }
@@ -53,8 +53,8 @@ body[data-page="About StayEd"] .st-about-facts div{
     flex-direction:column;
     gap:2px;
     padding:14px 16px;
-    border-radius:10px;
-    background:var(--st-background, var(--st-surface-container-low));
+    border-radius:var(--st-radius-card);
+    background:var(--st-background);
 }
 
 body[data-page="About StayEd"] .st-about-facts .material-symbols-outlined{
@@ -64,12 +64,12 @@ body[data-page="About StayEd"] .st-about-facts .material-symbols-outlined{
 }
 
 body[data-page="About StayEd"] .st-about-facts small{
-    font-size:0.75rem; /* 12px */
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    font-size: var(--st-fs-xs); /* 12px */
+    color:var(--st-ink-muted);
 }
 
 body[data-page="About StayEd"] .st-about-facts strong{
-    font-size:0.906rem; /* 14.5px */
+    font-size: var(--st-fs-base); /* 14.5px */
     font-weight:600;
 }
 
@@ -87,7 +87,7 @@ body[data-page="About StayEd"] [data-animate-cards].is-inview > *{
 }
 
 /* ---------- Responsive ---------- */
-@media (max-width:767px){
+@media (max-width: 767px){
     body[data-page="About StayEd"] .st-about-facts{
         grid-template-columns:1fr;
         padding:14px 16px 16px;
@@ -97,10 +97,10 @@ body[data-page="About StayEd"] [data-animate-cards].is-inview > *{
     }
     body[data-page="About StayEd"] .st-about-text{
         padding:16px 16px 4px;
-        font-size:0.938rem; /* 15px */
+        font-size: var(--st-fs-md); /* 15px */
     }
     body[data-page="About StayEd"] .st-about-name{
-        font-size:1.5rem; /* 24px */
+        font-size: var(--st-fs-2xl); /* 24px */
     }
 }
 
@@ -118,7 +118,7 @@ body[data-page="About StayEd"] [data-animate-cards].is-inview > *{
 
 .st-legal{
     color:#2b3346;
-    font-size:0.938rem; /* 15px */
+    font-size: var(--st-fs-md); /* 15px */
     line-height:1.7;
 }
 
@@ -156,9 +156,9 @@ body[data-page="About StayEd"] [data-animate-cards].is-inview > *{
     gap:8px 18px;
     margin-bottom:18px;
     padding-bottom:16px;
-    border-bottom:1px solid var(--st-line, var(--st-outline-variant));
-    font-size:0.813rem; /* 13px */
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    border-bottom:1px solid var(--st-line);
+    font-size: var(--st-fs-sm); /* 13px */
+    color:var(--st-ink-muted);
 }
 
 .st-legal-meta > span{
@@ -173,14 +173,14 @@ body[data-page="About StayEd"] [data-animate-cards].is-inview > *{
 }
 
 .st-legal-lead{
-    font-size:1rem;
-    color:var(--st-on-surface, #111a36);
+    font-size: var(--st-fs-md);
+    color:var(--st-on-surface);
 }
 
 .st-legal-section{
     padding-top:18px;
     margin-top:16px;
-    border-top:1px solid var(--st-line, var(--st-outline-variant));
+    border-top:1px solid var(--st-line);
 }
 
 .st-legal-section > :last-child{
@@ -193,9 +193,9 @@ body[data-page="About StayEd"] [data-animate-cards].is-inview > *{
     gap:8px;
     margin:0 0 10px;
     font-family:var(--st-font-heading);
-    font-size:1.063rem; /* 17px */
+    font-size: var(--st-fs-lg); /* 17px */
     font-weight:700;
-    color:var(--st-primary-dark, var(--st-primary));
+    color:var(--st-primary-dark);
 }
 
 .st-legal-num{
@@ -210,9 +210,9 @@ body[data-page="About StayEd"] [data-animate-cards].is-inview > *{
     align-items:flex-start;
     margin-top:16px;
     padding:14px 16px;
-    border-radius:10px;
-    background:var(--st-navy-soft, #e8eef6);
-    color:var(--st-primary-dark, var(--st-primary));
+    border-radius:var(--st-radius-card);
+    background:var(--st-navy-soft);
+    color:var(--st-primary-dark);
 }
 
 .st-legal-callout p{
@@ -238,8 +238,8 @@ body[data-page="About StayEd"] [data-animate-cards].is-inview > *{
     flex-direction:column;
     gap:4px;
     padding:16px;
-    border-radius:10px;
-    background:var(--st-background, var(--st-surface-container-low));
+    border-radius:var(--st-radius-card);
+    background:var(--st-background);
 }
 
 .st-about-capabilities .material-symbols-outlined{
@@ -249,16 +249,16 @@ body[data-page="About StayEd"] [data-animate-cards].is-inview > *{
 }
 
 .st-about-capabilities strong{
-    font-size:0.938rem;
+    font-size: var(--st-fs-md);
     font-weight:700;
-    color:var(--st-on-surface, #111a36);
+    color:var(--st-on-surface);
 }
 
 .st-about-capabilities p{
     margin:0;
-    font-size:0.844rem; /* 13.5px */
+    font-size: var(--st-fs-base); /* 13.5px */
     line-height:1.55;
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    color:var(--st-ink-muted);
 }
 
 /* Contact Us */
@@ -275,8 +275,8 @@ body[data-page="About StayEd"] [data-animate-cards].is-inview > *{
     column-gap:12px;
     align-items:center;
     padding:14px 16px;
-    border:1px solid var(--st-line, var(--st-outline-variant));
-    border-radius:10px;
+    border:1px solid var(--st-line);
+    border-radius:var(--st-radius-card);
     background:#fff;
 }
 
@@ -286,24 +286,24 @@ body[data-page="About StayEd"] [data-animate-cards].is-inview > *{
     place-items:center;
     width:38px;
     height:38px;
-    border-radius:10px;
-    background:var(--st-navy-soft, #e8eef6);
+    border-radius:var(--st-radius-card);
+    background:var(--st-navy-soft);
     color:var(--st-primary);
     font-size:20px;
 }
 
 .st-contact-grid small{
-    font-size:0.75rem;
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    font-size: var(--st-fs-xs);
+    color:var(--st-ink-muted);
 }
 
 .st-contact-grid b{
-    font-size:0.938rem;
+    font-size: var(--st-fs-md);
     font-weight:600;
 }
 
 .st-contact-empty{
-    color:var(--st-ink-faint, #8a91a0);
+    color:var(--st-ink-faint);
     font-style:italic;
     font-weight:500 !important;
 }
@@ -313,8 +313,8 @@ body[data-page="About StayEd"] [data-animate-cards].is-inview > *{
     align-items:center;
     gap:6px;
     margin:14px 0 0 !important;
-    font-size:0.813rem;
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    font-size: var(--st-fs-sm);
+    color:var(--st-ink-muted);
 }
 
 .st-contact-pending .material-symbols-outlined{
@@ -323,22 +323,22 @@ body[data-page="About StayEd"] [data-animate-cards].is-inview > *{
 
 .st-contact-escalate{
     margin:16px 0 0 !important;
-    font-size:0.875rem;
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    font-size: var(--st-fs-base);
+    color:var(--st-ink-muted);
 }
 
-@media (max-width:1023px){
+@media (max-width: 1023px){
     .st-about-capabilities{
         grid-template-columns:repeat(2,minmax(0,1fr));
     }
 }
 
-@media (max-width:767px){
+@media (max-width: 767px){
     .st-about-capabilities,
     .st-contact-grid{
         grid-template-columns:1fr;
     }
     .st-legal{
-        font-size:0.906rem;
+        font-size: var(--st-fs-base);
     }
 }

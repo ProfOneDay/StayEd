@@ -14,22 +14,22 @@ body[data-page="Learner Profile"] .st-icon-tile {
   width: 40px;
   height: 40px;
   flex: none;
-  border-radius: 11px;
+  border-radius: var(--st-radius-card);
   display: grid;
   place-items: center;
   background: var(--st-navy-soft);
   color: var(--st-primary);
 }
 body[data-page="Learner Profile"] .st-icon-tile .material-symbols-outlined {
-  font-size: 1.3125rem;
+  font-size: var(--st-fs-xl);
 }
 body[data-page="Learner Profile"] .st-icon-tile--teal {
-  background: #e3f4f3;
+  background: var(--st-teal-soft);
   color: var(--st-secondary);
 }
 body[data-page="Learner Profile"] .st-icon-tile--risk {
-  background: var(--st-risk-high-soft-2, #fdecea);
-  color: var(--st-risk-high-ink, #a01414);
+  background: var(--st-risk-high-soft);
+  color: var(--st-risk-high-ink);
 }
 
 body[data-page="Learner Profile"] .st-card {
@@ -48,13 +48,13 @@ body[data-page="Learner Profile"] .st-card-title {
   margin: 0;
   font-family: var(--st-font-heading);
   font-weight: 700;
-  font-size: 1.125rem;
+  font-size: var(--st-fs-lg);
   letter-spacing: -0.01em;
   color: var(--st-on-surface);
 }
 body[data-page="Learner Profile"] .st-card-sub {
   margin: 4px 0 0;
-  font-size: 0.844rem;
+  font-size: var(--st-fs-base);
   color: var(--st-on-surface-variant);
   line-height: 1.5;
 }
@@ -135,21 +135,21 @@ body[data-page="Learner Profile"] .st-profile-hero-avatar {
   color: var(--st-primary);
   font-family: var(--st-font-heading);
   font-weight: 800;
-  font-size: 1.75rem;
-  box-shadow: 0 0 0 4px #fff, 0 0 0 6px #dfe3ea;
+  font-size: var(--st-fs-3xl);
+  box-shadow: 0 0 0 4px #fff, 0 0 0 6px var(--st-risk-neutral-ring);
 }
 /* Avatar outer ring tints with the learner's current risk state. */
 body[data-page="Learner Profile"] .st-profile-hero--high .st-profile-hero-avatar {
-  box-shadow: 0 0 0 4px #fff, 0 0 0 6px #f6c9c6;
+  box-shadow: 0 0 0 4px #fff, 0 0 0 6px var(--st-risk-high-ring);
 }
 body[data-page="Learner Profile"] .st-profile-hero--moderate .st-profile-hero-avatar {
-  box-shadow: 0 0 0 4px #fff, 0 0 0 6px #f8d9ac;
+  box-shadow: 0 0 0 4px #fff, 0 0 0 6px var(--st-risk-moderate-ring);
 }
 body[data-page="Learner Profile"] .st-profile-hero--low .st-profile-hero-avatar {
-  box-shadow: 0 0 0 4px #fff, 0 0 0 6px #c9e6c1;
+  box-shadow: 0 0 0 4px #fff, 0 0 0 6px var(--st-risk-low-ring);
 }
 body[data-page="Learner Profile"] .st-profile-hero--neutral .st-profile-hero-avatar {
-  box-shadow: 0 0 0 4px #fff, 0 0 0 6px #dfe3ea;
+  box-shadow: 0 0 0 4px #fff, 0 0 0 6px var(--st-risk-neutral-ring);
 }
 body[data-page="Learner Profile"] .st-profile-hero-heading {
   min-width: 0;
@@ -158,13 +158,13 @@ body[data-page="Learner Profile"] .st-profile-hero-name {
   margin: 0;
   font-family: var(--st-font-heading);
   font-weight: 800;
-  font-size: 1.625rem;
+  font-size: var(--st-fs-2xl);
   letter-spacing: -0.02em;
   line-height: 1.15;
 }
 body[data-page="Learner Profile"] .st-profile-hero-lrn {
   margin: 4px 0 0;
-  font-size: 0.844rem;
+  font-size: var(--st-fs-base);
   color: var(--st-on-surface-variant);
 }
 body[data-page="Learner Profile"] .st-profile-hero-lrn span {
@@ -174,7 +174,7 @@ body[data-page="Learner Profile"] .st-profile-hero-lrn span {
 }
 body[data-page="Learner Profile"] .st-profile-hero-birthdate {
   margin: 2px 0 0;
-  font-size: 0.844rem;
+  font-size: var(--st-fs-base);
   color: var(--st-on-surface-variant);
 }
 body[data-page="Learner Profile"] .st-profile-hero-birthdate span {
@@ -187,10 +187,10 @@ body[data-page="Learner Profile"] .st-profile-chip-row {
 body[data-page="Learner Profile"] .st-profile-level-chip {
   display: inline-block;
   padding: 3px 10px;
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   background: var(--st-navy-soft);
   color: var(--st-primary);
-  font-size: 0.781rem;
+  font-size: var(--st-fs-xs);
   font-weight: 600;
 }
 
@@ -211,28 +211,28 @@ body[data-page="Learner Profile"] .st-profile-meta-row > .material-symbols-outli
   width: 36px;
   height: 36px;
   flex: none;
-  border-radius: 10px;
+  border-radius: var(--st-radius-card);
   display: grid;
   place-items: center;
   background: var(--st-background);
   color: var(--st-primary);
-  font-size: 1.1875rem;
+  font-size: var(--st-fs-lg);
 }
 body[data-page="Learner Profile"] .st-profile-meta-label {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: var(--st-fs-xs);
   color: var(--st-ink-faint);
 }
 body[data-page="Learner Profile"] .st-profile-meta-value {
   margin: 1px 0 0;
-  font-size: 0.906rem;
+  font-size: var(--st-fs-base);
   font-weight: 600;
   color: var(--st-on-surface);
   overflow-wrap: anywhere;
 }
 body[data-page="Learner Profile"] .st-profile-meta-note {
   margin: 1px 0 0;
-  font-size: 0.75rem;
+  font-size: var(--st-fs-xs);
   color: var(--st-on-surface-variant);
 }
 
@@ -248,7 +248,7 @@ body[data-page="Learner Profile"] .st-profile-hero-risk-panel {
 }
 body[data-page="Learner Profile"] .st-profile-risk-panel-label {
   margin: 0;
-  font-size: 0.781rem;
+  font-size: var(--st-fs-xs);
   font-weight: 600;
   color: var(--st-on-surface-variant);
 }
@@ -262,33 +262,33 @@ body[data-page="Learner Profile"] .st-profile-risk-panel-icon {
   color: var(--st-on-surface-variant);
 }
 body[data-page="Learner Profile"] .st-profile-risk-panel-icon .material-symbols-outlined {
-  font-size: 1.875rem;
+  font-size: var(--st-fs-3xl);
   font-variation-settings: "FILL" 1;
 }
 body[data-page="Learner Profile"] .st-profile-risk-panel-helper {
   margin: 0;
-  font-size: 0.8125rem;
+  font-size: var(--st-fs-sm);
   color: var(--st-on-surface-variant);
   max-width: 200px;
 }
 body[data-page="Learner Profile"] .st-profile-risk-panel-badge .st-risk-badge {
   padding: 4px 12px;
-  font-size: 0.781rem;
+  font-size: var(--st-fs-xs);
 }
 
 body[data-page="Learner Profile"] .st-profile-hero-risk-panel.is-high {
   background: linear-gradient(180deg, #fdf1f0, #fff 90%);
 }
 body[data-page="Learner Profile"] .st-profile-hero-risk-panel.is-high .st-profile-risk-panel-icon {
-  background: var(--st-risk-high-soft-2, #fdecea);
-  color: var(--st-risk-high, #ba1a1a);
+  background: var(--st-risk-high-soft);
+  color: var(--st-risk-high);
   animation: st-lp-pulse-once 900ms var(--st-ease-out) 300ms;
 }
 body[data-page="Learner Profile"] .st-profile-hero-risk-panel.is-moderate {
   background: linear-gradient(180deg, #fef6ea, #fff 90%);
 }
 body[data-page="Learner Profile"] .st-profile-hero-risk-panel.is-moderate .st-profile-risk-panel-icon {
-  background: var(--st-risk-moderate-soft-2, #fef3e4);
+  background: var(--st-risk-moderate-soft);
   color: #c46b00;
   animation: st-lp-pulse-once 900ms var(--st-ease-out) 300ms;
 }
@@ -296,8 +296,8 @@ body[data-page="Learner Profile"] .st-profile-hero-risk-panel.is-low {
   background: linear-gradient(180deg, #f0f8ee, #fff 90%);
 }
 body[data-page="Learner Profile"] .st-profile-hero-risk-panel.is-low .st-profile-risk-panel-icon {
-  background: var(--st-risk-low-soft-2, #edf7ea);
-  color: var(--st-risk-low-ink, #2c7121);
+  background: var(--st-risk-low-soft);
+  color: var(--st-risk-low-ink);
   animation: st-lp-pulse-once 900ms var(--st-ease-out) 300ms;
 }
 body[data-page="Learner Profile"] .st-profile-hero-risk-panel.is-neutral {
@@ -330,12 +330,6 @@ body[data-page="Learner Profile"] .st-profile-hero-actions .st-btn {
   width: 100%;
   min-width: 0;
 }
-/* Author rules always beat the UA [hidden]{display:none} default regardless
-   of specificity, so .st-btn's own display:inline-flex would otherwise keep
-   "View class" visible for learners with no class. */
-body[data-page="Learner Profile"] .st-profile-hero-actions .st-btn[hidden] {
-  display: none;
-}
 body[data-page="Learner Profile"] .st-profile-hero-actions .st-btn span:nth-child(2) {
   flex: 1;
   min-width: 0;
@@ -345,7 +339,7 @@ body[data-page="Learner Profile"] .st-profile-hero-actions .st-btn span:nth-chil
   white-space: nowrap;
 }
 body[data-page="Learner Profile"] .st-btn-tail {
-  font-size: 1.1875rem !important;
+  font-size: var(--st-fs-lg) !important;
   opacity: 0.6;
   transition: transform var(--st-t-hover) var(--st-ease-out), opacity var(--st-t-hover);
 }
@@ -394,10 +388,10 @@ body[data-page="Learner Profile"] .st-profile-hero-actions .st-btn:hover .st-btn
   body[data-page="Learner Profile"] .st-profile-hero-avatar {
     width: 64px;
     height: 64px;
-    font-size: 1.375rem;
+    font-size: var(--st-fs-xl);
   }
   body[data-page="Learner Profile"] .st-profile-hero-name {
-    font-size: 1.375rem;
+    font-size: var(--st-fs-xl);
   }
   body[data-page="Learner Profile"] .st-profile-hero-middle {
     grid-template-columns: 1fr 1fr;
@@ -432,7 +426,7 @@ body[data-page="Learner Profile"] .st-profile-tabs {
   padding: 4px;
   background: #fff;
   border: 1px solid var(--st-line);
-  border-radius: 12px;
+  border-radius: var(--st-radius-card);
   box-shadow: var(--st-shadow-card);
   overflow-x: auto;
   scrollbar-width: none;
@@ -453,10 +447,10 @@ body[data-page="Learner Profile"] .st-profile-tab {
   height: 40px;
   padding: 0 16px;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--st-radius-control);
   background: none;
   font: inherit;
-  font-size: 0.875rem;
+  font-size: var(--st-fs-base);
   font-weight: 500;
   color: var(--st-on-surface-variant);
   white-space: nowrap;
@@ -464,7 +458,7 @@ body[data-page="Learner Profile"] .st-profile-tab {
   transition: background-color var(--st-t-hover) ease, color var(--st-t-hover) ease, transform var(--st-t-press) ease;
 }
 body[data-page="Learner Profile"] .st-profile-tab .material-symbols-outlined {
-  font-size: 1.1875rem;
+  font-size: var(--st-fs-lg);
 }
 body[data-page="Learner Profile"] .st-profile-tab:hover {
   background: var(--st-background);
@@ -535,16 +529,16 @@ body[data-page="Learner Profile"] .st-metric-group-head {
 body[data-page="Learner Profile"] .st-metric-group-head .st-icon-tile {
   width: 34px;
   height: 34px;
-  border-radius: 9px;
+  border-radius: var(--st-radius-control);
 }
 body[data-page="Learner Profile"] .st-metric-group-head .st-icon-tile .material-symbols-outlined {
-  font-size: 1.1875rem;
+  font-size: var(--st-fs-lg);
 }
 body[data-page="Learner Profile"] .st-metric-group-head h3 {
   margin: 0;
   font-family: var(--st-font-heading);
   font-weight: 700;
-  font-size: 1rem;
+  font-size: var(--st-fs-md);
   color: var(--st-on-surface);
 }
 body[data-page="Learner Profile"] .st-metric-card {
@@ -552,7 +546,7 @@ body[data-page="Learner Profile"] .st-metric-card {
   flex-direction: column;
   gap: 4px;
   padding: 12px 14px;
-  border-radius: 10px;
+  border-radius: var(--st-radius-card);
   background: var(--st-background);
   min-width: 0;
 }
@@ -564,21 +558,21 @@ body[data-page="Learner Profile"] .st-metric-card--wide {
 }
 body[data-page="Learner Profile"] .st-metric-card-label {
   margin: 0;
-  font-size: 0.781rem;
+  font-size: var(--st-fs-xs);
   color: var(--st-on-surface-variant);
   font-weight: 500;
 }
 body[data-page="Learner Profile"] .st-metric-card-value {
   font-family: var(--st-font-heading);
   font-weight: 800;
-  font-size: 1.75rem;
+  font-size: var(--st-fs-3xl);
   line-height: 1.1;
   color: var(--st-on-surface);
   font-variant-numeric: tabular-nums;
 }
 body[data-page="Learner Profile"] .st-metric-card--hero .st-metric-card-value {
   color: var(--st-primary);
-  font-size: 2rem;
+  font-size: var(--st-fs-3xl);
 }
 /* "Not Yet Available" placeholder: a pill badge (same visual language as
    the "Not assessed" status badge on Assessment Scores) instead of the
@@ -589,26 +583,26 @@ body[data-page="Learner Profile"] .st-metric-card-value.is-unavailable {
   align-items: center;
   font-family: var(--st-font-body);
   font-weight: 600;
-  font-size: 0.75rem;
+  font-size: var(--st-fs-xs);
   line-height: 1.4;
   padding: 3px 10px;
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   background: var(--st-info-light);
   color: var(--st-info);
 }
 body[data-page="Learner Profile"] .st-metric-card-value--sm {
-  font-size: 1rem;
+  font-size: var(--st-fs-md);
   font-weight: 700;
   line-height: 1.35;
 }
 body[data-page="Learner Profile"] .st-metric-card-subtext {
   margin: 0;
-  font-size: 0.781rem;
+  font-size: var(--st-fs-xs);
   color: var(--st-on-surface-variant);
 }
 body[data-page="Learner Profile"] .st-metric-rate-bar {
   height: 6px;
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   background: #fff;
   overflow: hidden;
   margin: 4px 0 2px;
@@ -616,7 +610,7 @@ body[data-page="Learner Profile"] .st-metric-rate-bar {
 body[data-page="Learner Profile"] .st-metric-rate-bar i {
   display: block;
   height: 100%;
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   background: var(--st-primary);
   width: 0;
   transition: width var(--st-t-fill) var(--st-ease-out);
@@ -664,19 +658,19 @@ body[data-page="Learner Profile"] .st-performance-progress-current {
   flex-direction: column;
   align-items: flex-end;
   padding: 8px 14px;
-  border-radius: 10px;
+  border-radius: var(--st-radius-card);
   background: var(--st-navy-soft);
   flex: none;
 }
 body[data-page="Learner Profile"] .st-performance-progress-current span {
-  font-size: 0.75rem;
+  font-size: var(--st-fs-xs);
   color: var(--st-on-surface-variant);
   font-weight: 600;
 }
 body[data-page="Learner Profile"] .st-performance-progress-current strong {
   font-family: var(--st-font-heading);
   font-weight: 800;
-  font-size: 1.5rem;
+  font-size: var(--st-fs-2xl);
   color: var(--st-primary);
 }
 /* Same "Not Yet Available" pill badge treatment as the module rate card. */
@@ -685,10 +679,10 @@ body[data-page="Learner Profile"] .st-performance-progress-current strong.is-una
   align-items: center;
   font-family: var(--st-font-body);
   font-weight: 600;
-  font-size: 0.75rem;
+  font-size: var(--st-fs-xs);
   line-height: 1.4;
   padding: 3px 10px;
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   background: var(--st-info-light);
   color: var(--st-info);
 }
@@ -714,7 +708,7 @@ body[data-page="Learner Profile"] .st-performance-progress-grid-line span {
   position: absolute;
   right: calc(100% + 8px);
   top: -8px;
-  font-size: 0.719rem;
+  font-size: var(--st-fs-xs);
   color: var(--st-ink-faint);
   white-space: nowrap;
 }
@@ -793,7 +787,7 @@ body[data-page="Learner Profile"] .st-performance-progress-x-label {
   top: calc(100% + 8px);
   transform: translateX(-50%);
   white-space: nowrap;
-  font-size: 0.719rem;
+  font-size: var(--st-fs-xs);
   color: var(--st-ink-faint);
 }
 body[data-page="Learner Profile"] .st-performance-progress-x-label.is-first {
@@ -809,10 +803,10 @@ body[data-page="Learner Profile"] .st-performance-progress-empty {
   justify-content: center;
   padding: 24px;
   border: 1px dashed var(--st-line-strong);
-  border-radius: 10px;
+  border-radius: var(--st-radius-card);
   text-align: center;
   color: var(--st-on-surface-variant);
-  font-size: 0.844rem;
+  font-size: var(--st-fs-base);
 }
 @media (max-width: 767px) {
   body[data-page="Learner Profile"] .st-performance-progress-head {
@@ -848,8 +842,8 @@ body[data-page="Learner Profile"] .st-exam-readiness-title-wrap {
 body[data-page="Learner Profile"] .st-exam-readiness-badge {
   display: inline-block;
   padding: 4px 12px;
-  border-radius: 999px;
-  font-size: 0.781rem;
+  border-radius: var(--st-radius-pill);
+  font-size: var(--st-fs-xs);
   font-weight: 700;
   white-space: nowrap;
   text-transform: lowercase;
@@ -858,12 +852,12 @@ body[data-page="Learner Profile"] .st-exam-readiness-badge::first-letter {
   text-transform: uppercase;
 }
 body[data-page="Learner Profile"] .st-exam-readiness-badge--high {
-  background: var(--st-risk-low-soft-2, #edf7ea);
-  color: var(--st-risk-low-ink, #2c7121);
+  background: var(--st-risk-low-soft);
+  color: var(--st-risk-low-ink);
 }
 body[data-page="Learner Profile"] .st-exam-readiness-badge--low {
-  background: var(--st-risk-high-soft-2, #fdecea);
-  color: var(--st-risk-high-ink, #a01414);
+  background: var(--st-risk-high-soft);
+  color: var(--st-risk-high-ink);
 }
 body[data-page="Learner Profile"] .st-exam-readiness-badge--neutral {
   background: var(--st-background);
@@ -876,7 +870,7 @@ body[data-page="Learner Profile"] .st-exam-readiness-body {
 }
 body[data-page="Learner Profile"] .st-exam-readiness-score-label {
   margin: 0;
-  font-size: 0.781rem;
+  font-size: var(--st-fs-xs);
   font-weight: 600;
   color: var(--st-on-surface-variant);
 }
@@ -890,19 +884,19 @@ body[data-page="Learner Profile"] .st-exam-readiness-score-line {
 body[data-page="Learner Profile"] .st-exam-readiness-score-line strong {
   font-family: var(--st-font-heading);
   font-weight: 800;
-  font-size: 2.125rem;
+  font-size: var(--st-fs-4xl);
   letter-spacing: -0.02em;
   color: var(--st-on-surface);
 }
 body[data-page="Learner Profile"] .st-exam-readiness-score-line span {
-  font-size: 0.813rem;
+  font-size: var(--st-fs-sm);
   color: var(--st-on-surface-variant);
   font-weight: 600;
 }
 body[data-page="Learner Profile"] .st-exam-readiness-progress {
   position: relative;
   height: 10px;
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   background: var(--st-background);
 }
 body[data-page="Learner Profile"] .st-exam-readiness-progress-fill {
@@ -910,7 +904,7 @@ body[data-page="Learner Profile"] .st-exam-readiness-progress-fill {
   left: 0;
   top: 0;
   bottom: 0;
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   background: var(--st-outline);
   width: 0;
   transition: width var(--st-t-fill) var(--st-ease-out);
@@ -919,10 +913,10 @@ body[data-page="Learner Profile"] [data-animate].is-inview .st-exam-readiness-pr
   width: var(--w, 0%);
 }
 body[data-page="Learner Profile"] .st-exam-readiness-progress-fill--high {
-  background: var(--st-risk-low, #2c7121);
+  background: var(--st-risk-low);
 }
 body[data-page="Learner Profile"] .st-exam-readiness-progress-fill--low {
-  background: var(--st-risk-high, #ba1a1a);
+  background: var(--st-risk-high);
 }
 body[data-page="Learner Profile"] .st-exam-cutoff {
   position: absolute;
@@ -930,12 +924,12 @@ body[data-page="Learner Profile"] .st-exam-cutoff {
   bottom: -4px;
   width: 2px;
   background: var(--st-on-surface);
-  border-radius: 2px;
+  border-radius: var(--st-radius-xs);
   opacity: 0.5;
 }
 body[data-page="Learner Profile"] .st-exam-readiness-summary {
   margin: 10px 0 0;
-  font-size: 0.844rem;
+  font-size: var(--st-fs-base);
   color: var(--st-on-surface-variant);
   line-height: 1.55;
 }
@@ -943,7 +937,7 @@ body[data-page="Learner Profile"] .st-exam-readiness-factors {
   display: flex;
   flex-direction: column;
   border: 1px solid var(--st-line);
-  border-radius: 10px;
+  border-radius: var(--st-radius-card);
   padding: 2px 14px;
 }
 body[data-page="Learner Profile"] .st-exam-readiness-factor {
@@ -951,7 +945,7 @@ body[data-page="Learner Profile"] .st-exam-readiness-factor {
   justify-content: space-between;
   gap: 12px;
   padding: 10px 0;
-  font-size: 0.844rem;
+  font-size: var(--st-fs-base);
 }
 body[data-page="Learner Profile"] .st-exam-readiness-factor + .st-exam-readiness-factor {
   border-top: 1px solid var(--st-line);
@@ -970,12 +964,12 @@ body[data-page="Learner Profile"] .st-exam-readiness-note {
   margin: 16px 0 0;
   padding-top: 12px;
   border-top: 1px solid var(--st-line);
-  font-size: 0.75rem;
+  font-size: var(--st-fs-xs);
   color: var(--st-ink-faint);
   line-height: 1.5;
 }
 body[data-page="Learner Profile"] .st-exam-readiness-note .material-symbols-outlined {
-  font-size: 1rem;
+  font-size: var(--st-fs-md);
   flex: none;
 }
 
@@ -992,7 +986,7 @@ body[data-page="Learner Profile"] .st-assessment-card-head {
 }
 body[data-page="Learner Profile"] .st-assessment-summary {
   border: 1px solid var(--st-line);
-  border-radius: 12px;
+  border-radius: var(--st-radius-card);
   padding: 16px;
 }
 body[data-page="Learner Profile"] .st-assessment-summary-top {
@@ -1007,13 +1001,13 @@ body[data-page="Learner Profile"] .st-assessment-summary-title {
   margin: 0;
   font-weight: 700;
   color: var(--st-on-surface);
-  font-size: 0.938rem;
+  font-size: var(--st-fs-md);
 }
 body[data-page="Learner Profile"] .st-assessment-summary-date,
 body[data-page="Learner Profile"] .st-assessment-empty-sub {
   margin: 2px 0 0;
   color: var(--st-ink-faint);
-  font-size: 0.781rem;
+  font-size: var(--st-fs-xs);
 }
 body[data-page="Learner Profile"] .st-assessment-summary-grid {
   display: grid;
@@ -1025,17 +1019,17 @@ body[data-page="Learner Profile"] .st-assessment-summary-item {
   flex-direction: column;
   gap: 4px;
   padding: 12px 14px;
-  border-radius: 10px;
+  border-radius: var(--st-radius-card);
   background: var(--st-background);
 }
 body[data-page="Learner Profile"] .st-assessment-summary-label {
-  font-size: 0.781rem;
+  font-size: var(--st-fs-xs);
   color: var(--st-on-surface-variant);
 }
 body[data-page="Learner Profile"] .st-assessment-summary-value {
   font-family: var(--st-font-heading);
   font-weight: 800;
-  font-size: 1.375rem;
+  font-size: var(--st-fs-xl);
   color: var(--st-on-surface);
 }
 body[data-page="Learner Profile"] .st-assessment-summary-actions {
@@ -1044,7 +1038,7 @@ body[data-page="Learner Profile"] .st-assessment-summary-actions {
   margin-top: 12px;
 }
 body[data-page="Learner Profile"] .st-assessment-summary-actions .st-btn .material-symbols-outlined {
-  font-size: 1.0625rem;
+  font-size: var(--st-fs-md);
   transition: transform var(--st-t-hover) var(--st-ease-out);
 }
 body[data-page="Learner Profile"] .st-assessment-summary-actions .st-btn:hover .material-symbols-outlined {
@@ -1052,7 +1046,7 @@ body[data-page="Learner Profile"] .st-assessment-summary-actions .st-btn:hover .
 }
 body[data-page="Learner Profile"] .st-assessment-summary-empty {
   border: 1px dashed var(--st-line-strong);
-  border-radius: 12px;
+  border-radius: var(--st-radius-card);
   padding: 16px;
   background: var(--st-background);
 }
@@ -1079,7 +1073,7 @@ body[data-page="Learner Profile"] .st-risk-trend-head {
 body[data-page="Learner Profile"] .st-risk-trend-legend {
   display: flex;
   gap: 14px;
-  font-size: 0.781rem;
+  font-size: var(--st-fs-xs);
   color: var(--st-on-surface-variant);
   font-weight: 600;
 }
@@ -1128,7 +1122,7 @@ body[data-page="Learner Profile"] .st-risk-trend-zone {
   padding: 6px 10px;
 }
 body[data-page="Learner Profile"] .st-risk-trend-zone span {
-  font-size: 0.688rem;
+  font-size: var(--st-fs-xs);
   font-weight: 700;
   letter-spacing: 0.03em;
 }
@@ -1136,27 +1130,27 @@ body[data-page="Learner Profile"] .st-risk-trend-zone--high {
   top: 0;
   height: 30%;
   border-radius: 10px 10px 0 0;
-  background: var(--st-risk-high-soft-2, #fdf1f0);
+  background: var(--st-risk-high-soft, #fdf1f0);
 }
 body[data-page="Learner Profile"] .st-risk-trend-zone--high span {
-  color: var(--st-risk-high-ink, #a01414);
+  color: var(--st-risk-high-ink);
 }
 body[data-page="Learner Profile"] .st-risk-trend-zone--moderate {
   top: 30%;
   height: 40%;
-  background: var(--st-risk-moderate-soft-2, #fef8ee);
+  background: var(--st-risk-moderate-soft, #fef8ee);
 }
 body[data-page="Learner Profile"] .st-risk-trend-zone--moderate span {
-  color: var(--st-risk-moderate-ink, #8f5200);
+  color: var(--st-risk-moderate-ink);
 }
 body[data-page="Learner Profile"] .st-risk-trend-zone--low {
   top: 70%;
   height: 30%;
   border-radius: 0 0 10px 10px;
-  background: var(--st-risk-low-soft-2, #f2f9f0);
+  background: var(--st-risk-low-soft, #f2f9f0);
 }
 body[data-page="Learner Profile"] .st-risk-trend-zone--low span {
-  color: var(--st-risk-low-ink, #2c7121);
+  color: var(--st-risk-low-ink);
 }
 body[data-page="Learner Profile"] .st-risk-trend-points {
   position: absolute;
@@ -1236,9 +1230,9 @@ body[data-page="Learner Profile"] .st-risk-trend-date-label {
   bottom: 6px;
   transform: translateX(-50%);
   padding: 2px 6px;
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   background: rgba(255, 255, 255, 0.88);
-  font-size: 0.719rem;
+  font-size: var(--st-fs-xs);
   color: var(--st-on-surface-variant);
   white-space: nowrap;
 }
@@ -1246,7 +1240,7 @@ body[data-page="Learner Profile"] .st-risk-trend-list {
   display: flex;
   flex-direction: column;
   border: 1px solid var(--st-line);
-  border-radius: 10px;
+  border-radius: var(--st-radius-card);
   padding: 2px 14px;
 }
 body[data-page="Learner Profile"] .st-risk-trend-list-row {
@@ -1255,19 +1249,19 @@ body[data-page="Learner Profile"] .st-risk-trend-list-row {
   align-items: center;
   gap: 10px;
   padding: 10px 0;
-  font-size: 0.813rem;
+  font-size: var(--st-fs-sm);
 }
 body[data-page="Learner Profile"] .st-risk-trend-list-row + .st-risk-trend-list-row {
   border-top: 1px solid var(--st-line);
 }
 body[data-page="Learner Profile"] .st-risk-trend-list .st-risk-badge {
   padding: 3px 10px;
-  font-size: 0.75rem;
+  font-size: var(--st-fs-xs);
 }
 body[data-page="Learner Profile"] .st-risk-trend-empty {
   text-align: center;
   color: var(--st-on-surface-variant);
-  font-size: 0.844rem;
+  font-size: var(--st-fs-base);
   padding: 12px 0 0;
 }
 @media (max-width: 1023px) {
@@ -1287,7 +1281,7 @@ body[data-page="Learner Profile"] .st-panel-head--flush {
   padding: 16px 20px;
 }
 body[data-page="Learner Profile"] .st-panel-head--flush .st-card-title {
-  font-size: 1.0625rem;
+  font-size: var(--st-fs-md);
 }
 /* .st-panel-link's look/hover is now the global shared pattern
    (dashboard.css) + the shared icon-slide motion (layout.css) -- nothing
@@ -1297,25 +1291,25 @@ body[data-page="Learner Profile"] .st-cat-chip {
   align-items: center;
   gap: 5px;
   padding: 3px 10px 3px 8px;
-  border-radius: 999px;
-  font-size: 0.781rem;
+  border-radius: var(--st-radius-pill);
+  font-size: var(--st-fs-xs);
   font-weight: 600;
   white-space: nowrap;
 }
 body[data-page="Learner Profile"] .st-cat-chip .material-symbols-outlined {
-  font-size: 1rem;
+  font-size: var(--st-fs-md);
 }
 body[data-page="Learner Profile"] .st-cat-chip--module {
-  background: var(--st-risk-moderate-soft-2, #fef3e4);
-  color: var(--st-risk-moderate-ink, #8f5200);
+  background: var(--st-risk-moderate-soft);
+  color: var(--st-risk-moderate-ink);
 }
 body[data-page="Learner Profile"] .st-cat-chip--intervention {
-  background: #e3f4f3;
+  background: var(--st-teal-soft);
   color: var(--st-secondary);
 }
 body[data-page="Learner Profile"] .st-cat-chip--risk {
-  background: var(--st-risk-high-soft-2, #fdecea);
-  color: var(--st-risk-high-ink, #a01414);
+  background: var(--st-risk-high-soft);
+  color: var(--st-risk-high-ink);
 }
 body[data-page="Learner Profile"] .st-cat-chip--modality {
   background: var(--st-navy-soft);
@@ -1324,11 +1318,11 @@ body[data-page="Learner Profile"] .st-cat-chip--modality {
 body[data-page="Learner Profile"] .st-lp-table td[data-col="date"] {
   white-space: nowrap;
   color: var(--st-on-surface-variant);
-  font-size: 0.844rem;
+  font-size: var(--st-fs-base);
 }
 body[data-page="Learner Profile"] .st-lp-table td[data-col="det"] {
   color: #3a4256;
-  font-size: 0.844rem;
+  font-size: var(--st-fs-base);
 }
 body[data-page="Learner Profile"] .st-activity-panel {
   display: flex;
@@ -1375,19 +1369,19 @@ body[data-page="Learner Profile"] .st-timeline-dot {
   z-index: 1;
 }
 body[data-page="Learner Profile"] .st-timeline-dot .material-symbols-outlined {
-  font-size: 1.125rem;
+  font-size: var(--st-fs-lg);
 }
 body[data-page="Learner Profile"] .st-timeline-dot--module {
-  background: var(--st-risk-moderate-soft-2, #fef3e4);
+  background: var(--st-risk-moderate-soft);
   color: #c46b00;
 }
 body[data-page="Learner Profile"] .st-timeline-dot--intervention {
-  background: #e3f4f3;
+  background: var(--st-teal-soft);
   color: var(--st-secondary);
 }
 body[data-page="Learner Profile"] .st-timeline-dot--risk {
-  background: var(--st-risk-high-soft-2, #fdecea);
-  color: var(--st-risk-high-ink, #a01414);
+  background: var(--st-risk-high-soft);
+  color: var(--st-risk-high-ink);
 }
 body[data-page="Learner Profile"] .st-timeline-dot--modality {
   background: var(--st-navy-soft);
@@ -1396,7 +1390,7 @@ body[data-page="Learner Profile"] .st-timeline-dot--modality {
 body[data-page="Learner Profile"] .st-timeline-card {
   padding: 10px 14px;
   border: 1px solid var(--st-line);
-  border-radius: 10px;
+  border-radius: var(--st-radius-card);
   background: #fff;
   transition: border-color var(--st-t-hover), box-shadow var(--st-t-hover);
 }
@@ -1413,17 +1407,17 @@ body[data-page="Learner Profile"] .st-timeline-card-head {
 body[data-page="Learner Profile"] .st-timeline-card-title {
   margin: 0;
   font-weight: 600;
-  font-size: 0.906rem;
+  font-size: var(--st-fs-base);
   color: var(--st-on-surface);
 }
 body[data-page="Learner Profile"] .st-timeline-card-date {
-  font-size: 0.75rem;
+  font-size: var(--st-fs-xs);
   color: var(--st-ink-faint);
   white-space: nowrap;
 }
 body[data-page="Learner Profile"] .st-timeline-card-text {
   margin: 2px 0 0;
-  font-size: 0.844rem;
+  font-size: var(--st-fs-base);
   color: var(--st-on-surface-variant);
 }
 body[data-page="Learner Profile"] .st-timeline--compact .st-timeline-card {
@@ -1434,7 +1428,7 @@ body[data-page="Learner Profile"] .st-timeline--compact .st-timeline-card-head {
   gap: 0;
 }
 body[data-page="Learner Profile"] .st-timeline--compact .st-timeline-card-title {
-  font-size: 0.875rem;
+  font-size: var(--st-fs-base);
 }
 body[data-page="Learner Profile"] [data-animate-list] > * {
   opacity: 0;
@@ -1474,10 +1468,10 @@ body[data-page="Learner Profile"] .st-history-chip {
   height: 34px;
   padding: 0 14px;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--st-radius-sm);
   background: none;
   font: inherit;
-  font-size: 0.844rem;
+  font-size: var(--st-fs-base);
   font-weight: 500;
   color: var(--st-on-surface-variant);
   cursor: pointer;
@@ -1506,10 +1500,10 @@ body[data-page="Learner Profile"] .st-history-filters .st-search {
   gap: 8px;
   height: 40px;
   padding: 0 12px;
-  border: 1px solid var(--st-line-strong, var(--st-outline-variant));
-  border-radius: var(--st-radius-control, var(--st-button-radius));
+  border: 1px solid var(--st-line-strong);
+  border-radius: var(--st-radius-control);
   background: #fff;
-  color: var(--st-ink-faint, var(--st-outline));
+  color: var(--st-ink-faint);
 }
 body[data-page="Learner Profile"] .st-history-filters .st-search:hover {
   border-color: var(--st-primary);
@@ -1534,7 +1528,7 @@ body[data-page="Learner Profile"] .st-history-filters .st-search input {
   min-width: 0;
   padding: 0;
   font: inherit;
-  font-size: 0.875rem;
+  font-size: var(--st-fs-base);
   background: none;
   color: var(--st-on-surface);
 }
@@ -1554,9 +1548,9 @@ body[data-page="Learner Profile"] .st-history-filters .st-search input:focus {
 body[data-page="Learner Profile"] .st-prediction-summary-box {
   margin: 0;
   padding: 14px 16px;
-  border-radius: 10px;
+  border-radius: var(--st-radius-card);
   background: var(--st-background);
-  font-size: 0.938rem;
+  font-size: var(--st-fs-md);
   color: var(--st-on-surface);
   border-left: 4px solid var(--st-outline);
   line-height: 1.5;
@@ -1578,23 +1572,23 @@ body[data-page="Learner Profile"] .st-prediction-meta-line:not([hidden]) {
   align-items: center;
   gap: 6px;
   margin: 10px 0 0;
-  font-size: 0.813rem;
+  font-size: var(--st-fs-sm);
   color: var(--st-on-surface-variant);
 }
 body[data-page="Learner Profile"] .st-prediction-meta-line .material-symbols-outlined {
-  font-size: 1.0625rem;
+  font-size: var(--st-fs-md);
   color: var(--st-ink-faint);
 }
 body[data-page="Learner Profile"] .st-prediction-subsection-title {
   margin: 20px 0 4px;
   font-family: var(--st-font-heading);
   font-weight: 700;
-  font-size: 0.938rem;
+  font-size: var(--st-fs-md);
   color: var(--st-on-surface);
 }
 body[data-page="Learner Profile"] .st-prediction-explanation {
   margin: 0 0 12px;
-  font-size: 0.844rem;
+  font-size: var(--st-fs-base);
   color: var(--st-on-surface-variant);
 }
 body[data-page="Learner Profile"] .st-contributor-grid {
@@ -1608,7 +1602,7 @@ body[data-page="Learner Profile"] .st-contributor-item {
   align-items: flex-start;
   padding: 14px;
   border: 1px solid var(--st-line);
-  border-radius: 10px;
+  border-radius: var(--st-radius-card);
   border-top: 3px solid var(--st-outline-variant);
   transition: box-shadow var(--st-t-hover);
 }
@@ -1619,45 +1613,45 @@ body[data-page="Learner Profile"] .st-contributor-item > .material-symbols-outli
   width: 34px;
   height: 34px;
   flex: none;
-  border-radius: 9px;
+  border-radius: var(--st-radius-control);
   display: grid;
   place-items: center;
   background: var(--st-background);
   color: var(--st-on-surface-variant);
-  font-size: 1.1875rem;
+  font-size: var(--st-fs-lg);
 }
 body[data-page="Learner Profile"] .st-contributor-item--high {
   border-top-color: var(--st-risk-high);
 }
 body[data-page="Learner Profile"] .st-contributor-item--high > .material-symbols-outlined {
-  background: var(--st-risk-high-soft-2, #fdecea);
-  color: var(--st-risk-high-ink, #a01414);
+  background: var(--st-risk-high-soft);
+  color: var(--st-risk-high-ink);
 }
 body[data-page="Learner Profile"] .st-contributor-item--high .st-contributor-badge {
-  background: var(--st-risk-high-soft-2, #fdecea);
-  color: var(--st-risk-high-ink, #a01414);
+  background: var(--st-risk-high-soft);
+  color: var(--st-risk-high-ink);
 }
 body[data-page="Learner Profile"] .st-contributor-item--moderate {
   border-top-color: var(--st-risk-moderate);
 }
 body[data-page="Learner Profile"] .st-contributor-item--moderate > .material-symbols-outlined {
-  background: var(--st-risk-moderate-soft-2, #fef3e4);
-  color: var(--st-risk-moderate-ink, #8f5200);
+  background: var(--st-risk-moderate-soft);
+  color: var(--st-risk-moderate-ink);
 }
 body[data-page="Learner Profile"] .st-contributor-item--moderate .st-contributor-badge {
-  background: var(--st-risk-moderate-soft-2, #fef3e4);
-  color: var(--st-risk-moderate-ink, #8f5200);
+  background: var(--st-risk-moderate-soft);
+  color: var(--st-risk-moderate-ink);
 }
 body[data-page="Learner Profile"] .st-contributor-item--low {
   border-top-color: var(--st-risk-low);
 }
 body[data-page="Learner Profile"] .st-contributor-item--low > .material-symbols-outlined {
-  background: var(--st-risk-low-soft-2, #edf7ea);
-  color: var(--st-risk-low-ink, #2c7121);
+  background: var(--st-risk-low-soft);
+  color: var(--st-risk-low-ink);
 }
 body[data-page="Learner Profile"] .st-contributor-item--low .st-contributor-badge {
-  background: var(--st-risk-low-soft-2, #edf7ea);
-  color: var(--st-risk-low-ink, #2c7121);
+  background: var(--st-risk-low-soft);
+  color: var(--st-risk-low-ink);
 }
 body[data-page="Learner Profile"] .st-contributor-item--neutral {
   border-top-width: 1px;
@@ -1672,15 +1666,15 @@ body[data-page="Learner Profile"] .st-contributor-title-row {
 body[data-page="Learner Profile"] .st-contributor-title {
   margin: 0;
   font-weight: 700;
-  font-size: 0.938rem;
+  font-size: var(--st-fs-md);
   color: var(--st-on-surface);
 }
 body[data-page="Learner Profile"] .st-contributor-badge {
   padding: 2px 8px;
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   background: var(--st-background);
   color: var(--st-on-surface-variant);
-  font-size: 0.719rem;
+  font-size: var(--st-fs-xs);
   font-weight: 700;
   text-transform: lowercase;
   display: inline-block;
@@ -1690,7 +1684,7 @@ body[data-page="Learner Profile"] .st-contributor-badge::first-letter {
 }
 body[data-page="Learner Profile"] .st-contributor-text {
   margin: 4px 0 0;
-  font-size: 0.844rem;
+  font-size: var(--st-fs-base);
   color: #3a4256;
   line-height: 1.5;
 }
@@ -1713,7 +1707,7 @@ body[data-page="Learner Profile"] .st-info-tooltip {
   cursor: help;
 }
 body[data-page="Learner Profile"] .st-info-tooltip .material-symbols-outlined {
-  font-size: 1.125rem;
+  font-size: var(--st-fs-lg);
 }
 body[data-page="Learner Profile"] .st-info-tooltip::after {
   /* Same dark bubble as the shared [data-tooltip] component (same bg/
@@ -1731,7 +1725,7 @@ body[data-page="Learner Profile"] .st-info-tooltip::after {
   color: var(--st-tooltip-color);
   box-shadow: var(--st-tooltip-shadow);
   text-align: left;
-  font-size: 0.781rem;
+  font-size: var(--st-fs-xs);
   line-height: 1.45;
   opacity: 0;
   pointer-events: none;
@@ -1757,7 +1751,7 @@ body[data-page="Learner Profile"] .st-change-item {
   align-items: center;
   gap: 10px;
   padding: 8px 0;
-  font-size: 0.844rem;
+  font-size: var(--st-fs-base);
   border-bottom: 1px solid var(--st-line);
 }
 body[data-page="Learner Profile"] .st-change-item:last-child {
@@ -1769,7 +1763,7 @@ body[data-page="Learner Profile"] .st-change-list-label {
   gap: 8px;
 }
 body[data-page="Learner Profile"] .st-change-list-label .material-symbols-outlined {
-  font-size: 1rem;
+  font-size: var(--st-fs-md);
 }
 body[data-page="Learner Profile"] .st-change-item-date {
   font-weight: 700;
@@ -1794,12 +1788,12 @@ body[data-page="Learner Profile"] .st-change-list-empty {
   margin-top: 14px;
   padding: 14px;
   border: 1px dashed var(--st-line-strong);
-  border-radius: 10px;
-  font-size: 0.844rem;
+  border-radius: var(--st-radius-card);
+  font-size: var(--st-fs-base);
   color: var(--st-ink-faint);
 }
 body[data-page="Learner Profile"] .st-change-list-empty .material-symbols-outlined {
-  font-size: 1.25rem;
+  font-size: var(--st-fs-xl);
 }
 @media (max-width: 1279px) {
   body[data-page="Learner Profile"] .st-contributor-grid {
@@ -1838,7 +1832,7 @@ body[data-page="Learner Profile"] .st-rec-list {
 body[data-page="Learner Profile"] .st-intervention-card {
   padding: 14px 16px;
   border: 1px solid var(--st-line);
-  border-radius: 12px;
+  border-radius: var(--st-radius-card);
   border-left: 4px solid var(--st-outline-variant);
   transition: box-shadow var(--st-t-hover), background-color var(--st-t-hover);
 }
@@ -1867,14 +1861,14 @@ body[data-page="Learner Profile"] .st-intervention-card-title-row {
 body[data-page="Learner Profile"] .st-intervention-card-title {
   margin: 0;
   font-weight: 700;
-  font-size: 0.938rem;
+  font-size: var(--st-fs-md);
   color: var(--st-on-surface);
 }
 body[data-page="Learner Profile"] .st-priority-chip {
   display: inline-block;
   padding: 2px 9px;
-  border-radius: 999px;
-  font-size: 0.719rem;
+  border-radius: var(--st-radius-pill);
+  font-size: var(--st-fs-xs);
   font-weight: 700;
   text-transform: lowercase;
 }
@@ -1882,12 +1876,12 @@ body[data-page="Learner Profile"] .st-priority-chip::first-letter {
   text-transform: uppercase;
 }
 body[data-page="Learner Profile"] .st-priority-chip--high {
-  background: var(--st-risk-high-soft-2, #fdecea);
-  color: var(--st-risk-high-ink, #a01414);
+  background: var(--st-risk-high-soft);
+  color: var(--st-risk-high-ink);
 }
 body[data-page="Learner Profile"] .st-priority-chip--medium {
-  background: var(--st-risk-moderate-soft-2, #fef3e4);
-  color: var(--st-risk-moderate-ink, #8f5200);
+  background: var(--st-risk-moderate-soft);
+  color: var(--st-risk-moderate-ink);
 }
 body[data-page="Learner Profile"] .st-intervention-rank {
   display: inline-grid;
@@ -1895,16 +1889,16 @@ body[data-page="Learner Profile"] .st-intervention-rank {
   min-width: 34px;
   height: 24px;
   padding: 0 8px;
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   background: var(--st-background);
-  font-size: 0.75rem;
+  font-size: var(--st-fs-xs);
   font-weight: 700;
   color: var(--st-on-surface-variant);
   white-space: nowrap;
 }
 body[data-page="Learner Profile"] .st-intervention-card-factor {
   margin: 8px 0 0;
-  font-size: 0.781rem;
+  font-size: var(--st-fs-xs);
   color: var(--st-on-surface-variant);
 }
 body[data-page="Learner Profile"] .st-intervention-card-factor strong {
@@ -1913,7 +1907,7 @@ body[data-page="Learner Profile"] .st-intervention-card-factor strong {
 }
 body[data-page="Learner Profile"] .st-intervention-card-text {
   margin: 6px 0 0;
-  font-size: 0.875rem;
+  font-size: var(--st-fs-base);
   color: #3a4256;
 }
 body[data-page="Learner Profile"] .st-ai-insight {
@@ -1921,23 +1915,23 @@ body[data-page="Learner Profile"] .st-ai-insight {
   padding: 10px 12px;
   background: #f5f3ff;
   border-left: 3px solid #7c3aed;
-  border-radius: 8px;
+  border-radius: var(--st-radius-control);
 }
 body[data-page="Learner Profile"] .st-ai-insight-kicker {
   margin: 0 0 4px;
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 0.75rem;
+  font-size: var(--st-fs-xs);
   font-weight: 700;
   color: #6d28d9;
 }
 body[data-page="Learner Profile"] .st-ai-insight-kicker .material-symbols-outlined {
-  font-size: 1rem;
+  font-size: var(--st-fs-md);
 }
 body[data-page="Learner Profile"] .st-ai-insight p {
   margin: 0 0 6px;
-  font-size: 0.813rem;
+  font-size: var(--st-fs-sm);
   color: #374151;
 }
 body[data-page="Learner Profile"] .st-ai-insight p:last-child {
@@ -1945,7 +1939,7 @@ body[data-page="Learner Profile"] .st-ai-insight p:last-child {
 }
 body[data-page="Learner Profile"] .st-ai-disclaimer {
   margin-top: 6px;
-  font-size: 0.781rem;
+  font-size: var(--st-fs-xs);
   color: #6b7280;
   font-style: italic;
 }
@@ -1962,12 +1956,12 @@ body[data-page="Learner Profile"] .st-intervention-action-hint {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 0.781rem;
+  font-size: var(--st-fs-xs);
   color: var(--st-secondary);
   font-weight: 600;
 }
 body[data-page="Learner Profile"] .st-intervention-action-hint .material-symbols-outlined {
-  font-size: 1rem;
+  font-size: var(--st-fs-md);
 }
 body[data-page="Learner Profile"] .st-active-intervention {
   display: flex;
@@ -1976,7 +1970,7 @@ body[data-page="Learner Profile"] .st-active-intervention {
   align-items: flex-start;
   padding: 16px;
   border: 1px solid var(--st-line);
-  border-radius: 12px;
+  border-radius: var(--st-radius-card);
   border-left: 4px solid var(--st-secondary);
 }
 body[data-page="Learner Profile"] .st-active-intervention + .st-active-intervention {
@@ -1991,15 +1985,15 @@ body[data-page="Learner Profile"] .st-active-title-row {
 body[data-page="Learner Profile"] .st-active-title {
   margin: 0;
   font-weight: 700;
-  font-size: 0.938rem;
+  font-size: var(--st-fs-md);
   color: var(--st-on-surface);
 }
 body[data-page="Learner Profile"] .st-active-priority {
   padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--st-risk-high-soft-2, #fdecea);
-  color: var(--st-risk-high-ink, #a01414);
-  font-size: 0.719rem;
+  border-radius: var(--st-radius-pill);
+  background: var(--st-risk-high-soft);
+  color: var(--st-risk-high-ink);
+  font-size: var(--st-fs-xs);
   font-weight: 700;
 }
 body[data-page="Learner Profile"] .st-active-intervention-meta {
@@ -2007,7 +2001,7 @@ body[data-page="Learner Profile"] .st-active-intervention-meta {
   gap: 14px;
   flex-wrap: wrap;
   margin-top: 6px;
-  font-size: 0.813rem;
+  font-size: var(--st-fs-sm);
   color: var(--st-on-surface-variant);
 }
 body[data-page="Learner Profile"] .st-active-intervention-meta span {
@@ -2016,7 +2010,7 @@ body[data-page="Learner Profile"] .st-active-intervention-meta span {
   gap: 4px;
 }
 body[data-page="Learner Profile"] .st-active-intervention-meta .material-symbols-outlined {
-  font-size: 1rem;
+  font-size: var(--st-fs-md);
 }
 body[data-page="Learner Profile"] .st-due-flag {
   display: inline-flex;
@@ -2024,20 +2018,20 @@ body[data-page="Learner Profile"] .st-due-flag {
   gap: 5px;
   margin-top: 8px;
   padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 0.781rem;
+  border-radius: var(--st-radius-pill);
+  font-size: var(--st-fs-xs);
   font-weight: 700;
 }
 body[data-page="Learner Profile"] .st-due-flag .material-symbols-outlined {
-  font-size: 1rem;
+  font-size: var(--st-fs-md);
 }
 body[data-page="Learner Profile"] .st-due-flag--overdue {
-  background: var(--st-risk-high-soft-2, #fdecea);
-  color: var(--st-risk-high-ink, #a01414);
+  background: var(--st-risk-high-soft);
+  color: var(--st-risk-high-ink);
 }
 body[data-page="Learner Profile"] .st-due-flag--due {
-  background: var(--st-risk-moderate-soft-2, #fef3e4);
-  color: var(--st-risk-moderate-ink, #8f5200);
+  background: var(--st-risk-moderate-soft);
+  color: var(--st-risk-moderate-ink);
 }
 body[data-page="Learner Profile"] .st-active-status-row {
   margin-top: 10px;
@@ -2056,7 +2050,7 @@ body[data-page="Learner Profile"] .st-empty-inline {
   gap: 6px;
   padding: 28px 16px;
   border: 1px dashed var(--st-line-strong);
-  border-radius: 12px;
+  border-radius: var(--st-radius-card);
 }
 body[data-page="Learner Profile"] .st-empty-inline .material-symbols-outlined {
   width: 52px;
@@ -2066,18 +2060,18 @@ body[data-page="Learner Profile"] .st-empty-inline .material-symbols-outlined {
   place-items: center;
   background: var(--st-background);
   color: var(--st-ink-faint);
-  font-size: 1.75rem;
+  font-size: var(--st-fs-3xl);
 }
 body[data-page="Learner Profile"] .st-empty-inline p {
   margin: 0;
 }
 body[data-page="Learner Profile"] .st-empty-inline .t {
   font-weight: 600;
-  font-size: 0.938rem;
+  font-size: var(--st-fs-md);
   color: var(--st-on-surface);
 }
 body[data-page="Learner Profile"] .st-empty-inline .s {
-  font-size: 0.844rem;
+  font-size: var(--st-fs-base);
   color: var(--st-on-surface-variant);
 }
 body[data-page="Learner Profile"] .st-history-link {
@@ -2101,8 +2095,8 @@ body[data-page="Learner Profile"] .st-row-actions {
 }
 body[data-page="Learner Profile"] .st-btn-danger-outline:hover {
   border-color: #e7b4b4 !important;
-  background: var(--st-risk-high-soft-2, #fdecea) !important;
-  color: var(--st-risk-high-ink, #a01414) !important;
+  background: var(--st-risk-high-soft) !important;
+  color: var(--st-risk-high-ink) !important;
 }
 body[data-page="Learner Profile"] .st-risk-factor-list {
   display: flex;
@@ -2114,7 +2108,7 @@ body[data-page="Learner Profile"] .st-risk-factor-item {
   display: flex;
   gap: 10px;
   padding: 12px;
-  border-radius: 10px;
+  border-radius: var(--st-radius-card);
   background: var(--st-background);
 }
 body[data-page="Learner Profile"] .st-risk-factor-dot {
@@ -2137,12 +2131,12 @@ body[data-page="Learner Profile"] .st-risk-factor-item--neutral .st-risk-factor-
 body[data-page="Learner Profile"] .st-risk-factor-title {
   margin: 0;
   font-weight: 600;
-  font-size: 0.844rem;
+  font-size: var(--st-fs-base);
   color: var(--st-on-surface);
 }
 body[data-page="Learner Profile"] .st-risk-factor-text {
   margin: 2px 0 0;
-  font-size: 0.781rem;
+  font-size: var(--st-fs-xs);
   color: var(--st-on-surface-variant);
   line-height: 1.45;
 }
@@ -2185,7 +2179,7 @@ body[data-page="Learner Profile"] .st-table-empty-cell {
   text-align: center;
   padding: 24px;
   color: var(--st-on-surface-variant);
-  font-size: 0.844rem;
+  font-size: var(--st-fs-base);
 }
 
 /* ==========================================================================
@@ -2233,7 +2227,7 @@ body[data-page="Learner Profile"] [data-animate] {
    ========================================================================== */
 body[data-page="Learner Profile"] .st-outcome-card {
   cursor: pointer;
-  border-radius: 10px;
+  border-radius: var(--st-radius-card);
   padding: 12px;
   text-align: center;
   transition: var(--st-t-hover, 150ms);

@@ -36,7 +36,7 @@
   display: flex;
   flex-direction: column;
   background: #fff;
-  border-radius: 18px;
+  border-radius: var(--st-radius-xl);
   box-shadow: 0 30px 70px rgba(17, 26, 54, 0.3);
   overflow: hidden;
   transform: translateY(10px) scale(0.98);
@@ -56,7 +56,7 @@
   position: relative;
   padding: 20px 24px 16px;
   background: linear-gradient(180deg, var(--rs, var(--st-background)), #fff 92%);
-  border-bottom: 1px solid var(--st-line, var(--st-outline-variant));
+  border-bottom: 1px solid var(--st-line);
   flex: none;
 }
 
@@ -67,11 +67,11 @@
   width: 36px;
   height: 36px;
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--st-radius-card);
   background: rgba(255, 255, 255, 0.7);
   display: grid;
   place-items: center;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  color: var(--st-ink-muted);
   cursor: pointer;
   transition: background-color 150ms, color 150ms;
 }
@@ -108,8 +108,8 @@
   color: #fff;
   font-family: var(--st-font-heading);
   font-weight: 800;
-  font-size: 1.375rem;
-  box-shadow: 0 0 0 4px #fff, 0 0 0 6px var(--ring, #dfe3ea);
+  font-size: var(--st-fs-xl);
+  box-shadow: 0 0 0 4px #fff, 0 0 0 6px var(--ring, var(--st-risk-neutral-ring));
   overflow: hidden;
 }
 
@@ -123,7 +123,7 @@
   margin: 0;
   font-family: var(--st-font-heading);
   font-weight: 800;
-  font-size: 1.5rem;
+  font-size: var(--st-fs-2xl);
   letter-spacing: -0.02em;
   line-height: 1.15;
   color: var(--st-on-surface);
@@ -131,8 +131,8 @@
 
 .st-qv-lrn {
   margin: 3px 0 0;
-  font-size: 0.8125rem;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  font-size: var(--st-fs-sm);
+  color: var(--st-ink-muted);
 }
 
 .st-qv-lrn b {
@@ -150,10 +150,10 @@
 .st-qv-tag {
   display: inline-block;
   padding: 3px 10px;
-  border-radius: 999px;
-  background: var(--st-navy-soft, var(--st-primary-fixed));
+  border-radius: var(--st-radius-pill);
+  background: var(--st-navy-soft);
   color: var(--st-primary);
-  font-size: 0.75rem;
+  font-size: var(--st-fs-xs);
   font-weight: 600;
 }
 
@@ -164,9 +164,9 @@
   gap: 14px;
   margin-top: 14px;
   padding: 10px 14px;
-  border-radius: 12px;
+  border-radius: var(--st-radius-card);
   background: #fff;
-  border: 1px solid var(--st-line, var(--st-outline-variant));
+  border: 1px solid var(--st-line);
 }
 
 .st-qv-risk-icon {
@@ -176,7 +176,7 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: var(--rs, #eef1f5);
+  background: var(--rs, var(--st-risk-neutral-soft));
   color: var(--rc, var(--st-ink-muted));
 }
 
@@ -191,15 +191,15 @@
 
 .st-qv-risk-text small {
   display: block;
-  font-size: 0.75rem;
+  font-size: var(--st-fs-xs);
   font-weight: 600;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  color: var(--st-ink-muted);
 }
 
 .st-qv-risk-text p {
   margin: 2px 0 0;
-  font-size: 0.8125rem;
-  color: var(--st-ink, var(--st-on-surface));
+  font-size: var(--st-fs-sm);
+  color: var(--st-ink);
 }
 
 .st-qv-pill {
@@ -207,11 +207,11 @@
   align-items: center;
   gap: 6px;
   padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 0.75rem;
+  border-radius: var(--st-radius-pill);
+  font-size: var(--st-fs-xs);
   font-weight: 700;
   white-space: nowrap;
-  background: var(--rs, #eef1f5);
+  background: var(--rs, var(--st-risk-neutral-soft));
   color: var(--ri, var(--st-ink-muted));
 }
 
@@ -232,19 +232,19 @@
   display: block;
   font-family: var(--st-font-heading);
   font-weight: 800;
-  font-size: 1.5rem;
+  font-size: var(--st-fs-2xl);
   color: var(--ri, var(--st-on-surface));
 }
 
 .st-qv-prob small {
-  font-size: 0.6875rem;
-  color: var(--st-ink-faint, var(--st-outline));
+  font-size: var(--st-fs-xs);
+  color: var(--st-ink-faint);
 }
 
 .st-qv-meter {
   height: 5px;
-  border-radius: 999px;
-  background: #eef1f5;
+  border-radius: var(--st-radius-pill);
+  background: var(--st-risk-neutral-soft);
   margin-top: 4px;
   overflow: hidden;
   width: 90px;
@@ -253,7 +253,7 @@
 .st-qv-meter i {
   display: block;
   height: 100%;
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   background: var(--rc, var(--st-ink-muted));
   width: 0;
   transition: width 800ms var(--st-ease-out, cubic-bezier(0.2, 0.7, 0.2, 1)) 150ms;
@@ -266,34 +266,34 @@
 /* Risk tone variables -- same pattern as .st-sv-risk.is-high etc.
    (student-portal.css), sourced from the shared --st-risk-* tokens. */
 .st-qv.is-high {
-  --rc: var(--st-risk-high, #ba1a1a);
-  --rs: var(--st-risk-high-soft-2, #fdecea);
-  --ri: var(--st-risk-high-ink, #a01414);
-  --ring: #f6c9c6;
+  --rc: var(--st-risk-high);
+  --rs: var(--st-risk-high-soft);
+  --ri: var(--st-risk-high-ink);
+  --ring: var(--st-risk-high-ring);
 }
 .st-qv.is-moderate {
   --rc: #c46b00;
-  --rs: var(--st-risk-moderate-soft-2, #fef3e4);
-  --ri: var(--st-risk-moderate-ink, #8f5200);
-  --ring: #f8d9ac;
+  --rs: var(--st-risk-moderate-soft);
+  --ri: var(--st-risk-moderate-ink);
+  --ring: var(--st-risk-moderate-ring);
 }
 .st-qv.is-low {
-  --rc: var(--st-risk-low-ink, #2c7121);
-  --rs: var(--st-risk-low-soft-2, #edf7ea);
-  --ri: var(--st-risk-low-ink, #2c7121);
-  --ring: #c9e6c1;
+  --rc: var(--st-risk-low-ink);
+  --rs: var(--st-risk-low-soft);
+  --ri: var(--st-risk-low-ink);
+  --ring: var(--st-risk-low-ring);
 }
 .st-qv.is-preliminary {
   --rc: var(--st-info, #0288d1);
   --rs: #e6f2fb;
   --ri: #1a6fb0;
-  --ring: #bcdcf3;
+  --ring: var(--st-risk-preliminary-ring);
 }
 .st-qv.is-neutral {
-  --rc: var(--st-ink-faint, #8a91a0);
-  --rs: #eef1f5;
-  --ri: var(--st-ink-muted, #5a6275);
-  --ring: #dfe3ea;
+  --rc: var(--st-ink-faint);
+  --rs: var(--st-risk-neutral-soft);
+  --ri: var(--st-ink-muted);
+  --ring: var(--st-risk-neutral-ring);
 }
 
 /* ---------- Body ---------- */
@@ -311,9 +311,9 @@
   align-items: center;
   gap: 8px;
   margin: 0 0 8px;
-  font-size: 0.8125rem;
+  font-size: var(--st-fs-sm);
   font-weight: 700;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  color: var(--st-ink-muted);
 }
 
 .st-qv-sec h3 .material-symbols-outlined {
@@ -323,7 +323,7 @@
 
 .st-qv-sec h3 a {
   margin-left: auto;
-  font-size: 0.75rem;
+  font-size: var(--st-fs-xs);
   font-weight: 600;
   color: var(--st-secondary);
   text-decoration: none;
@@ -341,21 +341,21 @@
 
 .st-qv-facts div {
   padding: 9px 12px;
-  border-radius: 10px;
+  border-radius: var(--st-radius-card);
   background: var(--st-background);
   min-width: 0;
 }
 
 .st-qv-facts small {
   display: block;
-  font-size: 0.6875rem;
-  color: var(--st-ink-faint, var(--st-outline));
+  font-size: var(--st-fs-xs);
+  color: var(--st-ink-faint);
 }
 
 .st-qv-facts b {
   display: block;
   margin-top: 2px;
-  font-size: 0.8125rem;
+  font-size: var(--st-fs-sm);
   font-weight: 600;
   color: var(--st-on-surface);
   overflow-wrap: anywhere;
@@ -369,7 +369,7 @@
 
 .st-qv-stat {
   padding: 9px 12px;
-  border-radius: 10px;
+  border-radius: var(--st-radius-card);
   background: var(--st-background);
 }
 
@@ -377,19 +377,19 @@
   display: block;
   font-family: var(--st-font-heading);
   font-weight: 800;
-  font-size: 1.25rem;
+  font-size: var(--st-fs-xl);
   line-height: 1.1;
   color: var(--st-on-surface);
   font-variant-numeric: tabular-nums;
 }
 
 .st-qv-stat small {
-  font-size: 0.6875rem;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  font-size: var(--st-fs-xs);
+  color: var(--st-ink-muted);
 }
 
 .st-qv-stat--hero {
-  background: var(--st-navy-soft, var(--st-primary-fixed));
+  background: var(--st-navy-soft);
 }
 
 .st-qv-stat--hero b {
@@ -398,7 +398,7 @@
 
 .st-qv-stat .bar {
   height: 5px;
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   background: #fff;
   margin: 5px 0 3px;
   overflow: hidden;
@@ -408,7 +408,7 @@
   display: block;
   height: 100%;
   background: var(--st-primary);
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   width: 0;
   transition: width 800ms var(--st-ease-out, cubic-bezier(0.2, 0.7, 0.2, 1)) 200ms;
 }
@@ -418,7 +418,7 @@
 }
 
 .st-qv-stat--warn b {
-  color: var(--st-risk-high-ink, #a01414);
+  color: var(--st-risk-high-ink);
 }
 
 .st-qv-activity {
@@ -426,13 +426,13 @@
   align-items: center;
   gap: 8px;
   margin-top: 8px;
-  font-size: 0.8125rem;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  font-size: var(--st-fs-sm);
+  color: var(--st-ink-muted);
 }
 
 .st-qv-activity .material-symbols-outlined {
   font-size: 17px;
-  color: var(--st-ink-faint, var(--st-outline));
+  color: var(--st-ink-faint);
 }
 
 .st-qv-activity b {
@@ -457,10 +457,10 @@
   align-items: center;
   gap: 10px;
   padding: 8px 12px;
-  border: 1px solid var(--st-line, var(--st-outline-variant));
+  border: 1px solid var(--st-line);
   border-left: 3px solid var(--c, var(--st-ink-faint));
   border-radius: 0 10px 10px 0;
-  font-size: 0.8125rem;
+  font-size: var(--st-fs-sm);
 }
 
 .st-qv-factor b {
@@ -473,28 +473,28 @@
   margin-left: auto;
   flex: none;
   padding: 1px 8px;
-  border-radius: 999px;
-  background: var(--cs, #eef1f5);
+  border-radius: var(--st-radius-pill);
+  background: var(--cs, var(--st-risk-neutral-soft));
   color: var(--ci, var(--st-ink-muted));
-  font-size: 0.6875rem;
+  font-size: var(--st-fs-xs);
   font-weight: 700;
   white-space: nowrap;
 }
 
 .st-qv-factor.high {
-  --c: var(--st-risk-high, #ba1a1a);
-  --cs: var(--st-risk-high-soft-2, #fdecea);
-  --ci: var(--st-risk-high-ink, #a01414);
+  --c: var(--st-risk-high);
+  --cs: var(--st-risk-high-soft);
+  --ci: var(--st-risk-high-ink);
 }
 .st-qv-factor.moderate {
-  --c: var(--st-risk-moderate, #f39422);
-  --cs: var(--st-risk-moderate-soft-2, #fef3e4);
-  --ci: var(--st-risk-moderate-ink, #8f5200);
+  --c: var(--st-risk-moderate);
+  --cs: var(--st-risk-moderate-soft);
+  --ci: var(--st-risk-moderate-ink);
 }
 .st-qv-factor.low {
-  --c: var(--st-risk-low, #6bbf59);
-  --cs: var(--st-risk-low-soft-2, #edf7ea);
-  --ci: var(--st-risk-low-ink, #2c7121);
+  --c: var(--st-risk-low);
+  --cs: var(--st-risk-low-soft);
+  --ci: var(--st-risk-low-ink);
 }
 
 .st-qv-iv {
@@ -503,32 +503,32 @@
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  border: 1px solid var(--st-line, var(--st-outline-variant));
+  border: 1px solid var(--st-line);
   border-left: 4px solid var(--st-secondary);
-  border-radius: 12px;
+  border-radius: var(--st-radius-card);
 }
 
 .st-qv-iv .material-symbols-outlined {
   width: 36px;
   height: 36px;
   flex: none;
-  border-radius: 10px;
+  border-radius: var(--st-radius-card);
   display: grid;
   place-items: center;
-  background: var(--st-success-light, #e3f4f3);
+  background: var(--st-risk-low-soft);
   color: var(--st-secondary);
   font-size: 19px;
 }
 
 .st-qv-iv b {
   display: block;
-  font-size: 0.875rem;
+  font-size: var(--st-fs-base);
   color: var(--st-on-surface);
 }
 
 .st-qv-iv small {
-  font-size: 0.75rem;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  font-size: var(--st-fs-xs);
+  color: var(--st-ink-muted);
 }
 
 .st-qv-iv .due {
@@ -538,11 +538,11 @@
 
 .st-qv-empty {
   padding: 12px;
-  border: 1px dashed var(--st-line-strong, var(--st-outline-variant));
-  border-radius: 10px;
+  border: 1px dashed var(--st-line-strong);
+  border-radius: var(--st-radius-card);
   text-align: center;
-  font-size: 0.8125rem;
-  color: var(--st-ink-faint, var(--st-outline));
+  font-size: var(--st-fs-sm);
+  color: var(--st-ink-faint);
 }
 
 /* ---------- Error state ---------- */
@@ -557,13 +557,13 @@
 
 .st-qv-error .material-symbols-outlined {
   font-size: 32px;
-  color: var(--st-risk-high, #ba1a1a);
+  color: var(--st-risk-high);
 }
 
 .st-qv-error p {
   margin: 0;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
-  font-size: 0.9375rem;
+  color: var(--st-ink-muted);
+  font-size: var(--st-fs-base);
 }
 
 .st-qv-error .st-qv-error-actions {
@@ -579,7 +579,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 14px 24px;
-  border-top: 1px solid var(--st-line, var(--st-outline-variant));
+  border-top: 1px solid var(--st-line);
   background: #fff;
   flex: none;
 }
@@ -592,7 +592,7 @@
 .st-qv-foot .st-qv-btn-ghost {
   border-color: transparent;
   background: none;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  color: var(--st-ink-muted);
 }
 
 .st-qv-foot .st-qv-btn-ghost:hover {
@@ -616,16 +616,10 @@
 
 /* ---------- Loading skeleton ---------- */
 .st-qv-sk {
-  border-radius: 8px;
-  background: linear-gradient(90deg, #eef1f5 25%, #f6f8fa 50%, #eef1f5 75%);
+  border-radius: var(--st-radius-control);
+  background: linear-gradient(90deg, var(--st-risk-neutral-soft) 25%, #f6f8fa 50%, var(--st-risk-neutral-soft) 75%);
   background-size: 200% 100%;
-  animation: st-qv-sk 1.2s linear infinite;
-}
-
-@keyframes st-qv-sk {
-  to {
-    background-position: -200% 0;
-  }
+  animation: stShimmer 1.2s linear infinite;
 }
 
 /* ---------- Trigger (avatar + name button) ---------- */
@@ -639,7 +633,7 @@
   margin: -4px -6px;
   padding: 4px 6px;
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--st-radius-card);
   background: none;
   font: inherit;
   text-align: left;
@@ -659,7 +653,7 @@
 }
 
 .st-qv-trigger:hover .st-avatar-initials {
-  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--st-navy-soft, var(--st-primary-fixed));
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--st-navy-soft);
 }
 
 .st-qv-trigger:focus-visible {
@@ -680,7 +674,7 @@
   .st-qv {
     width: 100%;
     max-height: 92vh;
-    border-radius: 18px 18px 0 0;
+    border-radius: 16px 16px 0 0;
     transform: translateY(100%);
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
@@ -692,7 +686,7 @@
     width: 40px;
     height: 4px;
     margin-left: -20px;
-    border-radius: 4px;
+    border-radius: var(--st-radius-xs);
     background: rgba(17, 26, 54, 0.18);
     z-index: 2;
   }
@@ -705,15 +699,15 @@
   .st-qv-avatar {
     width: 52px;
     height: 52px;
-    font-size: 1.125rem;
+    font-size: var(--st-fs-lg);
   }
   .st-qv-name {
-    font-size: 1.25rem;
+    font-size: var(--st-fs-xl);
   }
   .st-qv-facts {
     grid-template-columns: 1fr;
     gap: 0;
-    border-radius: 10px;
+    border-radius: var(--st-radius-card);
     overflow: hidden;
     background: var(--st-background);
   }
@@ -725,7 +719,7 @@
     border-radius: 0;
   }
   .st-qv-facts div + div {
-    border-top: 1px solid var(--st-line, var(--st-outline-variant));
+    border-top: 1px solid var(--st-line);
   }
   .st-qv-facts b {
     margin: 0;

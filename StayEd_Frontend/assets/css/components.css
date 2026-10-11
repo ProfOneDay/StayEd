@@ -13,9 +13,9 @@
 
   border: none;
 
-  border-radius: var(--st-radius-control, var(--st-button-radius));
+  border-radius: var(--st-radius-control);
 
-  font-size: 0.875rem; /* 14px */
+  font-size: var(--st-fs-base); /* 14px */
 
   font-weight: 600;
 
@@ -63,19 +63,19 @@
 .st-btn-outline {
   background: #fff;
 
-  border: 1px solid var(--st-line-strong, var(--st-outline-variant));
+  border: 1px solid var(--st-line-strong);
 
   color: var(--st-primary);
 }
 
 .st-btn-outline:hover {
-  background: var(--st-navy-soft, var(--st-surface-container-low));
+  background: var(--st-navy-soft);
 
   border-color: var(--st-primary);
 }
 
 .st-btn-danger {
-  background: var(--st-error);
+  background: var(--st-risk-high);
 
   color: #fff;
 }
@@ -95,9 +95,9 @@
 
   border: 1px solid var(--st-line, rgba(195, 198, 207, 0.35));
 
-  border-radius: var(--st-radius-card, var(--st-card-radius));
+  border-radius: var(--st-radius-card);
 
-  box-shadow: var(--st-shadow-card, var(--st-shadow-sm));
+  box-shadow: var(--st-shadow-card);
 
   padding: 24px;
 }
@@ -199,7 +199,7 @@
 
   border: 1px solid rgba(195, 198, 207, 0.35);
 
-  border-radius: var(--st-card-radius);
+  border-radius: var(--st-radius-card);
 
   cursor: pointer;
 
@@ -227,7 +227,7 @@
 
   height: 46px;
 
-  border-radius: 12px;
+  border-radius: var(--st-radius-card);
 
   display: flex;
 
@@ -267,7 +267,7 @@
 
   padding: 4px 10px;
 
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
 
   font-size: var(--st-font-size-caption);
 
@@ -283,21 +283,21 @@
 }
 
 .st-badge-success {
-  background: var(--st-success-light);
+  background: var(--st-risk-low-soft);
 
-  color: var(--st-success);
+  color: var(--st-risk-low);
 }
 
 .st-badge-warning {
-  background: var(--st-warning-light);
+  background: var(--st-risk-moderate-soft);
 
-  color: var(--st-warning);
+  color: var(--st-risk-moderate);
 }
 
 .st-badge-danger {
-  background: var(--st-danger-light);
+  background: var(--st-risk-high-soft);
 
-  color: var(--st-danger);
+  color: var(--st-risk-high);
 }
 
 .st-badge-info {
@@ -315,7 +315,7 @@
 
   padding: 2px 10px;
 
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
 
   font-size: var(--st-font-size-micro);
 
@@ -393,7 +393,7 @@
 
   padding: 2px 10px;
 
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
 
   font-size: var(--st-font-size-micro);
 
@@ -425,7 +425,7 @@
 
   justify-content: center;
 
-  font-size:0.75rem;
+  font-size: var(--st-fs-xs);
 
   font-weight: 700;
 
@@ -473,7 +473,7 @@
 
   border: 1px solid var(--st-outline-variant);
 
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
 
   cursor: pointer;
 
@@ -505,27 +505,27 @@
 
   padding: 16px 18px;
 
-  border-radius: var(--st-card-radius);
+  border-radius: var(--st-radius-card);
 
   border-left: 4px solid transparent;
 }
 
 .st-alert-success {
-  background: var(--st-success-light);
+  background: var(--st-risk-low-soft);
 
-  border-left-color: var(--st-success);
+  border-left-color: var(--st-risk-low);
 }
 
 .st-alert-warning {
-  background: var(--st-warning-light);
+  background: var(--st-risk-moderate-soft);
 
-  border-left-color: var(--st-warning);
+  border-left-color: var(--st-risk-moderate);
 }
 
 .st-alert-danger {
-  background: var(--st-danger-light);
+  background: var(--st-risk-high-soft);
 
-  border-left-color: var(--st-danger);
+  border-left-color: var(--st-risk-high);
 }
 
 .st-alert-info {
@@ -565,15 +565,15 @@
 }
 
 .st-dot-success {
-  background: var(--st-success);
+  background: var(--st-risk-low);
 }
 
 .st-dot-warning {
-  background: var(--st-warning);
+  background: var(--st-risk-moderate);
 }
 
 .st-dot-danger {
-  background: var(--st-danger);
+  background: var(--st-risk-high);
 }
 
 .st-dot-info {
@@ -595,7 +595,7 @@
 
   border: 1px solid rgba(195, 198, 207, 0.35);
 
-  border-radius: var(--st-card-radius);
+  border-radius: var(--st-radius-card);
 
   box-shadow: var(--st-shadow-sm);
 }
@@ -645,7 +645,7 @@
 
   border: 1px solid var(--st-outline-variant);
 
-  border-radius: var(--st-button-radius);
+  border-radius: var(--st-radius-control);
 
   background: #fff;
 
@@ -677,14 +677,14 @@
 
   color: var(--st-outline);
 
-  font-size:1.25rem;
+  font-size: var(--st-fs-xl);
 }
 
 select {
   height: 40px;
   padding: 0 12px;
   border: 1px solid var(--st-outline-variant);
-  border-radius: var(--st-button-radius);
+  border-radius: var(--st-radius-control);
   background-color: #fff;
   font-family: var(--st-font-body);
   font-size: var(--st-font-size-label);
@@ -711,7 +711,7 @@ select:disabled {
 
   overflow: auto;
 
-  border-radius: var(--st-card-radius);
+  border-radius: var(--st-radius-card);
 
   border: 1px solid rgba(195, 198, 207, 0.35);
 }
@@ -777,7 +777,7 @@ select:disabled {
 
   border: 1px solid var(--st-outline-variant);
 
-  border-radius: var(--st-button-radius);
+  border-radius: var(--st-radius-control);
 
   background: #fff;
 
@@ -813,7 +813,7 @@ select:disabled {
 
   border: none;
 
-  border-radius: 8px;
+  border-radius: var(--st-radius-control);
 
   background: #fff;
 
@@ -848,7 +848,7 @@ select:disabled {
 
   animation: stSkeleton 1.4s infinite;
 
-  border-radius: 8px;
+  border-radius: var(--st-radius-control);
 }
 
 .st-skeleton-text {
@@ -916,7 +916,7 @@ select:disabled {
 
   border: 1px solid rgba(195, 198, 207, 0.3);
 
-  border-radius: var(--st-card-radius);
+  border-radius: var(--st-radius-card);
 
   box-shadow: var(--st-shadow-sm);
 
@@ -987,7 +987,7 @@ select:disabled {
 
   background: #fff;
 
-  border-radius: var(--st-radius-xl);
+  border-radius: var(--st-radius-card);
 
   box-shadow: var(--st-shadow-lg);
 
@@ -1071,7 +1071,7 @@ select:disabled {
 }
 
 .st-modal-close .material-symbols-outlined {
-  font-size:1.25rem;
+  font-size: var(--st-fs-xl);
 }
 
 .st-modal-title {
@@ -1145,7 +1145,7 @@ select:disabled {
 
   border-left: 4px solid var(--st-primary);
 
-  border-radius: var(--st-card-radius);
+  border-radius: var(--st-radius-card);
 
   box-shadow: var(--st-shadow-md);
 
@@ -1167,16 +1167,16 @@ select:disabled {
 }
 
 .st-toast-success {
-  border-left-color: var(--st-success);
+  border-left-color: var(--st-risk-low);
 }
 
 .st-toast-warning {
-  border-left-color: var(--st-warning);
+  border-left-color: var(--st-risk-moderate);
 }
 
 .st-toast-danger,
 .st-toast-error {
-  border-left-color: var(--st-danger);
+  border-left-color: var(--st-risk-high);
 }
 
 .st-toast-info {
@@ -1197,6 +1197,34 @@ select:disabled {
   }
 }
 
+/* Shared simple-animation keyframes -- several pages each defined their own
+   byte-identical copy of one of these under a different name. Kept here
+   once; the old per-page names were deleted and their animation: usages
+   repointed here. */
+@keyframes stFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes stPopIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes stFadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes stScaleIn {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes stShimmer {
+  to { background-position: -200% 0; }
+}
+
 .st-progress {
   width: 100%;
 
@@ -1204,7 +1232,7 @@ select:disabled {
 
   overflow: hidden;
 
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
 
   background: var(--st-surface-container);
 }
@@ -1214,7 +1242,7 @@ select:disabled {
 
   background: var(--st-primary);
 
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
 
   transition: width 0.3s ease;
 }
@@ -1298,7 +1326,7 @@ select:disabled {
 
   border: 2px dashed var(--st-outline-variant);
 
-  border-radius: var(--st-radius-xl);
+  border-radius: var(--st-radius-card);
 
   background: var(--st-surface);
 
@@ -1310,7 +1338,7 @@ select:disabled {
 }
 
 .st-chart-placeholder .material-symbols-outlined {
-  font-size:3.5rem;
+  font-size: var(--st-fs-4xl);
 
   color: var(--st-outline);
 }
@@ -1324,11 +1352,11 @@ select:disabled {
 }
 
 .st-text-danger {
-  color: var(--st-danger);
+  color: var(--st-risk-high);
 }
 
 .st-text-success {
-  color: var(--st-success);
+  color: var(--st-risk-low);
 }
 
 .st-bg-primary {
@@ -1342,14 +1370,14 @@ select:disabled {
 }
 
 .st-rounded {
-  border-radius: var(--st-card-radius);
+  border-radius: var(--st-radius-card);
 }
 
 .st-shadow {
   box-shadow: var(--st-shadow-sm);
 }
 
-@media (max-width: 992px) {
+@media (max-width: 1023px) {
   .st-filter-bar {
     flex-direction: column;
 
@@ -1373,7 +1401,7 @@ select:disabled {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .st-card {
     padding: 18px;
   }
@@ -1454,7 +1482,7 @@ select:disabled {
 }
 
 .st-error-icon .material-symbols-outlined {
-  font-size:3rem;
+  font-size: var(--st-fs-4xl);
 }
 
 .st-error-icon--warn {
@@ -1589,7 +1617,7 @@ select:disabled {
 .st-profile-avatar-lg {
   width: 96px;
   height: 96px;
-  font-size:2rem;
+  font-size: var(--st-fs-3xl);
   margin-bottom: 16px;
 }
 
@@ -1709,4 +1737,28 @@ input[type="radio"]:focus-visible {
   :is([data-tooltip], [data-tip]):not(.st-sidebar *, .st-sv-pt)::after {
     transition: none;
   }
+}
+
+/* The one, global [hidden] rule. Several pages used to redefine this
+   themselves, scoped by body/data-page -- harmless duplicates where they
+   matched this exactly, but also the reason a dozen *other* pages needed
+   their own extra-specific "#some-id[hidden]{display:none}" workaround
+   rule just to beat that same element's own unscoped display:flex/grid:
+   !important here means a single global rule now wins over any
+   non-important same-element display rule regardless of selector
+   specificity, so none of those workarounds are needed any more either. */
+[hidden] {
+  display: none !important;
+}
+
+/* Screen-reader-only text. Was page-scoped to System Settings
+   (system-settings.css) only -- a global utility class needs to work on
+   every page, not just the one that happened to add it first. */
+.st-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }

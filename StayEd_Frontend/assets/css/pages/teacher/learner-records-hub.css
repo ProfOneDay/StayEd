@@ -33,27 +33,27 @@ body[data-page="Learner Records"] .st-lr-toolbar{
    Module Management -- only this page's look is overridden here). */
 body[data-page="Learner Records"] .st-class-context-banner{
     background:#fff;
-    border:1px solid var(--st-line, var(--st-outline-variant));
+    border:1px solid var(--st-line);
     border-left:4px solid var(--st-primary);
-    border-radius:var(--st-radius-card, var(--st-card-radius));
-    box-shadow:var(--st-shadow-card, var(--st-shadow-sm));
+    border-radius:var(--st-radius-card);
+    box-shadow:var(--st-shadow-card);
     padding:14px 16px 14px 14px;
 }
 
 body[data-page="Learner Records"] .st-class-context-banner-icon{
     color:var(--st-primary);
-    background:var(--st-navy-soft, var(--st-primary-fixed));
+    background:var(--st-navy-soft);
     width:44px;
     height:44px;
     flex:none;
-    border-radius:12px;
+    border-radius:var(--st-radius-card);
     display:grid;
     place-items:center;
-    font-size:1.25rem;
+    font-size: var(--st-fs-xl);
 }
 
 body[data-page="Learner Records"] .st-class-context-banner-clc{
-    color:var(--st-ink-faint, var(--st-outline));
+    color:var(--st-ink-faint);
 }
 
 body[data-page="Learner Records"] .st-class-context-banner-level{
@@ -61,7 +61,7 @@ body[data-page="Learner Records"] .st-class-context-banner-level{
 }
 
 body[data-page="Learner Records"] .st-class-context-banner-meta{
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    color:var(--st-ink-muted);
 }
 
 body[data-page="Learner Records"] .st-class-context-banner-switch{
@@ -70,8 +70,8 @@ body[data-page="Learner Records"] .st-class-context-banner-switch{
     gap:6px;
     height:38px;
     padding:0 14px;
-    border:1px solid var(--st-line-strong, var(--st-outline-variant));
-    border-radius:var(--st-radius-control, var(--st-button-radius));
+    border:1px solid var(--st-line-strong);
+    border-radius:var(--st-radius-control);
     color:var(--st-on-surface);
     text-decoration:none;
     transition:background-color var(--st-t-hover, 150ms),border-color var(--st-t-hover, 150ms),color var(--st-t-hover, 150ms),transform var(--st-t-press, 90ms);
@@ -80,7 +80,7 @@ body[data-page="Learner Records"] .st-class-context-banner-switch{
 body[data-page="Learner Records"] .st-class-context-banner-switch:hover{
     border-color:var(--st-primary);
     color:var(--st-primary);
-    background:var(--st-navy-soft, var(--st-primary-fixed));
+    background:var(--st-navy-soft);
     text-decoration:none;
 }
 
@@ -101,11 +101,11 @@ body[data-page="Learner Records"] .st-lr-actions{
     justify-content:flex-end;
 }
 
-@media (max-width:1023px){
+@media (max-width: 1023px){
     body[data-page="Learner Records"] .st-lr-actions{ justify-content:flex-start; }
 }
 
-@media (max-width:767px){
+@media (max-width: 767px){
     body[data-page="Learner Records"] .st-lr-actions{
         display:grid;
         grid-template-columns:1fr 1fr;
@@ -114,7 +114,7 @@ body[data-page="Learner Records"] .st-lr-actions{
     body[data-page="Learner Records"] .st-lr-actions .st-btn{
         height:42px;
         padding:0 10px;
-        font-size:0.844rem;
+        font-size: var(--st-fs-base);
     }
     body[data-page="Learner Records"] .st-lr-actions [data-enroll-link]{
         order:-1;
@@ -163,8 +163,8 @@ body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page=
     appearance:none;
     width:34px;
     height:34px;
-    border:1px solid var(--st-line-strong, var(--st-outline-variant));
-    border-radius:8px;
+    border:1px solid var(--st-line-strong);
+    border-radius:var(--st-radius-control);
     background:#fff;
     display:grid;
     place-items:center;
@@ -177,7 +177,7 @@ body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page=
 body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu-trigger:hover,
 body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu.is-open .st-row-menu-trigger{
     border-color:var(--st-primary);
-    background:var(--st-navy-soft, var(--st-primary-fixed));
+    background:var(--st-navy-soft);
     color:var(--st-primary);
 }
 
@@ -188,30 +188,25 @@ body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page=
 body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu-list{
     min-width:230px;
     padding:6px;
-    border-radius:10px;
+    border-radius:var(--st-radius-card);
     box-shadow:0 12px 32px rgba(17,26,54,.16);
 }
 
 body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu.is-open .st-row-menu-list{
-    animation:st-lr-menu-pop 160ms var(--st-ease-out, ease);
-}
-
-@keyframes st-lr-menu-pop{
-    from{ opacity:0; transform:translateY(-4px); }
-    to{ opacity:1; transform:none; }
+    animation:stPopIn 160ms var(--st-ease-out, ease);
 }
 
 body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu-list button{
     padding:9px 10px;
-    border-radius:7px;
-    font-size:0.875rem;
+    border-radius:var(--st-radius-control);
+    font-size: var(--st-fs-base);
     color:var(--st-on-surface);
     transition:background-color var(--st-t-hover, 150ms);
 }
 
 body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu-list button .material-symbols-outlined{
     font-size:19px;
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    color:var(--st-ink-muted);
 }
 
 body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu-list button:hover{
@@ -231,7 +226,7 @@ body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page=
 }
 
 body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu-list button:disabled .material-symbols-outlined{
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    color:var(--st-ink-muted);
 }
 
 /* Modules cell (progress bar) -- scoped to the records table only, not
@@ -248,8 +243,8 @@ body[data-page="Learner Records"] .st-lr-table .st-progress-cell-top{
     display:flex;
     justify-content:space-between;
     gap:8px;
-    font-size:0.781rem;
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    font-size: var(--st-fs-xs);
+    color:var(--st-ink-muted);
 }
 
 body[data-page="Learner Records"] .st-lr-table .st-progress-cell-top b{
@@ -274,7 +269,7 @@ body[data-page="Learner Records"] .st-lr-table .st-progress-link{
     display:inline-flex;
     align-items:center;
     gap:3px;
-    font-size:0.813rem;
+    font-size: var(--st-fs-sm);
     font-weight:600;
     color:var(--st-secondary);
     width:fit-content;
@@ -294,13 +289,13 @@ body[data-page="Learner Records"] .st-lr-table .st-activity{
     display:flex;
     align-items:flex-start;
     gap:8px;
-    font-size:0.844rem;
+    font-size: var(--st-fs-base);
     color:var(--st-on-surface);
     max-width:260px;
 }
 
 body[data-page="Learner Records"] .st-lr-table .st-activity--none{
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    color:var(--st-ink-muted);
 }
 
 body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
@@ -323,7 +318,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     gap:2px;
     padding:3px;
     background:var(--st-background);
-    border-radius:var(--st-radius-control, var(--st-radius-lg));
+    border-radius:var(--st-radius-control);
     width:fit-content;
     margin-bottom:24px;
 }
@@ -335,10 +330,10 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     padding:10px 20px;
     border:none;
     background:transparent;
-    border-radius:var(--st-radius-md);
+    border-radius:var(--st-radius-sm);
     font-size: var(--st-font-size-label);
     font-weight:500;
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    color:var(--st-ink-muted);
     cursor:pointer;
     transition:var(--st-transition);
     white-space:nowrap;
@@ -356,7 +351,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
 }
 
 .st-modality-tab .material-symbols-outlined{
-    font-size:1.25rem;
+    font-size: var(--st-fs-xl);
 }
 
 .st-modality-panel{
@@ -385,7 +380,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     width:100%;
     height:6px;
     background:var(--st-surface-container);
-    border-radius:999px;
+    border-radius:var(--st-radius-pill);
     overflow:hidden;
 }
 
@@ -395,7 +390,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
 
 .st-progress-fill{
     height:100%;
-    border-radius:999px;
+    border-radius:var(--st-radius-pill);
     transition:width .6s cubic-bezier(.16,1,.3,1);
 }
 
@@ -464,7 +459,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     min-width:200px;
     background:#fff;
     border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     box-shadow:var(--st-shadow-md);
     z-index:var(--st-z-dropdown);
     overflow:hidden;
@@ -481,7 +476,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     padding:10px 12px;
     background:none;
     border:none;
-    border-radius:var(--st-radius-sm);
+    border-radius:var(--st-radius-xs);
     font-size: var(--st-font-size-caption);
     color:var(--st-on-surface);
     cursor:pointer;
@@ -497,7 +492,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
 }
 
 .st-row-menu-list button .material-symbols-outlined{
-    font-size:1.125rem;
+    font-size: var(--st-fs-lg);
 }
 
 .st-blended-summary{
@@ -507,14 +502,14 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     margin-bottom:24px;
 }
 
-@media (max-width:992px){
+@media (max-width: 1023px){
     .st-blended-summary{ grid-template-columns:1fr 1fr; }
 }
 
 .st-blended-summary-card{
     background:#fff;
     border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     box-shadow:var(--st-shadow-sm);
     padding:16px;
     display:flex;
@@ -525,7 +520,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
 .st-blended-summary-icon{
     width:40px;
     height:40px;
-    border-radius:var(--st-radius-md);
+    border-radius:var(--st-radius-sm);
     display:flex;
     align-items:center;
     justify-content:center;
@@ -548,7 +543,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     color:var(--st-on-surface-variant);
 }
 
-@media (max-width:768px){
+@media (max-width: 767px){
     .st-modality-tabs{ width:100%; overflow-x:auto; }
     .st-progress-cell{ min-width:120px; }
 }
@@ -664,7 +659,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
 
 .st-mrb-row{
     border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     background:#fff;
     overflow:hidden;
 }
@@ -766,7 +761,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     align-items:center;
     gap:6px;
     padding:6px 12px;
-    border-radius:999px;
+    border-radius:var(--st-radius-pill);
     font-size: var(--st-font-size-caption);
     font-weight:700;
     border:1px solid transparent;
@@ -774,14 +769,14 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     margin-left:auto;
 }
 
-.st-mrb-status-pill .material-symbols-outlined{ font-size:1rem; }
+.st-mrb-status-pill .material-symbols-outlined{ font-size: var(--st-fs-md); }
 
 .st-mrb-status-pill strong{ display:block; font-size: var(--st-font-size-caption); }
 .st-mrb-status-pill small{ display:block; font-size: var(--st-font-size-micro); font-weight:500; opacity:.85; }
 
 .st-mrb-status-pill--returned{
     background:var(--st-secondary-container, #8DF0EE);
-    color:#00504E;
+    color:var(--st-teal-ink);
 }
 
 .st-mrb-status-pill--pending{
@@ -816,7 +811,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     justify-content:center;
     width:32px;
     height:32px;
-    border-radius:999px;
+    border-radius:var(--st-radius-pill);
     border:1px solid rgba(195,198,207,.40);
     background:#fff;
     color:var(--st-on-surface-variant);
@@ -829,13 +824,13 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     color:var(--st-primary);
 }
 
-.st-mrb-edit-btn .material-symbols-outlined{ font-size:1.125rem; }
+.st-mrb-edit-btn .material-symbols-outlined{ font-size: var(--st-fs-lg); }
 
 .st-form-error{
     background:var(--st-risk-high-soft);
     color:var(--st-risk-high);
     border:1px solid var(--st-risk-high-border);
-    border-radius:var(--st-radius-md, 8px);
+    border-radius:var(--st-radius-sm);
     padding:10px 14px;
     font-size: var(--st-font-size-caption);
     margin-bottom:16px;
@@ -857,14 +852,14 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     margin-bottom:12px;
 }
 
-.st-mrb-followup .material-symbols-outlined{ font-size:1.125rem; color:var(--st-primary); }
+.st-mrb-followup .material-symbols-outlined{ font-size: var(--st-fs-lg); color:var(--st-primary); }
 
 .st-mrb-followup--overdue{
     color:var(--st-risk-high);
     font-weight:600;
     background:var(--st-risk-high-soft);
     padding:8px 12px;
-    border-radius:var(--st-radius-md);
+    border-radius:var(--st-radius-sm);
 }
 
 .st-mrb-followup--overdue .material-symbols-outlined{ color:var(--st-risk-high); }
@@ -874,7 +869,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
     gap:16px;
     border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     padding:16px;
     background:var(--st-surface-container-low);
 }
@@ -913,7 +908,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
 }
 
 .st-mrb-module-status-item .material-symbols-outlined{
-    font-size:1.125rem;
+    font-size: var(--st-fs-lg);
     flex-shrink:0;
 }
 
@@ -967,7 +962,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
 
 .st-mrf-strand-block{
     border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     padding:16px;
     background:var(--st-surface-container-low);
     display:flex;
@@ -990,7 +985,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
 .st-mrf-remove-strand{
     background:none;
     border:none;
-    color:var(--st-error);
+    color:var(--st-risk-high);
     font-size: var(--st-font-size-caption);
     font-weight:600;
     cursor:pointer;
@@ -1000,7 +995,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     height:40px;
     padding:0 12px;
     border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-button-radius);
+    border-radius:var(--st-radius-control);
     font-family:var(--st-font-body);
     font-size: var(--st-font-size-label);
     color:var(--st-on-surface);
@@ -1017,7 +1012,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
 .st-mrf-modules-box{
     background:#fff;
     border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-md);
+    border-radius:var(--st-radius-sm);
     padding:14px;
     display:flex;
     flex-direction:column;
@@ -1039,7 +1034,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     font-size: var(--st-font-size-micro);
     font-weight:700;
     padding:3px 10px;
-    border-radius:999px;
+    border-radius:var(--st-radius-pill);
 }
 
 .st-mrf-module-row{
@@ -1063,7 +1058,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     height:40px;
     padding:0 12px;
     border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-radius-sm);
+    border-radius:var(--st-radius-xs);
     font-size: var(--st-font-size-caption);
 }
 
@@ -1076,7 +1071,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     padding:9px 12px;
 }
 
-.st-mrf-remove-module .material-symbols-outlined{ font-size:1rem; }
+.st-mrf-remove-module .material-symbols-outlined{ font-size: var(--st-fs-md); }
 
 .st-mrf-add-module{
     display:flex;
@@ -1085,7 +1080,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     gap:6px;
     background:none;
     border:1px dashed var(--st-outline-variant);
-    border-radius:var(--st-radius-sm);
+    border-radius:var(--st-radius-xs);
     padding:10px;
     font-size: var(--st-font-size-caption);
     font-weight:600;
@@ -1105,7 +1100,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     justify-content:center;
     gap:8px;
     border:1px dashed var(--st-outline-variant);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     background:none;
     padding:14px;
     font-size: var(--st-font-size-label);
@@ -1148,7 +1143,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
 .st-return-summary-card{
     background:var(--st-surface-container-low);
     border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     padding:16px;
     display:flex;
     flex-direction:column;
@@ -1224,21 +1219,21 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     gap:8px;
     align-items:flex-start;
     background:var(--st-surface-container-high, #E3E7FF);
-    border-radius:var(--st-radius-md);
+    border-radius:var(--st-radius-sm);
     padding:12px;
     font-size: var(--st-font-size-caption);
     color:var(--st-on-surface-variant);
 }
 
 .st-return-info-note .material-symbols-outlined{
-    font-size:1.125rem;
+    font-size: var(--st-fs-lg);
     color:var(--st-primary);
     flex-shrink:0;
 }
 
 .st-return-checklist{
     border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     padding:14px;
     display:grid;
     grid-template-columns:repeat(2, minmax(0, 1fr));
@@ -1320,7 +1315,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     height:44px;
     padding:0 14px;
     border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     font-family:var(--st-font-body);
     font-size: var(--st-font-size-label);
     color:var(--st-on-surface);
@@ -1331,7 +1326,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     height:44px;
     padding:0 12px;
     border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-button-radius);
+    border-radius:var(--st-radius-control);
     font-family:var(--st-font-body);
     font-size: var(--st-font-size-label);
     color:var(--st-on-surface);
@@ -1378,14 +1373,14 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     margin-top:32px;
 }
 
-@media (max-width:720px){
+@media (max-width: 767px){
     .st-add-learner-choices{ grid-template-columns:1fr; }
 }
 
 .st-choice-card{
     background:#fff;
     border:2px solid rgba(195,198,207,.35);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     padding:32px 24px;
     text-align:center;
     cursor:pointer;
@@ -1416,7 +1411,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
 }
 
 .st-choice-card-icon .material-symbols-outlined{
-    font-size:2.25rem;
+    font-size: var(--st-fs-4xl);
 }
 
 .st-choice-card-title{
@@ -1448,7 +1443,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     align-items:center;
     gap:14px;
     background:var(--st-primary);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     box-shadow:var(--st-shadow-sm);
     padding:16px 24px;
     /* No margin-bottom: .st-content's gap:20px handles spacing between
@@ -1514,10 +1509,10 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
 
 .st-class-context-banner-switch .material-symbols-outlined{
     color:var(--st-primary-fixed-dim);
-    font-size:1rem;
+    font-size: var(--st-fs-md);
 }
 
-@media (max-width:600px){
+@media (max-width: 479px){
     .st-class-context-banner{
         flex-wrap:wrap;
         row-gap:8px;
@@ -1561,13 +1556,13 @@ body[data-page="Learner Records"] .st-portal-share-title{
     margin:0;
     font-family:var(--st-font-heading);
     font-weight:700;
-    font-size:1.03rem;
+    font-size: var(--st-fs-md);
     color:var(--st-on-surface);
 }
 
 body[data-page="Learner Records"] .st-portal-share-sub{
     margin:2px 0 0;
-    font-size:0.844rem;
+    font-size: var(--st-fs-base);
     color:var(--st-on-surface-variant);
     line-height:1.5;
 }
@@ -1579,13 +1574,9 @@ body[data-page="Learner Records"] .st-portal-share-link-row:not([hidden]){
     padding-top:14px;
     border-top:1px solid var(--st-line);
     flex-wrap:wrap;
-    animation:st-lr-portal-link-pop 200ms var(--st-ease-out);
+    animation:stPopIn 200ms var(--st-ease-out);
 }
 
-@keyframes st-lr-portal-link-pop{
-    from{opacity:0;transform:translateY(-4px);}
-    to{opacity:1;transform:none;}
-}
 
 body[data-page="Learner Records"] .st-portal-share-link{
     flex:1 1 240px;
@@ -1607,12 +1598,12 @@ body[data-page="Learner Records"] .st-portal-share-link input{
     border:0;
     background:none;
     font:inherit;
-    font-size:0.875rem;
+    font-size: var(--st-fs-base);
     color:var(--st-on-surface);
     outline:0;
 }
 
-@media (max-width:767px){
+@media (max-width: 767px){
     body[data-page="Learner Records"] .st-portal-share-card{
         padding:14px 16px;
     }

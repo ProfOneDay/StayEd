@@ -1,0 +1,28 @@
+
+StayEd style audit: C:\Users\REN\Desktop\StayEd\StayEd_Frontend
+
+[OK  ] Comments that end early and break the next rule                 0   target <= 0
+[TODO] Core components styled outside shared files                    45   target <= 0
+        .chart-type-btn in pages/admin/admin-reports.css, pages/teacher/dashboard.css; .chart-type-toggle in pages/admin/admin-reports.css, pages/teacher/dashboard.css; .st-avatar-initials in pages/teacher/dashboard.css; .st-btn in pages/admin/admin-account-pages.css, pages/admin/admin-list-pages.css, pages/admin/admin-reports.css, pages/public/landing.css, pages/student/student-portal.css, pages/teacher/calendar.css, pages/teacher/clc.css, pages/teacher/dashboard.css, pages/teacher/data-upload.css, pages/teacher/learner-profile.css, pages/teacher/learner-records-hub.css, pages/teacher/module-management.css, pages/teacher/notifications.css, pages/teacher/profile-settings.css, pages/teacher/reports.css; .st-btn-danger in pages/admin/admin-list-pages.css; .st-btn-danger-outline in pages/admin/admin-list-pages.css, pages/teacher/learner-profile.css; .st-btn-ghost in pages/admin/admin-list-pages.css; .st-btn-primary in pages/admin/admin-list-pages.css, pages/teacher/setup.css
+[TODO] Core components with conflicting base values                    8   target <= 0
+        .st-select(height,padding,background,border) .st-card(padding,background,border) .st-table-card-head(padding) .st-row-menu-trigger(padding,border-radius,background,border) .st-risk-meter(height,background) .st-empty(padding,background,border) .st-filter-bar(padding,border-radius,background,border) .st-class-context-banner(padding,border-radius,background)
+[TODO] Selectors sharing styles via body:is([data-page=..],..) lists    367   target <= 0
+[TODO] Uses of legacy/duplicate tokens (5px card radius etc.)          2   target <= 0
+[OK  ] Two-token fallback chains var(--a, var(--b))                    0   target <= 0
+[TODO] Hard-coded hex colors outside variables.css (not #fff)        109   target <= 25
+[TODO] Distinct border-radius values                                  15   target <= 12
+[TODO] Distinct media-query breakpoints                                8   target <= 4
+        in use: 479, 480, 767, 768, 1023, 1024, 1279, 1280
+[TODO] Distinct font-size values                                      44   target <= 20
+[TODO] !important declarations                                       350   target <= 40
+[OK  ] @keyframes names defined more than once                         0   target <= 0
+[TODO] @keyframes total (many are identical copies)                   30   target <= 20
+[TODO] Identical 5+ property blocks copied across files               38   target <= 3
+[TODO] Inline style="" with real properties (not --i / --w)          170   target <= 15
+[TODO] JS helper 'initials' re-implemented outside core/utils.js      13   target <= 0
+[TODO] JS helper 'esc/escapeHtml' re-implemented outside core/utils.js      7   target <= 0
+[TODO] JS helper 'countTo/countUp' re-implemented outside core/utils.js      9   target <= 0
+[TODO] JS helper 'riskPill/riskBadge' re-implemented outside core/utils.js      6   target <= 0
+
+3/19 checks on target.
+

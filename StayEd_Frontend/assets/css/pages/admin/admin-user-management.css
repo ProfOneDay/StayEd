@@ -10,7 +10,7 @@ body[data-page="User Management"] .role-toggle{
   gap:2px;
   padding:3px;
   background:var(--st-background);
-  border-radius:var(--st-radius-control,8px);
+  border-radius:var(--st-radius-control);
   width:fit-content;
 }
 
@@ -20,11 +20,11 @@ body[data-page="User Management"] .role-toggle-btn{
   background:transparent;
   height:34px;
   padding:0 20px;
-  border-radius:6px;
+  border-radius:var(--st-radius-sm);
   font:inherit;
-  font-size:.844rem;
+  font-size: var(--st-fs-base);
   font-weight:600;
-  color:var(--st-ink-muted,#5a6275);
+  color:var(--st-ink-muted);
   cursor:pointer;
   transition:background-color var(--st-t-hover,150ms),color var(--st-t-hover,150ms);
 }
@@ -75,10 +75,10 @@ body[data-page="User Management"] .radio-item{
   display:flex;
   align-items:center;
   gap:10px;
-  border:1px solid var(--st-line-strong,#cfd5de);
-  border-radius:10px;
+  border:1px solid var(--st-line-strong);
+  border-radius:var(--st-radius-card);
   padding:10px 12px;
-  font-size:.875rem;
+  font-size: var(--st-fs-base);
   cursor:pointer;
   transition:background-color var(--st-t-hover,150ms),border-color var(--st-t-hover,150ms);
 }
@@ -102,15 +102,15 @@ body[data-page="User Management"] .password-field{
   align-items:center;
   gap:6px;
   background:var(--st-background);
-  border:1px solid var(--st-line-strong,#cfd5de);
-  border-radius:10px;
+  border:1px solid var(--st-line-strong);
+  border-radius:var(--st-radius-card);
   padding:10px 12px;
 }
 
 body[data-page="User Management"] .password-field span{
   flex:1;
   font-family:monospace;
-  font-size:1rem;
+  font-size: var(--st-fs-md);
   letter-spacing:1px;
   color:var(--st-on-surface);
 }
@@ -122,13 +122,13 @@ body[data-page="User Management"] .icon-btn{
   color:var(--st-primary);
   cursor:pointer;
   padding:6px;
-  border-radius:6px;
+  border-radius:var(--st-radius-sm);
   display:flex;
   transition:background-color var(--st-t-hover,150ms);
 }
 
 body[data-page="User Management"] .icon-btn:hover{
-  background:var(--st-navy-soft,#e8eef6);
+  background:var(--st-navy-soft);
 }
 
 body[data-page="User Management"] .icon-btn .material-symbols-outlined{

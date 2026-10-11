@@ -18,11 +18,11 @@
   gap: 12px;
   margin: 20px var(--st-margin-desktop) 0;
   padding: 10px 12px 10px 16px;
-  border-radius: var(--st-radius-control, 8px);
-  background: #e3f4f3;
+  border-radius: var(--st-radius-control);
+  background: var(--st-teal-soft);
   border: 1px solid #c4e7e5;
   color: #004f4d;
-  font-size: 0.875rem; /* 14px */
+  font-size: var(--st-fs-base); /* 14px */
   font-weight: 500;
   transition: opacity 200ms ease, transform 200ms ease;
 }
@@ -39,8 +39,8 @@
 }
 
 .st-notif-banner-msg .material-symbols-outlined {
-  font-size: 1.125rem;
-  color: #006a68;
+  font-size: var(--st-fs-lg);
+  color: var(--st-secondary);
 }
 
 .st-notif-banner-close {
@@ -50,7 +50,7 @@
   color: inherit;
   width: 30px;
   height: 30px;
-  border-radius: 6px;
+  border-radius: var(--st-radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -61,7 +61,7 @@
 }
 
 .st-notif-banner-close .material-symbols-outlined {
-  font-size: 1.125rem;
+  font-size: var(--st-fs-lg);
 }
 
 /* ---------- Welcome ---------- */
@@ -77,7 +77,7 @@
 .st-welcome-title {
   margin: 0;
   font-family: var(--st-font-heading);
-  font-size: 1.875rem; /* 30px */
+  font-size: var(--st-fs-3xl); /* 30px */
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.15;
@@ -86,8 +86,8 @@
 
 .st-welcome-subtitle {
   margin: 6px 0 0;
-  font-size: 0.9375rem; /* 15px */
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  font-size: var(--st-fs-base); /* 15px */
+  color: var(--st-ink-muted);
 }
 
 .st-term-card {
@@ -95,10 +95,10 @@
   align-items: center;
   gap: 0;
   background: #fff;
-  border: 1px solid var(--st-line, var(--st-outline-variant));
-  border-radius: 999px;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-pill);
   padding: 4px;
-  box-shadow: var(--st-shadow-card, var(--st-shadow-sm));
+  box-shadow: var(--st-shadow-card);
 }
 
 .st-term-item {
@@ -109,15 +109,15 @@
 }
 
 .st-term-item-label {
-  font-size: 0.781rem; /* 12.5px */
+  font-size: var(--st-fs-xs); /* 12.5px */
   font-weight: 400;
   letter-spacing: normal;
   text-transform: none;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  color: var(--st-ink-muted);
 }
 
 .st-term-item-value {
-  font-size: 0.875rem; /* 14px */
+  font-size: var(--st-fs-base); /* 14px */
   font-weight: 600;
   color: var(--st-on-surface);
 }
@@ -125,7 +125,7 @@
 .st-term-divider {
   width: 1px;
   height: 20px;
-  background: var(--st-line, var(--st-outline-variant));
+  background: var(--st-line);
 }
 
 /* ---------- Filters ---------- */
@@ -133,9 +133,9 @@
 .st-filter-bar {
   background: #fff;
   padding: 14px 16px;
-  border-radius: var(--st-radius-card, var(--st-card-radius));
-  border: 1px solid var(--st-line, var(--st-outline-variant));
-  box-shadow: var(--st-shadow-card, var(--st-shadow-sm));
+  border-radius: var(--st-radius-card);
+  border: 1px solid var(--st-line);
+  box-shadow: var(--st-shadow-card);
   min-width: 0;
 }
 
@@ -152,7 +152,7 @@
   grid-column: 1 / -1;
 }
 
-@media (min-width: 1560px) {
+@media (min-width: 1280px) {
   .st-filter-row {
     grid-template-columns: auto repeat(3, minmax(150px, 1fr)) auto;
   }
@@ -169,9 +169,9 @@
 }
 
 .st-filter-label {
-  font-size: 0.781rem; /* 12.5px */
+  font-size: var(--st-fs-xs); /* 12.5px */
   font-weight: 600;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  color: var(--st-ink-muted);
   padding-left: 0;
 }
 
@@ -180,7 +180,7 @@
   gap: 2px;
   padding: 3px;
   background: var(--st-background);
-  border-radius: var(--st-radius-control, 8px);
+  border-radius: var(--st-radius-control);
   overflow-x: auto;
   scrollbar-width: none;
   max-width: 100%;
@@ -197,11 +197,11 @@
   padding: 0 12px;
   border: none;
   background: transparent;
-  border-radius: 6px;
+  border-radius: var(--st-radius-sm);
   font-family: var(--st-font-body);
-  font-size: 0.844rem; /* 13.5px */
+  font-size: var(--st-fs-base); /* 13.5px */
   font-weight: 500;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  color: var(--st-ink-muted);
   cursor: pointer;
   white-space: nowrap;
 }
@@ -225,11 +225,11 @@
   width: 100%;
   height: 38px;
   padding: 0 32px 0 12px;
-  border: 1px solid var(--st-line-strong, var(--st-outline-variant));
-  border-radius: var(--st-radius-control, 8px);
+  border: 1px solid var(--st-line-strong);
+  border-radius: var(--st-radius-control);
   background: #fff;
   font-family: var(--st-font-body);
-  font-size: 0.875rem; /* 14px */
+  font-size: var(--st-fs-base); /* 14px */
   color: var(--st-on-surface);
   cursor: pointer;
   appearance: none;
@@ -258,9 +258,9 @@
   width: 100%;
   height: 38px;
   padding: 0 16px;
-  border-radius: var(--st-radius-control, 8px);
+  border-radius: var(--st-radius-control);
   font-family: var(--st-font-body);
-  font-size: 0.875rem; /* 14px */
+  font-size: var(--st-fs-base); /* 14px */
   justify-content: center;
 }
 
@@ -294,9 +294,9 @@
 
 .st-panel {
   background: #fff;
-  border: 1px solid var(--st-line, var(--st-outline-variant));
-  border-radius: var(--st-radius-card, var(--st-card-radius));
-  box-shadow: var(--st-shadow-card, var(--st-shadow-sm));
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-card);
+  box-shadow: var(--st-shadow-card);
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -326,7 +326,7 @@
 
 .st-panel-title {
   font-family: var(--st-font-heading);
-  font-size: 1.125rem; /* 18px */
+  font-size: var(--st-fs-lg); /* 18px */
   font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--st-on-surface);
@@ -334,8 +334,8 @@
 }
 
 .st-panel-subtitle {
-  font-size: 0.844rem; /* 13.5px */
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  font-size: var(--st-fs-base); /* 13.5px */
+  color: var(--st-ink-muted);
   margin-top: 4px;
 }
 
@@ -349,11 +349,11 @@
   align-items: center;
   gap: 4px;
   padding: 6px 8px;
-  border-radius: 8px;
+  border-radius: var(--st-radius-control);
   border: none;
   background: transparent;
   font: inherit;
-  font-size: 0.844rem; /* 13.5px */
+  font-size: var(--st-fs-base); /* 13.5px */
   font-weight: 600;
   color: var(--st-secondary);
   cursor: pointer;
@@ -362,11 +362,11 @@
 }
 
 .st-panel-link:hover {
-  background: #e3f4f3;
+  background: var(--st-teal-soft);
 }
 
 .st-panel-link .material-symbols-outlined {
-  font-size: 1.125rem;
+  font-size: var(--st-fs-lg);
 }
 
 /* ---------- Overview (the one bold element) ---------- */
@@ -380,13 +380,13 @@
 
 .st-overview-total {
   padding-right: 28px;
-  border-right: 1px solid var(--st-line, var(--st-outline-variant));
+  border-right: 1px solid var(--st-line);
 }
 
 .st-overview-total .value {
   font-family: var(--st-font-heading);
   font-weight: 800;
-  font-size: 3.25rem; /* 52px */
+  font-size: var(--st-fs-4xl); /* 52px */
   line-height: 1;
   letter-spacing: -0.03em;
   color: var(--st-primary);
@@ -394,14 +394,14 @@
 
 .st-overview-total .label {
   margin-top: 6px;
-  font-size: 0.875rem; /* 14px */
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  font-size: var(--st-fs-base); /* 14px */
+  color: var(--st-ink-muted);
 }
 
 .st-risk-strip {
   display: flex;
   height: 14px;
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   overflow: hidden;
   gap: 3px;
   background: var(--st-background);
@@ -415,7 +415,7 @@
 .st-risk-strip .high { background: var(--st-risk-high); flex-grow: 1; }
 .st-risk-strip .mod { background: var(--st-risk-moderate); flex-grow: 1; }
 .st-risk-strip .low { background: var(--st-risk-low); flex-grow: 1; }
-.st-risk-strip .none { background: var(--st-line-strong, #cfd5de); flex-grow: 1; }
+.st-risk-strip .none { background: var(--st-line-strong); flex-grow: 1; }
 
 .st-risk-legend {
   display: grid;
@@ -440,28 +440,28 @@
 .st-risk-legend-item.high { border-color: var(--st-risk-high); background: transparent; }
 .st-risk-legend-item.mod { border-color: var(--st-risk-moderate); background: transparent; }
 .st-risk-legend-item.low { border-color: var(--st-risk-low); background: transparent; }
-.st-risk-legend-item.none { border-color: var(--st-line-strong, #cfd5de); background: transparent; }
+.st-risk-legend-item.none { border-color: var(--st-line-strong); background: transparent; }
 
 .st-risk-legend-item .count {
   font-family: var(--st-font-heading);
   font-weight: 800;
-  font-size: 1.75rem; /* 28px */
+  font-size: var(--st-fs-3xl); /* 28px */
   line-height: 1.1;
 }
 
-.st-risk-legend-item.high .count { color: var(--st-risk-high-ink, var(--st-risk-high)); }
-.st-risk-legend-item.mod .count { color: var(--st-risk-moderate-ink, var(--st-risk-moderate)); }
-.st-risk-legend-item.low .count { color: var(--st-risk-low-ink, var(--st-risk-low)); }
-.st-risk-legend-item.none .count { color: var(--st-ink-muted, var(--st-on-surface-variant)); }
+.st-risk-legend-item.high .count { color: var(--st-risk-high-ink); }
+.st-risk-legend-item.mod .count { color: var(--st-risk-moderate-ink); }
+.st-risk-legend-item.low .count { color: var(--st-risk-low-ink); }
+.st-risk-legend-item.none .count { color: var(--st-ink-muted); }
 
 .st-risk-legend-item .name {
-  font-size: 0.844rem; /* 13.5px */
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  font-size: var(--st-fs-base); /* 13.5px */
+  color: var(--st-ink-muted);
 }
 
 .st-risk-legend-item .pct {
-  font-size: 0.781rem; /* 12.5px */
-  color: var(--st-ink-faint, var(--st-outline));
+  font-size: var(--st-fs-xs); /* 12.5px */
+  color: var(--st-ink-faint);
 }
 
 .st-followup-card {
@@ -469,7 +469,7 @@
   flex-direction: column;
   justify-content: space-between;
   gap: 14px;
-  background: #fef3e4;
+  background: var(--st-risk-moderate-soft);
   border-color: #f6dcb8;
 }
 
@@ -478,8 +478,8 @@
   align-items: center;
   gap: 10px;
   font-weight: 600;
-  font-size: 0.906rem; /* 14.5px */
-  color: var(--st-risk-moderate-ink, #8f5200);
+  font-size: var(--st-fs-base); /* 14.5px */
+  color: var(--st-risk-moderate-ink);
 }
 
 .st-followup-card ul {
@@ -495,20 +495,20 @@
   display: flex;
   align-items: baseline;
   gap: 8px;
-  font-size: 0.875rem; /* 14px */
+  font-size: var(--st-fs-base); /* 14px */
   color: #6b3f00;
 }
 
 .st-followup-card li strong {
   font-family: var(--st-font-heading);
-  font-size: 1.625rem; /* 26px */
+  font-size: var(--st-fs-2xl); /* 26px */
   font-weight: 800;
   line-height: 1;
-  color: var(--st-risk-moderate-ink, #8f5200);
+  color: var(--st-risk-moderate-ink);
 }
 
 .st-followup-card .hint {
-  font-size: 0.781rem; /* 12.5px */
+  font-size: var(--st-fs-xs); /* 12.5px */
   color: #8a6a3c;
 }
 
@@ -529,7 +529,7 @@
   gap: 2px;
   padding: 2px;
   border: 1px solid var(--st-outline-variant);
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   background: var(--st-surface-container-lowest, #fff);
 }
 
@@ -537,9 +537,9 @@
   border: none;
   background: transparent;
   padding: 5px 12px;
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   font-family: var(--st-font-body);
-  font-size: 0.8125rem; /* 13px */
+  font-size: var(--st-fs-sm); /* 13px */
   font-weight: 600;
   color: var(--st-on-surface-variant);
   cursor: pointer;
@@ -581,25 +581,12 @@
 .chart-canvas-note {
   flex-shrink: 0;
   margin: 10px 0 0;
-  font-size: 0.781rem; /* 12.5px */
-  color: var(--st-ink-faint, var(--st-outline));
+  font-size: var(--st-fs-xs); /* 12.5px */
+  color: var(--st-ink-faint);
   text-align: center;
 }
 
 /* ---------- Risk distribution: horizontal bars ---------- */
-
-/* Author rules always beat the UA [hidden]{display:none} default regardless
-   of specificity/order, so .st-riskchart's own display:flex below would
-   otherwise keep this visible even with the hidden attribute set (it's
-   toggled via JS when switching the Risk Distribution chart type away from
-   "Bar") -- this needs to explicitly out-specificity that rule.
-   Scoped to this page: the admin dashboard reuses the same #riskBarView /
-   #riskChartView ids for its own (differently-styled) chart toggle, and
-   main.css loads every page's CSS everywhere, so an unscoped rule here
-   would otherwise leak into and resize/mis-hide admin's version. */
-body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskBarView[hidden] {
-  display: none;
-}
 
 body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChartView.chart-canvas-wrap {
   height: 260px;
@@ -627,7 +614,7 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
 }
 
 .st-hbar-label {
-  font-size: 0.875rem; /* 14px */
+  font-size: var(--st-fs-base); /* 14px */
   font-weight: 600;
   color: var(--st-on-surface);
 }
@@ -636,7 +623,7 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
   position: relative;
   height: 28px;
   background: var(--st-background);
-  border-radius: 6px;
+  border-radius: var(--st-radius-sm);
   /* Not overflow:hidden -- the bar's own width is always clamped to <=100%
      of the track so it can never visually spill past it, and this track is
      the hover target for the composition tooltip below, which needs to
@@ -645,7 +632,7 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
 
 .st-hbar {
   height: 100%;
-  border-radius: 6px;
+  border-radius: var(--st-radius-sm);
   width: var(--w, 0%);
 }
 
@@ -659,7 +646,7 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
 
 .st-hbar-value {
   text-align: left;
-  font-size: 0.875rem; /* 14px */
+  font-size: var(--st-fs-base); /* 14px */
   font-weight: 700;
   color: var(--st-on-surface);
 }
@@ -667,8 +654,8 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
 .st-hbar-value small {
   display: block;
   font-weight: 500;
-  font-size: 0.75rem; /* 12px */
-  color: var(--st-ink-faint, var(--st-outline));
+  font-size: var(--st-fs-xs); /* 12px */
+  color: var(--st-ink-faint);
 }
 
 .st-hbar-scale {
@@ -681,8 +668,8 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
 .st-hbar-scale div {
   display: flex;
   justify-content: space-between;
-  font-size: 0.719rem; /* 11.5px */
-  color: var(--st-ink-faint, var(--st-outline));
+  font-size: var(--st-fs-xs); /* 11.5px */
+  color: var(--st-ink-faint);
 }
 
 .st-riskchart-side {
@@ -693,14 +680,14 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
 
 .st-insights {
   background: var(--st-background);
-  border-radius: 10px;
+  border-radius: var(--st-radius-card);
   padding: 14px 16px;
   border: none;
 }
 
 .st-insights-title {
   margin: 0 0 8px;
-  font-size: 0.8125rem; /* 13px */
+  font-size: var(--st-fs-sm); /* 13px */
   font-weight: 700;
   text-transform: none;
   color: var(--st-on-surface);
@@ -716,9 +703,9 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
 .st-insights li {
   display: flex;
   gap: 8px;
-  font-size: 0.844rem; /* 13.5px */
+  font-size: var(--st-fs-base); /* 13.5px */
   line-height: 1.45;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  color: var(--st-ink-muted);
 }
 
 .st-bullet {
@@ -739,8 +726,8 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
   margin-top: auto;
   background: #fff;
   padding: 4px 14px;
-  border-radius: 10px;
-  border: 1px solid var(--st-line, var(--st-outline-variant));
+  border-radius: var(--st-radius-card);
+  border: 1px solid var(--st-line);
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -755,7 +742,7 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
 }
 
 .st-meta-grid-item + .st-meta-grid-item {
-  border-top: 1px solid var(--st-line, var(--st-outline-variant));
+  border-top: 1px solid var(--st-line);
 }
 
 .st-meta-grid-item p {
@@ -763,12 +750,12 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
 }
 
 .st-meta-grid-item p:first-child {
-  font-size: 0.8125rem; /* 13px */
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  font-size: var(--st-fs-sm); /* 13px */
+  color: var(--st-ink-muted);
 }
 
 .st-meta-grid-item p:last-child {
-  font-size: 0.844rem; /* 13.5px */
+  font-size: var(--st-fs-base); /* 13.5px */
   font-weight: 600;
   color: var(--st-on-surface);
   text-align: right;
@@ -802,7 +789,7 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
   padding: 10px 8px;
   border: 0;
   background: none;
-  border-radius: 10px;
+  border-radius: var(--st-radius-card);
   font-family: var(--st-font-body);
   cursor: pointer;
   text-align: left;
@@ -854,10 +841,10 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
   border-radius: 50%;
   display: grid;
   place-items: center;
-  font-size: 0.781rem; /* 12.5px */
+  font-size: var(--st-fs-xs); /* 12.5px */
   font-weight: 700;
-  background: var(--st-risk-high-soft-2, var(--st-risk-high-soft));
-  color: var(--st-risk-high-ink, var(--st-risk-high));
+  background: var(--st-risk-high-soft);
+  color: var(--st-risk-high-ink);
   transition: transform var(--st-t-hover, 150ms) var(--st-ease-out, ease);
 }
 
@@ -866,8 +853,8 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
 }
 
 .st-attention-row.is-moderate .st-attention-avatar {
-  background: var(--st-risk-moderate-soft-2, var(--st-risk-moderate-soft));
-  color: var(--st-risk-moderate-ink, var(--st-risk-moderate));
+  background: var(--st-risk-moderate-soft);
+  color: var(--st-risk-moderate-ink);
 }
 
 .st-attention-person {
@@ -880,15 +867,15 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.875rem; /* 14px */
+  font-size: var(--st-fs-base); /* 14px */
   font-weight: 600;
   color: var(--st-on-surface);
 }
 
 .st-attention-person small {
   margin-top: 1px;
-  font-size: 0.75rem; /* 12px */
-  color: var(--st-ink-faint, var(--st-outline));
+  font-size: var(--st-fs-xs); /* 12px */
+  color: var(--st-ink-faint);
 }
 
 .st-attention-risk {
@@ -896,16 +883,16 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
   flex-direction: column;
   align-items: flex-end;
   gap: 5px;
-  font-size: 0.8125rem; /* 13px */
+  font-size: var(--st-fs-sm); /* 13px */
   font-weight: 700;
-  color: var(--st-risk-high-ink, var(--st-risk-high));
+  color: var(--st-risk-high-ink);
 }
 
 .st-attention-risk .meter {
   width: 100%;
   height: 5px;
-  border-radius: 999px;
-  background: var(--st-risk-high-soft-2, var(--st-risk-high-soft));
+  border-radius: var(--st-radius-pill);
+  background: var(--st-risk-high-soft);
   overflow: hidden;
 }
 
@@ -914,15 +901,15 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
   height: 100%;
   width: var(--w, 0%);
   background: var(--st-risk-high);
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
 }
 
 .st-attention-row.is-moderate .st-attention-risk {
-  color: var(--st-risk-moderate-ink, var(--st-risk-moderate));
+  color: var(--st-risk-moderate-ink);
 }
 
 .st-attention-row.is-moderate .meter {
-  background: var(--st-risk-moderate-soft-2, var(--st-risk-moderate-soft));
+  background: var(--st-risk-moderate-soft);
 }
 
 .st-attention-row.is-moderate .meter i {
@@ -936,9 +923,9 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
   justify-content: center;
   gap: 6px;
   height: 40px;
-  border: 1px solid var(--st-line-strong, var(--st-outline-variant));
-  border-radius: var(--st-radius-control, 8px);
-  font-size: 0.875rem; /* 14px */
+  border: 1px solid var(--st-line-strong);
+  border-radius: var(--st-radius-control);
+  font-size: var(--st-fs-base); /* 14px */
   font-weight: 600;
   color: var(--st-primary);
   text-decoration: none;
@@ -946,15 +933,15 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
 
 .st-attention-view-all:hover {
   border-color: var(--st-primary);
-  background: var(--st-navy-soft, var(--st-primary-fixed));
+  background: var(--st-navy-soft);
 }
 
 .st-attention-empty {
   margin: auto 0;
   padding: 22px 10px;
   text-align: center;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
-  font-size: 0.844rem; /* 13.5px */
+  color: var(--st-ink-muted);
+  font-size: var(--st-fs-base); /* 13.5px */
 }
 
 /* ---------- Registry ----------
@@ -988,10 +975,10 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-searc
   align-items: center;
   gap: 8px;
   padding: 0 12px;
-  border: 1px solid var(--st-line-strong, var(--st-outline-variant));
-  border-radius: var(--st-radius-control, 8px);
+  border: 1px solid var(--st-line-strong);
+  border-radius: var(--st-radius-control);
   background: #fff;
-  color: var(--st-ink-faint, var(--st-outline));
+  color: var(--st-ink-faint);
 }
 
 body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-search:hover {
@@ -1006,7 +993,7 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-searc
 body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-search .material-symbols-outlined {
   position: static;
   transform: none;
-  font-size: 1.125rem;
+  font-size: var(--st-fs-lg);
   color: inherit;
   pointer-events: none;
 }
@@ -1018,7 +1005,7 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-searc
   min-width: 0;
   width: 100%;
   padding: 0;
-  font-size: 0.875rem; /* 14px */
+  font-size: var(--st-fs-base); /* 14px */
   font-family: var(--st-font-body);
   background: none;
   color: var(--st-on-surface);
@@ -1040,12 +1027,12 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-tool-
   gap: 6px;
   height: 38px;
   padding: 0 12px;
-  border: 1px solid var(--st-line-strong, var(--st-outline-variant));
-  border-radius: var(--st-radius-control, 8px);
+  border: 1px solid var(--st-line-strong);
+  border-radius: var(--st-radius-control);
   background: #fff;
   color: var(--st-on-surface);
   font-family: var(--st-font-body);
-  font-size: 0.844rem; /* 13.5px */
+  font-size: var(--st-fs-base); /* 13.5px */
   font-weight: 500;
   cursor: pointer;
 }
@@ -1055,7 +1042,7 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-tool-
 }
 
 body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-tool-btn .material-symbols-outlined {
-  font-size: 1.125rem;
+  font-size: var(--st-fs-lg);
 }
 
 .st-table-scroll {
@@ -1075,22 +1062,22 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-tool-
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  font-size: 0.875rem; /* 14px */
+  font-size: var(--st-fs-base); /* 14px */
 }
 
 .st-data-table thead tr {
-  background: #f8f9fb;
+  background: var(--st-table-header);
 }
 
 .st-data-table th {
   padding: 10px 22px;
-  font-size: 0.781rem; /* 12.5px */
+  font-size: var(--st-fs-xs); /* 12.5px */
   font-weight: 600;
   letter-spacing: normal;
   text-transform: none;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
-  border-top: 1px solid var(--st-line, var(--st-outline-variant));
-  border-bottom: 1px solid var(--st-line, var(--st-outline-variant));
+  color: var(--st-ink-muted);
+  border-top: 1px solid var(--st-line);
+  border-bottom: 1px solid var(--st-line);
   white-space: nowrap;
 }
 
@@ -1100,7 +1087,7 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-tool-
 
 .st-data-table tbody tr {
   border-top: 0;
-  border-bottom: 1px solid var(--st-line, var(--st-outline-variant));
+  border-bottom: 1px solid var(--st-line);
   transition: background-color var(--st-t-hover, 150ms) ease;
   cursor: pointer;
 }
@@ -1111,16 +1098,16 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-tool-
 
 .st-data-table td {
   padding: 12px 22px;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  color: var(--st-ink-muted);
   vertical-align: middle;
   white-space: nowrap;
-  font-size: 0.875rem; /* 14px */
+  font-size: var(--st-fs-base); /* 14px */
 }
 
 body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-registry-loading {
   text-align: center;
   padding: 32px;
-  color: var(--st-ink-faint, var(--st-outline));
+  color: var(--st-ink-faint);
   font-style: italic;
 }
 
@@ -1138,22 +1125,22 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
   width: 36px;
   height: 36px;
   flex: none;
-  font-size: 0.781rem; /* 12.5px */
+  font-size: var(--st-fs-xs); /* 12.5px */
   font-weight: 700;
 }
 
 .st-data-table .st-pill {
   padding: 3px 10px;
-  font-size: 0.781rem; /* 12.5px */
+  font-size: var(--st-fs-xs); /* 12.5px */
   font-weight: 600;
   background: var(--st-background);
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
-  border: 1px solid var(--st-line, var(--st-outline-variant));
+  color: var(--st-ink-muted);
+  border: 1px solid var(--st-line);
 }
 
 .st-data-table .st-risk-badge {
   padding: 3px 10px;
-  font-size: 0.781rem; /* 12.5px */
+  font-size: var(--st-fs-xs); /* 12.5px */
   font-weight: 600;
 }
 
@@ -1162,7 +1149,7 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
   border: 0;
   background: none;
   padding: 0;
-  font-size: 0.906rem; /* 14.5px */
+  font-size: var(--st-fs-base); /* 14.5px */
   font-weight: 600;
   font-family: var(--st-font-body);
   color: var(--st-on-surface);
@@ -1178,8 +1165,8 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
 
 .st-learner-id {
   margin: 1px 0 0;
-  font-size: 0.781rem; /* 12.5px */
-  color: var(--st-ink-faint, var(--st-outline));
+  font-size: var(--st-fs-xs); /* 12.5px */
+  color: var(--st-ink-faint);
 }
 
 .st-row-actions {
@@ -1193,9 +1180,9 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
   height: 32px;
   padding: 0 12px;
   font-family: var(--st-font-body);
-  font-size: 0.8125rem; /* 13px */
+  font-size: var(--st-fs-sm); /* 13px */
   font-weight: 600;
-  border-radius: var(--st-radius-control, 8px);
+  border-radius: var(--st-radius-control);
 }
 
 .st-icon-btn-sm {
@@ -1204,9 +1191,9 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
   padding: 0;
   border: none;
   background: transparent;
-  border-radius: 6px;
+  border-radius: var(--st-radius-sm);
   font-family: var(--st-font-body);
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  color: var(--st-ink-muted);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1218,7 +1205,7 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
 }
 
 .st-icon-btn-sm .material-symbols-outlined {
-  font-size: 1.125rem;
+  font-size: var(--st-fs-lg);
 }
 
 .st-pagination {
@@ -1232,9 +1219,9 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
 }
 
 .st-pagination-info {
-  font-size: 0.844rem; /* 13.5px */
+  font-size: var(--st-fs-base); /* 13.5px */
   font-family: var(--st-font-body);
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  color: var(--st-ink-muted);
 }
 
 .st-pagination-controls {
@@ -1251,11 +1238,11 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
   padding: 0 8px;
   border: 1px solid transparent;
   background: none;
-  border-radius: var(--st-radius-control, 8px);
+  border-radius: var(--st-radius-control);
   font-family: var(--st-font-body);
-  font-size: 0.844rem; /* 13.5px */
+  font-size: var(--st-fs-base); /* 13.5px */
   font-weight: 500;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  color: var(--st-ink-muted);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -1291,9 +1278,9 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
 
 @media (max-width: 767px) {
   .st-dash-grid { gap: 16px; }
-  .st-welcome-title { font-size: 1.5rem; /* 24px */ }
-  .st-welcome-subtitle { font-size: 0.875rem; }
-  .st-term-card { width: 100%; border-radius: 10px; }
+  .st-welcome-title { font-size: var(--st-fs-2xl); /* 24px */ }
+  .st-welcome-subtitle { font-size: var(--st-fs-base); }
+  .st-term-card { width: 100%; border-radius: var(--st-radius-card); }
   .st-term-item { flex: 1; flex-direction: column; gap: 0; padding: 6px 12px; }
   .st-filter-bar { padding: 12px; }
   .st-filter-row { grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -1305,20 +1292,20 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
   .st-overview-total {
     padding: 0 0 14px;
     border-right: 0;
-    border-bottom: 1px solid var(--st-line, var(--st-outline-variant));
+    border-bottom: 1px solid var(--st-line);
     display: flex;
     align-items: baseline;
     gap: 10px;
   }
-  .st-overview-total .value { font-size: 2.5rem; /* 40px */ }
+  .st-overview-total .value { font-size: var(--st-fs-4xl); /* 40px */ }
   .st-overview-total .label { margin: 0; }
   .st-risk-legend { gap: 10px; }
-  .st-risk-legend-item .count { font-size: 1.375rem; /* 22px */ }
+  .st-risk-legend-item .count { font-size: var(--st-fs-xl); /* 22px */ }
   .pct-suffix { display: none; }
   .st-attention-list { display: flex; }
   .st-hbar-row { grid-template-columns: 74px minmax(0, 1fr) 64px; gap: 10px; }
   .st-hbar-scale { grid-template-columns: 74px minmax(0, 1fr) 64px; gap: 10px; }
-  .st-hbar-label { font-size: 0.8125rem; }
+  .st-hbar-label { font-size: var(--st-fs-sm); }
   .chart-canvas-wrap { height: 230px; }
   body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-registry-head { padding: 16px; }
   body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-registry-tools { width: 100%; }
@@ -1328,12 +1315,12 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
   /* Table becomes stacked cards */
   body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-data-table thead { display: none; }
   body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-data-table, body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-data-table tbody { display: block; }
-  body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-data-table tr { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 14px 16px; border-bottom: 1px solid var(--st-line, var(--st-outline-variant)); }
+  body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-data-table tr { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 14px 16px; border-bottom: 1px solid var(--st-line); }
   body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-data-table td { display: block; padding: 0; border: 0; white-space: normal; }
   body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-data-table td[data-col="learner"] { flex-basis: 100%; }
-  body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-data-table td[data-col="level"] { flex-basis: 100%; font-size: 0.8125rem; color: var(--st-ink-muted, var(--st-on-surface-variant)); padding-left: 48px; margin-top: -6px; }
+  body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-data-table td[data-col="level"] { flex-basis: 100%; font-size: var(--st-fs-sm); color: var(--st-ink-muted); padding-left: 48px; margin-top: -6px; }
   body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-data-table td[data-col="modality"] { padding-left: 48px; }
-  body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-data-table td[data-col="activity"] { flex-basis: 100%; padding-left: 48px; font-size: 0.781rem; }
+  body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-data-table td[data-col="activity"] { flex-basis: 100%; padding-left: 48px; font-size: var(--st-fs-xs); }
   body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-data-table td[data-col="status"] { padding-left: 48px; }
   body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-data-table td[data-col="actions"] { flex-basis: 100%; padding-left: 48px; }
   body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-data-table td[data-col="actions"] .st-row-actions { justify-content: flex-start; }
@@ -1399,7 +1386,7 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
     gap:12px;
     width:100%;
     padding:8px;
-    border-radius:var(--st-button-radius);
+    border-radius:var(--st-radius-control);
     border:1px solid transparent;
     background:transparent;
     cursor:pointer;
@@ -1419,7 +1406,7 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
     align-items:center;
     justify-content:center;
     padding:6px;
-    border-radius:var(--st-radius-sm);
+    border-radius:var(--st-radius-xs);
     background:var(--st-primary-fixed);
     color:var(--st-primary);
     font-size: var(--st-font-size-body-lg);
@@ -1438,11 +1425,11 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
     padding:12px;
     background:rgba(211,227,255,.30);
     border:1px solid rgba(18,53,91,.10);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
 }
 
 .st-quick-tip .material-symbols-outlined{
-    font-size:1.25rem;
+    font-size: var(--st-fs-xl);
     color:var(--st-primary);
     flex-shrink:0;
 }
@@ -1463,12 +1450,12 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
     padding:32px;
     gap:8px;
     border:2px dashed rgba(195,198,207,.30);
-    border-radius:var(--st-radius-xl);
+    border-radius:var(--st-radius-card);
     background:var(--st-surface);
 }
 
 .st-empty .material-symbols-outlined{
-    font-size:3rem;
+    font-size: var(--st-fs-4xl);
     color:var(--st-outline);
     margin-bottom:8px;
 }
@@ -1488,7 +1475,7 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
 .st-alert-card{
     background:#fff;
     border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-card-radius);
+    border-radius:var(--st-radius-card);
     box-shadow:var(--st-shadow-sm);
     padding:20px;
     display:flex;
@@ -1558,7 +1545,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     margin-left:auto;
 }
 
-@media (max-width:767px){
+@media (max-width: 767px){
     body[data-page="Early Warning Alerts"] .st-ewa-clear-btn,
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-mgmt-clear-btn{
         margin-left:0;
@@ -1581,7 +1568,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
         grid-column:1/-1;
         order:3;
         padding-left:48px!important;
-        font-size:0.781rem;
-        color:var(--st-ink-faint, var(--st-outline));
+        font-size: var(--st-fs-xs);
+        color:var(--st-ink-faint);
     }
 }

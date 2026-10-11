@@ -1,11 +1,3 @@
-/* Deliberate no-op placeholder rule -- see module-management.css for why:
-   the literal first rule of a file loaded through main.css's @import chain
-   can be silently dropped by the browser's CSS parser. Keeping a throwaway
-   first rule here avoids losing whatever rule would otherwise be first. */
-.st-landing-root-guard {
-  display: block;
-}
-
 /* The whole page fits in one viewport, no scrolling -- nav and footer take
    their natural height, the hero flexes to fill whatever's left. */
 .st-landing {
@@ -77,7 +69,7 @@
 .st-landing-brand-mark {
   width: 40px;
   height: 40px;
-  border-radius: var(--st-radius-lg);
+  border-radius: var(--st-radius-control);
   background: #fff;
   box-shadow: var(--st-shadow-xs);
   display: flex;
@@ -131,7 +123,7 @@
 /* Only shown alongside the desktop Sign up/Log in buttons -- on narrower
    viewports these move into the mobile menu panel instead so the nav
    doesn't get crowded. */
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .st-landing-nav-links {
     display: flex;
   }
@@ -148,7 +140,7 @@
   border-top: 1px solid var(--st-outline-variant);
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .st-landing-nav-links--mobile {
     display: none;
   }
@@ -161,13 +153,13 @@
   width: 44px;
   height: 44px;
   border: 1px solid var(--st-outline-variant);
-  border-radius: var(--st-button-radius);
+  border-radius: var(--st-radius-control);
   background: #fff;
   color: var(--st-primary);
   cursor: pointer;
 }
 
-@media (min-width: 560px) {
+@media (min-width: 480px) {
   .st-landing-menu-btn {
     display: none;
   }
@@ -177,7 +169,7 @@
   display: none;
 }
 
-@media (min-width: 560px) {
+@media (min-width: 480px) {
   .st-landing-nav-actions .st-btn {
     display: inline-flex;
   }
@@ -203,7 +195,7 @@
   border-bottom-color: var(--st-outline-variant);
 }
 
-@media (min-width: 560px) {
+@media (min-width: 480px) {
   .st-landing-mobile-panel,
   .st-landing-menu-btn {
     display: none;
@@ -481,7 +473,7 @@
   max-width: 340px;
 }
 
-@media (min-width: 560px) {
+@media (min-width: 480px) {
   .st-landing-hero-cta {
     flex-direction: row;
     max-width: none;
@@ -492,7 +484,7 @@
   width: 100%;
 }
 
-@media (min-width: 560px) {
+@media (min-width: 480px) {
   .st-landing-hero-cta .st-btn {
     width: auto;
   }
@@ -593,7 +585,7 @@
   }
 
   .st-landing-hero-title {
-    font-size: 1.65rem;
+    font-size: var(--st-fs-2xl);
   }
 
   .st-landing-hero-subtitle {
@@ -645,7 +637,7 @@
   backdrop-filter: var(--st-glass-blur);
   -webkit-backdrop-filter: var(--st-glass-blur);
   border: var(--st-glass-border);
-  border-radius: var(--st-radius-xl);
+  border-radius: var(--st-radius-card);
   box-shadow: var(--st-glass-shadow);
   padding: 24px;
   /* Extra clearance so the "Close X" (absolutely positioned into this
@@ -670,7 +662,7 @@
 
 .st-landing-login-panel::-webkit-scrollbar-thumb {
   background: rgba(18, 53, 91, 0.28);
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
 }
 
 .st-landing-login-panel::-webkit-scrollbar-thumb:hover {

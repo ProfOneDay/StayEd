@@ -6,46 +6,45 @@
    map container/behavior, and the admin-specific grid column spans.
    See design/admin-dashboard/CLAUDE_CODE_PROMPT_admin-dashboard-v2.md. */
 
-body[data-page="Admin Dashboard"] [hidden]{display:none!important}
 body[data-page="Admin Dashboard"] .st-content{gap:20px}
 
 /* Area bar = teacher filter bar shell */
 body[data-page="Admin Dashboard"] .st-adm-filter-row{display:grid;grid-template-columns:minmax(220px,300px) minmax(0,1fr) auto;align-items:end;gap:20px}
-body[data-page="Admin Dashboard"] .st-adm-area-group select{width:100%;height:38px;padding:0 32px 0 12px;border:1px solid var(--st-line-strong,#cfd5de);border-radius:var(--st-radius-control,8px);background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%235a6275' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 10px center;appearance:none;font:inherit;font-size:.875rem;color:var(--st-on-surface);cursor:pointer;transition:border-color var(--st-t-hover,150ms),box-shadow var(--st-t-hover,150ms)}
+body[data-page="Admin Dashboard"] .st-adm-area-group select{width:100%;height:38px;padding:0 32px 0 12px;border:1px solid var(--st-line-strong);border-radius:var(--st-radius-control);background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%235a6275' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 10px center;appearance:none;font:inherit;font-size: var(--st-fs-base);color:var(--st-on-surface);cursor:pointer;transition:border-color var(--st-t-hover,150ms),box-shadow var(--st-t-hover,150ms)}
 body[data-page="Admin Dashboard"] .st-adm-area-group select:hover{border-color:var(--st-primary)}
 body[data-page="Admin Dashboard"] .st-adm-area-group select:focus{outline:none;border-color:var(--st-secondary);box-shadow:0 0 0 3px rgba(0,106,104,.12)}
 body[data-page="Admin Dashboard"] .st-adm-area-summary{display:flex;flex-direction:column;min-width:0;padding-left:20px;border-left:1px solid var(--st-line)}
-body[data-page="Admin Dashboard"] .st-adm-area-label{font-size:.781rem;font-weight:600;color:var(--st-ink-muted)}
-body[data-page="Admin Dashboard"] .selected-title{display:flex;align-items:center;gap:10px;margin:2px 0 0;font-family:var(--st-font-heading);font-weight:800;font-size:1.25rem;letter-spacing:-.01em;color:var(--st-on-surface);line-height:1.25}
-body[data-page="Admin Dashboard"] .risk-dot{width:10px;height:10px;border-radius:50%;flex:none;background:var(--st-primary);box-shadow:0 0 0 4px var(--st-navy-soft,#e8eef6)}
-body[data-page="Admin Dashboard"] .risk-dot.is-high{background:var(--st-risk-high);box-shadow:0 0 0 4px #fdecea}
-body[data-page="Admin Dashboard"] .risk-dot.is-moderate{background:var(--st-risk-moderate);box-shadow:0 0 0 4px #fef3e4}
-body[data-page="Admin Dashboard"] .risk-dot.is-low{background:var(--st-risk-low);box-shadow:0 0 0 4px #edf7ea}
-body[data-page="Admin Dashboard"] .scope-meta{font-size:.844rem;color:var(--st-ink-muted)}
-body[data-page="Admin Dashboard"] .legend-hint{display:flex;align-items:center;gap:6px;font-size:.8125rem;color:var(--st-ink-muted);padding-bottom:9px}
+body[data-page="Admin Dashboard"] .st-adm-area-label{font-size: var(--st-fs-xs);font-weight:600;color:var(--st-ink-muted)}
+body[data-page="Admin Dashboard"] .selected-title{display:flex;align-items:center;gap:10px;margin:2px 0 0;font-family:var(--st-font-heading);font-weight:800;font-size: var(--st-fs-xl);letter-spacing:-.01em;color:var(--st-on-surface);line-height:1.25}
+body[data-page="Admin Dashboard"] .risk-dot{width:10px;height:10px;border-radius:50%;flex:none;background:var(--st-primary);box-shadow:0 0 0 4px var(--st-navy-soft)}
+body[data-page="Admin Dashboard"] .risk-dot.is-high{background:var(--st-risk-high);box-shadow:0 0 0 4px var(--st-risk-high-soft)}
+body[data-page="Admin Dashboard"] .risk-dot.is-moderate{background:var(--st-risk-moderate);box-shadow:0 0 0 4px var(--st-risk-moderate-soft)}
+body[data-page="Admin Dashboard"] .risk-dot.is-low{background:var(--st-risk-low);box-shadow:0 0 0 4px var(--st-risk-low-soft)}
+body[data-page="Admin Dashboard"] .scope-meta{font-size: var(--st-fs-base);color:var(--st-ink-muted)}
+body[data-page="Admin Dashboard"] .legend-hint{display:flex;align-items:center;gap:6px;font-size: var(--st-fs-sm);color:var(--st-ink-muted);padding-bottom:9px}
 body[data-page="Admin Dashboard"] .legend-hint .material-symbols-outlined{font-size:18px}
 
 /* Overview: 4-item legend, sub-label under the total */
 body[data-page="Admin Dashboard"] .st-risk-legend--4{grid-template-columns:repeat(4,minmax(0,1fr))}
-body[data-page="Admin Dashboard"] .st-adm-sub{display:block;font-size:.75rem;color:var(--st-ink-faint,#8a91a0);margin-top:2px}
+body[data-page="Admin Dashboard"] .st-adm-sub{display:block;font-size: var(--st-fs-xs);color:var(--st-ink-faint);margin-top:2px}
 body[data-page="Admin Dashboard"] .st-risk-strip span{transition:flex-grow 600ms var(--st-ease-out,ease)}
 
 /* CLC card = teacher follow-up card shape, neutral teal tint */
 body[data-page="Admin Dashboard"] .st-adm-clc-card{display:flex;flex-direction:column;justify-content:space-between;gap:14px;background:#eef8f7;border-color:#cfe9e6}
-body[data-page="Admin Dashboard"] .st-adm-clc-card .head{display:flex;align-items:center;gap:10px;font-weight:600;font-size:.906rem;color:var(--st-secondary)}
+body[data-page="Admin Dashboard"] .st-adm-clc-card .head{display:flex;align-items:center;gap:10px;font-weight:600;font-size: var(--st-fs-base);color:var(--st-secondary)}
 body[data-page="Admin Dashboard"] .st-adm-clc-figure{display:flex;align-items:baseline;gap:10px}
-body[data-page="Admin Dashboard"] .st-adm-clc-figure strong{font-family:var(--st-font-heading);font-weight:800;font-size:2.75rem;line-height:1;color:var(--st-primary)}
-body[data-page="Admin Dashboard"] .st-adm-clc-figure span{font-size:.875rem;color:var(--st-ink-muted)}
-body[data-page="Admin Dashboard"] .st-adm-clc-card .hint{margin:0;font-size:.781rem;color:#3f6b68}
+body[data-page="Admin Dashboard"] .st-adm-clc-figure strong{font-family:var(--st-font-heading);font-weight:800;font-size: var(--st-fs-4xl);line-height:1;color:var(--st-primary)}
+body[data-page="Admin Dashboard"] .st-adm-clc-figure span{font-size: var(--st-fs-base);color:var(--st-ink-muted)}
+body[data-page="Admin Dashboard"] .st-adm-clc-card .hint{margin:0;font-size: var(--st-fs-xs);color:#3f6b68}
 
 /* Map card */
 body[data-page="Admin Dashboard"] .st-adm-map-card{display:flex;flex-direction:column;gap:14px}
 body[data-page="Admin Dashboard"] .st-adm-map-card .st-panel-head{margin-bottom:0}
-body[data-page="Admin Dashboard"] .mapwrap{position:relative;aspect-ratio:800/565;min-height:280px;border-radius:12px;border:1px solid var(--st-line);background:#e8f7f6;overflow:hidden}
+body[data-page="Admin Dashboard"] .mapwrap{position:relative;aspect-ratio:800/565;min-height:280px;border-radius:var(--st-radius-card);border:1px solid var(--st-line);background:#e8f7f6;overflow:hidden}
 /* Leaflet map: fills the frame; tiles load over the teal background */
 body[data-page="Admin Dashboard"] .st-adm-leaflet{position:absolute;inset:0;background:#e8f7f6;font:inherit}
-body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-control-attribution{font-size:.6875rem;background:rgba(255,255,255,.8)}
-body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-control-attribution a{color:var(--st-ink-muted,#5a6275)}
+body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-control-attribution{font-size: var(--st-fs-xs);background:rgba(255,255,255,.8)}
+body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-control-attribution a{color:var(--st-ink-muted)}
 
 /* KEEP the original map behaviour: navy outline on hover, navy fill when selected */
 body[data-page="Admin Dashboard"] .municipality{stroke:#fff;stroke-width:1.15;vector-effect:non-scaling-stroke;transform-box:fill-box;transform-origin:center;transition:transform .22s ease,fill .18s ease,stroke .18s ease,filter .22s ease,opacity .3s ease}
@@ -70,64 +69,64 @@ body[data-page="Admin Dashboard"] .map-tooltip.show{opacity:1;transform:translat
 /* Leaflet zoom + reset controls, styled as the white rounded buttons the map had before */
 body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-bottom.leaflet-right .leaflet-control{margin:0 12px 8px 0}
 body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-bottom.leaflet-right .leaflet-control:last-child{margin-bottom:12px}
-body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-bar{border:1px solid var(--st-line);border-radius:10px;background:#fff;box-shadow:0 4px 12px rgba(17,26,54,.1);overflow:hidden}
+body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-bar{border:1px solid var(--st-line);border-radius:var(--st-radius-card);background:#fff;box-shadow:0 4px 12px rgba(17,26,54,.1);overflow:hidden}
 body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-bar a{width:36px;height:36px;line-height:36px;display:grid;place-items:center;border:0;border-radius:0;background:none;color:var(--st-on-surface);font:600 20px/1 Inter,system-ui,sans-serif;text-decoration:none;transition:background-color var(--st-t-hover,150ms),transform var(--st-t-press,90ms)}
 body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-bar a + a{border-top:1px solid var(--st-line)}
-body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-bar a:hover{background:var(--st-navy-soft,#e8eef6);color:var(--st-primary)}
+body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-bar a:hover{background:var(--st-navy-soft);color:var(--st-primary)}
 body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-bar a:active{transform:scale(.9)}
-body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-bar a.leaflet-disabled{background:none;color:var(--st-ink-faint,#8a91a0);opacity:.5;cursor:default}
+body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-bar a.leaflet-disabled{background:none;color:var(--st-ink-faint);opacity:.5;cursor:default}
 body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-bar .material-symbols-outlined{font-size:20px}
-body[data-page="Admin Dashboard"] .map-legend-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:.781rem;color:var(--st-ink-muted)}
-body[data-page="Admin Dashboard"] .map-legend-head strong{color:var(--st-on-surface);font-size:.844rem}
+body[data-page="Admin Dashboard"] .map-legend-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size: var(--st-fs-xs);color:var(--st-ink-muted)}
+body[data-page="Admin Dashboard"] .map-legend-head strong{color:var(--st-on-surface);font-size: var(--st-fs-base)}
 body[data-page="Admin Dashboard"] .legend{display:flex;gap:8px;flex-wrap:wrap}
-body[data-page="Admin Dashboard"] .legend-item{appearance:none;display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 12px;border:1px solid var(--st-line);border-radius:999px;background:#fff;font:inherit;font-size:.8125rem;font-weight:500;color:var(--st-on-surface);cursor:pointer;transition:border-color var(--st-t-hover,150ms),background-color var(--st-t-hover,150ms),transform var(--st-t-press,90ms)}
-body[data-page="Admin Dashboard"] .legend-item:hover{border-color:var(--st-line-strong,#cfd5de);background:var(--st-background)}
+body[data-page="Admin Dashboard"] .legend-item{appearance:none;display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 12px;border:1px solid var(--st-line);border-radius:var(--st-radius-pill);background:#fff;font:inherit;font-size: var(--st-fs-sm);font-weight:500;color:var(--st-on-surface);cursor:pointer;transition:border-color var(--st-t-hover,150ms),background-color var(--st-t-hover,150ms),transform var(--st-t-press,90ms)}
+body[data-page="Admin Dashboard"] .legend-item:hover{border-color:var(--st-line-strong);background:var(--st-background)}
 body[data-page="Admin Dashboard"] .legend-item:active{transform:scale(.96)}
-body[data-page="Admin Dashboard"] .legend-item.active{border-color:var(--st-primary);background:var(--st-navy-soft,#e8eef6);color:var(--st-primary);font-weight:600}
+body[data-page="Admin Dashboard"] .legend-item.active{border-color:var(--st-primary);background:var(--st-navy-soft);color:var(--st-primary);font-weight:600}
 body[data-page="Admin Dashboard"] .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
-body[data-page="Admin Dashboard"] .dot--low{background:#6BBF59}body[data-page="Admin Dashboard"] .dot--moderate{background:#F39422}body[data-page="Admin Dashboard"] .dot--high{background:#D64545}body[data-page="Admin Dashboard"] .dot--nodata{background:#7f9fc6}
-body[data-page="Admin Dashboard"] .legend-count{min-width:22px;height:20px;padding:0 6px;border-radius:999px;background:var(--st-background);font-size:.719rem;font-weight:700;display:inline-grid;place-items:center;color:var(--st-ink-muted)}
+body[data-page="Admin Dashboard"] .dot--low{background:var(--st-risk-low)}body[data-page="Admin Dashboard"] .dot--moderate{background:var(--st-risk-moderate)}body[data-page="Admin Dashboard"] .dot--high{background:#D64545}body[data-page="Admin Dashboard"] .dot--nodata{background:#7f9fc6}
+body[data-page="Admin Dashboard"] .legend-count{min-width:22px;height:20px;padding:0 6px;border-radius:var(--st-radius-pill);background:var(--st-background);font-size: var(--st-fs-xs);font-weight:700;display:inline-grid;place-items:center;color:var(--st-ink-muted)}
 
 /* Bar rows: teacher st-hbar rows with a count sub-label */
 body[data-page="Admin Dashboard"] .st-adm-hbars{gap:16px;margin-top:4px}
 body[data-page="Admin Dashboard"] .st-adm-hbars .st-hbar-row{grid-template-columns:120px minmax(0,1fr) 48px}
-body[data-page="Admin Dashboard"] .st-adm-hbars .st-hbar-label small{display:block;font-size:.75rem;font-weight:500;color:var(--st-ink-faint,#8a91a0)}
+body[data-page="Admin Dashboard"] .st-adm-hbars .st-hbar-label small{display:block;font-size: var(--st-fs-xs);font-weight:500;color:var(--st-ink-faint)}
 body[data-page="Admin Dashboard"] .st-adm-hbars .st-hbar-track{position:relative;height:24px}
 body[data-page="Admin Dashboard"] .st-adm-hbars .st-hbar-value{text-align:right;font-weight:700}
-body[data-page="Admin Dashboard"] .st-hbar--level{background:#12355b}
+body[data-page="Admin Dashboard"] .st-hbar--level{background:var(--st-primary)}
 body[data-page="Admin Dashboard"] .st-hbar-row:nth-child(2) .st-hbar--level{background:#4c6f95}
-body[data-page="Admin Dashboard"] .st-hbar-row:nth-child(3) .st-hbar--level{background:#006a68}
+body[data-page="Admin Dashboard"] .st-hbar-row:nth-child(3) .st-hbar--level{background:var(--st-secondary)}
 body[data-page="Admin Dashboard"] .st-hbar-row:nth-child(4) .st-hbar--level{background:#9db5d3}
 body[data-page="Admin Dashboard"] [data-animate] .st-hbar-row:nth-child(4) .st-hbar{transition-delay:270ms}
-body[data-page="Admin Dashboard"] .avg-mark{position:absolute;top:-4px;bottom:-4px;width:2px;border-radius:2px;background:var(--st-on-surface);opacity:.45;transform:translateX(-1px)}
-body[data-page="Admin Dashboard"] .st-adm-avg-note{display:flex;align-items:center;gap:8px;margin:14px 0 0;font-size:.75rem;color:var(--st-ink-faint,#8a91a0)}
+body[data-page="Admin Dashboard"] .avg-mark{position:absolute;top:-4px;bottom:-4px;width:2px;border-radius:var(--st-radius-xs);background:var(--st-on-surface);opacity:.45;transform:translateX(-1px)}
+body[data-page="Admin Dashboard"] .st-adm-avg-note{display:flex;align-items:center;gap:8px;margin:14px 0 0;font-size: var(--st-fs-xs);color:var(--st-ink-faint)}
 body[data-page="Admin Dashboard"] .st-adm-avg-note i{width:2px;height:12px;background:var(--st-on-surface);opacity:.45}
-body[data-page="Admin Dashboard"] .gender-risk-callout{display:flex;gap:10px;align-items:flex-start;margin-bottom:16px;font-size:.875rem;font-weight:600;color:var(--st-primary);line-height:1.45}
+body[data-page="Admin Dashboard"] .gender-risk-callout{display:flex;gap:10px;align-items:flex-start;margin-bottom:16px;font-size: var(--st-fs-base);font-weight:600;color:var(--st-primary);line-height:1.45}
 body[data-page="Admin Dashboard"] .gender-risk-callout .material-symbols-outlined{font-size:20px;color:var(--st-secondary)}
 
 /* CLC list rows (like teacher attention rows) */
 body[data-page="Admin Dashboard"] .clc-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-body[data-page="Admin Dashboard"] .clc-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--st-line);border-radius:10px;background:#fff;transition:border-color var(--st-t-hover,150ms),background-color var(--st-t-hover,150ms)}
-body[data-page="Admin Dashboard"] .clc-row:hover{border-color:var(--st-line-strong,#cfd5de);background:#fafbfd}
+body[data-page="Admin Dashboard"] .clc-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--st-line);border-radius:var(--st-radius-card);background:#fff;transition:border-color var(--st-t-hover,150ms),background-color var(--st-t-hover,150ms)}
+body[data-page="Admin Dashboard"] .clc-row:hover{border-color:var(--st-line-strong);background:#fafbfd}
 body[data-page="Admin Dashboard"] .clc-row-main{display:flex;flex-direction:column;min-width:0}
-body[data-page="Admin Dashboard"] .clc-row-name{font-weight:600;font-size:.875rem;color:var(--st-on-surface)}
-body[data-page="Admin Dashboard"] .clc-row-meta{font-size:.781rem;color:var(--st-ink-muted)}
-body[data-page="Admin Dashboard"] .clc-row-status{padding:3px 10px;border-radius:999px;background:#e3f4f3;color:#00504e;font-size:.75rem;font-weight:600;flex:none}
-body[data-page="Admin Dashboard"] .clc-row-status.archived{background:var(--st-background);color:var(--st-ink-faint,#8a91a0)}
-body[data-page="Admin Dashboard"] .clc-list-pager{grid-column:1/-1;display:flex;justify-content:flex-end;align-items:center;gap:8px;font-size:.8125rem;color:var(--st-ink-muted)}
-body[data-page="Admin Dashboard"] .clc-pager-btn{width:32px;height:32px;border:1px solid var(--st-line-strong,#cfd5de);border-radius:8px;background:#fff;cursor:pointer;display:grid;place-items:center;transition:background-color var(--st-t-hover,150ms),border-color var(--st-t-hover,150ms)}
-body[data-page="Admin Dashboard"] .clc-pager-btn:hover:not(:disabled){border-color:var(--st-primary);background:var(--st-navy-soft,#e8eef6)}
+body[data-page="Admin Dashboard"] .clc-row-name{font-weight:600;font-size: var(--st-fs-base);color:var(--st-on-surface)}
+body[data-page="Admin Dashboard"] .clc-row-meta{font-size: var(--st-fs-xs);color:var(--st-ink-muted)}
+body[data-page="Admin Dashboard"] .clc-row-status{padding:3px 10px;border-radius:var(--st-radius-pill);background:var(--st-teal-soft);color:var(--st-teal-ink);font-size: var(--st-fs-xs);font-weight:600;flex:none}
+body[data-page="Admin Dashboard"] .clc-row-status.archived{background:var(--st-background);color:var(--st-ink-faint)}
+body[data-page="Admin Dashboard"] .clc-list-pager{grid-column:1/-1;display:flex;justify-content:flex-end;align-items:center;gap:8px;font-size: var(--st-fs-sm);color:var(--st-ink-muted)}
+body[data-page="Admin Dashboard"] .clc-pager-btn{width:32px;height:32px;border:1px solid var(--st-line-strong);border-radius:var(--st-radius-control);background:#fff;cursor:pointer;display:grid;place-items:center;transition:background-color var(--st-t-hover,150ms),border-color var(--st-t-hover,150ms)}
+body[data-page="Admin Dashboard"] .clc-pager-btn:hover:not(:disabled){border-color:var(--st-primary);background:var(--st-navy-soft)}
 body[data-page="Admin Dashboard"] .clc-pager-btn:disabled{opacity:.4;cursor:default}
-body[data-page="Admin Dashboard"] .clc-list-empty{grid-column:1/-1;padding:14px;text-align:center;font-size:.844rem;color:var(--st-ink-faint,#8a91a0);border:1px dashed var(--st-line-strong,#cfd5de);border-radius:10px}
+body[data-page="Admin Dashboard"] .clc-list-empty{grid-column:1/-1;padding:14px;text-align:center;font-size: var(--st-fs-base);color:var(--st-ink-faint);border:1px dashed var(--st-line-strong);border-radius:var(--st-radius-card)}
 
-@media (max-width:1279px){
+@media (max-width: 1279px){
   body[data-page="Admin Dashboard"] .st-adm-filter-row{grid-template-columns:minmax(200px,280px) minmax(0,1fr)}
   body[data-page="Admin Dashboard"] .legend-hint{display:none}
 }
-@media (max-width:767px){
+@media (max-width: 767px){
   body[data-page="Admin Dashboard"] .st-adm-filter-row{grid-template-columns:1fr;gap:12px}
   body[data-page="Admin Dashboard"] .st-adm-area-summary{padding:12px 0 0;border-left:0;border-top:1px solid var(--st-line)}
-  body[data-page="Admin Dashboard"] .selected-title{font-size:1.125rem}
+  body[data-page="Admin Dashboard"] .selected-title{font-size: var(--st-fs-lg)}
   body[data-page="Admin Dashboard"] .st-risk-legend--4{grid-template-columns:repeat(2,minmax(0,1fr))}
   body[data-page="Admin Dashboard"] .st-adm-hbars .st-hbar-row{grid-template-columns:96px minmax(0,1fr) 40px;gap:10px}
   body[data-page="Admin Dashboard"] .clc-list{grid-template-columns:1fr}
@@ -137,7 +136,7 @@ body[data-page="Admin Dashboard"] .clc-list-empty{grid-column:1/-1;padding:14px;
 @media (prefers-reduced-motion:reduce){body[data-page="Admin Dashboard"] [data-animate] .municipality.division-ii{opacity:1}}
 
 body[data-page="Admin Dashboard"] .col-9{grid-column:span 9}
-@media (max-width:1279px){body[data-page="Admin Dashboard"] .col-9,body[data-page="Admin Dashboard"] .col-3{grid-column:span 12}}
+@media (max-width: 1279px){body[data-page="Admin Dashboard"] .col-9,body[data-page="Admin Dashboard"] .col-3{grid-column:span 12}}
 body[data-page="Admin Dashboard"] .st-adm-clc-card .st-adm-clc-figure{flex-direction:column;align-items:flex-start;gap:4px}
 
 body[data-page="Admin Dashboard"] .st-adm-side{display:flex;flex-direction:column;gap:20px;min-width:0}
@@ -150,7 +149,7 @@ body[data-page="Admin Dashboard"] .clc-list{grid-template-columns:repeat(2,minma
    when that text wraps to extra lines it can be taller than its even half
    of the map's height; scrolling that one card internally beats silently
    clipping its bottom row off entirely. */
-@media (min-width:1280px){
+@media (min-width: 1280px){
   body[data-page="Admin Dashboard"] .st-adm-side{contain:size}
   body[data-page="Admin Dashboard"] .st-adm-side > .st-panel{flex:1 1 0;min-height:0;overflow-y:auto;overflow-x:hidden}
   body[data-page="Admin Dashboard"] .st-adm-side #riskChartView.chart-canvas-wrap,
@@ -162,7 +161,7 @@ body[data-page="Admin Dashboard"] .st-adm-side #genderBarView{flex:1 1 auto;just
 /* Caption under the bars; the chart views carry their own note, so it hides with the bar view */
 body[data-page="Admin Dashboard"] .st-adm-bar-note{flex-shrink:0}
 body[data-page="Admin Dashboard"] [hidden] + .st-adm-bar-note{display:none}
-@media (max-width:1279px){body[data-page="Admin Dashboard"] .st-adm-side{display:grid;grid-template-columns:1fr 1fr}}
-@media (max-width:1023px){body[data-page="Admin Dashboard"] .st-adm-side{grid-template-columns:1fr}}
-@media (max-width:767px){body[data-page="Admin Dashboard"] .clc-list{grid-template-columns:1fr}}
-@media (max-width:767px){body[data-page="Admin Dashboard"] .st-risk-legend--4 .pct-suffix{display:inline}}
+@media (max-width: 1279px){body[data-page="Admin Dashboard"] .st-adm-side{display:grid;grid-template-columns:1fr 1fr}}
+@media (max-width: 1023px){body[data-page="Admin Dashboard"] .st-adm-side{grid-template-columns:1fr}}
+@media (max-width: 767px){body[data-page="Admin Dashboard"] .clc-list{grid-template-columns:1fr}}
+@media (max-width: 767px){body[data-page="Admin Dashboard"] .st-risk-legend--4 .pct-suffix{display:inline}}

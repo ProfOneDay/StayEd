@@ -18,17 +18,17 @@
     gap:2px;
     padding:3px;
     background:var(--st-background);
-    border-radius:var(--st-radius-control, 8px);
+    border-radius:var(--st-radius-control);
     width:fit-content;
 }
 
 .st-notif-tab{
     padding:0 12px;
     height:32px;
-    border-radius:6px;
+    border-radius:var(--st-radius-sm);
     background:transparent;
     border:none;
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    color:var(--st-ink-muted);
     font-size: var(--st-font-size-caption);
     font-weight:500;
     cursor:pointer;
@@ -69,7 +69,7 @@
     align-items:flex-start;
     background:#fff;
     border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     padding:16px;
     box-shadow:var(--st-shadow-xs);
     transition:var(--st-transition);
@@ -123,7 +123,7 @@
     display:inline-flex;
     align-items:center;
     padding:2px 10px;
-    border-radius:999px;
+    border-radius:var(--st-radius-pill);
     font-size: var(--st-font-size-micro);
     font-weight:700;
     text-transform:uppercase;

@@ -6,7 +6,7 @@ body[data-page="Help & User Manual"] .st-icon-tile{
     width:40px;
     height:40px;
     flex:none;
-    border-radius:11px;
+    border-radius:var(--st-radius-card);
     display:grid;
     place-items:center;
     background:var(--st-navy-soft);
@@ -18,8 +18,8 @@ body[data-page="Help & User Manual"] .st-icon-tile .material-symbols-outlined{
 }
 
 body[data-page="Help & User Manual"] .st-icon-tile--risk{
-    background:#fdecea;
-    color:#a01414;
+    background:var(--st-risk-high-soft);
+    color:var(--st-risk-high-ink);
 }
 
 body[data-page="Help & User Manual"] .st-help-section{
@@ -32,7 +32,7 @@ body[data-page="Help & User Manual"] .st-section-title{
     margin:0;
     font-family:var(--st-font-heading);
     font-weight:700;
-    font-size:1.125rem; /* 18px */
+    font-size: var(--st-fs-lg); /* 18px */
     letter-spacing:-.01em;
 }
 
@@ -48,15 +48,15 @@ body[data-page="Help & User Manual"] .st-faq-item{
     align-items:flex-start;
     padding:20px;
     background:#fff;
-    border:1px solid var(--st-line, var(--st-outline-variant));
-    border-radius:var(--st-radius-card, var(--st-radius-lg));
-    box-shadow:var(--st-shadow-card, var(--st-shadow-sm));
+    border:1px solid var(--st-line);
+    border-radius:var(--st-radius-card);
+    box-shadow:var(--st-shadow-card);
     min-width:0;
     transition:border-color var(--st-t-hover, 150ms),box-shadow var(--st-t-hover, 150ms);
 }
 
 body[data-page="Help & User Manual"] .st-faq-item:hover{
-    border-color:var(--st-line-strong, var(--st-outline-variant));
+    border-color:var(--st-line-strong);
     box-shadow:0 2px 4px rgba(17,26,54,.05),0 8px 20px rgba(17,26,54,.07);
 }
 
@@ -64,13 +64,13 @@ body[data-page="Help & User Manual"] .st-faq-question{
     margin:0 0 6px;
     font-family:var(--st-font-heading);
     font-weight:700;
-    font-size:1.031rem; /* 16.5px */
+    font-size: var(--st-fs-md); /* 16.5px */
     line-height:1.35;
 }
 
 body[data-page="Help & User Manual"] .st-faq-answer{
     margin:0;
-    font-size:0.875rem; /* 14px */
+    font-size: var(--st-fs-base); /* 14px */
     color:#3a4256;
     line-height:1.6;
 }
@@ -86,8 +86,8 @@ body[data-page="Help & User Manual"] .st-faq-tiers span{
     align-items:center;
     gap:6px;
     padding:3px 10px;
-    border-radius:999px;
-    font-size:0.781rem; /* 12.5px */
+    border-radius:var(--st-radius-pill);
+    font-size: var(--st-fs-xs); /* 12.5px */
     font-weight:600;
 }
 
@@ -99,9 +99,9 @@ body[data-page="Help & User Manual"] .st-faq-tiers span::before{
     background:currentColor;
 }
 
-body[data-page="Help & User Manual"] .st-faq-tiers .low{ background:#edf7ea; color:#2c7121; }
-body[data-page="Help & User Manual"] .st-faq-tiers .mod{ background:#fef3e4; color:#8f5200; }
-body[data-page="Help & User Manual"] .st-faq-tiers .high{ background:#fdecea; color:#a01414; }
+body[data-page="Help & User Manual"] .st-faq-tiers .low{ background:var(--st-risk-low-soft); color:var(--st-risk-low-ink); }
+body[data-page="Help & User Manual"] .st-faq-tiers .mod{ background:var(--st-risk-moderate-soft); color:var(--st-risk-moderate-ink); }
+body[data-page="Help & User Manual"] .st-faq-tiers .high{ background:var(--st-risk-high-soft); color:var(--st-risk-high-ink); }
 
 /* ---------- Entrance motion ---------- */
 body[data-page="Help & User Manual"] [data-animate-cards] > *{
@@ -117,13 +117,13 @@ body[data-page="Help & User Manual"] [data-animate-cards].is-inview > *{
 }
 
 /* ---------- Responsive ---------- */
-@media (max-width:1023px){
+@media (max-width: 1023px){
     body[data-page="Help & User Manual"] .st-faq-list{
         grid-template-columns:1fr;
     }
 }
 
-@media (max-width:767px){
+@media (max-width: 767px){
     body[data-page="Help & User Manual"] .st-faq-item{
         padding:16px;
         gap:12px;

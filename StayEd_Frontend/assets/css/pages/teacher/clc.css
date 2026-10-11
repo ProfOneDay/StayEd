@@ -18,14 +18,14 @@ body[data-page="Class Management"] .st-clc-grid{
     gap:20px;
 }
 
-@media (max-width:1279px){
+@media (max-width: 1279px){
     body[data-page="CLC Overview"] .st-clc-grid,
     body[data-page="Class Management"] .st-clc-grid{
         grid-template-columns:repeat(2,minmax(0,1fr));
     }
 }
 
-@media (max-width:767px){
+@media (max-width: 767px){
     body[data-page="CLC Overview"] .st-clc-grid,
     body[data-page="Class Management"] .st-clc-grid{
         grid-template-columns:1fr;
@@ -38,9 +38,9 @@ body[data-page="Class Management"] .st-clc-card{
     display:flex;
     flex-direction:column;
     background:#fff;
-    border:1px solid var(--st-line, var(--st-outline-variant));
-    border-radius:var(--st-radius-card, var(--st-card-radius));
-    box-shadow:var(--st-shadow-card, var(--st-shadow-sm));
+    border:1px solid var(--st-line);
+    border-radius:var(--st-radius-card);
+    box-shadow:var(--st-shadow-card);
     min-width:0;
     overflow:hidden;
     transition:border-color var(--st-t-hover, 150ms) ease,box-shadow var(--st-t-hover, 150ms) ease;
@@ -48,7 +48,7 @@ body[data-page="Class Management"] .st-clc-card{
 
 body[data-page="CLC Overview"] .st-clc-card:hover,
 body[data-page="Class Management"] .st-clc-card:hover{
-    border-color:var(--st-line-strong, var(--st-outline-variant));
+    border-color:var(--st-line-strong);
     box-shadow:0 2px 4px rgba(17,26,54,.05),0 8px 20px rgba(17,26,54,.07);
 }
 
@@ -73,7 +73,7 @@ body[data-page="Class Management"] .st-clc-card-name{
     margin:0;
     font-family:var(--st-font-heading);
     font-weight:700;
-    font-size:1.125rem;
+    font-size: var(--st-fs-lg);
     letter-spacing:-.01em;
     line-height:1.3;
     color:var(--st-on-surface);
@@ -86,11 +86,11 @@ body[data-page="Class Management"] .st-clc-card-status{
     align-items:center;
     gap:6px;
     padding:3px 10px;
-    border-radius:999px;
-    font-size:0.781rem;
+    border-radius:var(--st-radius-pill);
+    font-size: var(--st-fs-xs);
     font-weight:600;
-    background:#e3f4f3;
-    color:#00504e;
+    background:var(--st-teal-soft);
+    color:var(--st-teal-ink);
     white-space:nowrap;
 }
 
@@ -105,9 +105,9 @@ body[data-page="Class Management"] .st-clc-card-status::before{
 
 body[data-page="CLC Overview"] .st-clc-card-status--neutral,
 body[data-page="Class Management"] .st-clc-card-status--neutral{
-    background:var(--st-background, #f3f5f8);
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
-    border:1px solid var(--st-line, var(--st-outline-variant));
+    background:var(--st-background);
+    color:var(--st-ink-muted);
+    border:1px solid var(--st-line);
 }
 
 body[data-page="CLC Overview"] .st-clc-card-status--neutral::before,
@@ -120,13 +120,13 @@ body[data-page="CLC Overview"] .st-clc-card-location{
     display:flex;
     align-items:center;
     gap:4px;
-    font-size:0.844rem;
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    font-size: var(--st-fs-base);
+    color:var(--st-ink-muted);
 }
 
 body[data-page="CLC Overview"] .st-clc-card-location .material-symbols-outlined{
     font-size:17px;
-    color:var(--st-ink-faint, var(--st-outline));
+    color:var(--st-ink-faint);
 }
 
 body[data-page="CLC Overview"] .st-clc-card-figure,
@@ -149,7 +149,7 @@ body[data-page="CLC Overview"] .st-clc-card-count b,
 body[data-page="Class Management"] .st-clc-card-count b{
     font-family:var(--st-font-heading);
     font-weight:800;
-    font-size:2.25rem;
+    font-size: var(--st-fs-4xl);
     line-height:1;
     letter-spacing:-.02em;
     color:var(--st-primary);
@@ -157,8 +157,8 @@ body[data-page="Class Management"] .st-clc-card-count b{
 
 body[data-page="CLC Overview"] .st-clc-card-count span,
 body[data-page="Class Management"] .st-clc-card-count span{
-    font-size:0.875rem;
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    font-size: var(--st-fs-base);
+    color:var(--st-ink-muted);
 }
 
 body[data-page="CLC Overview"] .st-clc-card.is-empty .st-clc-card-count b,
@@ -175,18 +175,18 @@ body[data-page="CLC Overview"] .st-clc-card-meta{
 }
 
 body[data-page="CLC Overview"] .st-clc-card-meta small{
-    font-size:0.75rem;
-    color:var(--st-ink-faint, var(--st-outline));
+    font-size: var(--st-fs-xs);
+    color:var(--st-ink-faint);
 }
 
 body[data-page="CLC Overview"] .st-clc-card-meta strong{
-    font-size:0.875rem;
+    font-size: var(--st-fs-base);
     font-weight:600;
     color:var(--st-on-surface);
 }
 
 body[data-page="CLC Overview"] .st-clc-card-meta strong.is-missing{
-    color:var(--st-ink-faint, var(--st-outline));
+    color:var(--st-ink-faint);
     font-weight:500;
 }
 
@@ -195,19 +195,19 @@ body[data-page="CLC Overview"] .st-clc-card-teachers{
     align-items:center;
     gap:6px;
     margin:-6px 20px 16px;
-    font-size:0.813rem;
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    font-size: var(--st-fs-sm);
+    color:var(--st-ink-muted);
 }
 
 body[data-page="CLC Overview"] .st-clc-card-teachers .material-symbols-outlined{
     font-size:17px;
-    color:var(--st-ink-faint, var(--st-outline));
+    color:var(--st-ink-faint);
 }
 
 body[data-page="CLC Overview"] .st-clc-card-footer,
 body[data-page="Class Management"] .st-clc-card-footer{
     margin-top:auto;
-    border-top:1px solid var(--st-line, var(--st-outline-variant));
+    border-top:1px solid var(--st-line);
     display:flex;
     align-items:center;
     gap:6px;
@@ -226,11 +226,11 @@ body[data-page="Class Management"] .st-clc-card-go{
     height:40px;
     padding:0 10px;
     border:0;
-    border-radius:8px;
+    border-radius:var(--st-radius-control);
     background:none;
     font:inherit;
     font-weight:600;
-    font-size:0.875rem;
+    font-size: var(--st-fs-base);
     color:var(--st-primary);
     cursor:pointer;
     transition:background-color var(--st-t-hover, 150ms) ease,transform var(--st-t-press, 90ms) ease;
@@ -244,7 +244,7 @@ body[data-page="Class Management"] .st-clc-card-go .material-symbols-outlined{
 
 body[data-page="CLC Overview"] .st-clc-card-go:hover,
 body[data-page="Class Management"] .st-clc-card-go:hover{
-    background:var(--st-navy-soft, var(--st-primary-fixed));
+    background:var(--st-navy-soft);
 }
 
 body[data-page="CLC Overview"] .st-clc-card-go:hover .material-symbols-outlined,
@@ -281,11 +281,11 @@ body[data-page="Class Management"] .st-card-icon-btn{
     height:40px;
     min-width:40px;
     padding:0 12px;
-    border:1px solid var(--st-line-strong, var(--st-outline-variant));
-    border-radius:8px;
+    border:1px solid var(--st-line-strong);
+    border-radius:var(--st-radius-control);
     background:#fff;
     font:inherit;
-    font-size:0.844rem;
+    font-size: var(--st-fs-base);
     font-weight:600;
     color:var(--st-on-surface);
     cursor:pointer;
@@ -299,7 +299,7 @@ body[data-page="Class Management"] .st-card-icon-btn .material-symbols-outlined{
 body[data-page="Class Management"] .st-card-icon-btn:hover{
     border-color:var(--st-primary);
     color:var(--st-primary);
-    background:var(--st-navy-soft, var(--st-primary-fixed));
+    background:var(--st-navy-soft);
 }
 
 body[data-page="Class Management"] .st-card-icon-btn:active{
@@ -309,13 +309,13 @@ body[data-page="Class Management"] .st-card-icon-btn:active{
 body[data-page="Class Management"] .st-card-icon-btn--danger{
     padding:0;
     width:40px;
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    color:var(--st-ink-muted);
 }
 
 body[data-page="Class Management"] .st-card-icon-btn--danger:hover{
     border-color:#e7b4b4;
-    color:#a01414;
-    background:#fdecea;
+    color:var(--st-risk-high-ink);
+    background:var(--st-risk-high-soft);
 }
 
 /* Entrance: cards settle in once, slightly staggered (no looping) */
@@ -354,19 +354,19 @@ body[data-page="Class Management"] .st-empty{
     text-align:center;
     gap:6px;
     padding:40px 24px;
-    border:1px dashed var(--st-line-strong, var(--st-outline-variant));
-    border-radius:var(--st-radius-card, var(--st-card-radius));
+    border:1px dashed var(--st-line-strong);
+    border-radius:var(--st-radius-card);
     background:#fff;
 }
 
 body[data-page="CLC Overview"] .st-empty .material-symbols-outlined,
 body[data-page="Class Management"] .st-empty .material-symbols-outlined{
     font-size:32px;
-    color:var(--st-ink-faint, var(--st-outline));
+    color:var(--st-ink-faint);
     width:56px;
     height:56px;
     border-radius:50%;
-    background:var(--st-background, #f3f5f8);
+    background:var(--st-background);
     display:grid;
     place-items:center;
     margin:0 0 6px;
@@ -376,16 +376,16 @@ body[data-page="CLC Overview"] .st-empty-title,
 body[data-page="Class Management"] .st-empty-title{
     margin:0;
     font-weight:600;
-    font-size:0.969rem;
+    font-size: var(--st-fs-md);
     color:var(--st-on-surface);
 }
 
 body[data-page="CLC Overview"] .st-empty-text,
 body[data-page="Class Management"] .st-empty-text{
     margin:0;
-    font-size:0.875rem;
+    font-size: var(--st-fs-base);
     font-style:normal;
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    color:var(--st-ink-muted);
     max-width:420px;
 }
 
@@ -393,7 +393,7 @@ body[data-page="Class Management"] .st-empty .st-btn{
     margin-top:16px;
 }
 
-@media (max-width:767px){
+@media (max-width: 767px){
     body[data-page="CLC Overview"] .st-clc-card-top,
     body[data-page="Class Management"] .st-clc-card-top{
         padding:14px 16px 0;
@@ -408,11 +408,11 @@ body[data-page="Class Management"] .st-empty .st-btn{
     }
     body[data-page="CLC Overview"] .st-clc-card-name,
     body[data-page="Class Management"] .st-clc-card-name{
-        font-size:1.0625rem;
+        font-size: var(--st-fs-md);
     }
     body[data-page="CLC Overview"] .st-clc-card-count b,
     body[data-page="Class Management"] .st-clc-card-count b{
-        font-size:1.875rem;
+        font-size: var(--st-fs-3xl);
     }
 }
 
@@ -434,22 +434,22 @@ body[data-page="CLC Overview"] .st-clc-summary-item{
 }
 
 body[data-page="CLC Overview"] .st-clc-summary-item + .st-clc-summary-item{
-    border-left:1px solid var(--st-line, var(--st-outline-variant));
+    border-left:1px solid var(--st-line);
 }
 
 body[data-page="CLC Overview"] .st-clc-summary-icon{
     width:44px;
     height:44px;
     flex:none;
-    border-radius:12px;
+    border-radius:var(--st-radius-card);
     display:grid;
     place-items:center;
-    background:var(--st-navy-soft, var(--st-primary-fixed));
+    background:var(--st-navy-soft);
     color:var(--st-primary);
 }
 
 body[data-page="CLC Overview"] .st-clc-municipality-label .st-clc-summary-icon{
-    background:#e3f4f3;
+    background:var(--st-teal-soft);
     color:var(--st-secondary);
 }
 
@@ -457,14 +457,14 @@ body[data-page="CLC Overview"] .st-clc-summary-value{
     margin:0;
     font-family:var(--st-font-heading);
     font-weight:800;
-    font-size:1.875rem;
+    font-size: var(--st-fs-3xl);
     line-height:1.05;
     letter-spacing:-.02em;
     color:var(--st-on-surface);
 }
 
 body[data-page="CLC Overview"] .st-clc-summary-value--text{
-    font-size:1.375rem;
+    font-size: var(--st-fs-xl);
     line-height:1.2;
     overflow:hidden;
     text-overflow:ellipsis;
@@ -473,15 +473,15 @@ body[data-page="CLC Overview"] .st-clc-summary-value--text{
 
 body[data-page="CLC Overview"] .st-clc-summary-label{
     margin:3px 0 0;
-    font-size:0.844rem;
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    font-size: var(--st-fs-base);
+    color:var(--st-ink-muted);
 }
 
 body[data-page="CLC Overview"] .st-lbl-short{
     display:none;
 }
 
-@media (max-width:767px){
+@media (max-width: 767px){
     body[data-page="CLC Overview"] .st-clc-summary{
         grid-template-columns:1fr 1fr;
     }
@@ -490,31 +490,31 @@ body[data-page="CLC Overview"] .st-lbl-short{
         gap:10px;
     }
     body[data-page="CLC Overview"] .st-clc-summary-item:nth-child(2){
-        border-left:1px solid var(--st-line, var(--st-outline-variant));
+        border-left:1px solid var(--st-line);
     }
     body[data-page="CLC Overview"] .st-clc-summary-item.st-clc-municipality-label{
         grid-column:1/-1;
         border-left:0;
-        border-top:1px solid var(--st-line, var(--st-outline-variant));
+        border-top:1px solid var(--st-line);
         padding:12px 16px;
         flex-direction:row;
     }
     body[data-page="CLC Overview"] .st-clc-summary-icon{
         width:36px;
         height:36px;
-        border-radius:10px;
+        border-radius:var(--st-radius-card);
     }
     body[data-page="CLC Overview"] .st-clc-summary-icon .material-symbols-outlined{
         font-size:19px;
     }
     body[data-page="CLC Overview"] .st-clc-summary-value{
-        font-size:1.5rem;
+        font-size: var(--st-fs-2xl);
     }
     body[data-page="CLC Overview"] .st-clc-summary-value--text{
-        font-size:1.0625rem;
+        font-size: var(--st-fs-md);
     }
     body[data-page="CLC Overview"] .st-clc-summary-label{
-        font-size:0.781rem;
+        font-size: var(--st-fs-xs);
     }
     body[data-page="CLC Overview"] .st-lbl-long{
         display:none;
@@ -549,10 +549,10 @@ body[data-page="CLC Overview"] .st-clc-search-wide{
     max-width:100%;
     height:40px;
     padding:0 12px;
-    border:1px solid var(--st-line-strong, var(--st-outline-variant));
-    border-radius:var(--st-radius-control, var(--st-button-radius));
+    border:1px solid var(--st-line-strong);
+    border-radius:var(--st-radius-control);
     background:#fff;
-    color:var(--st-ink-faint, var(--st-outline));
+    color:var(--st-ink-faint);
     transition:border-color var(--st-t-hover, 150ms),box-shadow var(--st-t-hover, 150ms);
 }
 
@@ -586,7 +586,7 @@ body[data-page="CLC Overview"] .st-clc-search-wide input{
     min-width:0;
     padding:0;
     font:inherit;
-    font-size:0.875rem;
+    font-size: var(--st-fs-base);
     background:none;
     color:var(--st-on-surface);
 }
@@ -598,15 +598,15 @@ body[data-page="CLC Overview"] .st-clc-search-wide input:focus{
 
 body[data-page="CLC Overview"] .st-clc-showing-indicator{
     display:block;
-    font-size:0.844rem;
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    font-size: var(--st-fs-base);
+    color:var(--st-ink-muted);
     border-left:0;
     padding-left:0;
     font-weight:400;
     white-space:nowrap;
 }
 
-@media (max-width:640px){
+@media (max-width: 767px){
     body[data-page="CLC Overview"] .st-clc-filter-row{
         grid-template-columns:1fr;
     }
@@ -630,10 +630,10 @@ body[data-page="Class Management"] .st-class-context-banner{
     gap:14px;
     padding:14px 16px 14px 14px;
     background:#fff;
-    border:1px solid var(--st-line, var(--st-outline-variant));
+    border:1px solid var(--st-line);
     border-left:4px solid var(--st-primary);
-    border-radius:var(--st-radius-card, var(--st-card-radius));
-    box-shadow:var(--st-shadow-card, var(--st-shadow-sm));
+    border-radius:var(--st-radius-card);
+    box-shadow:var(--st-shadow-card);
     margin-bottom:0;
 }
 
@@ -641,12 +641,12 @@ body[data-page="Class Management"] .st-class-context-banner-icon{
     width:44px;
     height:44px;
     flex:none;
-    border-radius:12px;
+    border-radius:var(--st-radius-card);
     display:grid !important;
     place-items:center;
-    background:var(--st-navy-soft, var(--st-primary-fixed));
+    background:var(--st-navy-soft);
     color:var(--st-primary);
-    font-size:1.25rem;
+    font-size: var(--st-fs-xl);
 }
 
 body[data-page="Class Management"] .st-class-context-banner-text{
@@ -657,15 +657,15 @@ body[data-page="Class Management"] .st-class-context-banner-text{
 }
 
 body[data-page="Class Management"] .st-class-context-banner-kicker{
-    font-size:0.75rem;
+    font-size: var(--st-fs-xs);
     font-weight:600;
-    color:var(--st-ink-faint, var(--st-outline));
+    color:var(--st-ink-faint);
 }
 
 body[data-page="Class Management"] .st-class-context-banner-name{
     font-family:var(--st-font-heading);
     font-weight:800;
-    font-size:1.25rem;
+    font-size: var(--st-fs-xl);
     letter-spacing:-.01em;
     line-height:1.2;
     color:var(--st-on-surface);
@@ -675,8 +675,8 @@ body[data-page="Class Management"] .st-class-context-banner-name{
 }
 
 body[data-page="Class Management"] .st-class-context-banner-meta{
-    font-size:0.844rem;
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    font-size: var(--st-fs-base);
+    color:var(--st-ink-muted);
     margin-top:2px;
 }
 
@@ -686,10 +686,10 @@ body[data-page="Class Management"] .st-class-context-banner-switch{
     gap:6px;
     height:38px;
     padding:0 14px;
-    border:1px solid var(--st-line-strong, var(--st-outline-variant));
-    border-radius:var(--st-radius-control, var(--st-button-radius));
+    border:1px solid var(--st-line-strong);
+    border-radius:var(--st-radius-control);
     font-weight:600;
-    font-size:0.875rem;
+    font-size: var(--st-fs-base);
     color:var(--st-on-surface);
     text-decoration:none;
     white-space:nowrap;
@@ -704,7 +704,7 @@ body[data-page="Class Management"] .st-class-context-banner-switch .material-sym
 body[data-page="Class Management"] .st-class-context-banner-switch:hover{
     border-color:var(--st-primary);
     color:var(--st-primary);
-    background:var(--st-navy-soft, var(--st-primary-fixed));
+    background:var(--st-navy-soft);
     text-decoration:none;
 }
 
@@ -712,7 +712,7 @@ body[data-page="Class Management"] .st-class-context-banner-switch:active{
     transform:scale(.96);
 }
 
-@media (max-width:767px){
+@media (max-width: 767px){
     body[data-page="Class Management"] .st-page-header-actions{
         width:100%;
     }
@@ -745,7 +745,7 @@ body[data-page="Class Management"] .st-class-context-banner-switch:active{
    an inline style. .st-schedule-modal-* base rules are shared and untouched. */
 body[data-page="Class Management"] .st-clc-modal-note{
     font-weight:400;
-    font-size:0.75rem;
+    font-size: var(--st-fs-xs);
     color:var(--st-outline);
 }
 
@@ -757,7 +757,7 @@ body[data-page="Class Management"] .st-clc-modal-note{
 
 .st-clc-form-card{
     background:#fff;
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     border:1px solid rgba(195,198,207,.30);
     box-shadow:var(--st-shadow-sm);
     overflow:hidden;
@@ -803,7 +803,7 @@ body[data-page="Class Management"] .st-clc-modal-note{
 
 .st-clc-form-section-title .material-symbols-outlined{
     color:var(--st-primary);
-    font-size:1.25rem;
+    font-size: var(--st-fs-xl);
 }
 
 .st-clc-form-grid{
@@ -812,7 +812,7 @@ body[data-page="Class Management"] .st-clc-modal-note{
     gap:24px;
 }
 
-@media (max-width:640px){
+@media (max-width: 767px){
     .st-clc-form-grid{ grid-template-columns:1fr; }
 }
 
@@ -820,11 +820,11 @@ body[data-page="Class Management"] .st-clc-modal-note{
     grid-template-columns:repeat(3,1fr);
 }
 
-@media (max-width:768px){
+@media (max-width: 767px){
     .st-clc-form-grid--3{ grid-template-columns:1fr 1fr; }
 }
 
-@media (max-width:480px){
+@media (max-width: 479px){
     .st-clc-form-grid--3{ grid-template-columns:1fr; }
 }
 
@@ -841,7 +841,7 @@ body[data-page="Class Management"] .st-clc-modal-note{
 }
 
 .st-clc-field label .required{
-    color:var(--st-error);
+    color:var(--st-risk-high);
 }
 
 .st-clc-field input,
@@ -849,7 +849,7 @@ body[data-page="Class Management"] .st-clc-modal-note{
     height:44px;
     padding:0 16px;
     border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     background:#fff;
     font-family:var(--st-font-body);
     font-size: var(--st-font-size-label);
@@ -861,7 +861,7 @@ body[data-page="Class Management"] .st-clc-modal-note{
     height:44px;
     padding:0 12px;
     border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-button-radius);
+    border-radius:var(--st-radius-control);
     background:#fff;
     font-family:var(--st-font-body);
     font-size: var(--st-font-size-label);
@@ -887,12 +887,12 @@ body[data-page="Class Management"] .st-clc-modal-note{
 
 .st-clc-field input.has-error,
 .st-clc-field select.has-error{
-    border-color:var(--st-error);
+    border-color:var(--st-risk-high);
 }
 
 .st-clc-field-error{
     font-size: var(--st-font-size-micro);
-    color:var(--st-error);
+    color:var(--st-risk-high);
     display:none;
 }
 
@@ -907,12 +907,12 @@ body[data-page="Class Management"] .st-clc-modal-note{
     padding:16px;
     background:var(--st-surface-container-low);
     border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
 }
 
 .st-clc-note .material-symbols-outlined{
     color:var(--st-secondary);
-    font-size:1.25rem;
+    font-size: var(--st-fs-xl);
     flex-shrink:0;
 }
 
@@ -951,7 +951,7 @@ body[data-page="Class Management"] .st-clc-modal-note{
     align-items:flex-start;
 }
 
-@media (max-width:992px){
+@media (max-width: 1023px){
     .st-clc-upload-grid{ grid-template-columns:1fr; }
 }
 
@@ -960,7 +960,7 @@ body[data-page="Class Management"] .st-clc-modal-note{
     align-items:center;
     gap:6px;
     padding:4px 12px;
-    border-radius:999px;
+    border-radius:var(--st-radius-pill);
     background:rgba(0,106,104,.12);
     color:var(--st-secondary);
     font-size: var(--st-font-size-micro);
@@ -986,7 +986,7 @@ body[data-page="Class Management"] .st-clc-modal-note{
     grid-template-columns:repeat(3,1fr);
 }
 
-@media (max-width:640px){
+@media (max-width: 767px){
     .st-clc-readonly-grid,
     .st-clc-readonly-grid--3{ grid-template-columns:1fr; }
 }
@@ -1009,7 +1009,7 @@ body[data-page="Class Management"] .st-clc-modal-note{
     align-items:center;
     padding:0 16px;
     border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     background:var(--st-surface-container-low);
     font-size: var(--st-font-size-label);
     color:var(--st-primary);
@@ -1023,7 +1023,7 @@ body[data-page="Class Management"] .st-clc-modal-note{
     padding:16px;
     background:var(--st-surface-container-low);
     border:1px solid rgba(0,106,104,.20);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     transition:border-color .2s ease;
 }
 
@@ -1034,7 +1034,7 @@ body[data-page="Class Management"] .st-clc-modal-note{
 .st-clc-file-icon{
     width:48px;
     height:48px;
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     background:rgba(0,106,104,.10);
     color:var(--st-secondary);
     display:flex;
@@ -1056,7 +1056,7 @@ body[data-page="Class Management"] .st-clc-modal-note{
 
 .st-clc-file-name .material-symbols-outlined{
     color:var(--st-secondary-container, #4ade80);
-    font-size:1.125rem;
+    font-size: var(--st-fs-lg);
 }
 
 .st-clc-file-sub{
@@ -1071,7 +1071,7 @@ body[data-page="Class Management"] .st-clc-modal-note{
     padding:12px;
     background:rgba(141,240,238,.20);
     color:var(--st-on-secondary-container);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     font-size: var(--st-font-size-caption);
 }
 
@@ -1092,7 +1092,7 @@ body[data-page="Class Management"] .st-clc-modal-note{
 .st-clc-tip-card{
     background:rgba(18,53,91,.05);
     border:1px solid rgba(18,53,91,.12);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     padding:20px;
 }
 
@@ -1161,7 +1161,7 @@ body[data-page="Class Management"] .st-clc-modal-note{
     text-align:center;
 }
 
-@media (max-width:640px){
+@media (max-width: 767px){
     .st-clc-form-footer{ flex-direction:column-reverse; align-items:stretch; }
     .st-clc-form-footer-left{ margin-right:0; text-align:center; }
 }

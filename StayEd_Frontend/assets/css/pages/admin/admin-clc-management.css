@@ -1,5 +1,0 @@
-/* CLC Management page -- the shared admin-list layer (KPIs, table,
-   pills, chips, modals, and the mobile .st-clc-table column order)
-   now lives in admin-list-pages.css. Nothing page-exclusive remains
-   here; kept as an empty file (rather than removed) so the @import
-   in main.css and the page's own history stay intact. */

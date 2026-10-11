@@ -7,7 +7,7 @@
 
 .st-upload-zone{
     border:2px dashed var(--st-outline-variant);
-    border-radius:var(--st-radius-xl);
+    border-radius:var(--st-radius-card);
     background:var(--st-surface-container-low);
     padding:48px;
     display:flex;
@@ -36,7 +36,7 @@
 }
 
 .st-upload-zone-icon .material-symbols-outlined{
-    font-size:2.25rem;
+    font-size: var(--st-fs-4xl);
     color:var(--st-primary);
     font-variation-settings:"FILL" 1;
 }
@@ -65,15 +65,15 @@
     padding:16px;
     background:var(--st-surface);
     border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     margin-top:16px;
-    box-shadow:var(--st-shadow-card, var(--st-shadow-sm));
+    box-shadow:var(--st-shadow-card);
 }
 
 .st-upload-file-icon{
     width:48px;
     height:48px;
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     background:var(--st-secondary-container);
     color:var(--st-on-secondary-container);
     display:flex;
@@ -99,7 +99,7 @@
     margin-top:8px;
     height:6px;
     background:var(--st-surface-container);
-    border-radius:999px;
+    border-radius:var(--st-radius-pill);
     overflow:hidden;
 }
 
@@ -107,7 +107,7 @@
     height:100%;
     width:0;
     background:var(--st-secondary);
-    border-radius:999px;
+    border-radius:var(--st-radius-pill);
     transition:width .3s ease;
 }
 
@@ -127,12 +127,12 @@
 }
 
 .st-upload-guide-item .material-symbols-outlined{
-    font-size:1.25rem;
+    font-size: var(--st-fs-xl);
     color:var(--st-secondary);
     flex-shrink:0;
 }
 
-@media (min-width:1024px){
+@media (min-width: 1024px){
     .st-upload-grid{ grid-template-columns:2fr 1fr; }
 }
 
@@ -166,7 +166,7 @@ body[data-page="Import Learners"] .st-import-steps li{
     gap:8px;
     font-size: var(--st-font-size-caption);
     font-weight:600;
-    color:var(--st-ink-faint, var(--st-outline));
+    color:var(--st-ink-faint);
     white-space:nowrap;
 }
 
@@ -175,8 +175,8 @@ body[data-page="Import Learners"] .st-import-steps li + li::before{
     width:36px;
     height:2px;
     margin:0 10px;
-    border-radius:2px;
-    background:var(--st-line, var(--st-outline-variant));
+    border-radius:var(--st-radius-xs);
+    background:var(--st-line);
     transition:background-color 400ms;
 }
 
@@ -189,7 +189,7 @@ body[data-page="Import Learners"] .st-import-steps li span{
     height:28px;
     border-radius:50%;
     background:#fff;
-    border:2px solid var(--st-line-strong, var(--st-outline-variant));
+    border:2px solid var(--st-line-strong);
     display:grid;
     place-items:center;
     font-size: var(--st-font-size-caption);
@@ -202,7 +202,7 @@ body[data-page="Import Learners"] .st-import-steps li.is-active span{
     background:var(--st-primary);
     border-color:var(--st-primary);
     color:#fff;
-    box-shadow:0 0 0 4px var(--st-navy-soft, var(--st-primary-fixed));
+    box-shadow:0 0 0 4px var(--st-navy-soft);
     transform:scale(1.06);
 }
 
@@ -231,7 +231,7 @@ body[data-page="Import Learners"] .st-import-preview-summary{
     margin-bottom:16px;
 }
 
-@media (max-width:700px){
+@media (max-width: 767px){
     body[data-page="Import Learners"] .st-import-preview-summary{ grid-template-columns:1fr 1fr; }
 }
 
@@ -246,21 +246,21 @@ body[data-page="Import Learners"] .st-import-stat-card{
     gap:12px;
     padding:16px;
     background:#fff;
-    border:1px solid var(--st-line, var(--st-outline-variant));
+    border:1px solid var(--st-line);
     border-left:4px solid var(--c, var(--st-outline-variant));
-    border-radius:12px;
-    box-shadow:var(--st-shadow-card, var(--st-shadow-sm));
+    border-radius:var(--st-radius-card);
+    box-shadow:var(--st-shadow-card);
 }
 
 body[data-page="Import Learners"] .st-import-stat-card .material-symbols-outlined{
     width:38px;
     height:38px;
     flex:none;
-    border-radius:10px;
+    border-radius:var(--st-radius-card);
     display:grid;
     place-items:center;
     background:var(--cs, var(--st-background));
-    color:var(--ci, var(--st-ink-muted, #5a6275));
+    color:var(--ci, var(--st-ink-muted));
     font-size:20px;
 }
 
@@ -274,24 +274,24 @@ body[data-page="Import Learners"] .st-import-stat-card-count{
 
 body[data-page="Import Learners"] .st-import-stat-card-label{
     font-size: var(--st-font-size-caption);
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    color:var(--st-ink-muted);
     margin-top:2px;
 }
 
 body[data-page="Import Learners"] .st-import-stat-card--total{
-    --c:var(--st-primary); --cs:var(--st-navy-soft, var(--st-primary-fixed)); --ci:var(--st-primary);
+    --c:var(--st-primary); --cs:var(--st-navy-soft); --ci:var(--st-primary);
 }
 
 body[data-page="Import Learners"] .st-import-stat-card--valid{
-    --c:var(--st-risk-low, #6bbf59); --cs:var(--st-risk-low-soft-2, #edf7ea); --ci:var(--st-risk-low-ink, #2c7121);
+    --c:var(--st-risk-low); --cs:var(--st-risk-low-soft); --ci:var(--st-risk-low-ink);
 }
 
 body[data-page="Import Learners"] .st-import-stat-card--duplicate{
-    --c:var(--st-risk-moderate, #f39422); --cs:var(--st-risk-moderate-soft-2, #fef3e4); --ci:var(--st-risk-moderate-ink, #8f5200);
+    --c:var(--st-risk-moderate); --cs:var(--st-risk-moderate-soft); --ci:var(--st-risk-moderate-ink);
 }
 
 body[data-page="Import Learners"] .st-import-stat-card--error{
-    --c:var(--st-risk-high, #ba1a1a); --cs:var(--st-risk-high-soft-2, #fdecea); --ci:var(--st-risk-high-ink, #a01414);
+    --c:var(--st-risk-high); --cs:var(--st-risk-high-soft); --ci:var(--st-risk-high-ink);
 }
 
 /* Preview table card header ("Learner rows" + "Showing N of N rows") --
@@ -304,7 +304,7 @@ body[data-page="Import Learners"] .st-import-stat-card--error{
     align-items:center;
     gap:10px;
     padding:16px 20px;
-    border-bottom:1px solid var(--st-line, var(--st-outline-variant));
+    border-bottom:1px solid var(--st-line);
 }
 
 .st-import-table-head h3 {
@@ -316,7 +316,7 @@ body[data-page="Import Learners"] .st-import-stat-card--error{
 
 .st-import-table-head span {
     font-size: var(--st-font-size-caption);
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    color:var(--st-ink-muted);
 }
 
 /* Preview table -- deliberately UNSCOPED (not body[data-page="Import
@@ -335,8 +335,8 @@ body[data-page="Import Learners"] .st-import-stat-card--error{
     align-items:center;
     gap:4px;
     padding:2px 10px;
-    border-radius:999px;
-    font-size:0.781rem;
+    border-radius:var(--st-radius-pill);
+    font-size: var(--st-fs-xs);
     font-weight:600;
 }
 
@@ -352,8 +352,8 @@ body[data-page="Import Learners"] .st-import-stat-card--error{
 }
 
 .st-import-issue{
-    font-size:0.781rem;
-    color:var(--st-ink-faint, var(--st-outline));
+    font-size: var(--st-fs-xs);
+    color:var(--st-ink-faint);
 }
 
 .st-import-learner-cell{
@@ -367,15 +367,15 @@ body[data-page="Import Learners"] .st-import-stat-card--error{
    else a learner's name+LRN appears in a table. This cell previously set
    its own smaller/monospace/darker styling instead of reusing it. */
 .st-import-learner-name{
-    font-size:0.906rem;
+    font-size: var(--st-fs-base);
     font-weight:600;
     color:var(--st-on-surface);
     white-space:nowrap;
 }
 
 .st-import-learner-lrn{
-    font-size:0.781rem;
-    color:var(--st-ink-faint, var(--st-outline));
+    font-size: var(--st-fs-xs);
+    color:var(--st-ink-faint);
 }
 
 /* .st-panel has rounded corners but no overflow clipping of its own (unlike
@@ -436,12 +436,12 @@ body[data-page="Import Learners"] .st-import-footer-note{
     display:flex;
     align-items:center;
     gap:6px;
-    font-size:0.8125rem;
+    font-size: var(--st-fs-sm);
     color:var(--st-on-surface-variant);
 }
 
 body[data-page="Import Learners"] .st-import-footer-note .material-symbols-outlined{
-    font-size:1.125rem;
+    font-size: var(--st-fs-lg);
     color:var(--st-outline);
 }
 
@@ -455,22 +455,17 @@ body[data-page="Import Learners"] .st-clc-success-icon{
     width:72px;
     height:72px;
     border-radius:50%;
-    background:#e3f4f3;
+    background:var(--st-teal-soft);
     display:flex;
     align-items:center;
     justify-content:center;
-    animation:st-import-icon-pop .35s cubic-bezier(.16,1,.3,1) both;
+    animation:stScaleIn .35s cubic-bezier(.16,1,.3,1) both;
 }
 
 body[data-page="Import Learners"] .st-clc-success-icon .material-symbols-outlined{
-    font-size:2.75rem;
+    font-size: var(--st-fs-4xl);
     color:var(--st-secondary);
     font-variation-settings:"FILL" 1;
-}
-
-@keyframes st-import-icon-pop{
-    from{ transform:scale(.6); opacity:0; }
-    to{ transform:scale(1); opacity:1; }
 }
 
 /* Matches .st-import-stat-card (the preview step's stat tiles) and
@@ -486,7 +481,7 @@ body[data-page="Import Learners"] .st-import-success-stats{
     margin:24px auto;
 }
 
-@media (max-width:700px){
+@media (max-width: 767px){
     body[data-page="Import Learners"] .st-import-success-stats{ grid-template-columns:1fr 1fr; }
 }
 
@@ -496,22 +491,22 @@ body[data-page="Import Learners"] .st-import-success-stat{
     gap:12px;
     text-align:left;
     background:#fff;
-    border:1px solid var(--st-line, var(--st-outline-variant));
+    border:1px solid var(--st-line);
     border-left:4px solid var(--c, var(--st-outline-variant));
-    border-radius:12px;
+    border-radius:var(--st-radius-card);
     padding:16px;
-    box-shadow:var(--st-shadow-card, var(--st-shadow-sm));
+    box-shadow:var(--st-shadow-card);
 }
 
 body[data-page="Import Learners"] .st-import-success-stat .material-symbols-outlined{
     width:38px;
     height:38px;
     flex:none;
-    border-radius:10px;
+    border-radius:var(--st-radius-card);
     display:grid;
     place-items:center;
     background:var(--cs, var(--st-background));
-    color:var(--ci, var(--st-ink-muted, #5a6275));
+    color:var(--ci, var(--st-ink-muted));
     font-size:20px;
 }
 
@@ -525,28 +520,28 @@ body[data-page="Import Learners"] .st-import-success-stat-value{
 
 body[data-page="Import Learners"] .st-import-success-stat-label{
     font-size: var(--st-font-size-caption);
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    color:var(--st-ink-muted);
     margin-top:2px;
 }
 
 body[data-page="Import Learners"] .st-import-success-stat{
-    --c:var(--st-primary); --cs:var(--st-navy-soft, var(--st-primary-fixed)); --ci:var(--st-primary);
+    --c:var(--st-primary); --cs:var(--st-navy-soft); --ci:var(--st-primary);
 }
 body[data-page="Import Learners"] .st-import-success-stat--imported{
-    --c:var(--st-risk-low, #6bbf59); --cs:var(--st-risk-low-soft-2, #edf7ea); --ci:var(--st-risk-low-ink, #2c7121);
+    --c:var(--st-risk-low); --cs:var(--st-risk-low-soft); --ci:var(--st-risk-low-ink);
 }
 body[data-page="Import Learners"] .st-import-success-stat--duplicates{
-    --c:var(--st-risk-moderate, #f39422); --cs:var(--st-risk-moderate-soft-2, #fef3e4); --ci:var(--st-risk-moderate-ink, #8f5200);
+    --c:var(--st-risk-moderate); --cs:var(--st-risk-moderate-soft); --ci:var(--st-risk-moderate-ink);
 }
 body[data-page="Import Learners"] .st-import-success-stat--errors{
-    --c:var(--st-risk-high, #ba1a1a); --cs:var(--st-risk-high-soft-2, #fdecea); --ci:var(--st-risk-high-ink, #a01414);
+    --c:var(--st-risk-high); --cs:var(--st-risk-high-soft); --ci:var(--st-risk-high-ink);
 }
 
 /* Scoped overrides on top of the shared upload-zone/browse-button base
    rules (left untouched above) so clc-upload.html is unaffected. */
 
 body[data-page="Import Learners"] .st-upload-zone{
-    border-radius:14px;
+    border-radius:var(--st-radius-lg);
     border-color:#c9d2de;
     background:#fafbfd;
     transition:var(--st-transition), transform .2s ease;
@@ -563,7 +558,7 @@ body[data-page="Import Learners"] .st-upload-zone.is-dragover .st-upload-zone-ic
 }
 
 body[data-page="Import Learners"] .st-upload-zone-icon{
-    background:var(--st-navy-soft, var(--st-primary-fixed));
+    background:var(--st-navy-soft);
     transition:transform .2s ease;
 }
 
@@ -623,7 +618,7 @@ body[data-page="Import Learners"] #importPreviewBtn:hover .material-symbols-outl
 .st-enroll-step-icon-tile{
     width:40px;
     height:40px;
-    border-radius:var(--st-radius-md);
+    border-radius:var(--st-radius-sm);
     background:var(--st-primary-fixed);
     display:flex;
     align-items:center;
@@ -633,7 +628,7 @@ body[data-page="Import Learners"] #importPreviewBtn:hover .material-symbols-outl
 
 .st-enroll-step-icon-tile .material-symbols-outlined{
     color:var(--st-primary);
-    font-size:1.375rem;
+    font-size: var(--st-fs-xl);
 }
 
 .st-enroll-step-title-text{
@@ -724,7 +719,7 @@ body[data-page="Import Learners"] #importPreviewBtn:hover .material-symbols-outl
 .st-enroll-progress-step.is-complete .st-enroll-progress-dot::before{
     content:"check";
     font-family:"Material Symbols Outlined";
-    font-size:1rem;
+    font-size: var(--st-fs-md);
 }
 
 .st-enroll-progress-label{
@@ -735,20 +730,20 @@ body[data-page="Import Learners"] #importPreviewBtn:hover .material-symbols-outl
     display:none;
 }
 
-@media (min-width:768px){
+@media (min-width: 768px){
     .st-enroll-progress-label{ display:block; }
 }
 
 .st-enroll-progress-compact{ display:none; }
 
-@media (min-width:768px){
+@media (min-width: 768px){
     /* Desktop: sticky vertical stepper beside the step card. Tablet
        (768-1023px) falls back to the same horizontal bar as mobile-large
        via the flex-row layout already used above 768px. */
     .st-enroll-progress{ margin-bottom:24px; }
 }
 
-@media (min-width:1024px){
+@media (min-width: 1024px){
     /* .st-enroll-progress and <form> are siblings under [data-enroll-wizard]
        (the stepper isn't nested inside the form), so the two-column grid
        has to live on that shared parent -- putting it on the form alone
@@ -799,7 +794,7 @@ body[data-page="Import Learners"] #importPreviewBtn:hover .material-symbols-outl
     .st-enroll-progress-label{ text-align:left; }
 }
 
-@media (max-width:767px){
+@media (max-width: 767px){
     .st-enroll-progress{ display:block; }
 
     .st-enroll-progress-step{ display:none; }
@@ -827,7 +822,7 @@ body[data-page="Import Learners"] #importPreviewBtn:hover .material-symbols-outl
 
     .st-enroll-progress-compact-track{
         height:6px;
-        border-radius:999px;
+        border-radius:var(--st-radius-pill);
         background:var(--st-surface-container);
         overflow:hidden;
     }
@@ -836,7 +831,7 @@ body[data-page="Import Learners"] #importPreviewBtn:hover .material-symbols-outl
         height:100%;
         width:12.5%;
         background:var(--st-primary);
-        border-radius:999px;
+        border-radius:var(--st-radius-pill);
         transition:width .25s ease;
     }
 }
@@ -872,7 +867,7 @@ body[data-page="Import Learners"] #importPreviewBtn:hover .material-symbols-outl
 .st-enroll-step-card{
     background:#fff;
     border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     box-shadow:var(--st-shadow-sm);
     padding:24px;
 }
@@ -908,7 +903,7 @@ body[data-page="Import Learners"] #importPreviewBtn:hover .material-symbols-outl
     gap:12px;
 }
 
-@media (max-width:600px){
+@media (max-width: 479px){
     .st-enroll-segment--cards{ flex-direction:column; }
 }
 
@@ -921,7 +916,7 @@ body[data-page="Import Learners"] #importPreviewBtn:hover .material-symbols-outl
     padding:18px 14px;
     background:#fff;
     border:2px solid var(--st-outline-variant);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     font-size: var(--st-font-size-label);
     font-weight:600;
     color:var(--st-on-surface-variant);
@@ -930,7 +925,7 @@ body[data-page="Import Learners"] #importPreviewBtn:hover .material-symbols-outl
 }
 
 .st-enroll-segment--cards button .material-symbols-outlined{
-    font-size:1.5rem;
+    font-size: var(--st-fs-2xl);
     color:var(--st-on-surface-variant);
 }
 
@@ -949,7 +944,7 @@ body[data-page="Import Learners"] #importPreviewBtn:hover .material-symbols-outl
     color:var(--st-primary);
 }
 
-@media (min-width:601px){
+@media (min-width: 480px){
     .st-enroll-segment--cards button{ flex-direction:row; justify-content:center; }
 }
 
@@ -970,7 +965,7 @@ body[data-page="Import Learners"] #importPreviewBtn:hover .material-symbols-outl
 }
 
 .st-enroll-review-section-title .material-symbols-outlined{
-    font-size:1.125rem;
+    font-size: var(--st-fs-lg);
     color:var(--st-secondary);
 }
 
@@ -980,11 +975,11 @@ body[data-page="Import Learners"] #importPreviewBtn:hover .material-symbols-outl
     gap:8px 16px;
 }
 
-@media (max-width:1023px){
+@media (max-width: 1023px){
     .st-enroll-review-grid{ grid-template-columns:1fr 1fr; }
 }
 
-@media (max-width:480px){
+@media (max-width: 479px){
     .st-enroll-review-grid{ grid-template-columns:1fr; }
 }
 
@@ -1019,18 +1014,13 @@ body[data-page="Manual Enrollment"] .st-clc-success-icon{
     align-items:center;
     justify-content:center;
     margin:0 auto 24px;
-    animation:st-enroll-icon-pop .35s cubic-bezier(.16,1,.3,1) both;
+    animation:stScaleIn .35s cubic-bezier(.16,1,.3,1) both;
 }
 
 body[data-page="Manual Enrollment"] .st-clc-success-icon .material-symbols-outlined{
-    font-size:2.75rem;
+    font-size: var(--st-fs-4xl);
     color:var(--st-secondary);
     font-variation-settings:"FILL" 1;
-}
-
-@keyframes st-enroll-icon-pop{
-    from{ transform:scale(.6); opacity:0; }
-    to{ transform:scale(1); opacity:1; }
 }
 
 /* ---- Footer nav ---- */
@@ -1063,7 +1053,7 @@ body[data-page="Manual Enrollment"] .st-clc-success-icon .material-symbols-outli
     transform:translateX(-3px);
 }
 
-@media (max-width:767px){
+@media (max-width: 767px){
     .st-enroll-wizard-footer{
         position:sticky;
         bottom:0;
@@ -1096,7 +1086,7 @@ body[data-page="Manual Enrollment"] .st-clc-success-icon .material-symbols-outli
     gap:16px;
 }
 
-@media (max-width:600px){
+@media (max-width: 479px){
     .st-enroll-gate-options{ grid-template-columns:1fr; }
 }
 
@@ -1108,7 +1098,7 @@ body[data-page="Manual Enrollment"] .st-clc-success-icon .material-symbols-outli
     padding:20px;
     background:#fff;
     border:1.5px solid var(--st-outline-variant);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     text-align:left;
     cursor:pointer;
     transition:var(--st-transition), transform .15s ease;
@@ -1128,7 +1118,7 @@ body[data-page="Manual Enrollment"] .st-clc-success-icon .material-symbols-outli
 .st-enroll-gate-option-icon{
     width:44px;
     height:44px;
-    border-radius:var(--st-radius-md);
+    border-radius:var(--st-radius-sm);
     background:var(--st-primary-fixed);
     display:flex;
     align-items:center;
@@ -1137,7 +1127,7 @@ body[data-page="Manual Enrollment"] .st-clc-success-icon .material-symbols-outli
 }
 
 .st-enroll-gate-option-icon .material-symbols-outlined{
-    font-size:1.5rem;
+    font-size: var(--st-fs-2xl);
     color:var(--st-primary);
 }
 
@@ -1194,10 +1184,10 @@ body[data-page="Manual Enrollment"] .st-clc-success-icon .material-symbols-outli
     gap:8px;
     height:40px;
     padding:0 12px;
-    border:1px solid var(--st-line-strong, var(--st-outline-variant));
-    border-radius:var(--st-radius-control, var(--st-button-radius));
+    border:1px solid var(--st-line-strong);
+    border-radius:var(--st-radius-control);
     background:#fff;
-    color:var(--st-ink-faint, var(--st-outline));
+    color:var(--st-ink-faint);
 }
 
 .st-enroll-gate-search-input:hover{
@@ -1226,7 +1216,7 @@ body[data-page="Manual Enrollment"] .st-clc-success-icon .material-symbols-outli
     min-width:0;
     padding:0;
     font:inherit;
-    font-size:0.875rem;
+    font-size: var(--st-fs-base);
     background:none;
     color:var(--st-on-surface);
 }
@@ -1251,7 +1241,7 @@ body[data-page="Manual Enrollment"] .st-clc-success-icon .material-symbols-outli
     padding:12px 14px;
     background:var(--st-surface-container-low);
     border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-radius-md);
+    border-radius:var(--st-radius-sm);
     text-align:left;
     cursor:pointer;
     transition:var(--st-transition);
@@ -1305,7 +1295,7 @@ body[data-page="Manual Enrollment"] .st-clc-success-icon .material-symbols-outli
     flex-shrink:0;
 }
 
-.st-enroll-gate-result-select .material-symbols-outlined{ font-size:1rem; }
+.st-enroll-gate-result-select .material-symbols-outlined{ font-size: var(--st-fs-md); }
 
 .st-enroll-gate-result:hover .st-enroll-gate-result-select{ opacity:1; }
 

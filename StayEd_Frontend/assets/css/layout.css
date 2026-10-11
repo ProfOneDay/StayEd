@@ -135,7 +135,7 @@ body {
 
   padding: 6px 12px;
 
-  border-radius: var(--st-radius-sm);
+  border-radius: var(--st-radius-xs);
 
   font-size: var(--st-font-size-label);
 
@@ -176,7 +176,7 @@ body {
 .st-sidebar-brand h2 {
   font-family: var(--st-font-heading);
 
-  font-size: 1.3125rem; /* 21px */
+  font-size: var(--st-fs-xl); /* 21px */
 
   font-weight: 800;
 
@@ -186,7 +186,7 @@ body {
 }
 
 .st-brand-icon {
-  font-size:1.875rem;
+  font-size: var(--st-fs-3xl);
 
   color: var(--st-secondary-container);
 }
@@ -218,7 +218,7 @@ body {
 .st-sidebar-divider {
   margin: 18px 12px 6px;
 
-  font-size: 0.75rem; /* 12px */
+  font-size: var(--st-fs-xs); /* 12px */
 
   font-weight: 600;
 
@@ -244,11 +244,11 @@ body {
 
   margin-bottom: 0;
 
-  border-radius: var(--st-radius-control, 8px);
+  border-radius: var(--st-radius-control);
 
   font-family: var(--st-font-body);
 
-  font-size: 0.906rem; /* 14.5px */
+  font-size: var(--st-fs-base); /* 14.5px */
 
   font-weight: 500;
 
@@ -280,7 +280,7 @@ body {
 }
 
 .st-sidebar-nav a .material-symbols-outlined {
-  font-size:1.25rem;
+  font-size: var(--st-fs-xl);
 
   transition: transform var(--st-t-hover, 150ms) var(--st-ease-out, ease);
 }
@@ -310,11 +310,11 @@ body {
 
   margin-bottom: 0;
 
-  border-radius: var(--st-radius-control, 8px);
+  border-radius: var(--st-radius-control);
 
   font-family: var(--st-font-body);
 
-  font-size: 0.906rem; /* 14.5px */
+  font-size: var(--st-fs-base); /* 14.5px */
 
   font-weight: 500;
 
@@ -338,7 +338,7 @@ body {
 }
 
 .st-submenu-trigger .material-symbols-outlined {
-  font-size:1.25rem;
+  font-size: var(--st-fs-xl);
 
   transition: transform var(--st-t-hover, 150ms) var(--st-ease-out, ease);
 }
@@ -380,12 +380,7 @@ body {
 .st-submenu.is-expanded .st-submenu-list {
   max-height: 200px;
 
-  animation: st-submenu-in 180ms var(--st-ease-out, ease);
-}
-
-@keyframes st-submenu-in {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: none; }
+  animation: stPopIn 180ms var(--st-ease-out, ease);
 }
 
 .st-submenu-list a {
@@ -403,9 +398,9 @@ body {
 
   margin-bottom: 2px;
 
-  border-radius: var(--st-radius-control, 8px);
+  border-radius: var(--st-radius-control);
 
-  font-size: 0.875rem; /* 14px */
+  font-size: var(--st-fs-base); /* 14px */
 
   transition: background-color var(--st-t-hover, 150ms) ease, color var(--st-t-hover, 150ms) ease;
 
@@ -431,7 +426,7 @@ body {
 }
 
 .st-submenu-list a .material-symbols-outlined {
-  font-size:1.125rem;
+  font-size: var(--st-fs-lg);
 }
 
 .st-sidebar.is-collapsed .st-submenu-list {
@@ -447,7 +442,7 @@ body {
 
   background: var(--st-inverse-surface, #262f4c);
 
-  border-radius: var(--st-radius-md);
+  border-radius: var(--st-radius-sm);
 
   padding: 8px;
 
@@ -493,13 +488,13 @@ body {
 
   padding: 9px 12px;
 
-  border-radius: var(--st-radius-control, 8px);
+  border-radius: var(--st-radius-control);
 
   color: rgba(255, 255, 255, 0.72);
 
   text-decoration: none;
 
-  font-size: 0.875rem; /* 14px */
+  font-size: var(--st-fs-base); /* 14px */
 
   transition: background-color var(--st-t-hover, 150ms) ease, color var(--st-t-hover, 150ms) ease, transform var(--st-t-press, 90ms) ease;
 }
@@ -515,7 +510,7 @@ body {
 }
 
 .st-sidebar-secondary .material-symbols-outlined {
-  font-size:1.125rem;
+  font-size: var(--st-fs-lg);
 
   transition: transform var(--st-t-hover, 150ms) var(--st-ease-out, ease);
 }
@@ -551,13 +546,13 @@ body {
 
   background: transparent;
 
-  border-radius: var(--st-radius-control, 8px);
+  border-radius: var(--st-radius-control);
 
   color: rgba(255, 255, 255, 0.72);
 
   font-family: var(--st-font-body);
 
-  font-size: 0.875rem; /* 14px */
+  font-size: var(--st-fs-base); /* 14px */
 
   cursor: pointer;
 
@@ -577,7 +572,7 @@ body {
 }
 
 .st-sidebar-logout .material-symbols-outlined {
-  font-size:1.125rem;
+  font-size: var(--st-fs-lg);
 
   transition: transform var(--st-t-hover, 150ms) var(--st-ease-out, ease);
 }
@@ -623,7 +618,7 @@ body {
 
   -webkit-backdrop-filter: blur(8px);
 
-  border-bottom: 1px solid var(--st-line, var(--st-outline-variant));
+  border-bottom: 1px solid var(--st-line);
 
   display: flex;
 
@@ -675,7 +670,7 @@ body {
 
   font-family: var(--st-font-heading);
 
-  font-size: 1.125rem; /* 18px */
+  font-size: var(--st-fs-lg); /* 18px */
 
   font-weight: 700;
 
@@ -723,7 +718,7 @@ body {
 
   border: none;
 
-  border-radius: var(--st-radius-control, 8px);
+  border-radius: var(--st-radius-control);
 
   background: transparent;
 
@@ -735,7 +730,7 @@ body {
 
   justify-content: center;
 
-  color: var(--st-ink-muted, var(--st-text-secondary));
+  color: var(--st-ink-muted);
 
   transition: background-color var(--st-t-hover, 150ms) ease, color var(--st-t-hover, 150ms) ease, transform var(--st-t-press, 90ms) ease;
 }
@@ -751,7 +746,7 @@ body {
 }
 
 .st-icon-button .material-symbols-outlined {
-  font-size:1.375rem;
+  font-size: var(--st-fs-xl);
 
   color: inherit;
 }
@@ -769,7 +764,7 @@ body {
 
   border-radius: 50%;
 
-  background: var(--st-error);
+  background: var(--st-risk-high);
 
   border: 2px solid #fff;
 }
@@ -779,7 +774,7 @@ body {
 
   height: 28px;
 
-  background: var(--st-line, var(--st-outline-variant));
+  background: var(--st-line);
 
   margin: 0 10px;
 }
@@ -799,7 +794,7 @@ body {
 }
 
 .st-user-name {
-  font-size: 0.875rem; /* 14px */
+  font-size: var(--st-fs-base); /* 14px */
 
   font-weight: 600;
 
@@ -807,9 +802,9 @@ body {
 }
 
 .st-user-role {
-  font-size: 0.781rem; /* 12.5px */
+  font-size: var(--st-fs-xs); /* 12.5px */
 
-  color: var(--st-ink-muted, var(--st-text-secondary));
+  color: var(--st-ink-muted);
 }
 
 .st-user-avatar-wrap {
@@ -821,7 +816,7 @@ body {
   align-items: center;
   justify-content: center;
   flex: none;
-  background: var(--st-navy-soft, var(--st-primary-fixed));
+  background: var(--st-navy-soft);
 }
 
 .st-user-avatar {
@@ -836,16 +831,11 @@ body {
   border: none;
 }
 
-.st-user-avatar[hidden],
-.st-user-avatar-wrap .st-avatar-initials[hidden]{
-  display:none!important;
-}
-
 .st-user-avatar-wrap .st-avatar-initials{
   width:36px;
   height:36px;
   flex:none;
-  font-size: 0.8125rem; /* 13px */
+  font-size: var(--st-fs-sm); /* 13px */
 }
 
 .st-content {
@@ -887,7 +877,7 @@ body {
 
   font-family: var(--st-font-heading);
 
-  font-size: 1.875rem; /* 30px */
+  font-size: var(--st-fs-3xl); /* 30px */
 
   font-weight: 800;
 
@@ -901,9 +891,9 @@ body {
 .st-page-header-subtitle {
   margin: 6px 0 0;
 
-  font-size: 0.9375rem; /* 15px */
+  font-size: var(--st-fs-base); /* 15px */
 
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  color: var(--st-ink-muted);
 
   max-width: 640px;
 }
@@ -911,7 +901,7 @@ body {
 .st-footer {
   background: transparent;
 
-  border-top: 1px solid var(--st-line, var(--st-outline-variant));
+  border-top: 1px solid var(--st-line);
 
   min-height: 0;
 
@@ -939,15 +929,15 @@ body {
 
   flex-wrap: wrap;
 
-  color: var(--st-ink-muted, var(--st-text-secondary));
+  color: var(--st-ink-muted);
 
-  font-size: 0.8125rem; /* 13px */
+  font-size: var(--st-fs-sm); /* 13px */
 }
 
 .st-footer-version {
-  color: var(--st-ink-faint, var(--st-outline));
+  color: var(--st-ink-faint);
 
-  font-size: 0.8125rem; /* 13px -- explicit, not inherited: it sits inside
+  font-size: var(--st-fs-sm); /* 13px -- explicit, not inherited: it sits inside
     .st-footer-right on the landing/public footers (no font-size of its
     own there), so without this it fell back to the 16px browser default
     instead of matching the rest of the footer's 13px text. */
@@ -966,9 +956,9 @@ body {
 .st-footer-right a {
   text-decoration: none;
 
-  color: var(--st-ink-muted, var(--st-text-secondary));
+  color: var(--st-ink-muted);
 
-  font-size: 0.8125rem; /* 13px */
+  font-size: var(--st-fs-sm); /* 13px */
 
   transition: var(--st-transition-color);
 }
@@ -992,7 +982,7 @@ body {
 ::-webkit-scrollbar-thumb {
   background: var(--st-scrollbar-thumb);
 
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -1034,7 +1024,7 @@ body {
 
   border: var(--st-card-border);
 
-  border-radius: var(--st-card-radius);
+  border-radius: var(--st-radius-card);
 
   padding: var(--st-card-padding);
 
@@ -1045,7 +1035,7 @@ body {
   margin-bottom: var(--st-section-gap);
 }
 
-@media (max-width: 992px) {
+@media (max-width: 1023px) {
   .st-sidebar {
     transform: translateX(-100%);
 
@@ -1116,7 +1106,7 @@ body {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .st-navbar {
     height: auto;
 
@@ -1134,11 +1124,11 @@ body {
   }
 
   .st-page-header-title {
-    font-size: 1.5rem; /* 24px */
+    font-size: var(--st-fs-2xl); /* 24px */
   }
 
   .st-page-header-subtitle {
-    font-size: 0.875rem; /* 14px */
+    font-size: var(--st-fs-base); /* 14px */
   }
 
   .st-footer {
@@ -1162,7 +1152,7 @@ body {
 
 
 /* UI polish: mobile navbar/sidebar compactness */
-@media (max-width: 992px) {
+@media (max-width: 1023px) {
   .st-sidebar {
     width: min(86vw, 320px);
     box-shadow: 0 24px 48px rgba(0, 0, 0, 0.24);
@@ -1173,10 +1163,10 @@ body {
   .st-breadcrumb { margin-bottom: 0; }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .st-navbar { height: 56px; padding: 0 12px; }
   .st-navbar-left { gap: 8px; }
-  .st-breadcrumb { font-size: 1.0625rem; /* 17px */ min-width: 0; }
+  .st-breadcrumb { font-size: var(--st-fs-md); /* 17px */ min-width: 0; }
   .st-breadcrumb > span:not(.active),
   .st-breadcrumb > .st-breadcrumb-icon { display: none; }
   .st-breadcrumb .active {
@@ -1226,7 +1216,7 @@ body {
 }
 
 .st-avatar-initials:hover {
-  box-shadow: 0 0 0 3px var(--st-navy-soft, var(--st-primary-fixed));
+  box-shadow: 0 0 0 3px var(--st-navy-soft);
 }
 
 .st-panel-link .material-symbols-outlined {

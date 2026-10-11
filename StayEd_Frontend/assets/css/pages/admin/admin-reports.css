@@ -14,20 +14,19 @@
 /* ---- Generic admin "table card" shell (st-table-card/-head/-title) ----
    Reused on top of the existing global .st-panel (white card shell) --
    only this page uses it today, but it isn't Reports-specific by nature. */
-body.st-admin [hidden]{display:none!important}
 body.st-admin .st-table-card{display:flex;flex-direction:column;overflow:hidden}
 body.st-admin .st-table-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:18px 20px 14px}
-body.st-admin .st-table-card-title{margin:0;font-family:var(--st-font-heading);font-weight:700;font-size:1.125rem;color:var(--st-on-surface)}
+body.st-admin .st-table-card-title{margin:0;font-family:var(--st-font-heading);font-weight:700;font-size: var(--st-fs-lg);color:var(--st-on-surface)}
 
 /* ---- Reports page ---- */
 body.st-admin[data-page="Reports"] .st-adm-report-head{align-items:flex-start;gap:16px;flex-wrap:wrap}
 body.st-admin[data-page="Reports"] .st-adm-report-head .chart-type-btn{display:inline-flex;align-items:center;gap:6px}
 body.st-admin[data-page="Reports"] .st-adm-report-head .chart-type-btn .material-symbols-outlined{font-size:17px}
 body.st-admin[data-page="Reports"] .st-adm-report-head > .st-btn{flex:none}
-body.st-admin[data-page="Reports"] .st-adm-card-sub{margin:3px 0 0;font-size:.844rem;color:var(--st-ink-muted,#5a6275);max-width:720px}
+body.st-admin[data-page="Reports"] .st-adm-card-sub{margin:3px 0 0;font-size: var(--st-fs-base);color:var(--st-ink-muted);max-width:720px}
 
 /* Count badge on "Reports from Teachers" */
-body.st-admin[data-page="Reports"] .st-adm-count-badge{display:inline-flex;align-items:center;margin-left:8px;padding:2px 9px;border-radius:999px;background:#fef3e4;color:#8f5200;font-family:var(--st-font-body,Inter);font-size:.75rem;font-weight:700;vertical-align:3px}
+body.st-admin[data-page="Reports"] .st-adm-count-badge{display:inline-flex;align-items:center;margin-left:8px;padding:2px 9px;border-radius:var(--st-radius-pill);background:var(--st-risk-moderate-soft);color:var(--st-risk-moderate-ink);font-family:var(--st-font-body,Inter);font-size: var(--st-fs-xs);font-weight:700;vertical-align:3px}
 
 /* Toolbar shared with admin-list-pages' .st-adm-toolbar -- that file's own
    base .st-adm-toolbar rule (display/gap/padding) is scoped to
@@ -55,10 +54,10 @@ body.st-admin[data-page="Reports"] .st-report-search{
     align-items:center;
     gap:8px;
     padding:0 12px;
-    border:1px solid var(--st-line-strong, var(--st-outline-variant));
-    border-radius:var(--st-radius-control, var(--st-button-radius));
+    border:1px solid var(--st-line-strong);
+    border-radius:var(--st-radius-control);
     background:#fff;
-    color:var(--st-ink-faint, var(--st-outline));
+    color:var(--st-ink-faint);
 }
 body.st-admin[data-page="Reports"] .st-report-search:hover{
     border-color:var(--st-primary);
@@ -83,7 +82,7 @@ body.st-admin[data-page="Reports"] .st-report-search input{
     min-width:0;
     padding:0;
     font:inherit;
-    font-size:0.875rem;
+    font-size: var(--st-fs-base);
     background:none;
     color:var(--st-on-surface);
 }
@@ -92,27 +91,27 @@ body.st-admin[data-page="Reports"] .st-report-search input:focus{
     box-shadow:none;
 }
 body.st-admin[data-page="Reports"] .st-adm-filter-field{display:flex;flex-direction:column;gap:6px;min-width:0}
-body.st-admin[data-page="Reports"] .st-adm-filter-field label{font-size:.781rem;font-weight:600;color:var(--st-ink-muted,#5a6275)}
+body.st-admin[data-page="Reports"] .st-adm-filter-field label{font-size: var(--st-fs-xs);font-weight:600;color:var(--st-ink-muted)}
 body.st-admin[data-page="Reports"] .st-adm-filter-field .st-select{width:100%}
 
-@media (max-width:1279px){
+@media (max-width: 1279px){
   body.st-admin[data-page="Reports"] .st-adm-report-filters{grid-template-columns:repeat(3,minmax(0,1fr))}
   body.st-admin[data-page="Reports"] .st-adm-report-filters .st-search{grid-column:1/-1}
 }
 
 /* Gray action bar: count line on the left, CSV chip + export button right. */
-body.st-admin[data-page="Reports"] .st-adm-report-actionbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 20px 14px;padding:10px 12px 10px 14px;border-radius:10px;background:var(--st-background)}
+body.st-admin[data-page="Reports"] .st-adm-report-actionbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 20px 14px;padding:10px 12px 10px 14px;border-radius:var(--st-radius-card);background:var(--st-background)}
 body.st-admin[data-page="Reports"] .st-adm-report-actions{display:flex;align-items:center;gap:12px}
-body.st-admin[data-page="Reports"] .st-report-preview-count{display:flex;align-items:center;gap:8px;margin:0;font-size:.844rem;color:var(--st-ink-muted,#5a6275)}
-body.st-admin[data-page="Reports"] .st-report-preview-count b{color:var(--st-primary);font-family:var(--st-font-heading);font-size:1rem}
-body.st-admin[data-page="Reports"] .st-report-preview-count .material-symbols-outlined{font-size:18px;color:var(--st-ink-faint,#8a91a0)}
+body.st-admin[data-page="Reports"] .st-report-preview-count{display:flex;align-items:center;gap:8px;margin:0;font-size: var(--st-fs-base);color:var(--st-ink-muted)}
+body.st-admin[data-page="Reports"] .st-report-preview-count b{color:var(--st-primary);font-family:var(--st-font-heading);font-size: var(--st-fs-md)}
+body.st-admin[data-page="Reports"] .st-report-preview-count .material-symbols-outlined{font-size:18px;color:var(--st-ink-faint)}
 body.st-admin[data-page="Reports"] .st-adm-count-line{padding:0 20px 14px}
 
 /* Search clear (x) button -- the input itself reuses the shared .st-search
    component; this just adds the inline clear control. */
 body.st-admin[data-page="Reports"] .st-report-search{position:relative}
 body.st-admin[data-page="Reports"] .st-report-search input{padding-right:34px!important}
-body.st-admin[data-page="Reports"] .st-report-search-clear{appearance:none;border:0;background:none;position:absolute;right:6px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:6px;display:grid;place-items:center;color:var(--st-ink-muted,#5a6275);cursor:pointer;transition:background-color var(--st-t-hover,150ms),color var(--st-t-hover,150ms)}
+body.st-admin[data-page="Reports"] .st-report-search-clear{appearance:none;border:0;background:none;position:absolute;right:6px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:var(--st-radius-sm);display:grid;place-items:center;color:var(--st-ink-muted);cursor:pointer;transition:background-color var(--st-t-hover,150ms),color var(--st-t-hover,150ms)}
 body.st-admin[data-page="Reports"] .st-report-search-clear:hover{background:var(--st-background);color:var(--st-on-surface)}
 body.st-admin[data-page="Reports"] .st-report-search-clear .material-symbols-outlined{font-size:17px}
 
@@ -121,16 +120,16 @@ body.st-admin[data-page="Reports"] .st-report-search-clear .material-symbols-out
    640px, to leave room for the action bar above it). */
 body.st-admin[data-page="Reports"] .st-report-table-wrap{margin:0 20px 20px}
 body.st-admin[data-page="Reports"] .st-report-table-wrap.st-table-scroll--sticky{max-height:520px}
-body.st-admin[data-page="Reports"] .st-adm-report-table td{font-size:.844rem;white-space:nowrap}
-body.st-admin[data-page="Reports"] .st-adm-report-table td.num{font-variant-numeric:tabular-nums;color:var(--st-ink-muted,#5a6275)}
+body.st-admin[data-page="Reports"] .st-adm-report-table td{font-size: var(--st-fs-base);white-space:nowrap}
+body.st-admin[data-page="Reports"] .st-adm-report-table td.num{font-variant-numeric:tabular-nums;color:var(--st-ink-muted)}
 body.st-admin[data-page="Reports"] .st-adm-learner{font-weight:600;color:var(--st-on-surface)}
-body.st-admin[data-page="Reports"] .st-adm-level-chip{display:inline-flex;padding:2px 8px;border-radius:6px;background:var(--st-navy-soft,#e8eef6);color:var(--st-primary);font-size:.75rem;font-weight:700}
-body.st-admin[data-page="Reports"] .st-report-sub{display:block;margin-top:2px;font-size:.75rem;color:var(--st-ink-faint,#8a91a0);white-space:normal}
+body.st-admin[data-page="Reports"] .st-adm-level-chip{display:inline-flex;padding:2px 8px;border-radius:var(--st-radius-sm);background:var(--st-navy-soft);color:var(--st-primary);font-size: var(--st-fs-xs);font-weight:700}
+body.st-admin[data-page="Reports"] .st-report-sub{display:block;margin-top:2px;font-size: var(--st-fs-xs);color:var(--st-ink-faint);white-space:normal}
 
 /* "Mark reviewed" -- teal text button (distinct from the gray .st-btn-text
    used elsewhere in the app). */
-body.st-admin[data-page="Reports"] .st-text-link-btn{appearance:none;border:0;background:none;padding:0 8px;height:32px;border-radius:8px;font:inherit;font-size:.8125rem;font-weight:600;color:var(--st-secondary);cursor:pointer}
-body.st-admin[data-page="Reports"] .st-text-link-btn:hover{background:#e3f4f3}
+body.st-admin[data-page="Reports"] .st-text-link-btn{appearance:none;border:0;background:none;padding:0 8px;height:32px;border-radius:var(--st-radius-control);font:inherit;font-size: var(--st-fs-sm);font-weight:600;color:var(--st-secondary);cursor:pointer}
+body.st-admin[data-page="Reports"] .st-text-link-btn:hover{background:var(--st-teal-soft)}
 
 /* Keep the existing DOM order (Reports-from-Teachers panel first, Master
    Enrollment Listing second) but display Master Enrollment Listing first. */
@@ -157,7 +156,7 @@ body.st-admin[data-page="Reports"] [data-animate-rows].is-inview tr{
   transition-delay:calc(var(--i,0) * 30ms);
 }
 
-@media (max-width:900px){
+@media (max-width: 1023px){
   body.st-admin[data-page="Reports"] .st-adm-report-filters{grid-template-columns:1fr 1fr}
   body.st-admin[data-page="Reports"] .st-adm-report-filters .st-search{grid-column:1/-1}
   body.st-admin[data-page="Reports"] .st-adm-report-actionbar{flex-direction:column;align-items:stretch}
@@ -167,7 +166,7 @@ body.st-admin[data-page="Reports"] [data-animate-rows].is-inview tr{
   body.st-admin[data-page="Reports"] .st-adm-report-head > .st-btn{width:100%}
 }
 
-@media (max-width:767px){
+@media (max-width: 767px){
   body.st-admin[data-page="Reports"] .st-adm-toolbar .st-select{width:100%;flex:1 1 100%}
   body.st-admin[data-page="Reports"] .st-adm-report-filters{padding:0 16px 14px}
   body.st-admin[data-page="Reports"] .st-adm-report-actionbar{margin:0 16px 14px}

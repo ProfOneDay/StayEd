@@ -32,12 +32,12 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     margin:0;
     font-family:var(--st-font-heading);
     font-weight:700;
-    font-size:1.125rem;
+    font-size: var(--st-fs-lg);
 }
 
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-table-card-count{
-    font-size:0.844rem;
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    font-size: var(--st-fs-base);
+    color:var(--st-ink-muted);
 }
 
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar{
@@ -57,10 +57,10 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     display:flex;
     align-items:center;
     gap:8px;
-    border:1px solid var(--st-line-strong, var(--st-outline-variant));
-    border-radius:var(--st-radius-control, var(--st-button-radius));
+    border:1px solid var(--st-line-strong);
+    border-radius:var(--st-radius-control);
     background:#fff;
-    color:var(--st-ink-faint, var(--st-outline));
+    color:var(--st-ink-faint);
     transition:border-color var(--st-t-hover, 150ms),box-shadow var(--st-t-hover, 150ms);
 }
 
@@ -90,7 +90,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     min-width:0;
     padding:0;
     font:inherit;
-    font-size:0.875rem;
+    font-size: var(--st-fs-base);
     background:none;
     color:var(--st-on-surface);
 }
@@ -102,12 +102,12 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
 
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-select{
     height:40px;
-    border:1px solid var(--st-line-strong, var(--st-outline-variant));
-    border-radius:var(--st-radius-control, var(--st-button-radius));
+    border:1px solid var(--st-line-strong);
+    border-radius:var(--st-radius-control);
     background:#fff;
     padding:0 34px 0 12px;
     font:inherit;
-    font-size:0.875rem;
+    font-size: var(--st-fs-base);
     color:var(--st-on-surface);
     appearance:none;
     cursor:pointer;
@@ -131,7 +131,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
    row in that view already has status "Archived", so the filter has
    nothing left to do (same treatment as Manage Modules' status filter). */
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-select:disabled{
-    background-color:var(--st-background, #f3f5f8);
+    background-color:var(--st-background);
     color:var(--st-on-surface-variant);
     cursor:not-allowed;
 }
@@ -144,12 +144,12 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     height:40px;
     padding:0 10px;
     border:0;
-    border-radius:8px;
+    border-radius:var(--st-radius-control);
     background:none;
     font:inherit;
-    font-size:0.875rem;
+    font-size: var(--st-fs-base);
     font-weight:600;
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    color:var(--st-ink-muted);
     cursor:pointer;
     transition:background-color var(--st-t-hover, 150ms),color var(--st-t-hover, 150ms),transform var(--st-t-press, 90ms);
 }
@@ -183,9 +183,9 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     background:none;
     padding:2px 4px;
     margin:-2px -4px;
-    border-radius:6px;
+    border-radius:var(--st-radius-sm);
     font:inherit;
-    font-size:0.781rem;
+    font-size: var(--st-fs-xs);
     font-weight:600;
     color:inherit;
     cursor:pointer;
@@ -193,13 +193,13 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
 }
 
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-sort-btn:hover{
-    background:#eef1f5;
+    background:var(--st-risk-neutral-soft);
     color:var(--st-on-surface);
 }
 
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-sort-btn .st-sort-icon{
     font-size:16px;
-    color:var(--st-ink-faint, var(--st-outline));
+    color:var(--st-ink-faint);
     opacity:1;
 }
 
@@ -224,7 +224,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     vertical-align:middle;
     margin-left:3px;
     font-size:15px!important;
-    color:var(--st-ink-faint, var(--st-outline));
+    color:var(--st-ink-faint);
     cursor:help;
     border-radius:50%;
 }
@@ -269,13 +269,13 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
 
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-two-line strong{
     font-weight:500;
-    font-size:0.875rem;
+    font-size: var(--st-fs-base);
     color:var(--st-on-surface);
 }
 
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-two-line small{
-    font-size:0.781rem;
-    color:var(--st-ink-faint, var(--st-outline));
+    font-size: var(--st-fs-xs);
+    color:var(--st-ink-faint);
     white-space:nowrap;
     display:flex;
     align-items:center;
@@ -303,17 +303,17 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
 }
 
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-pct{
-    font-size:0.813rem;
+    font-size: var(--st-fs-sm);
     font-weight:700;
 }
 
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--high .st-risk-pct{ color:var(--st-risk-high-ink, var(--st-risk-high)); }
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--moderate .st-risk-pct{ color:var(--st-risk-moderate-ink, var(--st-risk-moderate)); }
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--low .st-risk-pct{ color:var(--st-risk-low-ink, var(--st-risk-low)); }
+body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--high .st-risk-pct{ color:var(--st-risk-high-ink); }
+body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--moderate .st-risk-pct{ color:var(--st-risk-moderate-ink); }
+body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--low .st-risk-pct{ color:var(--st-risk-low-ink); }
 
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-meter{
     height:5px;
-    border-radius:999px;
+    border-radius:var(--st-radius-pill);
     background:var(--st-background);
     overflow:hidden;
 }
@@ -321,7 +321,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-meter i{
     display:block;
     height:100%;
-    border-radius:999px;
+    border-radius:var(--st-radius-pill);
     width:0;
     transition:width var(--st-t-fill, 800ms) var(--st-ease-out, ease);
 }
@@ -335,10 +335,10 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--low .st-risk-meter i{ background:var(--st-risk-low); }
 
 /* Status / new pill variants (Active/Pending/Archived/Inactive) */
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-pill--active{ background:#e3f4f3; color:#00504e; }
+body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-pill--active{ background:var(--st-teal-soft); color:var(--st-teal-ink); }
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-pill--pending{ background:var(--st-risk-moderate-soft); color:var(--st-risk-moderate); }
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-pill--archived,
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-pill--inactive{ background:var(--st-background); color:var(--st-ink-faint, var(--st-outline)); }
+body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-pill--inactive{ background:var(--st-background); color:var(--st-ink-faint); }
 
 /* Risk-tinted avatars in the learner cell */
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-learner-cell .st-avatar-initials--high{ background:var(--st-risk-high-soft); color:var(--st-risk-high); border-color:transparent; }
@@ -373,7 +373,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
 }
 
 /* ---- Mobile: rows become cards, header becomes a compact sort bar ---- */
-@media (max-width:767px){
+@media (max-width: 767px){
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-table-card-head{ padding:14px 16px; }
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar{ padding:0 16px 14px; }
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar .st-search{ flex:1 1 100%; max-width:none; }
@@ -389,9 +389,9 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
         gap:6px 14px;
         flex-wrap:wrap;
         padding:8px 16px;
-        background:#f8f9fb;
-        border-top:1px solid var(--st-line, var(--st-outline-variant));
-        border-bottom:1px solid var(--st-line, var(--st-outline-variant));
+        background:var(--st-table-header);
+        border-top:1px solid var(--st-line);
+        border-bottom:1px solid var(--st-line);
     }
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table th{ display:none; padding:0!important; border:0; background:none; }
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table th.checkbox-col,
@@ -404,7 +404,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
         gap:10px 12px;
         align-items:center;
         padding:14px 16px;
-        border-bottom:1px solid var(--st-line, var(--st-outline-variant));
+        border-bottom:1px solid var(--st-line);
     }
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table td{ display:block; padding:0!important; border:0; white-space:normal; }
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table td[data-col]{ grid-column:1/-1; }
@@ -415,7 +415,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table td[data-col="risk"] .st-risk-cell{ min-width:0; }
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table td[data-col="actions"] .st-row-actions{ justify-content:flex-start; }
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table td[data-col="actions"] .st-btn-xs{ flex:1; height:38px; }
-    body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table td[data-col="actions"] .st-icon-btn-sm{ width:38px; height:38px; border:1px solid var(--st-line-strong, var(--st-outline-variant)); }
+    body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-data-table td[data-col="actions"] .st-icon-btn-sm{ width:38px; height:38px; border:1px solid var(--st-line-strong); }
 
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-pagination{ justify-content:center; padding:14px 16px; }
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-pagination-info{ width:100%; text-align:center; }
@@ -473,7 +473,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
    still avoid the table's own horizontal scroll down to 1280px. Bounded to
    >=768px so these caps don't also bite the stacked mobile card layout
    below, which has its own, much roomier per-column widths. */
-@media (min-width:768px) and (max-width:1366px){
+@media (min-width: 768px) and (max-width: 1279px){
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-reg-table th,
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-reg-table td{
         padding-left:10px;
@@ -504,19 +504,19 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
    as risk levels) -- also used by the Teacher Dashboard's Student
    Registry Summary widget. */
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-modality-pill--f2f{
-    background:var(--st-navy-soft, #e8eef6);
-    color:var(--st-cat-1, var(--st-primary));
+    background:var(--st-navy-soft);
+    color:var(--st-cat-1);
 }
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-modality-pill--modular{
-    background:#e3f4f3;
-    color:var(--st-cat-3, var(--st-secondary));
+    background:var(--st-teal-soft);
+    color:var(--st-cat-3);
 }
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-modality-pill--blended{
     background:#eef1f7;
     color:var(--st-cat-2, #4c6f95);
 }
 
-@media (max-width:767px){
+@media (max-width: 767px){
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-risk-legend--4{
         grid-template-columns:repeat(2,minmax(0,1fr));
     }
@@ -537,7 +537,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-reg-table td[data-col="activity"]{
         order:3;
         padding-left:30px!important;
-        font-size:0.781rem;
+        font-size: var(--st-fs-xs);
     }
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-reg-table td[data-col="status"]{
         order:4;
@@ -595,7 +595,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
 .st-records-stat{
     background:#fff;
     border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-card-radius);
+    border-radius:var(--st-radius-card);
     box-shadow:var(--st-shadow-sm);
     padding:16px;
     display:flex;
@@ -606,14 +606,14 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
 .st-records-stat-icon{
     width:44px;
     height:44px;
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     display:flex;
     align-items:center;
     justify-content:center;
     flex-shrink:0;
 }
 
-.st-records-stat-icon .material-symbols-outlined{ font-size:1.375rem; }
+.st-records-stat-icon .material-symbols-outlined{ font-size: var(--st-fs-xl); }
 
 .st-records-stat--total .st-records-stat-icon{ background:var(--st-primary-fixed); color:var(--st-primary); }
 .st-records-stat--high .st-records-stat-icon{ background:var(--st-risk-high-soft); color:var(--st-risk-high); }
@@ -653,7 +653,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     height:40px;
     padding:0 12px;
     border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-button-radius);
+    border-radius:var(--st-radius-control);
     background:#fff;
     font-family:var(--st-font-body);
     font-size: var(--st-font-size-label);
@@ -700,7 +700,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:1.5rem;
+    font-size: var(--st-fs-2xl);
     font-weight:700;
     flex-shrink:0;
 }
@@ -742,14 +742,14 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
 .st-risk-meter{
     margin-top:8px;
     height:8px;
-    border-radius:999px;
+    border-radius:var(--st-radius-pill);
     background:var(--st-surface-container);
     overflow:hidden;
 }
 
 .st-risk-meter-fill{
     height:100%;
-    border-radius:999px;
+    border-radius:var(--st-radius-pill);
     transition:width .6s cubic-bezier(.16,1,.3,1);
 }
 
@@ -805,22 +805,17 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     flex-wrap:wrap;
     margin:0 20px 14px;
     padding:8px 8px 8px 14px;
-    border-radius:10px;
+    border-radius:var(--st-radius-card);
     background:var(--st-primary);
     color:#fff;
-    animation:st-bulk-in .18s var(--st-ease-out, ease);
-}
-
-@keyframes st-bulk-in{
-    from{ opacity:0; transform:translateY(-4px); }
-    to{ opacity:1; transform:none; }
+    animation:stPopIn .18s var(--st-ease-out, ease);
 }
 
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-bulk-bar-count{
     display:inline-flex;
     align-items:center;
     gap:8px;
-    font-size:0.875rem;
+    font-size: var(--st-fs-base);
     font-weight:600;
     color:#fff;
 }
@@ -843,10 +838,10 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     height:34px;
     padding:0 12px;
     border:0;
-    border-radius:7px;
+    border-radius:var(--st-radius-control);
     background:rgba(255,255,255,.1);
     color:#fff;
-    font-size:0.844rem;
+    font-size: var(--st-fs-base);
     font-weight:600;
     cursor:pointer;
     transition:background-color var(--st-t-hover, 150ms),transform var(--st-t-press, 90ms);
@@ -868,7 +863,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     font-size:18px;
 }
 
-@media (max-width:767px){
+@media (max-width: 767px){
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-bulk-bar{ margin:0 16px 12px; }
 }
 
@@ -885,16 +880,16 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     text-align:center;
 }
 
-@media (max-width:992px){
+@media (max-width: 1023px){
     .st-records-stats{ grid-template-columns:1fr 1fr; }
 }
 
-@media (max-width:768px){
+@media (max-width: 767px){
     .st-records-toolbar{ padding:16px; }
     .st-learner-modal-grid{ grid-template-columns:1fr; }
 }
 
-@media (max-width:520px){
+@media (max-width: 479px){
     .st-records-stats{ grid-template-columns:1fr; }
 }
 
@@ -902,7 +897,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     display:inline-flex;
     padding:4px;
     background:var(--st-surface-container-low);
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     gap:4px;
     margin-bottom:24px;
 }
@@ -914,7 +909,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     padding:10px 20px;
     border:none;
     background:transparent;
-    border-radius:var(--st-radius-md);
+    border-radius:var(--st-radius-sm);
     font-size: var(--st-font-size-label);
     font-weight:600;
     color:var(--st-on-surface-variant);
@@ -933,7 +928,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
 }
 
 .st-entry-tab .material-symbols-outlined{
-    font-size:1.25rem;
+    font-size: var(--st-fs-xl);
 }
 
 .st-entry-panel{
@@ -956,13 +951,13 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     gap:24px;
 }
 
-@media (max-width:900px){
+@media (max-width: 1023px){
     .st-enroll-grid{ grid-template-columns:1fr; }
 }
 
 .st-enroll-card{
     background:#fff;
-    border-radius:var(--st-radius-lg);
+    border-radius:var(--st-radius-control);
     border:1px solid rgba(195,198,207,.30);
     box-shadow:var(--st-shadow-sm);
     padding:20px;
@@ -994,7 +989,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     gap:16px 24px;
 }
 
-@media (max-width:520px){
+@media (max-width: 479px){
     .st-enroll-fields{ grid-template-columns:1fr; }
 }
 
@@ -1010,14 +1005,14 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     color:var(--st-on-surface-variant);
 }
 
-.st-enroll-field .required{ color:var(--st-error); }
+.st-enroll-field .required{ color:var(--st-risk-high); }
 
 .st-enroll-field input,
 .st-enroll-field textarea{
     height:40px;
     padding:0 12px;
     border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-radius-md);
+    border-radius:var(--st-radius-sm);
     background:#fff;
     font-family:var(--st-font-body);
     font-size: var(--st-font-size-label);
@@ -1029,7 +1024,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     height:40px;
     padding:0 12px;
     border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-button-radius);
+    border-radius:var(--st-radius-control);
     background:#fff;
     font-family:var(--st-font-body);
     font-size: var(--st-font-size-label);
@@ -1054,7 +1049,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
 
 .st-enroll-field input.has-error,
 .st-enroll-field select.has-error{
-    border-color:var(--st-error);
+    border-color:var(--st-risk-high);
 }
 
 .st-enroll-radio-row{
@@ -1083,7 +1078,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
 .st-enroll-segment{
     display:flex;
     border:1px solid var(--st-outline-variant);
-    border-radius:var(--st-radius-md);
+    border-radius:var(--st-radius-sm);
     overflow:hidden;
     height:40px;
 }

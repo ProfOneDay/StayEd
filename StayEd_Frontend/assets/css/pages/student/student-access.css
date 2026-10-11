@@ -67,7 +67,7 @@
 .st-sa-brand b {
   font-family: var(--st-font-heading);
   font-weight: 800;
-  font-size: 1.5rem;
+  font-size: var(--st-fs-2xl);
 }
 
 .st-sa-pitch {
@@ -79,9 +79,9 @@
 .st-sa-pill {
   display: inline-block;
   padding: 6px 14px;
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   background: rgba(255, 255, 255, 0.12);
-  font-size: 0.8125rem;
+  font-size: var(--st-fs-sm);
   font-weight: 600;
 }
 
@@ -89,14 +89,14 @@
   margin: 18px 0 12px;
   font-family: var(--st-font-heading);
   font-weight: 800;
-  font-size: 2.5rem;
+  font-size: var(--st-fs-4xl);
   line-height: 1.12;
   letter-spacing: -0.02em;
 }
 
 .st-sa-pitch p {
   margin: 0;
-  font-size: 1.0625rem;
+  font-size: var(--st-fs-md);
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.82);
 }
@@ -114,14 +114,14 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 0.9375rem;
+  font-size: var(--st-fs-base);
   color: rgba(255, 255, 255, 0.9);
 }
 
 .st-sa-points .material-symbols-outlined {
   width: 30px;
   height: 30px;
-  border-radius: 9px;
+  border-radius: var(--st-radius-control);
   display: grid;
   place-items: center;
   background: rgba(255, 255, 255, 0.12);
@@ -132,7 +132,7 @@
   position: relative;
   z-index: 1;
   color: rgba(255, 255, 255, 0.6);
-  font-size: 0.8125rem;
+  font-size: var(--st-fs-sm);
 }
 
 /* ---------- Form ---------- */
@@ -149,31 +149,20 @@
   width: 100%;
   max-width: 480px;
   background: #fff;
-  border: 1px solid var(--st-line, var(--st-outline-variant));
-  border-radius: 16px;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-lg);
   box-shadow: 0 12px 32px rgba(17, 26, 54, 0.08);
   padding: 32px;
-  animation: stSaIn 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-
-@keyframes stSaIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+  animation: stFadeUp 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 .st-sa-icon {
   width: 56px;
   height: 56px;
-  border-radius: 16px;
+  border-radius: var(--st-radius-lg);
   display: grid;
   place-items: center;
-  background: var(--st-navy-soft, var(--st-primary-fixed));
+  background: var(--st-navy-soft);
   color: var(--st-primary);
   margin-bottom: 16px;
 }
@@ -186,14 +175,14 @@
   margin: 0;
   font-family: var(--st-font-heading);
   font-weight: 800;
-  font-size: 1.625rem;
+  font-size: var(--st-fs-2xl);
   letter-spacing: -0.01em;
 }
 
 .st-sa-card .sub {
   margin: 6px 0 22px;
-  font-size: 0.9375rem;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  font-size: var(--st-fs-base);
+  color: var(--st-ink-muted);
   line-height: 1.5;
 }
 
@@ -204,7 +193,7 @@
 .st-sa-field label {
   display: block;
   margin-bottom: 8px;
-  font-size: 0.875rem;
+  font-size: var(--st-fs-base);
   font-weight: 600;
 }
 
@@ -214,8 +203,8 @@
   gap: 10px;
   height: 52px;
   padding: 0 14px;
-  border: 1.5px solid var(--st-line-strong, #cfd5de);
-  border-radius: 12px;
+  border: 1.5px solid var(--st-line-strong);
+  border-radius: var(--st-radius-card);
   background: #fff;
   transition: border-color 150ms, box-shadow 150ms;
 }
@@ -230,7 +219,7 @@
 }
 
 .st-sa-input .material-symbols-outlined {
-  color: var(--st-ink-faint, #8a91a0);
+  color: var(--st-ink-faint);
 }
 
 .st-sa-input input {
@@ -244,7 +233,7 @@
 }
 
 .st-sa-input input[inputmode="numeric"] {
-  font-size: 1.25rem;
+  font-size: var(--st-fs-xl);
   font-weight: 600;
   letter-spacing: 0.12em;
   font-variant-numeric: tabular-nums;
@@ -253,14 +242,14 @@
 .st-sa-input input::placeholder {
   letter-spacing: 0.04em;
   font-weight: 500;
-  font-size: 1rem;
+  font-size: var(--st-fs-md);
   color: var(--st-ink-faint, #9aa3b2);
 }
 
 .st-sa-count {
-  font-size: 0.8125rem;
+  font-size: var(--st-fs-sm);
   font-weight: 600;
-  color: var(--st-ink-faint, #8a91a0);
+  color: var(--st-ink-faint);
   font-variant-numeric: tabular-nums;
 }
 
@@ -270,8 +259,8 @@
 
 .st-sa-hint {
   margin: 8px 0 0;
-  font-size: 0.8125rem;
-  color: var(--st-ink-faint, #8a91a0);
+  font-size: var(--st-fs-sm);
+  color: var(--st-ink-faint);
 }
 
 .st-sa-error {
@@ -279,10 +268,10 @@
   gap: 8px;
   margin-top: 16px;
   padding: 10px 12px;
-  border-radius: 10px;
-  background: var(--st-risk-high-soft-2, #fdecea);
-  color: var(--st-risk-high-ink, #a01414);
-  font-size: 0.8125rem;
+  border-radius: var(--st-radius-card);
+  background: var(--st-risk-high-soft);
+  color: var(--st-risk-high-ink);
+  font-size: var(--st-fs-sm);
   line-height: 1.45;
 }
 
@@ -317,11 +306,11 @@
   justify-content: center;
   gap: 8px;
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--st-radius-card);
   background: var(--st-primary);
   color: #fff;
   font: inherit;
-  font-size: 1rem;
+  font-size: var(--st-fs-md);
   font-weight: 700;
   cursor: pointer;
   transition: background-color 150ms, box-shadow 150ms, transform 90ms;
@@ -361,23 +350,23 @@
   gap: 8px;
   margin-top: 20px;
   padding-top: 16px;
-  border-top: 1px solid var(--st-line, var(--st-outline-variant));
-  font-size: 0.8125rem;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  border-top: 1px solid var(--st-line);
+  font-size: var(--st-fs-sm);
+  color: var(--st-ink-muted);
   line-height: 1.5;
 }
 
 .st-sa-note .material-symbols-outlined {
   font-size: 18px;
-  color: var(--st-ink-faint, #8a91a0);
+  color: var(--st-ink-faint);
 }
 
 .st-sa-teacher {
   display: block;
   margin-top: 14px;
   text-align: center;
-  font-size: 0.8125rem;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  font-size: var(--st-fs-sm);
+  color: var(--st-ink-muted);
 }
 
 .st-sa-teacher a {
@@ -390,7 +379,7 @@
   font-weight: 700;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1023px) {
   .st-sa {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -398,11 +387,11 @@
     padding: 24px 20px 28px;
   }
   .st-sa-pitch h1 {
-    font-size: 1.75rem;
+    font-size: var(--st-fs-3xl);
     margin: 12px 0 8px;
   }
   .st-sa-pitch p {
-    font-size: 0.9375rem;
+    font-size: var(--st-fs-base);
   }
   .st-sa-points,
   .st-sa-side small {

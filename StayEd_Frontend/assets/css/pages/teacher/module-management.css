@@ -1,22 +1,15 @@
-/* Manage Modules page. Reuses .st-panel/.st-data-table/.st-badge-*/.st-pill/
-   .st-icon-btn-sm/.st-btn-text/.st-empty class NAMES for visual consistency
-   with the rest of the app, but .st-search/.st-select/.st-table-card-*/
-   .st-class-context-banner* have NO truly shared/unscoped definition
-   anywhere -- every page that uses them defines its own page-scoped copy
-   (learner-records.css does this for Student Registry/Learner Records/
-   Early Warning Alerts). This file previously assumed those were free
-   reuses and only defined "the pieces with no existing equivalent",
-   which left .st-select, .st-table-card-head/-title/-count, and the
-   .st-class-context-banner background/icon-tile/switch-button all
-   unstyled (bare browser defaults) until this was caught and fixed. */
-
-/* Deliberate no-op placeholder rule -- see git history for why (a real
-   first-rule-in-file parsing quirk through the @import chain). Do not
-   delete without re-verifying the next rule still applies via
-   getComputedStyle, not just visually. */
-.st-module-management-root {
-  display: block;
-}
+/* Manage Modules page. Reuses .st-panel/.st-data-table/.st-badge variants/
+   .st-pill/.st-icon-btn-sm/.st-btn-text/.st-empty class NAMES for visual
+   consistency with the rest of the app, but .st-search/.st-select/
+   .st-table-card variants/.st-class-context-banner variants have NO truly
+   shared/unscoped definition anywhere -- every page that uses them defines
+   its own page-scoped copy (learner-records.css does this for Student
+   Registry/Learner Records/Early Warning Alerts). This file previously
+   assumed those were free reuses and only defined "the pieces with no
+   existing equivalent", which left .st-select, .st-table-card-head/-title/
+   -count, and the .st-class-context-banner background/icon-tile/
+   switch-button all unstyled (bare browser defaults) until this was
+   caught and fixed. */
 
 body[data-page="Manage Modules"] [data-view-root] {
   display: flex;
@@ -35,12 +28,12 @@ body[data-page="Manage Modules"] [data-view-root] {
    Mirrors body[data-page="Learner Records"] exactly. */
 body[data-page="Manage Modules"] .st-class-context-banner {
   background: #fff;
-  border: 1px solid var(--st-line, var(--st-outline-variant));
+  border: 1px solid var(--st-line);
   border-left: 4px solid var(--st-primary);
 }
 
 body[data-page="Manage Modules"] .st-class-context-banner-clc {
-  color: var(--st-ink-faint, var(--st-outline));
+  color: var(--st-ink-faint);
 }
 
 body[data-page="Manage Modules"] .st-class-context-banner-level {
@@ -48,19 +41,19 @@ body[data-page="Manage Modules"] .st-class-context-banner-level {
 }
 
 body[data-page="Manage Modules"] .st-class-context-banner-meta {
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  color: var(--st-ink-muted);
 }
 
 body[data-page="Manage Modules"] .st-class-context-banner-icon {
   color: var(--st-primary);
-  background: var(--st-navy-soft, var(--st-primary-fixed));
+  background: var(--st-navy-soft);
   width: 44px;
   height: 44px;
   flex: none;
-  border-radius: 12px;
+  border-radius: var(--st-radius-card);
   display: grid;
   place-items: center;
-  font-size: 1.25rem;
+  font-size: var(--st-fs-xl);
 }
 
 body[data-page="Manage Modules"] .st-class-context-banner-switch {
@@ -69,8 +62,8 @@ body[data-page="Manage Modules"] .st-class-context-banner-switch {
   gap: 6px;
   height: 38px;
   padding: 0 14px;
-  border: 1px solid var(--st-line-strong, var(--st-outline-variant));
-  border-radius: var(--st-radius-control, var(--st-button-radius));
+  border: 1px solid var(--st-line-strong);
+  border-radius: var(--st-radius-control);
   color: var(--st-on-surface);
   text-decoration: none;
   transition:
@@ -83,7 +76,7 @@ body[data-page="Manage Modules"] .st-class-context-banner-switch {
 body[data-page="Manage Modules"] .st-class-context-banner-switch:hover {
   border-color: var(--st-primary);
   color: var(--st-primary);
-  background: var(--st-navy-soft, var(--st-primary-fixed));
+  background: var(--st-navy-soft);
   text-decoration: none;
 }
 
@@ -116,9 +109,9 @@ body[data-page="Manage Modules"] .st-module-summary-row {
   display: grid;
   grid-template-columns: auto minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
   background: #fff;
-  border: 1px solid var(--st-line, var(--st-outline-variant));
-  border-radius: var(--st-radius-card, var(--st-radius-lg));
-  box-shadow: var(--st-shadow-card, var(--st-shadow-sm));
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-card);
+  box-shadow: var(--st-shadow-card);
 }
 
 body[data-page="Manage Modules"] .st-module-summary-stat {
@@ -131,35 +124,35 @@ body[data-page="Manage Modules"] .st-module-summary-stat {
 }
 
 body[data-page="Manage Modules"] .st-module-summary-stat + .st-module-summary-stat {
-  border-left: 1px solid var(--st-line, var(--st-outline-variant));
+  border-left: 1px solid var(--st-line);
 }
 
 body[data-page="Manage Modules"] .st-module-summary-value {
   font-family: var(--st-font-heading);
   font-weight: 800;
-  font-size: 1.875rem; /* 30px */
+  font-size: var(--st-fs-3xl); /* 30px */
   line-height: 1.05;
   letter-spacing: -0.02em;
-  color: var(--st-ink, var(--st-on-surface));
+  color: var(--st-ink);
 }
 
 body[data-page="Manage Modules"] .st-module-summary-stat--total .st-module-summary-value {
-  font-size: 2.5rem; /* 40px */
+  font-size: var(--st-fs-4xl); /* 40px */
   color: var(--st-primary);
 }
 
 body[data-page="Manage Modules"] .st-module-summary-label {
-  font-size: 0.844rem; /* 13.5px */
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  font-size: var(--st-fs-base); /* 13.5px */
+  color: var(--st-ink-muted);
 }
 
 body[data-page="Manage Modules"] .st-release-bar {
   display: flex;
   height: 10px;
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   overflow: hidden;
   gap: 3px;
-  background: var(--st-background, var(--st-surface-container-low));
+  background: var(--st-background);
   margin: 4px 0 8px;
   clip-path: inset(0 100% 0 0 round 999px);
   transition: clip-path 900ms var(--st-ease-out, ease);
@@ -174,22 +167,22 @@ body[data-page="Manage Modules"] .st-release-bar .rel {
 }
 
 body[data-page="Manage Modules"] .st-release-bar .not {
-  background: #cfd5de;
+  background: var(--st-line-strong);
 }
 
 body[data-page="Manage Modules"] .st-release-legend {
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
-  font-size: 0.844rem; /* 13.5px */
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  font-size: var(--st-fs-base); /* 13.5px */
+  color: var(--st-ink-muted);
 }
 
 body[data-page="Manage Modules"] .st-release-legend b {
   font-family: var(--st-font-heading);
-  font-size: 1.1875rem; /* 19px */
+  font-size: var(--st-fs-lg); /* 19px */
   font-weight: 800;
-  color: var(--st-ink, var(--st-on-surface));
+  color: var(--st-ink);
   margin-right: 4px;
 }
 
@@ -197,7 +190,7 @@ body[data-page="Manage Modules"] .st-release-legend i {
   display: inline-block;
   width: 9px;
   height: 9px;
-  border-radius: 3px;
+  border-radius: var(--st-radius-xs);
   margin-right: 6px;
   vertical-align: 1px;
 }
@@ -219,12 +212,12 @@ body[data-page="Manage Modules"] .st-table-card-title {
   margin: 0;
   font-family: var(--st-font-heading);
   font-weight: 700;
-  font-size: 1.125rem;
+  font-size: var(--st-fs-lg);
 }
 
 body[data-page="Manage Modules"] .st-table-card-count {
-  font-size: 0.844rem;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  font-size: var(--st-fs-base);
+  color: var(--st-ink-muted);
 }
 
 /* ---------- Catalog toolbar ---------- */
@@ -248,10 +241,10 @@ body[data-page="Manage Modules"] .st-module-search {
   gap: 8px;
   height: 44px;
   padding: 0 14px;
-  border: 1px solid var(--st-line-strong, var(--st-outline-variant));
-  border-radius: var(--st-radius-control, var(--st-button-radius));
+  border: 1px solid var(--st-line-strong);
+  border-radius: var(--st-radius-control);
   background: #fff;
-  color: var(--st-ink-faint, var(--st-outline));
+  color: var(--st-ink-faint);
 }
 
 body[data-page="Manage Modules"] .st-module-search:hover {
@@ -280,7 +273,7 @@ body[data-page="Manage Modules"] .st-module-search input {
   min-width: 0;
   padding: 0;
   font: inherit;
-  font-size: 0.875rem;
+  font-size: var(--st-fs-base);
   background: none;
   color: var(--st-on-surface);
 }
@@ -304,11 +297,11 @@ body[data-page="Manage Modules"] .st-module-search input:focus {
 body[data-page="Manage Modules"] .st-select {
   height: 44px;
   border: 1px solid var(--st-outline-variant);
-  border-radius: var(--st-radius-control, var(--st-button-radius));
+  border-radius: var(--st-radius-control);
   background: #fff;
   padding: 0 34px 0 14px;
   font: inherit;
-  font-size: 0.875rem;
+  font-size: var(--st-fs-base);
   color: var(--st-on-surface);
   appearance: none;
   cursor: pointer;
@@ -329,12 +322,12 @@ body[data-page="Manage Modules"] .st-mm-clear-btn {
   height: 40px;
   padding: 0 10px;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--st-radius-control);
   background: none;
   font: inherit;
-  font-size: 0.875rem;
+  font-size: var(--st-fs-base);
   font-weight: 600;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  color: var(--st-ink-muted);
   cursor: pointer;
   margin-left: auto;
   white-space: nowrap;
@@ -342,7 +335,7 @@ body[data-page="Manage Modules"] .st-mm-clear-btn {
 }
 
 body[data-page="Manage Modules"] .st-mm-clear-btn:hover {
-  background: var(--st-background, #f3f5f8);
+  background: var(--st-background);
   color: var(--st-on-surface);
 }
 
@@ -365,7 +358,7 @@ body[data-page="Manage Modules"] .st-select:focus {
 }
 
 body[data-page="Manage Modules"] .st-select:disabled {
-  background-color: var(--st-surface-container-low, #f3f5f8);
+  background-color: var(--st-surface-container-low);
   color: var(--st-on-surface-variant);
   cursor: not-allowed;
 }
@@ -381,36 +374,36 @@ body[data-page="Manage Modules"] .st-module-num {
   width: 38px;
   height: 38px;
   flex: none;
-  border-radius: 10px;
+  border-radius: var(--st-radius-card);
   display: grid;
   place-items: center;
   background: var(--st-navy-soft);
   color: var(--st-primary);
   font-family: var(--st-font-heading);
   font-weight: 800;
-  font-size: 0.938rem; /* 15px */
+  font-size: var(--st-fs-md); /* 15px */
 }
 
 body[data-page="Manage Modules"] .st-strand-chip {
   display: inline-block;
   padding: 1px 7px;
-  border-radius: 5px;
-  background: var(--st-background, var(--st-surface-container-low));
-  border: 1px solid var(--st-line, var(--st-outline-variant));
-  font-size: 0.719rem; /* 11.5px */
+  border-radius: var(--st-radius-sm);
+  background: var(--st-background);
+  border: 1px solid var(--st-line);
+  font-size: var(--st-fs-xs); /* 11.5px */
   font-weight: 700;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  color: var(--st-ink-muted);
   letter-spacing: 0.02em;
 }
 
 body[data-page="Manage Modules"] .st-module-title {
   font-weight: 600;
-  font-size: 0.906rem; /* 14.5px */
+  font-size: var(--st-fs-base); /* 14.5px */
 }
 
 body[data-page="Manage Modules"] .st-module-topic {
-  font-size: 0.781rem; /* 12.5px */
-  color: var(--st-ink-faint, var(--st-outline));
+  font-size: var(--st-fs-xs); /* 12.5px */
+  color: var(--st-ink-faint);
   margin-top: 1px;
 }
 
@@ -422,19 +415,19 @@ body[data-page="Manage Modules"] .st-learners-cell {
 }
 
 body[data-page="Manage Modules"] .st-learners-cell span {
-  font-size: 0.813rem; /* 13px */
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  font-size: var(--st-fs-sm); /* 13px */
+  color: var(--st-ink-muted);
 }
 
 body[data-page="Manage Modules"] .st-learners-cell b {
-  color: var(--st-ink, var(--st-on-surface));
+  color: var(--st-ink);
   font-weight: 600;
 }
 
 body[data-page="Manage Modules"] .st-mini-track {
   height: 5px;
-  border-radius: 999px;
-  background: var(--st-background, var(--st-surface-container-low));
+  border-radius: var(--st-radius-pill);
+  background: var(--st-background);
   overflow: hidden;
 }
 
@@ -442,7 +435,7 @@ body[data-page="Manage Modules"] .st-mini-track i {
   display: block;
   height: 100%;
   background: var(--st-secondary);
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   width: 0;
   transition: width var(--st-t-fill, 800ms) var(--st-ease-out, ease);
 }
@@ -456,7 +449,7 @@ body[data-page="Manage Modules"] tr[data-module-row] {
 }
 
 body[data-page="Manage Modules"] tr[data-module-row] .st-row-go {
-  color: var(--st-ink-faint, var(--st-outline));
+  color: var(--st-ink-faint);
   transition: transform var(--st-t-hover, 150ms) var(--st-ease-out, ease), color var(--st-t-hover, 150ms);
 }
 
@@ -474,8 +467,8 @@ body[data-page="Manage Modules"] tr[data-module-row]:hover .st-module-title {
    blue -- overridden here rather than in components.css, since that class
    keeps its usual blue meaning on every other page. */
 body[data-page="Manage Modules"] .st-badge-info {
-  background: var(--st-background, #f3f5f8);
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  background: var(--st-background);
+  color: var(--st-ink-muted);
 }
 
 body[data-page="Manage Modules"] .st-empty--flush {
@@ -484,7 +477,7 @@ body[data-page="Manage Modules"] .st-empty--flush {
   box-shadow: none;
 }
 
-/* .st-empty .material-symbols-outlined{font-size:3rem;color:var(--st-outline)}
+/* .st-empty .material-symbols-outlined{font-size: var(--st-fs-4xl);color:var(--st-outline)}
    (dashboard.css) is meant for the big decorative gray icon at the top of
    the empty state, but the "Add module" button's own icon is also a
    descendant of .st-empty, so it was inheriting that same 48px gray
@@ -515,9 +508,9 @@ body[data-page="Manage Modules"] .st-back-link {
   background: none;
   padding: 6px 8px 6px 4px;
   margin-left: -4px;
-  border-radius: 8px;
+  border-radius: var(--st-radius-control);
   font: inherit;
-  font-size: 0.875rem; /* 14px */
+  font-size: var(--st-fs-base); /* 14px */
   font-weight: 600;
   color: var(--st-primary);
   cursor: pointer;
@@ -550,7 +543,7 @@ body[data-page="Manage Modules"] .st-module-detail-title {
   margin: 0;
   font-family: var(--st-font-heading);
   font-weight: 800;
-  font-size: 1.375rem; /* 22px */
+  font-size: var(--st-fs-xl); /* 22px */
   letter-spacing: -0.01em;
   display: flex;
   align-items: center;
@@ -564,8 +557,8 @@ body[data-page="Manage Modules"] .st-module-detail-meta {
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
-  font-size: 0.844rem; /* 13.5px */
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  font-size: var(--st-fs-base); /* 13.5px */
+  color: var(--st-ink-muted);
 }
 
 body[data-page="Manage Modules"] .st-table-actions {
@@ -583,19 +576,19 @@ body[data-page="Manage Modules"] .st-btn-danger-text {
   height: 34px;
   padding: 0 10px;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--st-radius-control);
   background: none;
   font: inherit;
-  font-size: 0.844rem; /* 13.5px */
+  font-size: var(--st-fs-base); /* 13.5px */
   font-weight: 600;
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  color: var(--st-ink-muted);
   cursor: pointer;
   transition: background-color var(--st-t-hover, 150ms), color var(--st-t-hover, 150ms);
 }
 
 body[data-page="Manage Modules"] .st-btn-danger-text:hover {
-  background: #fdecea;
-  color: #a01414;
+  background: var(--st-risk-high-soft);
+  color: var(--st-risk-high-ink);
 }
 
 /* ---------- Stage summary bar ---------- */
@@ -606,10 +599,10 @@ body[data-page="Manage Modules"] .st-stage-summary {
 body[data-page="Manage Modules"] .st-stage-bar {
   display: flex;
   height: 10px;
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   overflow: hidden;
   gap: 3px;
-  background: var(--st-background, var(--st-surface-container-low));
+  background: var(--st-background);
   clip-path: inset(0 100% 0 0 round 999px);
   transition: clip-path 900ms var(--st-ease-out, ease);
 }
@@ -619,11 +612,11 @@ body[data-page="Manage Modules"] .is-inview .st-stage-bar {
 }
 
 body[data-page="Manage Modules"] .st-stage-bar .not {
-  background: #cfd5de;
+  background: var(--st-line-strong);
 }
 
 body[data-page="Manage Modules"] .st-stage-bar .rel {
-  background: #f39422;
+  background: var(--st-risk-moderate);
 }
 
 body[data-page="Manage Modules"] .st-stage-bar .ret {
@@ -635,12 +628,12 @@ body[data-page="Manage Modules"] .st-stage-legend {
   gap: 18px;
   flex-wrap: wrap;
   margin-top: 8px;
-  font-size: 0.813rem; /* 13px */
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  font-size: var(--st-fs-sm); /* 13px */
+  color: var(--st-ink-muted);
 }
 
 body[data-page="Manage Modules"] .st-stage-legend b {
-  color: var(--st-ink, var(--st-on-surface));
+  color: var(--st-ink);
   font-weight: 700;
 }
 
@@ -648,7 +641,7 @@ body[data-page="Manage Modules"] .st-stage-legend i {
   display: inline-block;
   width: 9px;
   height: 9px;
-  border-radius: 3px;
+  border-radius: var(--st-radius-xs);
   margin-right: 6px;
   vertical-align: 0;
 }
@@ -662,7 +655,7 @@ body[data-page="Manage Modules"] .st-date-cell {
 }
 
 body[data-page="Manage Modules"] .st-date-cell span {
-  font-size: 0.813rem; /* 13px */
+  font-size: var(--st-fs-sm); /* 13px */
   white-space: nowrap;
   display: flex;
   align-items: center;
@@ -670,7 +663,7 @@ body[data-page="Manage Modules"] .st-date-cell span {
 }
 
 body[data-page="Manage Modules"] .st-muted {
-  color: var(--st-ink-faint, var(--st-outline));
+  color: var(--st-ink-faint);
 }
 
 body[data-page="Manage Modules"] .st-icon-btn-sm--tiny {
@@ -687,7 +680,7 @@ body[data-page="Manage Modules"] .st-roster-checklist {
   max-height: 240px;
   overflow-y: auto;
   border: 1px solid var(--st-outline-variant);
-  border-radius: var(--st-radius-lg);
+  border-radius: var(--st-radius-control);
   padding: 4px 12px;
 }
 
@@ -722,7 +715,7 @@ body[data-page="Manage Modules"] .st-roster-checklist-row label {
 }
 
 .st-schedule-modal-field label .required {
-  color: var(--st-error);
+  color: var(--st-risk-high);
   margin-left: 2px;
 }
 
@@ -759,10 +752,10 @@ body[data-page="Manage Modules"] [data-animate-rows].is-inview tr {
     grid-column: 1/-1;
     order: 3;
     border-left: 0 !important;
-    border-top: 1px solid var(--st-line, var(--st-outline-variant));
+    border-top: 1px solid var(--st-line);
   }
   body[data-page="Manage Modules"] .st-module-summary-stat:nth-child(3) {
-    border-left: 1px solid var(--st-line, var(--st-outline-variant));
+    border-left: 1px solid var(--st-line);
   }
 }
 
@@ -786,7 +779,7 @@ body[data-page="Manage Modules"] [data-animate-rows].is-inview tr {
     flex-direction: row;
     align-items: baseline;
     gap: 10px;
-    border-bottom: 1px solid var(--st-line, var(--st-outline-variant));
+    border-bottom: 1px solid var(--st-line);
   }
   body[data-page="Manage Modules"] .st-module-summary-stat--bar {
     grid-column: 1/-1;
@@ -795,10 +788,10 @@ body[data-page="Manage Modules"] [data-animate-rows].is-inview tr {
     border-left: 0;
   }
   body[data-page="Manage Modules"] .st-module-summary-value {
-    font-size: 1.5rem;
+    font-size: var(--st-fs-2xl);
   }
   body[data-page="Manage Modules"] .st-module-summary-stat--total .st-module-summary-value {
-    font-size: 2rem;
+    font-size: var(--st-fs-3xl);
   }
   body[data-page="Manage Modules"] .st-module-toolbar {
     padding: 0 16px 14px;
@@ -847,7 +840,7 @@ body[data-page="Manage Modules"] [data-animate-rows].is-inview tr {
     gap: 10px 12px;
     align-items: center;
     padding: 14px 16px;
-    border-bottom: 1px solid var(--st-line, var(--st-outline-variant));
+    border-bottom: 1px solid var(--st-line);
   }
   body[data-page="Manage Modules"] .st-mm-table td {
     display: block;

@@ -1,11 +1,3 @@
-/* Deliberate no-op placeholder rule -- see module-management.css for why:
-   the literal first rule of a file loaded through main.css's @import chain
-   can be silently dropped by the browser's CSS parser. Keeping a throwaway
-   first rule here avoids losing whatever rule would otherwise be first. */
-.st-assessment-scores-root {
-  display: block;
-}
-
 .st-assessment-scores-layout {
   display: grid;
   grid-template-columns: 300px 1fr;
@@ -34,11 +26,11 @@ body[data-page="Assessment Scores"] [data-detail-assessed-badge]::before {
    overrides it to neutral gray instead, since blue reads as informational
    rather than "nothing here yet". Matched here for the same standard. */
 body[data-page="Assessment Scores"] .st-badge-info {
-  background: var(--st-background, #f3f5f8);
-  color: var(--st-ink-muted, var(--st-on-surface-variant));
+  background: var(--st-background);
+  color: var(--st-ink-muted);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1023px) {
   .st-assessment-scores-layout {
     grid-template-columns: 1fr;
   }
@@ -49,7 +41,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
 .st-assessment-learner-panel {
   background: #fff;
   border: 1px solid rgba(195, 198, 207, 0.3);
-  border-radius: var(--st-radius-lg);
+  border-radius: var(--st-radius-control);
   box-shadow: var(--st-shadow-sm);
   padding: 16px;
   display: flex;
@@ -91,7 +83,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
   padding: 8px;
   border: none;
   background: transparent;
-  border-radius: var(--st-radius-md);
+  border-radius: var(--st-radius-sm);
   cursor: pointer;
   text-align: left;
   transition: var(--st-transition);
@@ -116,7 +108,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
    established default sizing for an avatar+name+id list row, reused here
    instead of inventing page-specific sizes. */
 .st-assessment-learner-row-name {
-  font-size: 0.906rem; /* 14.5px */
+  font-size: var(--st-fs-base); /* 14.5px */
   font-weight: 600;
   font-family: var(--st-font-body);
   color: var(--st-on-surface);
@@ -126,8 +118,8 @@ body[data-page="Assessment Scores"] .st-badge-info {
 }
 
 .st-assessment-learner-row-lrn {
-  font-size: 0.781rem; /* 12.5px */
-  color: var(--st-ink-faint, var(--st-outline));
+  font-size: var(--st-fs-xs); /* 12.5px */
+  color: var(--st-ink-faint);
 }
 
 .st-assessment-avatar {
@@ -166,7 +158,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
 .st-assessment-detail-panel[data-no-learner-panel] {
   background: #fff;
   border: 1px solid rgba(195, 198, 207, 0.3);
-  border-radius: var(--st-radius-lg);
+  border-radius: var(--st-radius-control);
   padding: 40px 20px;
   text-align: center;
 }
@@ -179,7 +171,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
   flex-wrap: wrap;
   background: #fff;
   border: 1px solid rgba(195, 198, 207, 0.3);
-  border-radius: var(--st-radius-lg);
+  border-radius: var(--st-radius-control);
   box-shadow: var(--st-shadow-sm);
   padding: 16px 20px;
   margin-bottom: 20px;
@@ -225,7 +217,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
 .st-assessment-table-card {
   background: #fff;
   border: 1px solid rgba(195, 198, 207, 0.3);
-  border-radius: var(--st-radius-lg);
+  border-radius: var(--st-radius-control);
   box-shadow: var(--st-shadow-sm);
   overflow: hidden;
   margin-bottom: 20px;
@@ -237,7 +229,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
 }
 
 .st-assessment-table-head h3 {
-  font-size: 1.0625rem; /* 17px */
+  font-size: var(--st-fs-md); /* 17px */
   font-weight: 700;
   color: var(--st-on-surface);
   letter-spacing: 0.02em;
@@ -252,12 +244,12 @@ body[data-page="Assessment Scores"] .st-badge-info {
 .st-assessment-table td {
   padding: 8px 12px;
   text-align: center;
-  font-size: 0.875rem; /* 14px */
+  font-size: var(--st-fs-base); /* 14px */
   border-bottom: 1px solid rgba(195, 198, 207, 0.2);
 }
 
 .st-assessment-table thead th {
-  font-size: 0.75rem; /* 12px */
+  font-size: var(--st-fs-xs); /* 12px */
   color: var(--st-on-surface-variant);
   font-weight: 700;
 }
@@ -299,7 +291,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
   height: 32px;
   padding: 0 6px;
   border: 1px solid var(--st-outline-variant);
-  border-radius: var(--st-radius-sm);
+  border-radius: var(--st-radius-xs);
   font-family: var(--st-font-body);
   font-size: var(--st-font-size-caption);
   text-align: center;
@@ -348,7 +340,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
   height: 36px;
   padding: 0 10px;
   border: none;
-  border-radius: var(--st-radius-md);
+  border-radius: var(--st-radius-sm);
   text-align: center;
   font-weight: 700;
   color: var(--st-risk-low);
@@ -397,7 +389,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
   min-width: 72px;
   height: 30px;
   padding: 0 10px;
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   font-size: var(--st-font-size-caption);
   font-weight: 700;
   border: 1px solid transparent;
@@ -484,7 +476,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
   min-width: 26px;
   height: 26px;
   padding: 0 8px;
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   background: rgba(27, 74, 128, 0.1);
   color: var(--st-primary);
   font-size: var(--st-font-size-micro);
@@ -500,10 +492,10 @@ body[data-page="Assessment Scores"] .st-badge-info {
   gap: 8px;
   height: 42px;
   padding: 0 12px;
-  border: 1px solid var(--st-line-strong, var(--st-outline-variant));
-  border-radius: var(--st-radius-control, var(--st-button-radius));
+  border: 1px solid var(--st-line-strong);
+  border-radius: var(--st-radius-control);
   background: #fff;
-  color: var(--st-ink-faint, var(--st-outline));
+  color: var(--st-ink-faint);
 }
 .st-assessment-search:hover {
   border-color: var(--st-primary);
@@ -528,7 +520,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
   min-width: 0;
   padding: 0;
   font: inherit;
-  font-size: 0.875rem;
+  font-size: var(--st-fs-base);
   background: none;
   color: var(--st-on-surface);
 }
@@ -553,7 +545,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
 }
 
 .st-assessment-learner-row.is-active {
-  background: var(--st-navy-soft, var(--st-primary-fixed));
+  background: var(--st-navy-soft);
 }
 
 .st-assessment-learner-row.is-active::before {
@@ -571,7 +563,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
 
 /* Avatar stays the light navy-soft tile by default; only the active
    row's avatar turns solid navy with white text. */
-.st-assessment-avatar { background: var(--st-navy-soft, var(--st-primary-fixed)); color: var(--st-primary); }
+.st-assessment-avatar { background: var(--st-navy-soft); color: var(--st-primary); }
 .st-assessment-learner-row.is-active .st-assessment-avatar {
   background: var(--st-primary);
   color: #fff;
@@ -637,12 +629,12 @@ body[data-page="Assessment Scores"] .st-badge-info {
 .st-assessment-input--wide { min-width: 180px; }
 .st-assessment-rating-banner { flex-wrap: wrap; row-gap: 10px; }
 
-@media (max-width: 1100px) {
+@media (max-width: 1023px) {
   .st-assessment-scores-layout { grid-template-columns: 1fr; }
   .st-assessment-learner-panel { position: static; max-height: none; }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .st-assessment-learner-header { padding: 16px; }
   .st-assessment-learner-header-actions {
     width: 100%;
@@ -684,11 +676,6 @@ body[data-page="Assessment Scores"] .st-badge-info {
 
 [data-assessment-form] > .st-assessment-table-card {
   margin-bottom: 0;
-}
-
-.st-assessment-detail-panel[hidden],
-[data-no-learner-panel][hidden] {
-  display: none !important;
 }
 
 .st-assessment-detail-panel[data-no-learner-panel] {
@@ -816,7 +803,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
   flex: 0 0 62px;
   padding: 0 8px;
   border: 1px solid var(--st-outline-variant);
-  border-radius: var(--st-radius-sm);
+  border-radius: var(--st-radius-xs);
   font-family: var(--st-font-body);
   font-size: var(--st-font-size-caption);
   font-weight: 600;
@@ -883,7 +870,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
   height: 30px;
   padding: 0 10px;
   box-sizing: border-box;
-  border-radius: 999px;
+  border-radius: var(--st-radius-pill);
   font-size: var(--st-font-size-caption);
   font-weight: 700;
   line-height: 1;
@@ -942,7 +929,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
 }
 
 .st-assessment-total-row .st-assessment-result--overall .st-assessment-result-note {
-  font-size: 0.82rem;
+  font-size: var(--st-fs-sm);
   white-space: nowrap;
 }
 
@@ -960,8 +947,8 @@ body[data-page="Assessment Scores"] .st-badge-info {
   min-width: 220px;
   height: 40px;
   padding: 0 12px;
-  font-size: 0.95rem;
-  border-radius: var(--st-radius-control, 8px);
+  font-size: var(--st-fs-md);
+  border-radius: var(--st-radius-control);
 }
 
 .st-assessment-input--date {
@@ -996,13 +983,13 @@ body[data-page="Assessment Scores"] .st-badge-info {
 
 
 
-@media (max-width: 1100px) {
+@media (max-width: 1023px) {
   [data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-table {
     min-width: 1040px;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .st-assessment-input--date,
   .st-assessment-input--rating {
     width: 190px;
@@ -1087,7 +1074,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
 }
 
 /* Keep spacing comfortable on smaller screens without stretching the controls. */
-@media (max-width: 900px) {
+@media (max-width: 1023px) {
   [data-assessment-form] > .st-assessment-table-card:nth-child(2) .st-assessment-table {
     min-width: 760px;
   }
@@ -1204,7 +1191,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
   white-space: normal;
   text-align: left;
   line-height: 1.05;
-  font-size: 0.78rem;
+  font-size: var(--st-fs-xs);
   font-weight: 800;
   letter-spacing: 0.01em;
 }
@@ -1215,7 +1202,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
   word-spacing: 92px;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1023px) {
   [data-assessment-form] > .st-assessment-table-card:nth-child(2)
     .st-assessment-table {
     min-width: 760px;
@@ -1368,7 +1355,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
 /* Keep the longer placeholder readable in the compact overall rating box. */
 [data-assessment-form] > .st-assessment-table-card:nth-child(2)
   .st-assessment-input--rating::placeholder {
-  font-size: 0.68rem;
+  font-size: var(--st-fs-xs);
 }
 
 /* Date of Assessment: only wide enough for MM/DD/YYYY + calendar icon. */
@@ -1436,7 +1423,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
   margin-left: auto !important;
   margin-right: 0 !important;
   padding: 0 8px !important;
-  font-size: 0.9rem !important;
+  font-size: var(--st-fs-base) !important;
 }
 
 
@@ -1557,7 +1544,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
 }
 
 [data-assessment-form] .st-assessment-table-card {
-  border-radius: var(--st-radius-lg);
+  border-radius: var(--st-radius-control);
 }
 
 [data-assessment-form] .st-assessment-table-head {
@@ -1670,7 +1657,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
 
 [data-assessment-form] > .st-assessment-table-card:nth-child(2)
   .st-assessment-input--rating::placeholder {
-  font-size: 0.72rem;
+  font-size: var(--st-fs-xs);
 }
 
 /* Date remains compact but readable. */
@@ -1697,7 +1684,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
 
 
 
-@media (max-width: 900px) {
+@media (max-width: 1023px) {
   [data-assessment-form] > .st-assessment-table-card:nth-child(2)
     .st-assessment-table th:last-child,
   [data-assessment-form] > .st-assessment-table-card:nth-child(2)
@@ -1764,7 +1751,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
 
 
 
-@media (max-width: 900px) {
+@media (max-width: 1023px) {
   
 
   
@@ -1783,7 +1770,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
   margin: var(--st-space-16);
   overflow: hidden;
   border: var(--st-card-border);
-  border-radius: var(--st-card-radius);
+  border-radius: var(--st-radius-card);
   background: var(--st-card-background);
   box-shadow: var(--st-shadow-xs);
   color: var(--st-on-surface);
@@ -1805,7 +1792,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
   flex: 0 0 var(--st-avatar-lg);
   width: var(--st-avatar-lg);
   height: var(--st-avatar-lg);
-  border-radius: var(--st-radius-xl);
+  border-radius: var(--st-radius-card);
   background: var(--st-surface-container-low);
   color: var(--st-primary);
   font-size: var(--st-icon-lg);
@@ -1862,7 +1849,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
   font-weight: var(--st-font-weight-semibold);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1023px) {
   .st-assessment-likelihood-summary {
     grid-template-columns: 1fr;
     margin: var(--st-space-12);
@@ -1879,7 +1866,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
   }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 479px) {
   .st-assessment-likelihood-main {
     align-items: flex-start;
   }

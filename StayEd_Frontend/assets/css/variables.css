@@ -31,27 +31,43 @@
   --st-on-tertiary-fixed: #001e2c;
   --st-on-tertiary-fixed-variant: #004c69;
 
-  --st-error: #ba1a1a;
   --st-error-container: #ffdad6;
 
   --st-on-error: #ffffff;
   --st-on-error-container: #93000a;
 
+  /* One soft tint per risk level -- used to be two (this rgba scale, plus
+     the solid-hex -soft-2 scale below). The solid hex reads better on the
+     card/panel backgrounds both scales were actually used on, so it's the
+     one that survives; -soft-2 is now just an alias of this. */
   --st-risk-high: #ba1a1a;
-  --st-risk-high-soft: rgba(186, 26, 26, 0.1);
+  --st-risk-high-soft: #fdecea;
   --st-risk-high-border: rgba(186, 26, 26, 0.2);
+  --st-risk-high-ring: #f6c9c6;
 
   --st-risk-moderate: #f39422;
-  --st-risk-moderate-soft: rgba(243, 148, 34, 0.1);
+  --st-risk-moderate-soft: #fef3e4;
   --st-risk-moderate-border: rgba(243, 148, 34, 0.2);
+  --st-risk-moderate-ring: #f8d9ac;
 
   --st-risk-low: #6bbf59;
-  --st-risk-low-soft: rgba(107, 191, 89, 0.12);
+  --st-risk-low-soft: #edf7ea;
   --st-risk-low-border: rgba(107, 191, 89, 0.22);
+  --st-risk-low-ring: #c9e6c1;
 
+  /* Not a real risk model state today (see learner-quick-view.js) but kept
+     alongside its siblings for the one place that still defends against it. */
+  --st-risk-preliminary-ring: #bcdcf3;
+
+  /* Same pale-gray pattern as the other risk levels' -soft tint, used as
+     the "no prediction yet" default -- was a differently-valued rgba()
+     before, now a solid hex to match its siblings. Also doubles as the
+     plain neutral ring/track-divider color used on several pages
+     (avatar rings, progress-track backgrounds) outside any risk context. */
   --st-risk-neutral: #73777f;
-  --st-risk-neutral-soft: rgba(115, 119, 127, 0.1);
+  --st-risk-neutral-soft: #eef1f5;
   --st-risk-neutral-border: rgba(115, 119, 127, 0.2);
+  --st-risk-neutral-ring: #dfe3ea;
 
   --st-primary-deep: #001f3f;
 
@@ -105,6 +121,21 @@
   /* Tiny eyebrow/status labels, badge & pill text, axis ticks. */
   --st-font-size-micro: 0.6875rem; /* 11px */
 
+  /* Canonical text-size scale every raw font-size literal now snaps to
+     (nearest step). Separate from the --st-font-size-* family above --
+     that family was already token-based (not raw literals) everywhere it
+     was used, so it isn't part of the "88 distinct values" problem this
+     scale fixes and is left as-is rather than merged. */
+  --st-fs-xs: 0.75rem;
+  --st-fs-sm: 0.8125rem;
+  --st-fs-base: 0.875rem;
+  --st-fs-md: 1rem;
+  --st-fs-lg: 1.125rem;
+  --st-fs-xl: 1.25rem;
+  --st-fs-2xl: 1.5rem;
+  --st-fs-3xl: 1.875rem;
+  --st-fs-4xl: 2.25rem;
+
   --st-font-weight-regular: 400;
   --st-font-weight-medium: 500;
   --st-font-weight-semibold: 600;
@@ -136,16 +167,19 @@
   --st-stack-md: var(--st-space-16);
   --st-stack-lg: var(--st-space-24);
 
-  --st-radius-xs: 2px;
-  --st-radius-sm: 4px;
-  --st-radius-md: 6px;
-  --st-radius-lg: 8px;
-  --st-radius-xl: 12px;
-  --st-radius-2xl: 16px;
-  --st-radius-full: 999px;
-
-  --st-card-radius: 5px;
-  --st-button-radius: 4px;
+  /* Canonical radius scale -- every border-radius in the app resolves to
+     one of these 7. xs/sm absorb the old, lower-use --st-radius-xs/-sm/-md
+     scale (same pixel values, renamed); -control/-card absorb the old
+     --st-radius-lg/-xl scale AND the legacy --st-button-radius (4px) /
+     --st-card-radius (5px) tokens -- the latter two are the one
+     intentional visible shift this pass makes (4px->8px, 5px->12px). */
+  --st-radius-xs: 4px;
+  --st-radius-sm: 6px;
+  --st-radius-control: 8px;
+  --st-radius-card: 12px;
+  --st-radius-lg: 16px;
+  --st-radius-xl: 20px;
+  --st-radius-pill: 999px;
 
   --st-sidebar-width: 256px;
   --st-sidebar-width-collapsed: 80px;
@@ -172,17 +206,20 @@
 
   --st-footer-border: 1px solid var(--st-outline-variant);
 
-  --st-button-height: 44px;
+  /* Canonical control-height scale (buttons/inputs/selects). Replaces the
+     old --st-button-height/--st-input-height (both 44px, both unused --
+     every real button/input/select already hard-codes its own height).
+     Buttons specifically stay at their existing 38px via --st-btn-h. */
+  --st-control-h: 40px;
+  --st-control-h-sm: 34px;
+  --st-control-h-xs: 32px;
+  --st-btn-h: 38px;
 
   --st-button-padding: 0 20px;
 
   --st-button-font: var(--st-font-size-small);
 
   --st-button-weight: var(--st-font-weight-semibold);
-
-  --st-input-height: 44px;
-
-  --st-input-radius: var(--st-button-radius);
 
   --st-input-border: 1px solid var(--st-outline-variant);
 
@@ -256,15 +293,6 @@
 
   --st-card-border: 1px solid rgba(195, 198, 207, 0.35);
 
-  --st-success: #2e7d32;
-  --st-success-light: #e8f5e9;
-
-  --st-warning: #ed6c02;
-  --st-warning-light: #fff3e0;
-
-  --st-danger: #d32f2f;
-  --st-danger-light: #fdecea;
-
   --st-info: #0288d1;
   --st-info-light: #e1f5fe;
 
@@ -318,6 +346,11 @@
      value change. */
   --st-line: #e1e5ec;
   --st-line-strong: #cfd5de;
+  /* --st-ink was referenced as var(--st-ink) in 13
+     places but never actually defined -- it always silently fell through
+     to the --st-on-surface fallback. Defined here with that same value so
+     collapsing those 13 chains down to var(--st-ink) alone changes nothing. */
+  --st-ink: #111a36;
   --st-ink-muted: #5a6275;
   --st-ink-faint: #8a91a0;
   --st-navy-soft: #e8eef6;
@@ -326,9 +359,6 @@
   --st-risk-moderate-ink: #8f5200;
   --st-risk-low-ink: #2c7121;
 
-  --st-risk-high-soft-2: #fdecea;
-  --st-risk-moderate-soft-2: #fef3e4;
-  --st-risk-low-soft-2: #edf7ea;
 
   /* Non-risk categories (learning level, modality) -- deliberately never
      reuse the risk red/orange/green, so these charts can't be misread as
@@ -338,8 +368,6 @@
   --st-cat-3: #006a68;
   --st-cat-4: #9db5d3;
 
-  --st-radius-card: 12px;
-  --st-radius-control: 8px;
   --st-shadow-card: 0 1px 2px rgba(17, 26, 54, 0.04), 0 2px 8px rgba(17, 26, 54, 0.04);
 
   /* Motion timing tokens -- see Part C (fill-in-on-view + hover/press). */
@@ -352,9 +380,15 @@
      event-type colors. Module return due uses violet, not orange, because
      orange means "moderate risk" everywhere else in StayEd and a return
      date isn't a risk level. */
+  /* The teal tint/ink pair used all over the app for "active"/"success"
+     status chips, icon tiles, etc. -- was hard-coded in 33 + 15 places
+     with no token of its own; the only existing token at this exact value
+     was this calendar-event one, which becomes an alias of it. */
+  --st-teal-soft: #e3f4f3;
+  --st-teal-ink: #00504e;
+
   --st-ev-attendance: #006a68;
-  --st-ev-attendance-soft: #e3f4f3;
-  --st-ev-attendance-ink: #00504e;
+  --st-ev-attendance-ink: var(--st-teal-ink);
   --st-ev-module: #12355b;
   --st-ev-module-soft: #e8eef6;
   --st-ev-module-ink: #12355b;

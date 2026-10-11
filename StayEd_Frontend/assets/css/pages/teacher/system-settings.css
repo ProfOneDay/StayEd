@@ -1,19 +1,11 @@
-/* System Settings page — see CLAUDE_CODE_PROMPT_teacher-account-pages-v2.md. */
-
-body[data-page="System Settings"] .st-sr-only{
-    position:absolute;
-    width:1px;
-    height:1px;
-    overflow:hidden;
-    clip:rect(0 0 0 0);
-    white-space:nowrap;
-}
+/* System Settings page — see CLAUDE_CODE_PROMPT_teacher-account-pages-v2.md.
+   .st-sr-only is now a global utility in components.css. */
 
 body[data-page="System Settings"] .st-icon-tile{
     width:40px;
     height:40px;
     flex:none;
-    border-radius:11px;
+    border-radius:var(--st-radius-card);
     display:grid;
     place-items:center;
     background:var(--st-navy-soft);
@@ -32,9 +24,9 @@ body[data-page="System Settings"] .st-settings-bento{
 
 body[data-page="System Settings"] .st-bento-card{
     background:#fff;
-    border:1px solid var(--st-line, var(--st-outline-variant));
-    border-radius:var(--st-radius-card, var(--st-radius-lg));
-    box-shadow:var(--st-shadow-card, var(--st-shadow-sm));
+    border:1px solid var(--st-line);
+    border-radius:var(--st-radius-card);
+    box-shadow:var(--st-shadow-card);
     padding:18px 20px 4px;
 }
 
@@ -43,14 +35,14 @@ body[data-page="System Settings"] .st-bento-card-head{
     align-items:center;
     gap:12px;
     padding-bottom:12px;
-    border-bottom:1px solid var(--st-line, var(--st-outline-variant));
+    border-bottom:1px solid var(--st-line);
 }
 
 body[data-page="System Settings"] .st-bento-card-title{
     margin:0;
     font-family:var(--st-font-heading);
     font-weight:700;
-    font-size:1.0625rem; /* 17px */
+    font-size: var(--st-fs-md); /* 17px */
 }
 
 body[data-page="System Settings"] .st-setting-row{
@@ -70,14 +62,14 @@ body[data-page="System Settings"] .st-bento-field{
 body[data-page="System Settings"] .st-bento-field input{
     width:100%;
     height:40px;
-    border:1px solid var(--st-line, var(--st-outline-variant));
-    border-radius:var(--st-radius-control, 8px);
-    background:#f8f9fb;
+    border:1px solid var(--st-line);
+    border-radius:var(--st-radius-control);
+    background:var(--st-table-header);
     padding:0 34px 0 12px;
     font:inherit;
-    font-size:0.906rem; /* 14.5px */
+    font-size: var(--st-fs-base); /* 14.5px */
     font-weight:600;
-    color:var(--st-ink, var(--st-on-surface));
+    color:var(--st-ink);
     font-variant-numeric:tabular-nums;
 }
 
@@ -87,7 +79,7 @@ body[data-page="System Settings"] .st-bento-field .material-symbols-outlined{
     top:50%;
     transform:translateY(-50%);
     font-size:17px;
-    color:var(--st-ink-faint, var(--st-outline));
+    color:var(--st-ink-faint);
 }
 
 /* ---------- Font size / accessibility ---------- */
@@ -105,10 +97,10 @@ body[data-page="System Settings"] .st-font-size-control-head{
 body[data-page="System Settings"] .st-font-size-current{
     flex:none;
     padding:3px 10px;
-    border-radius:999px;
+    border-radius:var(--st-radius-pill);
     background:var(--st-navy-soft);
     color:var(--st-primary);
-    font-size:0.781rem; /* 12.5px */
+    font-size: var(--st-fs-xs); /* 12.5px */
     font-weight:600;
     white-space:nowrap;
 }
@@ -123,12 +115,12 @@ body[data-page="System Settings"] .st-font-size-slider-row{
 body[data-page="System Settings"] .st-font-size-endpoint{
     font-family:var(--st-font-heading);
     font-weight:700;
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    color:var(--st-ink-muted);
     line-height:22px;
 }
 
-body[data-page="System Settings"] .st-font-size-endpoint--sm{ font-size:0.813rem; }
-body[data-page="System Settings"] .st-font-size-endpoint--lg{ font-size:1.375rem; }
+body[data-page="System Settings"] .st-font-size-endpoint--sm{ font-size: var(--st-fs-sm); }
+body[data-page="System Settings"] .st-font-size-endpoint--lg{ font-size: var(--st-fs-xl); }
 
 body[data-page="System Settings"] .st-font-size-slider-wrap{
     flex:1;
@@ -146,8 +138,8 @@ body[data-page="System Settings"] .st-font-size-slider{
 
 body[data-page="System Settings"] .st-font-size-slider::-webkit-slider-runnable-track{
     height:6px;
-    border-radius:999px;
-    background:linear-gradient(90deg,var(--st-secondary) var(--p),#dfe3ea var(--p));
+    border-radius:var(--st-radius-pill);
+    background:linear-gradient(90deg,var(--st-secondary) var(--p),var(--st-risk-neutral-ring) var(--p));
 }
 
 body[data-page="System Settings"] .st-font-size-slider::-webkit-slider-thumb{
@@ -170,13 +162,13 @@ body[data-page="System Settings"] .st-font-size-slider:hover::-webkit-slider-thu
 
 body[data-page="System Settings"] .st-font-size-slider::-moz-range-track{
     height:6px;
-    border-radius:999px;
-    background:#dfe3ea;
+    border-radius:var(--st-radius-pill);
+    background:var(--st-risk-neutral-ring);
 }
 
 body[data-page="System Settings"] .st-font-size-slider::-moz-range-progress{
     height:6px;
-    border-radius:999px;
+    border-radius:var(--st-radius-pill);
     background:var(--st-secondary);
 }
 
@@ -201,8 +193,8 @@ body[data-page="System Settings"] .st-font-size-ticks{
     display:grid;
     grid-template-columns:repeat(5,1fr);
     margin-top:4px;
-    font-size:0.719rem; /* 11.5px */
-    color:var(--st-ink-faint, var(--st-outline));
+    font-size: var(--st-fs-xs); /* 11.5px */
+    color:var(--st-ink-faint);
 }
 
 body[data-page="System Settings"] .st-font-size-ticks span{
@@ -221,10 +213,10 @@ body[data-page="System Settings"] .st-font-size-ticks span:last-child{ text-alig
 body[data-page="System Settings"] .st-font-size-preview{
     margin-top:14px;
     padding:14px 16px;
-    border:1px dashed var(--st-line-strong, var(--st-outline-variant));
-    border-radius:10px;
+    border:1px dashed var(--st-line-strong);
+    border-radius:var(--st-radius-card);
     background:#fbfcfd;
-    color:var(--st-ink, var(--st-on-surface));
+    color:var(--st-ink);
     font-family:var(--st-font-body);
     font-size:var(--st-font-size-label, 0.875rem);
 }
@@ -236,13 +228,13 @@ body[data-page="System Settings"] .st-settings-profile-hint{
     gap:8px;
     flex-wrap:wrap;
     margin:4px 2px 0;
-    font-size:0.844rem; /* 13.5px */
-    color:var(--st-ink-muted, var(--st-on-surface-variant));
+    font-size: var(--st-fs-base); /* 13.5px */
+    color:var(--st-ink-muted);
 }
 
 body[data-page="System Settings"] .st-settings-profile-hint .material-symbols-outlined{
     font-size:18px;
-    color:var(--st-ink-faint, var(--st-outline));
+    color:var(--st-ink-faint);
 }
 
 body[data-page="System Settings"] .st-settings-profile-hint a{
@@ -264,7 +256,7 @@ body[data-page="System Settings"] [data-animate-cards].is-inview > *{
 }
 
 /* ---------- Responsive ---------- */
-@media (max-width:767px){
+@media (max-width: 767px){
     body[data-page="System Settings"] .st-bento-card{
         padding:14px 16px 2px;
     }
