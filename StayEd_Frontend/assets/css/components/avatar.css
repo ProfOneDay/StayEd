@@ -1,0 +1,116 @@
+/* ============================================================
+   Avatar: .st-avatar-initials + sizes/tones, .st-learner-cell,
+   .st-two-line. One definition each.
+   ============================================================ */
+
+.st-avatar-initials {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  font-size: var(--st-fs-xs);
+  font-weight: 700;
+  background: rgba(18, 53, 91, 0.1);
+  color: var(--st-primary);
+  border: 1px solid rgba(18, 53, 91, 0.1);
+  transition: background-color var(--st-t-hover, 150ms) ease, color var(--st-t-hover, 150ms) ease,
+    border-color var(--st-t-hover, 150ms) ease, box-shadow var(--st-t-hover, 150ms) ease;
+}
+
+.st-avatar-initials:hover {
+  box-shadow: 0 0 0 3px var(--st-navy-soft);
+}
+
+/* ---- Sizes ---- */
+.st-avatar-initials--md {
+  width: 40px;
+  height: 40px;
+  font-size: var(--st-fs-sm);
+}
+
+.st-avatar-initials--lg {
+  width: 64px;
+  height: 64px;
+  font-size: var(--st-fs-xl);
+}
+
+.st-avatar-initials--xl {
+  width: 84px;
+  height: 84px;
+  font-size: var(--st-fs-3xl);
+}
+
+/* ---- Tones ---- */
+.st-avatar-initials--teal {
+  background: rgba(0, 106, 104, 0.1);
+  color: var(--st-secondary);
+  border-color: rgba(0, 106, 104, 0.1);
+}
+
+.st-avatar-initials--blue {
+  background: #dbeafe;
+  color: #2563eb;
+  border-color: #bfdbfe;
+}
+
+.st-avatar-initials--slate {
+  background: rgba(157, 181, 211, 0.25);
+  color: var(--st-cat-2, #4c6f95);
+  border-color: rgba(157, 181, 211, 0.35);
+}
+
+.st-avatar-initials--high {
+  background: var(--st-risk-high-soft);
+  color: var(--st-risk-high);
+  border-color: transparent;
+}
+
+.st-avatar-initials--moderate {
+  background: var(--st-risk-moderate-soft);
+  color: var(--st-risk-moderate);
+  border-color: transparent;
+}
+
+.st-avatar-initials--low {
+  background: var(--st-risk-low-soft);
+  color: var(--st-risk-low);
+  border-color: transparent;
+}
+
+/* ---- Learner cell: avatar + two-line name/id, used by every table. ---- */
+.st-learner-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Two-line cell (e.g. Level & modality). */
+.st-two-line {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  white-space: normal;
+}
+
+.st-two-line strong {
+  font-weight: 500;
+  font-size: var(--st-fs-base);
+  color: var(--st-on-surface);
+}
+
+.st-two-line small {
+  font-size: var(--st-fs-xs);
+  color: var(--st-ink-faint);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.st-two-line small .material-symbols-outlined {
+  font-size: 15px;
+}

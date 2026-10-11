@@ -1,0 +1,249 @@
+/* ============================================================
+   .st-btn -- the one button component. Base + size modifiers +
+   tone variants + .st-icon-btn(-sm), .st-text-btn, .st-sort-btn.
+   Every page used to carry its own copy of some part of this;
+   this file is now the only place any of it is defined. Pages
+   add .st-btn--block (full width) instead of re-declaring width
+   in a descendant selector.
+   ============================================================ */
+
+.st-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 16px;
+  border: none;
+  border-radius: var(--st-radius-control);
+  font: inherit;
+  font-size: var(--st-fs-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--st-transition-default);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.st-btn .material-symbols-outlined {
+  font-size: 19px;
+}
+
+.st-btn:active {
+  transform: scale(0.97);
+}
+
+.st-btn:focus-visible {
+  outline: 2px solid var(--st-secondary);
+  outline-offset: 2px;
+}
+
+.st-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ---- Sizes ---- */
+.st-btn-sm {
+  height: 34px;
+  padding: 0 12px;
+  font-size: var(--st-fs-sm);
+}
+
+.st-btn-xs {
+  height: 32px;
+  padding: 0 10px;
+  font-size: var(--st-fs-xs);
+}
+
+.st-btn-lg {
+  height: 44px;
+  padding: 0 20px;
+  font-size: var(--st-fs-md);
+}
+
+/* ---- Modifiers ---- */
+.st-btn-block {
+  width: 100%;
+}
+
+.st-btn-icon {
+  width: 44px;
+  padding: 0;
+}
+
+/* ---- Tones ---- */
+.st-btn-primary {
+  background: var(--st-primary);
+  color: #fff;
+}
+
+.st-btn-primary:hover {
+  background: var(--st-primary-dark);
+  box-shadow: 0 4px 12px rgba(18, 53, 91, 0.22);
+}
+
+.st-btn-secondary {
+  background: var(--st-secondary);
+  color: #fff;
+}
+
+.st-btn-secondary:hover {
+  opacity: 0.95;
+}
+
+.st-btn-outline {
+  background: #fff;
+  border: 1px solid var(--st-line-strong);
+  color: var(--st-primary);
+}
+
+.st-btn-outline:hover {
+  background: var(--st-navy-soft);
+  border-color: var(--st-primary);
+}
+
+.st-btn-ghost {
+  background: transparent;
+  color: var(--st-ink-muted);
+}
+
+.st-btn-ghost:hover {
+  background: var(--st-background);
+  color: var(--st-on-surface);
+}
+
+.st-btn-teal {
+  background: var(--st-secondary);
+  color: #fff;
+}
+
+.st-btn-teal:hover {
+  opacity: 0.92;
+}
+
+.st-btn-danger {
+  background: var(--st-risk-high);
+  color: #fff;
+}
+
+.st-btn-danger:hover {
+  opacity: 0.92;
+}
+
+.st-btn-danger-outline {
+  background: #fff;
+  border: 1px solid var(--st-risk-high);
+  color: var(--st-risk-high);
+}
+
+.st-btn-danger-outline:hover {
+  background: var(--st-risk-high-soft);
+}
+
+/* ---- Icon-only button ---- */
+.st-icon-btn-sm {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: var(--st-radius-sm);
+  font-family: var(--st-font-body);
+  color: var(--st-ink-muted);
+  cursor: pointer;
+  transition: background-color var(--st-t-hover, 150ms) ease, color var(--st-t-hover, 150ms) ease,
+    border-color var(--st-t-hover, 150ms) ease, box-shadow var(--st-t-hover, 150ms) ease,
+    transform var(--st-t-press, 90ms) ease;
+}
+
+.st-icon-btn-sm:hover {
+  background: var(--st-background);
+}
+
+.st-icon-btn-sm:active {
+  transform: scale(0.96);
+}
+
+.st-icon-btn-sm .material-symbols-outlined {
+  font-size: var(--st-fs-lg);
+}
+
+/* ---- Text-only button (icon + label, no fill) ---- */
+.st-text-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--st-radius-control);
+  background: none;
+  font: inherit;
+  font-size: var(--st-fs-base);
+  font-weight: 600;
+  color: var(--st-ink-muted);
+  cursor: pointer;
+  transition: background-color var(--st-t-hover, 150ms), color var(--st-t-hover, 150ms), transform var(--st-t-press, 90ms);
+}
+
+.st-text-btn:hover {
+  background: var(--st-background);
+  color: var(--st-on-surface);
+}
+
+.st-text-btn:active {
+  transform: scale(0.96);
+}
+
+.st-text-btn .material-symbols-outlined {
+  font-size: 19px;
+}
+
+/* ---- Column-header sort button ---- */
+.st-sort-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: 0;
+  background: none;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  border-radius: var(--st-radius-sm);
+  font: inherit;
+  font-size: var(--st-fs-xs);
+  font-weight: 600;
+  color: inherit;
+  cursor: pointer;
+  transition: background-color var(--st-t-hover, 150ms), color var(--st-t-hover, 150ms);
+}
+
+.st-sort-btn:hover {
+  background: var(--st-risk-neutral-soft);
+  color: var(--st-on-surface);
+}
+
+.st-sort-btn .st-sort-icon {
+  font-size: 16px;
+  color: var(--st-ink-faint);
+  opacity: 1;
+}
+
+.st-sort-btn.is-sorted {
+  color: var(--st-primary);
+}
+
+.st-sort-btn.is-sorted .st-sort-icon {
+  color: var(--st-primary);
+}
+
+@media (max-width: 1023px) {
+  .st-filter-actions .st-btn {
+    flex: 1;
+  }
+}

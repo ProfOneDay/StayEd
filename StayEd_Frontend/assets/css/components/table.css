@@ -1,0 +1,236 @@
+/* ============================================================
+   Table system: .st-table-card(+head/title/count), .st-toolbar,
+   .st-filter-bar, .st-data-table, .st-row-actions,
+   .st-row-menu-trigger, .st-pagination, .st-page-btn.
+   This was effectively already one shared implementation (most
+   "page copies" matched it exactly); this makes that the single,
+   unscoped source instead of a page-list-scoped one.
+   ============================================================ */
+
+.st-table-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.st-table-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+}
+
+.st-table-card-title {
+  margin: 0;
+  font-family: var(--st-font-heading);
+  font-weight: 700;
+  font-size: var(--st-fs-lg);
+  color: var(--st-on-surface);
+}
+
+.st-table-card-count {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--st-fs-base);
+  color: var(--st-ink-muted);
+}
+
+.st-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 0 20px 16px;
+}
+
+@media (max-width: 767px) {
+  .st-table-card-head {
+    padding: 14px 16px;
+  }
+  .st-toolbar {
+    padding: 0 16px 14px;
+  }
+}
+
+/* ---- Filter bar (card shell; .st-filter-row/.st-filter-group lay out
+   its contents on a grid on pages that use one -- kept flexible here
+   too, for pages that put fields directly inside the bar). ---- */
+.st-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+  background: #fff;
+  padding: 14px 16px;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-card);
+  box-shadow: var(--st-shadow-card);
+  min-width: 0;
+}
+
+@media (max-width: 1023px) {
+  .st-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* ---- Data table ---- */
+.st-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: var(--st-fs-base);
+}
+
+.st-data-table thead tr {
+  background: var(--st-table-header);
+}
+
+.st-data-table th {
+  padding: 10px 22px;
+  font-size: var(--st-fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--st-ink-muted);
+  border-top: 1px solid var(--st-line);
+  border-bottom: 1px solid var(--st-line);
+  white-space: nowrap;
+}
+
+.st-data-table th.is-center {
+  text-align: center;
+}
+
+.st-data-table th.is-right,
+.st-data-table td.is-right {
+  text-align: right;
+}
+
+.st-data-table tbody tr {
+  border-top: 0;
+  border-bottom: 1px solid var(--st-line);
+  transition: background-color var(--st-t-hover, 150ms) ease;
+  cursor: pointer;
+}
+
+.st-data-table tbody tr:hover {
+  background: #f8fafd;
+}
+
+.st-data-table td {
+  padding: 12px 22px;
+  color: var(--st-ink-muted);
+  vertical-align: middle;
+  white-space: nowrap;
+  font-size: var(--st-fs-base);
+}
+
+.st-data-table .st-pill {
+  padding: 3px 10px;
+  font-size: var(--st-fs-xs);
+  font-weight: 600;
+  background: var(--st-background);
+  color: var(--st-ink-muted);
+  border: 1px solid var(--st-line);
+}
+
+.st-data-table .st-risk-badge {
+  padding: 3px 10px;
+  font-size: var(--st-fs-xs);
+  font-weight: 600;
+}
+
+/* ---- Row actions ---- */
+.st-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.st-row-menu-trigger {
+  appearance: none;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--st-line-strong);
+  border-radius: var(--st-radius-control);
+  background: #fff;
+  display: grid;
+  place-items: center;
+  color: var(--st-on-surface);
+  cursor: pointer;
+  transition: background-color var(--st-t-hover, 150ms), border-color var(--st-t-hover, 150ms), transform var(--st-t-press, 90ms);
+}
+
+.st-row-menu-trigger:hover,
+.st-row-menu.is-open .st-row-menu-trigger {
+  border-color: var(--st-primary);
+  background: var(--st-navy-soft);
+  color: var(--st-primary);
+}
+
+.st-row-menu-trigger:active {
+  transform: scale(0.94);
+}
+
+/* ---- Pagination ---- */
+.st-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 22px;
+  border-top: none;
+}
+
+.st-pagination-info {
+  font-size: var(--st-fs-base);
+  font-family: var(--st-font-body);
+  color: var(--st-ink-muted);
+}
+
+.st-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+.st-page-btn {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  background: none;
+  border-radius: var(--st-radius-control);
+  font-family: var(--st-font-body);
+  font-size: var(--st-fs-base);
+  font-weight: 500;
+  color: var(--st-ink-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.st-page-btn:hover:not(:disabled) {
+  background: var(--st-background);
+  color: var(--st-on-surface);
+}
+
+.st-page-btn.is-active {
+  background: var(--st-primary);
+  color: #fff;
+}
+
+.st-page-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}

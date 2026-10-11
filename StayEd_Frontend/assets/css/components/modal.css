@@ -1,0 +1,173 @@
+/* ============================================================
+   .st-modal -- the one modal system. Slots: header (title,
+   subtitle, X), a scrolling body, and a footer (actions
+   right-aligned; stacked on mobile with the primary on top).
+   Sizes: --sm 420px, --md 560px, --lg 720px.
+   Desktop: navy 45% backdrop, 4px blur, 18px radius, rise-in
+   motion. Mobile: bottom sheet with a grab handle.
+   Focus trap/Escape/backdrop click/focus restore/scroll lock are
+   handled by assets/js/core/modal.js -- nothing here changes that.
+
+   The admin .overlay/.modal system (admin-list-pages.css,
+   admin-account-pages.css) and st-module-modal/st-return-modal/
+   st-avatar-preview-dialog/st-qv-overlay are visually similar but
+   still separate implementations with their own JS open/close --
+   moving them onto .st-modal is real markup+JS surgery per modal,
+   not a safe mechanical move, so it's deferred rather than rushed
+   here (see CHANGES file).
+   ============================================================ */
+
+.st-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(17, 26, 54, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: var(--st-z-modal);
+}
+
+.st-modal.hidden {
+  display: none;
+}
+
+.st-modal.open {
+  display: flex;
+}
+
+.st-modal-dialog,
+.st-modal-card {
+  width: min(560px, 90vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: var(--st-shadow-lg);
+  animation: stModalIn 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.st-modal--sm .st-modal-dialog,
+.st-modal--sm .st-modal-card {
+  width: min(420px, 90vw);
+}
+
+.st-modal--md .st-modal-dialog,
+.st-modal--md .st-modal-card {
+  width: min(560px, 90vw);
+}
+
+.st-modal--lg .st-modal-dialog,
+.st-modal--lg .st-modal-card {
+  width: min(720px, 92vw);
+}
+
+.st-modal--xl .st-modal-dialog,
+.st-modal--xl .st-modal-card {
+  width: min(1040px, 94vw);
+}
+
+.st-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
+
+.st-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--st-outline-variant);
+}
+
+.st-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  color: var(--st-on-surface-variant);
+  cursor: pointer;
+  transition: var(--st-transition);
+  flex-shrink: 0;
+}
+
+.st-modal-close:hover {
+  background: var(--st-surface-container-low);
+  color: var(--st-primary);
+}
+
+.st-modal-close .material-symbols-outlined {
+  font-size: var(--st-fs-xl);
+}
+
+.st-modal-title {
+  font-family: var(--st-font-heading);
+  font-size: var(--st-font-size-body-lg);
+  font-weight: 700;
+  color: var(--st-primary);
+}
+
+.st-modal-sub {
+  margin: 4px 0 0;
+  font-size: var(--st-fs-base);
+  color: var(--st-ink-muted);
+}
+
+.st-modal-body {
+  padding: 24px;
+}
+
+.st-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 24px;
+  border-top: 1px solid var(--st-outline-variant);
+}
+
+@keyframes stModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 767px) {
+  .st-modal {
+    align-items: flex-end;
+  }
+
+  .st-modal-dialog,
+  .st-modal-card {
+    width: 100%;
+    max-height: 92vh;
+    border-radius: 18px 18px 0 0;
+  }
+
+  /* Grab handle: a bare visual affordance, no drag-to-dismiss behavior. */
+  .st-modal-dialog::before,
+  .st-modal-card::before {
+    content: "";
+    width: 36px;
+    height: 4px;
+    border-radius: var(--st-radius-pill);
+    background: var(--st-line-strong);
+    margin: 10px auto 0;
+  }
+
+  .st-modal-footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}

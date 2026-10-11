@@ -1,68 +1,8 @@
 /* Reports page — see CLAUDE_CODE_PROMPT_teacher-account-pages-v2.md. */
 
-body[data-page="Reports"] .st-field label,
-body[data-page="Reports"] .st-field-label{
-    display:block;
-    font-size: var(--st-fs-sm); /* 13px */
-    font-weight:600;
-    color:var(--st-ink);
-    margin-bottom:6px;
-}
+/* .st-field/.st-select now live in components/forms.css. */
 
-body[data-page="Reports"] .st-select{
-    width:100%;
-    height:40px;
-    border:1px solid var(--st-line-strong);
-    border-radius:var(--st-radius-control);
-    background:#fff;
-    padding:0 34px 0 12px;
-    font:inherit;
-    font-size: var(--st-fs-base); /* 14px */
-    color:var(--st-ink);
-    appearance:none;
-    cursor:pointer;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%235a6275' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-    background-repeat:no-repeat;
-    background-position:right 10px center;
-    transition:border-color var(--st-t-hover, 150ms),box-shadow var(--st-t-hover, 150ms);
-}
-
-body[data-page="Reports"] .st-select:hover:not(:disabled){
-    border-color:var(--st-primary);
-}
-
-body[data-page="Reports"] .st-select:focus{
-    outline:none;
-    border-color:var(--st-secondary);
-    box-shadow:0 0 0 3px rgba(0,106,104,.12);
-}
-
-body[data-page="Reports"] .st-select:disabled{
-    background-color:var(--st-table-header);
-    color:var(--st-ink-muted);
-    cursor:not-allowed;
-    border-color:var(--st-line);
-}
-
-body[data-page="Reports"] .st-icon-tile{
-    width:40px;
-    height:40px;
-    flex:none;
-    border-radius:var(--st-radius-card);
-    display:grid;
-    place-items:center;
-    background:var(--st-navy-soft);
-    color:var(--st-primary);
-}
-
-body[data-page="Reports"] .st-icon-tile .material-symbols-outlined{
-    font-size:21px;
-}
-
-body[data-page="Reports"] .st-icon-tile--risk{
-    background:var(--st-risk-high-soft);
-    color:var(--st-risk-high-ink);
-}
+/* .st-icon-tile(+tones) now lives in components/surfaces.css. */
 
 /* ---------- Grid + card ---------- */
 body[data-page="Reports"] .st-report-grid{
@@ -131,58 +71,10 @@ body[data-page="Reports"] .st-report-search-wrap{
     position:relative;
 }
 
-/* Matches the canonical .st-toolbar .st-search treatment (learner-records.css,
-   and this page's own .st-select above) -- border on the wrapper, 8px radius,
-   hover/focus states -- instead of the shared component's 4px/border-on-input
-   default, so the search bar matches this page's own select fields. */
-body[data-page="Reports"] .st-report-search{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    height:40px;
-    padding:0 12px;
-    border:1px solid var(--st-line-strong);
-    border-radius:var(--st-radius-control);
-    background:#fff;
-    color:var(--st-ink-faint);
-}
-
-body[data-page="Reports"] .st-report-search:hover{
-    border-color:var(--st-primary);
-}
-
-body[data-page="Reports"] .st-report-search:focus-within{
-    border-color:var(--st-secondary);
-    box-shadow:0 0 0 3px rgba(0,106,104,.12);
-}
-
-body[data-page="Reports"] .st-report-search .material-symbols-outlined{
-    position:static;
-    top:auto;
-    left:auto;
-    transform:none;
-    flex:none;
-    color:inherit;
-}
-
-/* Keeps its 40px height while leaving room for the clear (x) button on
-   the right. */
+/* .st-report-search carries .st-search already (forms.css provides the
+   look). Only the clear (x) button's reserved space stays here. */
 body[data-page="Reports"] .st-report-search input{
-    height:100%;
-    border:0;
-    outline:0;
-    flex:1;
-    min-width:0;
-    padding:0 28px 0 0;
-    font:inherit;
-    font-size: var(--st-fs-base);
-    background:none;
-    color:var(--st-on-surface);
-}
-
-body[data-page="Reports"] .st-report-search input:focus{
-    outline:none;
-    box-shadow:none;
+    padding-right:28px;
 }
 
 body[data-page="Reports"] .st-report-search-clear{

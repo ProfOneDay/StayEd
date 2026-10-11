@@ -2,25 +2,7 @@
    The body[data-page] attribute is written `Help &amp; User Manual` in the
    HTML, which the browser reads as `Help & User Manual`. */
 
-body[data-page="Help & User Manual"] .st-icon-tile{
-    width:40px;
-    height:40px;
-    flex:none;
-    border-radius:var(--st-radius-card);
-    display:grid;
-    place-items:center;
-    background:var(--st-navy-soft);
-    color:var(--st-primary);
-}
-
-body[data-page="Help & User Manual"] .st-icon-tile .material-symbols-outlined{
-    font-size:21px;
-}
-
-body[data-page="Help & User Manual"] .st-icon-tile--risk{
-    background:var(--st-risk-high-soft);
-    color:var(--st-risk-high-ink);
-}
+/* .st-icon-tile(+tones) now lives in components/surfaces.css. */
 
 body[data-page="Help & User Manual"] .st-help-section{
     display:flex;

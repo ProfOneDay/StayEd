@@ -486,7 +486,6 @@ img.auth-brand-icon{
 }
 
 .auth-form .st-btn-block{
-    height:52px;
     margin-top:4px;
     box-shadow:0 12px 24px -8px rgba(0,31,63,.45);
 }
@@ -983,10 +982,6 @@ body.auth-page[data-page="Pending"] .auth-header h2{
 }
 
 @media (prefers-reduced-motion:reduce){
-    .auth-page *{
-        animation:none !important;
-        transition:none !important;
-    }
     .auth-step{
         opacity:1;
     }

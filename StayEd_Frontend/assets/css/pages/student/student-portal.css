@@ -871,10 +871,6 @@ body.st-sv-body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .st-sv * {
-    transition: none !important;
-    animation: none !important;
-  }
   [data-sv-animate] > * {
     opacity: 1;
     transform: none;

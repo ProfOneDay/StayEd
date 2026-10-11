@@ -1149,26 +1149,12 @@
   color: var(--st-secondary);
 }
 
-.setup-footer .st-btn-primary {
-  white-space: nowrap;
-  height: 48px;
-  padding: 0 24px;
-  border-radius: var(--st-radius-card);
-  font-size: var(--st-font-size-small);
-  transition: background-color 150ms, box-shadow 150ms, transform 90ms;
-}
-
 .setup-footer .st-btn-primary:hover:not(:disabled) .material-symbols-outlined {
   transform: translateX(3px);
 }
 
 .setup-footer .st-btn-primary .material-symbols-outlined {
   transition: transform 150ms var(--st-ease-out);
-}
-
-.setup-footer .st-btn-primary:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
 }
 
 .setup-ghost {
@@ -1320,10 +1306,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .setup-page * {
-    animation: none !important;
-    transition: none !important;
-  }
   .setup-benefit,
   .setup-import-stat {
     opacity: 1;

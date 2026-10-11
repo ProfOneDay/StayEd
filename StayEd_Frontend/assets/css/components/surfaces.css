@@ -1,0 +1,296 @@
+/* ============================================================
+   Surfaces: .st-card, .st-panel(+head/title/sub), .st-icon-tile,
+   .st-stat, .st-empty, .st-class-context-banner. One definition
+   each -- most of these already had ONE page acting as the de
+   facto shared source (every other page's "override" actually
+   just matched it exactly); this makes that explicit instead of
+   repeating the same declarations a page apart.
+   ============================================================ */
+
+.st-card {
+  background: #fff;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-card);
+  box-shadow: var(--st-shadow-card);
+  padding: 20px;
+  min-width: 0;
+}
+
+.st-card--flush {
+  padding: 0;
+  overflow: hidden;
+}
+
+.st-panel {
+  background: #fff;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-card);
+  box-shadow: var(--st-shadow-card);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.st-panel-pad {
+  padding: 20px 22px;
+}
+
+.st-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.st-panel-title {
+  font-family: var(--st-font-heading);
+  font-size: var(--st-fs-lg);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--st-on-surface);
+  display: block;
+}
+
+.st-panel-sub,
+.st-panel-subtitle {
+  margin: 3px 0 0;
+  font-size: var(--st-fs-base);
+  color: var(--st-ink-muted);
+  line-height: 1.5;
+}
+
+@media (max-width: 767px) {
+  .st-card {
+    padding: 16px;
+  }
+  .st-panel-pad {
+    padding: 16px;
+  }
+}
+
+/* ---- Icon tile ---- */
+.st-icon-tile {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: var(--st-radius-control);
+  display: grid;
+  place-items: center;
+  background: var(--st-navy-soft);
+  color: var(--st-primary);
+}
+
+.st-icon-tile .material-symbols-outlined {
+  font-size: 21px;
+}
+
+.st-icon-tile-sm {
+  width: 32px;
+  height: 32px;
+}
+
+.st-icon-tile-sm .material-symbols-outlined {
+  font-size: 17px;
+}
+
+.st-icon-tile-lg {
+  width: 48px;
+  height: 48px;
+}
+
+.st-icon-tile-lg .material-symbols-outlined {
+  font-size: 24px;
+}
+
+.st-icon-tile--navy {
+  background: var(--st-navy-soft);
+  color: var(--st-primary);
+}
+
+.st-icon-tile--teal {
+  background: var(--st-teal-soft);
+  color: var(--st-secondary);
+}
+
+.st-icon-tile--high,
+.st-icon-tile--risk {
+  background: var(--st-risk-high-soft);
+  color: var(--st-risk-high);
+}
+
+.st-icon-tile--moderate {
+  background: var(--st-risk-moderate-soft);
+  color: var(--st-risk-moderate);
+}
+
+.st-icon-tile--low {
+  background: var(--st-risk-low-soft);
+  color: var(--st-risk-low);
+}
+
+.st-icon-tile--neutral {
+  background: var(--st-risk-neutral-soft);
+  color: var(--st-risk-neutral);
+}
+
+/* ---- Stat / KPI tile: icon tile + label + a big number, optional
+   helper text and an optional 4px tone accent on the left edge. ---- */
+.st-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-card);
+  box-shadow: var(--st-shadow-sm);
+}
+
+.st-stat-label {
+  font-size: var(--st-fs-sm);
+  font-weight: 600;
+  color: var(--st-ink-muted);
+}
+
+.st-stat-value {
+  font-family: var(--st-font-heading);
+  font-size: var(--st-fs-3xl);
+  font-weight: 800;
+  color: var(--st-on-surface);
+  line-height: 1.1;
+}
+
+.st-stat-helper {
+  font-size: var(--st-fs-xs);
+  color: var(--st-ink-faint);
+}
+
+.st-stat--accent-high {
+  border-left: 4px solid var(--st-risk-high);
+}
+
+.st-stat--accent-moderate {
+  border-left: 4px solid var(--st-risk-moderate);
+}
+
+.st-stat--accent-low {
+  border-left: 4px solid var(--st-risk-low);
+}
+
+.st-stat--accent-navy {
+  border-left: 4px solid var(--st-primary);
+}
+
+.st-stat--accent-teal {
+  border-left: 4px solid var(--st-secondary);
+}
+
+/* ---- Empty state: icon circle, title, text, optional action. ---- */
+.st-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 40px 24px;
+  border: 1px dashed var(--st-line-strong);
+  border-radius: var(--st-radius-card);
+  background: #fff;
+}
+
+.st-empty .material-symbols-outlined {
+  font-size: 32px;
+  color: var(--st-ink-faint);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--st-background);
+  display: grid;
+  place-items: center;
+  margin: 0 0 6px;
+}
+
+.st-empty-title {
+  margin: 0;
+  font-weight: 700;
+  color: var(--st-on-surface);
+}
+
+.st-empty-text {
+  margin: 0;
+  font-size: var(--st-fs-base);
+  color: var(--st-ink-muted);
+  max-width: 420px;
+}
+
+.st-empty .st-btn {
+  margin-top: 16px;
+}
+
+/* ---- Class context banner: white bar with a navy left accent. Every
+   page that used this ended up overriding the same never-actually-shown
+   solid-navy default to reach this exact look, so it's now the default
+   itself. ---- */
+.st-class-context-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px 14px 14px;
+  background: #fff;
+  border: 1px solid var(--st-line);
+  border-left: 4px solid var(--st-primary);
+  border-radius: var(--st-radius-card);
+  box-shadow: var(--st-shadow-card);
+}
+
+@media (max-width: 767px) {
+  .st-class-context-banner {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+}
+
+/* ---- Insights panel (moved from dashboard.css unchanged). ---- */
+.st-insights {
+  background: var(--st-background);
+  border-radius: var(--st-radius-card);
+  padding: 14px 16px;
+  border: none;
+}
+
+.st-insights-title {
+  margin: 0 0 8px;
+  font-size: var(--st-fs-sm);
+  font-weight: 700;
+  text-transform: none;
+  color: var(--st-on-surface);
+}
+
+.st-insights ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.st-insights li {
+  display: flex;
+  gap: 8px;
+  font-size: var(--st-fs-base);
+  line-height: 1.45;
+  color: var(--st-ink-muted);
+}
+
+.st-bullet {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--st-primary);
+  flex: none;
+  margin-top: 7px;
+  font-size: 0;
+}

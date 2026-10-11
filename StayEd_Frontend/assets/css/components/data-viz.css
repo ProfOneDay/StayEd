@@ -1,0 +1,260 @@
+/* ============================================================
+   Data visualization: .st-risk-strip, .st-risk-legend*, .st-hbar*,
+   .st-segment, .chart-type-toggle/-btn, .chart-canvas-wrap. Moved
+   here unchanged from dashboard.css, which was already the single,
+   canonical (unscoped) source for all of these -- see the removed
+   comments there for the history of how that came to be.
+   Chart tooltips reuse the shared [data-tooltip]/[data-tip] component
+   in components/base.css -- nothing chart-specific to add here.
+   ============================================================ */
+
+.st-segment {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--st-background);
+  border-radius: var(--st-radius-control);
+  overflow-x: auto;
+  scrollbar-width: none;
+  max-width: 100%;
+  width: max-content;
+}
+
+.st-segment::-webkit-scrollbar {
+  display: none;
+}
+
+.st-segment button {
+  flex: 0 0 auto;
+  height: 32px;
+  padding: 0 12px;
+  border: none;
+  background: transparent;
+  border-radius: var(--st-radius-sm);
+  font-family: var(--st-font-body);
+  font-size: var(--st-fs-base);
+  font-weight: 500;
+  color: var(--st-ink-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.st-segment button:hover {
+  color: var(--st-on-surface);
+}
+
+.st-segment button.is-active {
+  background: #fff;
+  color: var(--st-primary);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(17, 26, 54, 0.12);
+}
+
+.st-risk-strip {
+  display: flex;
+  height: 14px;
+  border-radius: var(--st-radius-pill);
+  overflow: hidden;
+  gap: 3px;
+  background: var(--st-background);
+}
+
+.st-risk-strip span {
+  display: block;
+  min-width: 4px;
+}
+
+.st-risk-strip .high { background: var(--st-risk-high); flex-grow: 1; }
+.st-risk-strip .mod { background: var(--st-risk-moderate); flex-grow: 1; }
+.st-risk-strip .low { background: var(--st-risk-low); flex-grow: 1; }
+.st-risk-strip .none { background: var(--st-line-strong); flex-grow: 1; }
+
+.st-risk-legend {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.st-risk-legend-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 12px;
+  border-left: 3px solid;
+}
+
+.st-risk-legend-item.high { border-color: var(--st-risk-high); background: transparent; }
+.st-risk-legend-item.mod { border-color: var(--st-risk-moderate); background: transparent; }
+.st-risk-legend-item.low { border-color: var(--st-risk-low); background: transparent; }
+.st-risk-legend-item.none { border-color: var(--st-line-strong); background: transparent; }
+
+.st-risk-legend-item .count {
+  font-family: var(--st-font-heading);
+  font-weight: 800;
+  font-size: var(--st-fs-3xl);
+  line-height: 1.1;
+}
+
+.st-risk-legend-item.high .count { color: var(--st-risk-high-ink); }
+.st-risk-legend-item.mod .count { color: var(--st-risk-moderate-ink); }
+.st-risk-legend-item.low .count { color: var(--st-risk-low-ink); }
+.st-risk-legend-item.none .count { color: var(--st-ink-muted); }
+
+.st-risk-legend-item .name {
+  font-size: var(--st-fs-base);
+  color: var(--st-ink-muted);
+}
+
+.st-risk-legend-item .pct {
+  font-size: var(--st-fs-xs);
+  color: var(--st-ink-faint);
+}
+
+.chart-type-toggle {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--st-outline-variant);
+  border-radius: var(--st-radius-pill);
+  background: var(--st-surface-container-lowest, #fff);
+}
+
+.chart-type-btn {
+  border: none;
+  background: transparent;
+  padding: 5px 12px;
+  border-radius: var(--st-radius-pill);
+  font-family: var(--st-font-body);
+  font-size: var(--st-fs-sm);
+  font-weight: 600;
+  color: var(--st-on-surface-variant);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--st-t-hover, 150ms) ease, color var(--st-t-hover, 150ms) ease, transform var(--st-t-press, 90ms) ease;
+}
+
+.chart-type-btn.is-active {
+  background: var(--st-primary);
+  color: #fff;
+}
+
+.chart-type-btn:hover:not(.is-active) {
+  background: var(--st-info-light);
+}
+
+.chart-type-btn:active {
+  transform: scale(0.95);
+}
+
+.chart-canvas-wrap {
+  position: relative;
+  height: 260px;
+  margin-top: 10px;
+  min-height: 0;
+}
+
+.chart-canvas-wrap:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-canvas-wrap canvas {
+  flex: 1;
+  min-height: 0;
+  max-width: 100%;
+}
+
+.chart-canvas-note {
+  flex-shrink: 0;
+  margin: 10px 0 0;
+  font-size: var(--st-fs-xs);
+  color: var(--st-ink-faint);
+  text-align: center;
+}
+
+.st-hbars {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+}
+
+.st-hbar-row {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr) 56px;
+  align-items: center;
+  gap: 14px;
+}
+
+.st-hbar-label {
+  font-size: var(--st-fs-base);
+  font-weight: 600;
+  color: var(--st-on-surface);
+}
+
+.st-hbar-track {
+  position: relative;
+  height: 28px;
+  background: var(--st-background);
+  border-radius: var(--st-radius-sm);
+}
+
+.st-hbar {
+  height: 100%;
+  border-radius: var(--st-radius-sm);
+  width: var(--w, 0%);
+}
+
+.st-hbar--high { background: var(--st-risk-high); }
+.st-hbar--moderate { background: var(--st-risk-moderate); }
+.st-hbar--low { background: var(--st-risk-low); }
+
+.st-hbar-value {
+  text-align: left;
+  font-size: var(--st-fs-base);
+  font-weight: 700;
+  color: var(--st-on-surface);
+}
+
+.st-hbar-value small {
+  display: block;
+  font-weight: 500;
+  font-size: var(--st-fs-xs);
+  color: var(--st-ink-faint);
+}
+
+.st-hbar-scale {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr) 56px;
+  gap: 14px;
+  margin-top: -6px;
+}
+
+.st-hbar-scale div {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--st-fs-xs);
+  color: var(--st-ink-faint);
+}
+
+/* ---- Risk meter (probability bar in a table cell). ---- */
+.st-risk-meter {
+  height: 5px;
+  border-radius: var(--st-radius-pill);
+  background: var(--st-background);
+  overflow: hidden;
+}
+
+.st-risk-meter i {
+  display: block;
+  height: 100%;
+  border-radius: var(--st-radius-pill);
+  width: 0;
+  transition: width var(--st-t-fill, 800ms) var(--st-ease-out, ease);
+}
+
+.st-risk-cell--high .st-risk-meter i { background: var(--st-risk-high); }
+.st-risk-cell--moderate .st-risk-meter i { background: var(--st-risk-moderate); }
+.st-risk-cell--low .st-risk-meter i { background: var(--st-risk-low); }

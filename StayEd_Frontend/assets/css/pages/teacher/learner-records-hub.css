@@ -28,18 +28,9 @@ body[data-page="Learner Records"] .st-lr-toolbar{
     justify-content:flex-end;
 }
 
-/* Context banner: same light bar as Class Management (learner-records-hub.css
-   also hosts the shared base .st-class-context-banner* rules used by
-   Module Management -- only this page's look is overridden here). */
-body[data-page="Learner Records"] .st-class-context-banner{
-    background:#fff;
-    border:1px solid var(--st-line);
-    border-left:4px solid var(--st-primary);
-    border-radius:var(--st-radius-card);
-    box-shadow:var(--st-shadow-card);
-    padding:14px 16px 14px 14px;
-}
-
+/* .st-class-context-banner's shell now lives in components/surfaces.css
+   and already matches this page's look; only the content sub-parts
+   below are still this page's own. */
 body[data-page="Learner Records"] .st-class-context-banner-icon{
     color:var(--st-primary);
     background:var(--st-navy-soft);
@@ -120,10 +111,6 @@ body[data-page="Learner Records"] .st-lr-actions{
         order:-1;
         grid-column:1/-1;
     }
-    body[data-page="Learner Records"] .st-class-context-banner{
-        flex-wrap:wrap;
-        gap:12px;
-    }
     body[data-page="Learner Records"] .st-class-context-banner-icon{
         width:40px;
         height:40px;
@@ -156,35 +143,10 @@ body[data-page="Learner Records"] .st-lr-actions{
     body[data-page="Learner Records"] .st-lr-table td[data-col="risk"]{ order:3; padding-left:48px!important; }
 }
 
-/* Row menu: floating card popup. Also used by Student Registry and the
-   Teacher Dashboard's Student Registry Summary widget, for the same
-   View profile + Archive menu pattern. */
-body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu-trigger{
-    appearance:none;
-    width:34px;
-    height:34px;
-    border:1px solid var(--st-line-strong);
-    border-radius:var(--st-radius-control);
-    background:#fff;
-    display:grid;
-    place-items:center;
-    color:var(--st-on-surface);
-    cursor:pointer;
-    padding:0;
-    transition:background-color var(--st-t-hover, 150ms),border-color var(--st-t-hover, 150ms),transform var(--st-t-press, 90ms);
-}
-
-body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu-trigger:hover,
-body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu.is-open .st-row-menu-trigger{
-    border-color:var(--st-primary);
-    background:var(--st-navy-soft);
-    color:var(--st-primary);
-}
-
-body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu-trigger:active{
-    transform:scale(.94);
-}
-
+/* .st-row-menu-trigger now lives in components/table.css. Row menu:
+   floating card popup. Also used by Student Registry and the Teacher
+   Dashboard's Student Registry Summary widget, for the same View
+   profile + Archive menu pattern. */
 body:is([data-page="Learner Records"],[data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Teacher Dashboard"]) .st-row-menu-list{
     min-width:230px;
     padding:6px;
@@ -437,21 +399,10 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     display:inline-flex;
 }
 
-.st-row-menu-trigger{
-    background:none;
-    border:none;
-    padding:4px;
-    border-radius:50%;
-    color:var(--st-on-surface-variant);
-    cursor:pointer;
-    transition:var(--st-transition);
-    display:flex;
-}
-
-.st-row-menu-trigger:hover{
-    background:var(--st-surface-container);
-    color:var(--st-primary);
-}
+/* This unscoped .st-row-menu-trigger was dead: every page that renders
+   the trigger markup falls inside the page-list that used to override
+   it above with higher specificity. Now removed entirely; the one
+   definition is components/table.css. */
 
 .st-row-menu-list{
     display:none;
@@ -1438,18 +1389,12 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     color:var(--st-secondary);
 }
 
-.st-class-context-banner{
-    display:flex;
-    align-items:center;
-    gap:14px;
-    background:var(--st-primary);
-    border-radius:var(--st-radius-control);
-    box-shadow:var(--st-shadow-sm);
-    padding:16px 24px;
-    /* No margin-bottom: .st-content's gap:20px handles spacing between
-       top-level page sections now (this was a leftover from before that
-       existed, and doubled up to 44px on Learner Records/Module Management). */
-}
+/* The shell (background/border/radius/shadow/padding) is now the shared,
+   unscoped .st-class-context-banner in components/surfaces.css -- every
+   page that used this ended up overriding this exact shell away from its
+   old navy-fill default, so that override is now the default. Only the
+   content sub-parts below (icon/clc/level/name/meta/switch) are still
+   each page's own re-skin, left as-is for a later pass. */
 
 .st-class-context-banner-icon{
     color:var(--st-on-primary);

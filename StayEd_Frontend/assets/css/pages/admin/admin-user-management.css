@@ -56,12 +56,7 @@ body[data-page="User Management"] .st-field-grid-1col{
   grid-template-columns:1fr;
 }
 
-/* Full-width primary button (Reset Success's single "Done" action) --
-   .st-btn-block has no bare global definition, only a scoped one under
-   .auth-form (auth.css), so it needs its own rule here. */
-body[data-page="User Management"] .st-btn-block{
-  width:100%;
-}
+/* .st-btn-block is now a global modifier in components/buttons.css. */
 
 /* Reject modal: radio list of rejection reasons. */
 body[data-page="User Management"] .radio-list{

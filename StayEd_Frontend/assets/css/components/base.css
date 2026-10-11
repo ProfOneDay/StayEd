@@ -1,0 +1,90 @@
+/* ============================================================
+   Base component layer: cross-cutting rules that aren't a
+   component on their own, but every component (and every page)
+   depends on. Loaded first among components/*.css.
+   ============================================================ */
+
+/* The one, global [hidden] rule. A single global rule now wins over any
+   non-important same-element display rule regardless of selector
+   specificity, so no page needs its own "#some-id[hidden]{display:none}"
+   workaround. */
+[hidden] {
+  display: none !important;
+}
+
+/* Screen-reader-only text. A global utility needs to work on every page. */
+.st-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+a:focus-visible,
+button:focus-visible,
+.st-btn:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--st-secondary);
+  outline-offset: 2px;
+}
+
+input[type="checkbox"]:focus-visible,
+input[type="radio"]:focus-visible {
+  outline: 2px solid var(--st-secondary);
+  outline-offset: 1px;
+}
+
+/* Shared simple-animation keyframes -- several pages each defined their own
+   byte-identical copy of one of these under a different name. Kept here
+   once; the old per-page names were deleted and their animation: usages
+   repointed here. */
+@keyframes stFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes stPopIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes stFadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes stScaleIn {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes stShimmer {
+  to { background-position: -200% 0; }
+}
+
+@keyframes stSkeleton {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Global reduced-motion reset. Was duplicated page-by-page as
+   ".some-page-root *{animation:none!important;transition:none!important}"
+   in several files -- a universal selector already covers every one of
+   those roots, so this single rule replaces all of them. Pages that need
+   to additionally reset an animated end-state (opacity, transform,
+   stroke-dashoffset, a CSS custom property driving a width) still do that
+   themselves, scoped to their own elements, because this generic rule
+   can't know what that end-state should be. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

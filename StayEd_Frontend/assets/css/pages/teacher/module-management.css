@@ -17,21 +17,10 @@ body[data-page="Manage Modules"] [data-view-root] {
   gap: 20px;
 }
 
-/* ---------- Class context banner: white card, not the navy fallback ----------
-   The base .st-class-context-banner in learner-records-hub.css defaults to
-   a solid navy fill (background:var(--st-primary)) -- Learner Records
-   overrides that to a white card with a navy left accent, which is what
-   makes its dark on-surface icon/text/button colors below legible. This
-   page reused the shared banner markup but was missing that same
-   background override, so the icon tile and Switch button (also missing
-   until now) would otherwise render as dark-on-navy and be unreadable.
-   Mirrors body[data-page="Learner Records"] exactly. */
-body[data-page="Manage Modules"] .st-class-context-banner {
-  background: #fff;
-  border: 1px solid var(--st-line);
-  border-left: 4px solid var(--st-primary);
-}
-
+/* ---------- Class context banner ----------
+   .st-class-context-banner's shell (white card, navy left accent) is now
+   the shared, unscoped component in components/surfaces.css; only the
+   content sub-parts below are still this page's own. */
 body[data-page="Manage Modules"] .st-class-context-banner-clc {
   color: var(--st-ink-faint);
 }
@@ -90,10 +79,6 @@ body[data-page="Manage Modules"] .st-class-context-banner-switch .material-symbo
 }
 
 @media (max-width: 767px) {
-  body[data-page="Manage Modules"] .st-class-context-banner {
-    flex-wrap: wrap;
-    gap: 12px;
-  }
   body[data-page="Manage Modules"] .st-class-context-banner-icon {
     width: 40px;
     height: 40px;
@@ -228,86 +213,11 @@ body[data-page="Manage Modules"] .st-module-toolbar {
   padding: 0 20px 16px;
 }
 
-/* Matches the canonical .st-toolbar .st-search treatment (learner-records.css)
-   -- border on the wrapper, 8px radius, line-strong border color, hover/focus
-   states -- instead of the shared component's 4px/border-on-input default.
-   Height/padding stay at 44px/14px to match this page's own .st-select
-   below, rather than the 40px other pages use. */
+/* .st-module-search carries .st-search already, and .st-select's base
+   look now lives in components/forms.css; only layout stays here. */
 body[data-page="Manage Modules"] .st-module-search {
   flex: 1 1 260px;
   max-width: 380px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 44px;
-  padding: 0 14px;
-  border: 1px solid var(--st-line-strong);
-  border-radius: var(--st-radius-control);
-  background: #fff;
-  color: var(--st-ink-faint);
-}
-
-body[data-page="Manage Modules"] .st-module-search:hover {
-  border-color: var(--st-primary);
-}
-
-body[data-page="Manage Modules"] .st-module-search:focus-within {
-  border-color: var(--st-secondary);
-  box-shadow: 0 0 0 3px rgba(0, 106, 104, 0.12);
-}
-
-body[data-page="Manage Modules"] .st-module-search .material-symbols-outlined {
-  position: static;
-  top: auto;
-  left: auto;
-  transform: none;
-  flex: none;
-  color: inherit;
-}
-
-body[data-page="Manage Modules"] .st-module-search input {
-  height: 100%;
-  border: 0;
-  outline: 0;
-  flex: 1;
-  min-width: 0;
-  padding: 0;
-  font: inherit;
-  font-size: var(--st-fs-base);
-  background: none;
-  color: var(--st-on-surface);
-}
-
-body[data-page="Manage Modules"] .st-module-search input:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-/* .st-select has no shared/unscoped definition anywhere in the app (each
-   page that uses it defines its own) -- this page's file header comment
-   claiming it was "reused from shared component styles" was wrong, so the
-   status/sort dropdowns were rendering as bare native <select> elements
-   next to the properly-styled 44px .st-search input. Matched to the
-   global .st-search input's 44px height (not the 40px variant Learner
-   Records uses, since that page's search is also 40px via its own
-   page-scoped override, while this page's search stays at the global
-   default height), and to --st-radius-control (8px) for the corner
-   radius, matching every other page's controls instead of the sharper
-   4px --st-button-radius. */
-body[data-page="Manage Modules"] .st-select {
-  height: 44px;
-  border: 1px solid var(--st-outline-variant);
-  border-radius: var(--st-radius-control);
-  background: #fff;
-  padding: 0 34px 0 14px;
-  font: inherit;
-  font-size: var(--st-fs-base);
-  color: var(--st-on-surface);
-  appearance: none;
-  cursor: pointer;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%235a6275' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
 }
 
 /* "Clear filters" sits in line with the search/status/sort controls, pushed
@@ -345,22 +255,6 @@ body[data-page="Manage Modules"] .st-mm-clear-btn:active {
 
 body[data-page="Manage Modules"] .st-mm-clear-btn .material-symbols-outlined {
   font-size: 19px;
-}
-
-body[data-page="Manage Modules"] .st-select:hover {
-  border-color: var(--st-primary);
-}
-
-body[data-page="Manage Modules"] .st-select:focus {
-  outline: none;
-  border-color: var(--st-secondary);
-  box-shadow: var(--st-focus-ring);
-}
-
-body[data-page="Manage Modules"] .st-select:disabled {
-  background-color: var(--st-surface-container-low);
-  color: var(--st-on-surface-variant);
-  cursor: not-allowed;
 }
 
 /* ---------- Catalog: Module cell ---------- */

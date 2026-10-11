@@ -1,0 +1,236 @@
+/* ============================================================
+   Form controls: .st-field/.st-label, .st-input, .st-select,
+   .st-search, .st-toggle*, checkbox/radio. One definition each,
+   unscoped -- every page used to carry its own copy (or, for
+   .st-select, no shared copy at all, rendering as a bare native
+   <select> until a page remembered to style it itself).
+   ============================================================ */
+
+.st-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.st-field label,
+.st-field-label,
+.st-label {
+  display: block;
+  font-size: var(--st-fs-sm);
+  font-weight: 600;
+  color: var(--st-ink);
+  margin-bottom: 6px;
+}
+
+.st-input,
+.st-select {
+  width: 100%;
+  height: 40px;
+  border: 1px solid var(--st-line-strong);
+  border-radius: var(--st-radius-control);
+  background: #fff;
+  padding: 0 12px;
+  font: inherit;
+  font-size: var(--st-fs-base);
+  color: var(--st-ink);
+  transition: border-color var(--st-t-hover, 150ms), box-shadow var(--st-t-hover, 150ms);
+}
+
+.st-input-sm,
+.st-select-sm {
+  height: 34px;
+}
+
+.st-input:hover:not(:disabled):not([readonly]),
+.st-select:hover:not(:disabled) {
+  border-color: var(--st-primary);
+}
+
+.st-input:focus,
+.st-select:focus {
+  outline: none;
+  border-color: var(--st-secondary);
+  box-shadow: var(--st-focus-ring);
+}
+
+.st-input[readonly],
+.st-input:disabled,
+.st-select:disabled {
+  background: var(--st-background);
+  color: var(--st-ink-muted);
+  cursor: not-allowed;
+  border-color: var(--st-line);
+}
+
+/* One shared chevron for every <select>. */
+.st-select {
+  padding-right: 34px;
+  appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%235a6275' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+/* ---- Search box: border/radius/height on the wrapper, icon as a flex
+   sibling of the input (not absolutely positioned) -- the pattern every
+   page had already converged on independently of the shared component,
+   each describing it in a comment as "the canonical .st-toolbar
+   .st-search treatment" rather than the old default. ---- */
+.st-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--st-line-strong);
+  border-radius: var(--st-radius-control);
+  background: #fff;
+  color: var(--st-ink-faint);
+  transition: border-color var(--st-t-hover, 150ms), box-shadow var(--st-t-hover, 150ms);
+}
+
+.st-search:hover {
+  border-color: var(--st-primary);
+}
+
+.st-search:focus-within {
+  border-color: var(--st-secondary);
+  box-shadow: var(--st-focus-ring);
+}
+
+.st-search .material-symbols-outlined {
+  flex: none;
+  font-size: 18px;
+  color: inherit;
+}
+
+.st-search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--st-fs-base);
+  color: var(--st-on-surface);
+}
+
+.st-search input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.st-search--sm {
+  height: 34px;
+}
+
+.st-search--wide {
+  min-width: 280px;
+}
+
+/* ---- Checkbox / radio: consistent size and accent color everywhere.
+   accent-color is inherited, so a page that needs a bigger control (the
+   auth terms checkbox) only has to override width/height, not re-set
+   the color too. ---- */
+input[type="checkbox"],
+input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--st-primary);
+  cursor: pointer;
+}
+
+/* ---- Toggle switch. Was intentionally left unscoped in
+   profile-settings.css already (its only source, so every page's
+   toggle picked up the same look); moved here unchanged. ---- */
+.st-toggle {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  cursor: pointer;
+}
+
+.st-toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.st-toggle-track {
+  width: 44px;
+  height: 26px;
+  border-radius: var(--st-radius-pill);
+  background: var(--st-line-strong);
+  position: relative;
+  transition: background-color 200ms ease;
+}
+
+.st-toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(17, 26, 54, 0.25);
+  transition: transform 220ms var(--st-ease-out, cubic-bezier(0.2, 0.7, 0.2, 1));
+}
+
+.st-toggle input:checked + .st-toggle-track {
+  background: var(--st-secondary);
+}
+
+.st-toggle input:checked + .st-toggle-track .st-toggle-thumb {
+  transform: translateX(18px);
+}
+
+.st-toggle input:focus-visible + .st-toggle-track {
+  box-shadow: 0 0 0 3px rgba(0, 106, 104, 0.25);
+}
+
+.st-toggle:active .st-toggle-thumb {
+  width: 24px;
+}
+
+.st-toggle:has(input:disabled) {
+  cursor: not-allowed;
+}
+
+.st-toggle input:disabled + .st-toggle-track {
+  opacity: 0.5;
+}
+
+.st-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 0;
+}
+
+.st-toggle-row + .st-toggle-row {
+  border-top: 1px solid var(--st-line);
+}
+
+.st-toggle-row-title {
+  margin: 0;
+  font-weight: 600;
+  font-size: var(--st-fs-base);
+}
+
+.st-toggle-row-sub {
+  margin: 3px 0 0;
+  font-size: var(--st-fs-base);
+  color: var(--st-ink-muted);
+  max-width: 640px;
+}

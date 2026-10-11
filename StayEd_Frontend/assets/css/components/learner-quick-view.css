@@ -755,14 +755,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .st-qv-overlay,
-  .st-qv,
-  .st-qv-meter i,
-  .st-qv-stat .bar i,
-  .st-qv-body > * {
-    transition: none !important;
-    animation: none !important;
-  }
   .st-qv-body > * {
     opacity: 1;
     transform: none;

@@ -5,126 +5,21 @@
 }
 
 /* ============================================================
-   Shared table-card components: Student Registry, Learner Records,
-   Early Warning Alerts. New classes only -- .st-data-table, .st-pill,
-   .st-risk-badge, .st-row-actions, .st-icon-btn-sm, .st-pagination and
-   .st-search stay global (touched elsewhere in this file already) and
-   are not redefined here.
+   .st-table-card(+head/title/count)/.st-toolbar/.st-data-table/.st-pill/
+   .st-risk-badge/.st-row-actions/.st-icon-btn-sm/.st-pagination/
+   .st-search are all shared components (components/table.css etc.) --
+   not redefined here.
    ============================================================ */
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .num{
     font-variant-numeric:tabular-nums;
 }
 
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-table-card{
-    overflow:hidden;
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-table-card-head{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-    flex-wrap:wrap;
-    padding:16px 20px;
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-table-card-title{
-    margin:0;
-    font-family:var(--st-font-heading);
-    font-weight:700;
-    font-size: var(--st-fs-lg);
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-table-card-count{
-    font-size: var(--st-fs-base);
-    color:var(--st-ink-muted);
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    flex-wrap:wrap;
-    padding:0 20px 16px;
-}
-
+/* .st-search and .st-select base look now live in components/forms.css;
+   only this page's own layout context stays here. */
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar .st-search{
     flex:1 1 280px;
     min-width:0;
     max-width:420px;
-    height:40px;
-    padding:0 12px;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    border:1px solid var(--st-line-strong);
-    border-radius:var(--st-radius-control);
-    background:#fff;
-    color:var(--st-ink-faint);
-    transition:border-color var(--st-t-hover, 150ms),box-shadow var(--st-t-hover, 150ms);
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar .st-search:hover{
-    border-color:var(--st-primary);
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar .st-search:focus-within{
-    border-color:var(--st-secondary);
-    box-shadow:0 0 0 3px rgba(0,106,104,.12);
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar .st-search .material-symbols-outlined{
-    position:static;
-    top:auto;
-    left:auto;
-    transform:none;
-    flex:none;
-    color:inherit;
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar .st-search input{
-    height:100%;
-    border:0;
-    outline:0;
-    flex:1;
-    min-width:0;
-    padding:0;
-    font:inherit;
-    font-size: var(--st-fs-base);
-    background:none;
-    color:var(--st-on-surface);
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar .st-search input:focus{
-    outline:none;
-    box-shadow:none;
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-select{
-    height:40px;
-    border:1px solid var(--st-line-strong);
-    border-radius:var(--st-radius-control);
-    background:#fff;
-    padding:0 34px 0 12px;
-    font:inherit;
-    font-size: var(--st-fs-base);
-    color:var(--st-on-surface);
-    appearance:none;
-    cursor:pointer;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%235a6275' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-    background-repeat:no-repeat;
-    background-position:right 10px center;
-    transition:border-color var(--st-t-hover, 150ms),box-shadow var(--st-t-hover, 150ms);
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-select:hover{
-    border-color:var(--st-primary);
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-select:focus{
-    outline:none;
-    border-color:var(--st-secondary);
-    box-shadow:0 0 0 3px rgba(0,106,104,.12);
 }
 
 /* While viewing Archived learners the status filter is disabled -- every
@@ -136,79 +31,13 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     cursor:not-allowed;
 }
 
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-text-btn{
-    appearance:none;
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    height:40px;
-    padding:0 10px;
-    border:0;
-    border-radius:var(--st-radius-control);
-    background:none;
-    font:inherit;
-    font-size: var(--st-fs-base);
-    font-weight:600;
-    color:var(--st-ink-muted);
-    cursor:pointer;
-    transition:background-color var(--st-t-hover, 150ms),color var(--st-t-hover, 150ms),transform var(--st-t-press, 90ms);
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-text-btn:hover{
-    background:var(--st-background);
-    color:var(--st-on-surface);
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-text-btn:active{
-    transform:scale(.96);
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-text-btn .material-symbols-outlined{
-    font-size:19px;
-}
+/* .st-text-btn and .st-sort-btn now live in components/buttons.css. */
 
 /* Sort controls: buttons inside a header cell. Also used by the Teacher
    Dashboard's Student Registry Summary widget. */
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-data-table th.has-sort{
     padding-top:0;
     padding-bottom:0;
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-sort-btn{
-    appearance:none;
-    display:inline-flex;
-    align-items:center;
-    gap:2px;
-    border:0;
-    background:none;
-    padding:2px 4px;
-    margin:-2px -4px;
-    border-radius:var(--st-radius-sm);
-    font:inherit;
-    font-size: var(--st-fs-xs);
-    font-weight:600;
-    color:inherit;
-    cursor:pointer;
-    transition:background-color var(--st-t-hover, 150ms),color var(--st-t-hover, 150ms);
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-sort-btn:hover{
-    background:var(--st-risk-neutral-soft);
-    color:var(--st-on-surface);
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-sort-btn .st-sort-icon{
-    font-size:16px;
-    color:var(--st-ink-faint);
-    opacity:1;
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-sort-btn.is-sorted{
-    color:var(--st-primary);
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-sort-btn.is-sorted .st-sort-icon{
-    color:var(--st-primary);
 }
 
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-th-sep{
@@ -258,35 +87,9 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     text-align:right;
 }
 
-/* Two-line cell (e.g. Level & modality) */
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-two-line{
-    display:flex;
-    flex-direction:column;
-    gap:2px;
-    min-width:0;
-    white-space:normal;
-}
+/* .st-two-line now lives in components/avatar.css.
 
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-two-line strong{
-    font-weight:500;
-    font-size: var(--st-fs-base);
-    color:var(--st-on-surface);
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-two-line small{
-    font-size: var(--st-fs-xs);
-    color:var(--st-ink-faint);
-    white-space:nowrap;
-    display:flex;
-    align-items:center;
-    gap:4px;
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-two-line small .material-symbols-outlined{
-    font-size:15px;
-}
-
-/* Risk cell: badge + probability meter. Also used by the Teacher
+   Risk cell: badge + probability meter. Also used by the Teacher
    Dashboard's Student Registry Summary widget (components/dashboard/registry.html). */
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell{
     display:flex;
@@ -311,38 +114,16 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--moderate .st-risk-pct{ color:var(--st-risk-moderate-ink); }
 body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--low .st-risk-pct{ color:var(--st-risk-low-ink); }
 
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-meter{
-    height:5px;
-    border-radius:var(--st-radius-pill);
-    background:var(--st-background);
-    overflow:hidden;
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-meter i{
-    display:block;
-    height:100%;
-    border-radius:var(--st-radius-pill);
-    width:0;
-    transition:width var(--st-t-fill, 800ms) var(--st-ease-out, ease);
-}
-
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) [data-animate-rows].is-inview .st-risk-meter i{
+/* .st-risk-meter(+i/tones) now lives in components/data-viz.css. */
+[data-animate-rows].is-inview .st-risk-meter i{
     width:var(--w);
 }
 
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--high .st-risk-meter i{ background:var(--st-risk-high); }
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--moderate .st-risk-meter i{ background:var(--st-risk-moderate); }
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Early Warning Alerts"],[data-page="Teacher Dashboard"]) .st-risk-cell--low .st-risk-meter i{ background:var(--st-risk-low); }
-
 /* Status / new pill variants (Active/Pending/Archived/Inactive) */
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-pill--active{ background:var(--st-teal-soft); color:var(--st-teal-ink); }
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-pill--pending{ background:var(--st-risk-moderate-soft); color:var(--st-risk-moderate); }
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-pill--archived,
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-pill--inactive{ background:var(--st-background); color:var(--st-ink-faint); }
+/* .st-pill--active/--pending/--archived/--inactive now live in
+   components/pills.css. */
 
-/* Risk-tinted avatars in the learner cell */
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-learner-cell .st-avatar-initials--high{ background:var(--st-risk-high-soft); color:var(--st-risk-high); border-color:transparent; }
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-learner-cell .st-avatar-initials--moderate{ background:var(--st-risk-moderate-soft); color:var(--st-risk-moderate); border-color:transparent; }
+/* .st-avatar-initials--high/--moderate now live in components/avatar.css. */
 
 /* Visible tooltip for icon-only buttons -- look/content/reveal comes
    entirely from the shared [data-tip] component (components.css); only
@@ -374,8 +155,6 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
 
 /* ---- Mobile: rows become cards, header becomes a compact sort bar ---- */
 @media (max-width: 767px){
-    body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-table-card-head{ padding:14px 16px; }
-    body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar{ padding:0 16px 14px; }
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar .st-search{ flex:1 1 100%; max-width:none; }
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"],[data-page="Learner Records"],[data-page="Early Warning Alerts"]) .st-toolbar .st-select{ flex:1 1 calc(50% - 5px); min-width:0; }
 
@@ -739,23 +518,9 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     color:var(--st-on-surface);
 }
 
-.st-risk-meter{
-    margin-top:8px;
-    height:8px;
-    border-radius:var(--st-radius-pill);
-    background:var(--st-surface-container);
-    overflow:hidden;
-}
-
-.st-risk-meter-fill{
-    height:100%;
-    border-radius:var(--st-radius-pill);
-    transition:width .6s cubic-bezier(.16,1,.3,1);
-}
-
-.st-risk-meter-fill--high{ background:var(--st-risk-high); }
-.st-risk-meter-fill--moderate{ background:var(--st-risk-moderate); }
-.st-risk-meter-fill--low{ background:var(--st-risk-low); }
+/* .st-risk-meter now lives in components/data-viz.css. The
+   .st-risk-meter-fill child class that used to live here had no markup
+   anywhere in the app using it -- dead CSS, removed rather than moved. */
 
 .st-learner-modal-section-title{
     font-size: var(--st-font-size-caption);

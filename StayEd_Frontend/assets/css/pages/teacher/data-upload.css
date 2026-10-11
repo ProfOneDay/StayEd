@@ -1171,59 +1171,10 @@ body[data-page="Manual Enrollment"] .st-clc-success-icon .material-symbols-outli
     margin-top:8px;
 }
 
+/* .st-enroll-gate-search-input carries .st-search already (forms.css
+   provides the look). */
 .st-enroll-gate-search-input{
     margin-bottom:12px;
-}
-
-/* Matches the canonical .st-toolbar .st-search treatment (learner-records.css)
-   -- border on the wrapper, 8px radius, line-strong border color, hover/focus
-   states -- instead of the shared component's 4px/border-on-input default. */
-.st-enroll-gate-search-input{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    height:40px;
-    padding:0 12px;
-    border:1px solid var(--st-line-strong);
-    border-radius:var(--st-radius-control);
-    background:#fff;
-    color:var(--st-ink-faint);
-}
-
-.st-enroll-gate-search-input:hover{
-    border-color:var(--st-primary);
-}
-
-.st-enroll-gate-search-input:focus-within{
-    border-color:var(--st-secondary);
-    box-shadow:0 0 0 3px rgba(0,106,104,.12);
-}
-
-.st-enroll-gate-search-input .material-symbols-outlined{
-    position:static;
-    top:auto;
-    left:auto;
-    transform:none;
-    flex:none;
-    color:inherit;
-}
-
-.st-enroll-gate-search-input input{
-    height:100%;
-    border:0;
-    outline:0;
-    flex:1;
-    min-width:0;
-    padding:0;
-    font:inherit;
-    font-size: var(--st-fs-base);
-    background:none;
-    color:var(--st-on-surface);
-}
-
-.st-enroll-gate-search-input input:focus{
-    outline:none;
-    box-shadow:none;
 }
 
 .st-enroll-gate-results{

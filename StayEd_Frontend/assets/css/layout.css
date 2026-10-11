@@ -1019,17 +1019,7 @@ body {
   gap: var(--st-grid-gap);
 }
 
-.st-card {
-  background: var(--st-card-background);
-
-  border: var(--st-card-border);
-
-  border-radius: var(--st-radius-card);
-
-  padding: var(--st-card-padding);
-
-  box-shadow: var(--st-shadow-sm);
-}
+/* .st-card now lives in components/surfaces.css. */
 
 .st-section {
   margin-bottom: var(--st-section-gap);
@@ -1198,8 +1188,7 @@ body {
 .chart-type-btn,
 .st-segment button,
 .st-attention-view-all,
-.st-notif-banner-close,
-.st-avatar-initials {
+.st-notif-banner-close {
   transition: background-color var(--st-t-hover, 150ms) ease, color var(--st-t-hover, 150ms) ease,
     border-color var(--st-t-hover, 150ms) ease, box-shadow var(--st-t-hover, 150ms) ease,
     transform var(--st-t-press, 90ms) ease;
@@ -1215,10 +1204,6 @@ body {
   transform: scale(0.96);
 }
 
-.st-avatar-initials:hover {
-  box-shadow: 0 0 0 3px var(--st-navy-soft);
-}
-
 .st-panel-link .material-symbols-outlined {
   transition: transform var(--st-t-hover, 150ms) var(--st-ease-out, ease);
 }
@@ -1227,11 +1212,4 @@ body {
   transform: translateX(3px);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    transition: none !important;
-    animation: none !important;
-  }
-}
+/* Global reduced-motion reset now lives in components/base.css. */

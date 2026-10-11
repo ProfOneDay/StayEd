@@ -46,56 +46,11 @@ body:is([data-page="User Management"],[data-page="CLC Management"]) [data-animat
 body:is([data-page="User Management"],[data-page="CLC Management"]) [data-animate].is-inview .st-adm-strip{clip-path:inset(0 0 0 0 round 999px)}
 /* Table extras */
 body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:0 20px 16px}
-/* Matches the canonical .st-toolbar .st-search treatment (learner-records.css)
-   -- border on the wrapper, 8px radius, line-strong border color, hover/focus
-   states -- instead of the shared component's 4px/border-on-input default.
-   learner-records.css also lists these two data-page values in its own
-   .st-toolbar .st-search rule, but these admin pages use .st-adm-toolbar
-   (not .st-toolbar) so that rule never actually matches here -- this is
-   the one that does. */
+/* .st-search/.st-select base look now live in components/forms.css;
+   only this page's own flex sizing stays here. */
 body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-toolbar .st-search{
     flex:1 1 280px;
     max-width:420px;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    height:40px;
-    padding:0 12px;
-    border:1px solid var(--st-line-strong);
-    border-radius:var(--st-radius-control);
-    background:#fff;
-    color:var(--st-ink-faint);
-}
-body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-toolbar .st-search:hover{
-    border-color:var(--st-primary);
-}
-body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-toolbar .st-search:focus-within{
-    border-color:var(--st-secondary);
-    box-shadow:0 0 0 3px rgba(0,106,104,.12);
-}
-body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-toolbar .st-search .material-symbols-outlined{
-    position:static;
-    top:auto;
-    left:auto;
-    transform:none;
-    flex:none;
-    color:inherit;
-}
-body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-toolbar .st-search input{
-    height:100%;
-    border:0;
-    outline:0;
-    flex:1;
-    min-width:0;
-    padding:0;
-    font:inherit;
-    font-size: var(--st-fs-base);
-    background:none;
-    color:var(--st-on-surface);
-}
-body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-toolbar .st-search input:focus{
-    outline:none;
-    box-shadow:none;
 }
 body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-toolbar .st-select{width:220px}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-toolbar .st-btn-primary{margin-left:auto}
@@ -106,11 +61,8 @@ body:is([data-page="User Management"],[data-page="CLC Management"]) .st-learner-
 body:is([data-page="User Management"],[data-page="CLC Management"]) .teacher-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:var(--st-radius-pill);background:var(--st-navy-soft);color:var(--st-primary);font-size: var(--st-fs-xs);font-weight:600;white-space:nowrap}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .teacher-chip::before{content:"hub";font-family:"Material Symbols Outlined";font-size:14px;font-weight:400}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .more-chip{display:inline-flex;padding:3px 10px;border-radius:var(--st-radius-pill);background:var(--st-background);color:var(--st-ink-muted);font-size: var(--st-fs-xs);font-weight:600;border:1px dashed var(--st-line-strong)}
-body:is([data-page="User Management"],[data-page="CLC Management"]) .st-pill--pending{background:var(--st-risk-moderate-soft);color:var(--st-risk-moderate-ink);border-color:transparent}
-body:is([data-page="User Management"],[data-page="CLC Management"]) .st-pill--deactivated,
-body:is([data-page="User Management"],[data-page="CLC Management"]) .st-pill--archived{background:#f1f3f7;color:var(--st-ink-muted);border-color:transparent}
-body:is([data-page="User Management"],[data-page="CLC Management"]) .st-pill--active{background:var(--st-teal-soft);color:var(--st-teal-ink);border-color:transparent}
-body:is([data-page="User Management"],[data-page="CLC Management"]) .st-pill.st-pill--status::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+/* .st-pill--pending/--deactivated/--archived/--active/--status now live
+   in components/pills.css. */
 body:is([data-page="User Management"],[data-page="CLC Management"]) .archived-meta{display:block;margin-top:4px;font-size: var(--st-fs-xs);color:var(--st-ink-faint)}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .st-clc-cell{display:flex;align-items:center;gap:12px}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .st-clc-tile{width:36px;height:36px;flex:none;border-radius:var(--st-radius-card);display:grid;place-items:center;background:var(--st-navy-soft);color:var(--st-primary)}
@@ -121,8 +73,6 @@ body:is([data-page="User Management"],[data-page="CLC Management"]) .addr{font-s
 body:is([data-page="User Management"],[data-page="CLC Management"]) .st-teacher-count{display:inline-flex;align-items:center;gap:6px;font-size: var(--st-fs-base)}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .st-teacher-count .material-symbols-outlined{font-size:18px;color:var(--st-ink-faint)}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .st-teacher-count.is-zero{color:var(--st-ink-faint)}
-body:is([data-page="User Management"],[data-page="CLC Management"]) .st-btn-danger-outline{background:#fff;border:1px solid var(--st-line-strong);color:var(--st-risk-high-ink)}
-body:is([data-page="User Management"],[data-page="CLC Management"]) .st-btn-danger-outline:hover{background:var(--st-risk-high-soft);border-color:#e7b4b4}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .empty-state{display:flex;flex-direction:column;align-items:center;gap:6px;padding:36px 16px;text-align:center}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .empty-icon{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--st-background);color:var(--st-ink-faint)}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .empty-title{font-weight:600;font-size: var(--st-fs-md)}
@@ -202,10 +152,6 @@ body:is([data-page="User Management"],[data-page="CLC Management"]) .icon-circle
 body:is([data-page="User Management"],[data-page="CLC Management"]) .modal-actions{display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid var(--st-line)}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .modal-actions--split{justify-content:space-between}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .modal-actions .st-modal-actions-right{display:flex;gap:10px;flex-wrap:wrap}
-body:is([data-page="User Management"],[data-page="CLC Management"]) .st-btn-danger{background:var(--st-risk-high);color:#fff;border-color:var(--st-risk-high)}
-body:is([data-page="User Management"],[data-page="CLC Management"]) .st-btn-danger:hover{background:#9a1414}
-body:is([data-page="User Management"],[data-page="CLC Management"]) .st-btn-ghost{background:transparent;border-color:transparent;color:var(--st-ink-muted)}
-body:is([data-page="User Management"],[data-page="CLC Management"]) .st-btn-ghost:hover{background:var(--st-background);color:var(--st-on-surface)}
 @media (max-width: 767px){
   body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-overview{grid-template-columns:1fr;gap:12px}
   body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-overview .st-overview-total{border-right:0;border-bottom:1px solid var(--st-line);padding:4px 0 12px;margin:0;display:flex;align-items:baseline;gap:10px}
@@ -232,7 +178,6 @@ body:is([data-page="User Management"],[data-page="CLC Management"]) .quick-actio
 body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-sub{display:block;font-size: var(--st-fs-xs);color:var(--st-ink-faint);margin-top:2px}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-overview .st-overview-total .value{font-family:var(--st-font-heading);font-weight:800;font-size: var(--st-fs-4xl);line-height:1;letter-spacing:-.03em;color:var(--st-primary)}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-overview .st-overview-total .label{margin-top:6px;font-size: var(--st-fs-base);color:var(--st-ink-muted)}
-body:is([data-page="User Management"],[data-page="CLC Management"]) .st-pill.st-pill--status{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:var(--st-radius-pill);font-size: var(--st-fs-xs);font-weight:600}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .overlay .modal .detail-grid small,
 body:is([data-page="User Management"],[data-page="CLC Management"]) .overlay .modal .info-card small{text-transform:none;letter-spacing:normal;font-weight:500}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .overlay .modal .field input,

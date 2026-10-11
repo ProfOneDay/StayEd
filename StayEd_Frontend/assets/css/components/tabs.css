@@ -1,0 +1,31 @@
+/* ============================================================
+   .st-tabs / .st-tab -- underline style, navy active state.
+   (.st-segment, the pill-toggle style, lives in
+   components/data-viz.css next to the chart-type toggle it
+   shares a look with.)
+   ============================================================ */
+
+.st-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--st-outline-variant);
+}
+
+.st-tab {
+  padding: 12px 18px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--st-text-secondary);
+  font-weight: 600;
+  transition: var(--st-transition-default);
+}
+
+.st-tab:hover {
+  color: var(--st-primary);
+}
+
+.st-tab.active {
+  color: var(--st-primary);
+  border-bottom: 3px solid var(--st-primary);
+}

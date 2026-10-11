@@ -1,5 +1,16 @@
 @import url("./variables.css");
 
+@import url("./components/base.css");
+@import url("./components/buttons.css");
+@import url("./components/forms.css");
+@import url("./components/pills.css");
+@import url("./components/surfaces.css");
+@import url("./components/avatar.css");
+@import url("./components/table.css");
+@import url("./components/data-viz.css");
+@import url("./components/modal.css");
+@import url("./components/tabs.css");
+
 @import url("./components.css");
 
 @import url("./layout.css");

@@ -406,9 +406,4 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .st-sa * {
-    animation: none !important;
-    transition: none !important;
-  }
-}
+/* Global reduced-motion reset now lives in components/base.css. */

@@ -341,56 +341,13 @@ body[data-page="Class Management"] [data-animate-cards].is-inview > *{
     }
 }
 
-/* Restyled empty state (shared .st-empty from dashboard.css), scoped to
-   both pages -- other pages (notifications, early warning, etc.) keep the
-   default look. */
+/* .st-empty's look (icon circle/title/text) now lives in
+   components/surfaces.css and already matches this page's own look;
+   only the grid placement stays here. */
 body[data-page="CLC Overview"] .st-empty,
 body[data-page="Class Management"] .st-empty{
     grid-column:1/-1;
     flex:none;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    text-align:center;
-    gap:6px;
-    padding:40px 24px;
-    border:1px dashed var(--st-line-strong);
-    border-radius:var(--st-radius-card);
-    background:#fff;
-}
-
-body[data-page="CLC Overview"] .st-empty .material-symbols-outlined,
-body[data-page="Class Management"] .st-empty .material-symbols-outlined{
-    font-size:32px;
-    color:var(--st-ink-faint);
-    width:56px;
-    height:56px;
-    border-radius:50%;
-    background:var(--st-background);
-    display:grid;
-    place-items:center;
-    margin:0 0 6px;
-}
-
-body[data-page="CLC Overview"] .st-empty-title,
-body[data-page="Class Management"] .st-empty-title{
-    margin:0;
-    font-weight:600;
-    font-size: var(--st-fs-md);
-    color:var(--st-on-surface);
-}
-
-body[data-page="CLC Overview"] .st-empty-text,
-body[data-page="Class Management"] .st-empty-text{
-    margin:0;
-    font-size: var(--st-fs-base);
-    font-style:normal;
-    color:var(--st-ink-muted);
-    max-width:420px;
-}
-
-body[data-page="Class Management"] .st-empty .st-btn{
-    margin-top:16px;
 }
 
 @media (max-width: 767px){
@@ -619,24 +576,11 @@ body[data-page="CLC Overview"] .st-clc-showing-indicator{
 }
 
 /* ============================================================
-   Class Management: CLC context banner (white bar, not a solid block)
-   Base rules for .st-class-context-banner* live in
-   learner-records-hub.css and are shared with Learner Records and
-   Module Management -- only this page's look is overridden here.
+   Class Management: CLC context banner.
+   .st-class-context-banner's shell is now the shared, unscoped
+   component in components/surfaces.css; only the content sub-parts
+   below are still this page's own.
    ============================================================ */
-body[data-page="Class Management"] .st-class-context-banner{
-    display:flex;
-    align-items:center;
-    gap:14px;
-    padding:14px 16px 14px 14px;
-    background:#fff;
-    border:1px solid var(--st-line);
-    border-left:4px solid var(--st-primary);
-    border-radius:var(--st-radius-card);
-    box-shadow:var(--st-shadow-card);
-    margin-bottom:0;
-}
-
 body[data-page="Class Management"] .st-class-context-banner-icon{
     width:44px;
     height:44px;
@@ -719,10 +663,6 @@ body[data-page="Class Management"] .st-class-context-banner-switch:active{
     body[data-page="Class Management"] .st-page-header-actions .st-btn{
         width:100%;
         height:44px;
-    }
-    body[data-page="Class Management"] .st-class-context-banner{
-        flex-wrap:wrap;
-        gap:12px;
     }
     body[data-page="Class Management"] .st-class-context-banner-icon{
         width:40px;

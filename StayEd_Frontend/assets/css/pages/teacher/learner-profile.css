@@ -9,41 +9,8 @@ body[data-page="Learner Profile"] .st-content {
   gap: 20px;
 }
 
-/* ---------- Small shared building blocks for this page ---------- */
-body[data-page="Learner Profile"] .st-icon-tile {
-  width: 40px;
-  height: 40px;
-  flex: none;
-  border-radius: var(--st-radius-card);
-  display: grid;
-  place-items: center;
-  background: var(--st-navy-soft);
-  color: var(--st-primary);
-}
-body[data-page="Learner Profile"] .st-icon-tile .material-symbols-outlined {
-  font-size: var(--st-fs-xl);
-}
-body[data-page="Learner Profile"] .st-icon-tile--teal {
-  background: var(--st-teal-soft);
-  color: var(--st-secondary);
-}
-body[data-page="Learner Profile"] .st-icon-tile--risk {
-  background: var(--st-risk-high-soft);
-  color: var(--st-risk-high-ink);
-}
-
-body[data-page="Learner Profile"] .st-card {
-  background: #fff;
-  border: 1px solid var(--st-line);
-  border-radius: var(--st-radius-card);
-  box-shadow: var(--st-shadow-card);
-  padding: 20px 22px;
-  min-width: 0;
-}
-body[data-page="Learner Profile"] .st-card--flush {
-  padding: 0;
-  overflow: hidden;
-}
+/* .st-icon-tile(+tones)/.st-card/.st-card--flush now live in
+   components/surfaces.css. */
 body[data-page="Learner Profile"] .st-card-title {
   margin: 0;
   font-family: var(--st-font-heading);
@@ -1489,52 +1456,10 @@ body[data-page="Learner Profile"] .st-history-chip.is-active {
   font-weight: 600;
   box-shadow: 0 1px 2px rgba(17, 26, 54, 0.12);
 }
-/* Matches the canonical .st-toolbar .st-search treatment (learner-records.css)
-   -- border on the wrapper (not the global pattern's 4px border-on-input),
-   8px radius, hover/focus states -- so this search bar isn't the odd one
-   out against Student Registry/Learner Records/CLC Overview/Calendar. */
+/* .st-search base look now lives in components/forms.css; only this
+   page's own flex width stays here. */
 body[data-page="Learner Profile"] .st-history-filters .st-search {
   flex: 0 1 340px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 40px;
-  padding: 0 12px;
-  border: 1px solid var(--st-line-strong);
-  border-radius: var(--st-radius-control);
-  background: #fff;
-  color: var(--st-ink-faint);
-}
-body[data-page="Learner Profile"] .st-history-filters .st-search:hover {
-  border-color: var(--st-primary);
-}
-body[data-page="Learner Profile"] .st-history-filters .st-search:focus-within {
-  border-color: var(--st-secondary);
-  box-shadow: 0 0 0 3px rgba(0, 106, 104, 0.12);
-}
-body[data-page="Learner Profile"] .st-history-filters .st-search .material-symbols-outlined {
-  position: static;
-  top: auto;
-  left: auto;
-  transform: none;
-  flex: none;
-  color: inherit;
-}
-body[data-page="Learner Profile"] .st-history-filters .st-search input {
-  height: 100%;
-  border: 0;
-  outline: 0;
-  flex: 1;
-  min-width: 0;
-  padding: 0;
-  font: inherit;
-  font-size: var(--st-fs-base);
-  background: none;
-  color: var(--st-on-surface);
-}
-body[data-page="Learner Profile"] .st-history-filters .st-search input:focus {
-  outline: none;
-  box-shadow: none;
 }
 @media (max-width: 767px) {
   body[data-page="Learner Profile"] .st-history-filters .st-search {
@@ -2088,11 +2013,7 @@ body[data-page="Learner Profile"] .st-history-link {
 body[data-page="Learner Profile"] .st-history-link:hover {
   font-weight: 700;
 }
-body[data-page="Learner Profile"] .st-row-actions {
-  display: flex;
-  gap: 6px;
-  justify-content: flex-end;
-}
+/* .st-row-actions now lives in components/table.css. */
 body[data-page="Learner Profile"] .st-btn-danger-outline:hover {
   border-color: #e7b4b4 !important;
   background: var(--st-risk-high-soft) !important;
@@ -2190,12 +2111,6 @@ body[data-page="Learner Profile"] [data-animate] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body[data-page="Learner Profile"] *,
-  body[data-page="Learner Profile"] *::before,
-  body[data-page="Learner Profile"] *::after {
-    transition: none !important;
-    animation: none !important;
-  }
   body[data-page="Learner Profile"] .st-performance-progress-area,
   body[data-page="Learner Profile"] .st-performance-progress-path,
   body[data-page="Learner Profile"] .st-performance-progress-point,

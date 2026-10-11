@@ -1,20 +1,7 @@
 /* System Settings page — see CLAUDE_CODE_PROMPT_teacher-account-pages-v2.md.
    .st-sr-only is now a global utility in components.css. */
 
-body[data-page="System Settings"] .st-icon-tile{
-    width:40px;
-    height:40px;
-    flex:none;
-    border-radius:var(--st-radius-card);
-    display:grid;
-    place-items:center;
-    background:var(--st-navy-soft);
-    color:var(--st-primary);
-}
-
-body[data-page="System Settings"] .st-icon-tile .material-symbols-outlined{
-    font-size:21px;
-}
+/* .st-icon-tile now lives in components/surfaces.css. */
 
 body[data-page="System Settings"] .st-settings-bento{
     display:flex;

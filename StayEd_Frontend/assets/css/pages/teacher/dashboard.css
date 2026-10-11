@@ -128,16 +128,8 @@
   background: var(--st-line);
 }
 
-/* ---------- Filters ---------- */
-
-.st-filter-bar {
-  background: #fff;
-  padding: 14px 16px;
-  border-radius: var(--st-radius-card);
-  border: 1px solid var(--st-line);
-  box-shadow: var(--st-shadow-card);
-  min-width: 0;
-}
+/* ---------- Filters ----------
+   .st-filter-bar now lives in components/table.css. */
 
 .st-filter-row {
   display: grid;
@@ -175,47 +167,7 @@
   padding-left: 0;
 }
 
-.st-segment {
-  display: flex;
-  gap: 2px;
-  padding: 3px;
-  background: var(--st-background);
-  border-radius: var(--st-radius-control);
-  overflow-x: auto;
-  scrollbar-width: none;
-  max-width: 100%;
-  width: max-content;
-}
-
-.st-segment::-webkit-scrollbar {
-  display: none;
-}
-
-.st-segment button {
-  flex: 0 0 auto;
-  height: 32px;
-  padding: 0 12px;
-  border: none;
-  background: transparent;
-  border-radius: var(--st-radius-sm);
-  font-family: var(--st-font-body);
-  font-size: var(--st-fs-base); /* 13.5px */
-  font-weight: 500;
-  color: var(--st-ink-muted);
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.st-segment button:hover {
-  color: var(--st-on-surface);
-}
-
-.st-segment button.is-active {
-  background: #fff;
-  color: var(--st-primary);
-  font-weight: 600;
-  box-shadow: 0 1px 2px rgba(17, 26, 54, 0.12);
-}
+/* .st-segment now lives in components/data-viz.css. */
 
 .st-filter-controls {
   display: contents;
@@ -256,11 +208,6 @@
 
 .st-filter-apply .st-btn {
   width: 100%;
-  height: 38px;
-  padding: 0 16px;
-  border-radius: var(--st-radius-control);
-  font-family: var(--st-font-body);
-  font-size: var(--st-fs-base); /* 14px */
   justify-content: center;
 }
 
@@ -290,53 +237,13 @@
 .col-8 { grid-column: span 8; }
 .col-12 { grid-column: span 12; }
 
-/* ---------- Panel shell ---------- */
-
-.st-panel {
-  background: #fff;
-  border: 1px solid var(--st-line);
-  border-radius: var(--st-radius-card);
-  box-shadow: var(--st-shadow-card);
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.st-panel-pad {
-  padding: 20px 22px;
-}
-
-.st-panel-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
-  padding-bottom: 0;
-  border-bottom: none;
-}
+/* .st-panel(+pad/head/title/subtitle) now live in components/surfaces.css. */
 
 .st-head-actions {
   display: flex;
   align-items: center;
   gap: 14px;
   flex-wrap: wrap;
-}
-
-.st-panel-title {
-  font-family: var(--st-font-heading);
-  font-size: var(--st-fs-lg); /* 18px */
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--st-on-surface);
-  display: block;
-}
-
-.st-panel-subtitle {
-  font-size: var(--st-fs-base); /* 13.5px */
-  color: var(--st-ink-muted);
-  margin-top: 4px;
 }
 
 /* "View all" / "View logbook" / "View details" -- the one shared pattern
@@ -398,71 +305,8 @@
   color: var(--st-ink-muted);
 }
 
-.st-risk-strip {
-  display: flex;
-  height: 14px;
-  border-radius: var(--st-radius-pill);
-  overflow: hidden;
-  gap: 3px;
-  background: var(--st-background);
-}
-
-.st-risk-strip span {
-  display: block;
-  min-width: 4px;
-}
-
-.st-risk-strip .high { background: var(--st-risk-high); flex-grow: 1; }
-.st-risk-strip .mod { background: var(--st-risk-moderate); flex-grow: 1; }
-.st-risk-strip .low { background: var(--st-risk-low); flex-grow: 1; }
-.st-risk-strip .none { background: var(--st-line-strong); flex-grow: 1; }
-
-.st-risk-legend {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 16px;
-}
-
-.st-risk-legend-item {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding-left: 12px;
-  border-left: 3px solid;
-}
-
-/* background:transparent below neutralizes a pre-existing, unscoped
-   ".high/.moderate/.low { background: ... }" rule in admin-dashboard.css
-   (bare class selectors with no namespace) -- main.css imports every
-   page's CSS on every page, so that rule otherwise leaks in here and
-   fills these items with a solid color instead of just the left border. */
-.st-risk-legend-item.high { border-color: var(--st-risk-high); background: transparent; }
-.st-risk-legend-item.mod { border-color: var(--st-risk-moderate); background: transparent; }
-.st-risk-legend-item.low { border-color: var(--st-risk-low); background: transparent; }
-.st-risk-legend-item.none { border-color: var(--st-line-strong); background: transparent; }
-
-.st-risk-legend-item .count {
-  font-family: var(--st-font-heading);
-  font-weight: 800;
-  font-size: var(--st-fs-3xl); /* 28px */
-  line-height: 1.1;
-}
-
-.st-risk-legend-item.high .count { color: var(--st-risk-high-ink); }
-.st-risk-legend-item.mod .count { color: var(--st-risk-moderate-ink); }
-.st-risk-legend-item.low .count { color: var(--st-risk-low-ink); }
-.st-risk-legend-item.none .count { color: var(--st-ink-muted); }
-
-.st-risk-legend-item .name {
-  font-size: var(--st-fs-base); /* 13.5px */
-  color: var(--st-ink-muted);
-}
-
-.st-risk-legend-item .pct {
-  font-size: var(--st-fs-xs); /* 12.5px */
-  color: var(--st-ink-faint);
-}
+/* .st-risk-strip/.st-risk-legend(+item) now live in
+   components/data-viz.css. */
 
 .st-followup-card {
   display: flex;
@@ -512,79 +356,8 @@
   color: #8a6a3c;
 }
 
-/* ---------- Chart type toggle + canvas wrap (shared with admin dashboard
-   and admin reports -- see .chart-type-toggle usage there).
-   This is the canonical, only definition of these classes in the whole app
-   now -- they used to visually look like this on BOTH dashboards only
-   because the old admin-dashboard.css declared an unscoped, pill-shaped,
-   navy-active version of its own that (being loaded after this file in
-   main.css's @import chain) quietly won the cascade everywhere, including
-   here. That file's copy is gone now that admin-dashboard.css is scoped
-   to just its own page's extra rules, so this is promoted to be the real
-   shared source instead of a second competing definition. ---------- */
-
-.chart-type-toggle {
-  display: inline-flex;
-  flex-shrink: 0;
-  gap: 2px;
-  padding: 2px;
-  border: 1px solid var(--st-outline-variant);
-  border-radius: var(--st-radius-pill);
-  background: var(--st-surface-container-lowest, #fff);
-}
-
-.chart-type-btn {
-  border: none;
-  background: transparent;
-  padding: 5px 12px;
-  border-radius: var(--st-radius-pill);
-  font-family: var(--st-font-body);
-  font-size: var(--st-fs-sm); /* 13px */
-  font-weight: 600;
-  color: var(--st-on-surface-variant);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background-color var(--st-t-hover, 150ms) ease, color var(--st-t-hover, 150ms) ease, transform var(--st-t-press, 90ms) ease;
-}
-
-.chart-type-btn.is-active {
-  background: var(--st-primary);
-  color: #fff;
-}
-
-.chart-type-btn:hover:not(.is-active) {
-  background: var(--st-info-light);
-}
-
-.chart-type-btn:active {
-  transform: scale(0.95);
-}
-
-.chart-canvas-wrap {
-  position: relative;
-  height: 260px;
-  margin-top: 10px;
-  min-height: 0;
-}
-
-.chart-canvas-wrap:not([hidden]) {
-  display: flex;
-  flex-direction: column;
-}
-
-.chart-canvas-wrap canvas {
-  flex: 1;
-  min-height: 0;
-  max-width: 100%;
-}
-
-.chart-canvas-note {
-  flex-shrink: 0;
-  margin: 10px 0 0;
-  font-size: var(--st-fs-xs); /* 12.5px */
-  color: var(--st-ink-faint);
-  text-align: center;
-}
+/* .chart-type-toggle/-btn, .chart-canvas-wrap(+canvas)/.chart-canvas-note
+   now live in components/data-viz.css. */
 
 /* ---------- Risk distribution: horizontal bars ---------- */
 
@@ -599,78 +372,8 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
   align-items: stretch;
 }
 
-.st-hbars {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 18px;
-}
-
-.st-hbar-row {
-  display: grid;
-  grid-template-columns: 92px minmax(0, 1fr) 56px;
-  align-items: center;
-  gap: 14px;
-}
-
-.st-hbar-label {
-  font-size: var(--st-fs-base); /* 14px */
-  font-weight: 600;
-  color: var(--st-on-surface);
-}
-
-.st-hbar-track {
-  position: relative;
-  height: 28px;
-  background: var(--st-background);
-  border-radius: var(--st-radius-sm);
-  /* Not overflow:hidden -- the bar's own width is always clamped to <=100%
-     of the track so it can never visually spill past it, and this track is
-     the hover target for the composition tooltip below, which needs to
-     render above the track rather than being clipped by it. */
-}
-
-.st-hbar {
-  height: 100%;
-  border-radius: var(--st-radius-sm);
-  width: var(--w, 0%);
-}
-
-/* Composition tooltip on hover: the CSS-drawn bars here aren't Chart.js,
-   so they need their own hover affordance -- but the look/content comes
-   entirely from the shared [data-tooltip] component (components.css). */
-
-.st-hbar--high { background: var(--st-risk-high); }
-.st-hbar--moderate { background: var(--st-risk-moderate); }
-.st-hbar--low { background: var(--st-risk-low); }
-
-.st-hbar-value {
-  text-align: left;
-  font-size: var(--st-fs-base); /* 14px */
-  font-weight: 700;
-  color: var(--st-on-surface);
-}
-
-.st-hbar-value small {
-  display: block;
-  font-weight: 500;
-  font-size: var(--st-fs-xs); /* 12px */
-  color: var(--st-ink-faint);
-}
-
-.st-hbar-scale {
-  display: grid;
-  grid-template-columns: 92px minmax(0, 1fr) 56px;
-  gap: 14px;
-  margin-top: -6px;
-}
-
-.st-hbar-scale div {
-  display: flex;
-  justify-content: space-between;
-  font-size: var(--st-fs-xs); /* 11.5px */
-  color: var(--st-ink-faint);
-}
+/* .st-hbars/-row/-label/-track/.st-hbar(+tones)/-value/-scale now live
+   in components/data-viz.css. */
 
 .st-riskchart-side {
   display: flex;
@@ -678,45 +381,7 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
   gap: 12px;
 }
 
-.st-insights {
-  background: var(--st-background);
-  border-radius: var(--st-radius-card);
-  padding: 14px 16px;
-  border: none;
-}
-
-.st-insights-title {
-  margin: 0 0 8px;
-  font-size: var(--st-fs-sm); /* 13px */
-  font-weight: 700;
-  text-transform: none;
-  color: var(--st-on-surface);
-}
-
-.st-insights ul {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.st-insights li {
-  display: flex;
-  gap: 8px;
-  font-size: var(--st-fs-base); /* 13.5px */
-  line-height: 1.45;
-  color: var(--st-ink-muted);
-}
-
-.st-bullet {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--st-primary);
-  flex: none;
-  margin-top: 7px;
-  font-size: 0;
-}
+/* .st-insights(+title)/.st-bullet now live in components/surfaces.css. */
 
 .st-bullet--error {
   background: var(--st-risk-high);
@@ -966,59 +631,11 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
   gap: 8px;
 }
 
+/* .st-search base look now lives in components/forms.css; only this
+   page's own fixed width stays here. */
 body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-search {
-  position: relative;
   width: 260px;
   flex: none;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 12px;
-  border: 1px solid var(--st-line-strong);
-  border-radius: var(--st-radius-control);
-  background: #fff;
-  color: var(--st-ink-faint);
-}
-
-body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-search:hover {
-  border-color: var(--st-primary);
-}
-
-body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-search:focus-within {
-  border-color: var(--st-secondary);
-  box-shadow: 0 0 0 3px rgba(0, 106, 104, 0.12);
-}
-
-body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-search .material-symbols-outlined {
-  position: static;
-  transform: none;
-  font-size: var(--st-fs-lg);
-  color: inherit;
-  pointer-events: none;
-}
-
-body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-search input {
-  border: 0;
-  outline: 0;
-  flex: 1;
-  min-width: 0;
-  width: 100%;
-  padding: 0;
-  font-size: var(--st-fs-base); /* 14px */
-  font-family: var(--st-font-body);
-  background: none;
-  color: var(--st-on-surface);
-}
-
-/* components.css's global .st-search input:focus still applies its own
-   border-color/box-shadow on top of this scoped version (only the resting
-   state was overridden above) -- without this, focusing the field shows
-   two concentric rings: one from that leaked box-shadow hugging the input,
-   another from .st-search:focus-within below hugging the wrapper. */
-body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-search input:focus {
-  outline: none;
-  box-shadow: none;
 }
 
 body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-tool-btn {
@@ -1049,60 +666,8 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-tool-
   overflow-x: auto;
 }
 
-/* .st-data-table, .st-learner-cell/-name/-id, .st-row-actions, .st-btn-xs,
-   .st-icon-btn-sm and .st-pagination / .st-page-btn are shared components
-   used by tables across the whole app (Learner Records, Student Registry,
-   Early Warning, Learner Import, admin Reports, etc.), not just the
-   dashboard's own registry -- deliberately UNSCOPED so every table in the
-   system gets this same look. Several of those other pages' own CSS files
-   also declare th/td font-size etc. for .st-data-table at their own (older,
-   larger) scale; those need reconciling in each page's file so they don't
-   fight these values via equal-specificity + later source order. */
-.st-data-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-  font-size: var(--st-fs-base); /* 14px */
-}
-
-.st-data-table thead tr {
-  background: var(--st-table-header);
-}
-
-.st-data-table th {
-  padding: 10px 22px;
-  font-size: var(--st-fs-xs); /* 12.5px */
-  font-weight: 600;
-  letter-spacing: normal;
-  text-transform: none;
-  color: var(--st-ink-muted);
-  border-top: 1px solid var(--st-line);
-  border-bottom: 1px solid var(--st-line);
-  white-space: nowrap;
-}
-
-.st-data-table th.is-center {
-  text-align: center;
-}
-
-.st-data-table tbody tr {
-  border-top: 0;
-  border-bottom: 1px solid var(--st-line);
-  transition: background-color var(--st-t-hover, 150ms) ease;
-  cursor: pointer;
-}
-
-.st-data-table tbody tr:hover {
-  background: #f8fafd;
-}
-
-.st-data-table td {
-  padding: 12px 22px;
-  color: var(--st-ink-muted);
-  vertical-align: middle;
-  white-space: nowrap;
-  font-size: var(--st-fs-base); /* 14px */
-}
+/* .st-data-table(+th/td/hover), .st-row-actions, .st-row-menu-trigger,
+   .st-pagination and .st-page-btn now live in components/table.css. */
 
 body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-registry-loading {
   text-align: center;
@@ -1111,13 +676,8 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
   font-style: italic;
 }
 
-.st-learner-cell {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* .st-avatar-initials/.st-pill/.st-risk-badge have a smaller-scaled base
+/* .st-learner-cell now lives in components/avatar.css.
+   .st-avatar-initials/.st-pill/.st-risk-badge have a smaller-scaled base
    size (components.css) for places like the sidebar/attention list --
    scoped to inside a table's learner cell so they match the table's pill
    sizing without changing those other, non-table usages. */
@@ -1127,21 +687,6 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
   flex: none;
   font-size: var(--st-fs-xs); /* 12.5px */
   font-weight: 700;
-}
-
-.st-data-table .st-pill {
-  padding: 3px 10px;
-  font-size: var(--st-fs-xs); /* 12.5px */
-  font-weight: 600;
-  background: var(--st-background);
-  color: var(--st-ink-muted);
-  border: 1px solid var(--st-line);
-}
-
-.st-data-table .st-risk-badge {
-  padding: 3px 10px;
-  font-size: var(--st-fs-xs); /* 12.5px */
-  font-weight: 600;
 }
 
 .st-learner-name {
@@ -1169,100 +714,9 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
   color: var(--st-ink-faint);
 }
 
-.st-row-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 4px;
-}
 
-.st-btn-xs {
-  height: 32px;
-  padding: 0 12px;
-  font-family: var(--st-font-body);
-  font-size: var(--st-fs-sm); /* 13px */
-  font-weight: 600;
-  border-radius: var(--st-radius-control);
-}
-
-.st-icon-btn-sm {
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  border-radius: var(--st-radius-sm);
-  font-family: var(--st-font-body);
-  color: var(--st-ink-muted);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.st-icon-btn-sm:hover {
-  background: var(--st-background);
-}
-
-.st-icon-btn-sm .material-symbols-outlined {
-  font-size: var(--st-fs-lg);
-}
-
-.st-pagination {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding: 14px 22px;
-  border-top: none;
-}
-
-.st-pagination-info {
-  font-size: var(--st-fs-base); /* 13.5px */
-  font-family: var(--st-font-body);
-  color: var(--st-ink-muted);
-}
-
-.st-pagination-controls {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-wrap: wrap;
-  max-width: 100%;
-}
-
-.st-page-btn {
-  min-width: 34px;
-  height: 34px;
-  padding: 0 8px;
-  border: 1px solid transparent;
-  background: none;
-  border-radius: var(--st-radius-control);
-  font-family: var(--st-font-body);
-  font-size: var(--st-fs-base); /* 13.5px */
-  font-weight: 500;
-  color: var(--st-ink-muted);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.st-page-btn:hover:not(:disabled) {
-  background: var(--st-background);
-  color: var(--st-on-surface);
-}
-
-.st-page-btn.is-active {
-  background: var(--st-primary);
-  color: #fff;
-}
-
-.st-page-btn:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
+/* .st-pagination(+info/controls)/.st-page-btn now live in
+   components/table.css. */
 
 /* ---------- Responsive ---------- */
 
@@ -1286,8 +740,6 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
   .st-filter-row { grid-template-columns: 1fr 1fr; gap: 10px; }
   .st-filter-row > .st-filter-group--level { grid-column: 1 / -1; }
   .st-filter-apply { grid-column: 1 / -1; }
-  .st-filter-apply .st-btn { width: 100%; height: 42px; }
-  .st-panel-pad { padding: 16px; }
   .st-overview { grid-template-columns: 1fr; gap: 16px; }
   .st-overview-total {
     padding: 0 0 14px;
@@ -1440,37 +892,7 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
     color:var(--st-primary-container);
 }
 
-.st-empty{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    padding:32px;
-    gap:8px;
-    border:2px dashed rgba(195,198,207,.30);
-    border-radius:var(--st-radius-card);
-    background:var(--st-surface);
-}
-
-.st-empty .material-symbols-outlined{
-    font-size: var(--st-fs-4xl);
-    color:var(--st-outline);
-    margin-bottom:8px;
-}
-
-.st-empty-title{
-    font-size: var(--st-font-size-small);
-    font-weight:500;
-    color:var(--st-on-surface-variant);
-}
-
-.st-empty-text{
-    font-size: var(--st-font-size-label);
-    font-style:italic;
-    color:var(--st-outline);
-}
+/* .st-empty(+title/+text) now live in components/surfaces.css. */
 
 .st-alert-card{
     background:#fff;
