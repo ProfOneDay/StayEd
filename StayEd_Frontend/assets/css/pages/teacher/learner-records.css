@@ -214,9 +214,13 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
 /* Student Registry now has 8 columns (checkbox, Learner/LRN, Level,
    Modality, Risk, Latest activity, Status, Actions) -- tighter cell
    padding and a capped, ellipsis-truncated Latest activity column keep
-   it fitting at 1280px+ without the table's own horizontal scroll. */
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-reg-table th,
-body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-reg-table td{
+   it fitting at 1280px+ without the table's own horizontal scroll. Scoped
+   to Student Registry alone -- User Management and CLC Management only
+   have 4-5 columns, don't need the squeeze, and inheriting it just made
+   their tables read as cramped next to every other (un-tightened) table
+   in the app, which uses .st-data-table's plain, roomier default padding. */
+body[data-page="Student Registry"] .st-reg-table th,
+body[data-page="Student Registry"] .st-reg-table td{
     padding-left:14px;
     padding-right:14px;
 }
@@ -255,8 +259,8 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
    >=768px so these caps don't also bite the stacked mobile card layout
    below, which has its own, much roomier per-column widths. */
 @media (min-width: 768px) and (max-width: 1279px){
-    body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-reg-table th,
-    body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-reg-table td{
+    body[data-page="Student Registry"] .st-reg-table th,
+    body[data-page="Student Registry"] .st-reg-table td{
         padding-left:10px;
         padding-right:10px;
     }
