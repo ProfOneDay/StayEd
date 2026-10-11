@@ -160,6 +160,21 @@
   gap: 8px;
 }
 
+/* Every page's "View profile"/Edit/Archive/View logbook row-action button
+   was independently built with .st-btn-xs or .st-btn-sm, which read as a
+   noticeably smaller tier than .st-filter-apply's plain .st-btn (Apply
+   filters) despite doing a comparable "primary action for this row" job.
+   This is the one shared place all of them render through (every list
+   page's actions column goes through .st-row-actions), so resizing them
+   here once keeps every row-action button on the same base size as Apply
+   filters, instead of relocating the fix into each page's own JS/CSS. */
+.st-row-actions .st-btn-xs,
+.st-row-actions .st-btn-sm {
+  height: 38px;
+  padding: 0 16px;
+  font-size: var(--st-fs-base);
+}
+
 .st-row-menu-trigger {
   appearance: none;
   width: 32px;

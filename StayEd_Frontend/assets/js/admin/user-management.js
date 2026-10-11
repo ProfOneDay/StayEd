@@ -115,7 +115,7 @@ function renderTable(){
   tbody.innerHTML=pageRows.map((t,i)=>{
     let actions='';
     if(t.status==='pending'){
-      actions=`<button class="st-btn st-btn-primary st-btn-xs" onclick="openReview(${t.id})"><span class="material-symbols-outlined">fact_check</span>Review</button>`;
+      actions=`<button class="st-btn st-btn-primary st-btn-xs" onclick="openReview(${t.id})">Review</button>`;
     }else{
       actions=`<button class="st-btn st-btn-outline st-btn-xs" onclick="openEdit(${t.id})">Edit</button>`;
     }
