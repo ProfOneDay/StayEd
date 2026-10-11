@@ -18,8 +18,13 @@
    ============================================================ */
 /* Overview: teacher strip; legend items are the existing KPI filter buttons */
 body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-overview{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center}
-body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-overview .st-overview-total{appearance:none;border:0;background:none;font:inherit;text-align:left;cursor:pointer;border-radius:var(--st-radius-card);padding:8px 28px 8px 8px;margin:-8px 0 -8px -8px;border-right:1px solid var(--st-line);transition:background-color var(--st-t-hover,150ms)}
-body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-overview .st-overview-total:hover{background:var(--st-background)}
+/* The button shell (appearance/padding/margin/border/radius/hover) for
+   .st-overview-total now comes from the shared [data-filter-btn] rule
+   in components/data-viz.css -- this page's button carries that
+   attribute too, so it's the same rule as Student Registry/Early
+   Warning Alerts, not a hand-kept copy of the same values. Only the
+   "active" background stays here, since this page's own setFilter()
+   still toggles the plain .active class rather than .is-active. */
 body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-overview .kpi.active.st-overview-total{background:var(--st-navy-soft)}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-legend{display:grid;gap:12px;margin-top:16px}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-legend--3{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -152,9 +157,16 @@ body:is([data-page="User Management"],[data-page="CLC Management"]) .icon-circle
 body:is([data-page="User Management"],[data-page="CLC Management"]) .modal-actions{display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid var(--st-line)}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .modal-actions--split{justify-content:space-between}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .modal-actions .st-modal-actions-right{display:flex;gap:10px;flex-wrap:wrap}
+
+/* Teacher accounts table: each row shows exactly one action button --
+   "Review" (pending) or "Edit" (everything else). "Review" also carries
+   an icon, so left to its own content width it reads noticeably wider
+   than "Edit"; a shared min-width keeps every row's button the same size. */
+body[data-page="User Management"] .st-data-table td[data-col="actions"] .st-btn-xs{min-width:96px}
 @media (max-width: 767px){
   body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-overview{grid-template-columns:1fr;gap:12px}
-  body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-overview .st-overview-total{border-right:0;border-bottom:1px solid var(--st-line);padding:4px 0 12px;margin:0;display:flex;align-items:baseline;gap:10px}
+  /* Mobile .st-overview-total layout also now comes from the shared
+     (unscoped) rule in dashboard.css -- see the desktop note above. */
   body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-legend--3{grid-template-columns:repeat(3,minmax(0,1fr))}
   body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-legend .kpi b{font-size: var(--st-fs-xl)}
   body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-toolbar{padding:0 16px 14px}
@@ -176,7 +188,7 @@ body:is([data-page="User Management"],[data-page="CLC Management"]) .modal-actio
 }
 body:is([data-page="User Management"],[data-page="CLC Management"]) .quick-actions--neutral{border-color:var(--st-line);background:var(--st-background)}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-sub{display:block;font-size: var(--st-fs-xs);color:var(--st-ink-faint);margin-top:2px}
-body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-overview .st-overview-total .value{font-family:var(--st-font-heading);font-weight:800;font-size: var(--st-fs-4xl);line-height:1;letter-spacing:-.03em;color:var(--st-primary)}
+body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-overview .st-overview-total .value{font-family:var(--st-font-heading);font-weight:800;font-size: 3rem;line-height:1;letter-spacing:-.03em;color:var(--st-primary)}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .st-adm-overview .st-overview-total .label{margin-top:6px;font-size: var(--st-fs-base);color:var(--st-ink-muted)}
 body:is([data-page="User Management"],[data-page="CLC Management"]) .overlay .modal .detail-grid small,
 body:is([data-page="User Management"],[data-page="CLC Management"]) .overlay .modal .info-card small{text-transform:none;letter-spacing:normal;font-weight:500}

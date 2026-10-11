@@ -65,10 +65,11 @@
         </div>
 
         <section class="st-panel st-panel-pad st-overview" data-animate aria-label="Registry summary">
-          <div class="st-overview-total">
+          <button type="button" class="st-overview-total is-active" data-filter-btn data-filter="" aria-label="Show all learners">
             <div class="value num" data-mgmt-total data-countup>0</div>
             <div class="label">registered learners</div>
-          </div>
+            <span class="hint">Click a status to filter</span>
+          </button>
           <div>
             <div class="st-risk-strip" data-risk-strip role="img" aria-label="High, moderate, low and not yet assessed learners">
               <span class="high" data-risk-strip-high></span>
@@ -77,22 +78,26 @@
               <span class="none" data-risk-strip-unassessed></span>
             </div>
             <div class="st-risk-legend st-risk-legend--4">
-              <div class="st-risk-legend-item high">
+              <button type="button" class="st-risk-legend-item high" data-filter-btn data-filter="High" aria-label="Filter to high risk learners">
                 <span class="count num" data-mgmt-high data-countup>0</span>
                 <span class="name">High risk</span>
-              </div>
-              <div class="st-risk-legend-item mod">
+                <span class="pct num" data-mgmt-high-pct>0%</span>
+              </button>
+              <button type="button" class="st-risk-legend-item mod" data-filter-btn data-filter="Moderate" aria-label="Filter to moderate risk learners">
                 <span class="count num" data-mgmt-moderate data-countup>0</span>
                 <span class="name">Moderate risk</span>
-              </div>
-              <div class="st-risk-legend-item low">
+                <span class="pct num" data-mgmt-moderate-pct>0%</span>
+              </button>
+              <button type="button" class="st-risk-legend-item low" data-filter-btn data-filter="Low" aria-label="Filter to low risk learners">
                 <span class="count num" data-mgmt-low data-countup>0</span>
                 <span class="name">Low risk</span>
-              </div>
-              <div class="st-risk-legend-item none">
+                <span class="pct num" data-mgmt-low-pct>0%</span>
+              </button>
+              <button type="button" class="st-risk-legend-item none" data-filter-btn data-filter="Unassessed" aria-label="Filter to not yet assessed learners">
                 <span class="count num" data-mgmt-unassessed data-countup>0</span>
                 <span class="name">Not yet assessed</span>
-              </div>
+                <span class="pct num" data-mgmt-unassessed-pct>0%</span>
+              </button>
             </div>
           </div>
         </section>
@@ -127,6 +132,7 @@
               <option value="High">High Risk</option>
               <option value="Moderate">Moderate Risk</option>
               <option value="Low">Low Risk</option>
+              <option value="Unassessed">Not Yet Assessed</option>
             </select>
 
             <select class="st-select" data-mgmt-filter-status aria-label="Filter by status">

@@ -51,10 +51,11 @@
         </div>
 
         <section class="st-panel st-panel-pad st-overview" data-animate aria-label="Alert summary">
-          <div class="st-overview-total">
+          <button type="button" class="st-overview-total is-active" data-filter-btn data-filter="" aria-label="Show all alerts">
             <div class="value num" data-ewa-total data-countup>0</div>
             <div class="label">active alerts</div>
-          </div>
+            <span class="hint">Click a status to filter</span>
+          </button>
           <div>
             <div class="st-risk-strip" data-risk-strip role="img" aria-label="High, moderate and low risk alerts">
               <span class="high" data-risk-strip-high></span>
@@ -62,18 +63,21 @@
               <span class="low" data-risk-strip-low></span>
             </div>
             <div class="st-risk-legend st-risk-legend--3">
-              <div class="st-risk-legend-item high">
+              <button type="button" class="st-risk-legend-item high" data-filter-btn data-filter="High" aria-label="Filter to high risk alerts">
                 <span class="count num" data-ewa-high data-countup>0</span>
                 <span class="name">High risk</span>
-              </div>
-              <div class="st-risk-legend-item mod">
+                <span class="pct num" data-ewa-high-pct>0%</span>
+              </button>
+              <button type="button" class="st-risk-legend-item mod" data-filter-btn data-filter="Moderate" aria-label="Filter to moderate risk alerts">
                 <span class="count num" data-ewa-moderate data-countup>0</span>
                 <span class="name">Moderate risk</span>
-              </div>
-              <div class="st-risk-legend-item low">
+                <span class="pct num" data-ewa-moderate-pct>0%</span>
+              </button>
+              <button type="button" class="st-risk-legend-item low" data-filter-btn data-filter="Low" aria-label="Filter to low risk alerts">
                 <span class="count num" data-ewa-low data-countup>0</span>
                 <span class="name">Low risk</span>
-              </div>
+                <span class="pct num" data-ewa-low-pct>0%</span>
+              </button>
             </div>
           </div>
         </section>

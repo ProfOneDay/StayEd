@@ -56,6 +56,18 @@ body[data-page="Assessment Scores"] .st-badge-info {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  flex-shrink: 0;
+}
+
+/* The panel is a height-constrained flex column (max-height + overflow:
+   hidden below, for the sticky sidebar on desktop) -- without an explicit
+   flex-shrink:0, the search box's fixed 40px height (.st-search, forms.css)
+   shrinks along with everything else whenever the learner list's natural
+   content height doesn't fit, squashing it short and "pill"-looking. Mobile
+   never showed this (max-height:none there, see the 1023px breakpoint
+   below), which is why it only ever looked wrong on desktop. */
+.st-assessment-search {
+  flex-shrink: 0;
 }
 
 .st-assessment-learner-count {
@@ -72,6 +84,15 @@ body[data-page="Assessment Scores"] .st-badge-info {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  /* flex-basis 0 would make this item contribute nothing to the panel's
+     auto-computed height (the panel only has max-height, not a fixed
+     height, so there's no "extra space" otherwise for flex-grow to hand
+     it) -- collapses the whole list to 0px. flex-basis:auto instead
+     starts from the list's natural content size, so a short list just
+     renders at its full height with no scrolling, and only shrinks
+     (min-height:0 allows that) once the panel actually hits max-height. */
+  flex: 1 1 auto;
+  min-height: 0;
   gap: 4px;
 }
 
@@ -259,11 +280,6 @@ body[data-page="Assessment Scores"] .st-badge-info {
   text-align: left;
 }
 
-.st-assessment-subhead th {
-  padding-top: 0;
-  padding-bottom: 6px;
-}
-
 .st-assessment-section-row td {
   background: #fdf6d8;
   font-weight: 700;
@@ -303,12 +319,6 @@ body[data-page="Assessment Scores"] .st-badge-info {
   color: var(--st-on-surface-variant);
 }
 
-.st-assessment-input--wide {
-  width: 100%;
-  min-width: 140px;
-  text-align: left;
-}
-
 .st-assessment-input--date {
   width: 190px;
   min-width: 190px;
@@ -320,31 +330,6 @@ body[data-page="Assessment Scores"] .st-badge-info {
   width: 110px;
   min-width: 110px;
   text-align: center;
-}
-
-
-.st-assessment-rating-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  background: var(--st-primary);
-  color: #fff;
-  padding: 14px 16px;
-  font-weight: 700;
-  font-size: var(--st-font-size-label);
-}
-
-.st-assessment-rating-input {
-  width: 120px;
-  height: 36px;
-  padding: 0 10px;
-  border: none;
-  border-radius: var(--st-radius-sm);
-  text-align: center;
-  font-weight: 700;
-  color: var(--st-risk-low);
-  background: #fff;
 }
 
 /* Computed A&E passing-likelihood summary. */
@@ -581,10 +566,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
 
 .st-assessment-table th:first-child,
 .st-assessment-table td:first-child { width: 46%; }
-.st-assessment-subhead th { padding-top: 4px; }
 .st-assessment-input { width: 72px; height: 34px; padding: 0 8px; }
-.st-assessment-input--wide { min-width: 180px; }
-.st-assessment-rating-banner { flex-wrap: wrap; row-gap: 10px; }
 
 @media (max-width: 1023px) {
   .st-assessment-scores-layout { grid-template-columns: 1fr; }
@@ -699,8 +681,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
   text-align: center;
 }
 
-[data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-table td:nth-child(4),
-[data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-subhead th:nth-child(4) {
+[data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-table td:nth-child(4) {
   padding-left: 18px;
   padding-right: 18px;
   text-align: center;

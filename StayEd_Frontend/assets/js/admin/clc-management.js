@@ -46,20 +46,7 @@ const ST_REDUCE_MOTION=matchMedia('(prefers-reduced-motion: reduce)').matches;
 // Counts a [data-countup] element up from its previous value to `value`
 // over ~800ms (ease-out-cubic), mirroring the dashboard/registry pattern.
 function countTo(el,value){
-  if(!el) return;
-  const end=Number(value);
-  if(ST_REDUCE_MOTION||!Number.isFinite(end)){ el.textContent=value; return; }
-  const start=Number(el.dataset.final??0)||0;
-  el.dataset.final=end;
-  const t0=performance.now();
-  const dur=800;
-  const tick=(t)=>{
-    const k=Math.min(1,(t-t0)/dur);
-    const eased=1-Math.pow(1-k,3);
-    el.textContent=Math.round(start+(end-start)*eased);
-    if(k<1) requestAnimationFrame(tick);
-  };
-  requestAnimationFrame(tick);
+  Utils.countTo(el, value);
 }
 
 function replay(el){
@@ -70,36 +57,7 @@ function replay(el){
 
 function statusBadge(s){return `<span class="st-pill st-pill--status st-pill--${s}">${s==='active'?'Active':'Inactive'}</span>`}
 function clcCode(c){return `CLC-2026-${String(c.id).padStart(3,'0')}`}
-function renderPagination(containerId,totalItems,page,pageSize,onPageChange){
-  const container=document.getElementById(containerId);
-  const totalPages=Math.max(1,Math.ceil(totalItems/pageSize));
-  const startItem=totalItems===0?0:(page-1)*pageSize+1;
-  const endItem=Math.min(page*pageSize,totalItems);
-  const addBtn=p=>`<button class="st-page-btn ${p===page?'is-active':''}" data-page="${p}">${p}</button>`;
-  let pageBtns='';
-  if(totalPages<=7){
-    for(let p=1;p<=totalPages;p++) pageBtns+=addBtn(p);
-  }else{
-    pageBtns+=addBtn(1);
-    if(page>3) pageBtns+='<span class="st-page-ellipsis">…</span>';
-    const start=Math.max(2,page-1), end=Math.min(totalPages-1,page+1);
-    for(let p=start;p<=end;p++) pageBtns+=addBtn(p);
-    if(page<totalPages-2) pageBtns+='<span class="st-page-ellipsis">…</span>';
-    pageBtns+=addBtn(totalPages);
-  }
-  container.innerHTML=`
-    <span class="st-pagination-info">Showing ${startItem}–${endItem} of ${totalItems} entries</span>
-    <div class="st-pagination-controls">
-      <button class="st-page-btn" id="${containerId}-prev" ${page<=1?'disabled':''} aria-label="Previous page"><span class="material-symbols-outlined">chevron_left</span></button>
-      ${pageBtns}
-      <button class="st-page-btn" id="${containerId}-next" ${page>=totalPages?'disabled':''} aria-label="Next page"><span class="material-symbols-outlined">chevron_right</span></button>
-    </div>`;
-  container.querySelectorAll('.st-page-btn[data-page]').forEach(btn=>btn.addEventListener('click',()=>onPageChange(+btn.dataset.page)));
-  const prevBtn=document.getElementById(`${containerId}-prev`);
-  const nextBtn=document.getElementById(`${containerId}-next`);
-  if(prevBtn) prevBtn.addEventListener('click',()=>{if(page>1)onPageChange(page-1)});
-  if(nextBtn) nextBtn.addEventListener('click',()=>{if(page<totalPages)onPageChange(page+1)});
-}
+const renderPagination=(...args)=>Utils.renderPagination(...args);
 
 function pct(part,total){ return total?Math.round((part/total)*100):0; }
 

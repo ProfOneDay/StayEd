@@ -8,11 +8,18 @@
 
 html {
   scroll-behavior: smooth;
-  /* Reserves the scrollbar's width whether or not a given page actually
-     overflows, so centered content (e.g. the nav logo) doesn't shift a
-     few pixels sideways when navigating from a non-scrolling page (the
-     landing page, which is locked to 100vh) to one that scrolls. */
-  scrollbar-gutter: stable;
+  /* No scrollbar-gutter:stable -- that reserved the scrollbar's width on
+     every page even when it had nothing to scroll, which meant a page
+     that fits in one viewport (the landing page, most dialogs) always
+     rendered a bit narrower than its full available width for no reason.
+     Without it, a page's width can shift slightly when navigating to/from
+     one that actually scrolls, but every page now gets its full width
+     when it has no scrollbar to make room for. */
+  /* Firefox equivalent of the ::-webkit-scrollbar-* rules below -- both
+     are inherited properties, so setting them once here covers every
+     scrollable descendant in the app. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--st-scrollbar-thumb) transparent;
 }
 
 body {
@@ -28,7 +35,14 @@ body {
 
   min-height: 100vh;
 
-  overflow-x: hidden;
+  /* clip, not hidden: per spec, a non-visible overflow-x with no
+     overflow-y set makes the browser compute overflow-y as auto too,
+     turning body into its own scroll container -- that breaks
+     .st-navbar's position:sticky, which needs to stick to the real
+     viewport scroll, not a scroll box on body. clip doesn't trigger that
+     "other axis becomes auto" rule, so it clips horizontal overflow the
+     same way hidden did without the side effect. */
+  overflow-x: clip;
 }
 
 .st-app {
@@ -183,12 +197,6 @@ body {
   letter-spacing: -0.01em;
 
   color: #FFFFFF;
-}
-
-.st-brand-icon {
-  font-size: var(--st-fs-3xl);
-
-  color: var(--st-secondary-container);
 }
 
 .st-brand-logo {
@@ -350,7 +358,7 @@ body {
 .st-submenu-caret {
   margin-left: auto;
 
-  font-size: var(--st-font-size-body-lg) !important;
+  font-size: var(--st-font-size-body-lg);
 
   transition: transform 200ms var(--st-ease-out, ease);
 }
@@ -969,6 +977,13 @@ body {
   font-weight: 600;
 }
 
+/* A transparent track plus an inset thumb (padding-box background-clip
+   behind a transparent border) reads as a slim floating pill instead of a
+   flat-colored rectangle cutting through a rounded card's corners -- the
+   opaque track was the actual problem (see the now-removed per-page
+   workaround this replaced on the landing page's login panel), not
+   something that needed a container-specific fix. One definition for
+   every scrollbar across the app, admin and teacher pages included. */
 ::-webkit-scrollbar {
   width: var(--st-scrollbar-width);
 
@@ -976,53 +991,22 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--st-scrollbar-track);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--st-scrollbar-thumb);
-
+  background-color: var(--st-scrollbar-thumb);
+  background-clip: padding-box;
+  border: 3px solid transparent;
   border-radius: var(--st-radius-pill);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--st-outline);
+  background-color: var(--st-outline);
 }
 
 .st-hidden {
   display: none !important;
-}
-
-.st-flex {
-  display: flex;
-}
-
-.st-flex-between {
-  display: flex;
-
-  justify-content: space-between;
-
-  align-items: center;
-}
-
-.st-flex-center {
-  display: flex;
-
-  justify-content: center;
-
-  align-items: center;
-}
-
-.st-grid {
-  display: grid;
-
-  gap: var(--st-grid-gap);
-}
-
-/* .st-card now lives in components/surfaces.css. */
-
-.st-section {
-  margin-bottom: var(--st-section-gap);
 }
 
 @media (max-width: 1023px) {
@@ -1183,7 +1167,6 @@ body {
    dashboard-only "fill in on view" panel animations.
    ============================================================ */
 .st-page-btn,
-.st-tool-btn,
 .st-icon-btn-sm,
 .chart-type-btn,
 .st-segment button,
@@ -1195,7 +1178,6 @@ body {
 }
 
 .st-page-btn:active:not(:disabled),
-.st-tool-btn:active,
 .st-icon-btn-sm:active,
 .chart-type-btn:active,
 .st-segment button:active,

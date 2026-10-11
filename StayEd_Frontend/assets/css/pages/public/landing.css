@@ -1,5 +1,9 @@
-/* The whole page fits in one viewport, no scrolling -- nav and footer take
-   their natural height, the hero flexes to fill whatever's left. */
+/* The whole page fits in one viewport -- nav and footer take their
+   natural height, the hero flexes to fill whatever's left. No page-level
+   scrollbar: when content doesn't fit, the hero's own inner content
+   (.st-landing-hero-intro / the auth panels, further down) scrolls
+   internally within the space it's given instead, so the nav/photo/
+   footer frame stays fixed and only the text in the middle scrolls. */
 .st-landing {
   height: 100vh;
   overflow: hidden;
@@ -312,7 +316,11 @@
   position: absolute;
   right: var(--st-margin-mobile);
   bottom: 10px;
-  z-index: 1;
+  /* No z-index -- it doesn't need to be lifted above anything (it only
+     has to sit over the photo, which is already behind it via negative
+     z-index), and doing so bumped it above .st-landing-hero-inner (which
+     has no z-index of its own, i.e. z-index:auto) regardless of DOM
+     order, putting this watermark over the auth panels/modal too. */
   font-size: var(--st-font-size-micro);
   color: rgba(255, 255, 255, 0.45);
   letter-spacing: 0.02em;
@@ -414,6 +422,10 @@
      silently invisible. */
   max-height: 100%;
   overflow-y: auto;
+  /* Without this the scrollbar thumb (11px, see variables.css) sits flush
+     against the wrapped text with no gutter, reading as if it's crowding
+     the copy instead of belonging to the column's own right edge. */
+  padding-right: 16px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -425,7 +437,12 @@
 .st-landing-hero-signup,
 .st-landing-hero-forgot,
 .st-landing-hero-pending {
-  max-width: 460px;
+  /* Matches the panel column's own flex-basis at desktop
+     (.st-landing-hero-panels, below) -- 460px left a wide dead gap of bare
+     photo on windows between phone-width and the 768px breakpoint, where
+     this is still the only thing in the row (no intro column sharing the
+     space yet) but there's well over 460px available to fill. */
+  max-width: 560px;
   /* Capped to the row's own height, not just centered -- otherwise a
      panel taller than the available space (signup, mainly) gets its top
      and bottom both clipped by the hero's overflow:hidden instead of
@@ -445,14 +462,24 @@
   padding: 6px 16px;
 }
 
-/* Fluid type: scales continuously with viewport width between a 34px
-   floor (narrow phones) and a 44px ceiling (desktop), instead of jumping
-   at a single breakpoint -- a hard jump meant a window just under/over
-   768px CSS width could look identical to (or barely bigger than) a
-   phone's, which read as "desktop and mobile are the same size". */
+/* Fluid type: scales continuously with viewport width between a 28px
+   floor (320px, the narrowest common phone) and a 44px ceiling (1280px+
+   desktop), instead of jumping at a single breakpoint -- a hard jump
+   meant a window just under/over 768px CSS width could look identical to
+   (or barely bigger than) a phone's, which read as "desktop and mobile
+   are the same size". The old 34px floor kicked in as early as ~387px,
+   so anything narrower (most phones) was frozen at that size with no
+   further response to width -- this floor only arrives at the actual
+   320px low end, so it keeps scaling down across the whole phone range.
+   Coefficient is 1.6667vw, not 1.6667/16 -- 1vw is already a length (1%
+   of viewport width in px), so it doesn't get divided by 16 the way the
+   22.667px base did to become 1.4167rem; a previous pass divided it a
+   second time, landing on 0.1042vw, ~16x too shallow a slope -- the
+   preferred value barely grew at all, so it sat near the 28px floor at
+   every realistic width, phone or desktop alike. */
 .st-landing-hero-title {
   font-family: var(--st-font-heading);
-  font-size: clamp(2.125rem, 1.9rem + 0.93vw, 2.75rem);
+  font-size: clamp(1.75rem, 1.4167rem + 1.6667vw, 2.75rem);
   font-weight: 800;
   line-height: 1.15;
   color: #fff;
@@ -473,7 +500,13 @@
   max-width: 340px;
 }
 
-@media (min-width: 480px) {
+/* 768px, not 480 -- everything else in this hero (intro centering,
+   subtitle/divider margins just below) treats up to 767px as "mobile"
+   (see the max-width:767px block further down), so switching the CTAs to
+   a side-by-side row at 480 put two buttons sharing a row as narrow as a
+   large phone, cramped well before the rest of the hero stops treating
+   the viewport as mobile. */
+@media (min-width: 768px) {
   .st-landing-hero-cta {
     flex-direction: row;
     max-width: none;
@@ -484,7 +517,7 @@
   width: 100%;
 }
 
-@media (min-width: 480px) {
+@media (min-width: 768px) {
   .st-landing-hero-cta .st-btn {
     width: auto;
   }
@@ -572,8 +605,10 @@
    room for the intro's full type scale -- the "Create account" CTA (the
    2nd, lower button) ended up mostly past the intro's own overflow-y:auto
    clip line, tappable only after scrolling the card, which isn't obvious
-   and reads as "the button doesn't work". Compacting the whole stack
-   keeps both CTAs on-screen without scrolling on common device heights. */
+   and reads as "the button doesn't work". Compacting the stack's spacing
+   keeps both CTAs on-screen without scrolling on common device heights --
+   font-size stays driven only by width (the title's clamp() above), never
+   by viewport height. */
 @media (max-height: 700px) {
   .st-landing-hero {
     padding-top: 16px;
@@ -582,15 +617,6 @@
 
   .st-landing-hero-intro {
     gap: 12px;
-  }
-
-  .st-landing-hero-title {
-    font-size: var(--st-fs-2xl);
-  }
-
-  .st-landing-hero-subtitle {
-    font-size: var(--st-font-size-label);
-    line-height: 1.45;
   }
 
   .st-landing-hero-cta {
@@ -632,7 +658,7 @@
 .st-landing-login-panel {
   position: relative;
   width: 100%;
-  max-width: 460px;
+  max-width: 560px;
   background: rgba(255, 255, 255, 0.55);
   backdrop-filter: var(--st-glass-blur);
   -webkit-backdrop-filter: var(--st-glass-blur);
@@ -649,15 +675,11 @@
   scrollbar-color: rgba(18, 53, 91, 0.28) transparent;
 }
 
-/* The page-wide scrollbar theme uses an opaque track, which reads as a
-   flat gray block cutting through this panel's rounded, translucent
-   corners. Give it its own transparent-track, subtle-thumb treatment. */
+/* The page-wide scrollbar theme (layout.css) now has a transparent track
+   by default -- only this panel's narrower width and navy-tinted thumb
+   (to suit its translucent glass look) still need overriding here. */
 .st-landing-login-panel::-webkit-scrollbar {
   width: 6px;
-}
-
-.st-landing-login-panel::-webkit-scrollbar-track {
-  background: transparent;
 }
 
 .st-landing-login-panel::-webkit-scrollbar-thumb {
@@ -721,12 +743,47 @@
     display: flex;
     align-items: center;
     gap: var(--st-margin-desktop);
+    /* On mobile, the intro column scrolls itself (its own narrow box,
+       scrollbar hugging the text). On desktop that same narrow scrollbar
+       read as stranded mid-page instead of belonging to the page -- so
+       here the stage stops clipping and instead lets overflowing intro
+       content fall through to .st-landing-hero-inner below, which spans
+       the full row and is the one that actually scrolls, putting the
+       scrollbar at the row's real right edge. */
+    overflow: visible;
+  }
+
+  /* Spans the full hero row (both columns), so its scrollbar sits at the
+     true right edge of the page instead of a single narrow column. */
+  .st-landing-hero-inner {
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .st-landing-hero-intro {
     flex: 0 1 min(38vw, 680px);
     min-width: 0;
     max-width: min(38vw, 680px);
+    /* align-self:center (inherited from the base rule) plus max-height:100%
+       (also inherited) is enough on its own: when content is shorter than
+       the row, max-height never clamps anything, so the box hugs its own
+       (shorter) content and the stage centers that snugly-fit box like
+       normal. When content is taller than the row, max-height clamps the
+       box down to exactly the row's height -- at that point centering an
+       already-exactly-row-height box has nothing left to offset, so it
+       reads as pinned to the top either way, and the excess content (with
+       overflow-y:visible below) only ever extends downward into
+       .st-landing-hero-inner's scrollable area. Forcing align-self:stretch
+       here would skip that "hug the content when it's short" step and
+       leave the box at full row height always, which looked top-pinned
+       with dead space below even when the content easily fit. */
+    /* The narrow per-column scroll (and its gutter padding) is a
+       mobile-only affordance now -- on desktop the whole row scrolls via
+       .st-landing-hero-inner above instead, so this box just lets its
+       content overflow past its own bottom edge rather than clipping or
+       scrolling itself. */
+    overflow-y: visible;
+    padding-right: 0;
     /* Always visible on desktop -- login/signup/forgot open beside it in
        .st-landing-hero-panels instead of covering it, so fading it out
        based on data-stage would just leave an empty gap next to the

@@ -24,8 +24,8 @@ class ReportPrinter {
   }
 
   static riskBadge(risk) {
-    const cls = { High: "high", Moderate: "moderate", Low: "low" }[risk] || "neutral";
-    return { html: `<span class="badge badge-${cls}">${this.escape(risk || "Not Yet Assessed")}</span>` };
+    const { key, label } = Utils.risk(risk);
+    return { html: `<span class="badge badge-${key}">${this.escape(label)}</span>` };
   }
 
   static downloadCsv(filename, headers, rows) {
@@ -253,6 +253,11 @@ class ReportPrinter {
     background: #12355b;
     border-color: #12355b;
   }
+  .print-toolbar svg {
+    width: 15px;
+    height: 15px;
+    fill: currentColor;
+  }
   @media print {
     .print-toolbar { display: none; }
     body { padding: 0 8px; }
@@ -262,19 +267,19 @@ class ReportPrinter {
 <body>
   <div class="print-toolbar">
     <button type="button" class="btn-close" onclick="window.close()">
-      <svg style="width:15px;height:15px;fill:currentColor;" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
       Close Preview
     </button>
     <button type="button" class="btn-csv" onclick="downloadReportCsv()">
-      <svg style="width:15px;height:15px;fill:currentColor;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
       Export as CSV
     </button>
     ${sendToAdmin ? `<button type="button" class="btn-admin" onclick="sendReportToAdmin()">
-      <svg style="width:15px;height:15px;fill:currentColor;" viewBox="0 0 24 24"><path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"/></svg>
       Send to Admin
     </button>` : ""}
     <button type="button" class="btn-print" onclick="window.print()">
-      <svg style="width:15px;height:15px;fill:currentColor;" viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
       Print / Save as PDF
     </button>
   </div>

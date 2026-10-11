@@ -450,6 +450,7 @@ body[data-page="Calendar"] .st-cal-upcoming-dot {
   height: 8px;
   border-radius: 50%;
   flex: none;
+  background: var(--dot-color);
 }
 
 body[data-page="Calendar"] .st-cal-upcoming-meta {
@@ -1235,6 +1236,11 @@ body[data-page="Calendar"] .st-cal-modal-info .material-symbols-outlined {
   margin-top: 1px;
 }
 
+body[data-page="Calendar"] .st-cal-modal-info-sy {
+  font-size: var(--st-fs-xs);
+  color: var(--st-outline);
+}
+
 body[data-page="Calendar"] .st-cal-modal-class-list {
   display: flex;
   flex-direction: column;
@@ -1294,25 +1300,6 @@ body[data-page="Calendar"] .st-cal-modal-class-meta {
 body[data-page="Calendar"] .st-cal-modal-class-chevron {
   font-size: var(--st-fs-lg);
   color: var(--st-ink-faint);
-}
-
-/* ============================================================
-   LOADING / SKELETON
-   ============================================================ */
-
-body[data-page="Calendar"] .st-cal-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 48px;
-  color: var(--st-ink-faint);
-  font-size: var(--st-fs-sm); /* 13px */
-  gap: 8px;
-}
-
-body[data-page="Calendar"] .st-cal-loading .material-symbols-outlined {
-  font-size: var(--st-fs-xl);
-  animation: stCalSpin 1s linear infinite;
 }
 
 @keyframes stCalSpin {
@@ -1547,4 +1534,15 @@ body[data-page="Calendar"] .st-cal-loading .material-symbols-outlined {
   body[data-page="Calendar"] .st-cal-class-search-dropdown {
     animation: none !important;
   }
+}
+
+body[data-page="Calendar"] .st-cal-modal-row-end {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+body[data-page="Calendar"] .st-cal-modal-row-end .material-symbols-outlined {
+  font-size: 1rem;
+  vertical-align: -3px;
 }

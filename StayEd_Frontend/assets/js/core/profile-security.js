@@ -72,7 +72,7 @@ class ProfileSecurity {
 
           <button type="button" class="st-cp-link" data-cp-forgot>Forgot your password?</button>
 
-          <div class="st-field" style="margin-top:12px">
+          <div class="st-field st-mt-12">
             <label>New password</label>
             <div class="st-cp-password-wrap">
               <input type="password" data-cp-field="new" placeholder="Enter new password" autocomplete="new-password">
@@ -219,12 +219,7 @@ class ProfileSecurity {
   }
 
   static escapeHtml(value) {
-    return String(value ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
+    return Utils.esc(value);
   }
 }
 

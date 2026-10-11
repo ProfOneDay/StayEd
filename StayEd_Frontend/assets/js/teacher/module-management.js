@@ -27,9 +27,9 @@ class ModuleManagement {
     await this.loadClassContext();
 
     if (!this.classId) {
-      document.querySelector("[data-no-class-notice]").style.display = "";
+      document.querySelector("[data-no-class-notice]").hidden = false;
       document.querySelector("[data-add-module-btn]").disabled = true;
-      document.querySelector("[data-catalog-view-toggle]").style.display = "none";
+      document.querySelector("[data-catalog-view-toggle]").hidden = true;
       return;
     }
 
@@ -138,19 +138,6 @@ class ModuleManagement {
     }
   }
 
-  // initials("Dela Cruz, Juan") -> "DJ" -- presentational only, used by the
-  // detail table's learner-cell avatar.
-  static initials(name) {
-    return String(name || "?")
-      .replace(",", "")
-      .split(" ")
-      .filter(Boolean)
-      .map((w) => w[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase();
-  }
-
   // Cards/rows settle in with a fade+rise only on a "real" render (initial
   // load, or opening/leaving a module's detail) -- not on the re-render
   // that runs on every catalog search/filter keystroke, which just needs
@@ -218,21 +205,21 @@ class ModuleManagement {
         </div>
         <div class="st-module-summary-stat st-module-summary-stat--bar">
           <div class="st-release-bar" role="img" aria-label="${released} released, ${notYet} not yet released">
-            <span class="rel" style="flex-grow:${released}"></span>
-            <span class="not" style="flex-grow:${notYet}"></span>
+            <span class="rel" style="--grow:${released}"></span>
+            <span class="not" style="--grow:${notYet}"></span>
           </div>
           <div class="st-release-legend">
-            <span><i style="background:var(--st-secondary)"></i><b>${released}</b>released</span>
-            <span><i style="background:#cfd5de"></i><b>${notYet}</b>not yet released</span>
+            <span><i class="st-release-legend-dot--rel"></i><b>${released}</b>released</span>
+            <span><i class="st-release-legend-dot--not"></i><b>${notYet}</b>not yet released</span>
           </div>
         </div>
         <div class="st-module-summary-stat">
           <span class="st-module-summary-value">${s.activeTransactions ?? 0}</span>
-          <span class="st-module-summary-label">Active modules</span>
+          <span class="st-module-summary-label">Active releases</span>
         </div>
         <div class="st-module-summary-stat">
           <span class="st-module-summary-value">${s.returnedTransactions ?? 0}</span>
-          <span class="st-module-summary-label">Returned modules</span>
+          <span class="st-module-summary-label">Returned releases</span>
         </div>
       </div>
 
@@ -404,7 +391,7 @@ class ModuleManagement {
           <label for="amDescription">Description (optional)</label>
           <textarea id="amDescription" rows="3" placeholder="Notes about this module..."></textarea>
         </div>
-        <p style="color:var(--st-on-surface-variant);font-size:0.8125rem;margin-top:8px;">
+        <p class="st-mrf-subtitle st-mt-8">
           This defines the module once for the whole class -- you'll choose who receives it and when from Module Details.
         </p>
       `,
@@ -459,9 +446,9 @@ class ModuleManagement {
           <label for="emDescription">Description (optional)</label>
           <textarea id="emDescription" rows="3">${module.description || ""}</textarea>
         </div>
-        <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+        <div class="st-mm-modal-row-end">
           <button type="button" class="st-btn-text" data-remove-edit-module>
-            <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:-3px;">delete</span>
+            <span class="material-symbols-outlined">delete</span>
             Remove from catalog
           </button>
         </div>
@@ -671,14 +658,14 @@ class ModuleManagement {
 
         <div class="st-stage-summary">
           <div class="st-stage-bar" role="img" aria-label="${notCount} not released, ${relCount} released, ${retCount} returned">
-            <span class="not" style="flex-grow:${notCount}"></span>
-            <span class="rel" style="flex-grow:${relCount}"></span>
-            <span class="ret" style="flex-grow:${retCount}"></span>
+            <span class="not" style="--grow:${notCount}"></span>
+            <span class="rel" style="--grow:${relCount}"></span>
+            <span class="ret" style="--grow:${retCount}"></span>
           </div>
           <div class="st-stage-legend">
-            <span><i style="background:#cfd5de"></i><b>${notCount}</b> not released</span>
-            <span><i style="background:#f39422"></i><b>${relCount}</b> released</span>
-            <span><i style="background:var(--st-secondary)"></i><b>${retCount}</b> returned</span>
+            <span><i class="st-stage-legend-dot--not"></i><b>${notCount}</b> not released</span>
+            <span><i class="st-stage-legend-dot--rel"></i><b>${relCount}</b> released</span>
+            <span><i class="st-stage-legend-dot--ret"></i><b>${retCount}</b> returned</span>
           </div>
         </div>
 
@@ -723,7 +710,7 @@ class ModuleManagement {
               ${
                 list.length
                   ? list.map((r, i) => this.renderDetailRow(r, i)).join("")
-                  : `<tr><td colspan="6" style="padding:0">
+                  : `<tr><td colspan="6" class="st-mm-empty-cell">
                       <div class="st-empty st-empty--flush">
                         <span class="material-symbols-outlined">group_off</span>
                         <p class="st-empty-title">No learners match your filters</p>
@@ -813,9 +800,9 @@ class ModuleManagement {
     if (stage === "Not Released") {
       actionHtml = `<button type="button" class="st-btn st-btn-outline st-btn-xs" data-release-one="${r.enrollmentId}">Release</button>`;
     } else if (stage === "Released") {
-      actionHtml = `<button type="button" class="st-btn st-btn-primary st-btn-xs" data-return-one="${r.enrollmentId}"><span class="material-symbols-outlined" style="font-size:17px">assignment_return</span>Mark as returned</button>`;
+      actionHtml = `<button type="button" class="st-btn st-btn-primary st-btn-xs" data-return-one="${r.enrollmentId}"><span class="material-symbols-outlined st-mm-return-icon">assignment_return</span>Mark as returned</button>`;
     } else if (stage === "Returned") {
-      actionHtml = `<button type="button" class="st-btn-text" data-undo-return="${r.enrollmentId}"><span class="material-symbols-outlined" style="font-size:17px;vertical-align:-4px">undo</span>Undo</button>`;
+      actionHtml = `<button type="button" class="st-btn-text" data-undo-return="${r.enrollmentId}"><span class="material-symbols-outlined st-mm-undo-icon">undo</span>Undo</button>`;
     }
 
     const releaseDateHtml = r.releaseDate
@@ -827,7 +814,7 @@ class ModuleManagement {
     return `
       <tr style="--i:${i}" class="${checked ? "is-selected" : ""}">
         <td class="checkbox-col" data-col="select">${stage === "Not Released" ? `<input type="checkbox" data-select-learner="${r.enrollmentId}" ${checked}>` : ""}</td>
-        <td data-col="learner"><button type="button" class="st-qv-trigger st-learner-cell" data-learner-preview="${r.learnerId}" aria-haspopup="dialog" aria-label="Preview ${r.name}'s profile"><span class="st-avatar-initials">${this.initials(r.name)}</span><span class="st-module-title">${r.name}</span></button></td>
+        <td data-col="learner"><button type="button" class="st-qv-trigger st-learner-cell" data-learner-preview="${r.learnerId}" aria-haspopup="dialog" aria-label="Preview ${r.name}'s profile"><span class="st-avatar-initials">${Utils.initials(String(r.name || "?").replace(",", ""))}</span><span class="st-module-title">${r.name}</span></button></td>
         <td data-col="modality">${this.modalityPill(r.modality)}</td>
         <td data-col="stage"><span class="st-badge st-badge-${badgeClass}">${stage === "Not Released" ? "Not released" : stage}</span></td>
         <td data-col="dates"><div class="st-date-cell"><span>Released ${releaseDateHtml}</span><span class="st-muted">Returned ${r.returnDate || "—"}</span></div></td>
@@ -864,16 +851,16 @@ class ModuleManagement {
           <div class="st-schedule-modal-field">
             <label>Students receiving this module</label>
             <div class="st-roster-checklist" id="rmChecklist">
-              <div class="st-roster-checklist-row" style="font-weight:600;">
+              <div class="st-roster-checklist-row st-text-strong">
                 <input type="checkbox" id="rmSelectAll" checked>
-                <label for="rmSelectAll" style="cursor:pointer;margin:0;font-weight:600;">Select all (${candidates.length})</label>
+                <label for="rmSelectAll" class="st-text-strong">Select all (${candidates.length})</label>
               </div>
               ${candidates
                 .map(
                   (r) => `
                 <div class="st-roster-checklist-row">
                   <input type="checkbox" id="rmStudent${r.enrollmentId}" data-rm-student="${r.enrollmentId}" checked>
-                  <label for="rmStudent${r.enrollmentId}" style="cursor:pointer;margin:0;">${r.name}</label>
+                  <label for="rmStudent${r.enrollmentId}">${r.name}</label>
                 </div>
               `,
                 )
@@ -881,7 +868,7 @@ class ModuleManagement {
             </div>
           </div>
         `
-        : `<p style="color:var(--st-on-surface-variant);font-size:0.875rem;">${candidates[0]?.name || ""}</p>`;
+        : `<p class="st-mm-single-recipient">${candidates[0]?.name || ""}</p>`;
 
     Modal.show({
       title: candidates.length === 1 ? "Release module" : `Release module to ${candidates.length} learners`,
@@ -897,7 +884,7 @@ class ModuleManagement {
         <div class="st-schedule-modal-field">
           <label for="rmPlannedReturn">Planned return date</label>
           <input type="date" id="rmPlannedReturn" value="${plannedReturn}">
-          <p class="st-mrf-subtitle" style="margin-top:4px;">
+          <p class="st-mrf-subtitle st-mt-4">
             Auto-suggested (${this.defaultDurationDays} days from release). Adjust if needed.
           </p>
         </div>
@@ -958,12 +945,12 @@ class ModuleManagement {
       confirmLabel: "Save changes",
       asyncConfirm: true,
       message: `
-        <p style="color:var(--st-on-surface-variant);font-size:0.875rem;">${rosterRow.name}</p>
+        <p class="st-mm-single-recipient">${rosterRow.name}</p>
         <div class="st-schedule-modal-field">
           <label for="erdReleaseDate">Release date</label>
           <input type="date" id="erdReleaseDate" value="${current}" max="${today}">
         </div>
-        <p class="st-mrf-subtitle" style="margin-top:4px;">
+        <p class="st-mrf-subtitle st-mt-4">
           This corrects the recorded release date -- it will also update the
           return date's minimum bound for any modules released together in
           the same batch.
@@ -998,7 +985,7 @@ class ModuleManagement {
       confirmLabel: "Confirm return",
       asyncConfirm: true,
       message: `
-        <p style="color:var(--st-on-surface-variant);font-size:0.875rem;">${rosterRow.name}</p>
+        <p class="st-mm-single-recipient">${rosterRow.name}</p>
         <div class="st-schedule-modal-field">
           <label for="rtReturnDate">Return date</label>
           <input type="date" id="rtReturnDate" value="${today}" max="${today}">
@@ -1032,7 +1019,7 @@ class ModuleManagement {
       asyncConfirm: true,
       message: `
         <p><strong>${rosterRow.name}</strong></p>
-        <p style="color:var(--st-on-surface-variant);font-size:0.875rem;margin-top:8px;">
+        <p class="st-mm-single-recipient st-mt-8">
           This will revert this module back to "Released" for this learner (returned on ${rosterRow.returnDate}). Use this if the return was recorded by mistake.
         </p>
       `,

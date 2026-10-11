@@ -30,11 +30,11 @@ const Skeletons = {
 
   cards(count = 3) {
     const card = `
-            <div class="st-skeleton-stat-card" style="height:220px;justify-content:flex-start;">
+            <div class="st-skeleton-stat-card st-skeleton-stat-card--tall">
                 <div class="st-skeleton st-skeleton-title"></div>
                 <div class="st-skeleton st-skeleton-text"></div>
-                <div class="st-skeleton st-skeleton-text" style="width:70%;"></div>
-                <div class="st-skeleton st-skeleton-card" style="height:40px;margin-top:auto;"></div>
+                <div class="st-skeleton st-skeleton-text st-skeleton-text--w70"></div>
+                <div class="st-skeleton st-skeleton-card st-skeleton-card--sm"></div>
             </div>
         `;
 
@@ -43,11 +43,11 @@ const Skeletons = {
 
   listItems(count = 4) {
     const item = `
-            <div class="st-skeleton-row" style="border-top:none;background:#fff;border:1px solid rgba(195,198,207,.30);border-radius:var(--st-radius-lg);margin-bottom:8px;">
-                <div class="st-skeleton" style="width:40px;height:40px;border-radius:50%;flex-shrink:0;"></div>
+            <div class="st-skeleton-row st-skeleton-row--card">
+                <div class="st-skeleton st-skeleton-avatar--md"></div>
                 <div class="st-skeleton-row-lines">
-                    <div class="st-skeleton st-skeleton-text" style="width:55%;"></div>
-                    <div class="st-skeleton st-skeleton-text" style="width:85%;"></div>
+                    <div class="st-skeleton st-skeleton-text st-skeleton-text--w55"></div>
+                    <div class="st-skeleton st-skeleton-text st-skeleton-text--w85"></div>
                 </div>
             </div>
         `;

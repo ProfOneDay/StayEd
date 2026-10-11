@@ -80,16 +80,10 @@ class Layout {
         element.textContent = roleLabel;
       });
 
-    const initials = fullName
-      .split(" ")
-      .filter(Boolean)
-      .map((part) => part[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase() || "T";
+    const avatarInitials = Utils.initials(fullName) || "T";
 
     document.querySelectorAll("[data-st-user-initials]").forEach((element) => {
-      element.textContent = initials;
+      element.textContent = avatarInitials;
       element.hidden = Boolean(user.avatar);
     });
 

@@ -45,6 +45,14 @@
   padding: 0 20px 16px;
 }
 
+/* .st-select's shared base (components/forms.css) is width:100%, for
+   selects stacked in a vertical .st-field column -- reset that here so
+   filter selects size to their content and sit in a row next to the
+   search box, like they did before that shared rule existed. */
+.st-toolbar .st-select {
+  width: auto;
+}
+
 @media (max-width: 767px) {
   .st-table-card-head {
     padding: 14px 16px;
@@ -178,6 +186,79 @@
   transform: scale(0.94);
 }
 
+/* ---- Bulk selection bar (Student Registry, User Management, CLC
+   Management) -- moved here from learner-records.css, see the note left
+   in its place. ---- */
+body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-bulk-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 0 20px 14px;
+  padding: 8px 8px 8px 14px;
+  border-radius: var(--st-radius-card);
+  background: var(--st-primary);
+  color: #fff;
+  animation: stPopIn 0.18s var(--st-ease-out, ease);
+}
+
+body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-bulk-bar-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--st-fs-base);
+  font-weight: 600;
+  color: #fff;
+}
+
+body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-bulk-bar-count .material-symbols-outlined {
+  font-size: 19px;
+}
+
+body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-bulk-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-bulk-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--st-radius-control);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: var(--st-fs-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--st-t-hover, 150ms), transform var(--st-t-press, 90ms);
+}
+
+body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-bulk-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-bulk-btn:active {
+  transform: scale(0.96);
+}
+
+body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-bulk-btn--danger:hover {
+  background: var(--st-risk-high);
+}
+
+body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-bulk-btn .material-symbols-outlined {
+  font-size: 18px;
+}
+
+@media (max-width: 767px) {
+  body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-bulk-bar { margin: 0 16px 12px; }
+}
+
 /* ---- Pagination ---- */
 .st-pagination {
   display: flex;
@@ -233,4 +314,8 @@
 .st-page-btn:disabled {
   opacity: 0.35;
   cursor: default;
+}
+
+.st-page-btn .material-symbols-outlined {
+  font-size: 1rem;
 }

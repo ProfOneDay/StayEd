@@ -668,6 +668,7 @@ body[data-page="Learner Profile"] .st-performance-progress-grid-line {
   position: absolute;
   left: 0;
   right: 0;
+  top: var(--top);
   border-top: 1px dashed var(--st-line);
   pointer-events: none;
 }
@@ -709,6 +710,8 @@ body[data-page="Learner Profile"] [data-animate].is-inview .st-performance-progr
 }
 body[data-page="Learner Profile"] .st-performance-progress-point {
   position: absolute;
+  left: var(--left);
+  top: var(--top);
   width: 12px;
   height: 12px;
   border-radius: 50%;
@@ -751,6 +754,7 @@ body[data-page="Learner Profile"] .st-performance-progress-point.is-first:focus-
 }
 body[data-page="Learner Profile"] .st-performance-progress-x-label {
   position: absolute;
+  left: var(--left);
   top: calc(100% + 8px);
   transform: translateX(-50%);
   white-space: nowrap;
@@ -887,6 +891,7 @@ body[data-page="Learner Profile"] .st-exam-readiness-progress-fill--low {
 }
 body[data-page="Learner Profile"] .st-exam-cutoff {
   position: absolute;
+  left: 70%;
   top: -4px;
   bottom: -4px;
   width: 2px;
@@ -1140,6 +1145,8 @@ body[data-page="Learner Profile"] [data-animate].is-inview .st-risk-trend-line p
 }
 body[data-page="Learner Profile"] .st-risk-trend-point {
   position: absolute;
+  left: var(--left);
+  top: var(--top);
   width: 12px;
   height: 12px;
   border-radius: 50%;
@@ -1194,6 +1201,7 @@ body[data-page="Learner Profile"] .st-risk-trend-point.is-first:focus-visible[da
 }
 body[data-page="Learner Profile"] .st-risk-trend-date-label {
   position: absolute;
+  left: var(--left);
   bottom: 6px;
   transform: translateX(-50%);
   padding: 2px 6px;
@@ -2137,15 +2145,169 @@ body[data-page="Learner Profile"] [data-animate] {
 }
 
 /* ==========================================================================
-   Outcome modal helper (unchanged from the previous revision — out of scope
-   for this pass, kept only so its two small hooks still resolve).
+   Outcome modal (Add Outcome, from an intervention's timeline). Its own
+   small palette (not --st- tokens) was previously all inline style="" --
+   given real CSS classes here instead, values unchanged.
    ========================================================================== */
+body[data-page="Learner Profile"] .st-outcome-intro {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 16px;
+}
+
+body[data-page="Learner Profile"] .st-outcome-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 8px;
+}
+
+body[data-page="Learner Profile"] .st-outcome-section-label--flush {
+  margin-bottom: 0;
+}
+
+body[data-page="Learner Profile"] .st-outcome-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
 body[data-page="Learner Profile"] .st-outcome-card {
   cursor: pointer;
   border-radius: var(--st-radius-card);
   padding: 12px;
   text-align: center;
   transition: var(--st-t-hover, 150ms);
+  border: 2px solid #e5e7eb;
+  background: transparent;
+}
+
+body[data-page="Learner Profile"] .st-outcome-card.is-active {
+  border-color: #10b981;
+  background: #ecfdf5;
+}
+
+body[data-page="Learner Profile"] .st-outcome-card-icon {
+  font-size: 22px;
+}
+
+body[data-page="Learner Profile"] .st-outcome-card-icon--success {
+  color: #10b981;
+}
+
+body[data-page="Learner Profile"] .st-outcome-card-icon--danger {
+  color: #dc2626;
+}
+
+body[data-page="Learner Profile"] .st-outcome-card-icon--neutral {
+  color: #6b7280;
+}
+
+body[data-page="Learner Profile"] .st-outcome-card-title {
+  font-weight: 700;
+  font-size: 0.8125rem;
+  margin-top: 4px;
+}
+
+body[data-page="Learner Profile"] .st-outcome-card-title--success {
+  color: #065f46;
+}
+
+body[data-page="Learner Profile"] .st-outcome-card-title--dark {
+  color: #111827;
+}
+
+body[data-page="Learner Profile"] .st-outcome-card-sub {
+  font-size: 0.6875rem;
+}
+
+body[data-page="Learner Profile"] .st-outcome-card-sub--success {
+  color: #059669;
+}
+
+body[data-page="Learner Profile"] .st-outcome-card-sub--muted {
+  color: #6b7280;
+}
+
+body[data-page="Learner Profile"] .st-outcome-other-field {
+  margin-bottom: 16px;
+}
+
+body[data-page="Learner Profile"] .st-outcome-other-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+body[data-page="Learner Profile"] .st-outcome-rte {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+body[data-page="Learner Profile"] .st-outcome-rte-toolbar {
+  display: flex;
+  gap: 4px;
+  padding: 6px 8px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+body[data-page="Learner Profile"] .st-outcome-rte-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+body[data-page="Learner Profile"] .st-outcome-rte-btn--bold {
+  font-weight: 700;
+}
+
+body[data-page="Learner Profile"] .st-outcome-rte-btn--italic {
+  font-style: italic;
+}
+
+body[data-page="Learner Profile"] .st-outcome-rte-btn .material-symbols-outlined {
+  font-size: var(--st-fs-lg);
+}
+
+body[data-page="Learner Profile"] .st-outcome-notes {
+  min-height: 110px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #111827;
+  outline: none;
+}
+
+body[data-page="Learner Profile"] .st-outcome-artifacts-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+body[data-page="Learner Profile"] .st-outcome-artifacts-count {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+body[data-page="Learner Profile"] .st-outcome-file-input {
+  margin-bottom: 10px;
+}
+
+body[data-page="Learner Profile"] .st-outcome-artifacts-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 body[data-page="Learner Profile"] #ivNotesRich[data-placeholder]:empty::before {
   content: attr(data-placeholder);
@@ -2165,4 +2327,184 @@ body[data-page="Learner Profile"] #ivNotesRich li {
 body[data-page="Learner Profile"] .st-profile-fullwidth {
   margin-top: var(--st-card-gap);
   width: 100%;
+}
+
+/* ---- Outcome artifact/photo tiles + shared remove button ---- */
+body[data-page="Learner Profile"] .st-outcome-remove-btn {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+body[data-page="Learner Profile"] .st-outcome-artifact-tile {
+  width: 130px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px;
+  position: relative;
+}
+
+body[data-page="Learner Profile"] .st-outcome-artifact-thumb {
+  width: 100%;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+body[data-page="Learner Profile"] .st-outcome-artifact-thumb-placeholder {
+  width: 100%;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  border-radius: 6px;
+}
+
+body[data-page="Learner Profile"] .st-outcome-artifact-thumb-placeholder .material-symbols-outlined {
+  color: #6b7280;
+  font-size: 28px;
+}
+
+body[data-page="Learner Profile"] .st-outcome-artifact-filename {
+  font-size: 10px;
+  color: #6b7280;
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body[data-page="Learner Profile"] .st-outcome-artifact-type-select {
+  width: 100%;
+  font-size: 10px;
+  margin-top: 4px;
+  padding: 2px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+}
+
+body[data-page="Learner Profile"] .st-outcome-photo-tile {
+  position: relative;
+  width: 72px;
+  height: 72px;
+}
+
+body[data-page="Learner Profile"] .st-outcome-photo-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+/* ---- Photo lightbox (built once, reused by every outcome photo) ---- */
+body[data-page="Learner Profile"] .st-photo-lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  cursor: zoom-out;
+}
+
+body[data-page="Learner Profile"] .st-photo-lightbox-img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+body[data-page="Learner Profile"] .st-photo-lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 32px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* ---- View History modal (an intervention's past outcome) ---- */
+body[data-page="Learner Profile"] .st-history-modal-meta {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 10px;
+}
+
+body[data-page="Learner Profile"] .st-history-modal-desc {
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+body[data-page="Learner Profile"] .st-history-modal-ai-box {
+  padding: 10px 12px;
+  background: #f5f3ff;
+  border-left: 3px solid #7c3aed;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+body[data-page="Learner Profile"] .st-history-modal-ai-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #7c3aed;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+body[data-page="Learner Profile"] .st-history-modal-ai-text {
+  font-size: 13px;
+  color: #374151;
+}
+
+body[data-page="Learner Profile"] .st-history-modal-line {
+  font-size: 13px;
+}
+
+body[data-page="Learner Profile"] .st-history-modal-artifacts-label {
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 12px;
+  margin-bottom: 6px;
+}
+
+body[data-page="Learner Profile"] .st-history-modal-artifacts-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+body[data-page="Learner Profile"] .st-history-modal-artifact-tile {
+  width: 100px;
+}
+
+body[data-page="Learner Profile"] .st-history-modal-artifact-img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+}
+
+body[data-page="Learner Profile"] .st-history-modal-artifact-type {
+  font-size: 10px;
+  color: #6b7280;
+  text-align: center;
+  margin-top: 3px;
 }

@@ -173,20 +173,12 @@ class ClcOverview {
   static countTo(el, value) {
     if (!el) return;
     const end = Number(value ?? el.dataset.final ?? el.textContent);
-    el.dataset.final = Number.isFinite(end) ? end : (value ?? "");
-    if (CLC_OVERVIEW_REDUCE_MOTION || !Number.isFinite(end)) {
-      el.textContent = value ?? el.dataset.final;
+    if (!Number.isFinite(end)) {
+      el.dataset.final = value ?? "";
+      el.textContent = value ?? "";
       return;
     }
-    const t0 = performance.now();
-    const dur = 800;
-    const tick = (t) => {
-      const k = Math.min(1, (t - t0) / dur);
-      const eased = 1 - Math.pow(1 - k, 3);
-      el.textContent = Math.round(end * eased);
-      if (k < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
+    Utils.countTo(el, end);
   }
 
   static showSkeleton() {

@@ -35,8 +35,6 @@
 .st-modal.open {
   display: flex;
 }
-
-.st-modal-dialog,
 .st-modal-card {
   width: min(560px, 90vw);
   max-height: 85vh;
@@ -49,22 +47,18 @@
   flex-direction: column;
 }
 
-.st-modal--sm .st-modal-dialog,
 .st-modal--sm .st-modal-card {
   width: min(420px, 90vw);
 }
 
-.st-modal--md .st-modal-dialog,
 .st-modal--md .st-modal-card {
   width: min(560px, 90vw);
 }
 
-.st-modal--lg .st-modal-dialog,
 .st-modal--lg .st-modal-card {
   width: min(720px, 92vw);
 }
 
-.st-modal--xl .st-modal-dialog,
 .st-modal--xl .st-modal-card {
   width: min(1040px, 94vw);
 }
@@ -148,7 +142,6 @@
     align-items: flex-end;
   }
 
-  .st-modal-dialog,
   .st-modal-card {
     width: 100%;
     max-height: 92vh;
@@ -156,7 +149,6 @@
   }
 
   /* Grab handle: a bare visual affordance, no drag-to-dismiss behavior. */
-  .st-modal-dialog::before,
   .st-modal-card::before {
     content: "";
     width: 36px;

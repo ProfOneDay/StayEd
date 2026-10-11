@@ -231,6 +231,14 @@
   margin-top: 16px;
 }
 
+/* Nested inside something already boxed (a modal, a table cell) -- no
+   dashed border or background of its own. Replaces a repeated
+   style="border:none;background:transparent" across 5 JS files. */
+.st-empty--plain {
+  border: none;
+  background: transparent;
+}
+
 /* ---- Class context banner: white bar with a navy left accent. Every
    page that used this ended up overriding the same never-actually-shown
    solid-navy default to reach this exact look, so it's now the default

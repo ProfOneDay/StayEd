@@ -64,11 +64,12 @@ body.st-admin[data-page="Reports"] .st-report-search-clear{appearance:none;borde
 body.st-admin[data-page="Reports"] .st-report-search-clear:hover{background:var(--st-background);color:var(--st-on-surface)}
 body.st-admin[data-page="Reports"] .st-report-search-clear .material-symbols-outlined{font-size:17px}
 
-/* Preview table: scrolls inside its card with a sticky header, max-height
-   520px (narrower than the shared .st-table-scroll--sticky default of
-   640px, to leave room for the action bar above it). */
-body.st-admin[data-page="Reports"] .st-report-table-wrap{margin:0 20px 20px}
-body.st-admin[data-page="Reports"] .st-report-table-wrap.st-table-scroll--sticky{max-height:520px}
+/* Preview table: paginated (10 rows/page, like every other table in the
+   app) instead of scrolling inside the card -- see Utils.renderPagination.
+   No bottom margin here -- .st-pagination (components/table.css) already
+   carries its own top padding for that gap, same as every other table;
+   a second margin on top of it was the oversized gap in this card. */
+body.st-admin[data-page="Reports"] .st-report-table-wrap{margin:0 20px}
 body.st-admin[data-page="Reports"] .st-adm-report-table td{font-size: var(--st-fs-base);white-space:nowrap}
 body.st-admin[data-page="Reports"] .st-adm-report-table td.num{font-variant-numeric:tabular-nums;color:var(--st-ink-muted)}
 body.st-admin[data-page="Reports"] .st-adm-learner{font-weight:600;color:var(--st-on-surface)}
@@ -129,3 +130,6 @@ body.st-admin[data-page="Reports"] [data-animate-rows].is-inview tr{
     opacity:1;transform:none;
   }
 }
+
+body.st-admin[data-page="Reports"] .chart-type-toggle--inline{width:fit-content}
+body.st-admin[data-page="Reports"] .st-notify-municipality{color:var(--st-on-surface-variant)}

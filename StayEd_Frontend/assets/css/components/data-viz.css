@@ -111,6 +111,94 @@
   color: var(--st-ink-faint);
 }
 
+/* Clickable variant -- opt-in via [data-filter-btn] so this doesn't
+   affect the (non-interactive) uses of these same classes on other
+   dashboards. One shared implementation for every page that offers the
+   "click a status to filter" pattern (Early Warning Alerts, Student
+   Registry -- see Utils.bindFilterButtons in core/utils.js). Resets the
+   native <button> look back to how the <div> these replace was already
+   styled, then layers on hover/active. */
+.st-overview-total[data-filter-btn],
+.st-risk-legend-item[data-filter-btn] {
+  appearance: none;
+  width: 100%;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--st-radius-sm);
+  transition: background-color var(--st-t-hover, 150ms);
+}
+
+/* The base rules set display:block (.st-overview-total) and
+   display:flex;flex-direction:column (.st-risk-legend-item) -- the
+   [data-filter-btn] selector outranks them (extra attribute), so
+   restate each explicitly rather than let the <button> default
+   (inline-block) win. Padding/margin/radius match admin's .kpi.active
+   .st-overview-total (admin-list-pages.css) -- same hit-area breathing
+   room, offset by a matching negative margin so the padded box doesn't
+   shift where the number/label actually sit in the .st-overview grid. */
+.st-overview-total[data-filter-btn] {
+  display: block;
+  border: none;
+  border-right: 1px solid var(--st-line);
+  padding: 8px 28px 8px 8px;
+  margin: -8px 0 -8px -8px;
+  border-radius: var(--st-radius-card);
+}
+
+/* Only clear the native <button> top/right/bottom border here -- the
+   base .st-risk-legend-item rule's colored border-left (its risk-tone
+   accent strip) must survive; a blanket "border: none" would win over
+   it (this selector has higher specificity) and erase that accent. */
+.st-risk-legend-item[data-filter-btn] {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  border-radius: 0 10px 10px 0;
+}
+
+.st-overview-total[data-filter-btn]:hover,
+.st-risk-legend-item[data-filter-btn]:hover {
+  background: var(--st-background);
+}
+
+.st-overview-total[data-filter-btn]:active,
+.st-risk-legend-item[data-filter-btn]:active {
+  transform: scale(0.98);
+}
+
+.st-overview-total[data-filter-btn].is-active {
+  background: var(--st-navy-soft);
+}
+
+/* Selected state mirrors admin's .kpi.active (admin-list-pages.css): a
+   soft fill plus a 1px inset outline, both in the item's own risk color
+   instead of a flat gray, so the colored left-border theme carries through. */
+.st-risk-legend-item.high[data-filter-btn].is-active {
+  background: var(--st-risk-high-soft);
+  box-shadow: inset 0 0 0 1px var(--st-risk-high);
+}
+
+.st-risk-legend-item.mod[data-filter-btn].is-active {
+  background: var(--st-risk-moderate-soft);
+  box-shadow: inset 0 0 0 1px var(--st-risk-moderate);
+}
+
+.st-risk-legend-item.low[data-filter-btn].is-active {
+  background: var(--st-risk-low-soft);
+  box-shadow: inset 0 0 0 1px var(--st-risk-low);
+}
+
+.st-risk-legend-item.none[data-filter-btn].is-active {
+  background: var(--st-risk-neutral-soft);
+  box-shadow: inset 0 0 0 1px var(--st-line-strong);
+}
+
 .chart-type-toggle {
   display: inline-flex;
   flex-shrink: 0;
@@ -258,3 +346,4 @@
 .st-risk-cell--high .st-risk-meter i { background: var(--st-risk-high); }
 .st-risk-cell--moderate .st-risk-meter i { background: var(--st-risk-moderate); }
 .st-risk-cell--low .st-risk-meter i { background: var(--st-risk-low); }
+.st-risk-cell--preliminary .st-risk-meter i { background: var(--st-risk-preliminary); }

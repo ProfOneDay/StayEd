@@ -399,19 +399,14 @@ class LearnerRecordsHub {
   }
 
   static recordCells(l) {
-    const initials = (l.name || "?")
-      .split(" ")
-      .map((w) => w[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase();
+    const avatarInitials = Utils.initials(l.name || "?");
     const avatarCls = { High: " st-avatar-initials--high", Moderate: " st-avatar-initials--moderate" }[l.risk] || "";
 
     return `
             <td data-col="learner">
                 <button type="button" class="st-qv-trigger st-learner-cell" data-learner-preview="${l.id}" aria-haspopup="dialog" aria-label="Preview ${this.formatDisplayName(l)}'s profile">
-                    <span class="st-avatar-initials${avatarCls}">${initials}</span>
-                    <span style="min-width:0">
+                    <span class="st-avatar-initials${avatarCls}">${avatarInitials}</span>
+                    <span>
                         <span class="st-learner-name">${this.formatDisplayName(l)}</span>
                         <p class="st-learner-id">LRN <span class="num">${l.lrn}</span></p>
                     </span>
@@ -432,12 +427,8 @@ class LearnerRecordsHub {
             <div class="st-progress-cell">
                 <div class="st-progress-cell-top"><span><b class="num">${m.completed} of ${m.total}</b> returned</span><span class="num">${m.total ? pct + "%" : ""}</span></div>
                 <div class="st-progress-track">
-                    <div class="st-progress-fill st-progress-fill--primary" style="--w:${pct}%;width:${pct}%;"></div>
+                    <div class="st-progress-fill st-progress-fill--primary" style="--w:${pct}%;"></div>
                 </div>
-                <button type="button" class="st-progress-link" data-open-module-modal="${l.id}">
-                    View logbook
-                    <span class="material-symbols-outlined">arrow_forward</span>
-                </button>
             </div>
         `;
   }
@@ -485,7 +476,7 @@ class LearnerRecordsHub {
       body.innerHTML = `
                 <tr>
                     <td colspan="${colspan}">
-                        <div class="st-empty" style="border:none;background:transparent;">
+                        <div class="st-empty st-empty--plain">
                             <span class="material-symbols-outlined">search_off</span>
                             <p class="st-empty-title">No learners found</p>
                             <p class="st-empty-text">Try adjusting your search or filters.</p>
@@ -529,7 +520,7 @@ class LearnerRecordsHub {
 
     let html = `
             <button class="st-page-btn" ${current === 1 ? "disabled" : ""} data-prev>
-                <span class="material-symbols-outlined" style="font-size:1rem;">chevron_left</span>
+                <span class="material-symbols-outlined">chevron_left</span>
             </button>
         `;
 
@@ -539,7 +530,7 @@ class LearnerRecordsHub {
 
     html += `
             <button class="st-page-btn" ${current === pages ? "disabled" : ""} data-next>
-                <span class="material-symbols-outlined" style="font-size:1rem;">chevron_right</span>
+                <span class="material-symbols-outlined">chevron_right</span>
             </button>
         `;
 
@@ -604,7 +595,9 @@ class LearnerRecordsHub {
     const showConsultation = l.modality !== "Modular";
     const showSchedule = l.modality !== "Modular";
     return `
-            <div class="st-row-menu" data-row-menu>
+            <div class="st-row-actions">
+                <button type="button" class="st-btn st-btn-outline st-btn-xs" data-open-module-modal="${id}">View logbook</button>
+                <div class="st-row-menu" data-row-menu>
                 <button type="button" class="st-row-menu-trigger" data-row-menu-trigger aria-label="More actions">
                     <span class="material-symbols-outlined">more_vert</span>
                 </button>
@@ -612,10 +605,6 @@ class LearnerRecordsHub {
                     <button type="button" data-view-learner="${id}">
                         <span class="material-symbols-outlined">visibility</span>
                         View learner profile
-                    </button>
-                    <button type="button" data-open-module-modal="${id}">
-                        <span class="material-symbols-outlined">menu_book</span>
-                        Open module progress
                     </button>
                     ${showSchedule ? `
                     <button type="button" data-open-schedule-modal="${id}">
@@ -634,14 +623,13 @@ class LearnerRecordsHub {
                         Assign intervention
                     </button>
                 </div>
+                </div>
             </div>
         `;
   }
 
   static riskBadge(risk) {
-    const cls = { High: "high", Moderate: "moderate", Low: "low" }[risk];
-    const label = cls ? risk : "Not yet assessed";
-    return `<span class="st-risk-badge st-risk-badge--${cls || "neutral"}"><span class="st-risk-dot"></span>${label}</span>`;
+    return Utils.riskPill(risk);
   }
 
   static set(selector, value) {
@@ -691,7 +679,7 @@ document.addEventListener("click", (event) => {
 
   const assignBtn = event.target.closest("[data-assign-intervention]");
   if (assignBtn) {
-    window.location.href = `learner-profile.html?id=${encodeURIComponent(assignBtn.dataset.assignIntervention)}&tab=interventions`;
+    Utils.openAssignInterventionModal(assignBtn.dataset.assignIntervention);
   }
 });
 

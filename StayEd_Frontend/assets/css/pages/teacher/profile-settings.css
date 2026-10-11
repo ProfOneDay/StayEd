@@ -339,7 +339,9 @@ body[data-page="Profile Settings"] #profileInfoForm.is-editing [data-profile-edi
     border-color:var(--st-primary);
 }
 
-body[data-page="Profile Settings"] .st-settings-info-box{
+/* Unscoped: .st-settings-info-box is also used by Manual Enrollment
+   (learner-enroll.html), not just Profile Settings. */
+.st-settings-info-box{
     display:flex;
     gap:10px;
     padding:10px 12px;
@@ -349,12 +351,18 @@ body[data-page="Profile Settings"] .st-settings-info-box{
     font-size:var(--st-font-size-caption);
 }
 
-body[data-page="Profile Settings"] .st-settings-info-box p{
+.st-settings-info-box p{
     margin:0;
 }
 
-body[data-page="Profile Settings"] .st-settings-info-box .material-symbols-outlined{
+.st-settings-info-box .material-symbols-outlined{
     font-size:19px;
+}
+
+/* Manual Enrollment's "existing learner" success icon is brand-teal, not
+   the box's own inherited dark-ink color. */
+.st-settings-info-box .material-symbols-outlined--teal{
+    color:var(--st-secondary);
 }
 
 /* ---------- Danger zone ---------- */

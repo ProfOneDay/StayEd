@@ -40,7 +40,7 @@ class ModuleManagementModal {
 
     this.bodyEl = body;
     body.parentElement.classList.add("st-module-modal");
-    body.innerHTML = `<div class="st-empty" style="border:none;background:transparent;">
+    body.innerHTML = `<div class="st-empty st-empty--plain">
       <span class="material-symbols-outlined">progress_activity</span>
       <p class="st-empty-title">Loading module release logbook…</p>
     </div>`;
@@ -114,7 +114,7 @@ class ModuleManagementModal {
             </p>
           </div>
           <button type="button" class="st-btn st-btn-primary" data-open-release-form>
-            <span class="material-symbols-outlined" style="font-size:1.125rem;">add</span>
+            <span class="material-symbols-outlined material-symbols-outlined--lg">add</span>
             Add Modules
           </button>
         </div>
@@ -128,7 +128,7 @@ class ModuleManagementModal {
 
   static renderLogbookEmpty() {
     return `
-      <div class="st-empty" style="border:none;background:transparent;">
+      <div class="st-empty st-empty--plain">
         <span class="material-symbols-outlined">menu_book</span>
         <p class="st-empty-title">No modules released yet</p>
         <p class="st-empty-text">Click "Add Modules" to record the first release batch for this learner.</p>
@@ -208,7 +208,7 @@ class ModuleManagementModal {
             <div class="st-progress-cell">
               <span class="st-progress-cell-count">${batch.returnedCount} of ${batch.moduleCount} Returned (${Math.round((batch.returnedCount / batch.moduleCount) * 100) || 0}%)</span>
               <div class="st-progress-track">
-                <div class="st-progress-fill st-progress-fill--primary" style="width:${Math.round((batch.returnedCount / batch.moduleCount) * 100) || 0}%;"></div>
+                <div class="st-progress-fill st-progress-fill--primary" style="--w:${Math.round((batch.returnedCount / batch.moduleCount) * 100) || 0}%;"></div>
               </div>
             </div>
           </div>
@@ -268,18 +268,18 @@ class ModuleManagementModal {
                         ${m.status !== "returned" ? `
                           <br>
                           ${this.editingPlannedModuleId === m.id ? `
-                            <small style="display:inline-flex;align-items:center;gap:6px;">
+                            <small class="st-mm-planned-edit">
                               Planned Return:
-                              <input type="date" data-planned-input="${m.id}" value="${m.plannedReturnIso || ""}" style="font-size:0.75rem;padding:2px 4px;">
+                              <input type="date" data-planned-input="${m.id}" value="${m.plannedReturnIso || ""}">
                               <button type="button" class="st-btn st-btn-primary st-btn-xs" data-save-planned="${m.id}">Save</button>
                               <button type="button" class="st-btn-text" data-cancel-planned="${m.id}">Cancel</button>
                             </small>
                           ` : `
                             <small>
                               Planned Return: ${m.plannedReturn || "—"}
-                              ${m.overdue ? `<strong style="color:var(--st-risk-high);"> · Overdue by ${m.daysOverdue} day${m.daysOverdue === 1 ? "" : "s"}</strong>` : ""}
-                              <button type="button" class="st-icon-btn-sm" data-edit-planned="${m.id}" title="Edit planned return date" style="vertical-align:middle;">
-                                <span class="material-symbols-outlined" style="font-size:0.875rem;">edit</span>
+                              ${m.overdue ? `<strong class="st-mm-overdue"> · Overdue by ${m.daysOverdue} day${m.daysOverdue === 1 ? "" : "s"}</strong>` : ""}
+                              <button type="button" class="st-icon-btn-sm st-mm-planned-edit-btn" data-edit-planned="${m.id}" title="Edit planned return date">
+                                <span class="material-symbols-outlined">edit</span>
                               </button>
                             </small>
                           `}
@@ -488,7 +488,7 @@ class ModuleManagementModal {
         <div class="st-schedule-modal-field">
           <label for="mrfPlannedReturn">Planned Return Date</label>
           <input type="date" id="mrfPlannedReturn" data-planned-return value="${form.plannedReturnDate}">
-          <p class="st-mrf-subtitle" style="margin-top:4px;">
+          <p class="st-mrf-subtitle st-mt-4">
             Auto-suggested (${this.defaultDurationDays} days from release). Adjust if needed.
           </p>
         </div>
@@ -887,15 +887,15 @@ class ModuleManagementModal {
               </div>
               <input type="text" value="${m.title}" data-edit-module-title="${i}" placeholder="Module name">
 
-              <label for="mreStrand${i}" style="margin-top:8px;">Learning Strand</label>
+              <label for="mreStrand${i}" class="st-mt-8">Learning Strand</label>
               <select id="mreStrand${i}" data-edit-module-strand="${i}">
                 ${strandOptionsHtml(m.strandCode)}
               </select>
 
-              <label for="mreReturn${i}" style="margin-top:8px;">Return Date</label>
+              <label for="mreReturn${i}" class="st-mt-8">Return Date</label>
               <input type="date" id="mreReturn${i}" data-edit-module-return="${i}" value="${m.returnDate || ""}">
 
-              <label for="mreRemarks${i}" style="margin-top:8px;">Remarks</label>
+              <label for="mreRemarks${i}" class="st-mt-8">Remarks</label>
               <textarea id="mreRemarks${i}" data-edit-module-remarks="${i}" rows="2">${m.remarks || ""}</textarea>
             </div>
           `,

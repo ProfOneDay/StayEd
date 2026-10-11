@@ -284,9 +284,9 @@
   --ring: var(--st-risk-low-ring);
 }
 .st-qv.is-preliminary {
-  --rc: var(--st-info, #0288d1);
-  --rs: #e6f2fb;
-  --ri: #1a6fb0;
+  --rc: var(--st-risk-preliminary);
+  --rs: var(--st-risk-preliminary-soft);
+  --ri: var(--st-risk-preliminary-ink);
   --ring: var(--st-risk-preliminary-ring);
 }
 .st-qv.is-neutral {
@@ -620,6 +620,56 @@
   background: linear-gradient(90deg, var(--st-risk-neutral-soft) 25%, #f6f8fa 50%, var(--st-risk-neutral-soft) 75%);
   background-size: 200% 100%;
   animation: stShimmer 1.2s linear infinite;
+}
+
+.st-qv-id-wrap {
+  flex: 1;
+}
+
+.st-qv-sk--avatar {
+  background-color: #eef1f5;
+}
+
+.st-qv-sk--title {
+  height: 22px;
+  width: 60%;
+}
+
+.st-qv-sk--subtitle {
+  height: 12px;
+  width: 35%;
+  margin-top: 8px;
+}
+
+.st-qv-sk--banner {
+  height: 66px;
+  margin-top: 16px;
+  border-radius: var(--st-radius-card);
+}
+
+.st-qv-body--skeleton {
+  padding-bottom: 20px;
+}
+
+/* Skeleton rows don't animate in (no [data-animate] trigger ever runs
+   for them -- they're replaced by real content first), so they render
+   already in their settled end-state. */
+.st-qv-sk--row-1 {
+  height: 58px;
+  opacity: 1;
+  transform: none;
+}
+
+.st-qv-sk--row-2 {
+  height: 70px;
+  opacity: 1;
+  transform: none;
+}
+
+.st-qv-sk--row-3 {
+  height: 90px;
+  opacity: 1;
+  transform: none;
 }
 
 /* ---------- Trigger (avatar + name button) ---------- */

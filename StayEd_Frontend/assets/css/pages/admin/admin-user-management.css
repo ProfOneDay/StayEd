@@ -129,3 +129,19 @@ body[data-page="User Management"] .icon-btn:hover{
 body[data-page="User Management"] .icon-btn .material-symbols-outlined{
   font-size:18px;
 }
+
+/* Manage Admins has no dedicated page CSS file of its own -- these two
+   rules replace that page's own inline style="". */
+body[data-page="Manage Admins"] .st-admin-title-label{
+  display:inline-block;
+  width:280px;
+  font-weight:600;
+  vertical-align:middle;
+}
+
+/* This row's name isn't a link on this page -- not scoped to
+   [data-page], since .st-learner-name is a shared class and this
+   override only matters where the modifier class is actually used. */
+.st-learner-name--static{
+  cursor:default;
+}

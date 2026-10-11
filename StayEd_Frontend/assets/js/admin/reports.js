@@ -40,6 +40,8 @@ function reportStatusPillClass(status) {
   return "";
 }
 
+const ADMIN_REPORTS_PAGE_SIZE = 10;
+
 class AdminReports {
   static state = {
     mode: "learners", // "learners" | "teachers"
@@ -47,6 +49,7 @@ class AdminReports {
     filtered: [],
     teachersAll: [],
     filteredTeachers: [],
+    previewPage: 1,
     search: "",
     clc: "",
     schoolYear: "",
@@ -56,6 +59,8 @@ class AdminReports {
     teacherStatus: "",
     groupBy: "",
     submissions: [],
+    filteredSubmissions: [],
+    submissionPage: 1,
     submissionSearch: "",
     submissionType: "",
     submissionStatus: "",
@@ -221,12 +226,16 @@ class AdminReports {
       return true;
     });
 
-    this.renderSubmittedReports(rows);
+    this.state.filteredSubmissions = rows;
+    this.state.submissionPage = 1;
+    this.renderSubmittedReports();
   }
 
-  static renderSubmittedReports(rows) {
+  static renderSubmittedReports() {
     const body = document.querySelector("[data-submitted-reports-body]");
     if (!body) return;
+
+    const rows = this.state.filteredSubmissions;
 
     this.set(
       "[data-submitted-reports-count]",
@@ -240,10 +249,14 @@ class AdminReports {
           : "No reports have been sent by teachers yet."
       }</td></tr>`;
       replay(body);
+      Utils.renderPagination("submittedReportsPagination", 0, 1, ADMIN_REPORTS_PAGE_SIZE, () => {});
       return;
     }
 
-    body.innerHTML = rows
+    const page = this.state.submissionPage;
+    const pageRows = rows.slice((page - 1) * ADMIN_REPORTS_PAGE_SIZE, page * ADMIN_REPORTS_PAGE_SIZE);
+
+    body.innerHTML = pageRows
       .map(
         (s, i) => `
           <tr style="--i:${i}">
@@ -271,6 +284,11 @@ class AdminReports {
     });
 
     replay(body);
+
+    Utils.renderPagination("submittedReportsPagination", rows.length, page, ADMIN_REPORTS_PAGE_SIZE, (p) => {
+      this.state.submissionPage = p;
+      this.renderSubmittedReports();
+    });
   }
 
   static async viewSubmittedReport(id) {
@@ -341,7 +359,7 @@ class AdminReports {
       message: `
         <div class="st-schedule-modal-field">
           <label>What is this?</label>
-          <div class="chart-type-toggle" role="group" aria-label="Notification kind" id="notifyKindToggle" style="width:fit-content;">
+          <div class="chart-type-toggle chart-type-toggle--inline" role="group" aria-label="Notification kind" id="notifyKindToggle">
             <button type="button" class="chart-type-btn is-active" data-notify-kind="ANNOUNCEMENT">Announcement</button>
             <button type="button" class="chart-type-btn" data-notify-kind="REPORT_REQUEST">Request a Report</button>
           </div>
@@ -357,16 +375,16 @@ class AdminReports {
         <div class="st-schedule-modal-field">
           <label>Recipients</label>
           <div class="st-roster-checklist" id="notifyTeacherChecklist">
-            <div class="st-roster-checklist-row" style="font-weight:600;">
+            <div class="st-roster-checklist-row st-text-strong">
               <input type="checkbox" id="notifySelectAll">
-              <label for="notifySelectAll" style="cursor:pointer;margin:0;">Select All Teachers (${teachers.length})</label>
+              <label for="notifySelectAll">Select All Teachers (${teachers.length})</label>
             </div>
             ${teachers
               .map(
                 (t) => `
               <div class="st-roster-checklist-row">
                 <input type="checkbox" id="notifyTeacher${t.id}" data-notify-teacher="${t.id}">
-                <label for="notifyTeacher${t.id}" style="cursor:pointer;margin:0;">${t.name}${t.municipality ? ` <span style="color:var(--st-on-surface-variant);">· ${t.municipality}</span>` : ""}</label>
+                <label for="notifyTeacher${t.id}">${t.name}${t.municipality ? ` <span class="st-notify-municipality">· ${t.municipality}</span>` : ""}</label>
               </div>
             `,
               )
@@ -695,6 +713,7 @@ class AdminReports {
     if (teacherStatus) rows = rows.filter((t) => t.status === teacherStatus);
 
     this.state.filteredTeachers = rows;
+    this.state.previewPage = 1;
     this.renderPreview();
   }
 
@@ -720,6 +739,7 @@ class AdminReports {
     if (modality) rows = rows.filter((r) => r.learning_modality === modality);
 
     this.state.filtered = rows;
+    this.state.previewPage = 1;
     this.renderPreview();
   }
 
@@ -750,12 +770,14 @@ class AdminReports {
     if (!rows.length) {
       body.innerHTML = `<tr><td colspan="${columns.length}" class="st-table-empty-cell">No teachers match these filters.</td></tr>`;
       replay(body);
+      Utils.renderPagination("reportPreviewPagination", 0, 1, ADMIN_REPORTS_PAGE_SIZE, () => {});
       return;
     }
 
-    const preview = rows.slice(0, 50);
+    const page = this.state.previewPage;
+    const pageRows = rows.slice((page - 1) * ADMIN_REPORTS_PAGE_SIZE, page * ADMIN_REPORTS_PAGE_SIZE);
 
-    body.innerHTML = preview
+    body.innerHTML = pageRows
       .map(
         (t, i) => `
       <tr style="--i:${i}">
@@ -771,11 +793,12 @@ class AdminReports {
       )
       .join("");
 
-    if (rows.length > preview.length) {
-      body.innerHTML += `<tr><td colspan="${columns.length}" class="st-table-empty-cell">…and ${rows.length - preview.length} more. Export the CSV report to see the full listing.</td></tr>`;
-    }
-
     replay(body);
+
+    Utils.renderPagination("reportPreviewPagination", rows.length, page, ADMIN_REPORTS_PAGE_SIZE, (p) => {
+      this.state.previewPage = p;
+      this.renderPreview();
+    });
   }
 
   static renderLearnerPreview() {
@@ -797,12 +820,14 @@ class AdminReports {
     if (!rows.length) {
       body.innerHTML = `<tr><td colspan="${columns.length}" class="st-table-empty-cell">No enrollment records match these filters.</td></tr>`;
       replay(body);
+      Utils.renderPagination("reportPreviewPagination", 0, 1, ADMIN_REPORTS_PAGE_SIZE, () => {});
       return;
     }
 
-    const preview = rows.slice(0, 50);
+    const page = this.state.previewPage;
+    const pageRows = rows.slice((page - 1) * ADMIN_REPORTS_PAGE_SIZE, page * ADMIN_REPORTS_PAGE_SIZE);
 
-    body.innerHTML = preview
+    body.innerHTML = pageRows
       .map(
         (r, i) => `
       <tr style="--i:${i}">
@@ -819,11 +844,12 @@ class AdminReports {
       )
       .join("");
 
-    if (rows.length > preview.length) {
-      body.innerHTML += `<tr><td colspan="${columns.length}" class="st-table-empty-cell">…and ${rows.length - preview.length} more. Export the CSV report to see the full listing.</td></tr>`;
-    }
-
     replay(body);
+
+    Utils.renderPagination("reportPreviewPagination", rows.length, page, ADMIN_REPORTS_PAGE_SIZE, (p) => {
+      this.state.previewPage = p;
+      this.renderPreview();
+    });
   }
 
   static set(selector, value) {

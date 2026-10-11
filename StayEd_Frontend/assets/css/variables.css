@@ -55,8 +55,9 @@
   --st-risk-low-border: rgba(107, 191, 89, 0.22);
   --st-risk-low-ring: #c9e6c1;
 
-  /* Not a real risk model state today (see learner-quick-view.js) but kept
-     alongside its siblings for the one place that still defends against it. */
+  --st-risk-preliminary: #0288d1;
+  --st-risk-preliminary-soft: #e6f2fb;
+  --st-risk-preliminary-border: rgba(2, 136, 209, 0.2);
   --st-risk-preliminary-ring: #bcdcf3;
 
   /* Same pale-gray pattern as the other risk levels' -soft tint, used as
@@ -314,11 +315,9 @@
   --st-transition-color:
     color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 
-  --st-scrollbar-width: 8px;
+  --st-scrollbar-width: 11px;
 
   --st-scrollbar-thumb: #c3c6cf;
-
-  --st-scrollbar-track: #f4f6f8;
 
   --st-elevation-0: none;
 
@@ -358,6 +357,7 @@
   --st-risk-high-ink: #a01414;
   --st-risk-moderate-ink: #8f5200;
   --st-risk-low-ink: #2c7121;
+  --st-risk-preliminary-ink: #1a6fb0;
 
 
   /* Non-risk categories (learning level, modality) -- deliberately never

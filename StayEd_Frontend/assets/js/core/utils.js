@@ -179,6 +179,157 @@ class Utils {
       .join(" ");
   }
 
+  // Canonical risk-level tone map. Anything not listed here (including
+  // learners with no prediction yet) falls into the generic
+  // "not yet assessed" neutral tone.
+  static RISK_TONE = {
+    High: { key: "high", label: "High", icon: "warning" },
+    Moderate: { key: "moderate", label: "Moderate", icon: "warning" },
+    Low: { key: "low", label: "Low", icon: "check_circle" },
+    Preliminary: { key: "preliminary", label: "Preliminary", icon: "hourglass_top" },
+  };
+
+  static risk(level) {
+    const tone = this.RISK_TONE[level];
+
+    if (tone) {
+      return { key: tone.key, label: tone.label, pillClass: `st-risk-badge--${tone.key}`, icon: tone.icon };
+    }
+
+    return { key: "neutral", label: "Not Yet Assessed", pillClass: "st-risk-badge--neutral", icon: "help" };
+  }
+
+  static riskPill(level) {
+    const { label, pillClass } = this.risk(level);
+
+    return `<span class="st-risk-badge ${pillClass}"><span class="st-risk-dot"></span>${label}</span>`;
+  }
+
+  static pct(part, total) {
+    return total ? Math.round((part / total) * 100) : 0;
+  }
+
+  static INTERVENTION_TYPES = [
+    "Home Visit", "Consultation", "Referral",
+    "Learner Follow-up", "Parent/Guardian Conference", "Other",
+  ];
+
+  // The "Assign Intervention" modal -- was only wired up on the Learner
+  // Profile page (learner-profile.js), so the same-looking "Assign
+  // intervention" button/menu item on the Quick View popup and the
+  // Learner Records row menu just navigated to that page instead of
+  // actually opening it. window.Modal is loaded globally (every page
+  // carries data-component="layout/modal"), so there's no reason this
+  // needs a page to call it from; one shared implementation every
+  // trigger can call directly, instead of each page re-navigating.
+  static openAssignInterventionModal(learnerId, { prefillDescription = "", onDone } = {}) {
+    if (!window.Modal || !learnerId) return;
+
+    const types = this.INTERVENTION_TYPES;
+
+    Modal.show({
+      title: "Assign Intervention",
+      size: "sm",
+      confirmLabel: "Select Intervention",
+      message: `
+        <div class="st-schedule-modal-field">
+          <label for="ivType">Intervention Type</label>
+          <select id="ivType">${types.map((t) => `<option value="${t}">${t}</option>`).join("")}</select>
+        </div>
+        <div class="st-schedule-modal-field">
+          <label for="ivDescription">Description</label>
+          <textarea id="ivDescription" rows="3" placeholder="What will this intervention involve?">${prefillDescription}</textarea>
+        </div>
+        <div class="st-schedule-modal-field">
+          <label for="ivTargetDate">Target Follow-up Date (required)</label>
+          <input type="date" id="ivTargetDate">
+        </div>
+      `,
+      onConfirm: async () => {
+        const type = document.getElementById("ivType")?.value;
+        const description = document.getElementById("ivDescription")?.value.trim();
+        const targetDate = document.getElementById("ivTargetDate")?.value;
+
+        if (!description) {
+          Toast?.error("Please describe the intervention.");
+          return;
+        }
+        if (!targetDate) {
+          Toast?.error("Please set a target follow-up date.");
+          return;
+        }
+
+        try {
+          await API.createIntervention(learnerId, { type, description, targetDate });
+          Toast?.success("Intervention assigned.");
+          if (onDone) await onDone();
+        } catch (error) {
+          console.error("[Utils] Assign intervention failed", error);
+          Toast?.error(error?.data?.message || "Unable to assign intervention.");
+        }
+      },
+    });
+  }
+
+  // Renders a "Showing X-Y of Z entries" + numbered page button row into
+  // the element at `containerId`, replacing its full contents. Was
+  // duplicated verbatim in admin/user-management.js and
+  // admin/clc-management.js; this is the one copy everything else (new
+  // and existing) should call.
+  static renderPagination(containerId, totalItems, page, pageSize, onPageChange) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+    const startItem = totalItems === 0 ? 0 : (page - 1) * pageSize + 1;
+    const endItem = Math.min(page * pageSize, totalItems);
+    const addBtn = (p) => `<button class="st-page-btn ${p === page ? "is-active" : ""}" data-page="${p}">${p}</button>`;
+
+    let pageBtns = "";
+    if (totalPages <= 7) {
+      for (let p = 1; p <= totalPages; p++) pageBtns += addBtn(p);
+    } else {
+      pageBtns += addBtn(1);
+      if (page > 3) pageBtns += '<span class="st-page-ellipsis">…</span>';
+      const start = Math.max(2, page - 1), end = Math.min(totalPages - 1, page + 1);
+      for (let p = start; p <= end; p++) pageBtns += addBtn(p);
+      if (page < totalPages - 2) pageBtns += '<span class="st-page-ellipsis">…</span>';
+      pageBtns += addBtn(totalPages);
+    }
+
+    container.innerHTML = `
+      <span class="st-pagination-info">Showing ${startItem}–${endItem} of ${totalItems} entries</span>
+      <div class="st-pagination-controls">
+        <button class="st-page-btn" id="${containerId}-prev" ${page <= 1 ? "disabled" : ""} aria-label="Previous page"><span class="material-symbols-outlined">chevron_left</span></button>
+        ${pageBtns}
+        <button class="st-page-btn" id="${containerId}-next" ${page >= totalPages ? "disabled" : ""} aria-label="Next page"><span class="material-symbols-outlined">chevron_right</span></button>
+      </div>`;
+
+    container.querySelectorAll(".st-page-btn[data-page]").forEach((btn) => btn.addEventListener("click", () => onPageChange(+btn.dataset.page)));
+    const prevBtn = document.getElementById(`${containerId}-prev`);
+    const nextBtn = document.getElementById(`${containerId}-next`);
+    if (prevBtn) prevBtn.addEventListener("click", () => { if (page > 1) onPageChange(page - 1); });
+    if (nextBtn) nextBtn.addEventListener("click", () => { if (page < totalPages) onPageChange(page + 1); });
+  }
+
+  // Wires up the "click a status to filter" pattern: a hero number plus
+  // its per-category siblings, each carrying [data-filter-btn] and a
+  // data-filter value, kept in sync with a <select> that filters the
+  // same thing. One shared implementation for every page that offers
+  // this (Early Warning Alerts, Student Registry, originally Admin's
+  // User/CLC Management) instead of each page re-deriving it.
+  static bindFilterButtons(buttons, select, onChange) {
+    const setFilter = (value) => {
+      if (select) select.value = value;
+      buttons.forEach((btn) => btn.classList.toggle("is-active", btn.dataset.filter === value));
+      onChange(value);
+    };
+
+    buttons.forEach((btn) => btn.addEventListener("click", () => setFilter(btn.dataset.filter)));
+
+    return setFilter;
+  }
+
   static initials(name = "") {
     return name
 
@@ -191,6 +342,54 @@ class Utils {
       .substring(0, 2)
 
       .toUpperCase();
+  }
+
+  // HTML-escapes & < > " ' -- safe for both text content and attribute
+  // values. Some of the 6 copies this replaces only escaped & < > (fine
+  // for text content, not for attributes); using this everywhere is a
+  // strict improvement for the ones that render into an attribute.
+  static esc(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  // Counts el's text from its previous rendered value (or `from`, if given)
+  // up to `to`, respecting prefers-reduced-motion. Of the 9 copies this
+  // replaces, only the admin ones (clc-management/user-management) and
+  // admin/dashboard's plain countTo() actually started from the previous
+  // value -- the 5 byte-identical teacher-side copies always restarted
+  // from 0 on every call despite tracking a dataset.final they never read
+  // back. Starting from the previous value (as asked) is the fix for those 5.
+  static countTo(el, to, { from, duration = 800 } = {}) {
+    if (!el) return;
+
+    const end = Number(to);
+
+    if (!Number.isFinite(end)) {
+      el.textContent = to;
+      return;
+    }
+
+    const start = from !== undefined ? Number(from) || 0 : Number(el.dataset.final ?? 0) || 0;
+    el.dataset.final = end;
+
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      el.textContent = Math.round(end);
+      return;
+    }
+
+    const t0 = performance.now();
+    const tick = (t) => {
+      const k = Math.min(1, (t - t0) / duration);
+      const eased = 1 - Math.pow(1 - k, 3);
+      el.textContent = Math.round(start + (end - start) * eased);
+      if (k < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
   }
 
   static randomId(prefix = "st") {

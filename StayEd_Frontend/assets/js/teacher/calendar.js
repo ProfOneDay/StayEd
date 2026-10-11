@@ -765,7 +765,7 @@ class TeacherCalendar {
           >
             <span class="st-cal-upcoming-date"><b>${d.getDate()}</b><small>${d.toLocaleDateString("en-PH", { month: "short" })}</small></span>
             <span class="st-cal-upcoming-info">
-              <span class="st-cal-upcoming-label"><span class="st-cal-upcoming-dot" style="background:${t.color}"></span>${this._esc(item.label)}</span>
+              <span class="st-cal-upcoming-label"><span class="st-cal-upcoming-dot" style="--dot-color:${t.color}"></span>${this._esc(item.label)}</span>
               <span class="st-cal-upcoming-meta">${t.name} · ${this._esc(item.meta)}</span>
             </span>
           </button>`;
@@ -1187,7 +1187,7 @@ class TeacherCalendar {
             <span>${this._esc(m.title || m.module_name || `Module ${m.id}`)}</span>
           </label>`
         ).join("")
-      : `<p style="margin:0;color:var(--st-on-surface-variant);">No modules set up for this class yet.</p>`;
+      : `<p class="st-text-muted">No modules set up for this class yet.</p>`;
 
     const formHtml = `
       <div class="st-cal-modal-body">
@@ -1195,18 +1195,18 @@ class TeacherCalendar {
           <span class="material-symbols-outlined">hub</span>
           <div>
             <strong>${this._esc(getLevel(cls) || "Class")}</strong> &mdash; ${this._esc(getClc(cls))}
-            ${getSY(cls) ? `<br><span style="font-size:0.75rem;color:var(--st-outline);">SY ${this._esc(getSY(cls))}</span>` : ""}
+            ${getSY(cls) ? `<br><span class="st-cal-modal-info-sy">SY ${this._esc(getSY(cls))}</span>` : ""}
           </div>
         </div>
         <div class="st-schedule-modal-field">
-          <label>Modules <span style="color:#ba1a1a;">*</span></label>
+          <label>Modules <span class="st-text-danger">*</span></label>
           <div class="st-roster-checklist" id="calModuleChecklist">
             ${moduleOptions}
           </div>
         </div>
         <div class="st-schedule-modal-row">
           <div class="st-schedule-modal-field">
-            <label for="calModRelease">Release Date <span style="color:#ba1a1a;">*</span></label>
+            <label for="calModRelease">Release Date <span class="st-text-danger">*</span></label>
             <input type="date" id="calModRelease" value="${date}" />
           </div>
           <div class="st-schedule-modal-field">
@@ -1292,12 +1292,12 @@ class TeacherCalendar {
             <label for="calModNewDate">New Release Date</label>
             <input type="date" id="calModNewDate" value="${oldDate}">
           </div>
-          <p class="st-mrf-subtitle" style="margin-top:4px;">
+          <p class="st-mrf-subtitle st-mt-4">
             Only applies to learners who haven't returned this module yet.
           </p>
-          <div style="display:flex;justify-content:flex-end;margin-top:14px;">
+          <div class="st-cal-modal-row-end">
             <button type="button" class="st-btn-text" data-calendar-remove-module>
-              <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:-3px;">delete</span>
+              <span class="material-symbols-outlined">delete</span>
               Remove Module from Catalog
             </button>
           </div>

@@ -28,7 +28,6 @@ body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .
 body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .icon-circle.warn{background:var(--st-risk-moderate-soft);color:var(--st-risk-moderate)}
 body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .icon-circle.danger{background:var(--st-risk-high-soft);color:var(--st-risk-high)}
 body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .st-icon-circle--navy{background:var(--st-navy-soft);color:var(--st-primary)}
-body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .st-icon-circle--teal{background:var(--st-teal-soft);color:var(--st-secondary)}
 body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .field{margin-bottom:14px}
 body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .field label{display:block;margin-bottom:6px;font-size: var(--st-fs-sm);font-weight:600;color:var(--st-on-surface)}
 body.st-admin:is([data-page="Profile Settings"],[data-page="System Settings"]) .field input,

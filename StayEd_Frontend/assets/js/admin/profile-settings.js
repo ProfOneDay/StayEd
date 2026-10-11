@@ -41,15 +41,6 @@ class AdminProfileSettingsPage {
     });
   }
 
-  static initialsOf(name) {
-    return String(name || "")
-      .split(" ")
-      .filter(Boolean)
-      .map((part) => part[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase();
-  }
 
   static formatJoinDate(value) {
     if (!value) return "—";
@@ -70,11 +61,11 @@ class AdminProfileSettingsPage {
       [user.first_name, user.last_name].filter(Boolean).join(" ") ||
       "Admin";
 
-    const initials = this.initialsOf(fullName);
+    const avatarInitials = Utils.initials(fullName);
 
     this.set("#profileDisplayName", fullName);
 
-    ProfileAvatar.render(user.avatar || "", initials, "Admin");
+    ProfileAvatar.render(user.avatar || "", avatarInitials, "Admin");
 
     const first = document.getElementById("profileFirstName");
     const last = document.getElementById("profileLastName");

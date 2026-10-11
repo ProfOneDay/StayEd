@@ -135,6 +135,16 @@
   background: var(--st-risk-low);
 }
 
+.st-risk-badge--preliminary {
+  background: var(--st-risk-preliminary-soft);
+  color: var(--st-risk-preliminary);
+  border-color: var(--st-risk-preliminary-border);
+}
+
+.st-risk-badge--preliminary .st-risk-dot {
+  background: var(--st-risk-preliminary);
+}
+
 .st-risk-badge--neutral {
   background: var(--st-risk-neutral-soft);
   color: var(--st-risk-neutral);

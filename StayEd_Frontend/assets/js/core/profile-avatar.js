@@ -69,12 +69,7 @@ class ProfileAvatar {
   }
 
   static escapeHtml(value) {
-    return String(value ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
+    return Utils.esc(value);
   }
 
   static bindUpload(fallbackName = "User") {

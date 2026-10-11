@@ -26,7 +26,7 @@ class ClassAttendanceModal {
 
     this.bodyEl = body;
     body.parentElement.classList.add("st-module-modal");
-    body.innerHTML = `<div class="st-empty" style="border:none;background:transparent;">
+    body.innerHTML = `<div class="st-empty st-empty--plain">
       <span class="material-symbols-outlined">progress_activity</span>
       <p class="st-empty-title">Loading meet-up dates…</p>
     </div>`;
@@ -102,7 +102,7 @@ class ClassAttendanceModal {
             <label for="attNewDate">Add Meet-up Date</label>
             <input type="date" id="attNewDate" value="${this.newDate}">
             <button type="button" class="st-btn st-btn-primary" data-add-date>
-              <span class="material-symbols-outlined" style="font-size:1.125rem;">add</span>
+              <span class="material-symbols-outlined">add</span>
               Add Date
             </button>
           </div>
@@ -118,7 +118,7 @@ class ClassAttendanceModal {
 
   static renderDatesEmpty() {
     return `
-      <div class="st-empty" style="border:none;background:transparent;">
+      <div class="st-empty st-empty--plain">
         <span class="material-symbols-outlined">event</span>
         <p class="st-empty-title">No meet-up dates scheduled yet</p>
         <p class="st-empty-text">Add a date above to start recording attendance.</p>
@@ -128,7 +128,7 @@ class ClassAttendanceModal {
 
   static renderSessionList(visibleSessions = this.sessions) {
     return `
-      <div style="display:flex;flex-direction:column;gap:12px;margin-top:20px;">
+      <div class="st-module-modal-session-list">
         ${visibleSessions
           .map(
             (s) => `
@@ -269,7 +269,7 @@ class ClassAttendanceModal {
           <p class="st-mrf-subtitle">Meet-up: ${list.date}</p>
         </div>
         <div class="st-module-modal-body">
-          <div class="st-empty" style="border:none;background:transparent;">
+          <div class="st-empty st-empty--plain">
             <span class="material-symbols-outlined">group_off</span>
             <p class="st-empty-title">No Face-to-Face or Blended learners enrolled</p>
             <p class="st-empty-text">Attendance only applies to learners with a meet-up-based modality.</p>

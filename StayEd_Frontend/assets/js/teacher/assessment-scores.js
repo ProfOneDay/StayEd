@@ -192,7 +192,7 @@ class AssessmentScores {
             class="st-assessment-learner-row ${String(l.id) === String(this.selectedLearnerId) ? "is-active" : ""}"
             data-learner-row="${l.id}"
           >
-            <span class="st-assessment-avatar st-assessment-avatar--sm">${this.initials(l.name)}</span>
+            <span class="st-assessment-avatar st-assessment-avatar--sm">${Utils.initials(l.name)}</span>
             <span class="st-assessment-learner-row-text">
               <span class="st-assessment-learner-row-name">${this.esc(l.name)}</span>
               <span class="st-assessment-learner-row-lrn">LRN ${this.esc(l.lrn || "—")}</span>
@@ -217,7 +217,7 @@ class AssessmentScores {
 
     const learner = this.learners.find((l) => l.id === learnerId);
     if (learner) {
-      document.querySelector("[data-detail-avatar]").textContent = this.initials(learner.name);
+      document.querySelector("[data-detail-avatar]").textContent = Utils.initials(learner.name);
       document.querySelector("[data-detail-name]").textContent = learner.name;
       document.querySelector("[data-detail-meta]").textContent =
         `LRN: ${learner.lrn || "—"} · Level: ${learner.level || "—"} · SY: ${learner.school_year || this.classInfo?.schoolYear || "—"}`;
@@ -973,19 +973,8 @@ class AssessmentScores {
     return raw === "" || raw == null ? null : raw.trim();
   }
 
-  static initials(name) {
-    return (name || "")
-      .split(" ")
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((p) => p[0].toUpperCase())
-      .join("");
-  }
-
   static esc(value) {
-    const div = document.createElement("div");
-    div.textContent = value == null ? "" : String(value);
-    return div.innerHTML;
+    return value == null ? "" : Utils.esc(value);
   }
 
   static escAttr(value) {

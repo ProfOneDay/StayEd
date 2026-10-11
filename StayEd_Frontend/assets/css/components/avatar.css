@@ -1,6 +1,7 @@
 /* ============================================================
-   Avatar: .st-avatar-initials + sizes/tones, .st-learner-cell,
-   .st-two-line. One definition each.
+   Avatar: .st-avatar-initials + sizes/tones, .st-learner-cell.
+   (.st-two-line was removed in Phase 3's dead-CSS pass -- it had
+   zero matches anywhere in the app's HTML/JS.)
    ============================================================ */
 
 .st-avatar-initials {
@@ -50,12 +51,6 @@
   border-color: rgba(0, 106, 104, 0.1);
 }
 
-.st-avatar-initials--blue {
-  background: #dbeafe;
-  color: #2563eb;
-  border-color: #bfdbfe;
-}
-
 .st-avatar-initials--slate {
   background: rgba(157, 181, 211, 0.25);
   color: var(--st-cat-2, #4c6f95);
@@ -87,30 +82,9 @@
   gap: 12px;
 }
 
-/* Two-line cell (e.g. Level & modality). */
-.st-two-line {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+/* The name/id text wrapper always needs min-width:0 for its own
+   text-overflow truncation to work in this flex row -- was a repeated
+   inline style="min-width:0" in several files' row markup. */
+.st-learner-cell > *:not(.st-avatar-initials) {
   min-width: 0;
-  white-space: normal;
-}
-
-.st-two-line strong {
-  font-weight: 500;
-  font-size: var(--st-fs-base);
-  color: var(--st-on-surface);
-}
-
-.st-two-line small {
-  font-size: var(--st-fs-xs);
-  color: var(--st-ink-faint);
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.st-two-line small .material-symbols-outlined {
-  font-size: 15px;
 }

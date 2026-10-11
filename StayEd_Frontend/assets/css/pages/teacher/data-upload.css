@@ -1,9 +1,4 @@
 
-.st-upload-grid{
-    display:grid;
-    grid-template-columns:1fr;
-    gap:24px;
-}
 
 .st-upload-zone{
     border:2px dashed var(--st-outline-variant);
@@ -109,31 +104,6 @@
     background:var(--st-secondary);
     border-radius:var(--st-radius-pill);
     transition:width .3s ease;
-}
-
-.st-upload-guide{
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-}
-
-.st-upload-guide-item{
-    display:flex;
-    gap:12px;
-    align-items:flex-start;
-    font-size: var(--st-font-size-label);
-    color:var(--st-on-surface-variant);
-    line-height:1.5;
-}
-
-.st-upload-guide-item .material-symbols-outlined{
-    font-size: var(--st-fs-xl);
-    color:var(--st-secondary);
-    flex-shrink:0;
-}
-
-@media (min-width: 1024px){
-    .st-upload-grid{ grid-template-columns:2fr 1fr; }
 }
 
 /* ============================================================
@@ -613,6 +583,126 @@ body[data-page="Import Learners"] #importPreviewBtn:hover .material-symbols-outl
     gap:20px;
 }
 
+/* ---- Form fields (moved here from learner-records.css -- see the note
+   left in its place; this file is the one actually taking effect on this
+   page, that copy mysteriously wasn't). ---- */
+
+.st-enroll-fields{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px 24px;
+}
+
+@media (max-width: 479px){
+    .st-enroll-fields{ grid-template-columns:1fr; }
+}
+
+.st-enroll-field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.st-enroll-field label{
+    font-size: var(--st-font-size-caption);
+    font-weight:600;
+    color:var(--st-on-surface-variant);
+}
+
+.st-enroll-field .required{ color:var(--st-risk-high); }
+
+.st-enroll-field input,
+.st-enroll-field textarea{
+    height:40px;
+    padding:0 12px;
+    border:1px solid var(--st-outline-variant);
+    border-radius:var(--st-radius-sm);
+    background:#fff;
+    font-family:var(--st-font-body);
+    font-size: var(--st-font-size-label);
+    color:var(--st-on-surface);
+    transition:var(--st-transition);
+}
+
+.st-enroll-field select{
+    height:40px;
+    padding:0 34px 0 12px;
+    border:1px solid var(--st-outline-variant);
+    border-radius:var(--st-radius-control);
+    background:#fff;
+    font-family:var(--st-font-body);
+    font-size: var(--st-font-size-label);
+    color:var(--st-on-surface);
+    cursor:pointer;
+    transition:var(--st-transition);
+    /* Same chevron as the shared .st-select (components/forms.css) --
+       this is a bare <select>, not .st-select, so it never inherited it
+       and was falling back to the browser's native dropdown arrow. */
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%235a6275' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 10px center;
+}
+
+.st-enroll-field textarea{
+    height:auto;
+    padding:10px 12px;
+    resize:vertical;
+}
+
+.st-enroll-field input:focus,
+.st-enroll-field select:focus,
+.st-enroll-field textarea:focus{
+    outline:none;
+    border-color:var(--st-secondary);
+    box-shadow:var(--st-focus-ring);
+}
+
+.st-enroll-field input.has-error,
+.st-enroll-field select.has-error{
+    border-color:var(--st-risk-high);
+}
+
+.st-enroll-field--full{
+    grid-column:1/-1;
+}
+
+.st-enroll-field input[readonly],
+.st-enroll-field textarea[readonly],
+.st-enroll-field select[disabled]{
+    background:var(--st-surface-container-low);
+    cursor:not-allowed;
+    opacity:1;
+    -webkit-text-fill-color:currentColor;
+}
+
+.st-enroll-segment{
+    display:flex;
+    border:1px solid var(--st-outline-variant);
+    border-radius:var(--st-radius-sm);
+    overflow:hidden;
+    height:40px;
+}
+
+.st-enroll-segment button{
+    flex:1;
+    border:none;
+    background:#fff;
+    color:var(--st-on-surface-variant);
+    font-size: var(--st-font-size-caption);
+    font-weight:600;
+    cursor:pointer;
+    transition:var(--st-transition);
+    border-right:1px solid var(--st-outline-variant);
+}
+
+.st-enroll-segment button:last-child{ border-right:none; }
+
+.st-enroll-segment button.is-active{
+    background:var(--st-primary-container);
+    color:#fff;
+}
+
 /* ---- Step icon tiles + subtitle (shared by gate + step headings) ---- */
 
 .st-enroll-step-icon-tile{
@@ -671,6 +761,9 @@ body[data-page="Import Learners"] #importPreviewBtn:hover .material-symbols-outl
    because it matches by tag name (div), not by class, so the compact
    div still counts as "the same type". Only an explicit attribute
    exclusion reliably keeps step 8 from getting a dangling connector line. */
+/* Dot/connector states (transition timing, active ring, done checkmark)
+   now match .st-import-steps (Import Learners) exactly -- see that
+   component for the shared reasoning. */
 .st-enroll-progress-step:not([data-progress-step="8"])::after{
     content:"";
     position:absolute;
@@ -679,7 +772,7 @@ body[data-page="Import Learners"] #importPreviewBtn:hover .material-symbols-outl
     width:calc(100% - 42px);
     height:2px;
     background:var(--st-outline-variant);
-    transition:background .2s ease;
+    transition:background-color 400ms;
 }
 
 .st-enroll-progress-step.is-complete:not([data-progress-step="8"])::after{
@@ -699,27 +792,30 @@ body[data-page="Import Learners"] #importPreviewBtn:hover .material-symbols-outl
     font-weight:700;
     color:var(--st-on-surface-variant);
     z-index:1;
-    transition:var(--st-transition), transform .2s ease;
+    transition:all 300ms var(--st-ease-out);
 }
 
 .st-enroll-progress-step.is-active .st-enroll-progress-dot{
     border-color:var(--st-primary);
     background:var(--st-primary);
     color:#fff;
-    transform:scale(1.08);
-    box-shadow:0 0 0 4px rgba(11,42,74,.12);
+    transform:scale(1.06);
+    box-shadow:0 0 0 4px var(--st-navy-soft);
 }
 
 .st-enroll-progress-step.is-complete .st-enroll-progress-dot{
     border-color:var(--st-secondary);
     background:var(--st-secondary);
-    color:#fff;
+    color:transparent;
+    position:relative;
 }
 
 .st-enroll-progress-step.is-complete .st-enroll-progress-dot::before{
     content:"check";
+    position:absolute;
     font-family:"Material Symbols Outlined";
-    font-size: var(--st-fs-md);
+    font-size:17px;
+    color:#fff;
 }
 
 .st-enroll-progress-label{

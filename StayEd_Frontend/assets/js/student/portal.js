@@ -171,7 +171,7 @@ class StudentPortal {
         <section class="st-sv-card st-sv-progress" style="--i:3">
           <h3 class="st-sv-title">Student Performance Progress</h3>
           <p class="st-sv-sub">Cumulative module return rate over time.</p>
-          <p class="st-sv-empty" style="margin-top:14px">Progress will appear after modules are released or returned.</p>
+          <p class="st-sv-empty st-mt-12">Progress will appear after modules are released or returned.</p>
         </section>
       `;
     }
@@ -190,14 +190,14 @@ class StudentPortal {
         const safeTooltip = this.esc(tooltip);
 
         return `
-          <span class="st-sv-pt${edge}" tabindex="0" style="left:${x(i)}%;top:${y(pt.rate)}%;--d:${700 + i * 250}" data-tooltip="${safeTooltip}" aria-label="${safeTooltip}"></span>
-          <span class="st-sv-xlab${edge}" style="left:${x(i)}%">${this.esc(pt.date)}</span>
+          <span class="st-sv-pt${edge}" tabindex="0" style="--left:${x(i)}%;--top:${y(pt.rate)}%;--d:${700 + i * 250}" data-tooltip="${safeTooltip}" aria-label="${safeTooltip}"></span>
+          <span class="st-sv-xlab${edge}" style="--left:${x(i)}%">${this.esc(pt.date)}</span>
         `;
       })
       .join("");
 
     const gridLines = [100, 75, 50, 25, 0]
-      .map((v) => `<div class="st-sv-grid-line" style="top:${100 - v}%"><span>${v}%</span></div>`)
+      .map((v) => `<div class="st-sv-grid-line" style="--top:${100 - v}%"><span>${v}%</span></div>`)
       .join("");
 
     return `
@@ -293,9 +293,7 @@ class StudentPortal {
   }
 
   static esc(value) {
-    const div = document.createElement("div");
-    div.textContent = value == null ? "" : String(value);
-    return div.innerHTML;
+    return Utils.esc(value);
   }
 }
 

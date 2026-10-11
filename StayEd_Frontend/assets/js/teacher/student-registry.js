@@ -87,10 +87,18 @@ class StudentRegistry {
       this.apply();
     });
 
+    this.setRiskFilter = Utils.bindFilterButtons(
+      [...document.querySelectorAll("[data-filter-btn]")],
+      document.querySelector("[data-mgmt-filter-risk]"),
+      (level) => {
+        this.state.risk = level;
+        this.state.page = 1;
+        this.apply();
+      },
+    );
+
     on("[data-mgmt-filter-risk]", "change", (e) => {
-      this.state.risk = e.target.value;
-      this.state.page = 1;
-      this.apply();
+      this.setRiskFilter(e.target.value);
     });
 
     on("[data-mgmt-filter-status]", "change", (e) => {
@@ -102,7 +110,6 @@ class StudentRegistry {
     on("[data-mgmt-clear]", "click", () => {
       this.state.search = "";
       this.state.level = "";
-      this.state.risk = "";
       this.state.status = "";
       this.state.page = 1;
 
@@ -110,12 +117,10 @@ class StudentRegistry {
       if (search) search.value = "";
       const level = document.querySelector("[data-mgmt-filter-level]");
       if (level) level.value = "";
-      const risk = document.querySelector("[data-mgmt-filter-risk]");
-      if (risk) risk.value = "";
       const status = document.querySelector("[data-mgmt-filter-status]");
       if (status) status.value = "";
 
-      this.apply();
+      this.setRiskFilter("");
     });
 
     document.querySelectorAll("[data-sort]").forEach((th) => {
@@ -216,6 +221,15 @@ class StudentRegistry {
     this.countTo(document.querySelector("[data-mgmt-low]"), low);
     this.countTo(document.querySelector("[data-mgmt-unassessed]"), unassessed);
 
+    const setPct = (selector, value) => {
+      const el = document.querySelector(selector);
+      if (el) el.textContent = `${Utils.pct(value, total)}%`;
+    };
+    setPct("[data-mgmt-high-pct]", high);
+    setPct("[data-mgmt-moderate-pct]", moderate);
+    setPct("[data-mgmt-low-pct]", low);
+    setPct("[data-mgmt-unassessed-pct]", unassessed);
+
     // Proportional risk strip: each segment's flex-grow equals its own
     // count, matching the dashboard's overview strip.
     const grow = (selector, value) => {
@@ -253,20 +267,12 @@ class StudentRegistry {
   static countTo(el, value) {
     if (!el) return;
     const end = Number(value ?? el.dataset.final ?? el.textContent);
-    el.dataset.final = Number.isFinite(end) ? end : (value ?? "");
-    if (ST_REGISTRY_REDUCE_MOTION || !Number.isFinite(end)) {
-      el.textContent = value ?? el.dataset.final;
+    if (!Number.isFinite(end)) {
+      el.dataset.final = value ?? "";
+      el.textContent = value ?? "";
       return;
     }
-    const t0 = performance.now();
-    const dur = 800;
-    const tick = (t) => {
-      const k = Math.min(1, (t - t0) / dur);
-      const eased = 1 - Math.pow(1 - k, 3);
-      el.textContent = Math.round(end * eased);
-      if (k < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
+    Utils.countTo(el, end);
   }
 
   static apply() {
@@ -286,7 +292,14 @@ class StudentRegistry {
     }
 
     if (level) rows = rows.filter((l) => l.level === level);
-    if (risk) rows = rows.filter((l) => l.risk === risk);
+    if (risk === "Unassessed") {
+      // Matches the "unassessed" count in renderStats(): anything that
+      // isn't one of the three assessed states, not a literal risk value
+      // the backend ever sends.
+      rows = rows.filter((l) => !["High", "Moderate", "Low"].includes(l.risk));
+    } else if (risk) {
+      rows = rows.filter((l) => l.risk === risk);
+    }
     if (!wantArchived && status) rows = rows.filter((l) => l.status === status);
 
     if (this.state.sortKey) {
@@ -367,7 +380,7 @@ class StudentRegistry {
       body.innerHTML = `
                 <tr>
                     <td colspan="8">
-                        <div class="st-empty" style="border:none;background:transparent;">
+                        <div class="st-empty st-empty--plain">
                             <span class="material-symbols-outlined">${icon}</span>
                             <p class="st-empty-title">${title}</p>
                             <p class="st-empty-text">${text}</p>
@@ -433,12 +446,7 @@ class StudentRegistry {
   }
 
   static row(l, i) {
-    const initials = (l.name || "?")
-      .split(" ")
-      .map((w) => w[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase();
+    const avatarInitials = Utils.initials(l.name || "?");
 
     const isArchived = l.status === "Archived";
 
@@ -451,8 +459,8 @@ class StudentRegistry {
                 </td>
                 <td data-col="learner">
                     <button type="button" class="st-qv-trigger st-learner-cell" data-learner-preview="${l.id}" aria-haspopup="dialog" aria-label="Preview ${l.name}'s profile">
-                        ${this.avatar(l, initials)}
-                        <span style="min-width:0">
+                        ${this.avatar(l, avatarInitials)}
+                        <span>
                             <span class="st-learner-name">${this.formatDisplayName(l)}</span>
                             <p class="st-learner-id"><span class="num">${l.lrn}</span>${l.sex || l.age ? ` · ${l.sex || ""}${l.sex && l.age ? ", " : ""}${l.age || ""}` : ""}</p>
                         </span>
@@ -496,7 +504,7 @@ class StudentRegistry {
   }
 
   static riskCell(l) {
-    const cls = { High: "high", Moderate: "moderate", Low: "low" }[l.risk];
+    const cls = { High: "high", Moderate: "moderate", Low: "low", Preliminary: "preliminary" }[l.risk];
     if (!cls) {
       return `<div class="st-risk-cell"><div class="st-risk-cell-top">${this.riskBadge(l.risk)}</div></div>`;
     }
@@ -565,7 +573,7 @@ class StudentRegistry {
 
     let html = `
             <button class="st-page-btn" ${page === 1 ? "disabled" : ""} data-prev>
-                <span class="material-symbols-outlined" style="font-size:1rem;">chevron_left</span>
+                <span class="material-symbols-outlined">chevron_left</span>
             </button>
         `;
 
@@ -575,7 +583,7 @@ class StudentRegistry {
 
     html += `
             <button class="st-page-btn" ${page === pages ? "disabled" : ""} data-next>
-                <span class="material-symbols-outlined" style="font-size:1rem;">chevron_right</span>
+                <span class="material-symbols-outlined">chevron_right</span>
             </button>
         `;
 
@@ -721,9 +729,7 @@ class StudentRegistry {
   }
 
   static riskBadge(risk) {
-    const cls = { High: "high", Moderate: "moderate", Low: "low" }[risk];
-    const label = cls ? risk : "Not yet assessed";
-    return `<span class="st-risk-badge st-risk-badge--${cls || "neutral"}"><span class="st-risk-dot"></span>${label}</span>`;
+    return Utils.riskPill(risk);
   }
 
   static statusPill(status) {

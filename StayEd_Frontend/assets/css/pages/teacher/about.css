@@ -302,25 +302,6 @@ body[data-page="About StayEd"] [data-animate-cards].is-inview > *{
     font-weight:600;
 }
 
-.st-contact-empty{
-    color:var(--st-ink-faint);
-    font-style:italic;
-    font-weight:500 !important;
-}
-
-.st-contact-pending{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    margin:14px 0 0 !important;
-    font-size: var(--st-fs-sm);
-    color:var(--st-ink-muted);
-}
-
-.st-contact-pending .material-symbols-outlined{
-    font-size:17px;
-}
-
 .st-contact-escalate{
     margin:16px 0 0 !important;
     font-size: var(--st-fs-base);

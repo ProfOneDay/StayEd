@@ -18,17 +18,6 @@ class LearnerEnrollWizard {
     8: "Done",
   };
 
-  static initials(name) {
-    if (!name) return "?";
-    return String(name)
-      .replace(/,/g, " ")
-      .trim()
-      .split(/\s+/)
-      .slice(0, 2)
-      .map((w) => w[0]?.toUpperCase() || "")
-      .join("");
-  }
-
   static async init() {
     if (window.Guards) Guards.teacher();
 
@@ -122,7 +111,7 @@ class LearnerEnrollWizard {
         .map(
           (l) => `
             <button type="button" class="st-enroll-gate-result" data-gate-select="${l.id}">
-              <span class="st-enroll-gate-result-avatar">${this.initials(l.name)}</span>
+              <span class="st-enroll-gate-result-avatar">${l.name ? Utils.initials(String(l.name).replace(/,/g, " ")) : "?"}</span>
               <span class="st-enroll-gate-result-info">
                 <strong>${l.name}</strong>
                 <small>LRN ${l.lrn || "—"} · ${l.clc || "—"} · ${l.level || "—"}</small>
@@ -189,7 +178,7 @@ class LearnerEnrollWizard {
     const statusBox = document.querySelector("[data-reenrollee-status]");
     if (statusBox) {
       statusBox.innerHTML = `
-                <span class="material-symbols-outlined" style="color:var(--st-secondary);">check_circle</span>
+                <span class="material-symbols-outlined material-symbols-outlined--teal">check_circle</span>
                 <p><strong>Existing learner selected.</strong> ${learner.name} is already known to StayEd and will be enrolled into this class.</p>
             `;
     }
@@ -320,7 +309,7 @@ class LearnerEnrollWizard {
         hidden.value = "Yes";
 
         statusBox.innerHTML = `
-                  <span class="material-symbols-outlined" style="color:var(--st-secondary);">check_circle</span>
+                  <span class="material-symbols-outlined material-symbols-outlined--teal">check_circle</span>
                   <p><strong>Re-enrollee detected.</strong> This LRN matches ${existing.name}, already known to the system. Marked as a re-enrollee automatically.</p>
               `;
       } else {

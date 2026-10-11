@@ -15,10 +15,6 @@ class LearnerQuickView {
     High: { cls: "high", icon: "warning" },
     Moderate: { cls: "moderate", icon: "warning" },
     Low: { cls: "low", icon: "check_circle" },
-    // Not a state the real risk model emits today (see _shape_learner on
-    // the backend) -- kept for parity with the student portal's own
-    // risk-tone map (assets/js/student/portal.js), which already defines
-    // this exact tone/icon pairing defensively for the same reason.
     Preliminary: { cls: "preliminary", icon: "hourglass_top" },
   };
 
@@ -76,20 +72,8 @@ class LearnerQuickView {
     return this.RISK_TONE[risk] || { cls: "neutral", icon: "help" };
   }
 
-  static initialsOf(name) {
-    return String(name || "?")
-      .split(" ")
-      .filter(Boolean)
-      .map((w) => w[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase();
-  }
-
   static esc(value) {
-    const div = document.createElement("div");
-    div.textContent = value ?? "";
-    return div.innerHTML;
+    return Utils.esc(value);
   }
 
   static open(id, triggerEl) {
@@ -148,18 +132,18 @@ class LearnerQuickView {
     this.dialog.innerHTML = `
       <header class="st-qv-head">
         <div class="st-qv-id">
-          <div class="st-qv-avatar st-qv-sk" style="background-color:#eef1f5"></div>
-          <div style="flex:1">
-            <div class="st-qv-sk" style="height:22px;width:60%"></div>
-            <div class="st-qv-sk" style="height:12px;width:35%;margin-top:8px"></div>
+          <div class="st-qv-avatar st-qv-sk st-qv-sk--avatar"></div>
+          <div class="st-qv-id-wrap">
+            <div class="st-qv-sk st-qv-sk--title"></div>
+            <div class="st-qv-sk st-qv-sk--subtitle"></div>
           </div>
         </div>
-        <div class="st-qv-sk" style="height:66px;margin-top:16px;border-radius:12px"></div>
+        <div class="st-qv-sk st-qv-sk--banner"></div>
       </header>
-      <div class="st-qv-body" style="padding-bottom:20px">
-        <div class="st-qv-sk" style="height:58px;opacity:1;transform:none"></div>
-        <div class="st-qv-sk" style="height:70px;opacity:1;transform:none"></div>
-        <div class="st-qv-sk" style="height:90px;opacity:1;transform:none"></div>
+      <div class="st-qv-body st-qv-body--skeleton">
+        <div class="st-qv-sk st-qv-sk--row-1"></div>
+        <div class="st-qv-sk st-qv-sk--row-2"></div>
+        <div class="st-qv-sk st-qv-sk--row-3"></div>
       </div>
     `;
   }
@@ -215,7 +199,7 @@ class LearnerQuickView {
   static renderProfile(profile) {
     const risk = profile.risk;
     const { cls, icon } = this.tone(risk === "Not Yet Assessed" ? null : risk);
-    const initials = this.initialsOf(profile.name);
+    const avatarInitials = Utils.initials(profile.name || "?");
     const badgeLabel = cls === "neutral" ? "Not Yet Assessed" : `${risk} Risk`;
     const helper = this.esc(this.riskHelper(profile));
 
@@ -243,7 +227,7 @@ class LearnerQuickView {
           <span class="material-symbols-outlined">close</span>
         </button>
         <div class="st-qv-id">
-          <div class="st-qv-avatar">${this.esc(initials)}</div>
+          <div class="st-qv-avatar">${this.esc(avatarInitials)}</div>
           <div>
             <h2 class="st-qv-name" id="stQvTitle">${this.esc(profile.name)}</h2>
             <p class="st-qv-lrn">LRN <b>${this.esc(profile.lrn || "—")}</b></p>
@@ -321,9 +305,9 @@ class LearnerQuickView {
       <footer class="st-qv-foot">
         <button type="button" class="st-btn st-qv-btn-ghost" data-qv-close>Close</button>
         <div class="r">
-          <a href="learner-profile.html?id=${encodeURIComponent(id)}&tab=interventions" class="st-btn st-btn-outline">
+          <button type="button" class="st-btn st-btn-outline" data-qv-assign="${id}">
             <span class="material-symbols-outlined">person_add</span>Assign intervention
-          </a>
+          </button>
           <a href="learner-profile.html?id=${encodeURIComponent(id)}" class="st-btn st-btn-primary">
             <span>View full profile</span><span class="material-symbols-outlined">arrow_forward</span>
           </a>
@@ -332,6 +316,15 @@ class LearnerQuickView {
     `;
 
     this.bindCloseTargets();
+
+    this.dialog.querySelector("[data-qv-assign]")?.addEventListener("click", (e) => {
+      const learnerId = e.currentTarget.dataset.qvAssign;
+      // Close this overlay first -- the intervention modal replaces the
+      // profile preview rather than stacking on top of it.
+      this.close();
+      this.cache.delete(id);
+      Utils.openAssignInterventionModal(learnerId);
+    });
   }
 }
 

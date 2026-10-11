@@ -288,12 +288,16 @@
 .st-overview-total {
   padding-right: 28px;
   border-right: 1px solid var(--st-line);
+  /* .st-overview's "auto" column can otherwise shrink below this text's
+     natural width when the panel is tight, wrapping "registered learners"
+     / the hint onto extra lines and making the whole card taller. */
+  min-width: max-content;
 }
 
 .st-overview-total .value {
   font-family: var(--st-font-heading);
   font-weight: 800;
-  font-size: var(--st-fs-4xl); /* 52px */
+  font-size: 3.25rem; /* 52px -- the one bold element on this page, a size up from the --st-fs-4xl scale */
   line-height: 1;
   letter-spacing: -0.03em;
   color: var(--st-primary);
@@ -303,6 +307,16 @@
   margin-top: 6px;
   font-size: var(--st-fs-base); /* 14px */
   color: var(--st-ink-muted);
+}
+
+/* "Click a status to filter" -- same caption admin's .st-adm-sub is
+   (admin-list-pages.css), unscoped here since .st-overview-total is
+   shared across several teacher pages, not just one body:is() list. */
+.st-overview-total .hint {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--st-fs-xs);
+  color: var(--st-ink-faint);
 }
 
 /* .st-risk-strip/.st-risk-legend(+item) now live in
@@ -638,30 +652,6 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-searc
   flex: none;
 }
 
-body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-tool-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 38px;
-  padding: 0 12px;
-  border: 1px solid var(--st-line-strong);
-  border-radius: var(--st-radius-control);
-  background: #fff;
-  color: var(--st-on-surface);
-  font-family: var(--st-font-body);
-  font-size: var(--st-fs-base); /* 13.5px */
-  font-weight: 500;
-  cursor: pointer;
-}
-
-body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-tool-btn:hover {
-  background: var(--st-background);
-}
-
-body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-tool-btn .material-symbols-outlined {
-  font-size: var(--st-fs-lg);
-}
-
 .st-table-scroll {
   overflow-x: auto;
 }
@@ -747,9 +737,13 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
     border-bottom: 1px solid var(--st-line);
     display: flex;
     align-items: baseline;
+    flex-wrap: wrap;
     gap: 10px;
+    /* The desktop min-width:max-content fix for the 2-column grid would
+       otherwise force this flex row to overflow horizontally here. */
+    min-width: 0;
   }
-  .st-overview-total .value { font-size: var(--st-fs-4xl); /* 40px */ }
+  .st-overview-total .value { font-size: 2.5rem; /* 40px */ }
   .st-overview-total .label { margin: 0; }
   .st-risk-legend { gap: 10px; }
   .st-risk-legend-item .count { font-size: var(--st-fs-xl); /* 22px */ }
@@ -762,7 +756,6 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
   body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-registry-head { padding: 16px; }
   body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-registry-tools { width: 100%; }
   body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-search { width: 100%; }
-  body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-registry-tools .st-tool-btn,
   body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-registry-tools .st-btn { flex: 1; }
   /* Table becomes stacked cards */
   body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-data-table thead { display: none; }
@@ -819,143 +812,6 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
   [data-animate] .st-attention-risk .meter i { width: var(--w); }
 }
 
-/* ============================================================
-   Shared with other pages (notifications.html, clc-overview.html,
-   class-management.html) -- left as-is by the dashboard UI revision.
-   ============================================================ */
-
-.st-quick-list{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-    overflow-y:auto;
-}
-
-.st-quick-item{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    width:100%;
-    padding:8px;
-    border-radius:var(--st-radius-control);
-    border:1px solid transparent;
-    background:transparent;
-    cursor:pointer;
-    text-align:left;
-    transition:var(--st-transition);
-    text-decoration:none;
-    color:var(--st-on-surface);
-}
-
-.st-quick-item:hover{
-    background:var(--st-surface);
-    border-color:rgba(195,198,207,.20);
-}
-
-.st-quick-item-icon{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:6px;
-    border-radius:var(--st-radius-xs);
-    background:var(--st-primary-fixed);
-    color:var(--st-primary);
-    font-size: var(--st-font-size-body-lg);
-}
-
-.st-quick-item-label{
-    font-size: var(--st-font-size-label);
-    font-weight:500;
-}
-
-.st-quick-tip{
-    margin-top:16px;
-    display:flex;
-    gap:12px;
-    align-items:flex-start;
-    padding:12px;
-    background:rgba(211,227,255,.30);
-    border:1px solid rgba(18,53,91,.10);
-    border-radius:var(--st-radius-control);
-}
-
-.st-quick-tip .material-symbols-outlined{
-    font-size: var(--st-fs-xl);
-    color:var(--st-primary);
-    flex-shrink:0;
-}
-
-.st-quick-tip p{
-    font-size: var(--st-font-size-micro);
-    line-height:1.3;
-    color:var(--st-primary-container);
-}
-
-/* .st-empty(+title/+text) now live in components/surfaces.css. */
-
-.st-alert-card{
-    background:#fff;
-    border:1px solid rgba(195,198,207,.30);
-    border-radius:var(--st-radius-card);
-    box-shadow:var(--st-shadow-sm);
-    padding:20px;
-    display:flex;
-    gap:16px;
-    align-items:flex-start;
-    border-left:4px solid var(--st-outline-variant);
-}
-
-.st-alert-card--high{ border-left-color:var(--st-risk-high); }
-.st-alert-card--moderate{ border-left-color:var(--st-risk-moderate); }
-.st-alert-card--low{ border-left-color:var(--st-risk-low); }
-
-.st-alert-card-icon{
-    width:40px;
-    height:40px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex-shrink:0;
-}
-
-.st-alert-card--high .st-alert-card-icon{ background:var(--st-risk-high-soft); color:var(--st-risk-high); }
-.st-alert-card--moderate .st-alert-card-icon{ background:var(--st-risk-moderate-soft); color:var(--st-risk-moderate); }
-.st-alert-card--low .st-alert-card-icon{ background:var(--st-risk-low-soft); color:var(--st-risk-low); }
-
-.st-alert-card-body{ flex:1; }
-
-.st-alert-card-title{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    font-size: var(--st-font-size-body-lg);
-    font-weight:600;
-    color:var(--st-on-surface);
-    margin-bottom:4px;
-}
-
-.st-alert-card-text{
-    font-size: var(--st-font-size-label);
-    line-height:1.5;
-    color:var(--st-on-surface-variant);
-    margin-bottom:12px;
-}
-
-.st-alert-card-footer{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:12px;
-    flex-wrap:wrap;
-}
-
-.st-alert-card-status{
-    font-size: var(--st-font-size-caption);
-    font-weight:600;
-    color:var(--st-outline);
-}
 
 /* Early Warning now reuses the shared .st-overview (summary) and
    .st-table-card/.st-toolbar (table card) components -- see

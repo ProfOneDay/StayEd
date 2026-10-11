@@ -756,18 +756,6 @@ body[data-page="Class Management"] .st-clc-modal-note{
     .st-clc-form-grid{ grid-template-columns:1fr; }
 }
 
-.st-clc-form-grid--3{
-    grid-template-columns:repeat(3,1fr);
-}
-
-@media (max-width: 767px){
-    .st-clc-form-grid--3{ grid-template-columns:1fr 1fr; }
-}
-
-@media (max-width: 479px){
-    .st-clc-form-grid--3{ grid-template-columns:1fr; }
-}
-
 .st-clc-field{
     display:flex;
     flex-direction:column;
@@ -1114,10 +1102,6 @@ body[data-page="Class Management"] .st-clc-modal-note{
 
 .st-breadcrumb-link:hover{
     color:var(--st-primary);
-}
-
-.st-breadcrumb--gapped{
-    margin-bottom:8px;
 }
 
 .st-clc-upload-sidebar{

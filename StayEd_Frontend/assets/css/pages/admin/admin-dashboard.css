@@ -33,7 +33,7 @@ body[data-page="Admin Dashboard"] .st-risk-strip span{transition:flex-grow 600ms
 body[data-page="Admin Dashboard"] .st-adm-clc-card{display:flex;flex-direction:column;justify-content:space-between;gap:14px;background:#eef8f7;border-color:#cfe9e6}
 body[data-page="Admin Dashboard"] .st-adm-clc-card .head{display:flex;align-items:center;gap:10px;font-weight:600;font-size: var(--st-fs-base);color:var(--st-secondary)}
 body[data-page="Admin Dashboard"] .st-adm-clc-figure{display:flex;align-items:baseline;gap:10px}
-body[data-page="Admin Dashboard"] .st-adm-clc-figure strong{font-family:var(--st-font-heading);font-weight:800;font-size: var(--st-fs-4xl);line-height:1;color:var(--st-primary)}
+body[data-page="Admin Dashboard"] .st-adm-clc-figure strong{font-family:var(--st-font-heading);font-weight:800;font-size: 2.75rem;line-height:1;color:var(--st-primary)}
 body[data-page="Admin Dashboard"] .st-adm-clc-figure span{font-size: var(--st-fs-base);color:var(--st-ink-muted)}
 body[data-page="Admin Dashboard"] .st-adm-clc-card .hint{margin:0;font-size: var(--st-fs-xs);color:#3f6b68}
 
@@ -98,7 +98,7 @@ body[data-page="Admin Dashboard"] .st-hbar-row:nth-child(2) .st-hbar--level{back
 body[data-page="Admin Dashboard"] .st-hbar-row:nth-child(3) .st-hbar--level{background:var(--st-secondary)}
 body[data-page="Admin Dashboard"] .st-hbar-row:nth-child(4) .st-hbar--level{background:#9db5d3}
 body[data-page="Admin Dashboard"] [data-animate] .st-hbar-row:nth-child(4) .st-hbar{transition-delay:270ms}
-body[data-page="Admin Dashboard"] .avg-mark{position:absolute;top:-4px;bottom:-4px;width:2px;border-radius:var(--st-radius-xs);background:var(--st-on-surface);opacity:.45;transform:translateX(-1px)}
+body[data-page="Admin Dashboard"] .avg-mark{position:absolute;left:var(--left);top:-4px;bottom:-4px;width:2px;border-radius:var(--st-radius-xs);background:var(--st-on-surface);opacity:.45;transform:translateX(-1px)}
 body[data-page="Admin Dashboard"] .st-adm-avg-note{display:flex;align-items:center;gap:8px;margin:14px 0 0;font-size: var(--st-fs-xs);color:var(--st-ink-faint)}
 body[data-page="Admin Dashboard"] .st-adm-avg-note i{width:2px;height:12px;background:var(--st-on-surface);opacity:.45}
 body[data-page="Admin Dashboard"] .gender-risk-callout{display:flex;gap:10px;align-items:flex-start;margin-bottom:16px;font-size: var(--st-fs-base);font-weight:600;color:var(--st-primary);line-height:1.45}
@@ -152,8 +152,15 @@ body[data-page="Admin Dashboard"] .clc-list{grid-template-columns:repeat(2,minma
 @media (min-width: 1280px){
   body[data-page="Admin Dashboard"] .st-adm-side{contain:size}
   body[data-page="Admin Dashboard"] .st-adm-side > .st-panel{flex:1 1 0;min-height:0;overflow-y:auto;overflow-x:hidden}
+  /* min-height:0 here (instead of a real floor) let Chart.js's resize
+     observer shrink the canvas down to a sliver whenever the callout text
+     above it wraps to 2 lines -- a bar chart at near-zero height renders
+     bars too short to see at all, and a doughnut shrinks to a speck. The
+     canvas was always meant to fill its height="220" attribute; give it
+     that as a floor so it only ever grows from there, and let the panel's
+     own overflow-y:auto (above) scroll the rest if it still doesn't fit. */
   body[data-page="Admin Dashboard"] .st-adm-side #riskChartView.chart-canvas-wrap,
-  body[data-page="Admin Dashboard"] .st-adm-side #genderChartView.chart-canvas-wrap{flex:1 1 0;height:auto;min-height:0}
+  body[data-page="Admin Dashboard"] .st-adm-side #genderChartView.chart-canvas-wrap{flex:1 1 0;height:auto;min-height:220px}
 }
 /* Bar view is shorter than the card: let it fill the free space below the header and spread the rows across it */
 body[data-page="Admin Dashboard"] .st-adm-side #riskBarView,

@@ -200,14 +200,9 @@ class LearnerProfilePage {
     const p = this.profile;
     const h = p.header || {};
 
-    const initials = (p.name || "?")
-      .split(" ")
-      .map((w) => w[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase();
+    const avatarInitials = Utils.initials(p.name || "?");
 
-    this.set("[data-profile-avatar]", initials);
+    this.set("[data-profile-avatar]", avatarInitials);
     this.set("[data-profile-name]", p.name);
     this.set("[data-profile-lrn]", p.lrn);
     this.set("[data-profile-birthdate]", p.birthdate ? Utils.formatDate(p.birthdate) : "—");
@@ -322,11 +317,11 @@ class LearnerProfilePage {
             ${modalities.map((m) => `<option value="${m}" ${m === currentModality ? "selected" : ""}>${m}</option>`).join("")}
           </select>
         </div>
-        <div class="st-schedule-modal-field" id="elModalityEffectiveField" style="display:none;">
+        <div class="st-schedule-modal-field" id="elModalityEffectiveField" hidden>
           <label for="elModalityEffective">Effective Date</label>
           <input id="elModalityEffective" type="date" value="${today}" max="${today}">
         </div>
-        <div class="st-schedule-modal-field" id="elModalityReasonField" style="display:none;">
+        <div class="st-schedule-modal-field" id="elModalityReasonField" hidden>
           <label for="elModalityReason">Reason for Modality Change (optional)</label>
           <input id="elModalityReason" type="text" placeholder="e.g. Schedule constraints">
         </div>
@@ -421,7 +416,7 @@ class LearnerProfilePage {
                 <p><strong>New modality:</strong> ${modality}</p>
                 <p><strong>Effective date:</strong> ${this.formatModalityDate(modalityEffective)}</p>
                 ${modalityReason ? `<p><strong>Reason:</strong> ${modalityReason}</p>` : ""}
-                <p style="color:var(--st-on-surface-variant);font-size:0.8125rem;margin-top:12px;">
+                <p class="st-mrf-subtitle st-mt-12">
                   This will update the learner's current modality. The previous modality will remain in the learner's modality history.
                 </p>
               `,
@@ -446,8 +441,8 @@ class LearnerProfilePage {
 
     const syncModalityChangeFields = () => {
       const changed = modalitySelect?.value !== currentModality;
-      if (reasonField) reasonField.style.display = changed ? "" : "none";
-      if (effectiveField) effectiveField.style.display = changed ? "" : "none";
+      if (reasonField) reasonField.hidden = !changed;
+      if (effectiveField) effectiveField.hidden = !changed;
     };
 
     modalitySelect?.addEventListener("change", syncModalityChangeFields);
@@ -567,7 +562,7 @@ class LearnerProfilePage {
         return `
           <span
             class="st-performance-progress-point${edgeClass}"
-            style="left:${x}%;top:${y}%;--d:${700 + i * 120}"
+            style="--left:${x}%;--top:${y}%;--d:${700 + i * 120}"
             data-tooltip="${safeTooltip}"
             aria-label="${safeTooltip}"
             tabindex="0"
@@ -589,7 +584,7 @@ class LearnerProfilePage {
       .map(({ x, pt }, i) => {
         if (!labelIndexes.has(i)) return "";
         const edgeClass = i === 0 ? "is-first" : i === coords.length - 1 ? "is-last" : "";
-        return `<span class="st-performance-progress-x-label ${edgeClass}" style="left:${x}%;">${pt.date}</span>`;
+        return `<span class="st-performance-progress-x-label ${edgeClass}" style="--left:${x}%;">${pt.date}</span>`;
       })
       .join("");
 
@@ -598,7 +593,7 @@ class LearnerProfilePage {
         ${[100, 75, 50, 25, 0]
           .map(
             (value) => `
-              <div class="st-performance-progress-grid-line" style="top:${100 - value}%;">
+              <div class="st-performance-progress-grid-line" style="--top:${100 - value}%;">
                 <span>${value}%</span>
               </div>
             `,
@@ -697,8 +692,8 @@ class LearnerProfilePage {
       const y = yForPoint(pt);
       const tip = `${pt.date}: ${pt.level} Risk${pt.probability != null ? ` (${pt.probability}%)` : ""}`;
       points.innerHTML = `
-        <span class="st-risk-trend-point st-risk-trend-point--${pt.level.toLowerCase()} st-risk-trend-point--single" style="left:50%;top:${y}%;" data-tooltip="${this.escAttr(tip)}" aria-label="${this.escAttr(tip)}" tabindex="0"></span>
-        <span class="st-risk-trend-date-label" style="left:50%;">${pt.date}</span>
+        <span class="st-risk-trend-point st-risk-trend-point--${pt.level.toLowerCase()} st-risk-trend-point--single" style="--left:50%;--top:${y}%;" data-tooltip="${this.escAttr(tip)}" aria-label="${this.escAttr(tip)}" tabindex="0"></span>
+        <span class="st-risk-trend-date-label" style="--left:50%;">${pt.date}</span>
       `;
       list.innerHTML = `
         <div class="st-risk-trend-list-row">
@@ -726,7 +721,7 @@ class LearnerProfilePage {
         // chart's first/last points) -- anchor it to the point's own side
         // instead of centering, for the first/last dots.
         const edgeClass = i === coords.length - 1 ? " is-last" : i === 0 ? " is-first" : "";
-        return `<span class="st-risk-trend-point st-risk-trend-point--${pt.level.toLowerCase()}${edgeClass}" style="left:${x}%;top:${y}%;--d:${500 + i * 150}" data-tooltip="${this.escAttr(tip)}" aria-label="${this.escAttr(tip)}" tabindex="0"></span>`;
+        return `<span class="st-risk-trend-point st-risk-trend-point--${pt.level.toLowerCase()}${edgeClass}" style="--left:${x}%;--top:${y}%;--d:${500 + i * 150}" data-tooltip="${this.escAttr(tip)}" aria-label="${this.escAttr(tip)}" tabindex="0"></span>`;
       })
       .join("");
 
@@ -1217,55 +1212,11 @@ class LearnerProfilePage {
   }
 
   static openAddInterventionModal(prefillDescription = "") {
-    if (!window.Modal) return;
-    const types = [
-      "Home Visit", "Consultation", "Referral",
-      "Learner Follow-up", "Parent/Guardian Conference", "Other",
-    ];
-
-    Modal.show({
-      title: "Assign Intervention",
-      size: "sm",
-      confirmLabel: "Select Intervention",
-      message: `
-        <div class="st-schedule-modal-field">
-          <label for="ivType">Intervention Type</label>
-          <select id="ivType">${types.map((t) => `<option value="${t}">${t}</option>`).join("")}</select>
-        </div>
-        <div class="st-schedule-modal-field">
-          <label for="ivDescription">Description</label>
-          <textarea id="ivDescription" rows="3" placeholder="What will this intervention involve?">${prefillDescription}</textarea>
-        </div>
-        <div class="st-schedule-modal-field">
-          <label for="ivTargetDate">Target Follow-up Date (required)</label>
-          <input type="date" id="ivTargetDate">
-        </div>
-      `,
-      onConfirm: async () => {
-        const type = document.getElementById("ivType")?.value;
-        const description = document.getElementById("ivDescription")?.value.trim();
-        const targetDate = document.getElementById("ivTargetDate")?.value;
-
-        if (!description) {
-          Toast?.error("Please describe the intervention.");
-          return;
-        }
-                if (!targetDate) {
-          Toast?.error("Please set a target follow-up date.");
-          return;
-        }
-
-        try {
-          await API.createIntervention(this.getLearnerId(), {
-            type, description, targetDate,
-          });
-          Toast?.success("Intervention assigned.");
-          await this.load();
-          document.querySelector('[data-profile-tab="interventions"]')?.click();
-        } catch (error) {
-          console.error("[LearnerProfile] Assign intervention failed", error);
-          Toast?.error(error?.data?.message || "Unable to assign intervention.");
-        }
+    Utils.openAssignInterventionModal(this.getLearnerId(), {
+      prefillDescription,
+      onDone: async () => {
+        await this.load();
+        document.querySelector('[data-profile-tab="interventions"]')?.click();
       },
     });
   }
@@ -1310,48 +1261,48 @@ class LearnerProfilePage {
       size: "xl",
       confirmLabel: "Save Outcome",
       message: `
-        <p style="font-size:13px;color:#6B7280;margin-bottom:16px;">Document what happened after the intervention and record the learner's response.</p>
+        <p class="st-outcome-intro">Document what happened after the intervention and record the learner's response.</p>
 
-        <p style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:8px;">Outcome Status</p>
-        <div id="ivOutcomeCards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px;">
-          <div class="st-outcome-card" data-outcome-card="Successful" style="border:2px solid #10B981;background:#ECFDF5;">
-            <span class="material-symbols-outlined" style="color:#10B981;font-size:22px;">check_circle</span>
-            <p style="font-weight:700;font-size:0.8125rem;color:#065F46;margin-top:4px;">Successful</p>
-            <p style="font-size:0.6875rem;color:#059669;">Goals achieved</p>
+        <p class="st-outcome-section-label">Outcome Status</p>
+        <div id="ivOutcomeCards" class="st-outcome-cards">
+          <div class="st-outcome-card is-active" data-outcome-card="Successful">
+            <span class="material-symbols-outlined st-outcome-card-icon st-outcome-card-icon--success">check_circle</span>
+            <p class="st-outcome-card-title st-outcome-card-title--success">Successful</p>
+            <p class="st-outcome-card-sub st-outcome-card-sub--success">Goals achieved</p>
           </div>
-          <div class="st-outcome-card" data-outcome-card="Failed" style="border:2px solid #E5E7EB;">
-            <span class="material-symbols-outlined" style="color:#DC2626;font-size:22px;">cancel</span>
-            <p style="font-weight:700;font-size:0.8125rem;color:#111827;margin-top:4px;">Failed</p>
-            <p style="font-size:0.6875rem;color:#6B7280;">Needs escalation</p>
+          <div class="st-outcome-card" data-outcome-card="Failed">
+            <span class="material-symbols-outlined st-outcome-card-icon st-outcome-card-icon--danger">cancel</span>
+            <p class="st-outcome-card-title st-outcome-card-title--dark">Failed</p>
+            <p class="st-outcome-card-sub st-outcome-card-sub--muted">Needs escalation</p>
           </div>
-          <div class="st-outcome-card" data-outcome-card="Others" style="border:2px solid #E5E7EB;">
-            <span class="material-symbols-outlined" style="color:#6B7280;font-size:22px;">more_horiz</span>
-            <p style="font-weight:700;font-size:0.8125rem;color:#111827;margin-top:4px;">Others</p>
-            <p style="font-size:0.6875rem;color:#6B7280;">Specify below</p>
+          <div class="st-outcome-card" data-outcome-card="Others">
+            <span class="material-symbols-outlined st-outcome-card-icon st-outcome-card-icon--neutral">more_horiz</span>
+            <p class="st-outcome-card-title st-outcome-card-title--dark">Others</p>
+            <p class="st-outcome-card-sub st-outcome-card-sub--muted">Specify below</p>
           </div>
         </div>
-        <div id="ivOutcomeOtherField" style="display:none;margin-bottom:16px;">
-          <input id="ivOutcomeOther" type="text" placeholder="Please specify the outcome..." style="width:100%;padding:8px 10px;border:1px solid #E5E7EB;border-radius:6px;font-size:13px;">
+        <div id="ivOutcomeOtherField" class="st-outcome-other-field" hidden>
+          <input id="ivOutcomeOther" type="text" placeholder="Please specify the outcome..." class="st-outcome-other-input">
         </div>
 
-        <p style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:8px;">What Happened? *</p>
-        <div style="border:1px solid #E5E7EB;border-radius:8px;overflow:hidden;margin-bottom:16px;">
-          <div style="display:flex;gap:4px;padding:6px 8px;background:#F9FAFB;border-bottom:1px solid #E5E7EB;">
-            <button type="button" data-rt-cmd="bold" style="width:28px;height:28px;border:none;background:transparent;border-radius:4px;cursor:pointer;font-weight:700;">B</button>
-            <button type="button" data-rt-cmd="italic" style="width:28px;height:28px;border:none;background:transparent;border-radius:4px;cursor:pointer;font-style:italic;">I</button>
-            <button type="button" data-rt-cmd="insertUnorderedList" style="width:28px;height:28px;border:none;background:transparent;border-radius:4px;cursor:pointer;">
-              <span class="material-symbols-outlined" style="font-size:18px;">format_list_bulleted</span>
+        <p class="st-outcome-section-label">What Happened? *</p>
+        <div class="st-outcome-rte">
+          <div class="st-outcome-rte-toolbar">
+            <button type="button" data-rt-cmd="bold" class="st-outcome-rte-btn st-outcome-rte-btn--bold">B</button>
+            <button type="button" data-rt-cmd="italic" class="st-outcome-rte-btn st-outcome-rte-btn--italic">I</button>
+            <button type="button" data-rt-cmd="insertUnorderedList" class="st-outcome-rte-btn">
+              <span class="material-symbols-outlined">format_list_bulleted</span>
             </button>
           </div>
-          <div id="ivNotesRich" contenteditable="true" style="min-height:110px;padding:10px 12px;font-size:13px;color:#111827;outline:none;" data-placeholder="Met with the learner and discussed..."></div>
+          <div id="ivNotesRich" contenteditable="true" class="st-outcome-notes" data-placeholder="Met with the learner and discussed..."></div>
         </div>
 
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <p style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.03em;">Attached Artifacts</p>
-          <span id="ivArtifactCount" style="font-size:11px;color:#6B7280;">0 attached</span>
+        <div class="st-outcome-artifacts-head">
+          <p class="st-outcome-section-label st-outcome-section-label--flush">Attached Artifacts</p>
+          <span id="ivArtifactCount" class="st-outcome-artifacts-count">0 attached</span>
         </div>
-        <input id="ivArtifactInput" type="file" accept="image/*,.pdf,.doc,.docx" multiple style="margin-bottom:10px;">
-        <div id="ivArtifactPreview" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+        <input id="ivArtifactInput" type="file" accept="image/*,.pdf,.doc,.docx" multiple class="st-outcome-file-input">
+        <div id="ivArtifactPreview" class="st-outcome-artifacts-preview"></div>
       `,
       onConfirm: async () => {
         const otherText = document.getElementById("ivOutcomeOther")?.value.trim();
@@ -1399,12 +1350,10 @@ class LearnerProfilePage {
       card.addEventListener("click", () => {
         this._outcomeStatus = card.dataset.outcomeCard;
         cards.forEach((c) => {
-          const active = c === card;
-          c.style.border = active ? "2px solid #10B981" : "2px solid #E5E7EB";
-          c.style.background = active ? "#ECFDF5" : "transparent";
+          c.classList.toggle("is-active", c === card);
         });
         if (otherField) {
-          otherField.style.display = this._outcomeStatus === "Others" ? "" : "none";
+          otherField.hidden = this._outcomeStatus !== "Others";
         }
       });
     });
@@ -1459,14 +1408,14 @@ class LearnerProfilePage {
 
     preview.innerHTML = this._outcomeArtifacts
       .map((a, i) => `
-        <div style="width:130px;border:1px solid #E5E7EB;border-radius:8px;padding:8px;position:relative;">
-          <button type="button" data-remove-artifact="${i}" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#DC2626;color:#fff;border:none;font-size:12px;cursor:pointer;line-height:1;">×</button>
+        <div class="st-outcome-artifact-tile">
+          <button type="button" data-remove-artifact="${i}" class="st-outcome-remove-btn">×</button>
           ${a.is_image
-            ? `<img src="${a.image_data}" style="width:100%;height:70px;object-fit:cover;border-radius:6px;">`
-            : `<div style="width:100%;height:70px;display:flex;align-items:center;justify-content:center;background:#F3F4F6;border-radius:6px;"><span class="material-symbols-outlined" style="color:#6B7280;font-size:28px;">description</span></div>`
+            ? `<img src="${a.image_data}" class="st-outcome-artifact-thumb">`
+            : `<div class="st-outcome-artifact-thumb-placeholder"><span class="material-symbols-outlined">description</span></div>`
           }
-          <p style="font-size:10px;color:#6B7280;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.file_name}</p>
-          <select data-artifact-type="${i}" style="width:100%;font-size:10px;margin-top:4px;padding:2px;border:1px solid #E5E7EB;border-radius:4px;">
+          <p class="st-outcome-artifact-filename">${a.file_name}</p>
+          <select data-artifact-type="${i}" class="st-outcome-artifact-type-select">
             ${typeOptions.map((t) => `<option value="${t}" ${a.artifact_type === t ? "selected" : ""}>${t}</option>`).join("")}
           </select>
         </div>
@@ -1512,9 +1461,9 @@ class LearnerProfilePage {
     preview.innerHTML = this._outcomePhotos
       .map(
         (p, i) => `
-        <div style="position:relative;width:72px;height:72px;">
-          <img src="${p.image_data}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;border:1px solid #E5E7EB;">
-          <button type="button" data-remove-outcome-photo="${i}" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#DC2626;color:#fff;border:none;font-size:12px;cursor:pointer;line-height:1;">×</button>
+        <div class="st-outcome-photo-tile">
+          <img src="${p.image_data}" class="st-outcome-photo-thumb">
+          <button type="button" data-remove-outcome-photo="${i}" class="st-outcome-remove-btn">×</button>
         </div>
       `
       )
@@ -1565,11 +1514,10 @@ class LearnerProfilePage {
 
     const overlay = document.createElement("div");
     overlay.id = "stPhotoLightbox";
-    overlay.style.cssText =
-      "position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;cursor:zoom-out;";
+    overlay.className = "st-photo-lightbox";
     overlay.innerHTML = `
-      <img src="${imageData}" style="max-width:100%;max-height:100%;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,0.4);">
-      <button type="button" style="position:absolute;top:16px;right:24px;background:none;border:none;color:#fff;font-size:32px;cursor:pointer;line-height:1;">×</button>
+      <img src="${imageData}" class="st-photo-lightbox-img">
+      <button type="button" class="st-photo-lightbox-close">×</button>
     `;
     overlay.addEventListener("click", () => overlay.remove());
     document.body.appendChild(overlay);
@@ -1582,23 +1530,23 @@ class LearnerProfilePage {
       size: "md",
       confirmLabel: "Close",
       message: `
-        <p style="font-size:13px;color:#6B7280;margin-bottom:10px;">Assigned: ${h.date} — ${h.remarks}</p>
-        <p style="font-size:14px;margin-bottom:12px;">${h.description || "No description recorded."}</p>
+        <p class="st-history-modal-meta">Assigned: ${h.date} — ${h.remarks}</p>
+        <p class="st-history-modal-desc">${h.description || "No description recorded."}</p>
         ${h.aiReason ? `
-        <div style="padding:10px 12px;background:#F5F3FF;border-left:3px solid #7C3AED;border-radius:6px;margin-bottom:12px;">
-          <p style="font-size:11px;font-weight:700;color:#7C3AED;text-transform:uppercase;margin-bottom:4px;">AI Insight</p>
-          <p style="font-size:13px;color:#374151;">${h.aiReason}</p>
+        <div class="st-history-modal-ai-box">
+          <p class="st-history-modal-ai-label">AI Insight</p>
+          <p class="st-history-modal-ai-text">${h.aiReason}</p>
         </div>
         ` : ""}
-          ${h.outcome ? `<p style="font-size:13px;"><strong>Outcome:</strong> ${h.outcome}</p>` : ""}
-          ${h.outcomeNotes ? `<p style="font-size:13px;"><strong>Outcome Notes:</strong> ${h.outcomeNotes}</p>` : ""}
+          ${h.outcome ? `<p class="st-history-modal-line"><strong>Outcome:</strong> ${h.outcome}</p>` : ""}
+          ${h.outcomeNotes ? `<p class="st-history-modal-line"><strong>Outcome Notes:</strong> ${h.outcomeNotes}</p>` : ""}
           ${photos.length ? `
-          <p style="font-size:13px;font-weight:700;margin-top:12px;margin-bottom:6px;">Attached Artifacts</p>
-          <div style="display:flex;flex-wrap:wrap;gap:10px;">
+          <p class="st-history-modal-artifacts-label">Attached Artifacts</p>
+          <div class="st-history-modal-artifacts-grid">
           ${photos.map((p, i) => `
-            <div style="width:100px;">
-              <img src="${p.imageData}" alt="${p.fileName || "Outcome photo"}" style="width:100px;height:100px;object-fit:cover;border-radius:6px;border:1px solid #E5E7EB;cursor:pointer;" onclick="LearnerProfilePage.openPhotoLightbox('${p.imageData.replace(/'/g, "\\'")}')">
-              ${p.artifactType ? `<p style="font-size:10px;color:#6B7280;text-align:center;margin-top:3px;">${p.artifactType}</p>` : ""}
+            <div class="st-history-modal-artifact-tile">
+              <img src="${p.imageData}" alt="${p.fileName || "Outcome photo"}" class="st-history-modal-artifact-img" onclick="LearnerProfilePage.openPhotoLightbox('${p.imageData.replace(/'/g, "\\'")}')">
+              ${p.artifactType ? `<p class="st-history-modal-artifact-type">${p.artifactType}</p>` : ""}
             </div>
           `).join("")}
           </div>
@@ -1676,10 +1624,7 @@ class LearnerProfilePage {
   }
 
   static riskPill(risk) {
-    const cls =
-      { High: "high", Moderate: "moderate", Low: "low" }[risk] || "neutral";
-    const label = cls === "neutral" ? "Not Yet Assessed" : `${risk} Risk`;
-    return `<span class="st-risk-badge st-risk-badge--${cls}"><span class="st-risk-dot"></span>${label}</span>`;
+    return Utils.riskPill(risk);
   }
 
   static capitalize(s) {
@@ -1687,11 +1632,7 @@ class LearnerProfilePage {
   }
 
   static escAttr(s) {
-    return String(s)
-      .replace(/&/g, "&amp;")
-      .replace(/"/g, "&quot;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
+    return Utils.esc(s);
   }
 
   // One IntersectionObserver for every [data-animate]/[data-animate-list]

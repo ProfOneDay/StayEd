@@ -331,9 +331,9 @@ body.st-sv-body {
   --ri: var(--st-risk-low-ink);
 }
 .st-sv-risk.is-preliminary {
-  --rc: var(--st-info, #1f7fcf);
-  --rs: #e6f2fb;
-  --ri: #1a6fb0;
+  --rc: var(--st-risk-preliminary);
+  --rs: var(--st-risk-preliminary-soft);
+  --ri: var(--st-risk-preliminary-ink);
 }
 .st-sv-risk.is-neutral {
   --rc: var(--st-ink-faint);
@@ -466,6 +466,7 @@ body.st-sv-body {
   position: absolute;
   left: 0;
   right: 0;
+  top: var(--top);
   border-top: 1px dashed var(--st-line, #e6e9ef);
 }
 
@@ -513,6 +514,8 @@ body.st-sv-body {
 
 .st-sv-pt {
   position: absolute;
+  left: var(--left);
+  top: var(--top);
   width: 12px;
   height: 12px;
   border-radius: 50%;
@@ -573,6 +576,7 @@ body.st-sv-body {
 
 .st-sv-xlab {
   position: absolute;
+  left: var(--left);
   top: calc(100% + 9px);
   font-size: var(--st-fs-xs);
   color: var(--st-ink-faint);
@@ -758,15 +762,6 @@ body.st-sv-body {
   flex-wrap: wrap;
   font-size: var(--st-fs-sm);
   color: var(--st-ink-muted);
-}
-
-/* ---------- Loading skeleton ---------- */
-.st-sv-skel {
-  height: 110px;
-  border-radius: var(--st-radius-lg);
-  background: linear-gradient(90deg, var(--st-risk-neutral-soft) 25%, #f6f8fa 50%, var(--st-risk-neutral-soft) 75%);
-  background-size: 200% 100%;
-  animation: stShimmer 1.2s linear infinite;
 }
 
 /* ---------- Motion ---------- */

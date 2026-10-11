@@ -211,3 +211,23 @@ Port 5433 or 5000 or 5500 already in use
   -> Something else on your computer is already using that port.
      Close other running copies of StayEd (extra PowerShell windows
      from a previous session), or restart your computer.
+
+
+====================================================================
+ BEFORE YOU MAKE A UI CHANGE
+====================================================================
+
+Run the style audit first, from the StayEd-1 folder:
+
+    python tools/style-audit/stayed_style_audit.py StayEd_Frontend --strict
+
+It's read-only (never edits anything) and checks for exactly the kind
+of drift that caused three separate cleanup passes in October 2026:
+a shared component (a button, a field, a card, a modal) getting
+redefined in a page's own CSS instead of reused, a new page missing
+from a `body:is([data-page=...])` list, a hard-coded color/radius/
+font-size instead of the shared token, or a duplicated JS helper
+(initials, esc, countTo, riskPill) instead of the one in
+assets/js/core/utils.js. See tools/style-audit/STYLE_AUDIT_REPORT.md
+and the three CHANGES_2026-10-11_style-phase*.md files in this folder
+for the full history of what it caught and why each number matters.

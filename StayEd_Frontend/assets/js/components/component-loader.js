@@ -1,6 +1,13 @@
 class ComponentLoader {
   static BASE = "../../components";
 
+  // Set once components:loaded has actually fired -- code that only runs
+  // later (e.g. an admin page's own init(), itself triggered by this same
+  // event or a delayed fallback) can check this instead of registering a
+  // listener for an event that has already happened and will never fire
+  // again. See Guards.admin().
+  static loaded = false;
+
   static async load() {
     const components = document.querySelectorAll("[data-component]");
 
@@ -67,6 +74,7 @@ document.addEventListener(
   async () => {
     await ComponentLoader.load();
 
+    ComponentLoader.loaded = true;
     document.dispatchEvent(new CustomEvent("components:loaded"));
   },
 );

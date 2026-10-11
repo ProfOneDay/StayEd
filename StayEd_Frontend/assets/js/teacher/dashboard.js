@@ -623,17 +623,12 @@ class TeacherDashboard {
 
     root.innerHTML = rows.map((learner) => {
       const pct = Math.round(Number(learner.risk_probability || 0) * 100);
-      const initials = String(learner.name || "?")
-        .split(/\s+/)
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((part) => part[0]?.toUpperCase())
-        .join("") || "?";
+      const avatarInitials = Utils.initials(learner.name || "?") || "?";
       const isModerate = learner.risk === "Moderate";
       return `
         <div class="st-attention-row${isModerate ? " is-moderate" : ""}">
           <button type="button" class="st-qv-trigger st-attention-trigger" data-learner-preview="${learner.id}" aria-haspopup="dialog" aria-label="Preview ${esc(learner.name || "this learner")}'s profile">
-            <span class="st-attention-avatar">${initials}</span>
+            <span class="st-attention-avatar">${avatarInitials}</span>
             <span class="st-attention-person">
               <strong>${esc(learner.name || "Learner")}</strong>
               <small>${esc(learner.lrn || "No LRN")}</small>
@@ -848,12 +843,7 @@ class TeacherDashboard {
   static registryRow(l, index) {
     const initialsTheme = MODALITY_AVATAR_THEMES[l.modality] || "";
 
-    const initials = (l.name || "?")
-      .split(" ")
-      .map((w) => w[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase();
+    const avatarInitials = Utils.initials(l.name || "?");
 
     const isArchived = l.status === "Archived";
 
@@ -861,7 +851,7 @@ class TeacherDashboard {
             <tr tabindex="0">
                 <td data-col="learner">
                     <button type="button" class="st-qv-trigger st-learner-cell" data-learner-preview="${l.id}" aria-haspopup="dialog" aria-label="Preview ${l.name}'s profile">
-                        <span class="st-avatar-initials st-avatar-initials${initialsTheme}">${initials}</span>
+                        <span class="st-avatar-initials st-avatar-initials${initialsTheme}">${avatarInitials}</span>
                         <span>
                             <span class="st-learner-name">${l.name}</span>
                             <p class="st-learner-id">LRN ${l.lrn}</p>
@@ -919,7 +909,7 @@ class TeacherDashboard {
   // Badge + probability meter, matching Student Registry/Early Warning's
   // risk cell. Falls back to the plain badge for learners not yet assessed.
   static riskCell(l) {
-    const cls = { High: "high", Moderate: "moderate", Low: "low" }[l.risk];
+    const cls = { High: "high", Moderate: "moderate", Low: "low", Preliminary: "preliminary" }[l.risk];
     if (!cls) {
       return `<div class="st-risk-cell"><div class="st-risk-cell-top">${this.riskBadge(l.risk)}</div></div>`;
     }
@@ -954,7 +944,7 @@ class TeacherDashboard {
 
     let html = `
             <button class="st-page-btn" ${page === 1 ? "disabled" : ""} data-page-prev>
-                <span class="material-symbols-outlined" style="font-size:1rem;">chevron_left</span>
+                <span class="material-symbols-outlined">chevron_left</span>
             </button>
         `;
 
@@ -967,7 +957,7 @@ class TeacherDashboard {
 
     html += `
             <button class="st-page-btn" ${page === pages ? "disabled" : ""} data-page-next>
-                <span class="material-symbols-outlined" style="font-size:1rem;">chevron_right</span>
+                <span class="material-symbols-outlined">chevron_right</span>
             </button>
         `;
 
@@ -1000,19 +990,7 @@ class TeacherDashboard {
   }
 
   static riskBadge(risk) {
-    const map = {
-      High: "high",
-      Moderate: "moderate",
-      Low: "low",
-    };
-
-    const cls = map[risk] || "neutral";
-
-    return `
-            <span class="st-risk-badge st-risk-badge--${cls}">
-                <span class="st-risk-dot"></span>${risk || "Not Yet Assessed"}
-            </span>
-        `;
+    return Utils.riskPill(risk);
   }
 
   static modalityPill(modality) {
@@ -1036,20 +1014,12 @@ class TeacherDashboard {
   static countTo(el, value) {
     if (!el) return;
     const end = Number(value ?? el.dataset.final ?? el.textContent);
-    el.dataset.final = Number.isFinite(end) ? end : (value ?? "");
-    if (ST_REDUCE_MOTION || !Number.isFinite(end)) {
-      el.textContent = value ?? el.dataset.final;
+    if (!Number.isFinite(end)) {
+      el.dataset.final = value ?? "";
+      el.textContent = value ?? "";
       return;
     }
-    const t0 = performance.now();
-    const dur = 800;
-    const tick = (t) => {
-      const k = Math.min(1, (t - t0) / dur);
-      const eased = 1 - Math.pow(1 - k, 3);
-      el.textContent = Math.round(end * eased);
-      if (k < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
+    Utils.countTo(el, end);
   }
 
   // One IntersectionObserver for every [data-animate] panel: fills bars,

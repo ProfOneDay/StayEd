@@ -128,12 +128,20 @@ class EarlyWarningPage {
         this.apply();
       });
 
+    this.setRiskFilter = Utils.bindFilterButtons(
+      [...document.querySelectorAll("[data-filter-btn]")],
+      document.querySelector("[data-ewa-filter-risk]"),
+      (level) => {
+        this.state.riskLevel = level;
+        this.state.page = 1;
+        this.apply();
+      },
+    );
+
     document
       .querySelector("[data-ewa-filter-risk]")
       ?.addEventListener("change", (e) => {
-        this.state.riskLevel = e.target.value;
-        this.state.page = 1;
-        this.apply();
+        this.setRiskFilter(e.target.value);
       });
 
     document
@@ -148,15 +156,13 @@ class EarlyWarningPage {
       .querySelector("[data-ewa-clear]")
       ?.addEventListener("click", () => {
         this.state.search = "";
-        this.state.riskLevel = "";
         this.state.clc = "";
         this.state.page = 1;
 
         document.querySelector("[data-ewa-search]").value = "";
-        document.querySelector("[data-ewa-filter-risk]").value = "";
         document.querySelector("[data-ewa-filter-clc]").value = "";
 
-        this.apply();
+        this.setRiskFilter("");
       });
   }
 
@@ -170,6 +176,18 @@ class EarlyWarningPage {
     this.countTo(document.querySelector("[data-ewa-high]"), high);
     this.countTo(document.querySelector("[data-ewa-moderate]"), moderate);
     this.countTo(document.querySelector("[data-ewa-low]"), low);
+
+    // Percentages are of all learners (allLearners.length), not of
+    // `total` (active alerts = high+moderate only) -- Low is deliberately
+    // excluded from the alert count but still shown in the legend, and
+    // dividing by `total` would push its percentage over 100%.
+    const setPct = (selector, value) => {
+      const el = document.querySelector(selector);
+      if (el) el.textContent = `${Utils.pct(value, allLearners.length)}%`;
+    };
+    setPct("[data-ewa-high-pct]", high);
+    setPct("[data-ewa-moderate-pct]", moderate);
+    setPct("[data-ewa-low-pct]", low);
 
     const grow = (selector, value) => {
       const el = document.querySelector(selector);
@@ -202,20 +220,12 @@ class EarlyWarningPage {
   static countTo(el, value) {
     if (!el) return;
     const end = Number(value ?? el.dataset.final ?? el.textContent);
-    el.dataset.final = Number.isFinite(end) ? end : (value ?? "");
-    if (EARLY_WARNING_REDUCE_MOTION || !Number.isFinite(end)) {
-      el.textContent = value ?? el.dataset.final;
+    if (!Number.isFinite(end)) {
+      el.dataset.final = value ?? "";
+      el.textContent = value ?? "";
       return;
     }
-    const t0 = performance.now();
-    const dur = 800;
-    const tick = (t) => {
-      const k = Math.min(1, (t - t0) / dur);
-      const eased = 1 - Math.pow(1 - k, 3);
-      el.textContent = Math.round(end * eased);
-      if (k < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
+    Utils.countTo(el, end);
   }
 
   static apply() {
@@ -267,7 +277,7 @@ class EarlyWarningPage {
       body.innerHTML = `
                 <tr>
                     <td colspan="5">
-                        <div class="st-empty" style="border:none;background:transparent;">
+                        <div class="st-empty st-empty--plain">
                             <span class="material-symbols-outlined">verified_user</span>
                             <p class="st-empty-title">${title}</p>
                             <p class="st-empty-text">${text}</p>
@@ -294,14 +304,9 @@ class EarlyWarningPage {
   }
 
   static row(l, i) {
-    const cls = { High: "high", Moderate: "moderate", Low: "low" }[l.risk];
+    const cls = { High: "high", Moderate: "moderate", Low: "low", Preliminary: "preliminary" }[l.risk];
 
-    const initials = (l.name || "?")
-      .split(" ")
-      .map((w) => w[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase();
+    const avatarInitials = Utils.initials(l.name || "?");
 
     const pct = Math.round(Math.min(1, Math.max(0, l.risk_probability ?? 0)) * 100);
 
@@ -318,8 +323,8 @@ class EarlyWarningPage {
             <tr style="--i:${i}">
                 <td data-col="learner">
                     <button type="button" class="st-qv-trigger st-learner-cell" data-learner-preview="${l.id}" aria-haspopup="dialog" aria-label="Preview ${l.name}'s profile">
-                        <span class="st-avatar-initials${avatarCls}">${initials}</span>
-                        <span style="min-width:0">
+                        <span class="st-avatar-initials${avatarCls}">${avatarInitials}</span>
+                        <span>
                             <span class="st-learner-name">${l.name}</span>
                             <p class="st-learner-id">LRN <span class="num">${l.lrn}</span></p>
                         </span>
@@ -357,7 +362,7 @@ class EarlyWarningPage {
 
     let html = `
             <button class="st-page-btn" ${page === 1 ? "disabled" : ""} data-prev>
-                <span class="material-symbols-outlined" style="font-size:1rem;">chevron_left</span>
+                <span class="material-symbols-outlined">chevron_left</span>
             </button>
         `;
 
@@ -367,7 +372,7 @@ class EarlyWarningPage {
 
     html += `
             <button class="st-page-btn" ${page === pages ? "disabled" : ""} data-next>
-                <span class="material-symbols-outlined" style="font-size:1rem;">chevron_right</span>
+                <span class="material-symbols-outlined">chevron_right</span>
             </button>
         `;
 
@@ -404,9 +409,7 @@ class EarlyWarningPage {
   }
 
   static riskBadge(risk) {
-    const cls = { High: "high", Moderate: "moderate", Low: "low" }[risk];
-    const label = cls ? risk : "Not yet assessed";
-    return `<span class="st-risk-badge st-risk-badge--${cls || "neutral"}"><span class="st-risk-dot"></span>${label}</span>`;
+    return Utils.riskPill(risk);
   }
 
   static set(selector, value) {

@@ -471,8 +471,7 @@ img.auth-brand-icon{
     cursor:pointer;
 }
 
-.auth-options a,
-.auth-link{
+.auth-options a{
     font-size: var(--st-font-size-label);
     font-weight:600;
     color:var(--st-primary);
@@ -480,8 +479,7 @@ img.auth-brand-icon{
     transition:var(--st-transition-color);
 }
 
-.auth-options a:hover,
-.auth-link:hover{
+.auth-options a:hover{
     text-decoration:underline;
 }
 

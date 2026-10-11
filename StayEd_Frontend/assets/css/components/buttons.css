@@ -29,6 +29,10 @@
   font-size: 19px;
 }
 
+.st-btn .material-symbols-outlined--lg {
+  font-size: var(--st-fs-lg);
+}
+
 .st-btn:active {
   transform: scale(0.97);
 }
@@ -242,8 +246,3 @@
   color: var(--st-primary);
 }
 
-@media (max-width: 1023px) {
-  .st-filter-actions .st-btn {
-    flex: 1;
-  }
-}

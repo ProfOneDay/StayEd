@@ -45,20 +45,7 @@ const ST_REDUCE_MOTION=matchMedia('(prefers-reduced-motion: reduce)').matches;
 // Counts a [data-countup] element up from its previous value to `value`
 // over ~800ms (ease-out-cubic), mirroring the dashboard/registry pattern.
 function countTo(el,value){
-  if(!el) return;
-  const end=Number(value);
-  if(ST_REDUCE_MOTION||!Number.isFinite(end)){ el.textContent=value; return; }
-  const start=Number(el.dataset.final??0)||0;
-  el.dataset.final=end;
-  const t0=performance.now();
-  const dur=800;
-  const tick=(t)=>{
-    const k=Math.min(1,(t-t0)/dur);
-    const eased=1-Math.pow(1-k,3);
-    el.textContent=Math.round(start+(end-start)*eased);
-    if(k<1) requestAnimationFrame(tick);
-  };
-  requestAnimationFrame(tick);
+  Utils.countTo(el, value);
 }
 
 function replay(el){
@@ -67,38 +54,8 @@ function replay(el){
   requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('is-inview')));
 }
 
-function initials(name){return name.split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase()}
 function statusBadge(s){const label={active:"Active",pending:"Pending",deactivated:"Deactivated"}[s];return `<span class="st-pill st-pill--status st-pill--${s}">${label}</span>`}
-function renderPagination(containerId,totalItems,page,pageSize,onPageChange){
-  const container=document.getElementById(containerId);
-  const totalPages=Math.max(1,Math.ceil(totalItems/pageSize));
-  const startItem=totalItems===0?0:(page-1)*pageSize+1;
-  const endItem=Math.min(page*pageSize,totalItems);
-  const addBtn=p=>`<button class="st-page-btn ${p===page?'is-active':''}" data-page="${p}">${p}</button>`;
-  let pageBtns='';
-  if(totalPages<=7){
-    for(let p=1;p<=totalPages;p++) pageBtns+=addBtn(p);
-  }else{
-    pageBtns+=addBtn(1);
-    if(page>3) pageBtns+='<span class="st-page-ellipsis">…</span>';
-    const start=Math.max(2,page-1), end=Math.min(totalPages-1,page+1);
-    for(let p=start;p<=end;p++) pageBtns+=addBtn(p);
-    if(page<totalPages-2) pageBtns+='<span class="st-page-ellipsis">…</span>';
-    pageBtns+=addBtn(totalPages);
-  }
-  container.innerHTML=`
-    <span class="st-pagination-info">Showing ${startItem}–${endItem} of ${totalItems} entries</span>
-    <div class="st-pagination-controls">
-      <button class="st-page-btn" id="${containerId}-prev" ${page<=1?'disabled':''} aria-label="Previous page"><span class="material-symbols-outlined">chevron_left</span></button>
-      ${pageBtns}
-      <button class="st-page-btn" id="${containerId}-next" ${page>=totalPages?'disabled':''} aria-label="Next page"><span class="material-symbols-outlined">chevron_right</span></button>
-    </div>`;
-  container.querySelectorAll('.st-page-btn[data-page]').forEach(btn=>btn.addEventListener('click',()=>onPageChange(+btn.dataset.page)));
-  const prevBtn=document.getElementById(`${containerId}-prev`);
-  const nextBtn=document.getElementById(`${containerId}-next`);
-  if(prevBtn) prevBtn.addEventListener('click',()=>{if(page>1)onPageChange(page-1)});
-  if(nextBtn) nextBtn.addEventListener('click',()=>{if(page<totalPages)onPageChange(page+1)});
-}
+const renderPagination=(...args)=>Utils.renderPagination(...args);
 function clcChips(list){
   if(!list||!list.length) return '<span class="more-chip">Unassigned</span>';
   const shown=list.slice(0,2).map(c=>`<span class="teacher-chip">${c}</span>`).join('');
@@ -163,7 +120,7 @@ function renderTable(){
       actions=`<button class="st-btn st-btn-outline st-btn-xs" onclick="openEdit(${t.id})">Edit</button>`;
     }
     return `<tr style="--i:${i}">
-      <td data-col="learner"><div class="st-learner-cell"><span class="st-avatar-initials${t.status==='pending'?' st-avatar-initials--moderate':''}">${initials(t.name)}</span><div style="min-width:0"><span class="st-learner-name" style="cursor:default">${t.name}</span><p class="st-learner-sub">${t.email}</p></div></div></td>
+      <td data-col="learner"><div class="st-learner-cell"><span class="st-avatar-initials${t.status==='pending'?' st-avatar-initials--moderate':''}">${Utils.initials(t.name)}</span><div><span class="st-learner-name st-learner-name--static">${t.name}</span><p class="st-learner-sub">${t.email}</p></div></div></td>
       <td data-col="level"><div class="st-clc-chips">${clcChips(t.clcs)}</div></td>
       <td data-col="status">${statusBadge(t.status)}</td>
       <td data-col="actions" class="is-right"><div class="st-row-actions">${actions}</div></td>
@@ -196,7 +153,7 @@ document.querySelectorAll('.overlay').forEach(ov=>ov.addEventListener('click',e=
 
 function openReview(id){
   const t=teachers.find(x=>x.id===id); activeTeacherId=id;
-  document.getElementById('rv-avatar').textContent=initials(t.name);
+  document.getElementById('rv-avatar').textContent=Utils.initials(t.name);
   document.getElementById('rv-name').textContent=t.name;
   document.getElementById('rv-email').textContent=t.email;
   const verifiedBadge=document.getElementById('rv-verified-badge');

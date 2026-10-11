@@ -274,27 +274,7 @@ class LearnerImportPage {
     const el = document.querySelector(selector);
     if (!el || value === undefined || value === null) return;
 
-    const target = Number(value) || 0;
-    const reduceMotion = window.matchMedia?.(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-
-    if (reduceMotion) {
-      el.textContent = target;
-      return;
-    }
-
-    const duration = 600;
-    const start = performance.now();
-
-    const tick = (now) => {
-      const t = Math.min(1, (now - start) / duration);
-      const eased = 1 - Math.pow(1 - t, 3);
-      el.textContent = Math.round(eased * target);
-      if (t < 1) requestAnimationFrame(tick);
-    };
-
-    requestAnimationFrame(tick);
+    Utils.countTo(el, Number(value) || 0, { from: 0, duration: 600 });
   }
 }
 

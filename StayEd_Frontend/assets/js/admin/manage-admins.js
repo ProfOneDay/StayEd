@@ -60,6 +60,13 @@ function syncSuperAdminLock(row) {
   usersCheckbox.disabled = superCheckbox.checked;
 }
 
+// How many OTHER admins (besides `id`) are currently a super admin, per
+// the last loaded/saved state -- not the live unsaved toggle state of
+// other rows, which each only take effect once their own Save is clicked.
+function otherSuperAdminCount(id) {
+  return admins.filter((a) => a.id !== id && a.isSuperAdmin).length;
+}
+
 function rowToggleState(row) {
   return {
     canManageClcs: row.querySelector('[data-admin-field="canManageClcs"]').checked,
@@ -77,10 +84,10 @@ function renderTable() {
       (a) => `
     <tr data-admin-row="${a.id}">
       <td>
-        <div style="font-weight:700">${esc(a.name)}</div>
-        <div style="font-size:0.8125rem;color:var(--muted)">${esc(a.email)}</div>
+        <div class="st-text-strong">${esc(a.name)}</div>
+        <div class="st-text-muted">${esc(a.email)}</div>
       </td>
-      <td><span data-admin-title-label="${a.id}" style="display:inline-block;width:280px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle">${esc(computeTitle(a.canManageClcs, a.canManageUsers, a.isSuperAdmin))}</span></td>
+      <td><span data-admin-title-label="${a.id}" class="st-admin-title-label st-truncate">${esc(computeTitle(a.canManageClcs, a.canManageUsers, a.isSuperAdmin))}</span></td>
       <td>${toggleCell(a.id, "canManageClcs", a.canManageClcs || a.isSuperAdmin, a.isSuperAdmin)}</td>
       <td>${toggleCell(a.id, "canManageUsers", a.canManageUsers || a.isSuperAdmin, a.isSuperAdmin)}</td>
       <td>${toggleCell(a.id, "isSuperAdmin", a.isSuperAdmin)}</td>
@@ -102,6 +109,16 @@ function renderTable() {
     const label = row.querySelector(`[data-admin-title-label="${id}"]`);
     row.querySelectorAll("[data-admin-field]").forEach((checkbox) => {
       checkbox.addEventListener("change", () => {
+        // There must always be at least one super admin -- if unchecking
+        // this one would leave zero, snap it back on and explain why
+        // instead of letting it go through.
+        if (checkbox.dataset.adminField === "isSuperAdmin" && !checkbox.checked) {
+          if (otherSuperAdminCount(Number(id)) === 0) {
+            checkbox.checked = true;
+            Utils.toast("There should always be at least one super admin.", "warning");
+          }
+        }
+
         syncSuperAdminLock(row);
         const state = rowToggleState(row);
         label.textContent = computeTitle(state.canManageClcs, state.canManageUsers, state.isSuperAdmin);

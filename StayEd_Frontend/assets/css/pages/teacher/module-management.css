@@ -149,10 +149,12 @@ body[data-page="Manage Modules"] .is-inview .st-release-bar {
 
 body[data-page="Manage Modules"] .st-release-bar .rel {
   background: var(--st-secondary);
+  flex-grow: var(--grow);
 }
 
 body[data-page="Manage Modules"] .st-release-bar .not {
   background: var(--st-line-strong);
+  flex-grow: var(--grow);
 }
 
 body[data-page="Manage Modules"] .st-release-legend {
@@ -178,6 +180,14 @@ body[data-page="Manage Modules"] .st-release-legend i {
   border-radius: var(--st-radius-xs);
   margin-right: 6px;
   vertical-align: 1px;
+}
+
+body[data-page="Manage Modules"] .st-release-legend .st-release-legend-dot--rel {
+  background: var(--st-secondary);
+}
+
+body[data-page="Manage Modules"] .st-release-legend .st-release-legend-dot--not {
+  background: var(--st-line-strong);
 }
 
 /* .st-table-card-head/-title/-count also have no shared/unscoped
@@ -218,6 +228,15 @@ body[data-page="Manage Modules"] .st-module-toolbar {
 body[data-page="Manage Modules"] .st-module-search {
   flex: 1 1 260px;
   max-width: 380px;
+}
+
+/* .st-select's shared base is width:100%, for selects stacked in a
+   vertical .st-field column -- without this reset (same fix as
+   .st-toolbar .st-select in components/table.css) the status/sort
+   selects stretch full-width and stack onto their own line instead of
+   sitting in a row next to the search box. */
+body[data-page="Manage Modules"] .st-module-toolbar .st-select {
+  width: auto;
 }
 
 /* "Clear filters" sits in line with the search/status/sort controls, pushed
@@ -507,14 +526,17 @@ body[data-page="Manage Modules"] .is-inview .st-stage-bar {
 
 body[data-page="Manage Modules"] .st-stage-bar .not {
   background: var(--st-line-strong);
+  flex-grow: var(--grow);
 }
 
 body[data-page="Manage Modules"] .st-stage-bar .rel {
   background: var(--st-risk-moderate);
+  flex-grow: var(--grow);
 }
 
 body[data-page="Manage Modules"] .st-stage-bar .ret {
   background: var(--st-secondary);
+  flex-grow: var(--grow);
 }
 
 body[data-page="Manage Modules"] .st-stage-legend {
@@ -538,6 +560,36 @@ body[data-page="Manage Modules"] .st-stage-legend i {
   border-radius: var(--st-radius-xs);
   margin-right: 6px;
   vertical-align: 0;
+}
+
+body[data-page="Manage Modules"] .st-stage-legend-dot--not {
+  background: var(--st-line-strong);
+}
+
+body[data-page="Manage Modules"] .st-stage-legend-dot--rel {
+  background: var(--st-risk-moderate);
+}
+
+body[data-page="Manage Modules"] .st-stage-legend-dot--ret {
+  background: var(--st-secondary);
+}
+
+body[data-page="Manage Modules"] .st-mm-empty-cell {
+  padding: 0;
+}
+
+body[data-page="Manage Modules"] .st-mm-return-icon {
+  font-size: 17px;
+}
+
+body[data-page="Manage Modules"] .st-mm-undo-icon {
+  font-size: 17px;
+  vertical-align: -4px;
+}
+
+body[data-page="Manage Modules"] .st-mm-single-recipient {
+  color: var(--st-on-surface-variant);
+  font-size: var(--st-fs-base);
 }
 
 /* ---------- Dates cell (merges Release date + Return date) ---------- */
@@ -578,7 +630,10 @@ body[data-page="Manage Modules"] .st-roster-checklist {
   padding: 4px 12px;
 }
 
-body[data-page="Manage Modules"] .st-roster-checklist-row {
+/* Unscoped: .st-roster-checklist-row is reused by Manage Modules'
+   roster checklist, Calendar's module-release checklist, and admin
+   Reports' teacher-notification checklist -- not Manage-Modules-only. */
+.st-roster-checklist-row {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -587,18 +642,18 @@ body[data-page="Manage Modules"] .st-roster-checklist-row {
   font-size: var(--st-font-size-label);
 }
 
-body[data-page="Manage Modules"] .st-roster-checklist-row:last-child {
+.st-roster-checklist-row:last-child {
   border-bottom: none;
 }
 
-body[data-page="Manage Modules"] .st-roster-checklist-row input[type="checkbox"] {
+.st-roster-checklist-row input[type="checkbox"] {
   margin-right: 8px;
 }
 
 /* Overrides .st-schedule-modal-field's generic uppercase/micro label style
    (equal specificity, wins on source order) -- these labels are learner
    names, not field labels, so they should read like normal body text. */
-body[data-page="Manage Modules"] .st-roster-checklist-row label {
+.st-roster-checklist-row label {
   font-size: var(--st-font-size-label);
   font-weight: 400;
   text-transform: none;
@@ -792,4 +847,39 @@ body[data-page="Manage Modules"] [data-animate-rows].is-inview tr {
     opacity: 1;
     transform: none;
   }
+}
+
+/* Planned-return-date inline editor (module release batch detail). */
+body[data-page="Manage Modules"] .st-mm-planned-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+body[data-page="Manage Modules"] .st-mm-planned-edit input[type="date"] {
+  font-size: var(--st-fs-xs);
+  padding: 2px 4px;
+}
+
+body[data-page="Manage Modules"] .st-mm-overdue {
+  color: var(--st-risk-high);
+}
+
+body[data-page="Manage Modules"] .st-mm-planned-edit-btn {
+  vertical-align: middle;
+}
+
+body[data-page="Manage Modules"] .st-mm-planned-edit-btn .material-symbols-outlined {
+  font-size: var(--st-fs-base);
+}
+
+body[data-page="Manage Modules"] .st-mm-modal-row-end {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+body[data-page="Manage Modules"] .st-mm-modal-row-end .material-symbols-outlined {
+  font-size: 1rem;
+  vertical-align: -3px;
 }

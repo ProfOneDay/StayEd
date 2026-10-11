@@ -41,16 +41,11 @@ class ProfileSettingsPage {
       [user.first_name, user.last_name].filter(Boolean).join(" ") ||
       "Teacher";
 
-    const initials = name
-      .split(" ")
-      .map((w) => w[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase();
+    const avatarInitials = Utils.initials(name);
 
     this.set("[data-settings-name]", name);
 
-    ProfileAvatar.render(user.avatar || "", initials, "Teacher");
+    ProfileAvatar.render(user.avatar || "", avatarInitials, "Teacher");
 
     const first = document.getElementById("settingsFirstName");
     const last = document.getElementById("settingsLastName");

@@ -229,16 +229,7 @@ const ST_CENTER_TOTAL = {
   },
 };
 function countTo(el,to){
-  const from=Number(el.dataset.cur??0);
-  el.dataset.cur=to;
-  if(ST_REDUCE_MOTION){el.textContent=to;return;}
-  const t0=performance.now(),dur=700;
-  const tick=(t)=>{
-    const k=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-k,3);
-    el.textContent=Math.round(from+(to-from)*e);
-    if(k<1)requestAnimationFrame(tick);
-  };
-  requestAnimationFrame(tick);
+  Utils.countTo(el, to, { duration: 700 });
 }
 
 function selectMunicipality(id){const d=municipalityData[id]||emptyBucket(id);map.querySelectorAll('.municipality').forEach(x=>x.classList.remove('selected'));const el=map.querySelector('#'+CSS.escape(id));if(el){el.classList.add('selected');el.parentNode.appendChild(el)}
@@ -254,7 +245,7 @@ function selectMunicipality(id){const d=municipalityData[id]||emptyBucket(id);ma
   const max=Math.max(1,...Object.values(d.levels),...Object.values(levelAverages));
   document.getElementById('levels').innerHTML=levelKeys.map(k=>{
     const val=d.levels[k];const avg=levelAverages[k];const avgPct=Math.min(100,avg/max*100);
-    return `<div class="st-hbar-row"><span class="st-hbar-label">${levelLabels[k]}<small>${val} learner${val===1?'':'s'}</small></span><div class="st-hbar-track" data-tooltip="${levelLabels[k]}: ${val} learner${val===1?'':'s'} · division average ${avg.toFixed(1)}"><div class="st-hbar st-hbar--level" style="--w:${val/max*100}%"></div><div class="avg-mark" style="left:${avgPct}%" title="Division average: ${avg.toFixed(1)} learners"></div></div><span class="st-hbar-value num">${val}</span></div>`;
+    return `<div class="st-hbar-row"><span class="st-hbar-label">${levelLabels[k]}<small>${val} learner${val===1?'':'s'}</small></span><div class="st-hbar-track" data-tooltip="${levelLabels[k]}: ${val} learner${val===1?'':'s'} · division average ${avg.toFixed(1)}"><div class="st-hbar st-hbar--level" style="--w:${val/max*100}%"></div><div class="avg-mark" style="--left:${avgPct}%" title="Division average: ${avg.toFixed(1)} learners"></div></div><span class="st-hbar-value num">${val}</span></div>`;
   }).join('');
   clcListPage=1;
   renderClcList(id);
