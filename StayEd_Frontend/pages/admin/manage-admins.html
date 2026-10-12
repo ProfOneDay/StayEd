@@ -37,6 +37,12 @@
       <h1 class="st-page-header-title">Manage Admins</h1>
       <p class="st-page-header-subtitle">Assign what each admin can manage, and who else can be a super admin. Super admin only.</p>
     </div>
+    <div class="st-page-header-actions">
+      <button class="st-btn st-btn-primary" type="button" id="openCreateAdmin">
+        <span class="material-symbols-outlined">person_add</span>
+        Create admin account
+      </button>
+    </div>
   </div>
 
   <section class="st-panel st-table-card">
@@ -53,7 +59,7 @@
             <th>Can manage CLCs</th>
             <th>Can manage users</th>
             <th>Super admin</th>
-            <th></th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody id="adminsTbody"></tbody>
@@ -65,6 +71,109 @@
 </div>
 <div data-component="layout/toast"></div>
 
+<div class="overlay" id="modal-create-admin" aria-hidden="true">
+  <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="createAdminTitle">
+    <h2 id="createAdminTitle">Create Admin Account</h2>
+    <div class="modal-sub">New admins start without management permissions. Assign access from the table after creating the account.</div>
+    <form id="adminCreateForm">
+      <div class="field st-field-grid-3">
+        <div><label for="newAdminFirstName">First Name</label><input id="newAdminFirstName" type="text" placeholder="e.g. Maria" autocomplete="given-name" required /></div>
+        <div><label for="newAdminMiddleName">Middle Name (Optional)</label><input id="newAdminMiddleName" type="text" placeholder="e.g. Clara" autocomplete="additional-name" /></div>
+        <div><label for="newAdminLastName">Last Name</label><input id="newAdminLastName" type="text" placeholder="e.g. Santos" autocomplete="family-name" required /></div>
+      </div>
+      <div class="field">
+        <label for="newAdminEmail">DepEd Email</label>
+        <input id="newAdminEmail" type="email" placeholder="maria.santos@deped.gov.ph" autocomplete="email" required />
+      </div>
+      <div class="field st-field-grid-2">
+        <div>
+          <label for="newAdminPhone">Contact Number (Optional)</label>
+          <input id="newAdminPhone" type="text" placeholder="+63 9xx xxx xxxx" autocomplete="tel" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="st-btn st-btn-ghost" type="button" data-close-admin-modal>Cancel</button>
+        <button class="st-btn st-btn-primary" type="submit" id="createAdminSubmit">Create admin account</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="overlay" id="modal-admin-created" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="adminCreatedTitle">
+    <div class="st-admin-success-icon"><span class="material-symbols-outlined">check_circle</span></div>
+    <h2 id="adminCreatedTitle">Admin Account Created Successfully</h2>
+    <div class="modal-sub">The new admin account is ready.</div>
+    <div class="detail-grid st-field-grid-1col">
+      <div><small>Admin Name</small><b id="adminCreateResultName">—</b></div>
+    </div>
+    <span class="st-modal-section-label">Temporary Password</span>
+    <div class="st-admin-temp-password">
+      <input class="st-input" id="adminTempPassword" type="password" readonly aria-label="Temporary password" />
+      <button class="st-icon-btn-sm" type="button" id="toggleAdminTempPassword" aria-label="Show temporary password" title="Show password">
+        <span class="material-symbols-outlined">visibility</span>
+      </button>
+      <button class="st-icon-btn-sm" type="button" id="copyAdminTempPassword" aria-label="Copy temporary password" title="Copy password">
+        <span class="material-symbols-outlined">content_copy</span>
+      </button>
+    </div>
+    <div class="info-banner">Share this temporary password securely with the admin. Assign their access from the table.</div>
+    <div class="modal-actions">
+      <button class="st-btn st-btn-primary st-btn-block" type="button" data-close-admin-modal>Done</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-reset-admin" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="resetAdminTitle">
+    <div class="st-admin-success-icon st-admin-reset-icon"><span class="material-symbols-outlined">lock_reset</span></div>
+    <h2 id="resetAdminTitle">Reset Admin Password?</h2>
+    <div class="modal-sub">A new temporary password will be generated for <strong id="resetAdminName">this admin</strong>. Their current password will stop working immediately.</div>
+    <div class="modal-actions">
+      <button class="st-btn st-btn-ghost" type="button" data-close-admin-modal>Cancel</button>
+      <button class="st-btn st-btn-primary" type="button" id="confirmResetAdmin">Reset password</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-admin-password-reset" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="adminPasswordResetTitle">
+    <div class="st-admin-success-icon"><span class="material-symbols-outlined">check_circle</span></div>
+    <h2 id="adminPasswordResetTitle">Password Reset Successful</h2>
+    <div class="modal-sub">The admin's password has been updated.</div>
+    <div class="detail-grid st-field-grid-1col">
+      <div><small>Admin Name</small><b id="resetAdminResultName">—</b></div>
+    </div>
+    <span class="st-modal-section-label">Temporary Password</span>
+    <div class="st-admin-temp-password">
+      <input class="st-input" id="resetAdminTempPassword" type="password" readonly aria-label="Temporary password" />
+      <button class="st-icon-btn-sm" type="button" id="toggleResetAdminPassword" aria-label="Show temporary password" title="Show password">
+        <span class="material-symbols-outlined">visibility</span>
+      </button>
+      <button class="st-icon-btn-sm" type="button" id="copyResetAdminPassword" aria-label="Copy temporary password" title="Copy password">
+        <span class="material-symbols-outlined">content_copy</span>
+      </button>
+    </div>
+    <div class="info-banner">Share this temporary password securely with the admin.</div>
+    <div class="modal-actions">
+      <button class="st-btn st-btn-primary st-btn-block" type="button" data-close-admin-modal>Done</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-remove-admin" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="removeAdminTitle">
+    <div class="st-admin-success-icon st-admin-remove-icon"><span class="material-symbols-outlined">person_remove</span></div>
+    <h2 id="removeAdminTitle">Remove Admin Account?</h2>
+    <div class="modal-sub">Remove <strong id="removeAdminName">this admin</strong> from active admin access? They will no longer be able to sign in. Historical records are retained.</div>
+    <div class="info-banner">The account is deactivated rather than permanently deleted so related records remain intact.</div>
+    <div class="modal-actions">
+      <button class="st-btn st-btn-ghost" type="button" data-close-admin-modal>Cancel</button>
+      <button class="st-btn st-btn-danger" type="button" id="confirmRemoveAdmin">Remove admin</button>
+    </div>
+  </div>
+</div>
+
 <script src="../../assets/js/config.js"></script>
 <script src="../../assets/js/core/utils.js"></script>
 <script src="../../assets/js/core/router.js"></script>
@@ -74,6 +183,6 @@
 <script src="../../assets/js/core/layout.js"></script>
 <script src="../../assets/js/components/component-loader.js"></script>
 <script src="../../assets/js/components/toast.js"></script>
-<script src="../../assets/js/admin/manage-admins.js"></script>
+<script src="../../assets/js/admin/manage-admins.js?v=5"></script>
 </body>
 </html>

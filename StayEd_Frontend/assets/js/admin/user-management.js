@@ -402,7 +402,11 @@ document.getElementById('rs-confirm-btn').addEventListener('click',async()=>{
     const response=await API.post(`/admin/users/${activeTeacherId}/reset-password`,{});
     closeModal('modal-reset');
     realPassword=response.temp_password; passwordVisible=false;
+    document.getElementById('ps-title').textContent='Password Reset Successful';
+    document.getElementById('ps-subtitle').textContent="The teacher's credentials have been updated.";
+    document.getElementById('ps-name-label').textContent='Teacher Name';
     document.getElementById('ps-name').textContent=t.name;
+    document.getElementById('ps-password-note').textContent='Share this temporary password securely with the teacher.';
     document.getElementById('temp-pass-val').textContent='••••••••••••';
     openModal('modal-reset-success');
   }catch(error){
@@ -476,10 +480,9 @@ async function reactivate(id){
   }
 }
 
-// Create Account (Teacher or Admin)
+// Create teacher account
 const createClcSelect=document.getElementById('cr-clc');
 const createMuniSelect=document.getElementById('cr-muni');
-let createRole='teacher';
 function populateCreateMuniOptions(){
   createMuniSelect.innerHTML='<option value="" disabled selected hidden>Select Municipality…</option>'+DIVISION_II_MUNICIPALITIES.map(m=>`<option>${m.name}</option>`).join('');
 }
@@ -489,22 +492,10 @@ function populateCreateClc(muni){
 }
 createMuniSelect.addEventListener('change',()=>populateCreateClc(createMuniSelect.value));
 
-function setCreateRole(role){
-  createRole=role;
-  document.querySelectorAll('#cr-role-toggle .role-toggle-btn').forEach(b=>b.classList.toggle('active',b.dataset.role===role));
-  const isTeacher=role==='teacher';
-  document.getElementById('cr-empid-field').style.display=isTeacher?'':'none';
-  document.getElementById('cr-clc-fields').style.display=isTeacher?'':'none';
-}
-document.querySelectorAll('#cr-role-toggle .role-toggle-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>setCreateRole(btn.dataset.role));
-});
-
 document.getElementById('createTeacherBtn').addEventListener('click',()=>{
   ['cr-first','cr-middle','cr-last','cr-email','cr-phone','cr-empid'].forEach(id=>document.getElementById(id).value='');
   createMuniSelect.selectedIndex=0;
   populateCreateClc('');
-  setCreateRole('teacher');
   openModal('modal-create');
 });
 document.getElementById('cr-save-btn').addEventListener('click',async()=>{
@@ -513,31 +504,33 @@ document.getElementById('cr-save-btn').addEventListener('click',async()=>{
   const email=document.getElementById('cr-email').value.trim();
   if(!first||!last||!email){ showToast('Please fill in first name, last name, and email','warning'); return; }
   const payload={
-    role:createRole,
+    role:'teacher',
     firstName:first,
     middleName:document.getElementById('cr-middle').value.trim(),
     lastName:last,
     email,
     phone:document.getElementById('cr-phone').value.trim(),
   };
-  if(createRole==='teacher'){
-    payload.employeeId=document.getElementById('cr-empid').value.trim();
-    payload.municipality=createMuniSelect.value;
-    payload.clc=createClcSelect.value;
-    if(!payload.municipality||!payload.clc){
-      showToast('Please select a municipality and assign a CLC','warning');
-      return;
-    }
+  payload.employeeId=document.getElementById('cr-empid').value.trim();
+  payload.municipality=createMuniSelect.value;
+  payload.clc=createClcSelect.value;
+  if(!payload.municipality||!payload.clc){
+    showToast('Please select a municipality and assign a CLC','warning');
+    return;
   }
   try{
     const response=await API.post('/admin/users',payload);
     closeModal('modal-create');
-    if(createRole==='teacher') await loadTeachers();
+    await loadTeachers();
     realPassword=response.temp_password; passwordVisible=false;
+    document.getElementById('ps-title').textContent='Teacher Account Created Successfully';
+    document.getElementById('ps-subtitle').textContent='The new teacher account is ready.';
+    document.getElementById('ps-name-label').textContent='Teacher Name';
     document.getElementById('ps-name').textContent=response.data.name;
+    document.getElementById('ps-password-note').textContent='Share this temporary password securely with the teacher.';
     document.getElementById('temp-pass-val').textContent='••••••••••••';
     openModal('modal-reset-success');
-    showToast(createRole==='admin'?'Admin account created':'Teacher account created');
+    showToast('Teacher account created');
   }catch(error){
     console.error('[UserManagement] Create failed',error);
     showToast(error?.data?.message||'Unable to create this account.','error');

@@ -647,11 +647,90 @@ def list_admins():
         SELECT user_id, username, first_name, last_name, email, account_status,
                is_super_admin, can_manage_clcs, can_manage_users, admin_title
         FROM users
-        WHERE role = 'ADMIN'
+        WHERE role = 'ADMIN' AND account_status='ACTIVE'
         ORDER BY is_super_admin DESC, last_name NULLS LAST, first_name NULLS LAST
         """
     )
     return {"data": [_shape_admin_row(r) for r in rows]}
+
+
+@bp.post("/admin/admins/<int:user_id>/reset-password")
+@super_admin_required
+def reset_admin_password(user_id: int):
+    row = fetch_one(
+        "SELECT user_id FROM users WHERE user_id=%s AND role='ADMIN' AND account_status='ACTIVE'",
+        (user_id,),
+    )
+    if not row:
+        return error("Admin account not found.", 404)
+
+    temp_password = _generate_temp_password()
+    execute(
+        "UPDATE users SET password_hash=%s WHERE user_id=%s",
+        (generate_password_hash(temp_password), user_id),
+    )
+    return {"success": True, "message": "Password reset.", "temp_password": temp_password}
+
+
+@bp.delete("/admin/admins/<int:user_id>")
+@super_admin_required
+def remove_admin(user_id: int):
+    if user_id == current_user_id():
+        return error("You cannot remove your own admin account.", 409)
+
+    db = get_db()
+    try:
+        with db.cursor() as cur:
+            cur.execute(
+                """
+                SELECT user_id, account_status, is_super_admin
+                FROM users
+                WHERE role='ADMIN'
+                ORDER BY user_id
+                FOR UPDATE
+                """,
+            )
+            admins = cur.fetchall()
+            admin = next((row for row in admins if row["user_id"] == user_id), None)
+            if not admin:
+                db.rollback()
+                return error("Admin account not found.", 404)
+            if admin["account_status"] != "ACTIVE":
+                db.rollback()
+                return error("This admin account has already been removed.", 409)
+
+            if admin["is_super_admin"]:
+                other_super_admins = sum(
+                    row["account_status"] == "ACTIVE"
+                    and row["is_super_admin"]
+                    and row["user_id"] != user_id
+                    for row in admins
+                )
+                if other_super_admins == 0:
+                    db.rollback()
+                    return error(
+                        "This is the only active super admin. Promote another admin before removing this one.",
+                        409,
+                    )
+
+            cur.execute(
+                """
+                UPDATE users
+                SET account_status='INACTIVE',
+                    is_super_admin=FALSE,
+                    can_manage_clcs=FALSE,
+                    can_manage_users=FALSE,
+                    admin_title='Staff'
+                WHERE user_id=%s
+                """,
+                (user_id,),
+            )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    return {"success": True, "message": "Admin account removed."}
 
 
 @bp.put("/admin/admins/<int:user_id>/permissions")

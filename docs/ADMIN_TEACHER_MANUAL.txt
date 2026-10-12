@@ -109,7 +109,7 @@ Buttons and controls
 - Active accounts KPI: Filters to active teachers.
 - Deactivated KPI: Filters to deactivated or suspended teachers.
 - Search box: Searches by teacher name or CLC.
-- Create Account: Opens the account creation form.
+- Create Teacher Account: Opens the teacher account creation form.
 - Review: Opens the teacher registration details.
 - Approve Account: Opens an approval confirmation. Confirming activates the
   teacher account.
@@ -125,12 +125,11 @@ Buttons and controls
 - Reset Password: Opens password reset confirmation.
 - Copy password: Copies the generated temporary password after a reset.
 - Show or hide password: Displays or masks the temporary password.
-- Create Account modal:
-  - Teacher or Admin account type buttons select the account role.
-  - Name, email, phone, employee ID, municipality, and optional CLC fields
-    collect the new account information.
-  - Create Account saves the new account and displays the temporary password
-    when applicable.
+- Create Teacher Account modal:
+  - Name, email, phone, employee ID, municipality, and CLC fields collect
+    the new teacher account information.
+  - Create Account saves the teacher account and displays its temporary
+    password.
 - Cancel or Close: Leaves a dialog without saving changes.
 
 Expected result
@@ -138,8 +137,34 @@ Approving a registration activates the teacher account and removes the pending
 registration notification. Rejecting removes the registration and records the
 review action. Creating or updating an account refreshes the user table.
 
+4. MANAGE ADMINS
+----------------
+Page name: Manage Admins
 
-3. CLC MANAGEMENT
+Description
+Manage Admins is restricted to accounts with the Super Admin title. Super
+admins can create admin accounts and assign scoped management permissions.
+
+Buttons and controls
+- Create admin account: Collects an admin's name, email, and optional contact
+  number, then displays the temporary password.
+- Admin accounts table: Lists each admin and their current title.
+- Can manage CLCs / Can manage users: Assigns scoped access to those areas.
+- Super admin: Grants full admin access, including access to Manage Admins.
+- Reset password: Confirms before replacing an admin's password, then shows
+  the temporary password with show/hide and copy controls.
+- Remove: Deactivates the selected admin so they can no longer sign in.
+  Historical records are retained; the current admin and last active
+  super admin cannot be removed.
+- Save: Applies an admin's updated permissions. Changes take effect at the
+  admin's next login.
+
+Expected result
+New admin accounts start without scoped permissions. Assign the required
+access in the table and share the temporary password securely.
+
+
+5. CLC MANAGEMENT
 ------------------
 Page name: CLC Management
 
@@ -188,7 +213,7 @@ which teachers can work with that center. Archived CLCs remain available for
 historical records but are not treated as active centers.
 
 
-4. ADMIN REPORTS
+6. ADMIN REPORTS
 ----------------
 Page name: Reports
 
@@ -229,7 +254,7 @@ Changing a filter refreshes the visible table and matching record count. The
 Preview & Export action uses the same filtered records shown in the table.
 
 
-5. ADMIN NOTIFICATIONS
+7. ADMIN NOTIFICATIONS
 ----------------------
 Page name: Notifications
 
@@ -261,7 +286,7 @@ account registration succeeds. It is not a permanent sample alert. Approval or
 rejection removes the pending registration notification.
 
 
-6. ADMIN SETTINGS
+8. ADMIN SETTINGS
 ------------------
 Page name: Settings
 
@@ -311,7 +336,7 @@ Buttons and controls:
 - Save Changes: Saves the module return default.
 
 
-7. ABOUT STAYED
+9. ABOUT STAYED
 ---------------
 Page name: About StayEd
 

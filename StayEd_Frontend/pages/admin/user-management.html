@@ -34,7 +34,7 @@
 <main class="st-content">
   <div class="st-page-header">
     <div><h1 class="st-page-header-title">User Management</h1><p class="st-page-header-subtitle">Review teacher registrations and manage existing accounts.</p></div>
-    <div class="st-page-header-actions"><button class="st-btn st-btn-primary" id="createTeacherBtn"><span class="material-symbols-outlined">person_add</span>Create account</button></div>
+    <div class="st-page-header-actions"><button class="st-btn st-btn-primary" id="createTeacherBtn"><span class="material-symbols-outlined">person_add</span>Create teacher account</button></div>
   </div>
 
   <section class="st-panel st-panel-pad" aria-label="Account summary" data-animate>
@@ -213,10 +213,10 @@
 <div class="overlay" id="modal-reset-success">
   <div class="modal">
     <div class="icon-circle success"><span class="material-symbols-outlined">check_circle</span></div>
-    <h2>Password Reset Successful</h2>
-    <div class="modal-sub">The teacher's credentials have been updated.</div>
+    <h2 id="ps-title">Password Reset Successful</h2>
+    <div class="modal-sub" id="ps-subtitle">The teacher's credentials have been updated.</div>
     <div class="detail-grid st-field-grid-1col">
-      <div><small>Teacher Name</small><b id="ps-name">—</b></div>
+      <div><small id="ps-name-label">Teacher Name</small><b id="ps-name">—</b></div>
     </div>
     <span class="st-modal-section-label">Temporary Password</span>
     <div class="password-field">
@@ -228,7 +228,7 @@
         <span class="material-symbols-outlined">content_copy</span>
       </button>
     </div>
-    <div class="info-banner">Share this temporary password securely with the teacher.</div>
+    <div class="info-banner" id="ps-password-note">Share this temporary password securely with the teacher.</div>
     <div class="modal-actions">
       <button class="st-btn st-btn-primary st-btn-block" onclick="closeModal('modal-reset-success')">Done</button>
     </div>
@@ -274,14 +274,8 @@
 <!-- Create Account Modal -->
 <div class="overlay" id="modal-create">
   <div class="modal wide">
-    <h2>Create Account</h2>
-    <div class="modal-sub">Create a StayEd account and, for teachers, assign them to a Community Learning Center.</div>
-
-    <span class="st-modal-section-label">Account Type</span>
-    <div class="role-toggle" id="cr-role-toggle" role="group" aria-label="Account type">
-      <button type="button" class="role-toggle-btn active" data-role="teacher">Teacher</button>
-      <button type="button" class="role-toggle-btn" data-role="admin">Admin</button>
-    </div>
+    <h2>Create Teacher Account</h2>
+    <div class="modal-sub">Create a teacher account and assign them to a Community Learning Center.</div>
 
     <div class="field st-field-grid-3">
       <div><label for="cr-first">First Name</label><input id="cr-first" type="text" placeholder="e.g. Maria"/></div>
@@ -299,7 +293,7 @@
     </div>
     <div class="modal-actions">
       <button class="st-btn st-btn-ghost" onclick="closeModal('modal-create')">Cancel</button>
-      <button class="st-btn st-btn-primary" id="cr-save-btn">Create account</button>
+      <button class="st-btn st-btn-primary" id="cr-save-btn">Create teacher account</button>
     </div>
   </div>
 </div>
@@ -316,6 +310,6 @@
 <script src="../../assets/js/components/toast.js"></script>
 <script src="../../assets/js/components/modal.js"></script>
 <script src="../../assets/js/admin/division-ii-municipalities.js?v=2"></script>
-<script src="../../assets/js/admin/user-management.js?v=6"></script>
+<script src="../../assets/js/admin/user-management.js?v=7"></script>
 </body>
 </html>

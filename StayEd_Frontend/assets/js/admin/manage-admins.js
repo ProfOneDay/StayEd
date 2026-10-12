@@ -2,12 +2,52 @@
 Guards.superAdmin();
 
 let admins = [];
+let newAdminTempPassword = "";
+let newAdminPasswordVisible = false;
+let resetAdminId = null;
+let resetAdminTempPassword = "";
+let resetAdminPasswordVisible = false;
 
 function esc(value) {
   const div = document.createElement("div");
   div.textContent = value == null ? "" : String(value);
   return div.innerHTML;
 }
+
+function openAdminModal(id) {
+  const modal = document.getElementById(id);
+  modal.classList.add("show");
+  modal.setAttribute("aria-hidden", "false");
+}
+
+function closeAdminModal(id) {
+  const modal = document.getElementById(id);
+  modal.classList.remove("show");
+  modal.setAttribute("aria-hidden", "true");
+}
+
+document.getElementById("openCreateAdmin").addEventListener("click", () => {
+  openAdminModal("modal-create-admin");
+  document.getElementById("newAdminFirstName").focus();
+});
+
+document.querySelectorAll("[data-close-admin-modal]").forEach((button) => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".overlay[aria-hidden='false']").forEach((overlay) => closeAdminModal(overlay.id));
+  });
+});
+
+document.querySelectorAll(".overlay[id^='modal-']").forEach((overlay) => {
+  overlay.addEventListener("click", (event) => {
+    if (event.target === overlay) closeAdminModal(overlay.id);
+  });
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    document.querySelectorAll(".overlay[aria-hidden='false']").forEach((overlay) => closeAdminModal(overlay.id));
+  }
+});
 
 // Single source of truth for the title, used both for the live label shown
 // next to the toggles AND for what actually gets saved -- the title can
@@ -91,7 +131,13 @@ function renderTable() {
       <td>${toggleCell(a.id, "canManageClcs", a.canManageClcs || a.isSuperAdmin, a.isSuperAdmin)}</td>
       <td>${toggleCell(a.id, "canManageUsers", a.canManageUsers || a.isSuperAdmin, a.isSuperAdmin)}</td>
       <td>${toggleCell(a.id, "isSuperAdmin", a.isSuperAdmin)}</td>
-      <td><button class="st-btn st-btn-outline st-btn-xs" data-admin-save="${a.id}">Save</button></td>
+      <td>
+        <div class="st-admin-row-actions">
+          <button class="st-btn st-btn-outline st-btn-xs" data-admin-save="${a.id}">Save</button>
+          <button class="st-btn st-btn-outline st-btn-xs" data-admin-reset-password="${a.id}">Reset password</button>
+          <button class="st-btn st-btn-danger st-btn-xs" data-admin-remove="${a.id}">Remove</button>
+        </div>
+      </td>
     </tr>
   `,
     )
@@ -99,6 +145,12 @@ function renderTable() {
 
   tbody.querySelectorAll("[data-admin-save]").forEach((btn) => {
     btn.addEventListener("click", () => saveAdmin(Number(btn.dataset.adminSave)));
+  });
+  tbody.querySelectorAll("[data-admin-reset-password]").forEach((btn) => {
+    btn.addEventListener("click", () => openResetAdmin(Number(btn.dataset.adminResetPassword)));
+  });
+  tbody.querySelectorAll("[data-admin-remove]").forEach((btn) => {
+    btn.addEventListener("click", () => openRemoveAdmin(Number(btn.dataset.adminRemove)));
   });
 
   // Keep the title label live as the toggles change, before Save is even
@@ -157,5 +209,155 @@ async function saveAdmin(id) {
     renderTable();
   }
 }
+
+function openResetAdmin(id) {
+  const admin = admins.find((item) => item.id === id);
+  if (!admin) {
+    Utils.toast("Admin account not found.", "error");
+    return;
+  }
+  resetAdminId = id;
+  document.getElementById("resetAdminName").textContent = admin.name;
+  openAdminModal("modal-reset-admin");
+}
+
+document.getElementById("confirmResetAdmin").addEventListener("click", async (event) => {
+  if (resetAdminId == null) return;
+  const button = event.currentTarget;
+  button.disabled = true;
+  try {
+    const response = await API.post(`/admin/admins/${resetAdminId}/reset-password`, {});
+    const admin = admins.find((item) => item.id === resetAdminId);
+    resetAdminTempPassword = response.temp_password;
+    resetAdminPasswordVisible = false;
+    document.getElementById("resetAdminResultName").textContent = admin?.name || "Admin";
+    document.getElementById("resetAdminTempPassword").value = resetAdminTempPassword;
+    document.getElementById("resetAdminTempPassword").type = "password";
+    document.getElementById("toggleResetAdminPassword").querySelector("span").textContent = "visibility";
+    document.getElementById("toggleResetAdminPassword").setAttribute("aria-label", "Show temporary password");
+    document.getElementById("toggleResetAdminPassword").title = "Show password";
+    closeAdminModal("modal-reset-admin");
+    openAdminModal("modal-admin-password-reset");
+  } catch (error) {
+    console.error("[ManageAdmins] Failed to reset admin password", error);
+    Utils.toast(error?.data?.message || "Unable to reset this admin's password.", "error");
+  } finally {
+    button.disabled = false;
+  }
+});
+
+let removeAdminId = null;
+
+function openRemoveAdmin(id) {
+  const admin = admins.find((item) => item.id === id);
+  if (!admin) {
+    Utils.toast("Admin account not found.", "error");
+    return;
+  }
+  removeAdminId = id;
+  document.getElementById("removeAdminName").textContent = admin.name;
+  openAdminModal("modal-remove-admin");
+}
+
+document.getElementById("confirmRemoveAdmin").addEventListener("click", async (event) => {
+  if (removeAdminId == null) return;
+  const button = event.currentTarget;
+  button.disabled = true;
+  try {
+    await API.delete(`/admin/admins/${removeAdminId}`);
+    closeAdminModal("modal-remove-admin");
+    removeAdminId = null;
+    await loadAdmins();
+    Utils.toast("Admin account removed. Historical records were retained.", "success");
+  } catch (error) {
+    console.error("[ManageAdmins] Failed to remove admin account", error);
+    Utils.toast(error?.data?.message || "Unable to remove this admin account.", "error");
+  } finally {
+    button.disabled = false;
+  }
+});
+
+document.getElementById("toggleResetAdminPassword").addEventListener("click", (event) => {
+  resetAdminPasswordVisible = !resetAdminPasswordVisible;
+  event.currentTarget.querySelector("span").textContent = resetAdminPasswordVisible ? "visibility_off" : "visibility";
+  event.currentTarget.setAttribute("aria-label", resetAdminPasswordVisible ? "Hide temporary password" : "Show temporary password");
+  event.currentTarget.title = resetAdminPasswordVisible ? "Hide password" : "Show password";
+  document.getElementById("resetAdminTempPassword").type = resetAdminPasswordVisible ? "text" : "password";
+});
+
+document.getElementById("copyResetAdminPassword").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(resetAdminTempPassword);
+    Utils.toast("Temporary password copied.", "success");
+  } catch (error) {
+    console.error("[ManageAdmins] Unable to copy reset admin password", error);
+    Utils.toast("Unable to copy the temporary password.", "error");
+  }
+});
+
+document.getElementById("adminCreateForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+
+  const firstName = document.getElementById("newAdminFirstName").value.trim();
+  const middleName = document.getElementById("newAdminMiddleName").value.trim();
+  const lastName = document.getElementById("newAdminLastName").value.trim();
+  const email = document.getElementById("newAdminEmail").value.trim();
+  const phone = document.getElementById("newAdminPhone").value.trim();
+  const submitButton = document.getElementById("createAdminSubmit");
+  if (!firstName || !lastName || !email) {
+    Utils.toast("First name, last name, and email are required.", "warning");
+    return;
+  }
+
+  submitButton.disabled = true;
+  try {
+    const response = await API.post("/admin/users", {
+      role: "admin",
+      firstName,
+      middleName,
+      lastName,
+      email,
+      phone,
+    });
+
+    newAdminTempPassword = response.temp_password;
+    newAdminPasswordVisible = false;
+    document.getElementById("adminTempPassword").value = newAdminTempPassword;
+    document.getElementById("adminTempPassword").type = "password";
+    document.getElementById("toggleAdminTempPassword").querySelector("span").textContent = "visibility";
+    document.getElementById("toggleAdminTempPassword").setAttribute("aria-label", "Show temporary password");
+    document.getElementById("toggleAdminTempPassword").title = "Show password";
+    document.getElementById("adminCreateResultName").textContent = response.data.name;
+    form.reset();
+    closeAdminModal("modal-create-admin");
+    openAdminModal("modal-admin-created");
+    await loadAdmins();
+    Utils.toast("Admin account created. Assign their access below.", "success");
+  } catch (error) {
+    console.error("[ManageAdmins] Failed to create admin account", error);
+    Utils.toast(error?.data?.message || "Unable to create this admin account.", "error");
+  } finally {
+    submitButton.disabled = false;
+  }
+});
+
+document.getElementById("toggleAdminTempPassword").addEventListener("click", (event) => {
+  newAdminPasswordVisible = !newAdminPasswordVisible;
+  event.currentTarget.querySelector("span").textContent = newAdminPasswordVisible ? "visibility_off" : "visibility";
+  event.currentTarget.setAttribute("aria-label", newAdminPasswordVisible ? "Hide temporary password" : "Show temporary password");
+  event.currentTarget.title = newAdminPasswordVisible ? "Hide password" : "Show password";
+  document.getElementById("adminTempPassword").type = newAdminPasswordVisible ? "text" : "password";
+});
+
+document.getElementById("copyAdminTempPassword").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(newAdminTempPassword);
+    Utils.toast("Temporary password copied.", "success");
+  } catch (error) {
+    console.error("[ManageAdmins] Unable to copy temporary password", error);
+    Utils.toast("Unable to copy the temporary password.", "error");
+  }
+});
 
 document.addEventListener("DOMContentLoaded", loadAdmins);
