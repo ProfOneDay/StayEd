@@ -1,0 +1,19 @@
+[Unit]
+Description=StayEd API (gunicorn)
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+User=stayed
+Group=stayed
+WorkingDirectory=/opt/stayed/StayEd_Backend
+# run.py loads .env itself; 2 workers suits a 1-2 GB server.
+# --timeout 120 leaves room for OpenAI recommendation calls.
+ExecStart=/opt/stayed/StayEd_Backend/.venv/bin/gunicorn run:app \
+  --workers 2 --bind 127.0.0.1:8000 --timeout 120 \
+  --access-logfile - --error-logfile -
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
