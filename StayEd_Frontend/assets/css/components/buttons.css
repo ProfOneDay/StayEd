@@ -222,6 +222,11 @@
   font: inherit;
   font-size: var(--st-fs-xs);
   font-weight: 600;
+  /* Browsers' built-in form-control styling resets text-transform on
+     <button> back to none, so it doesn't actually inherit the th's
+     uppercase like a plain text header does -- every sortable column
+     label (Learner/LRN, Risk, ...) needs it set explicitly here instead. */
+  text-transform: uppercase;
   color: inherit;
   cursor: pointer;
   transition: background-color var(--st-t-hover, 150ms), color var(--st-t-hover, 150ms);

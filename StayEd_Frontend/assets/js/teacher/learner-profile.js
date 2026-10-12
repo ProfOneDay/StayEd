@@ -107,7 +107,7 @@ class LearnerProfilePage {
           </div>
         </div>
         <div class="st-assessment-summary-actions">
-          <a class="st-btn st-btn-outline st-btn-xs" href="${this.buildAssessmentScoresUrl()}">Open full assessment record<span class="material-symbols-outlined">arrow_forward</span></a>
+          <a class="st-btn st-btn-outline st-btn-sm" href="${this.buildAssessmentScoresUrl()}">Open full assessment record<span class="material-symbols-outlined">arrow_forward</span></a>
         </div>
       </div>
     `;
@@ -308,7 +308,7 @@ class LearnerProfilePage {
 
     Modal.show({
       title: "Edit Learner",
-      size: "sm",
+      size: "md",
       confirmLabel: "Save Changes",
       message: `
         <div class="st-schedule-modal-field">

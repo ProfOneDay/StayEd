@@ -55,17 +55,20 @@ class ProfileSecurity {
     const email = (window.Auth?.user && Auth.user()?.email) || "";
 
     const body = Modal.showCustom({
-      title: "Change Password",
-      size: "sm",
+      title: "",
+      size: "md",
+      headerless: true,
       bodyHtml: `
         <div data-cp-view="main">
           <div class="st-cp-icon"><span class="material-symbols-outlined">lock_reset</span></div>
+          <h3 class="st-cp-view-title">Change Password</h3>
           <p class="st-cp-sub">Use a strong password you don't use anywhere else.</p>
+          <hr class="st-cp-divider">
 
           <div class="st-field">
             <label>Current password</label>
             <div class="st-cp-password-wrap">
-              <input type="password" data-cp-field="current" placeholder="Enter current password" autocomplete="current-password">
+              <input type="password" class="st-input" data-cp-field="current" placeholder="Enter current password" autocomplete="current-password">
               <button type="button" class="st-cp-eye" data-cp-eye="current" aria-label="Show or hide password">${this.eyeIcon()}</button>
             </div>
           </div>
@@ -75,15 +78,15 @@ class ProfileSecurity {
           <div class="st-field st-mt-12">
             <label>New password</label>
             <div class="st-cp-password-wrap">
-              <input type="password" data-cp-field="new" placeholder="Enter new password" autocomplete="new-password">
+              <input type="password" class="st-input" data-cp-field="new" placeholder="Enter new password" autocomplete="new-password">
               <button type="button" class="st-cp-eye" data-cp-eye="new" aria-label="Show or hide password">${this.eyeIcon()}</button>
             </div>
           </div>
 
-          <div class="st-field">
+          <div class="st-field st-mt-12">
             <label>Confirm new password</label>
             <div class="st-cp-password-wrap">
-              <input type="password" data-cp-field="confirm" placeholder="Confirm new password" autocomplete="new-password">
+              <input type="password" class="st-input" data-cp-field="confirm" placeholder="Confirm new password" autocomplete="new-password">
               <button type="button" class="st-cp-eye" data-cp-eye="confirm" aria-label="Show or hide password">${this.eyeIcon()}</button>
             </div>
           </div>

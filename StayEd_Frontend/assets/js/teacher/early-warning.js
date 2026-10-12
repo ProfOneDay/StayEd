@@ -404,7 +404,9 @@ class EarlyWarningPage {
     const body = document.querySelector("[data-ewa-body]");
 
     if (body && window.Skeletons) {
-      body.innerHTML = Skeletons.tableRows(6, 5);
+      // Matches state.perPage (8) -- see Student Registry's showSkeleton()
+      // for why this has to line up exactly.
+      body.innerHTML = Skeletons.tableRows(8, 5);
     }
   }
 

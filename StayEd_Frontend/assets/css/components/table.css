@@ -137,6 +137,32 @@
   font-size: var(--st-fs-base);
 }
 
+/* A loading-skeleton row (Skeletons.tableRows()) is a single <td> holding
+   .st-skeleton-row, which already carries its own 16px padding -- stacked
+   on top of this td's own 12px, every skeleton row rendered noticeably
+   taller than the real row it's standing in for (same row count, but each
+   one padded twice), so a page that fits once real data loads could still
+   need a scrollbar during the skeleton phase. The td contributes no
+   padding of its own here; .st-skeleton-row is the only source of it. */
+.st-data-table td:has(> .st-skeleton-row) {
+  padding: 0;
+}
+
+/* Zeroing the td above only removed the double-counted padding -- the
+   skeleton row still used its own general-purpose 16px padding and 36px
+   avatar circle, both a bit larger than this table's actual values (12px
+   td padding, 32px avatar), so skeleton rows were still a few px taller
+   than real ones per row (adds up over a full page of them). Matched to
+   this table's real row dimensions instead, so a page's height is the
+   same whether it's showing skeleton or real rows. */
+.st-data-table .st-skeleton-row {
+  padding: 12px 22px;
+}
+.st-data-table .st-skeleton-row .st-skeleton-avatar {
+  width: 32px;
+  height: 32px;
+}
+
 .st-data-table .st-pill {
   padding: 3px 10px;
   font-size: var(--st-fs-xs);
@@ -160,19 +186,13 @@
   gap: 8px;
 }
 
-/* Every page's "View profile"/Edit/Archive/View logbook row-action button
-   was independently built with .st-btn-xs or .st-btn-sm, which read as a
-   noticeably smaller tier than .st-filter-apply's plain .st-btn (Apply
-   filters) despite doing a comparable "primary action for this row" job.
-   This is the one shared place all of them render through (every list
-   page's actions column goes through .st-row-actions), so resizing them
-   here once keeps every row-action button on the same base size as Apply
-   filters, instead of relocating the fix into each page's own JS/CSS. */
-.st-row-actions .st-btn-xs,
-.st-row-actions .st-btn-sm {
-  height: 38px;
-  padding: 0 16px;
-  font-size: var(--st-fs-base);
+/* One size up from .st-btn-xs's own 32px/10px/xs-font (i.e. .st-btn-sm's
+   dimensions) -- xs read as too small next to the row's kebab menu button,
+   but the full base size (38px, matching Apply filters) read as too big. */
+.st-row-actions .st-btn-xs {
+  height: 34px;
+  padding: 0 12px;
+  font-size: var(--st-fs-sm);
 }
 
 .st-row-menu-trigger {
@@ -297,6 +317,13 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
   gap: 4px;
   flex-wrap: wrap;
   max-width: 100%;
+  /* Empty until the first real render (nothing to page through while a
+     skeleton is showing), so .st-pagination's own height -- centered on
+     its tallest child -- was shorter before data loaded than after, once
+     actual 34px page buttons appeared here. Reserving that height up
+     front keeps the pagination row a constant size throughout, instead of
+     growing the instant real rows replace the skeleton. */
+  min-height: 34px;
 }
 
 .st-page-btn {

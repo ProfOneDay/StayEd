@@ -481,6 +481,15 @@ body[data-page="Profile Settings"] [data-animate-cards].is-inview > *{
     color:var(--st-ink-muted);
 }
 
+/* Separates the icon/title/subtitle block from the form fields below it,
+   now that the modal's own header (title+X+divider) is hidden for this
+   view (see .st-modal--headerless) and this block stands in for it. */
+.st-cp-divider{
+    margin:0 0 18px;
+    border:none;
+    border-top:1px solid var(--st-outline-variant);
+}
+
 .st-cp-password-wrap{
     position:relative;
 }
@@ -641,6 +650,21 @@ body[data-page="Profile Settings"] [data-animate-cards].is-inview > *{
     }
     body[data-page="Profile Settings"] .st-settings-form-footer .st-btn{
         width:100%;
+    }
+    /* The Account Information section's Cancel/Save now live in the section
+       header (next to the icon+title it replaces the Edit Profile button
+       in), not the form body -- the stacked full-width treatment above is
+       for the form-bottom footer other sections still use, and would make
+       this one wrap over the header's icon/title instead of sitting beside
+       them. Keep it as a compact, wrappable inline pair instead. */
+    body[data-page="Profile Settings"] .st-settings-section-header .st-settings-form-footer{
+        flex-direction:row;
+        align-items:center;
+        flex-wrap:wrap;
+        justify-content:flex-end;
+    }
+    body[data-page="Profile Settings"] .st-settings-section-header .st-settings-form-footer .st-btn{
+        width:auto;
     }
     body[data-page="Profile Settings"] .st-danger-row{
         flex-direction:column;

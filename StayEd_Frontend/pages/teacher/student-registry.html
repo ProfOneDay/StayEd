@@ -209,6 +209,7 @@
                       >info</span
                     >
                   </th>
+                  <th>Sex / Age</th>
                   <th>Learning level</th>
                   <th>Modality</th>
                   <th class="has-sort">
@@ -230,12 +231,25 @@
                   <th class="is-right">Actions</th>
                 </tr>
               </thead>
+              <!-- Pre-rendered to match Skeletons.tableRows(8, 9) (8 rows =
+                   state.perPage, 9 = this table's column count) exactly, so
+                   the only swap that ever happens is skeleton -> real rows,
+                   which are also both 8 rows tall -- the page's height
+                   never changes across the whole load, so there's nothing
+                   left to flicker a scrollbar in and out over. A single
+                   shorter "Loading learners…" row here (replaced by JS a
+                   few hundred ms later) was the actual remaining source of
+                   the shake: a real, visible height jump the moment
+                   showSkeleton() ran. -->
               <tbody data-mgmt-body data-animate-rows>
-                <tr>
-                  <td colspan="8" class="st-table-empty-cell">
-                    Loading learners…
-                  </td>
-                </tr>
+                <tr><td colspan="9"><div class="st-skeleton-row"><div class="st-skeleton st-skeleton-avatar"></div><div class="st-skeleton-row-lines"><div class="st-skeleton st-skeleton-text"></div><div class="st-skeleton st-skeleton-text"></div></div></div></td></tr>
+                <tr><td colspan="9"><div class="st-skeleton-row"><div class="st-skeleton st-skeleton-avatar"></div><div class="st-skeleton-row-lines"><div class="st-skeleton st-skeleton-text"></div><div class="st-skeleton st-skeleton-text"></div></div></div></td></tr>
+                <tr><td colspan="9"><div class="st-skeleton-row"><div class="st-skeleton st-skeleton-avatar"></div><div class="st-skeleton-row-lines"><div class="st-skeleton st-skeleton-text"></div><div class="st-skeleton st-skeleton-text"></div></div></div></td></tr>
+                <tr><td colspan="9"><div class="st-skeleton-row"><div class="st-skeleton st-skeleton-avatar"></div><div class="st-skeleton-row-lines"><div class="st-skeleton st-skeleton-text"></div><div class="st-skeleton st-skeleton-text"></div></div></div></td></tr>
+                <tr><td colspan="9"><div class="st-skeleton-row"><div class="st-skeleton st-skeleton-avatar"></div><div class="st-skeleton-row-lines"><div class="st-skeleton st-skeleton-text"></div><div class="st-skeleton st-skeleton-text"></div></div></div></td></tr>
+                <tr><td colspan="9"><div class="st-skeleton-row"><div class="st-skeleton st-skeleton-avatar"></div><div class="st-skeleton-row-lines"><div class="st-skeleton st-skeleton-text"></div><div class="st-skeleton st-skeleton-text"></div></div></div></td></tr>
+                <tr><td colspan="9"><div class="st-skeleton-row"><div class="st-skeleton st-skeleton-avatar"></div><div class="st-skeleton-row-lines"><div class="st-skeleton st-skeleton-text"></div><div class="st-skeleton st-skeleton-text"></div></div></div></td></tr>
+                <tr><td colspan="9"><div class="st-skeleton-row"><div class="st-skeleton st-skeleton-avatar"></div><div class="st-skeleton-row-lines"><div class="st-skeleton st-skeleton-text"></div><div class="st-skeleton st-skeleton-text"></div></div></div></td></tr>
               </tbody>
             </table>
           </div>

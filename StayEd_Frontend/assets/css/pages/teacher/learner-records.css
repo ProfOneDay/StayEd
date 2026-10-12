@@ -211,7 +211,7 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     grid-template-columns:repeat(4,minmax(0,1fr));
 }
 
-/* Student Registry now has 8 columns (checkbox, Learner/LRN, Level,
+/* Student Registry now has 9 columns (checkbox, Learner/LRN, Sex, Level,
    Modality, Risk, Latest activity, Status, Actions) -- tighter cell
    padding and a capped, ellipsis-truncated Latest activity column keep
    it fitting at 1280px+ without the table's own horizontal scroll. Scoped
@@ -275,13 +275,29 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
     }
     /* "Learning level" (renamed from "Level") no longer fits the 75px cap
        above on one line -- let the header itself wrap to two lines instead
-       of forcing the column wider than its data rows. */
-    body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-reg-table th:nth-child(3){
+       of forcing the column wider than its data rows. nth-child(3) is
+       User Management/CLC Management's own 3rd header ("Status") -- Student
+       Registry's own Learning-level header moved to nth-child(4) once the
+       new Sex column (below) was inserted before it, so it's handled by its
+       own page-scoped rule instead of staying in this shared :is() list. */
+    body:is([data-page="User Management"],[data-page="CLC Management"]) .st-reg-table th:nth-child(3){
+        max-width:75px;
+        white-space:normal;
+    }
+    body[data-page="Student Registry"] .st-reg-table th:nth-child(4){
         max-width:75px;
         white-space:normal;
     }
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-reg-table td[data-col="modality"]{
         max-width:100px;
+    }
+    /* Keeps the new Sex column (e.g. "Female, 20") from pushing the table
+       wider than the other tightened columns around it. */
+    body[data-page="Student Registry"] .st-reg-table td[data-col="sex"]{
+        max-width:60px;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
     }
 }
 
@@ -304,6 +320,14 @@ body:is([data-page="Student Registry"],[data-page="User Management"],[data-page=
 @media (max-width: 767px){
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-risk-legend--4{
         grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+    /* Student Registry only -- the other two pages in this :is() list don't
+       have a Sex column. No explicit order needed: it defaults to 0, which
+       already sorts before every other stacked field below (all order:1+),
+       so it lands right under the learner's name/LRN as intended. */
+    body[data-page="Student Registry"] .st-reg-table td[data-col="sex"]{
+        padding-left:30px!important;
+        color:var(--st-ink-muted);
     }
     body:is([data-page="Student Registry"],[data-page="User Management"],[data-page="CLC Management"]) .st-reg-table td[data-col="level"]{
         grid-column:1/-2;

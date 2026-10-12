@@ -63,8 +63,11 @@ body[data-page="Learner Records"] .st-class-context-banner-switch{
     padding:0 14px;
     border:1px solid var(--st-line-strong);
     border-radius:var(--st-radius-control);
+    font-weight:600;
+    font-size: var(--st-fs-base);
     color:var(--st-on-surface);
     text-decoration:none;
+    white-space:nowrap;
     transition:background-color var(--st-t-hover, 150ms),border-color var(--st-t-hover, 150ms),color var(--st-t-hover, 150ms),transform var(--st-t-press, 90ms);
 }
 
@@ -1227,7 +1230,7 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
 
 .st-schedule-modal-field select{
     height:44px;
-    padding:0 12px;
+    padding:0 34px 0 12px;
     border:1px solid var(--st-outline-variant);
     border-radius:var(--st-radius-control);
     font-family:var(--st-font-body);
@@ -1235,6 +1238,13 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     color:var(--st-on-surface);
     background:#fff;
     cursor:pointer;
+    /* Same chevron as the shared .st-select (components/forms.css) --
+       this field never set appearance:none, so it was falling back to
+       the browser's own native dropdown arrow instead of the app's. */
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%235a6275' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 10px center;
 }
 
 .st-schedule-modal-field textarea{

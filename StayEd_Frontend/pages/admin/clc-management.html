@@ -34,7 +34,13 @@
 <main class="st-content">
   <div class="st-page-header">
     <div><h1 class="st-page-header-title">CLC Management</h1><p class="st-page-header-subtitle">Manage Community Learning Centers and their assigned teachers.</p></div>
-    <div class="st-page-header-actions"><button class="st-btn st-btn-primary" id="addClcBtn"><span class="material-symbols-outlined">add_business</span>Add new CLC</button></div>
+    <div class="st-page-header-actions">
+      <button type="button" class="st-btn st-btn-outline" id="clcViewToggleBtn">
+        <span class="material-symbols-outlined" id="clcViewToggleIcon">archive</span>
+        <span id="clcViewToggleLabel">View archived</span>
+      </button>
+      <button class="st-btn st-btn-primary" id="addClcBtn"><span class="material-symbols-outlined">add_business</span>Add new CLC</button>
+    </div>
   </div>
 
   <section class="st-panel st-panel-pad" aria-label="CLC summary" data-animate>
@@ -51,7 +57,7 @@
   </section>
 
   <section class="st-panel st-table-card">
-    <div class="st-table-card-head"><h2 class="st-table-card-title">Community Learning Centers</h2><span class="st-table-card-count" data-clc-count>0 CLCs</span></div>
+    <div class="st-table-card-head"><h2 class="st-table-card-title" id="clcTableTitle">Community Learning Centers</h2><span class="st-table-card-count" data-clc-count>0 CLCs</span></div>
     <div class="st-adm-toolbar">
       <label class="st-search"><span class="material-symbols-outlined">search</span><input id="searchInput" type="text" placeholder="Search by name or municipality" /></label>
       <select class="st-select" id="muniFilterSelect" aria-label="Filter by municipality"><option value="">All municipalities</option></select>

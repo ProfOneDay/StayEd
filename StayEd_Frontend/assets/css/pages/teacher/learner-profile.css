@@ -131,7 +131,10 @@ body[data-page="Learner Profile"] .st-profile-hero-name {
 }
 body[data-page="Learner Profile"] .st-profile-hero-lrn {
   margin: 4px 0 0;
-  font-size: var(--st-fs-base);
+  /* Was a one-off 0.844rem; the token-snapping pass rounded up to the
+     base size (1rem) instead of the much closer --st-fs-sm (0.8125rem),
+     making these secondary identity lines read as big as body text. */
+  font-size: var(--st-fs-sm);
   color: var(--st-on-surface-variant);
 }
 body[data-page="Learner Profile"] .st-profile-hero-lrn span {
@@ -141,7 +144,7 @@ body[data-page="Learner Profile"] .st-profile-hero-lrn span {
 }
 body[data-page="Learner Profile"] .st-profile-hero-birthdate {
   margin: 2px 0 0;
-  font-size: var(--st-fs-base);
+  font-size: var(--st-fs-sm);
   color: var(--st-on-surface-variant);
 }
 body[data-page="Learner Profile"] .st-profile-hero-birthdate span {
@@ -539,7 +542,13 @@ body[data-page="Learner Profile"] .st-metric-card-value {
 }
 body[data-page="Learner Profile"] .st-metric-card--hero .st-metric-card-value {
   color: var(--st-primary);
-  font-size: var(--st-fs-3xl);
+  /* The Phase 1 token-snapping pass collapsed this and the regular
+     .st-metric-card-value onto the same --st-fs-3xl, losing the hero
+     tile's deliberate size bump over ordinary metric cards (28px vs the
+     regular 32px, pre-refactor). --st-fs-4xl is the next step up on the
+     scale -- restores the visual hierarchy using a real token instead of
+     reintroducing a one-off literal size. */
+  font-size: var(--st-fs-4xl);
 }
 /* "Not Yet Available" placeholder: a pill badge (same visual language as
    the "Not assessed" status badge on Assessment Scores) instead of the
@@ -1234,10 +1243,18 @@ body[data-page="Learner Profile"] .st-risk-trend-list .st-risk-badge {
   font-size: var(--st-fs-xs);
 }
 body[data-page="Learner Profile"] .st-risk-trend-empty {
+  width: 100%;
   text-align: center;
   color: var(--st-on-surface-variant);
-  font-size: var(--st-fs-base);
-  padding: 12px 0 0;
+  /* Was 0.844rem -- another instance of the token pass rounding up to
+     --st-fs-base instead of the closer --st-fs-sm. */
+  font-size: var(--st-fs-sm);
+  /* Top-only padding here, stacked on top of .st-risk-trend-list's own
+     2px top/bottom padding, left the text sitting 14px from the top of
+     the card but only 2px from the bottom -- not vertically centered.
+     Symmetric padding here balances it out (14px top and bottom once
+     combined with the list's own). */
+  padding: 12px 0;
 }
 @media (max-width: 1023px) {
   body[data-page="Learner Profile"] .st-risk-trend-body {
@@ -2006,6 +2023,15 @@ body[data-page="Learner Profile"] .st-empty-inline .t {
 body[data-page="Learner Profile"] .st-empty-inline .s {
   font-size: var(--st-fs-base);
   color: var(--st-on-surface-variant);
+}
+/* Recent activity's empty state (renderTimeline()) renders through the
+   shared .st-empty/.st-empty-title component instead of .st-empty-inline
+   above -- that shared title has no font-size of its own by design (each
+   page sets one if it needs something other than the ambient body size),
+   and this page's 18px body text made it read oversized for what used to
+   be a 15px title back when this was .st-empty-inline .t. */
+body[data-page="Learner Profile"] .st-empty-title {
+  font-size: var(--st-fs-md);
 }
 body[data-page="Learner Profile"] .st-history-link {
   appearance: none;

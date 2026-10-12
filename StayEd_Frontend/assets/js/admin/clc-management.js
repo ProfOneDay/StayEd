@@ -77,8 +77,34 @@ function renderKPIs(){
   document.getElementById('stripOff').style.flexGrow=Math.max(archivedCount,total?0:1);
   document.getElementById('admStrip').setAttribute('aria-label',`${activeCount} active, ${archivedCount} inactive`);
 
+  // Keeps the header toggle's "(N)" archived count in sync with every KPI
+  // refresh (load, archive, restore), not just explicit view switches.
+  renderViewChrome();
+
   replay(document.querySelector('.st-panel[data-animate]'));
 }
+
+// Updates the parts of the page that depend on whether the archived view
+// (toggled via clcViewToggleBtn, or by clicking the "Inactive" KPI chip --
+// both drive the same `activeFilter` state) is showing: the table title and
+// the toggle button's own icon/label -- same pattern as Manage Modules'/
+// Student Registry's view-toggle chrome.
+function renderViewChrome(){
+  const isArchivedView=activeFilter==='archived';
+  const archivedCount=clcs.filter(c=>c.status==='archived').length;
+
+  const title=document.getElementById('clcTableTitle');
+  if(title) title.textContent=isArchivedView?'Archived Community Learning Centers':'Community Learning Centers';
+
+  const icon=document.getElementById('clcViewToggleIcon');
+  if(icon) icon.textContent=isArchivedView?'unarchive':'archive';
+
+  const label=document.getElementById('clcViewToggleLabel');
+  if(label) label.textContent=isArchivedView?'View active':`View archived${archivedCount?` (${archivedCount})`:''}`;
+}
+document.getElementById('clcViewToggleBtn').addEventListener('click',()=>{
+  setFilter(activeFilter==='archived'?'active':'archived');
+});
 
 function renderTable(){
   const tbody=document.getElementById('tbody');
@@ -92,12 +118,21 @@ function renderTable(){
   const countEl=document.querySelector('[data-clc-count]');
   if(countEl) countEl.textContent=`${clcs.length} CLC${clcs.length===1?'':'s'}`;
   if(!totalFiltered){
-    const filtered=searchTerm||muniFilter||activeFilter!=='all';
+    const isArchivedView=activeFilter==='archived';
+    const filtered=searchTerm||muniFilter||(!isArchivedView&&activeFilter!=='all');
+    const icon=isArchivedView?'inventory_2':'search_off';
+    const title=isArchivedView?'No archived CLCs':'No CLCs found';
+    const desc=isArchivedView
+      ?(filtered?"We couldn't find any archived CLCs matching your current filters. Try adjusting your search.":'No Community Learning Centers have been archived yet.')
+      :(filtered?"We couldn't find any CLCs matching your current filters. Try adjusting your search.":'No Community Learning Centers have been added yet.');
+    const action=filtered
+      ?'<button class="st-btn st-btn-primary" onclick="clearClcFilters()">Clear filters</button>'
+      :(isArchivedView?'':'<button class="st-btn st-btn-primary" onclick="openAddClcModal()"><span class="material-symbols-outlined">add_business</span>Add new CLC</button>');
     tbody.innerHTML=`<tr><td colspan="5"><div class="empty-state">
-      <div class="empty-icon"><span class="material-symbols-outlined">search_off</span></div>
-      <div class="empty-title">No CLCs found</div>
-      <div class="empty-desc">${filtered?"We couldn't find any CLCs matching your current filters. Try adjusting your search.":'No Community Learning Centers have been added yet.'}</div>
-      ${filtered?'<button class="st-btn st-btn-primary" onclick="clearClcFilters()">Clear filters</button>':'<button class="st-btn st-btn-primary" onclick="openAddClcModal()"><span class="material-symbols-outlined">add_business</span>Add new CLC</button>'}
+      <div class="empty-icon"><span class="material-symbols-outlined">${icon}</span></div>
+      <div class="empty-title">${title}</div>
+      <div class="empty-desc">${desc}</div>
+      ${action}
     </div></td></tr>`;
     renderPagination('clcPagination',0,currentPage,PAGE_SIZE,p=>{currentPage=p;renderTable()});
     return;
@@ -128,6 +163,7 @@ function setFilter(f){
   activeFilter=f;
   currentPage=1;
   document.querySelectorAll('.kpi[data-filter]').forEach(b=>b.classList.toggle('active',b.dataset.filter===f));
+  renderViewChrome();
   renderTable();
 }
 document.querySelectorAll('.kpi[data-filter]').forEach(b=>b.addEventListener('click',()=>setFilter(b.dataset.filter)));

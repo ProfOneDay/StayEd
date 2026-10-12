@@ -134,8 +134,24 @@
                   data-profile-edit
                 >
                   <span class="material-symbols-outlined">edit</span>
-                  <span>Edit</span>
+                  <span>Edit Profile</span>
                 </button>
+                <div class="st-settings-form-footer" data-profile-edit-actions hidden>
+                  <button
+                    type="button"
+                    class="st-btn st-btn-outline st-btn-sm"
+                    data-profile-cancel
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    form="profileInfoForm"
+                    class="st-btn st-btn-primary st-btn-sm"
+                  >
+                    Save Changes
+                  </button>
+                </div>
               </div>
               <div class="st-settings-section-body">
                 <div class="st-settings-section-body-inner">
@@ -219,18 +235,6 @@
                       <span class="material-symbols-outlined">lock</span>
                       Email Address, Position, Organization, and Assigned CLC are read-only on this page.
                     </p>
-                    <div class="st-settings-form-footer" data-profile-edit-actions hidden>
-                      <button
-                        type="button"
-                        class="st-btn st-btn-outline"
-                        data-profile-cancel
-                      >
-                        Cancel
-                      </button>
-                      <button type="submit" class="st-btn st-btn-primary">
-                        Save Changes
-                      </button>
-                    </div>
                   </form>
                 </div>
               </div>

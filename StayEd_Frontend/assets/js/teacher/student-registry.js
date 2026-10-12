@@ -62,7 +62,13 @@ class StudentRegistry {
     const body = document.querySelector("[data-mgmt-body]");
 
     if (body && window.Skeletons) {
-      body.innerHTML = Skeletons.tableRows(6, 8);
+      // Matches state.perPage (8) exactly -- a skeleton with fewer rows
+      // than a real full page renders shorter, so the page could cross
+      // the "needs a scrollbar" threshold going from skeleton to real
+      // data even though the table itself never scrolls (it's paginated).
+      // Same row height either way now, so that transition can't change
+      // the page's total height at all.
+      body.innerHTML = Skeletons.tableRows(8, 9);
     }
   }
 
@@ -462,10 +468,11 @@ class StudentRegistry {
                         ${this.avatar(l, avatarInitials)}
                         <span>
                             <span class="st-learner-name">${this.formatDisplayName(l)}</span>
-                            <p class="st-learner-id"><span class="num">${l.lrn}</span>${l.sex || l.age ? ` · ${l.sex || ""}${l.sex && l.age ? ", " : ""}${l.age || ""}` : ""}</p>
+                            <p class="st-learner-id"><span class="num">${l.lrn}</span></p>
                         </span>
                     </button>
                 </td>
+                <td data-col="sex">${l.sex || ""}${l.sex && l.age ? ", " : ""}${l.age || (l.sex ? "" : "—")}</td>
                 <td data-col="level">${l.level || "—"}</td>
                 <td data-col="modality">${this.modalityPill(l.modality)}</td>
                 <td data-col="risk">${this.riskCell(l)}</td>

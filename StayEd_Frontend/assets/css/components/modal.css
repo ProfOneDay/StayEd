@@ -77,6 +77,16 @@
   border-bottom: 1px solid var(--st-outline-variant);
 }
 
+/* For modals (e.g. Change Password) that build their own icon+title+close
+   block as the first thing in the body instead of using this header -- the
+   header is passed an empty title and has nothing left to show (no text,
+   no X), so it's hidden entirely rather than left as an empty padded bar.
+   Closing still works via the body's own Cancel button or a backdrop
+   click (closeOnBackdrop). */
+.st-modal--headerless .st-modal-header {
+  display: none;
+}
+
 .st-modal-close {
   display: flex;
   align-items: center;

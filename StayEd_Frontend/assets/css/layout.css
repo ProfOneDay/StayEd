@@ -8,13 +8,13 @@
 
 html {
   scroll-behavior: smooth;
-  /* No scrollbar-gutter:stable -- that reserved the scrollbar's width on
-     every page even when it had nothing to scroll, which meant a page
-     that fits in one viewport (the landing page, most dialogs) always
-     rendered a bit narrower than its full available width for no reason.
-     Without it, a page's width can shift slightly when navigating to/from
-     one that actually scrolls, but every page now gets its full width
-     when it has no scrollbar to make room for. */
+  /* No scrollbar-gutter:stable -- every list page is paginated to a fixed
+     row count, so its height (and whether it needs a scrollbar at all)
+     doesn't change once its loading skeleton's row count matches that
+     page size (see e.g. Student Registry's showSkeleton()) -- there's no
+     threshold left to cross mid-load, so nothing to reserve a gutter
+     against. Reserving one anyway would just narrow every paginated page
+     for no benefit, the same cost this was originally removed to avoid. */
   /* Firefox equivalent of the ::-webkit-scrollbar-* rules below -- both
      are inherited properties, so setting them once here covers every
      scrollable descendant in the app. */

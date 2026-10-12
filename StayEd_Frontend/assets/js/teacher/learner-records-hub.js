@@ -240,7 +240,9 @@ class LearnerRecordsHub {
       const body = document.querySelector(`[data-${key}-body]`);
 
       if (body && window.Skeletons) {
-        body.innerHTML = Skeletons.tableRows(4, 6);
+        // Matches state.perPage (6) -- see Student Registry's
+        // showSkeleton() for why this has to line up exactly.
+        body.innerHTML = Skeletons.tableRows(6, 6);
       }
     });
   }

@@ -127,6 +127,13 @@ class Modal {
 
     size = "lg",
 
+    // For modals that build their own icon+title block as the first thing
+    // in bodyHtml (e.g. Change Password) instead of using the shared
+    // header's title text -- hides the header's divider/bottom padding so
+    // it doesn't read as an empty bar sitting above that block. The close
+    // button stays; only the title text and the line under it go away.
+    headerless = false,
+
     onClose = null,
 
     closeOnBackdrop = true,
@@ -143,6 +150,8 @@ class Modal {
       .join(" ");
 
     modal.classList.add(`st-modal--${size}`);
+
+    modal.classList.toggle("st-modal--headerless", headerless);
 
     modal.classList.remove("hidden");
 

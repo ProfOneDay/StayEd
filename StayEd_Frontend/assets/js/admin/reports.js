@@ -40,6 +40,16 @@ function reportStatusPillClass(status) {
   return "";
 }
 
+// Same colored pill as Student Registry's modality column (.st-modality-pill,
+// learner-records.css) instead of plain text -- reused here via a
+// page-scoped color rule in admin-reports.css, since that file's own
+// :is(...) list can't safely add [data-page="Reports"] without also
+// matching the unrelated teacher Reports page.
+function modalityPill(label) {
+  const cls = { "Face-to-Face": " st-modality-pill--f2f", Modular: " st-modality-pill--modular", Blended: " st-modality-pill--blended" }[label] || "";
+  return `<span class="st-pill st-modality-pill${cls}">${label || "—"}</span>`;
+}
+
 const ADMIN_REPORTS_PAGE_SIZE = 10;
 
 class AdminReports {
@@ -87,10 +97,10 @@ class AdminReports {
   // ---------------------------------------------------------------------------
 
   static bindReportModeToggle() {
-    document.querySelectorAll("#reportModeToggle .chart-type-btn").forEach((btn) => {
+    document.querySelectorAll("#reportModeToggle .st-adm-mode-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         if (btn.dataset.reportMode === this.state.mode) return;
-        document.querySelectorAll("#reportModeToggle .chart-type-btn").forEach((b) => b.classList.toggle("is-active", b === btn));
+        document.querySelectorAll("#reportModeToggle .st-adm-mode-btn").forEach((b) => b.classList.toggle("is-active", b === btn));
         this.state.mode = btn.dataset.reportMode;
         this.onReportModeChange();
       });
@@ -267,8 +277,8 @@ class AdminReports {
             <td><span class="st-pill st-pill--status ${s.status === "REVIEWED" ? "st-pill--active" : "st-pill--pending"}">${s.status === "REVIEWED" ? "Reviewed" : "New"}</span></td>
             <td class="is-right">
               <div class="st-table-actions">
-                <button type="button" class="st-btn st-btn-outline st-btn-xs" data-view-submission="${s.id}">View</button>
                 ${s.status === "REVIEWED" ? "" : `<button type="button" class="st-text-link-btn" data-review-submission="${s.id}">Mark reviewed</button>`}
+                <button type="button" class="st-btn st-btn-outline st-btn-xs" data-view-submission="${s.id}">View</button>
               </div>
             </td>
           </tr>
@@ -663,10 +673,10 @@ class AdminReports {
             "Learner",
             "Sex",
             "Learning Level",
+            "Modality",
             "Learning Center",
             "Assigned Teacher",
             "School Year / Semester",
-            "Modality",
             "Status",
           ],
           rows: rows.map((r) => [
@@ -674,10 +684,10 @@ class AdminReports {
             `${r.first_name || ""} ${r.last_name || ""}`.trim(),
             r.sex || "—",
             r.learning_level || "—",
+            REPORT_MODALITY_LABELS[r.learning_modality] || r.learning_modality || "—",
             r.clc_name || "—",
             r.teacher_name || "—",
             `${r.school_year || "—"} · ${REPORT_SEMESTER_LABELS[r.semester] || r.semester || "—"}`,
-            REPORT_MODALITY_LABELS[r.learning_modality] || r.learning_modality || "—",
             r.enrollment_status || "—",
           ]),
           emptyText: "No enrollment records match the current filters.",
@@ -806,7 +816,7 @@ class AdminReports {
     const head = document.querySelector("[data-report-preview-head]");
     if (!body) return;
 
-    const columns = ["LRN", "Learner", "Sex", "Learning Level", "Learning Center", "Assigned Teacher", "School Year / Semester", "Modality", "Status"];
+    const columns = ["LRN", "Learner", "Sex", "Learning Level", "Modality", "Learning Center", "Assigned Teacher", "School Year / Semester", "Status"];
     if (head) head.innerHTML = columns.map((c) => `<th>${c}</th>`).join("");
 
     const rows = this.state.filtered;
@@ -834,11 +844,11 @@ class AdminReports {
         <td>${r.lrn}</td>
         <td><span class="st-adm-learner">${r.first_name} ${r.last_name}</span></td>
         <td>${r.sex || "—"}</td>
-        <td><span class="st-adm-level-chip">${r.learning_level || "—"}</span></td>
+        <td>${Utils.levelChip(r.learning_level)}</td>
+        <td>${modalityPill(REPORT_MODALITY_LABELS[r.learning_modality] || r.learning_modality)}</td>
         <td>${r.clc_name || "—"}</td>
         <td>${r.teacher_name || "—"}</td>
         <td>${r.school_year || "—"} · ${REPORT_SEMESTER_LABELS[r.semester] || r.semester || "—"}</td>
-        <td>${REPORT_MODALITY_LABELS[r.learning_modality] || r.learning_modality || "—"}</td>
         <td><span class="st-pill st-pill--status ${reportStatusPillClass(r.enrollment_status)}">${r.enrollment_status || "—"}</span></td>
       </tr>`,
       )

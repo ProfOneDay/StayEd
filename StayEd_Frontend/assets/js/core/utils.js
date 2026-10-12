@@ -209,6 +209,17 @@ class Utils {
     return total ? Math.round((part / total) * 100) : 0;
   }
 
+  // learning_level is kept as its raw backend code (BLP/ELEMENTARY/
+  // JUNIOR_HIGH_SCHOOL/SENIOR_HIGH_SCHOOL, sql/00_core_schema.sql's
+  // ck_learning_class_level check) rather than a prettified label -- it's
+  // also the literal categorical value the risk model was trained on
+  // (models/features.py), so keeping the tag text 1:1 with that avoids a
+  // display label that doesn't correspond to anything in the data/model.
+  // One shared chip builder so every page renders it identically.
+  static levelChip(level) {
+    return level ? `<span class="st-level-chip">${level}</span>` : "—";
+  }
+
   static INTERVENTION_TYPES = [
     "Home Visit", "Consultation", "Referral",
     "Learner Follow-up", "Parent/Guardian Conference", "Other",
@@ -229,7 +240,7 @@ class Utils {
 
     Modal.show({
       title: "Assign Intervention",
-      size: "sm",
+      size: "md",
       confirmLabel: "Select Intervention",
       message: `
         <div class="st-schedule-modal-field">

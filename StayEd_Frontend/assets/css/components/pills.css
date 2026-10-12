@@ -180,6 +180,20 @@
   color: #fff;
 }
 
+/* ---- Level chip: small rect-radius tag for a learner's Learning Level
+   (BLP, etc). Started as admin Reports' own .st-adm-level-chip; also used
+   by the teacher Student Registry's Learning level column now, so it lives
+   here instead of staying duplicated per page. ---- */
+.st-level-chip {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: var(--st-radius-sm);
+  background: var(--st-navy-soft);
+  color: var(--st-primary);
+  font-size: var(--st-fs-xs);
+  font-weight: 700;
+}
+
 /* ---- Tag: a static label chip (no hover/active interaction). ---- */
 .st-tag {
   display: inline-flex;
