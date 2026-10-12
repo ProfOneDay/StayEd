@@ -148,6 +148,44 @@
                   ><span class="st-toggle-thumb"></span
                 ></span>
               </label>
+            </div> 
+                        <div class="st-toggle-row">
+              <div>
+                <p class="st-toggle-row-title">Show Assessment Record scores button</p>
+                <p class="st-toggle-row-sub">
+                  Show or hide the Record scores button in Class Management.
+                </p>
+              </div>
+              <label class="st-toggle">
+                <input
+                  type="checkbox"
+                  data-settings-toggle-pref="show-assessment-scores"
+                  checked
+                  aria-label="Show Record scores button"
+                />
+                <span class="st-toggle-track"
+                  ><span class="st-toggle-thumb"></span
+                ></span>
+              </label>
+            </div>
+            <div class="st-toggle-row">
+              <div>
+                <p class="st-toggle-row-title">Show Copy link</p>
+                <p class="st-toggle-row-sub">
+                  Show or hide the Student view link and Copy link button in Class Management.
+                </p>
+              </div>
+              <label class="st-toggle">
+                <input
+                  type="checkbox"
+                  data-settings-toggle-pref="show-copy-link"
+                  checked
+                  aria-label="Show Copy link"
+                />
+                <span class="st-toggle-track"
+                  ><span class="st-toggle-thumb"></span
+                ></span>
+              </label>
             </div>
           </section>
 
@@ -231,6 +269,21 @@
 
     <div data-component="layout/toast"></div>
     <div data-component="layout/modal"></div>
+
+    <script>
+  document
+    .querySelector('[data-settings-toggle-pref="student-portal-enabled"]')
+    .addEventListener("change", async (e) => {
+      const on = e.target.checked;
+      document.querySelector('[data-settings-toggle-pref="show-assessment-scores"]').checked = on;
+      document.querySelector('[data-settings-toggle-pref="show-copy-link"]').checked = on;
+      try {
+        await API.updateSettings({ "show-assessment-scores": on, "show-copy-link": on });
+      } catch (error) {
+        console.error("Unable to sync toggles", error);
+      }
+    });
+</script>
 
     <script src="../../assets/js/config.js"></script>
     <script src="../../assets/js/core/utils.js"></script>

@@ -106,7 +106,27 @@ class LearnerRecordsHub {
     }
   }
 
+  static async applyFeatureToggles() {
+    try {
+      const settings = await API.getSettings();
+      const prefs = settings.preferences || {};
+
+      if (prefs["show-assessment-scores"] === false) {
+        const btn = document.querySelector("[data-assessment-scores-link]");
+        if (btn) btn.style.display = "none";
+      }
+
+      if (prefs["show-copy-link"] === false) {
+        const card = document.querySelector("[data-class-portal-share-card]");
+        if (card) card.style.display = "none";
+      }
+    } catch (error) {
+      console.error("[LearnerRecordsHub] Unable to load feature toggles", error);
+    }
+  }
+
   static async loadClassContext() {
+    this.applyFeatureToggles();
     const params = new URLSearchParams(window.location.search);
     const classId = params.get("class");
     const clcName = params.get("clc");
