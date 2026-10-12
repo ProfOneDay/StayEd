@@ -401,49 +401,6 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) #riskChar
   background: var(--st-risk-high);
 }
 
-.st-meta-grid {
-  margin-top: auto;
-  background: #fff;
-  padding: 4px 14px;
-  border-radius: var(--st-radius-card);
-  border: 1px solid var(--st-line);
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.st-meta-grid-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 12px;
-  padding: 8px 0;
-}
-
-.st-meta-grid-item + .st-meta-grid-item {
-  border-top: 1px solid var(--st-line);
-}
-
-.st-meta-grid-item p {
-  margin: 0;
-}
-
-.st-meta-grid-item p:first-child {
-  font-size: var(--st-fs-sm); /* 13px */
-  color: var(--st-ink-muted);
-}
-
-.st-meta-grid-item p:last-child {
-  font-size: var(--st-fs-base); /* 13.5px */
-  font-weight: 600;
-  color: var(--st-on-surface);
-  text-align: right;
-}
-
-.st-meta-grid-item .is-teal {
-  color: var(--st-secondary);
-}
-
 /* ---------- Recent high-risk (attention list) -- dynamically injected by
    dashboard.js only, so these classes are dashboard-exclusive. ---------- */
 

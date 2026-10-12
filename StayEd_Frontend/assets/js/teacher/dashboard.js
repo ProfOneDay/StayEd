@@ -390,10 +390,6 @@ class TeacherDashboard {
       ).join("");
     }
 
-    this.setText("[data-risk-coverage]", summary.coverage);
-    this.setText("[data-risk-model]", summary.model);
-    this.setText("[data-risk-confidence]", summary.confidence);
-
     const list = document.querySelector("[data-risk-insights]");
 
     if (list && Array.isArray(summary.insights)) {
