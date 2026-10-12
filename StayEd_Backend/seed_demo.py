@@ -184,21 +184,46 @@ def main():
                 )
                 enrollment_id = cur.fetchone()["enrollment_id"]
                 enrollment_ids.append((enrollment_id, first + " " + last, probability))
+                # sql/29_risk_assessment_history.sql dropped the unique
+                # constraint this used to ON CONFLICT against (so every
+                # prediction is kept as history). Look the demo row up by
+                # hand instead, so re-running the seed still doesn't
+                # duplicate it.
                 cur.execute(
                     """
-                    INSERT INTO risk_assessment (
-                        model_id, enrollment_id, monitoring_start_date, monitoring_end_date,
-                        data_sufficiency_status, risk_probability, generated_by_user_id
-                    ) VALUES (%s,%s,%s,%s,'PREDICTION_GENERATED',%s,%s)
-                    ON CONFLICT (model_id, enrollment_id, monitoring_start_date, monitoring_end_date)
-                    DO UPDATE SET data_sufficiency_status='PREDICTION_GENERATED',
-                                  risk_probability=EXCLUDED.risk_probability,
-                                  generated_by_user_id=EXCLUDED.generated_by_user_id
-                    RETURNING risk_assessment_id
+                    SELECT risk_assessment_id FROM risk_assessment
+                    WHERE model_id=%s AND enrollment_id=%s
+                      AND monitoring_start_date=%s AND monitoring_end_date=%s
+                    ORDER BY risk_assessment_id DESC
+                    LIMIT 1
                     """,
-                    (model_id, enrollment_id, monitoring_start, monitoring_end, probability, teacher_user_id),
+                    (model_id, enrollment_id, monitoring_start, monitoring_end),
                 )
-                risk_id = cur.fetchone()["risk_assessment_id"]
+                existing_risk = cur.fetchone()
+                if existing_risk:
+                    risk_id = existing_risk["risk_assessment_id"]
+                    cur.execute(
+                        """
+                        UPDATE risk_assessment
+                        SET data_sufficiency_status='PREDICTION_GENERATED',
+                            risk_probability=%s,
+                            generated_by_user_id=%s
+                        WHERE risk_assessment_id=%s
+                        """,
+                        (probability, teacher_user_id, risk_id),
+                    )
+                else:
+                    cur.execute(
+                        """
+                        INSERT INTO risk_assessment (
+                            model_id, enrollment_id, monitoring_start_date, monitoring_end_date,
+                            data_sufficiency_status, risk_probability, generated_by_user_id
+                        ) VALUES (%s,%s,%s,%s,'PREDICTION_GENERATED',%s,%s)
+                        RETURNING risk_assessment_id
+                        """,
+                        (model_id, enrollment_id, monitoring_start, monitoring_end, probability, teacher_user_id),
+                    )
+                    risk_id = cur.fetchone()["risk_assessment_id"]
 
                 attendance_factor = max(0.0, min(1.0, probability))
                 cur.execute(

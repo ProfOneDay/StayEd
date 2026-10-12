@@ -110,10 +110,8 @@ if [ "$HAS_USERS" != "t" ]; then
     echo "  applying $(basename "$f")"
     psql "$DATABASE_URL" -q -v ON_ERROR_STOP=1 -f "$f"
   done
-  FRESH_DB=1
 else
   echo "  database already has tables - skipped"
-  FRESH_DB=0
 fi
 
 say "Installing Python packages (takes a few minutes: pandas, xgboost, scikit-learn)"
@@ -121,14 +119,22 @@ sudo -u "$APP_USER" python3 -m venv "$BACKEND/.venv"
 sudo -u "$APP_USER" "$BACKEND/.venv/bin/pip" install --upgrade pip wheel
 sudo -u "$APP_USER" "$BACKEND/.venv/bin/pip" install -r "$BACKEND/requirements.txt"
 
-if [ ! -f "$BACKEND/models/stayed_xgb_v2.joblib" ]; then
-  say "Training the dropout-risk model"
-  (cd "$BACKEND" && sudo -u "$APP_USER" .venv/bin/python models/train_model.py)
-fi
-
-if [ "$FRESH_DB" = "1" ]; then
+# Seed only while no admin account exists yet (a fresh database, or a
+# previous run that stopped before the seed finished).
+SEEDED=0
+HAS_ADMIN="$(psql "$DATABASE_URL" -tAc "SELECT EXISTS (SELECT 1 FROM users WHERE role='ADMIN')")"
+if [ "$HAS_ADMIN" != "t" ]; then
   say "Seeding the admin account and demo data"
   (cd "$BACKEND" && sudo -u "$APP_USER" bash -c "set -a; . ./.env; set +a; .venv/bin/python seed_demo.py")
+  SEEDED=1
+fi
+
+# Train after seeding: seed_demo.py registers its own 'rf-v1-demo' entry as
+# ACTIVE, and training re-registers the real XGBoost model as the only
+# ACTIVE one.
+if [ ! -f "$BACKEND/models/stayed_xgb_v2.joblib" ] || [ "$SEEDED" = "1" ]; then
+  say "Training the dropout-risk model"
+  (cd "$BACKEND" && sudo -u "$APP_USER" .venv/bin/python models/train_model.py)
 fi
 
 say "Installing the backend service"
