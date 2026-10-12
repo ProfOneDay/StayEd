@@ -400,7 +400,7 @@ class AssessmentScores {
           <td class="${labelClass}">${this.esc(row.label)}</td>
           <td>${this.renderScoreInput(row.id, "pre", r.pre, row.preMax, row.preMax)}</td>
           <td>${this.renderScoreInput(row.id, "post", r.post, row.postMax, row.postMax)}</td>
-          <td class="st-assessment-result-cell" aria-hidden="true"></td>
+          <td class="st-assessment-result-cell" data-abl-computed-cell="${row.id}">${this.renderAblPercentage(row, r)}</td>
         </tr>
       `;
     }
@@ -449,6 +449,22 @@ class AssessmentScores {
       <div class="st-assessment-score-entry st-assessment-score-entry--overall" data-overall-score-wrap="${part}">
         <span class="st-assessment-readonly-score-box st-assessment-overall-value-box" data-overall-${part}>${value == null ? "" : this.esc(value)}</span>
         <span class="st-assessment-score-denominator">/ ${this.TOTAL_ASSESSMENT_MAX_SCORE}</span>
+      </div>
+    `;
+  }
+
+  static renderAblPercentage(row, rowData = {}) {
+    const postValue = this.validNumber(rowData.post, row.postMax);
+    if (postValue == null || !row.postMax) {
+      return `<span class="st-assessment-computed-empty">—</span>`;
+    }
+
+    const percentage = this.roundPercent((postValue / row.postMax) * 100);
+    const competency = this.competencyLabel(percentage);
+    return `
+      <div class="st-assessment-result">
+        <span class="st-assessment-result-pill is-competency">${percentage}%</span>
+        <span class="st-assessment-result-note">${this.esc(competency)}</span>
       </div>
     `;
   }
@@ -687,6 +703,12 @@ class AssessmentScores {
       if (groupKey) updateGroupPreview(groupKey);
     };
 
+    const updateAblPreview = (rowId) => {
+      const row = this.AF5_ROWS.find((item) => item.id === rowId && item.type === "abl");
+      const target = document.querySelector(`[data-abl-computed-cell="${rowId}"]`);
+      if (row && target) target.innerHTML = this.renderAblPercentage(row, this.readScoreRowFromDom(rowId));
+    };
+
     const updateOverallScores = () => {
       const preEl = document.querySelector("[data-overall-pre]");
       const postEl = document.querySelector("[data-overall-post]");
@@ -718,6 +740,7 @@ class AssessmentScores {
         const rowId = input.dataset.scoreField;
         const row = this.AF5_ROWS.find((item) => item.id === rowId);
         if (row?.type === "score") updateRowPreview(rowId);
+        if (row?.type === "abl") updateAblPreview(rowId);
         updateOverallScores();
         updateLikelihoodPreview();
         this.updateScoreValidity();
@@ -736,6 +759,7 @@ class AssessmentScores {
     });
 
     this.AF5_ROWS.filter((row) => row.id && row.type === "score").forEach((row) => updateRowPreview(row.id));
+    this.AF5_ROWS.filter((row) => row.id && row.type === "abl").forEach((row) => updateAblPreview(row.id));
     Object.keys(this.SUBJECT_GROUPS).forEach(updateGroupPreview);
     updateOverallScores();
     updatePortfolioPreview();
