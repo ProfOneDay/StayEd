@@ -798,9 +798,9 @@ class ModuleManagement {
 
     let actionHtml = "";
     if (stage === "Not Released") {
-      actionHtml = `<button type="button" class="st-btn st-btn-outline st-btn-xs" data-release-one="${r.enrollmentId}">Release</button>`;
+      actionHtml = `<button type="button" class="st-btn st-btn-outline st-btn-sm" data-release-one="${r.enrollmentId}">Release</button>`;
     } else if (stage === "Released") {
-      actionHtml = `<button type="button" class="st-btn st-btn-primary st-btn-xs" data-return-one="${r.enrollmentId}"><span class="material-symbols-outlined st-mm-return-icon">assignment_return</span>Mark as returned</button>`;
+      actionHtml = `<button type="button" class="st-btn st-btn-primary st-btn-sm" data-return-one="${r.enrollmentId}"><span class="material-symbols-outlined st-mm-return-icon">assignment_return</span>Mark as returned</button>`;
     } else if (stage === "Returned") {
       actionHtml = `<button type="button" class="st-btn-text" data-undo-return="${r.enrollmentId}"><span class="material-symbols-outlined st-mm-undo-icon">undo</span>Undo</button>`;
     }

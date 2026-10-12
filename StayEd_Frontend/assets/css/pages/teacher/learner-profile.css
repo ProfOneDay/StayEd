@@ -620,6 +620,17 @@ body[data-page="Learner Profile"] .st-overview-row {
   body[data-page="Learner Profile"] .st-overview-row {
     grid-template-columns: 1fr;
   }
+  /* The height cap below only exists to keep this card from stretching
+     its shorter sibling taller while they're side by side -- once the row
+     stacks them instead, there's nothing to match heights with, so let
+     this go back to its full natural height rather than scrolling
+     unnecessarily. */
+  body[data-page="Learner Profile"] .st-exam-readiness-card {
+    max-height: none;
+  }
+  body[data-page="Learner Profile"] .st-exam-readiness-body {
+    overflow-y: visible;
+  }
 }
 
 body[data-page="Learner Profile"] .st-performance-progress-head {
@@ -803,13 +814,33 @@ body[data-page="Learner Profile"] .st-performance-progress-empty {
   }
 }
 
-/* A&E exam passing chance */
+/* A&E exam passing chance -- capped to roughly match
+   .st-performance-progress-card's own height instead of being the taller
+   of the two and stretching its shorter sibling up to match via the row's
+   default grid stretch. 440px (a bit taller than that card's own content
+   actually needs) rather than a tight pixel-for-pixel match -- leaves some
+   empty space under that card's chart, but gives this one's readiness
+   score/factors real breathing room instead of scrolling almost
+   immediately. The head/note stay fully visible; only the body (readiness
+   score + contributing factors, the part that grows with real data) gets
+   its own internal scroll within what's left of that capped height. */
+body[data-page="Learner Profile"] .st-exam-readiness-card {
+  display: flex;
+  flex-direction: column;
+  max-height: 440px;
+  /* Grid items have an implicit min-height:auto floor sized to their own
+     content, which would otherwise keep this card at its full natural
+     height despite max-height -- same quirk as several other grid/flex
+     sizing fixes across this app. */
+  min-height: 0;
+}
 body[data-page="Learner Profile"] .st-exam-readiness-head {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
   flex-wrap: wrap;
+  flex-shrink: 0;
   margin-bottom: 14px;
 }
 body[data-page="Learner Profile"] .st-exam-readiness-title-wrap {
@@ -847,6 +878,9 @@ body[data-page="Learner Profile"] .st-exam-readiness-body {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 body[data-page="Learner Profile"] .st-exam-readiness-score-label {
   margin: 0;
@@ -941,6 +975,7 @@ body[data-page="Learner Profile"] .st-exam-readiness-factor-detail {
 }
 body[data-page="Learner Profile"] .st-exam-readiness-note {
   display: flex;
+  flex-shrink: 0;
   gap: 6px;
   margin: 16px 0 0;
   padding-top: 12px;
@@ -1226,6 +1261,15 @@ body[data-page="Learner Profile"] .st-risk-trend-list {
   border: 1px solid var(--st-line);
   border-radius: var(--st-radius-card);
   padding: 2px 14px;
+  /* Capped to .st-risk-trend-chart's own fixed 200px height -- without
+     this, a run with several recorded assessments grows taller than the
+     chart and the whole card grows to fit it (align-items:start on
+     .st-risk-trend-body stops it from being stretched, but doesn't stop
+     its natural height from still driving the row/card's own height).
+     Scrolls internally instead once there's more than fits in that
+     space. */
+  max-height: 200px;
+  overflow-y: auto;
 }
 body[data-page="Learner Profile"] .st-risk-trend-list-row {
   display: flex;
@@ -1259,6 +1303,13 @@ body[data-page="Learner Profile"] .st-risk-trend-empty {
 @media (max-width: 1023px) {
   body[data-page="Learner Profile"] .st-risk-trend-body {
     grid-template-columns: 1fr;
+  }
+  /* The cap only exists to keep the list from growing the card taller
+     than the chart beside it -- once they stack instead, there's nothing
+     left to match, so let it take its full natural height. */
+  body[data-page="Learner Profile"] .st-risk-trend-list {
+    max-height: none;
+    overflow-y: visible;
   }
 }
 

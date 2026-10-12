@@ -1744,7 +1744,10 @@ body[data-page="Assessment Scores"] .st-badge-info {
   margin: 0 0 var(--st-space-4);
   color: var(--st-on-surface);
   font-family: var(--st-font-heading);
-  font-size: var(--st-font-size-label);
+  /* Was --st-font-size-label (14px, an older/separate token family this
+     card never got migrated off of) -- the standard kicker/label size
+     used everywhere else in the app is --st-fs-sm (13px). */
+  font-size: var(--st-fs-sm);
   font-weight: var(--st-font-weight-semibold);
   line-height: var(--st-line-height-heading);
 }
@@ -1754,7 +1757,10 @@ body[data-page="Assessment Scores"] .st-badge-info {
   margin: 0;
   color: var(--st-primary);
   font-family: var(--st-font-heading);
-  font-size: var(--st-font-size-display);
+  /* Was --st-font-size-display (34px) -- bigger than the standard "big
+     stat" size used elsewhere for a comparable headline number
+     (--st-fs-3xl, 30px, e.g. a regular metric-card value). */
+  font-size: var(--st-fs-3xl);
   font-weight: var(--st-font-weight-bold);
   line-height: var(--st-line-height-display);
   letter-spacing: -0.02em;
@@ -1762,7 +1768,11 @@ body[data-page="Assessment Scores"] .st-badge-info {
 
 .st-assessment-likelihood-summary strong[data-overall-likelihood-preview][data-level="neutral"] {
   color: var(--st-on-surface-variant);
-  font-size: var(--st-font-size-body-lg);
+  /* Was --st-font-size-body-lg (20px) -- this is a short status message
+     ("Waiting for post-test scores"), not an actual number, so it reads
+     better a step down from the real result's size instead of nearly as
+     large. */
+  font-size: var(--st-fs-lg);
   letter-spacing: 0;
 }
 
@@ -1775,7 +1785,10 @@ body[data-page="Assessment Scores"] .st-badge-info {
   border-left: 1px solid var(--st-outline-variant);
   color: var(--st-on-surface-variant);
   font-family: var(--st-font-body);
-  font-size: var(--st-font-size-small);
+  /* Was --st-font-size-small (16px) -- standard secondary/description
+     text elsewhere in the app is --st-fs-sm (13px); at 16px this long
+     paragraph read noticeably larger than any other card's body copy. */
+  font-size: var(--st-fs-sm);
   font-weight: var(--st-font-weight-regular);
   line-height: var(--st-line-height-body);
   overflow-wrap: normal;
@@ -1789,7 +1802,13 @@ body[data-page="Assessment Scores"] .st-badge-info {
 
 @media (max-width: 1023px) {
   .st-assessment-likelihood-summary {
-    grid-template-columns: 1fr;
+    /* Plain 1fr still carries an implicit auto minimum sized to its
+       content (same grid quirk as .st-landing-hero-stage elsewhere in
+       this app) -- with a long note paragraph as that content, the track
+       refused to shrink below its min-content width, pushing the whole
+       card wider than the viewport instead of letting the text wrap down
+       to fit it. minmax(0, 1fr) removes that floor. */
+    grid-template-columns: minmax(0, 1fr);
     margin: var(--st-space-12);
   }
 
@@ -1817,10 +1836,10 @@ body[data-page="Assessment Scores"] .st-badge-info {
   }
 
   .st-assessment-likelihood-summary strong[data-overall-likelihood-preview] {
-    font-size: var(--st-font-size-title);
+    font-size: var(--st-fs-2xl);
   }
 
   .st-assessment-likelihood-note {
-    font-size: var(--st-font-size-label);
+    font-size: var(--st-fs-xs);
   }
 }

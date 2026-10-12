@@ -1045,7 +1045,7 @@ class LearnerProfilePage {
                     ` : ""}
                     <div class="st-intervention-card-footer">
                         <span class="st-intervention-action-hint"><span class="material-symbols-outlined">bolt</span>Action: ${r.action}</span>
-                        <button type="button" class="st-btn st-btn-primary st-btn-xs" data-assign-recommendation="${r.rank}">Select</button>
+                        <button type="button" class="st-btn st-btn-primary st-btn-sm" data-assign-recommendation="${r.rank}">Select</button>
                     </div>
                 </div>
             `;
@@ -1103,9 +1103,9 @@ class LearnerProfilePage {
               ` : ""}
             </div>
             <div class="st-active-actions">
-              <button type="button" class="st-btn st-btn-outline st-btn-xs" data-update-status>Update status</button>
-              <button type="button" class="st-btn st-btn-primary st-btn-xs" data-add-outcome>Add outcome</button>
-              ${a.canSaveToHistory ? `<button type="button" class="st-btn st-btn-outline st-btn-xs" data-save-to-history>Save to history</button>` : ""}
+              <button type="button" class="st-btn st-btn-outline st-btn-sm" data-update-status>Update status</button>
+              <button type="button" class="st-btn st-btn-primary st-btn-sm" data-add-outcome>Add outcome</button>
+              ${a.canSaveToHistory ? `<button type="button" class="st-btn st-btn-outline st-btn-sm" data-save-to-history>Save to history</button>` : ""}
             </div>
           </div>
         `).join("");
@@ -1150,8 +1150,8 @@ class LearnerProfilePage {
                     <td data-col="det">${h.remarks}</td>
                     <td class="is-right">
                         <div class="st-row-actions">
-                            <button type="button" class="st-btn st-btn-outline st-btn-xs" data-edit-history="${h.id}">Edit</button>
-                            <button type="button" class="st-btn st-btn-outline st-btn-xs st-btn-danger-outline" data-delete-history="${h.id}">Delete</button>
+                            <button type="button" class="st-btn st-btn-outline st-btn-sm" data-edit-history="${h.id}">Edit</button>
+                            <button type="button" class="st-btn st-btn-outline st-btn-sm st-btn-danger-outline" data-delete-history="${h.id}">Delete</button>
                         </div>
                     </td>
                 </tr>

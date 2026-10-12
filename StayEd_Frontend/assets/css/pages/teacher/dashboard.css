@@ -754,7 +754,12 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
   .st-hbar-label { font-size: var(--st-fs-sm); }
   .chart-canvas-wrap { height: 230px; }
   body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-registry-head { padding: 16px; }
-  body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-registry-tools { width: 100%; }
+  /* Base .st-registry-tools is flex-wrap:nowrap (fine on desktop, where
+     .st-search has a fixed 260px width) -- at this width .st-search below
+     grows to 100% instead, leaving no room on the same row for "View full
+     registry" beside it, which pushed the button off the edge instead of
+     wrapping under the search field. */
+  body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-registry-tools { width: 100%; flex-wrap: wrap; }
   body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-search { width: 100%; }
   body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-registry-tools .st-btn { flex: 1; }
   /* Table becomes stacked cards */

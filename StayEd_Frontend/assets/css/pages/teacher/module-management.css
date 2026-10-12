@@ -823,6 +823,15 @@ body[data-page="Manage Modules"] [data-animate-rows].is-inview tr {
     grid-column: 1;
     grid-row: 1;
   }
+  /* The generic .st-mm-table td[data-col="learner"] rule above (written
+     for the catalog table, which has no checkbox column) puts the learner
+     cell at grid-column:1/-2 -- on this table that overlaps the checkbox,
+     which also starts at column 1, rendering its checkmark on top of the
+     avatar instead of beside it. Starts one column later here instead. */
+  body[data-page="Manage Modules"] .st-mm-table--detail td[data-col="learner"] {
+    grid-column: 2/-2;
+    grid-row: 1;
+  }
   body[data-page="Manage Modules"] .st-mm-table--detail td[data-col="modality"] {
     grid-column: 1/-2;
     order: 1;

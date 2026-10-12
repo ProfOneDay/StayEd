@@ -8,18 +8,33 @@
 
 html {
   scroll-behavior: smooth;
-  /* No scrollbar-gutter:stable -- every list page is paginated to a fixed
-     row count, so its height (and whether it needs a scrollbar at all)
-     doesn't change once its loading skeleton's row count matches that
-     page size (see e.g. Student Registry's showSkeleton()) -- there's no
-     threshold left to cross mid-load, so nothing to reserve a gutter
-     against. Reserving one anyway would just narrow every paginated page
-     for no benefit, the same cost this was originally removed to avoid. */
+  /* No scrollbar-gutter:stable anywhere -- reserving it was itself
+     visible as a jump/shift (the page narrows by the gutter's width
+     the instant it's reserved), which defeated the point of chasing
+     down the skeleton/real-row height mismatches in
+     components/table.css and each page's showSkeleton(). Those fixes
+     close the height gap directly instead, so there's nothing left
+     that needs a reserved gutter to paper over. */
   /* Firefox equivalent of the ::-webkit-scrollbar-* rules below -- both
      are inherited properties, so setting them once here covers every
      scrollable descendant in the app. */
   scrollbar-width: thin;
   scrollbar-color: var(--st-scrollbar-thumb) transparent;
+}
+
+/* Hides the page-level scrollbar entirely on the logged-in app shell
+   (every teacher/admin page carries body.st-app) -- chasing down every
+   skeleton/real-row height mismatch that could make it toggle during load
+   (components/table.css, each page's showSkeleton()) still left enough
+   natural variance in real data (wrapped text, a risk-meter bar on some
+   rows and not others, ...) that it kept appearing anyway. Scroll still
+   works via wheel/keyboard/touch -- only the visible track/thumb is gone,
+   so there's nothing left to flicker in and out during a reload. */
+html:has(body.st-app) {
+  scrollbar-width: none;
+}
+html:has(body.st-app)::-webkit-scrollbar {
+  display: none;
 }
 
 body {
@@ -620,14 +635,6 @@ body {
 
   height: var(--st-navbar-height);
 
-  background: rgba(255, 255, 255, 0.94);
-
-  backdrop-filter: blur(8px);
-
-  -webkit-backdrop-filter: blur(8px);
-
-  border-bottom: 1px solid var(--st-line);
-
   display: flex;
 
   justify-content: space-between;
@@ -639,6 +646,24 @@ body {
   padding: 0 var(--st-margin-desktop);
 
   z-index: var(--st-z-navbar);
+}
+
+/* backdrop-filter and position:sticky on the same element is a known
+   WebKit/Safari combination that can silently stop the element from
+   sticking at all (the filter forces its own compositing layer in a way
+   that conflicts with sticky's). Moved the blur/background/border onto a
+   ::before layer behind the actual content instead -- .st-navbar itself
+   (the thing that's actually sticky) now carries no filter of its own,
+   which keeps sticky working reliably everywhere. */
+.st-navbar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--st-line);
 }
 
 .st-navbar-left {
@@ -1140,9 +1165,18 @@ body {
 @media (max-width: 767px) {
   .st-navbar { height: 56px; padding: 0 12px; }
   .st-navbar-left { gap: 8px; }
-  .st-breadcrumb { font-size: var(--st-fs-md); /* 17px */ min-width: 0; }
-  .st-breadcrumb > span:not(.active),
-  .st-breadcrumb > .st-breadcrumb-icon { display: none; }
+  .st-navbar-right { gap: 0; }
+  /* Full trail (both crumbs + the chevron between them) stays, just
+     smaller and allowed to shrink/ellipsis if it's ever too long for a
+     56px bar -- it used to drop to the active crumb alone here, which
+     also silently removed the chevron since there was nothing left to
+     separate. */
+  .st-breadcrumb { font-size: var(--st-fs-sm); /* 13px */ min-width: 0; flex-wrap: nowrap; }
+  .st-breadcrumb span:not(.active) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   .st-breadcrumb .active {
     display: inline-flex;
     align-items: center;
@@ -1152,11 +1186,11 @@ body {
     color: inherit;
     font-weight: inherit;
   }
-  /* Keep the bell and avatar; drop the name/role, settings and divider so
-     a 56px bar has room for what's actually tappable at this width. */
+  /* Settings now stays too (was dropped along with name/role and the
+     divider to save space at this width) -- still drop those three,
+     they're either redundant with the avatar or purely decorative. */
   .st-user-details,
-  .st-navbar-divider,
-  [data-st-settings] { display: none; }
+  .st-navbar-divider { display: none; }
 }
 
 /* ============================================================
