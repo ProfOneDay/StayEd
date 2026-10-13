@@ -205,10 +205,20 @@ cd /opt/stayed/StayEd_Backend && sudo -u stayed .venv/bin/python models/train_mo
 ```
 This retrains from `models/data/stayed_modeling_dataset_demo.csv` and registers it as the ACTIVE `model_info` row. Deploy-time metrics: Accuracy 0.736, Precision 0.796, Recall 0.755, F1 0.775, ROC-AUC 0.812.
 
+### 6.7 Super admin flags (needed after any fresh deploy / reseed)
+`sql/36_admin_permissions.sql` adds `is_super_admin`, `can_manage_clcs`, `can_manage_users`, `admin_title` to `users` (all default `FALSE`) and promotes the admins that **already exist** when it runs, **once** (tracked in `data_seed_log`, key `existing_admins_full_permissions_backfill`). On a fresh server all SQL runs *before* `seed_demo.py`, so nothing is promoted, and the seeded `admin@stayed.com` ends up with every flag `f`. Symptom: after logging in as `admin@stayed.com`, the super-admin features (assigning admin permissions/titles) are missing.
+
+Fix (server, back up first; done on Oct 13, 2026):
+```bash
+sudo -u postgres pg_dump stayed_db | gzip > /root/stayed_before_superadmin_$(date +%F).sql.gz
+sudo -u postgres psql stayed_db -c "UPDATE users SET is_super_admin=TRUE, can_manage_clcs=TRUE, can_manage_users=TRUE, admin_title=COALESCE(admin_title,'Supervisor') WHERE email='admin@stayed.com' AND role='ADMIN';"
+```
+Expect `UPDATE 1`. The flags live in the JWT, so the admin must **log out and log in again** for the change to show. Check with: `sudo -u postgres psql stayed_db -c "SELECT email, is_super_admin, can_manage_clcs, can_manage_users, admin_title FROM users WHERE role='ADMIN';"`
+
 ---
 
 ## 7. Accounts & credentials (no secrets stored here)
-- Seeded by `seed_demo.py`: **`admin@stayed.com`** and **`teacher@stayed.com`**, both with password **`12345678`**. This password is public (the repo is public). ⚠️ **Change both right away, or deactivate the demo teacher.** `seed_fill_gaps.py` (not run on the server) would add more demo admins.
+- Seeded by `seed_demo.py`: **`admin@stayed.com`** and **`teacher@stayed.com`**, both with password **`12345678`**. This password is public (the repo is public). ⚠️ **Change both right away, or deactivate the demo teacher.** `seed_fill_gaps.py` (not run on the server) would add more demo admins. `seed_demo.py` creates `admin@stayed.com` with **no** super-admin flags; on the live server it was promoted manually on Oct 13, 2026 (see §6.7).
 - Vultr root password: in the Vultr dashboard (Overview → Password).
 - Production secrets: only in `/opt/stayed/StayEd_Backend/.env` on the server.
 - OpenAI key: same key as in King's local `StayEd_Backend/.env`.
@@ -226,6 +236,7 @@ This retrains from `models/data/stayed_modeling_dataset_demo.csv` and registers 
 7. *(Optional hardening)* SSH keys instead of the root password, then disable password login; install `fail2ban`.
 8. **`config.js`** still has `MODE: "development"` and `DEBUG: true` (cosmetic/logging only; the API URL logic is already production-safe).
 9. **Local repo housekeeping:** `seed_demo.py` has CRLF line endings (fine). Git warns "LF will be replaced by CRLF" on Windows, which is harmless; the server checkout uses LF.
+10. ✅ **DONE (Oct 13, 2026):** promoted `admin@stayed.com` to super admin on the live DB (§6.7). **Optional code fix:** make `seed_demo.py` (or `setup_server.sh`) set the super-admin flags for the seeded admin, so a future fresh deploy doesn't need the manual `UPDATE`. This is a code change, so discuss and test before pushing.
 
 ---
 
