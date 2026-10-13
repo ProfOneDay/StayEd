@@ -62,6 +62,8 @@ The frontend and API share one origin, so CORS isn't involved in production.
 | Postgres | Local install, DB `stayed_db`, role `stayed` (random password, stored only in `.env`) |
 | Firewall | `ufw`: OpenSSH + Nginx Full only |
 | Swap | 2 GB `/swapfile` |
+| `/etc/cron.daily/stayed-backup` | Daily DB backup script (see §6.4); not in git, lives only on the server |
+| `/root/backups` | Daily `stayed_YYYY-MM-DD.sql.gz` dumps, last 14 days kept |
 
 ### Production `.env` keys (values intentionally omitted)
 `FLASK_ENV=production`, `FLASK_DEBUG=0`, `SECRET_KEY`, `JWT_SECRET_KEY` (both **rotated** after deploy), `DATABASE_URL` (local Postgres), `FRONTEND_ORIGINS=https://stay-ed.site,https://www.stay-ed.site`, `TRUSTED_PROXY_COUNT=1`, `AUTO_PROVISION_DB=0`, `MODEL_COMMAND='"/opt/stayed/StayEd_Backend/.venv/bin/python" "/opt/stayed/StayEd_Backend/models/predict_bridge.py"'`, `STAYED_RISK_CLASS=NotCompleted`, `OPENAI_API_KEY` (**set**), `OPENAI_MODEL=gpt-4o-mini`, `SMTP_*` (**blank**).
@@ -174,8 +176,15 @@ If `requirements.txt` changed: `sudo -u stayed /opt/stayed/StayEd_Backend/.venv/
 - Write migrations to be idempotent (`IF NOT EXISTS`, `DROP ... IF EXISTS`), like the existing ones.
 - Locally, `app/db_bootstrap.py` (Docker-based) re-applies all non-00 SQL files on each start. That's why migrations must be idempotent. On the server, `AUTO_PROVISION_DB=0` disables it.
 
-### 6.4 Backups (none automatic: Vultr backups are OFF)
-Manual dump:
+### 6.4 Backups
+**Automatic (set up Oct 13, 2026):** `/etc/cron.daily/stayed-backup` runs once a day (cron.daily) and writes `/root/backups/stayed_YYYY-MM-DD.sql.gz` (folder is `chmod 700`). It writes to a temp file first and renames it only when the dump finishes, and it deletes backups older than **14 days**. Check with:
+```bash
+ls -lh /root/backups
+run-parts --test /etc/cron.daily | grep stayed
+```
+⚠️ These backups live on the **same server**, so they do not protect against losing the server itself. Vultr Auto Backups are still **OFF**. Before demos/defense, also download a copy to the laptop (command below).
+
+Manual dump (also use this right before migrations):
 ```bash
 sudo -u postgres pg_dump stayed_db | gzip > /root/stayed_$(date +%F).sql.gz
 ```
@@ -210,9 +219,9 @@ This retrains from `models/data/stayed_modeling_dataset_demo.csv` and registers 
 
 1. ✅ **DONE (Oct 13, commit `ae2cdc8`):** the HTTPS-safe `deploy/setup_server.sh` is pushed. Remaining: make sure the server's `/root/stayed-repo` has pulled it (`grep -c letsencrypt /root/stayed-repo/deploy/setup_server.sh` should be ≥1).
 2. **Change the demo account passwords** (`12345678`) for admin and teacher.
-3. **Verify the Namecheap contact email** (the yellow ALERT on the domain page). If it isn't verified within ~15 days of Oct 12 2026, the domain gets suspended.
+3. ✅ **DONE (Oct 13, 2026):** Namecheap registrant email verified (Namecheap said the site would (re)activate within 24-48 hours). Confirm the yellow ALERT is gone and the site still loads.
 4. **Configure Brevo SMTP** (`SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM_EMAIL` in `.env`; the sender must be verified in Brevo). Without it, approval and password-reset emails are silently skipped. For deliverability, add Brevo's DNS records (SPF/DKIM) in Namecheap Advanced DNS. Note: there's currently a Namecheap email-forwarding SPF TXT record on `@`; merge rather than duplicate SPF.
-5. **Automate DB backups:** add a daily `pg_dump` cron with rotation (e.g. `/etc/cron.daily/stayed-backup`), and/or enable Vultr Auto Backups (+$2/mo).
+5. ✅ **DONE (Oct 13, 2026):** daily `pg_dump` cron with 14-day rotation (see §6.4). **Still open:** the backups are on the same server, so keep an off-server copy (download to laptop before demos/defense) and/or enable Vultr Auto Backups (+$2/mo).
 6. *(Optional)* Rotate the Postgres role password. It appeared in a screenshot, but Postgres only listens on localhost, so the risk is low. If rotated: `ALTER ROLE stayed PASSWORD '...'`, update `DATABASE_URL` in `.env`, then restart.
 7. *(Optional hardening)* SSH keys instead of the root password, then disable password login; install `fail2ban`.
 8. **`config.js`** still has `MODE: "development"` and `DEBUG: true` (cosmetic/logging only; the API URL logic is already production-safe).
