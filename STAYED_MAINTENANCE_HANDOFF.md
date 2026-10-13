@@ -188,7 +188,13 @@ Manual dump (also use this right before migrations):
 ```bash
 sudo -u postgres pg_dump stayed_db | gzip > /root/stayed_$(date +%F).sql.gz
 ```
-Download it to the laptop (PowerShell): `scp root@45.76.183.119:/root/stayed_2026-10-13.sql.gz .`
+**Off-server copy (laptop, PowerShell).** Backups contain student data and this repo is public, so download them to a folder **outside the repo**, never inside `StayEd\`:
+```powershell
+New-Item -ItemType Directory -Force "$HOME\StayEd-backups"
+scp "root@45.76.183.119:/root/backups/*.sql.gz" "$HOME\StayEd-backups\"
+Get-ChildItem "$HOME\StayEd-backups"
+```
+The first off-server copy was made on Oct 13, 2026 (`stayed_2026-10-13.sql.gz`, ~17 KB, in `C:\Users\Admin\StayEd-backups`). The root password is asked each time (it's in the Vultr dashboard). Repeat before demos/defense and after big changes. Files made by hand (e.g. `/root/stayed_before_superadmin_*.sql.gz`) are in `/root/`, not `/root/backups/`, so fetch those by their exact path.
 Restore (destructive): `gunzip -c file.sql.gz | sudo -u postgres psql stayed_db`
 **Always back up before applying migrations or before demos/defense.**
 
@@ -231,7 +237,7 @@ Expect `UPDATE 1`. The flags live in the JWT, so the admin must **log out and lo
 2. **Change the demo account passwords** (`12345678`) for admin and teacher.
 3. ✅ **DONE (Oct 13, 2026):** Namecheap registrant email verified (Namecheap said the site would (re)activate within 24-48 hours). Confirm the yellow ALERT is gone and the site still loads.
 4. **Configure Brevo SMTP** (`SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM_EMAIL` in `.env`; the sender must be verified in Brevo). Without it, approval and password-reset emails are silently skipped. For deliverability, add Brevo's DNS records (SPF/DKIM) in Namecheap Advanced DNS. Note: there's currently a Namecheap email-forwarding SPF TXT record on `@`; merge rather than duplicate SPF.
-5. ✅ **DONE (Oct 13, 2026):** daily `pg_dump` cron with 14-day rotation (see §6.4). **Still open:** the backups are on the same server, so keep an off-server copy (download to laptop before demos/defense) and/or enable Vultr Auto Backups (+$2/mo).
+5. ✅ **DONE (Oct 13, 2026):** daily `pg_dump` cron with 14-day rotation (see §6.4). A manual off-server copy to the laptop was made Oct 13 (see §6.4); repeat it regularly and before demos/defense. **Still open (optional):** make the off-server copy automatic, e.g. Vultr Auto Backups (+$2/mo).
 6. *(Optional)* Rotate the Postgres role password. It appeared in a screenshot, but Postgres only listens on localhost, so the risk is low. If rotated: `ALTER ROLE stayed PASSWORD '...'`, update `DATABASE_URL` in `.env`, then restart.
 7. *(Optional hardening)* SSH keys instead of the root password, then disable password login; install `fail2ban`.
 8. **`config.js`** still has `MODE: "development"` and `DEBUG: true` (cosmetic/logging only; the API URL logic is already production-safe).
