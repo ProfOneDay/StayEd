@@ -150,6 +150,15 @@ rm -f /etc/nginx/sites-enabled/default
 nginx -t
 systemctl reload nginx
 
+# The template above is HTTP-only. If an HTTPS certificate was already issued
+# for this domain (certbot, see the end of this script), re-attach it so that
+# re-running this script for an update never turns HTTPS off.
+if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
+  say "Re-attaching the existing HTTPS certificate"
+  certbot --nginx --cert-name "$DOMAIN" -d "$DOMAIN" -d "www.$DOMAIN" \
+    --redirect --reinstall --non-interactive
+fi
+
 say "Firewall: allow SSH, HTTP, HTTPS only"
 ufw allow OpenSSH
 ufw allow 'Nginx Full'
