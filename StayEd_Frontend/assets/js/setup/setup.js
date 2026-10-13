@@ -75,7 +75,13 @@ class SetupWizard {
       backBtn.addEventListener(
         "click",
 
-        () => {
+        async () => {
+          // The login page sends signed-in users straight back to the wizard
+          // (landing.js), so sign out first; otherwise "Back to Login" loops.
+          if (window.Auth && typeof Auth.logout === "function") {
+            await Auth.logout();
+            return;
+          }
           Router.go("/login");
         },
       );
