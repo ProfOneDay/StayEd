@@ -1,0 +1,234 @@
+# StayEd: Deployment & Maintenance Handoff
+
+> **For the AI assistant reading this:** you're helping King (student, capstone group) maintain and patch **StayEd**, which is already deployed and live. Read this whole file before suggesting changes. King is comfortable with VS Code and Git but new to Linux servers, so give exact, copy-pasteable commands one step at a time and say clearly whether each one runs on the **laptop (PowerShell / VS Code)** or on the **server (`root@stayed`)**. Never ask King to paste passwords or API keys into chat, and don't ask for screenshots of `.env`.
+
+*Last updated: Oct 13, 2026 (deployment completed Oct 13, 2026 ~01:50 PHT)*
+
+---
+
+## 1. What StayEd is
+
+An early dropout-risk monitoring system for ALS (Alternative Learning System) learners. Users: Admin, Teacher (and a public student-portal lookup).
+
+| Layer | Tech |
+|---|---|
+| Frontend | Static HTML / CSS / vanilla JS (`StayEd_Frontend/`) with no build step |
+| Backend | Python **Flask** API (`StayEd_Backend/`), all routes under `/api/*`, JWT auth |
+| Database | **PostgreSQL 16** |
+| ML | **XGBoost** dropout-risk classifier (`models/train_model.py` → `models/stayed_xgb_v2.joblib`), called through `models/predict_bridge.py` via the `MODEL_COMMAND` env var |
+| AI | OpenAI (`gpt-4o-mini`) for intervention recommendations (`app/services/ai_intervention_service.py`) |
+| Email | Brevo SMTP (**not configured yet**, so emails are skipped) |
+
+- **Repo:** https://github.com/ProfOneDay/StayEd (public, branch `main`)
+- **King's local repo folder:** `C:\Users\Admin\Desktop\STAYED FOLDER CAPSTONE DONT DELETE\StayEd`
+
+---
+
+## 2. Live environment
+
+| Item | Value |
+|---|---|
+| Live URL | **https://stay-ed.site** (also `https://www.stay-ed.site`) |
+| Host | **Vultr** Cloud Compute, Regular Performance `vc2-1c-2gb` (1 vCPU, 2 GB RAM, 55 GB SSD), Singapore, **$10/mo**, Auto Backups **OFF** |
+| Server IP | `45.76.183.119` (hostname `stayed`) |
+| OS | **Ubuntu 24.04 LTS**. ⚠️ Do **not** run `do-release-upgrade` (the login banner suggests 26.04) |
+| Login | `ssh -o ServerAliveInterval=30 root@45.76.183.119` (root password is in the Vultr dashboard; King has it) |
+| Domain | `stay-ed.site` on **Namecheap**, registered Oct 12 2026 → **expires Oct 12 2027**, **auto-renew OFF**, WithheldForPrivacy ON |
+| DNS (Namecheap → Advanced DNS) | `A @ → 45.76.183.119`, `A www → 45.76.183.119` (the default parking CNAME/redirect were removed) |
+| HTTPS | Let's Encrypt via certbot (nginx plugin), issued Oct 12 2026, expires Jan 10 2027, **auto-renews** (systemd timer) |
+
+### How requests flow
+
+```
+Browser ──HTTPS──▶ nginx (:443, :80 redirects to 443)
+                     ├── /        → static files from /opt/stayed/StayEd_Frontend
+                     └── /api/... → gunicorn (Flask) on 127.0.0.1:8000 → PostgreSQL 127.0.0.1:5432 (stayed_db)
+```
+The frontend and API share one origin, so CORS isn't involved in production.
+
+### Server layout
+
+| Path / thing | Purpose |
+|---|---|
+| `/root/stayed-repo` | `git clone` of the GitHub repo, the **source** for updates |
+| `/opt/stayed/StayEd_Backend` | Running backend (rsync'd from the repo by the setup script) |
+| `/opt/stayed/StayEd_Frontend` | Served by nginx |
+| `/opt/stayed/StayEd_Backend/.env` | **Production secrets** (chmod 600). Never commit it, never print it |
+| `/opt/stayed/StayEd_Backend/.venv` | Python virtualenv (Python 3.12) |
+| `/opt/stayed/StayEd_Backend/models/stayed_xgb_v2.joblib` | Trained model (generated on the server, not in git) |
+| Linux user `stayed` | Runs the app (system user, no login) |
+| systemd unit `stayed` | `/etc/systemd/system/stayed.service`: gunicorn `run:app`, 2 workers, bind `127.0.0.1:8000`, timeout 120 s, auto-restart |
+| nginx site | `/etc/nginx/sites-available/stayed` (certbot added the 443 block) |
+| Postgres | Local install, DB `stayed_db`, role `stayed` (random password, stored only in `.env`) |
+| Firewall | `ufw`: OpenSSH + Nginx Full only |
+| Swap | 2 GB `/swapfile` |
+
+### Production `.env` keys (values intentionally omitted)
+`FLASK_ENV=production`, `FLASK_DEBUG=0`, `SECRET_KEY`, `JWT_SECRET_KEY` (both **rotated** after deploy), `DATABASE_URL` (local Postgres), `FRONTEND_ORIGINS=https://stay-ed.site,https://www.stay-ed.site`, `TRUSTED_PROXY_COUNT=1`, `AUTO_PROVISION_DB=0`, `MODEL_COMMAND='"/opt/stayed/StayEd_Backend/.venv/bin/python" "/opt/stayed/StayEd_Backend/models/predict_bridge.py"'`, `STAYED_RISK_CLASS=NotCompleted`, `OPENAI_API_KEY` (**set**), `OPENAI_MODEL=gpt-4o-mini`, `SMTP_*` (**blank**).
+
+---
+
+## 3. Changes made to the codebase for deployment
+
+| Commit | Files | What / why |
+|---|---|---|
+| `a99ddb3` *Add Vultr deployment setup* | `deploy/setup_server.sh`, `deploy/stayed.service`, `deploy/nginx-stayed.conf`, `deploy/DEPLOY_VULTR.md` | New deployment tooling (see §4) |
+| same | `StayEd_Frontend/assets/js/config.js` | `API_URL` was hard-coded to `http://127.0.0.1:5000/api`. It now uses that on `localhost`/`127.0.0.1` and **`/api` (relative)** everywhere else, so local dev still works unchanged |
+| same | `StayEd_Backend/requirements.txt` | Added `gunicorn>=23,<24` |
+| `71a68b7` *Fix demo seeding for deployment* | `StayEd_Backend/seed_demo.py` | The `risk_assessment` insert used `ON CONFLICT (model_id, enrollment_id, monitoring_start_date, monitoring_end_date)`, but `sql/29_risk_assessment_history.sql` **dropped** that unique constraint, so on a fresh DB the seed crashed with `InvalidColumnReference`. It's now a SELECT-then-UPDATE/INSERT, so re-runs are still idempotent. (This would also have broken local seeding on a fresh DB.) |
+| same | `deploy/setup_server.sh` | Seeding now runs whenever **no ADMIN user exists** (self-heals a half-finished run), and model training runs **after** seeding so the real XGBoost model ends up as the single ACTIVE `model_info` row (the seed inserts a demo `rf-v1-demo` row as ACTIVE) |
+| `ae2cdc8` *Keep HTTPS: re-attach existing Let's Encrypt cert when setup_server.sh re-runs* (Oct 13) | `deploy/setup_server.sh` | Re-attaches the existing HTTPS cert after rewriting the nginx config. Before this fix, re-running the script for an update reverted the site to HTTP-only |
+
+Nothing else in the app code was changed.
+
+---
+
+## 4. `deploy/setup_server.sh`: what it does (idempotent; safe to re-run)
+
+Usage on the server: `bash deploy/setup_server.sh stay-ed.site`
+
+1. `apt-get update/upgrade`; installs python3-venv, build tools, postgresql, nginx, certbot, ufw, rsync
+2. Creates the 2 GB swap (if missing)
+3. Creates the `stayed` user; **rsyncs** `StayEd_Backend` + `StayEd_Frontend` from the repo into `/opt/stayed` with `--delete`, **excluding** `.env`, `.venv`, `__pycache__`, `models/*.joblib`, `*.log`
+4. **First run only** (if `.env` doesn't exist): creates the Postgres role/DB with a random password and writes `.env` with fresh secrets. Later runs **keep the existing `.env`**
+5. Applies **all** `sql/*.sql` **only if the `users` table doesn't exist** (fresh DB). On an existing DB it skips SQL entirely (see §6.3)
+6. Creates the venv and runs `pip install -r requirements.txt`
+7. Runs `seed_demo.py` if no ADMIN user exists
+8. Trains the model if the `.joblib` is missing or if it just seeded
+9. Installs/restarts the systemd service, writes the nginx config from the HTTP-only template, reloads nginx
+10. **If a Let's Encrypt cert already exists** for the domain, re-attaches it (`certbot --nginx --reinstall --non-interactive`), so re-runs keep HTTPS
+11. Configures ufw, then health-checks `http://127.0.0.1:8000/api/health`
+
+On the very first run there's no cert yet; HTTPS was then enabled once, manually, with `certbot --nginx -d stay-ed.site -d www.stay-ed.site --redirect`.
+
+---
+
+## 5. Problems hit during deployment (and the fixes)
+
+| Problem | Cause | Fix |
+|---|---|---|
+| `psycopg.errors.InvalidColumnReference: no unique or exclusion constraint matching the ON CONFLICT` during seeding | Seed out of sync with migration 29 | Patched `seed_demo.py` (commit `71a68b7`) |
+| `cd /root/stayed-repo` / `bash` errors in PowerShell (WSL error) | Server commands typed on the **laptop** | Check the prompt is `root@stayed:...#` before running server commands |
+| SSH "Connection closed / reset" | Idle or slow password paste | Use `ssh -o ServerAliveInterval=30 ...`; paste the password with Ctrl+V right away (nothing echoes) |
+| `^M` shown, Enter not working in the VS Code terminal | Terminal left in a weird mode after nano | Close the terminal tab and reconnect; standalone Windows PowerShell is more reliable (right-click = paste) |
+| Commands copied from chat had `[www.x](https://www.x)` | Chat link formatting | Type domains manually or paste via Notepad |
+| Secrets visible in a screenshot | `.env` opened in nano and screenshotted | Rotated `SECRET_KEY` + `JWT_SECRET_KEY` with `sed` + `openssl rand -hex 32` |
+
+How the OpenAI key was set without nano (useful pattern for any secret):
+```bash
+cd /opt/stayed/StayEd_Backend
+read -rsp "Paste value: " K; echo; sed -i "s|^OPENAI_API_KEY=.*|OPENAI_API_KEY=$K|" .env; unset K
+grep -c '^OPENAI_API_KEY=sk-' .env    # 1 = OK
+systemctl restart stayed
+```
+
+---
+
+## 6. Maintenance runbook
+
+### 6.1 Deploy a code update (normal workflow)
+**Laptop (VS Code terminal):** commit only the intended files, then push.
+```powershell
+git add <specific files>      # avoid `git add .` unless you checked `git status`
+git commit -m "message"
+git push
+```
+**Server:**
+```bash
+cd /root/stayed-repo && git pull && bash deploy/setup_server.sh stay-ed.site
+```
+Afterwards, confirm https://stay-ed.site still shows the 🔒. If it doesn't (the HTTPS-safe `setup_server.sh` has been in the repo since commit `ae2cdc8`, but the server must have pulled it), run:
+```bash
+certbot --nginx --cert-name stay-ed.site -d stay-ed.site -d www.stay-ed.site --redirect --reinstall --non-interactive
+```
+For **frontend-only** or small backend changes, a faster option skips apt/pip:
+```bash
+cd /root/stayed-repo && git pull
+rsync -a --delete --exclude '.env' --exclude '.venv' --exclude '__pycache__' --exclude 'models/*.joblib' --exclude '*.log' \
+  StayEd_Backend StayEd_Frontend /opt/stayed/
+chown -R stayed:stayed /opt/stayed
+systemctl restart stayed
+```
+If `requirements.txt` changed: `sudo -u stayed /opt/stayed/StayEd_Backend/.venv/bin/pip install -r /opt/stayed/StayEd_Backend/requirements.txt` then restart.
+
+### 6.2 Everyday commands (server)
+| Task | Command |
+|---|---|
+| Service status | `systemctl status stayed --no-pager` |
+| Live backend logs | `journalctl -u stayed -f` (last 100: `journalctl -u stayed -n 100 --no-pager`) |
+| Restart after `.env` change | `systemctl restart stayed` |
+| Health check | `curl -s http://127.0.0.1:8000/api/health` |
+| nginx errors | `tail -n 50 /var/log/nginx/error.log` |
+| Test nginx config | `nginx -t && systemctl reload nginx` |
+| DB shell | `sudo -u postgres psql stayed_db` |
+| Disk / memory | `df -h /` · `free -h` |
+| Cert status | `certbot certificates` · test renewal: `certbot renew --dry-run` |
+
+### 6.3 Database migrations ⚠️
+- New `sql/NN_*.sql` files are **NOT auto-applied** on the server (the script only runs SQL on a fresh DB). Apply each new one **once**, manually:
+  ```bash
+  cd /opt/stayed/StayEd_Backend
+  sudo -u stayed bash -c 'set -a; . ./.env; psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/37_new_migration.sql'
+  ```
+- **NEVER run `sql/00_core_schema.sql` on the server.** It begins with `DROP TABLE ... CASCADE` and wipes everything.
+- Write migrations to be idempotent (`IF NOT EXISTS`, `DROP ... IF EXISTS`), like the existing ones.
+- Locally, `app/db_bootstrap.py` (Docker-based) re-applies all non-00 SQL files on each start. That's why migrations must be idempotent. On the server, `AUTO_PROVISION_DB=0` disables it.
+
+### 6.4 Backups (none automatic: Vultr backups are OFF)
+Manual dump:
+```bash
+sudo -u postgres pg_dump stayed_db | gzip > /root/stayed_$(date +%F).sql.gz
+```
+Download it to the laptop (PowerShell): `scp root@45.76.183.119:/root/stayed_2026-10-13.sql.gz .`
+Restore (destructive): `gunzip -c file.sql.gz | sudo -u postgres psql stayed_db`
+**Always back up before applying migrations or before demos/defense.**
+
+### 6.5 OS patching
+```bash
+apt-get update && apt-get upgrade -y     # security/package updates (fine to run)
+[ -f /var/run/reboot-required ] && reboot  # if a kernel update requires it; service + nginx + postgres auto-start
+```
+Do **not** run `do-release-upgrade`.
+
+### 6.6 Retraining the model
+```bash
+cd /opt/stayed/StayEd_Backend && sudo -u stayed .venv/bin/python models/train_model.py && systemctl restart stayed
+```
+This retrains from `models/data/stayed_modeling_dataset_demo.csv` and registers it as the ACTIVE `model_info` row. Deploy-time metrics: Accuracy 0.736, Precision 0.796, Recall 0.755, F1 0.775, ROC-AUC 0.812.
+
+---
+
+## 7. Accounts & credentials (no secrets stored here)
+- Seeded by `seed_demo.py`: **`admin@stayed.com`** and **`teacher@stayed.com`**, both with password **`12345678`**. This password is public (the repo is public). ⚠️ **Change both right away, or deactivate the demo teacher.** `seed_fill_gaps.py` (not run on the server) would add more demo admins.
+- Vultr root password: in the Vultr dashboard (Overview → Password).
+- Production secrets: only in `/opt/stayed/StayEd_Backend/.env` on the server.
+- OpenAI key: same key as in King's local `StayEd_Backend/.env`.
+
+---
+
+## 8. Open TODOs / known issues (prioritized)
+
+1. ✅ **DONE (Oct 13, commit `ae2cdc8`):** the HTTPS-safe `deploy/setup_server.sh` is pushed. Remaining: make sure the server's `/root/stayed-repo` has pulled it (`grep -c letsencrypt /root/stayed-repo/deploy/setup_server.sh` should be ≥1).
+2. **Change the demo account passwords** (`12345678`) for admin and teacher.
+3. **Verify the Namecheap contact email** (the yellow ALERT on the domain page). If it isn't verified within ~15 days of Oct 12 2026, the domain gets suspended.
+4. **Configure Brevo SMTP** (`SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM_EMAIL` in `.env`; the sender must be verified in Brevo). Without it, approval and password-reset emails are silently skipped. For deliverability, add Brevo's DNS records (SPF/DKIM) in Namecheap Advanced DNS. Note: there's currently a Namecheap email-forwarding SPF TXT record on `@`; merge rather than duplicate SPF.
+5. **Automate DB backups:** add a daily `pg_dump` cron with rotation (e.g. `/etc/cron.daily/stayed-backup`), and/or enable Vultr Auto Backups (+$2/mo).
+6. *(Optional)* Rotate the Postgres role password. It appeared in a screenshot, but Postgres only listens on localhost, so the risk is low. If rotated: `ALTER ROLE stayed PASSWORD '...'`, update `DATABASE_URL` in `.env`, then restart.
+7. *(Optional hardening)* SSH keys instead of the root password, then disable password login; install `fail2ban`.
+8. **`config.js`** still has `MODE: "development"` and `DEBUG: true` (cosmetic/logging only; the API URL logic is already production-safe).
+9. **Local repo housekeeping:** `seed_demo.py` has CRLF line endings (fine). Git warns "LF will be replaced by CRLF" on Windows, which is harmless; the server checkout uses LF.
+
+---
+
+## 9. Costs & renewals
+| Item | Cost | Notes |
+|---|---|---|
+| Vultr server | ~$10/mo, billed hourly to the linked card ($0 prepaid deposit) | **Stopping does not stop billing. Destroy the instance when the project ends.** Back up the DB first |
+| Domain `stay-ed.site` | $1.18 paid (1 yr incl. $0.20 ICANN fee) | Expires **Oct 12 2027**; `.site` renews at a much higher price; auto-renew is OFF |
+| SSL | Free (Let's Encrypt) | Auto-renews every ~60 days |
+| OpenAI | Pay-as-you-go on the key's account | `gpt-4o-mini`, low cost |
+
+---
+
+## 10. Local development (unchanged)
+`start.ps1` launches the backend (`python run.py` on :5000, with Docker Postgres auto-bootstrap on :5433) and the frontend (`python serve.py 5500`). `config.js` automatically uses `http://127.0.0.1:5000/api` on localhost, so nothing needs switching between local and production.
