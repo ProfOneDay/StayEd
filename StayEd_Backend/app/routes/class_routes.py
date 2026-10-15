@@ -13,12 +13,6 @@ from ..services.settings_service import get_active_school_year, get_default_modu
 
 bp = Blueprint("classes", __name__)
 
-LEVEL_LABELS = {
-    "BLP": "Basic Literacy Program",
-    "ELEMENTARY": "Elementary A&E",
-    "JUNIOR_HIGH_SCHOOL": "Junior High School A&E",
-    "SENIOR_HIGH_SCHOOL": "Senior High School A&E",
-}
 SEM_LABELS = {
     "FIRST": "First Trimester",
     "SECOND": "Second Trimester",
@@ -34,7 +28,7 @@ def _shape(row):
         "municipality": row.get("municipality") or "",
         "schoolYear": row["school_year"],
         "semester": SEM_LABELS.get(row["semester"], row["semester"]),
-        "learningLevel": LEVEL_LABELS.get(row["learning_level"], row["learning_level"]),
+        "learningLevel": title_enum(row["learning_level"]),
         "className": row.get("class_name") or "",
         "status": row["status"].title(),
     }
@@ -69,12 +63,6 @@ def teacher_class_cards():
         (teacher["teacher_id"],),
     )
 
-    level_labels = {
-        "BLP": "Basic Literacy Program",
-        "ELEMENTARY": "Elementary",
-        "JUNIOR_HIGH_SCHOOL": "Junior High School",
-        "SENIOR_HIGH_SCHOOL": "Senior High School",
-    }
     icons = {
         "BLP": "menu_book",
         "ELEMENTARY": "auto_stories",
@@ -86,7 +74,7 @@ def teacher_class_cards():
         {
             "id": row["class_id"],
             "clc": row["clc_name"],
-            "level": level_labels.get(row["learning_level"], title_enum(row["learning_level"])),
+            "level": title_enum(row["learning_level"]),
             "modality": title_enum(row["modality"]),
             "schoolYear": row["school_year"],
             "learnerCount": row["learner_count"],

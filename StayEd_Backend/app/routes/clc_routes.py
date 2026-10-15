@@ -280,19 +280,13 @@ def current_clc():
     )
     if not row:
         return error("No active CLC assignment found.", 404)
-    level_map = {
-        "BLP": "Basic Literacy Program",
-        "ELEMENTARY": "Elementary A&E",
-        "JUNIOR_HIGH_SCHOOL": "Junior High School A&E",
-        "SENIOR_HIGH_SCHOOL": "Senior High School A&E",
-    }
     return {
         "id": row["clc_id"],
         "name": row["clc_name"],
         "municipality": row["municipality"],
         "address": row.get("address") or "",
         "schoolYear": get_active_school_year(),
-        "learningLevel": level_map.get(row.get("learning_level"), "Basic Literacy Program"),
+        "learningLevel": title_enum(row.get("learning_level")),
     }
 
 
