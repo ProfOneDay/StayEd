@@ -372,6 +372,7 @@ function renderRiskChart(){
   const barView=document.getElementById('riskBarView');
   const chartView=document.getElementById('riskChartView');
   if(!barView||!chartView) return;
+  Utils.hideEmptyTrend(chartView);
 
   if(riskChartType==='bar'){
     barView.hidden=false; chartView.hidden=true;
@@ -400,42 +401,27 @@ function renderRiskChart(){
   }
 
   if(riskChartType==='line'){
-    // No assessed learners yet: still draw the chart frame (last 6 month
-    // labels, empty 0-5 axis, legend) with a centered message, not a blank panel.
-    const isEmpty=!riskTrendData.length;
-    const trend=isEmpty?lastSixMonths().map(month=>({month,high:null,moderate:null,low:null})):riskTrendData;
-    note.textContent=isEmpty
-      ?'No prediction runs recorded in the last 6 months yet.'
-      :'Division-wide monthly trend of assessed risk levels (last 6 months) -- not filtered by the selected area.';
-    const ds=(label,color,key)=>({label,data:trend.map(m=>m[key]),borderColor:color,backgroundColor:color+'22',fill:false,tension:.35,pointRadius:3,pointHoverRadius:6,borderWidth:2.5});
+    if(!riskTrendData.length){
+      // No assessed learners yet: designed HTML/SVG empty state instead of
+      // a blank panel (see Utils.showEmptyTrend).
+      note.textContent='';
+      Utils.showEmptyTrend(chartView);
+      return;
+    }
+    note.textContent='Division-wide monthly trend of assessed risk levels (last 6 months) -- not filtered by the selected area.';
+    const ds=(label,color,key)=>({label,data:riskTrendData.map(m=>m[key]),borderColor:color,backgroundColor:color+'22',fill:false,tension:.35,pointRadius:3,pointHoverRadius:6,borderWidth:2.5});
     riskChartInstance=new Chart(canvas.getContext('2d'),{
       type:'line',
-      plugins:isEmpty?[emptyChartMessage('No assessed learners yet')]:[],
       data:{
-        labels:trend.map(m=>m.month),
+        labels:riskTrendData.map(m=>m.month),
         datasets:[ds('High','#D64545','high'),ds('Moderate','#F39422','moderate'),ds('Low','#6BBF59','low')],
       },
       options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
         animation:ST_REDUCE_MOTION?false:{duration:700,delay:(ctx)=>ctx.type==='data'&&ctx.mode==='default'?ctx.dataIndex*110:0},
-        plugins:{legend:ST_LEGEND_BOTTOM,tooltip:isEmpty?{enabled:false}:{...ST_TOOLTIP,callbacks:{footer:(items)=>`Total assessed: ${items.reduce((a,i)=>a+i.parsed.y,0)}`}}},
-        scales:{y:{beginAtZero:true,suggestedMax:isEmpty?5:undefined,ticks:{precision:0},grid:{color:'#eef1f5'},border:{display:false}},x:{grid:{display:false},border:{display:false}}}},
+        plugins:{legend:ST_LEGEND_BOTTOM,tooltip:{...ST_TOOLTIP,callbacks:{footer:(items)=>`Total assessed: ${items.reduce((a,i)=>a+i.parsed.y,0)}`}}},
+        scales:{y:{beginAtZero:true,ticks:{precision:0},grid:{color:'#eef1f5'},border:{display:false}},x:{grid:{display:false},border:{display:false}}}},
     });
   }
-}
-
-// "Mon YYYY" labels for the current month and the 5 before it, matching the
-// backend's riskTrend month format -- the empty Trend chart's x-axis.
-function lastSixMonths(){
-  const now=new Date();
-  return Array.from({length:6},(_,i)=>new Date(now.getFullYear(),now.getMonth()-5+i,1).toLocaleDateString('en-US',{month:'short',year:'numeric'}));
-}
-// Draws a centered message inside an empty chart's plot area.
-function emptyChartMessage(text){
-  return {id:'emptyMessage',afterDraw(chart){
-    const {ctx,chartArea}=chart; if(!chartArea) return;
-    ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#8a91a0';ctx.font='600 14px Inter, sans-serif';
-    ctx.fillText(text,(chartArea.left+chartArea.right)/2,(chartArea.top+chartArea.bottom)/2);ctx.restore();
-  }};
 }
 
 function renderLevelChart(){

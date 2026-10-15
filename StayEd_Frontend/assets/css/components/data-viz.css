@@ -348,3 +348,185 @@
 .st-risk-cell--moderate .st-risk-meter i { background: var(--st-risk-moderate); }
 .st-risk-cell--low .st-risk-meter i { background: var(--st-risk-low); }
 .st-risk-cell--preliminary .st-risk-meter i { background: var(--st-risk-preliminary); }
+
+/* ============================================================
+   Risk Trend empty state (Utils.showEmptyTrend) -- teacher and admin
+   dashboards, when no learner has an assessed prediction yet. HTML/SVG
+   so text stays crisp; faint decorative "ghost" lines draw in, then the
+   end dots pulse softly. Not data -- the card says so.
+   ============================================================ */
+.st-trend-empty {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.st-trend-empty-plot {
+  position: relative;
+  flex: 1;
+  min-height: 150px;
+  margin-right: 6px;
+}
+
+.st-trend-empty-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.st-trend-empty-svg .grid {
+  stroke: var(--st-line);
+  stroke-width: 1;
+  stroke-dasharray: 3 5;
+  vector-effect: non-scaling-stroke;
+}
+
+.st-trend-empty-svg .base {
+  stroke: var(--st-line-strong);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.st-trend-empty-svg .ghost {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.32;
+}
+
+/* Lines reveal left-to-right (a clip, not stroke-dash tricks, which break
+   with vector-effect + a stretched viewBox). */
+.st-trend-empty-svg .ghosts {
+  clip-path: inset(-10px 100% -10px -10px);
+  animation: stTrendDraw 1.4s cubic-bezier(.22, .8, .3, 1) forwards;
+}
+
+.st-trend-empty-svg .ghost--high { stroke: var(--st-risk-high); }
+.st-trend-empty-svg .ghost--moderate { stroke: var(--st-risk-moderate); }
+.st-trend-empty-svg .ghost--low { stroke: var(--st-risk-low); }
+
+.st-trend-empty-dot {
+  position: absolute;
+  right: -5px;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  opacity: 0;
+  animation:
+    stTrendDotIn 0.3s ease forwards,
+    stTrendPulse 2.4s ease-in-out infinite;
+  animation-delay:
+    calc(1.2s + var(--i) * 160ms),
+    calc(1.6s + var(--i) * 300ms);
+}
+
+.st-trend-empty-dot.dot--high { background: var(--st-risk-high); --pulse: var(--st-risk-high-ring); }
+.st-trend-empty-dot.dot--moderate { background: var(--st-risk-moderate); --pulse: var(--st-risk-moderate-ring); }
+.st-trend-empty-dot.dot--low { background: var(--st-risk-low); --pulse: var(--st-risk-low-ring); }
+
+.st-trend-empty-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(340px, calc(100% - 32px));
+  padding: 16px 20px;
+  text-align: center;
+  background: var(--st-surface-container-lowest, #fff);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-lg);
+  box-shadow: var(--st-shadow-md);
+  opacity: 0;
+  animation: stTrendCardIn 0.45s ease 0.25s forwards;
+}
+
+.st-trend-empty-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--st-primary-fixed, #d3e3ff);
+  color: var(--st-primary, #12355b);
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+
+.st-trend-empty-title {
+  margin: 0;
+  font-family: var(--st-font-heading);
+  font-weight: 700;
+  font-size: var(--st-font-size-body-lg, 16px);
+  color: var(--st-ink);
+}
+
+.st-trend-empty-text {
+  margin: 4px 0 0;
+  font-size: var(--st-font-size-small, 13px);
+  line-height: 1.45;
+  color: var(--st-ink-muted);
+}
+
+.st-trend-empty-months {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--st-font-size-caption, 12px);
+  color: var(--st-ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.st-trend-empty-months span:first-child { transform: translateX(-2px); }
+.st-trend-empty-months span:last-child { transform: translateX(2px); }
+
+.st-trend-empty-legend {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  font-size: var(--st-font-size-small, 13px);
+  color: var(--st-ink-muted);
+}
+
+.st-trend-empty-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.st-trend-empty-legend i {
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+  opacity: 0.6;
+}
+
+.st-trend-empty-legend .dot--high { background: var(--st-risk-high); }
+.st-trend-empty-legend .dot--moderate { background: var(--st-risk-moderate); }
+.st-trend-empty-legend .dot--low { background: var(--st-risk-low); }
+
+@keyframes stTrendDraw { to { clip-path: inset(-10px -10px -10px -10px); } }
+@keyframes stTrendDotIn { to { opacity: 1; } }
+@keyframes stTrendPulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--pulse); }
+  50% { box-shadow: 0 0 0 6px var(--pulse); }
+}
+@keyframes stTrendCardIn {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 8px)); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .st-trend-empty-svg .ghosts { animation: none; clip-path: none; }
+  .st-trend-empty-dot { animation: none; opacity: 1; }
+  .st-trend-empty-card { animation: none; opacity: 1; }
+}
+
+@media (max-width: 480px) {
+  .st-trend-empty-months span:nth-child(even) { visibility: hidden; }
+}

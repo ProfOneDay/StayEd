@@ -624,6 +624,69 @@ Utils.toast = function (message, type = "info") {
   console.log(`[toast:${type}] ${message}`);
 };
 
+// Empty state for the Risk Distribution "Trend" view (teacher + admin
+// dashboards) when no learner has an assessed prediction yet. Built in
+// HTML/SVG rather than drawn on the Chart.js canvas so text stays crisp and
+// the faint "ghost" trend lines can animate in with CSS. `wrap` is the
+// .chart-canvas-wrap holding the canvas; the canvas is hidden while shown.
+Utils.lastSixMonths = function () {
+  const now = new Date();
+  return Array.from({ length: 6 }, (_, i) =>
+    new Date(now.getFullYear(), now.getMonth() - 5 + i, 1)
+      .toLocaleDateString("en-US", { month: "short", year: "numeric" }),
+  );
+};
+
+Utils.showEmptyTrend = function (wrap) {
+  if (!wrap) return;
+  Utils.hideEmptyTrend(wrap);
+  const canvas = wrap.querySelector("canvas");
+  if (canvas) canvas.hidden = true;
+
+  const months = Utils.lastSixMonths();
+  // Three gentle placeholder curves (High / Moderate / Low order), drawn in a
+  // 600x200 box. Purely decorative -- not data.
+  const ghosts = [
+    { cls: "low", d: "M0,120 C80,108 140,92 200,96 S330,70 400,74 S520,52 600,46" },
+    { cls: "moderate", d: "M0,150 C70,146 150,132 200,136 S320,118 400,124 S520,108 600,104" },
+    { cls: "high", d: "M0,172 C90,170 150,162 200,166 S320,156 400,160 S520,150 600,148" },
+  ];
+  const ends = { low: 46, moderate: 104, high: 148 };
+
+  const el = document.createElement("div");
+  el.className = "st-trend-empty";
+  el.setAttribute("role", "img");
+  el.setAttribute("aria-label", "Risk trend: no assessed learners yet in the last 6 months");
+  el.innerHTML = `
+    <div class="st-trend-empty-plot">
+      <svg class="st-trend-empty-svg" viewBox="0 0 600 200" preserveAspectRatio="none" aria-hidden="true">
+        ${[40, 80, 120, 160].map((y) => `<line class="grid" x1="0" x2="600" y1="${y}" y2="${y}" />`).join("")}
+        <line class="base" x1="0" x2="600" y1="199" y2="199" />
+        <g class="ghosts">${ghosts.map((g) => `<path class="ghost ghost--${g.cls}" d="${g.d}" />`).join("")}</g>
+      </svg>
+      ${ghosts.map((g, i) => `<span class="st-trend-empty-dot dot--${g.cls}" style="--i:${i};top:${(ends[g.cls] / 200) * 100}%"></span>`).join("")}
+      <div class="st-trend-empty-card">
+        <span class="st-trend-empty-icon material-symbols-outlined" aria-hidden="true">insights</span>
+        <p class="st-trend-empty-title">No trend yet</p>
+        <p class="st-trend-empty-text">Each prediction run adds a point here once learners have module or attendance activity.</p>
+      </div>
+    </div>
+    <div class="st-trend-empty-months" aria-hidden="true">${months.map((m) => `<span>${m}</span>`).join("")}</div>
+    <div class="st-trend-empty-legend" aria-hidden="true">
+      <span><i class="dot--high"></i>High</span>
+      <span><i class="dot--moderate"></i>Moderate</span>
+      <span><i class="dot--low"></i>Low</span>
+    </div>`;
+  wrap.insertBefore(el, wrap.querySelector(".chart-canvas-note"));
+};
+
+Utils.hideEmptyTrend = function (wrap) {
+  if (!wrap) return;
+  wrap.querySelector(".st-trend-empty")?.remove();
+  const canvas = wrap.querySelector("canvas");
+  if (canvas) canvas.hidden = false;
+};
+
 window.Utils = Utils;
 
 document.addEventListener(
