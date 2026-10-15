@@ -2,7 +2,7 @@
 
 > **For the AI assistant reading this:** you're helping King (student, capstone group) maintain and patch **StayEd**, which is already deployed and live. Read this whole file before suggesting changes. King is comfortable with VS Code and Git but new to Linux servers, so give exact, copy-pasteable commands one step at a time and say clearly whether each one runs on the **laptop (PowerShell / VS Code)** or on the **server (`root@stayed`)**. Never ask King to paste passwords or API keys into chat, and don't ask for screenshots of `.env`.
 
-*Last updated: Oct 13, 2026 (deployment completed Oct 13, 2026 ~01:50 PHT)*
+*Last updated: Oct 15, 2026 (Brevo SMTP configured, see §6.8)*
 
 ---
 
@@ -17,7 +17,7 @@ An early dropout-risk monitoring system for ALS (Alternative Learning System) le
 | Database | **PostgreSQL 16** |
 | ML | **XGBoost** dropout-risk classifier (`models/train_model.py` → `models/stayed_xgb_v2.joblib`), called through `models/predict_bridge.py` via the `MODEL_COMMAND` env var |
 | AI | OpenAI (`gpt-4o-mini`) for intervention recommendations (`app/services/ai_intervention_service.py`) |
-| Email | Brevo SMTP (**not configured yet**, so emails are skipped) |
+| Email | Brevo SMTP, sender `no-reply@stay-ed.site` (**configured Oct 15, 2026**, see §6.8) |
 
 - **Repo:** https://github.com/ProfOneDay/StayEd (public, branch `main`)
 - **King's local repo folder:** `C:\Users\Admin\Desktop\STAYED FOLDER CAPSTONE DONT DELETE\StayEd`
@@ -34,7 +34,7 @@ An early dropout-risk monitoring system for ALS (Alternative Learning System) le
 | OS | **Ubuntu 24.04 LTS**. ⚠️ Do **not** run `do-release-upgrade` (the login banner suggests 26.04) |
 | Login | `ssh -o ServerAliveInterval=30 root@45.76.183.119` (root password is in the Vultr dashboard; King has it) |
 | Domain | `stay-ed.site` on **Namecheap**, registered Oct 12 2026 → **expires Oct 12 2027**, **auto-renew OFF**, WithheldForPrivacy ON |
-| DNS (Namecheap → Advanced DNS) | `A @ → 45.76.183.119`, `A www → 45.76.183.119` (the default parking CNAME/redirect were removed) |
+| DNS (Namecheap → Advanced DNS) | `A @ → 45.76.183.119`, `A www → 45.76.183.119` (the default parking CNAME/redirect were removed), plus 7 Brevo domain-authentication records added Oct 15, 2026 (see §6.8) |
 | HTTPS | Let's Encrypt via certbot (nginx plugin), issued Oct 12 2026, expires Jan 10 2027, **auto-renews** (systemd timer) |
 
 ### How requests flow
@@ -66,7 +66,7 @@ The frontend and API share one origin, so CORS isn't involved in production.
 | `/root/backups` | Daily `stayed_YYYY-MM-DD.sql.gz` dumps, last 14 days kept |
 
 ### Production `.env` keys (values intentionally omitted)
-`FLASK_ENV=production`, `FLASK_DEBUG=0`, `SECRET_KEY`, `JWT_SECRET_KEY` (both **rotated** after deploy), `DATABASE_URL` (local Postgres), `FRONTEND_ORIGINS=https://stay-ed.site,https://www.stay-ed.site`, `TRUSTED_PROXY_COUNT=1`, `AUTO_PROVISION_DB=0`, `MODEL_COMMAND='"/opt/stayed/StayEd_Backend/.venv/bin/python" "/opt/stayed/StayEd_Backend/models/predict_bridge.py"'`, `STAYED_RISK_CLASS=NotCompleted`, `OPENAI_API_KEY` (**set**), `OPENAI_MODEL=gpt-4o-mini`, `SMTP_*` (**blank**).
+`FLASK_ENV=production`, `FLASK_DEBUG=0`, `SECRET_KEY`, `JWT_SECRET_KEY` (both **rotated** after deploy), `DATABASE_URL` (local Postgres), `FRONTEND_ORIGINS=https://stay-ed.site,https://www.stay-ed.site`, `TRUSTED_PROXY_COUNT=1`, `AUTO_PROVISION_DB=0`, `MODEL_COMMAND='"/opt/stayed/StayEd_Backend/.venv/bin/python" "/opt/stayed/StayEd_Backend/models/predict_bridge.py"'`, `STAYED_RISK_CLASS=NotCompleted`, `OPENAI_API_KEY` (**set**), `OPENAI_MODEL=gpt-4o-mini`, `SMTP_*` (**set** — Brevo, see §6.8).
 
 ---
 
@@ -222,6 +222,23 @@ sudo -u postgres psql stayed_db -c "UPDATE users SET is_super_admin=TRUE, can_ma
 ```
 Expect `UPDATE 1`. The flags live in the JWT, so the admin must **log out and log in again** for the change to show. Check with: `sudo -u postgres psql stayed_db -c "SELECT email, is_super_admin, can_manage_clcs, can_manage_users, admin_title FROM users WHERE role='ADMIN';"`
 
+### 6.8 Brevo SMTP configured (Oct 15, 2026)
+
+**Background:** the original Brevo account (sender `capstonepang@gmail.com`, SMTP login `bc0a0...@smtp-brevo.com`) was **permanently suspended** by Brevo before it was ever wired into production. A new account was created to replace it.
+
+**What was done:**
+1. New Brevo account created (same team Gmail, `capstonepang@gmail.com`, as the login — a separate thing from the *sender* address below).
+2. Domain `stay-ed.site` added under **Senders, Domains & Dedicated IPs → Domains** and authenticated via 7 DNS records added in Namecheap Advanced DNS: a `brevo-code` ownership TXT on `@`, two DKIM CNAMEs (`brevo1._domainkey`, `brevo2._domainkey`), a `_dmarc` TXT, and 3 branding CNAMEs (`mail`, `r.mail`, `img.mail`) for a branded-link subdomain. All 7 matched and the domain shows **Authenticated**.
+3. Sender **`no-reply@stay-ed.site`** added under **Senders** — auto-verified instantly (no email-confirmation click needed) because the whole domain was already authenticated. DKIM and DMARC both show green for this sender, unlike the old Gmail-based sender, which Brevo flags "Freemail domain is not recommended."
+4. New SMTP key generated (**SMTP & API → SMTP**, name `stayed-prod`, Standard variant, 1-year expiry). Login: `be3dd9001@smtp-brevo.com`.
+5. Local `StayEd_Backend/.env` updated directly in the editor, then verified with a standalone `smtplib` test script (not via the Flask app) — login + send both succeeded against Brevo's relay.
+6. Production `/opt/stayed/StayEd_Backend/.env` updated the same way as the OpenAI key (§5, `read -rsp` + `sed`, so the key never appeared on screen or in shell history): `SMTP_USERNAME=be3dd9001@smtp-brevo.com`, `SMTP_PASSWORD=<new key>`, `SMTP_FROM_EMAIL=no-reply@stay-ed.site`. Then `systemctl restart stayed`.
+7. Confirmed end-to-end on the **live site**: rejected a test teacher application as admin; `journalctl -u stayed -f` showed the `POST /api/admin/users/<id>/reject` request succeed (200) with no mailer warning/exception logged (the mailer in `app/services/mailer.py` only logs on skip/failure, not on success); the rejection email arrived in the test account's real inbox.
+
+**Note on the old TODO about SPF:** item 4 below previously assumed there was an existing Namecheap email-forwarding SPF TXT record on `@` that would need merging with Brevo's. At the time of this setup, no such record was present in Advanced DNS — only the records listed in step 2 above. Domain authentication succeeded without adding a separate SPF record (DKIM + DMARC were sufficient for Brevo). If email forwarding is set up on `@` later, double-check for an SPF conflict then.
+
+**If the key ever needs rotating again:** repeat steps 4–6 above (generate a new key in the same Brevo account under the same sender/domain — no need to redo DNS or domain authentication).
+
 ---
 
 ## 7. Accounts & credentials (no secrets stored here)
@@ -229,6 +246,7 @@ Expect `UPDATE 1`. The flags live in the JWT, so the admin must **log out and lo
 - Vultr root password: in the Vultr dashboard (Overview → Password).
 - Production secrets: only in `/opt/stayed/StayEd_Backend/.env` on the server.
 - OpenAI key: same key as in King's local `StayEd_Backend/.env`.
+- Brevo: new account as of Oct 15, 2026 (the previous one was permanently suspended); login is the team Gmail (`capstonepang@gmail.com`). SMTP key is in `.env` only (local and production), not stored here.
 
 ---
 
@@ -237,7 +255,7 @@ Expect `UPDATE 1`. The flags live in the JWT, so the admin must **log out and lo
 1. ✅ **DONE (Oct 13, commit `ae2cdc8`):** the HTTPS-safe `deploy/setup_server.sh` is pushed. Remaining: make sure the server's `/root/stayed-repo` has pulled it (`grep -c letsencrypt /root/stayed-repo/deploy/setup_server.sh` should be ≥1).
 2. **Change the demo account passwords** (`12345678`) for admin and teacher.
 3. ✅ **DONE (Oct 13, 2026):** Namecheap registrant email verified (Namecheap said the site would (re)activate within 24-48 hours). Confirm the yellow ALERT is gone and the site still loads.
-4. **Configure Brevo SMTP** (`SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM_EMAIL` in `.env`; the sender must be verified in Brevo). Without it, approval and password-reset emails are silently skipped. For deliverability, add Brevo's DNS records (SPF/DKIM) in Namecheap Advanced DNS. Note: there's currently a Namecheap email-forwarding SPF TXT record on `@`; merge rather than duplicate SPF.
+4. ✅ **DONE (Oct 15, 2026):** Brevo SMTP configured end-to-end — new account (old one was permanently suspended), domain `stay-ed.site` authenticated, sender `no-reply@stay-ed.site` verified, production `.env` updated, confirmed delivered to a real inbox. See §6.8 for full detail.
 5. ✅ **DONE (Oct 13, 2026):** daily `pg_dump` cron with 14-day rotation (see §6.4). A manual off-server copy to the laptop was made Oct 13 (see §6.4); repeat it regularly and before demos/defense. **Still open (optional):** make the off-server copy automatic, e.g. Vultr Auto Backups (+$2/mo).
 6. *(Optional)* Rotate the Postgres role password. It appeared in a screenshot, but Postgres only listens on localhost, so the risk is low. If rotated: `ALTER ROLE stayed PASSWORD '...'`, update `DATABASE_URL` in `.env`, then restart.
 7. *(Optional hardening)* SSH keys instead of the root password, then disable password login; install `fail2ban`.
