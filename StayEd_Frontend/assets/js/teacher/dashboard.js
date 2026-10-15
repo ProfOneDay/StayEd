@@ -437,6 +437,7 @@ class TeacherDashboard {
           document.querySelectorAll(`#${toggleId} .chart-type-btn`).forEach((b) => b.classList.toggle("is-active", b === btn));
           this.chartType[key] = btn.dataset.chartType;
           onChange();
+          this.replayChartAnimation(key);
         });
       });
     };
@@ -445,6 +446,22 @@ class TeacherDashboard {
     // doesn't replay the other chart's animation.
     bind("levelChartToggle", "level", () => this.renderLevelModalityCharts(this.state.filtered, "level"));
     bind("modalityChartToggle", "modality", () => this.renderLevelModalityCharts(this.state.filtered, "modality"));
+  }
+
+  // Replays a freshly toggled chart's entry animation the same way the
+  // scroll-in observer (setupMotionObserver) does. The animation Chart.js
+  // starts on construction can be cut short by the responsive resize that
+  // follows a destroy/re-create on the same canvas, which made a toggled
+  // chart appear to snap straight to its final state; replaying it a couple
+  // of frames later, once that resize has settled, makes it reliably animate.
+  static replayChartAnimation(key) {
+    if (ST_REDUCE_MOTION) return;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const chart = this.chartInstances[key];
+      if (!chart) return;
+      chart.reset();
+      chart.update();
+    }));
   }
 
   static chartJsReady(note) {
