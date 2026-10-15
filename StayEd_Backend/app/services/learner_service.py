@@ -35,6 +35,24 @@ def _module_totals(enrollment_id: int) -> dict:
     }
 
 
+def _monitoring_engaged_sql(enrollment_ref: str = "ce.enrollment_id") -> str:
+    """SQL boolean expression, true only once an enrollment has a released
+    module batch AND real engagement (a returned module or a PRESENT
+    attendance record). Mirrors the `assessed` gate in _shape_learner, so a
+    risk_level is never surfaced anywhere (admin dashboards included) before
+    it's actually earned -- a prediction can exist in risk_assessment ahead
+    of real activity (e.g. demo/seeded data), but it shouldn't be shown as a
+    verdict until the learner has done something.
+    """
+    return f"""(
+        EXISTS (SELECT 1 FROM module_release_batch mrb WHERE mrb.enrollment_id = {enrollment_ref})
+        AND (
+            EXISTS (SELECT 1 FROM module_record mr WHERE mr.enrollment_id = {enrollment_ref} AND mr.date_returned IS NOT NULL)
+            OR EXISTS (SELECT 1 FROM session_attendance sa WHERE sa.enrollment_id = {enrollment_ref} AND sa.attendance_status = 'PRESENT')
+        )
+    )"""
+
+
 def _latest_risk_join_sql():
     return """
         LEFT JOIN LATERAL (

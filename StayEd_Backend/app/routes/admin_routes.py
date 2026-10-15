@@ -10,6 +10,7 @@ from werkzeug.security import generate_password_hash
 from ..authz import admin_permission_required, current_user_id, role_required, super_admin_required
 from ..db import execute, fetch_all, fetch_one, get_db
 from ..helpers import error, is_deped_email, split_name
+from ..services.learner_service import _monitoring_engaged_sql
 from ..services.mailer import send_email
 from ..services.roster_service import find_roster_assignment
 from ..services.settings_service import (
@@ -890,10 +891,11 @@ def admin_dashboard():
         "SELECT municipality, COUNT(*) AS clc_count FROM clc WHERE status='ACTIVE' GROUP BY municipality"
     )
     learner_rows = fetch_all(
-        """
+        f"""
         WITH latest AS (
             SELECT DISTINCT ON (ce.enrollment_id)
-                ce.enrollment_id, ce.learner_id, lc.clc_id, lc.learning_level, ra.risk_level
+                ce.enrollment_id, ce.learner_id, lc.clc_id, lc.learning_level,
+                CASE WHEN {_monitoring_engaged_sql("ce.enrollment_id")} THEN ra.risk_level END AS risk_level
             FROM class_enrollment ce
             JOIN learning_class lc ON lc.class_id = ce.class_id
             LEFT JOIN risk_assessment ra
@@ -911,12 +913,15 @@ def admin_dashboard():
     # Last 6 months of every prediction run (not just each enrollment's
     # current one) -- a line-chart trend of how the assessed population
     # looked at the time each batch of predictions ran, division-wide.
+    # Same engagement gate as above: a prediction that outran real activity
+    # (e.g. demo/seeded data) still shouldn't count toward the trend.
     trend_rows = fetch_all(
-        """
+        f"""
         SELECT date_trunc('month', ra.assessment_date) AS month, ra.risk_level, COUNT(*) AS n
         FROM risk_assessment ra
         WHERE ra.data_sufficiency_status = 'PREDICTION_GENERATED'
           AND ra.assessment_date >= (CURRENT_DATE - INTERVAL '6 months')
+          AND {_monitoring_engaged_sql("ra.enrollment_id")}
         GROUP BY 1, 2
         """
     )
