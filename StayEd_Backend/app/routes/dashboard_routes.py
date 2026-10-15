@@ -4,6 +4,7 @@ from flask import Blueprint
 
 from ..authz import role_required, teacher_for_user
 from ..db import fetch_all, fetch_one
+from ..services.learner_service import _monitoring_engaged_sql
 from .learner_routes import _learner_query, _shape_learner
 
 bp = Blueprint("dashboard", __name__)
@@ -58,17 +59,17 @@ def dashboard():
         latest_by_learner.setdefault(row["learner_id"], row)
     learners = [_shape_learner(row) for row in latest_by_learner.values()]
 
-    # Every learner falls into exactly one of these buckets, so high+moderate+low
-    # always equals registered -- learners with no completed prediction yet
-    # default into Low rather than vanishing from the KPI cards/chart, while
-    # `_shape_learner`'s "Not Yet Assessed" risk value (kept as-is on each
-    # learner) still lets tables/profiles show the distinction.
+    # Every learner falls into exactly one of these four buckets, so
+    # high+moderate+low+not_assessed always equals registered. A learner whose
+    # prediction hasn't been earned yet (`_shape_learner`'s "Not Yet Assessed")
+    # is reported as its own bucket rather than folded into Low, matching the
+    # admin dashboard's "Not yet assessed" count for the same learners.
     registered = len(learners)
     high = sum(l["risk"] == "High" for l in learners)
     moderate = sum(l["risk"] == "Moderate" for l in learners)
-    low_pending = sum(l["risk"] == "Not Yet Assessed" for l in learners)
-    low = sum(l["risk"] == "Low" for l in learners) + low_pending
-    predicted = registered - low_pending
+    low = sum(l["risk"] == "Low" for l in learners)
+    not_assessed = registered - high - moderate - low
+    predicted = registered - not_assessed
 
     model = _model_info()
     latest_date = max((r["assessment_date"] for r in learner_rows if r.get("assessment_date")), default=None)
@@ -98,7 +99,10 @@ def dashboard():
         (teacher["teacher_id"],),
     )
 
-    dist = {"high": high, "moderate": moderate, "low": low, "scale_max": max(high, moderate, low, 1)}
+    dist = {
+        "high": high, "moderate": moderate, "low": low, "not_assessed": not_assessed,
+        "scale_max": max(high, moderate, low, not_assessed, 1),
+    }
 
     reminder = fetch_one(
         """
@@ -119,9 +123,9 @@ def dashboard():
     # Last 6 months of this teacher's own prediction runs, for the dashboard's
     # Risk Distribution "Trend" chart view -- mirrors the admin dashboard's
     # division-wide riskTrend (admin_routes.admin_dashboard), scoped here to
-    # just this teacher's learners.
+    # just this teacher's learners, with the same engagement gate.
     trend_rows = fetch_all(
-        """
+        f"""
         SELECT date_trunc('month', ra.assessment_date) AS month, ra.risk_level, COUNT(*) AS n
         FROM risk_assessment ra
         JOIN class_enrollment ce ON ce.enrollment_id = ra.enrollment_id
@@ -129,6 +133,7 @@ def dashboard():
         WHERE lc.teacher_id = %s
           AND ra.data_sufficiency_status = 'PREDICTION_GENERATED'
           AND ra.assessment_date >= (CURRENT_DATE - INTERVAL '6 months')
+          AND {_monitoring_engaged_sql("ra.enrollment_id")}
         GROUP BY 1, 2
         """,
         (teacher["teacher_id"],),
@@ -158,6 +163,7 @@ def dashboard():
             "high": high,
             "moderate": moderate,
             "low": low,
+            "not_assessed": not_assessed,
         },
         "riskDistribution": dist,
         "interventionReminder": {

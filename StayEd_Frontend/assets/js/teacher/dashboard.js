@@ -86,7 +86,7 @@ class TeacherDashboard {
     sortDir: 1,
     filtersApplied: false,
     riskTrend: [],
-    currentRiskCounts: { high: 0, moderate: 0, low: 0 },
+    currentRiskCounts: { high: 0, moderate: 0, low: 0, unassessed: 0 },
   };
 
   static chartType = { risk: "bar", level: "bar", modality: "pie" };
@@ -317,11 +317,13 @@ class TeacherDashboard {
     const high = Number(stats.high) || 0;
     const moderate = Number(stats.moderate) || 0;
     const low = Number(stats.low) || 0;
+    const unassessed = Number(stats.not_assessed) || 0;
 
     this.countTo(document.querySelector("[data-stat-total]"), total);
     this.countTo(document.querySelector("[data-stat-high]"), high);
     this.countTo(document.querySelector("[data-stat-moderate]"), moderate);
     this.countTo(document.querySelector("[data-stat-low]"), low);
+    this.countTo(document.querySelector("[data-stat-unassessed]"), unassessed);
 
     // Proportional risk strip: each segment's flex-grow equals its own
     // count, so the strip's visual split always matches the legend below
@@ -334,9 +336,10 @@ class TeacherDashboard {
     grow("[data-risk-strip-high]", high);
     grow("[data-risk-strip-moderate]", moderate);
     grow("[data-risk-strip-low]", low);
+    grow("[data-risk-strip-unassessed]", unassessed);
 
     const strip = document.querySelector("[data-risk-strip]");
-    if (strip) strip.setAttribute("aria-label", `${high} high, ${moderate} moderate, ${low} low risk`);
+    if (strip) strip.setAttribute("aria-label", `${high} high, ${moderate} moderate, ${low} low risk, ${unassessed} not yet assessed`);
 
     const pct = (value) => (total > 0 ? Math.round((value / total) * 100) : 0);
     // The percentage text node sits before the nested .pct-suffix span
@@ -349,12 +352,13 @@ class TeacherDashboard {
     setPct("[data-stat-high-pct]", high);
     setPct("[data-stat-moderate-pct]", moderate);
     setPct("[data-stat-low-pct]", low);
+    setPct("[data-stat-unassessed-pct]", unassessed);
   }
 
   static renderRiskChart(dist = {}, summary = {}) {
     const rawMax = dist.scale_max || 25;
     const max = Math.max(5, Math.ceil(rawMax / 5) * 5);
-    const total = (dist.high || 0) + (dist.moderate || 0) + (dist.low || 0);
+    const total = (dist.high || 0) + (dist.moderate || 0) + (dist.low || 0) + (dist.not_assessed || 0);
 
     const setBar = (level, value) => {
       const bar = document.querySelector(`[data-bar="${level}"]`);
@@ -366,7 +370,9 @@ class TeacherDashboard {
       if (bar) {
         bar.style.setProperty("--w", `${pct}%`);
         const track = bar.closest(".st-hbar-track");
-        const tipText = `${this.capitalize(level)} risk: ${value} (${shareOfTotal}%)`;
+        const tipText = level === "unassessed"
+          ? `Not yet assessed: ${value} (${shareOfTotal}%)`
+          : `${this.capitalize(level)} risk: ${value} (${shareOfTotal}%)`;
         if (track) track.setAttribute("data-tooltip", tipText);
         bar.setAttribute("title", tipText);
       }
@@ -377,6 +383,7 @@ class TeacherDashboard {
     setBar("high", dist.high || 0);
     setBar("moderate", dist.moderate || 0);
     setBar("low", dist.low || 0);
+    setBar("unassessed", dist.not_assessed || 0);
 
     const yaxis = document.querySelector("[data-riskchart-yaxis]");
 
@@ -407,7 +414,12 @@ class TeacherDashboard {
         .join("");
     }
 
-    this.state.currentRiskCounts = { high: dist.high || 0, moderate: dist.moderate || 0, low: dist.low || 0 };
+    this.state.currentRiskCounts = {
+      high: dist.high || 0,
+      moderate: dist.moderate || 0,
+      low: dist.low || 0,
+      unassessed: dist.not_assessed || 0,
+    };
     this.renderRiskChartTypeView();
   }
 
@@ -460,7 +472,7 @@ class TeacherDashboard {
     this.chartInstances.risk = null;
     if (!canvas || !this.chartJsReady(note)) return;
 
-    const { high, moderate, low } = this.state.currentRiskCounts;
+    const { high, moderate, low, unassessed } = this.state.currentRiskCounts;
 
     if (this.chartType.risk === "pie") {
       note.textContent = "Current risk distribution for your filtered learners.";
@@ -468,8 +480,8 @@ class TeacherDashboard {
         type: "doughnut",
         plugins: [ST_CENTER_TOTAL],
         data: {
-          labels: ["High risk", "Moderate risk", "Low risk"],
-          datasets: [{ data: [high, moderate, low], backgroundColor: ["#ba1a1a", "#f39422", "#6bbf59"], borderColor: "#fff", borderWidth: 3, hoverOffset: 4 }],
+          labels: ["High risk", "Moderate risk", "Low risk", "Not yet assessed"],
+          datasets: [{ data: [high, moderate, low, unassessed], backgroundColor: ["#ba1a1a", "#f39422", "#6bbf59", "#c4cad4"], borderColor: "#fff", borderWidth: 3, hoverOffset: 4 }],
         },
         options: {
           responsive: true,
@@ -736,7 +748,8 @@ class TeacherDashboard {
       registered: rows.length,
       high: count("High"),
       moderate: count("Moderate"),
-      low: count("Low") + count("Not Yet Assessed"),
+      low: count("Low"),
+      not_assessed: count("Not Yet Assessed"),
     });
   }
 
@@ -746,9 +759,7 @@ class TeacherDashboard {
     const high = count("High");
     const moderate = count("Moderate");
     const notYetAssessed = count("Not Yet Assessed");
-
-    // "Not Yet Assessed" learners are counted under Low for this KPI/chart.
-    const low = count("Low") + notYetAssessed;
+    const low = count("Low");
 
     const registered = rows.length;
     const predicted = registered - notYetAssessed;
@@ -756,7 +767,7 @@ class TeacherDashboard {
 
     // Scale the Y-axis to the largest visible category so bars don't
     // render as tiny slivers (e.g. High=0, Moderate=3, Low=9 -> max 10).
-    const largestCategory = Math.max(high, moderate, low, 1);
+    const largestCategory = Math.max(high, moderate, low, notYetAssessed, 1);
     const scaleMax = Math.max(5, Math.ceil(largestCategory / 5) * 5);
 
     const insights = [
@@ -778,7 +789,7 @@ class TeacherDashboard {
     }
 
     this.renderRiskChart(
-      { scale_max: scaleMax, high, moderate, low },
+      { scale_max: scaleMax, high, moderate, low, not_assessed: notYetAssessed },
       {
         coverage: `${coverage}%`,
         confidence: predicted > 0 ? "Available" : "Pending",

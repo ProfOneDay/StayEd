@@ -5,7 +5,7 @@ from flask import Blueprint, request
 from ..authz import admin_permission_required, current_user_id, role_required, teacher_for_user
 from ..db import execute, fetch_all, fetch_one, get_db
 from ..helpers import enum_level, error, title_enum
-from ..services.learner_service import _latest_risk_join_sql
+from ..services.learner_service import _latest_risk_join_sql, _monitoring_engaged_sql
 from ..services.settings_service import get_active_school_year
 
 bp = Blueprint("clcs", __name__)
@@ -118,6 +118,7 @@ def list_clcs():
             COUNT(DISTINCT ce.learner_id) FILTER (WHERE ce.enrollment_status = 'ENROLLED') AS total_learners,
             COUNT(DISTINCT ce.learner_id) FILTER (
                 WHERE ce.enrollment_status = 'ENROLLED' AND risk.risk_level = 'HIGH'
+                  AND {_monitoring_engaged_sql("ce.enrollment_id")}
             ) AS high_risk_learners,
             MAX(tc.school_year) AS school_year
         FROM clc c
@@ -212,7 +213,8 @@ def list_teacher_clcs():
         f"""
         SELECT
             ce.learner_id, ce.enrollment_id, ce.enrollment_date,
-            lc.clc_id, risk.risk_level
+            lc.clc_id,
+            CASE WHEN {_monitoring_engaged_sql("ce.enrollment_id")} THEN risk.risk_level END AS risk_level
         FROM class_enrollment ce
         JOIN learning_class lc ON lc.class_id = ce.class_id
         {_latest_risk_join_sql()}

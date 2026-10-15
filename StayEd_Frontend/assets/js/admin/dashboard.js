@@ -111,16 +111,19 @@ leafletMap.on('dragstart zoomstart',()=>hideTooltip());
 leafletMap.on('dragend',()=>{justPanned=true;setTimeout(()=>{justPanned=false},50)});
 map.addEventListener('click',e=>{if(justPanned){e.stopPropagation();justPanned=false}},true);
 
-function riskLevel(d){if(!d.total)return 'low';const rate=d.high/d.total; return rate>=.20?'high':rate>=.10?'moderate':'low'}
+// A municipality's color is judged only from learners with an earned
+// prediction (high+moderate+low); one whose learners are all still "Not yet
+// assessed" is 'pending' (grey), never defaulted to Low/green.
+function riskLevel(d){const assessed=(d.high||0)+(d.moderate||0)+(d.low||0);if(!assessed)return 'pending';const rate=d.high/assessed; return rate>=.20?'high':rate>=.10?'moderate':'low'}
 function hasLearnerData(d){return !!(d&&d.total>0)}
-function riskColor(d){return {high:'#D64545',moderate:'#F39422',low:'#6BBF59'}[riskLevel(d)]}
+function riskColor(d){return {high:'#D64545',moderate:'#F39422',low:'#6BBF59',pending:'#c4cad4'}[riskLevel(d)]}
 const levelKeys=['BLP','Elementary','JHS','SHS'];
 const levelLabels={BLP:'Basic Literacy',Elementary:'Elementary',JHS:'Junior High',SHS:'Senior High'};
 function recolorMap(){
   // Only municipalities with learner records in the database get a risk
   // color; the rest are shaded a neutral blue (.no-data in the CSS)
   // but still hover, select and filter like every other municipality.
-  const riskCounts={low:0,moderate:0,high:0,nodata:0};
+  const riskCounts={low:0,moderate:0,high:0,pending:0,nodata:0};
   Object.entries(municipalityData).forEach(([id,d])=>{
     const hasData=hasLearnerData(d);
     if(hasData) riskCounts[riskLevel(d)]++; else riskCounts.nodata++;
@@ -132,6 +135,7 @@ function recolorMap(){
   document.getElementById('countLow').textContent=riskCounts.low;
   document.getElementById('countModerate').textContent=riskCounts.moderate;
   document.getElementById('countHigh').textContent=riskCounts.high;
+  document.getElementById('countPending').textContent=riskCounts.pending;
   document.getElementById('countNoData').textContent=riskCounts.nodata;
   levelAverages=Object.fromEntries(levelKeys.map(k=>{
     const municipalities=Object.values(municipalityData);

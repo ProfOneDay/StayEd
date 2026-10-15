@@ -322,6 +322,12 @@
 /* .st-risk-strip/.st-risk-legend(+item) now live in
    components/data-viz.css. */
 
+/* Overview legend has a 4th "Not yet assessed" item, same as the admin
+   dashboard and Student Registry. */
+body[data-page="Teacher Dashboard"] .st-risk-legend--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .st-followup-card {
   display: flex;
   flex-direction: column;
@@ -703,6 +709,7 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
   .st-overview-total .value { font-size: 2.5rem; /* 40px */ }
   .st-overview-total .label { margin: 0; }
   .st-risk-legend { gap: 10px; }
+  body[data-page="Teacher Dashboard"] .st-risk-legend--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .st-risk-legend-item .count { font-size: var(--st-fs-xl); /* 22px */ }
   .pct-suffix { display: none; }
   .st-attention-list { display: flex; }
@@ -749,6 +756,7 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
 [data-animate].is-inview .st-hbar { width: var(--w); }
 [data-animate] .st-hbar-row:nth-child(2) .st-hbar { transition-delay: 90ms; }
 [data-animate] .st-hbar-row:nth-child(3) .st-hbar { transition-delay: 180ms; }
+[data-animate] .st-hbar-row:nth-child(4) .st-hbar { transition-delay: 270ms; }
 [data-animate] .st-hbar-value { opacity: 0; transition: opacity 300ms ease; }
 [data-animate].is-inview .st-hbar-value { opacity: 1; transition-delay: 450ms; }
 

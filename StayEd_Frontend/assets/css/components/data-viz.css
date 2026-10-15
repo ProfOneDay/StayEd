@@ -298,6 +298,7 @@
 .st-hbar--high { background: var(--st-risk-high); }
 .st-hbar--moderate { background: var(--st-risk-moderate); }
 .st-hbar--low { background: var(--st-risk-low); }
+.st-hbar--none { background: var(--st-line-strong); }
 
 .st-hbar-value {
   text-align: left;

@@ -100,7 +100,7 @@
     <!-- Map -->
     <div class="st-panel st-panel-pad col-8 st-adm-map-card" data-animate>
       <div class="st-panel-head">
-        <div><h3 class="st-panel-title">Interactive Municipality Map</h3><p class="st-panel-subtitle">Pangasinan II municipalities. Risk colors show areas with learner records; blue areas have none yet.</p></div>
+        <div><h3 class="st-panel-title">Interactive Municipality Map</h3><p class="st-panel-subtitle">Pangasinan II municipalities. Risk colors show areas with assessed learners; grey areas have learners not yet assessed; blue areas have none yet.</p></div>
       </div>
       <div class="mapwrap">
         <div id="adminLeafletMap" class="st-adm-leaflet" role="region" aria-label="Map of Pangasinan municipalities colored by learner risk"></div>
@@ -111,6 +111,7 @@
         <button class="legend-item" data-level="low"><i class="dot dot--low"></i>Low <span class="legend-count" id="countLow">0</span></button>
         <button class="legend-item" data-level="moderate"><i class="dot dot--moderate"></i>Moderate <span class="legend-count" id="countModerate">0</span></button>
         <button class="legend-item" data-level="high"><i class="dot dot--high"></i>High <span class="legend-count" id="countHigh">0</span></button>
+        <button class="legend-item" data-level="pending"><i class="dot dot--pending"></i>Not yet assessed <span class="legend-count" id="countPending">0</span></button>
         <button class="legend-item" data-level="nodata"><i class="dot dot--nodata"></i>No learner data <span class="legend-count" id="countNoData">0</span></button>
       </div>
     </div>
@@ -207,5 +208,5 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="../../assets/js/admin/division-ii-municipalities.js?v=3"></script>
 <script src="../../assets/js/admin/pangasinan-municipalities-geo.js?v=1"></script>
-<script src="../../assets/js/admin/dashboard.js?v=6"></script>
+<script src="../../assets/js/admin/dashboard.js?v=7"></script>
 </body></html>
