@@ -100,6 +100,8 @@ const Landing = {
       });
     }
 
+    Utils.limitDigits(form.querySelector("#signupEmployeeId"), 7);
+
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
 
@@ -107,6 +109,11 @@ const Landing = {
 
       if (!form.checkValidity()) {
         form.reportValidity();
+        return;
+      }
+
+      if (!Utils.isEmployeeId(data.employee_id.trim())) {
+        Toast.error("Employee ID must be exactly 7 digits.");
         return;
       }
 
