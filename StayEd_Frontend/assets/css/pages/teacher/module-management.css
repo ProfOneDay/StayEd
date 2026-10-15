@@ -401,8 +401,14 @@ body[data-page="Manage Modules"] .st-empty--flush {
    (.st-btn-primary sets color:#fff, which this was overriding). */
 body[data-page="Manage Modules"] .st-mm-empty-add .material-symbols-outlined {
   font-size: 19px;
-  margin-bottom: 0;
+  margin: 0;
   color: #fff;
+  /* surfaces.css also draws that decorative icon as a 56px gray circle */
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  display: inline-block;
 }
 
 body[data-page="Manage Modules"] .st-mm-empty-cell {
