@@ -250,7 +250,10 @@
 
   --st-z-modal: 900;
 
-  --st-z-toast: 1000;
+  /* Above every modal overlay (several page overlays use z-index 1000)
+     and the admin map tooltip (1100), so a toast raised from inside an
+     open modal is never hidden behind its blurred backdrop. */
+  --st-z-toast: 1200;
 
   --st-transition-fast: 0.15s ease;
 
