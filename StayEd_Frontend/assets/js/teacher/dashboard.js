@@ -441,8 +441,10 @@ class TeacherDashboard {
       });
     };
     bind("riskChartToggle", "risk", () => this.renderRiskChartTypeView());
-    bind("levelChartToggle", "level", () => this.renderLevelModalityCharts(this.state.filtered));
-    bind("modalityChartToggle", "modality", () => this.renderLevelModalityCharts(this.state.filtered));
+    // Each toggle redraws only its own panel, so switching one chart's type
+    // doesn't replay the other chart's animation.
+    bind("levelChartToggle", "level", () => this.renderLevelModalityCharts(this.state.filtered, "level"));
+    bind("modalityChartToggle", "modality", () => this.renderLevelModalityCharts(this.state.filtered, "modality"));
   }
 
   static chartJsReady(note) {
@@ -527,7 +529,9 @@ class TeacherDashboard {
     }
   }
 
-  static renderLevelModalityCharts(rows = []) {
+  // `only` ("level" | "modality") limits the redraw to one panel; omitted,
+  // both are redrawn (initial load and filter changes).
+  static renderLevelModalityCharts(rows = [], only = null) {
     const levelOrder = ["Basic Literacy", "Elementary", "Junior High", "Senior High"];
     const modalityOrder = ["Face-to-Face", "Modular", "Blended"];
 
@@ -538,7 +542,7 @@ class TeacherDashboard {
     // charts can't be misread as risk levels.
     const catColors = ["#12355b", "#4c6f95", "#006a68", "#9db5d3"];
 
-    this.renderDistributionChart({
+    if (!only || only === "level") this.renderDistributionChart({
       key: "level",
       canvasId: "levelChartCanvas",
       noteId: "levelChartNote",
@@ -548,7 +552,7 @@ class TeacherDashboard {
       noteText: "Learner count per ALS learning level for your currently filtered learners.",
     });
 
-    this.renderDistributionChart({
+    if (!only || only === "modality") this.renderDistributionChart({
       key: "modality",
       canvasId: "modalityChartCanvas",
       noteId: "modalityChartNote",
