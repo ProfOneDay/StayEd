@@ -40,7 +40,8 @@ body[data-page="Admin Dashboard"] .st-adm-clc-card .hint{margin:0;font-size: var
 /* Map card */
 body[data-page="Admin Dashboard"] .st-adm-map-card{display:flex;flex-direction:column;gap:14px}
 body[data-page="Admin Dashboard"] .st-adm-map-card .st-panel-head{margin-bottom:0}
-body[data-page="Admin Dashboard"] .mapwrap{position:relative;aspect-ratio:800/565;min-height:280px;border-radius:var(--st-radius-card);border:1px solid var(--st-line);background:#e8f7f6;overflow:hidden}
+body[data-page="Admin Dashboard"] .mapwrap{position:relative;aspect-ratio:800/565;min-height:280px;border-radius:var(--st-radius-card);border:1px solid var(--st-line);background:#e8f7f6;overflow:hidden;isolation:isolate}
+/* isolation: Leaflet panes/controls use z-index 400-1000; keep them ranked only inside the map box so the mobile sidebar drawer (z-index 100) and modals always cover the map. */
 /* Leaflet map: fills the frame; tiles load over the teal background */
 body[data-page="Admin Dashboard"] .st-adm-leaflet{position:absolute;inset:0;background:#e8f7f6;font:inherit}
 body[data-page="Admin Dashboard"] .st-adm-leaflet .leaflet-control-attribution{font-size: var(--st-fs-xs);background:rgba(255,255,255,.8)}
