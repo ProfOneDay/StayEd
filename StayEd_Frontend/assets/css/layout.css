@@ -643,7 +643,9 @@ body {
 
   gap: 12px;
 
-  padding: 0 var(--st-margin-desktop);
+  /* Same side padding as .st-content (32px), so the navbar's edges line up
+     with the page content below it. */
+  padding: 0 32px;
 
   z-index: var(--st-z-navbar);
 }
@@ -684,6 +686,10 @@ body {
 
 .st-navbar-toggle {
   display: flex;
+  /* The 40px button centers a 24px icon (8px inset each side); pull it left
+     by that inset so the icon itself sits on the content's left edge, in
+     line with the page title below. */
+  margin-left: -8px;
 }
 
 .st-navbar-right {
@@ -1163,7 +1169,7 @@ body {
 }
 
 @media (max-width: 767px) {
-  .st-navbar { height: 56px; padding: 0 12px; }
+  .st-navbar { height: 56px; padding: 0 16px; } /* = .st-content's 16px */
   .st-navbar-left { gap: 8px; }
   .st-navbar-right { gap: 0; }
   /* Full trail (both crumbs + the chevron between them) stays, just
