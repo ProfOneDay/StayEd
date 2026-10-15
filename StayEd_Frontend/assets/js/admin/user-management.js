@@ -318,6 +318,7 @@ function openEdit(id){
   const empidInput=document.getElementById('edit-empid');
   const isPendingEmpId=/^pending-\d+$/i.test(t.employeeId||'');
   empidInput.value=isPendingEmpId?'':t.employeeId;
+  empidInput.dataset.original=empidInput.value;
   empidInput.placeholder=isPendingEmpId?'Not yet assigned — enter Employee ID':'e.g. 1234567';
   document.getElementById('edit-phone').value=t.phone;
   document.getElementById('edit-email').value=t.email;
@@ -352,6 +353,9 @@ function openEdit(id){
   }
   openModal('modal-edit');
 }
+// Employee ID: digits only, max 7 (official DepEd employee number).
+Utils.limitDigits(document.getElementById('edit-empid'),7);
+Utils.limitDigits(document.getElementById('cr-empid'),7);
 document.getElementById('edit-save-btn').addEventListener('click',async()=>{
   const payload={
     firstName:document.getElementById('edit-first').value.trim(),
@@ -363,6 +367,11 @@ document.getElementById('edit-save-btn').addEventListener('click',async()=>{
     municipality:document.getElementById('edit-muni').value,
     clcs:[...editClcDraft],
   };
+  // Only a changed ID must be 7 digits -- an older placeholder ID can stay.
+  const origEmpId=document.getElementById('edit-empid').dataset.original||'';
+  if(payload.employeeId!==origEmpId&&!Utils.isEmployeeId(payload.employeeId)){
+    showToast('Employee ID must be exactly 7 digits','warning'); return;
+  }
   try{
     await API.put(`/admin/users/${activeTeacherId}`,payload);
     closeModal('modal-edit');
@@ -503,6 +512,8 @@ document.getElementById('cr-save-btn').addEventListener('click',async()=>{
   const last=document.getElementById('cr-last').value.trim();
   const email=document.getElementById('cr-email').value.trim();
   if(!first||!last||!email){ showToast('Please fill in first name, last name, and email','warning'); return; }
+  const crEmpId=document.getElementById('cr-empid').value.trim();
+  if(crEmpId&&!Utils.isEmployeeId(crEmpId)){ showToast('Employee ID must be exactly 7 digits','warning'); return; }
   const payload={
     role:'teacher',
     firstName:first,

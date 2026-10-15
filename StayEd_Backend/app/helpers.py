@@ -9,6 +9,9 @@ from flask import jsonify
 
 
 LRN_RE = re.compile(r"^\d{12}$")
+# Official DepEd employee number: exactly 7 digits.
+EMPLOYEE_ID_RE = re.compile(r"^\d{7}$")
+EMPLOYEE_ID_ERROR = "Employee ID must be exactly 7 digits (official DepEd employee number)."
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 # Official DepEd email domains (or subdomains of them, e.g. region1.deped.gov.ph).

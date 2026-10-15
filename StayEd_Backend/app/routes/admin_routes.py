@@ -9,7 +9,7 @@ from werkzeug.security import generate_password_hash
 
 from ..authz import admin_permission_required, current_user_id, role_required, super_admin_required
 from ..db import execute, fetch_all, fetch_one, get_db
-from ..helpers import error, is_deped_email, split_name
+from ..helpers import EMPLOYEE_ID_ERROR, EMPLOYEE_ID_RE, error, is_deped_email, split_name
 from ..services.learner_service import _monitoring_engaged_sql
 from ..services.mailer import ACCENT_WARNING, render_email, send_email
 from ..services.roster_service import find_roster_assignment
@@ -166,6 +166,8 @@ def pending_users():
 def approve_user(user_id: int):
     data = request.get_json(silent=True) or {}
     employee_id = str(data.get("employee_id") or "").strip()
+    if employee_id and not EMPLOYEE_ID_RE.match(employee_id):
+        return error(EMPLOYEE_ID_ERROR, 422)
     # Optional: the municipality/CLC as confirmed or edited on the review screen.
     municipality = str(data.get("municipality") or "").strip()
     clc_name = str(data.get("clc") or "").strip()
@@ -429,6 +431,10 @@ def update_user(user_id: int):
 
     if not first_name or not last_name or not email or not employee_id:
         return error("First name, last name, employee ID, and email are required.", 422)
+    # Only a changed ID is checked, so older placeholder IDs (e.g.
+    # "ALS-TEACHER-12") don't block editing a teacher's other fields.
+    if employee_id != existing["employee_id"] and not EMPLOYEE_ID_RE.match(employee_id):
+        return error(EMPLOYEE_ID_ERROR, 422)
     email = email.lower()
 
     db = get_db()
@@ -573,6 +579,8 @@ def create_user():
 
                 if not municipality or not clc_name:
                     return error("Municipality and CLC assignment are required for teacher accounts.", 422)
+                if employee_id and not EMPLOYEE_ID_RE.match(employee_id):
+                    return error(EMPLOYEE_ID_ERROR, 422)
 
                 if not fetch_one(
                     "SELECT clc_id FROM clc WHERE LOWER(clc_name)=LOWER(%s) AND LOWER(municipality)=LOWER(%s) AND status='ACTIVE'",

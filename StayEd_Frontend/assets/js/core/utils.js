@@ -624,6 +624,19 @@ Utils.toast = function (message, type = "info") {
   console.log(`[toast:${type}] ${message}`);
 };
 
+// Keeps a text input to digits only, at most `max` of them, as the user types
+// or pastes (e.g. the 7-digit DepEd employee number).
+Utils.limitDigits = function (input, max) {
+  if (!input) return;
+  input.addEventListener("input", () => {
+    const clean = input.value.replace(/\D/g, "").slice(0, max);
+    if (clean !== input.value) input.value = clean;
+  });
+};
+
+// Official DepEd employee number: exactly 7 digits.
+Utils.isEmployeeId = (value) => /^\d{7}$/.test(String(value || ""));
+
 // Empty state for the Risk Distribution "Trend" view (teacher + admin
 // dashboards) when no learner has an assessed prediction yet. Built in
 // HTML/SVG rather than drawn on the Chart.js canvas so text stays crisp and

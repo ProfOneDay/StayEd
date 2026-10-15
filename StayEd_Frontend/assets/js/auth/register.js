@@ -12,6 +12,8 @@ class RegisterPage {
   }
 
   static bind() {
+    Utils.limitDigits(document.getElementById("employee_id"), 7);
+
     this.form.addEventListener(
       "submit",
 
@@ -34,6 +36,11 @@ class RegisterPage {
 
     if (!this.form.checkValidity()) {
       this.form.reportValidity();
+      return;
+    }
+
+    if (!Utils.isEmployeeId(form.employee_id.trim())) {
+      Toast.error("Employee ID must be exactly 7 digits.");
       return;
     }
 

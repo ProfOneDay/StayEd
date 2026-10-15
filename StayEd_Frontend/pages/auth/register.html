@@ -106,7 +106,11 @@
                 id="employee_id"
                 name="employee_id"
                 type="text"
-                placeholder="e.g. 123456"
+                inputmode="numeric"
+                maxlength="7"
+                pattern="\d{7}"
+                title="Employee ID must be exactly 7 digits."
+                placeholder="e.g. 1234567"
                 autocomplete="off"
                 required
               />

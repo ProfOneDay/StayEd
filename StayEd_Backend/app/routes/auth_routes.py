@@ -9,7 +9,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from ..authz import current_user_id
 from ..db import execute, fetch_all, fetch_one, get_db
-from ..helpers import EMAIL_RE, error, split_name
+from ..helpers import EMAIL_RE, EMPLOYEE_ID_ERROR, EMPLOYEE_ID_RE, error, split_name
 from ..services.roster_service import find_roster_assignment, is_on_teacher_roster
 from ..services.settings_service import get_active_school_year
 
@@ -150,6 +150,8 @@ def register():
     password = str(data.get("password", ""))
     if not full_name or not employee_id or not email or len(password) < 8:
         return error("Full name, employee ID, email, and a password of at least 8 characters are required.", 422)
+    if not EMPLOYEE_ID_RE.match(employee_id):
+        return error(EMPLOYEE_ID_ERROR, 422)
     if not EMAIL_RE.match(email):
         return error("Enter a valid email address.", 422)
 
