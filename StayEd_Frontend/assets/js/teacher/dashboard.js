@@ -75,6 +75,30 @@ const ST_CENTER_TOTAL = {
   },
 };
 
+// "Mon YYYY" labels for the current month and the 5 before it, matching the
+// backend's riskTrend month format -- the empty Trend chart's x-axis.
+const ST_LAST_SIX_MONTHS = () => {
+  const now = new Date();
+  return Array.from({ length: 6 }, (_, i) =>
+    new Date(now.getFullYear(), now.getMonth() - 5 + i, 1).toLocaleDateString("en-US", { month: "short", year: "numeric" }),
+  );
+};
+// Draws a centered message inside an empty chart's plot area.
+const ST_EMPTY_MESSAGE = (text) => ({
+  id: "emptyMessage",
+  afterDraw(chart) {
+    const { ctx, chartArea } = chart;
+    if (!chartArea) return;
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#8a91a0";
+    ctx.font = "600 14px Inter, sans-serif";
+    ctx.fillText(text, (chartArea.left + chartArea.right) / 2, (chartArea.top + chartArea.bottom) / 2);
+    ctx.restore();
+  },
+});
+
 class TeacherDashboard {
   static state = {
     learners: [],
@@ -514,14 +538,19 @@ class TeacherDashboard {
     }
 
     if (this.chartType.risk === "line") {
-      const trend = this.state.riskTrend;
-      if (!trend.length) {
-        note.textContent = "No prediction runs recorded in the last 6 months yet.";
-        return;
-      }
-      note.textContent = "Monthly trend of your learners' assessed risk levels (last 6 months).";
+      // No assessed learners yet: still draw the chart frame (last 6 month
+      // labels, empty 0-5 axis, legend) with a centered message, rather than
+      // leaving the panel blank.
+      const isEmpty = !this.state.riskTrend.length;
+      const trend = isEmpty
+        ? ST_LAST_SIX_MONTHS().map((month) => ({ month, high: null, moderate: null, low: null }))
+        : this.state.riskTrend;
+      note.textContent = isEmpty
+        ? "No prediction runs recorded in the last 6 months yet."
+        : "Monthly trend of your learners' assessed risk levels (last 6 months).";
       this.chartInstances.risk = new Chart(canvas.getContext("2d"), {
         type: "line",
+        plugins: isEmpty ? [ST_EMPTY_MESSAGE("No assessed learners yet")] : [],
         data: {
           labels: trend.map((m) => m.month),
           datasets: [
@@ -536,9 +565,9 @@ class TeacherDashboard {
           interaction: { mode: "index", intersect: false },
           animation: ST_REDUCE_MOTION ? false : { duration: 700, easing: "easeOutQuart", ...ST_CHART_STAGGER(110) },
           animations: ST_REDUCE_MOTION ? {} : { y: { from: (ctx) => (ctx.type === "data" ? ctx.chart.scales.y.getPixelForValue(0) : undefined) } },
-          plugins: { legend: ST_LEGEND_BOTTOM, tooltip: ST_TOOLTIP_COMPOSE },
+          plugins: { legend: ST_LEGEND_BOTTOM, tooltip: isEmpty ? { enabled: false } : ST_TOOLTIP_COMPOSE },
           scales: {
-            y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: "#eef1f5" }, border: { display: false } },
+            y: { beginAtZero: true, suggestedMax: isEmpty ? 5 : undefined, ticks: { precision: 0 }, grid: { color: "#eef1f5" }, border: { display: false } },
             x: { grid: { display: false }, border: { display: false } },
           },
         },
