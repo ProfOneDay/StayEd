@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 import secrets
 
-from flask import Blueprint, request
+from flask import Blueprint, current_app, request
 from flask_jwt_extended import get_jwt
 from werkzeug.security import generate_password_hash
 
@@ -11,7 +11,7 @@ from ..authz import admin_permission_required, current_user_id, role_required, s
 from ..db import execute, fetch_all, fetch_one, get_db
 from ..helpers import error, is_deped_email, split_name
 from ..services.learner_service import _monitoring_engaged_sql
-from ..services.mailer import send_email
+from ..services.mailer import ACCENT_WARNING, render_email, send_email
 from ..services.roster_service import find_roster_assignment
 from ..services.settings_service import (
     get_active_school_year,
@@ -241,13 +241,21 @@ def approve_user(user_id: int):
         raise
 
     if row.get("email"):
+        first_name = row.get("first_name") or ""
+        message = (
+            "Your StayEd teacher account has been approved by a Division Administrator. "
+            "You can now log in using the email and password you registered with."
+        )
         send_email(
             row["email"],
             "Your StayEd account has been approved",
-            f"Hi {row.get('first_name') or ''},\n\n"
-            "Your StayEd teacher account has been approved by a Division Administrator. "
-            "You can now log in at StayEd using the email and password you registered with.\n\n"
-            "— StayEd",
+            f"Hi {first_name},\n\n{message}\n\n— StayEd",
+            html=render_email(
+                "Your account is approved \N{PARTY POPPER}",
+                first_name,
+                [message],
+                button=("Log in to StayEd", current_app.config["PUBLIC_SITE_URL"] + "/"),
+            ),
         )
 
     return {"success": True, "message": "Teacher account approved."}
@@ -362,17 +370,32 @@ def reject_user(user_id: int):
         raise
 
     if row.get("email"):
+        first_name = row.get("first_name") or ""
         reason_line = f"\n\nReason: {reason}" if reason else ""
         remarks_line = f"\n\n{remarks}" if remarks else ""
+        intro = (
+            "Your StayEd teacher account registration was reviewed by a Division Administrator "
+            "and was not approved at this time."
+        )
+        outro = "If you believe this was a mistake, please contact your Division Office for more information."
+        # Reason and remarks share one highlighted box in the HTML version.
+        callout = None
+        if reason:
+            callout = ("Reason", f"{reason}\n\n{remarks}" if remarks else reason)
+        elif remarks:
+            callout = ("Remarks", remarks)
         send_email(
             row["email"],
             "Your StayEd registration was not approved",
-            f"Hi {row.get('first_name') or ''},\n\n"
-            "Your StayEd teacher account registration was reviewed by a Division Administrator "
-            f"and was not approved at this time.{reason_line}{remarks_line}\n\n"
-            "If you believe this was a mistake, please contact your Division Office for more "
-            "information.\n\n"
-            "— StayEd",
+            f"Hi {first_name},\n\n{intro}{reason_line}{remarks_line}\n\n{outro}\n\n— StayEd",
+            html=render_email(
+                "Registration not approved",
+                first_name,
+                [intro],
+                accent=ACCENT_WARNING,
+                callout=callout,
+                closing=[outro],
+            ),
         )
 
     return {"success": True, "message": "Registration rejected."}

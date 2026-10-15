@@ -35,3 +35,7 @@ class Config:
     SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "").strip()
     SMTP_FROM_EMAIL = os.getenv("SMTP_FROM_EMAIL", "").strip() or SMTP_USERNAME
     SMTP_FROM_NAME = os.getenv("SMTP_FROM_NAME", "StayEd")
+    # Public address of the live site -- used in emails for the logo image
+    # and the "Log in" button, so it must be reachable from the recipient's
+    # inbox (not localhost), even when sending from a local dev backend.
+    PUBLIC_SITE_URL = os.getenv("PUBLIC_SITE_URL", "https://stay-ed.site").strip().rstrip("/")
