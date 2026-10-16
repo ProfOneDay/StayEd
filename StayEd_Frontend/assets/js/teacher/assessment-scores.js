@@ -322,7 +322,12 @@ class AssessmentScores {
             ).join("")}
             <tr class="st-assessment-total-row">
               <td>Total Work Samples Raw Score</td>
-              <td><input type="text" class="st-assessment-input st-assessment-portfolio-work-sample-total" data-portfolio-total readonly value="${workSampleTotal ?? ""}"></td>
+              <td>
+                <span class="st-assessment-score-entry st-assessment-score-entry--total">
+                  <input type="text" class="st-assessment-input st-assessment-portfolio-work-sample-total" data-portfolio-total readonly value="${workSampleTotal ?? ""}" aria-label="Total Work Samples raw score out of ${this.PORTFOLIO_WORK_SAMPLE_MAX_SCORE}">
+                  <span class="st-assessment-score-denominator">/ ${this.PORTFOLIO_WORK_SAMPLE_MAX_SCORE}</span>
+                </span>
+              </td>
             </tr>
             <tr class="st-assessment-section-row"><td colspan="2">Inter-District Revalida</td></tr>
             ${this.PORTFOLIO_REVALIDA_ROWS.map(
@@ -335,19 +340,25 @@ class AssessmentScores {
             ).join("")}
             <tr class="st-assessment-total-row">
               <td>Total Inter-District Revalida Raw Score</td>
-              <td><input type="text" class="st-assessment-input" data-revalida-total readonly value="${revalidaTotal ?? ""}"></td>
+              <td>
+                <span class="st-assessment-score-entry st-assessment-score-entry--total">
+                  <input type="text" class="st-assessment-input" data-revalida-total readonly value="${revalidaTotal ?? ""}" aria-label="Total Inter-District Revalida raw score out of ${this.PORTFOLIO_REVALIDA_MAX_SCORE}">
+                  <span class="st-assessment-score-denominator">/ ${this.PORTFOLIO_REVALIDA_MAX_SCORE}</span>
+                </span>
+              </td>
             </tr>
             <tr class="st-assessment-total-row">
               <td>Total Presentation Portfolio Assessment Raw Score</td>
-              <td><input type="text" class="st-assessment-input" data-portfolio-raw-total readonly value="${portfolioRawTotal ?? ""}"></td>
+              <td>
+                <span class="st-assessment-score-entry st-assessment-score-entry--total">
+                  <input type="text" class="st-assessment-input" data-portfolio-raw-total readonly value="${portfolioRawTotal ?? ""}" aria-label="Total Presentation Portfolio Assessment raw score out of ${this.PORTFOLIO_MAX_SCORE}">
+                  <span class="st-assessment-score-denominator">/ ${this.PORTFOLIO_MAX_SCORE}</span>
+                </span>
+              </td>
             </tr>
             <tr class="st-assessment-total-row">
               <td>Final Score Percentage Grade</td>
-              <td><input type="number" min="0" max="100" step="0.01" class="st-assessment-input st-assessment-input--rating" data-final-grade readonly value="${this.escAttr(finalPercentage)}"></td>
-            </tr>
-            <tr class="st-assessment-total-row">
-              <td>Overall Final Assessment Rating</td>
-              <td><input type="number" min="0" max="100" step="0.01" class="st-assessment-input st-assessment-input--rating" placeholder="e.g. 98.55" data-overall-rating value="${this.escAttr(f.overallFinalAssessmentRating)}"></td>
+              <td><input type="text" class="st-assessment-input st-assessment-input--rating" data-final-grade readonly value="${finalPercentage == null ? "" : `${this.escAttr(finalPercentage)}%`}" aria-label="Final score percentage grade"></td>
             </tr>
           </tbody>
         </table>
@@ -360,7 +371,9 @@ class AssessmentScores {
               <strong aria-live="polite" data-overall-likelihood-preview data-level="${hasAnyPost ? "readiness" : "neutral"}">${(() => {
                 if (!hasAnyPost) return "Waiting for post-test scores";
                 const percentage = this.overallLikelihoodPercentage(overallPost);
-                return percentage == null ? "Waiting for post-test scores" : `${percentage}%`;
+                if (percentage == null) return "Waiting for post-test scores";
+                const { label } = this.componentLikelihoodMeta(percentage);
+                return `${percentage}% · ${label} Likelihood`;
               })()}</strong>
             </div>
           </div>
@@ -520,10 +533,11 @@ class AssessmentScores {
     if (percentage == null || !hasAnyPost) {
       return `<span class="st-assessment-computed-empty">Waiting for post-test scores</span>`;
     }
+    const { label, tone } = this.componentLikelihoodMeta(percentage);
     return `
       <div class="st-assessment-result st-assessment-result--overall">
-        <span class="st-assessment-result-pill is-readiness">${percentage}%</span>
-        <span class="st-assessment-result-note">READINESS ESTIMATE</span>
+        <span class="st-assessment-result-pill is-${tone}">${percentage}%</span>
+        <span class="st-assessment-result-note">${this.esc(label)} Likelihood</span>
       </div>
     `;
   }
@@ -553,7 +567,8 @@ class AssessmentScores {
     if (overallPostScore == null || overallPostScore === "") return null;
     const score = Number(overallPostScore);
     if (!Number.isFinite(score)) return null;
-    return this.roundPercent((score / this.TOTAL_ASSESSMENT_MAX_SCORE) * 100);
+    const percentage = Math.max(0, Math.min(100, (score / this.TOTAL_ASSESSMENT_MAX_SCORE) * 100));
+    return Number(percentage.toFixed(2));
   }
 
   static subjectGroupTotal(groupKey, scores = {}, part = "post") {
@@ -598,9 +613,7 @@ class AssessmentScores {
   }
 
   static componentLikelihoodMeta(percentage) {
-    if (percentage >= 85) return { label: "High", tone: "high" };
-    if (percentage >= 80) return { label: "Likely", tone: "likely" };
-    if (percentage >= 75) return { label: "Moderate", tone: "moderate" };
+    if (percentage >= 70) return { label: "High", tone: "high" };
     return { label: "Low", tone: "low" };
   }
 
@@ -673,8 +686,14 @@ class AssessmentScores {
       const hasAnyPost = this.hasAnyPostScoreInDom();
       const percentage = hasAnyPost ? this.overallLikelihoodPercentage(overallPost) : null;
       if (preview) {
-        preview.textContent = percentage == null ? "Waiting for post-test scores" : `${percentage}%`;
-        preview.dataset.level = percentage == null ? "neutral" : "readiness";
+        if (percentage == null) {
+          preview.textContent = "Waiting for post-test scores";
+          preview.dataset.level = "neutral";
+        } else {
+          const { label } = this.componentLikelihoodMeta(percentage);
+          preview.textContent = `${percentage}% · ${label} Likelihood`;
+          preview.dataset.level = "readiness";
+        }
       }
       if (overallGradeCell) {
         overallGradeCell.innerHTML = this.renderOverallLikelihoodCell(overallPost, hasAnyPost);
@@ -730,7 +749,7 @@ class AssessmentScores {
       if (workEl) workEl.value = workTotal ?? "";
       if (revalidaEl) revalidaEl.value = revalidaTotal ?? "";
       if (rawEl) rawEl.value = rawTotal ?? "";
-      if (finalEl) finalEl.value = finalPercentage ?? "";
+      if (finalEl) finalEl.value = finalPercentage == null ? "" : `${finalPercentage}%`;
       this.updatePortfolioValidity();
     };
 
@@ -752,10 +771,6 @@ class AssessmentScores {
         this.clampInputToBounds(input);
         updatePortfolioPreview();
       });
-    });
-
-    document.querySelector("[data-overall-rating]")?.addEventListener("input", (event) => {
-      this.clampInputToBounds(event.currentTarget);
     });
 
     this.AF5_ROWS.filter((row) => row.id && row.type === "score").forEach((row) => updateRowPreview(row.id));
@@ -939,7 +954,9 @@ class AssessmentScores {
     });
     const overallPostForLikelihood = this.sumRowScores("post");
     const overallPercentage = this.overallLikelihoodPercentage(overallPostForLikelihood);
-    scores.overall_likelihood = overallPercentage == null ? null : `${overallPercentage}%`;
+    scores.overall_likelihood = overallPercentage == null
+      ? null
+      : `${this.componentLikelihoodMeta(overallPercentage).label.toUpperCase()} LIKELIHOOD`;
 
     const portfolio = this.readPortfolioFromDom();
 
@@ -948,7 +965,6 @@ class AssessmentScores {
       scores,
       portfolio,
       finalScorePercentageGrade: this.portfolioPercentageGrade(portfolio),
-      overallFinalAssessmentRating: this.readNumber("[data-overall-rating]"),
     };
 
     const btn = document.querySelector("[data-save-scores-btn]");

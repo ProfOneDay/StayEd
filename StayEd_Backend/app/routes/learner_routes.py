@@ -2010,7 +2010,7 @@ def list_learner_modules(learner_id: int):
             "name": f"{base['first_name']} {base['last_name']}",
             "lrn": base["lrn"],
             "clc": base["clc_name"],
-            "level": title_enum(base["learning_level"]),
+            "level": base["learning_level"],
             **learner_activity,
         },
         **_logbook(base["enrollment_id"], learner_activity),
@@ -2113,7 +2113,7 @@ def release_module_batch(learner_id: int):
             "name": f"{base['first_name']} {base['last_name']}",
             "lrn": base["lrn"],
             "clc": base["clc_name"],
-            "level": title_enum(base["learning_level"]),
+            "level": base["learning_level"],
             **learner_activity,
         },
         **_logbook(base["enrollment_id"], learner_activity),
@@ -2182,7 +2182,7 @@ def return_module_batch(learner_id: int, batch_id: int):
             "name": f"{base['first_name']} {base['last_name']}",
             "lrn": base["lrn"],
             "clc": base["clc_name"],
-            "level": title_enum(base["learning_level"]),
+            "level": base["learning_level"],
             **learner_activity,
         },
         **_logbook(base["enrollment_id"], learner_activity),
@@ -2241,7 +2241,7 @@ def undo_return_module_batch(learner_id: int, batch_id: int):
             "name": f"{base['first_name']} {base['last_name']}",
             "lrn": base["lrn"],
             "clc": base["clc_name"],
-            "level": title_enum(base["learning_level"]),
+            "level": base["learning_level"],
             **learner_activity,
         },
         **_logbook(base["enrollment_id"], learner_activity),
@@ -2287,7 +2287,7 @@ def update_module_planned_return(learner_id: int, batch_id: int, module_record_i
             "name": f"{base['first_name']} {base['last_name']}",
             "lrn": base["lrn"],
             "clc": base["clc_name"],
-            "level": title_enum(base["learning_level"]),
+            "level": base["learning_level"],
             **learner_activity,
         },
         **_logbook(base["enrollment_id"], learner_activity),
@@ -2480,7 +2480,7 @@ def edit_module_batch(learner_id: int, batch_id: int):
             "name": f"{base['first_name']} {base['last_name']}",
             "lrn": base["lrn"],
             "clc": base["clc_name"],
-            "level": title_enum(base["learning_level"]),
+            "level": base["learning_level"],
             **learner_activity,
         },
         **_logbook(base["enrollment_id"], learner_activity),
@@ -2524,7 +2524,7 @@ def delete_module_batch(learner_id: int, batch_id: int):
             "name": f"{base['first_name']} {base['last_name']}",
             "lrn": base["lrn"],
             "clc": base["clc_name"],
-            "level": title_enum(base["learning_level"]),
+            "level": base["learning_level"],
             **learner_activity,
         },
         **_logbook(base["enrollment_id"], learner_activity),
@@ -3173,12 +3173,12 @@ ASSESSMENT_SCORE_ROW_IDS = (
     "flt_ls1_fil_mc", "flt_ls1_fil_writing", "flt_ls1_fil_listening",
     "flt_ls2", "flt_ls3", "flt_ls4", "flt_ls5", "flt_ls6",
 )
-# The "Overall Score" row on the form sums only the Functional Literacy
-# Assessment (FLT) rows -- PIS Score sits in its own section above ABL and
-# is deliberately excluded (confirmed against the reference form: FLT-only
-# sum of 76/79 matches the form exactly; including PIS gives 86/89, which
-# does not).
+# StayEd project readiness formula uses the full post-test score shown by
+# the Assessment Scores page: likelihood percentage = post-test total / 98 * 100.
+# Keep the backend aligned with the frontend so save/reload cannot change the
+# High/Low result.
 ASSESSMENT_FLT_ROW_IDS = (
+    "pis",
     "flt_ls1_en_mc", "flt_ls1_en_writing", "flt_ls1_en_listening",
     "flt_ls1_fil_mc", "flt_ls1_fil_writing", "flt_ls1_fil_listening",
     "flt_ls2", "flt_ls3", "flt_ls4", "flt_ls5", "flt_ls6",
@@ -3197,9 +3197,8 @@ ASSESSMENT_PORTFOLIO_TOTAL_FIELD_IDS = (
 # It is deliberately labelled as a StayEd threshold rather than an official
 # DepEd A&E passing mark.
 ASSESSMENT_PASSING_LIKELIHOOD_THRESHOLD = 70.0
-# Sum of the internal FLT component display scales used by the Assessment
-# Scores page. PIS is excluded because it is not part of the FLT Overall Score.
-ASSESSMENT_FLT_TOTAL_MAX_SCORE = 93.7
+# Denominator approved for the StayEd passing-likelihood computation.
+ASSESSMENT_FLT_TOTAL_MAX_SCORE = 98.0
 
 
 def _assessment_likelihood_from_percentage(value):

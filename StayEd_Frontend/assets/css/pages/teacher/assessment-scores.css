@@ -1785,12 +1785,10 @@ body[data-page="Assessment Scores"] .st-badge-info {
   border-left: 1px solid var(--st-outline-variant);
   color: var(--st-on-surface-variant);
   font-family: var(--st-font-body);
-  /* Was --st-font-size-small (16px) -- standard secondary/description
-     text elsewhere in the app is --st-fs-sm (13px); at 16px this long
-     paragraph read noticeably larger than any other card's body copy. */
-  font-size: var(--st-fs-sm);
+  /* Keep the likelihood explanation comfortably readable. */
+  font-size: 16px;
   font-weight: var(--st-font-weight-regular);
-  line-height: var(--st-line-height-body);
+  line-height: 1.6;
   overflow-wrap: normal;
   word-break: normal;
 }
@@ -1840,6 +1838,122 @@ body[data-page="Assessment Scores"] .st-badge-info {
   }
 
   .st-assessment-likelihood-note {
-    font-size: var(--st-fs-xs);
+    font-size: 15px;
+    line-height: 1.6;
   }
+}
+
+
+/* ============================================================
+   2026-10-16 — Final Assessment Scores consistency fixes
+   Presentation Portfolio numeric/computed boxes match the AF5 score
+   controls exactly (62 x 34). Date remains wider for the calendar UI.
+   ============================================================ */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child > .st-assessment-input:not(.st-assessment-input--date),
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child > [data-portfolio-total],
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child > [data-revalida-total],
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child > [data-portfolio-raw-total] {
+  display: block !important;
+  box-sizing: border-box !important;
+  width: 62px !important;
+  min-width: 62px !important;
+  max-width: 62px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: 0 6px !important;
+  text-align: center !important;
+  line-height: 1 !important;
+}
+
+/* Overall Final Assessment Rating is a calculated/display-only value,
+   not a form control the teacher can type into. */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-input--computed {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: default;
+  font-weight: 700 !important;
+  background: var(--st-surface-container-low) !important;
+  color: var(--st-on-surface-variant) !important;
+}
+
+/* ============================================================
+   2026-10-16 — Final box sizing pass
+   Keep every score/computed value box identical to AF5 (62 x 34).
+   The date control is the only wider field and is sized just large
+   enough for MM/DD/YYYY plus the browser calendar icon.
+   ============================================================ */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child > .st-assessment-input:not(.st-assessment-input--date),
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child > [data-portfolio-total],
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child > [data-revalida-total],
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-table td:last-child > [data-portfolio-raw-total] {
+  box-sizing: border-box !important;
+  width: 62px !important;
+  min-width: 62px !important;
+  max-width: 62px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  padding: 0 6px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  border-radius: var(--st-radius-xs) !important;
+  text-align: center !important;
+  line-height: 1 !important;
+}
+
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-input--date {
+  box-sizing: border-box !important;
+  width: 128px !important;
+  min-width: 128px !important;
+  max-width: 128px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  padding: 0 7px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  border-radius: var(--st-radius-xs) !important;
+}
+
+/* ============================================================
+   2026-10-16 — Nested portfolio total-box override
+   Total Revalida / Total PPA inputs sit inside .st-assessment-score-entry,
+   so target the nested input itself to guarantee the same AF5 footprint.
+   ============================================================ */
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  .st-assessment-score-entry .st-assessment-input,
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  input[data-revalida-total],
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  input[data-portfolio-raw-total],
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  input[data-portfolio-total],
+[data-assessment-form] > .st-assessment-table-card:nth-child(2)
+  input[data-final-grade] {
+  box-sizing: border-box !important;
+  width: 62px !important;
+  min-width: 62px !important;
+  max-width: 62px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  flex: 0 0 62px !important;
+  padding: 0 6px !important;
+  border-radius: var(--st-radius-xs) !important;
+  text-align: center !important;
+  line-height: 1 !important;
 }
