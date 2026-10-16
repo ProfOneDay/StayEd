@@ -3220,7 +3220,8 @@ def _assessment_overall_percentage(scores: dict, key: str = "post") -> float | N
     if not any(value is not None for value in recorded):
         return None
     total = sum(value or 0 for value in recorded)
-    return round((total / ASSESSMENT_FLT_TOTAL_MAX_SCORE) * 100, 2)
+    percentage = (total / ASSESSMENT_FLT_TOTAL_MAX_SCORE) * 100
+    return round(max(0.0, min(100.0, percentage)), 2)
 
 
 def _coerce_number(value):
@@ -3325,6 +3326,10 @@ def update_assessment_scores(learner_id: int):
     scores = _sanitize_score_rows(data.get("scores"))
     portfolio = _sanitize_portfolio(data.get("portfolio"))
     final_grade = _coerce_number(data.get("finalScorePercentageGrade"))
+    # The form no longer has an input for this field, so the payload never
+    # sends it -- treat "not provided" as "leave whatever was last recorded
+    # alone" (via the COALESCE below) instead of silently wiping it to NULL
+    # on every single save.
     overall_rating = _coerce_number(data.get("overallFinalAssessmentRating"))
 
     # Do not ask the teacher to type a subjective likelihood. Derive the
@@ -3346,7 +3351,10 @@ def update_assessment_scores(learner_id: int):
             scores = EXCLUDED.scores,
             portfolio = EXCLUDED.portfolio,
             final_score_percentage_grade = EXCLUDED.final_score_percentage_grade,
-            overall_final_assessment_rating = EXCLUDED.overall_final_assessment_rating,
+            overall_final_assessment_rating = COALESCE(
+                EXCLUDED.overall_final_assessment_rating,
+                als_assessment_scores.overall_final_assessment_rating
+            ),
             updated_by_teacher_id = EXCLUDED.updated_by_teacher_id,
             updated_at = now()
         RETURNING *

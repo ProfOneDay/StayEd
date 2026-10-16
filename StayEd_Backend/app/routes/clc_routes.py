@@ -286,7 +286,11 @@ def current_clc():
         "municipality": row["municipality"],
         "address": row.get("address") or "",
         "schoolYear": get_active_school_year(),
-        "learningLevel": title_enum(row.get("learning_level")),
+        # No active learning_class yet (a newly assigned teacher before
+        # creating one) means learning_level is NULL here -- title_enum("")
+        # would leave the field blank, so fall back the same way this
+        # endpoint always has.
+        "learningLevel": title_enum(row.get("learning_level")) or "Basic Literacy Program",
     }
 
 

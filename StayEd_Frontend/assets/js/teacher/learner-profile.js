@@ -66,15 +66,16 @@ class LearnerProfilePage {
       return;
     }
 
-    const finalGrade = Number.isFinite(Number(assessment.finalScorePercentageGrade))
-      ? Math.round(Number(assessment.finalScorePercentageGrade))
-      : null;
-    const overallRating = Number.isFinite(Number(assessment.overallFinalAssessmentRating))
-      ? Math.round(Number(assessment.overallFinalAssessmentRating))
-      : null;
-    const overallPost = Number.isFinite(Number(assessment.overallScorePost))
-      ? Math.round(Number(assessment.overallScorePost))
-      : null;
+    // Number(null) is 0 (not NaN), so checking Number.isFinite on a value
+    // that's already null/undefined would read a missing score as "0%"
+    // instead of "no data yet" -- rule those out before the Number() cast.
+    const toDisplayNumber = (raw) =>
+      raw === null || raw === undefined || raw === ""
+        ? null
+        : Number.isFinite(Number(raw)) ? Math.round(Number(raw)) : null;
+    const finalGrade = toDisplayNumber(assessment.finalScorePercentageGrade);
+    const overallRating = toDisplayNumber(assessment.overallFinalAssessmentRating);
+    const overallPost = toDisplayNumber(assessment.overallScorePost);
 
     const likelihoodRaw = String(assessment.scores?.overall_likelihood || "").toUpperCase();
     const likelihoodClass = likelihoodRaw.includes("HIGH") ? "high" : likelihoodRaw.includes("LOW") ? "low" : "neutral";
