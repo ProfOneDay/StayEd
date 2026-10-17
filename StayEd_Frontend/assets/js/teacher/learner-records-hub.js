@@ -199,6 +199,12 @@ class LearnerRecordsHub {
       `Viewing records for ${match.clc}, ${match.level} (SY ${match.schoolYear}).`,
     );
 
+    // Senior High remains supported for learner records, but its assessment
+    // process is outside the current StayEd Assessment Scores module.
+    const assessmentLink = document.querySelector("[data-assessment-scores-link]");
+    const isSeniorHigh = String(match.level || "").toLowerCase().includes("senior");
+    if (assessmentLink && isSeniorHigh) assessmentLink.style.display = "none";
+
     await this.loadClassPortalShare(classId);
   }
 

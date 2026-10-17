@@ -824,6 +824,7 @@ def _exam_passing_chance(
     enrollment_id: int,
     modality: str | None,
     *,
+    learning_level: str | None,
     modules_released: int,
     modules_returned: int,
     overdue_modules: int,
@@ -839,8 +840,26 @@ def _exam_passing_chance(
 
     The output is HIGH/LOW passing chance rather than an official pass/fail
     result. A score of 70 is an internal readiness threshold, not the official
-    A&E passing mark.
+    A&E passing mark. This estimate is only applicable to A&E Elementary and
+    Junior High School learners.
     """
+    if learning_level not in {"ELEMENTARY", "JUNIOR_HIGH_SCHOOL"}:
+        return {
+            "status": "NOT_APPLICABLE",
+            "label": "Not applicable",
+            "score": None,
+            "confidence": "A&E readiness not used for this level",
+            "summary": (
+                "A&E exam passing chance is only estimated for A&E Elementary "
+                "and Junior High School learners."
+            ),
+            "factors": [],
+            "threshold": 70,
+            "disclaimer": (
+                "This readiness estimate is not used for Basic Literacy Program "
+                "or ALS Senior High School learners."
+            ),
+        }
     # Performance data actually lives in als_assessment_scores.scores (one
     # JSONB row per enrollment, keyed by FLT component id -> {"pre","post"}),
     # not per-module pretest/posttest columns on module_record -- those
@@ -1277,6 +1296,7 @@ def learner_profile(learner_id: int):
     exam_passing_chance = _exam_passing_chance(
         enrollment_id,
         base.get("learning_modality"),
+        learning_level=base.get("learning_level"),
         modules_released=modules_released,
         modules_returned=modules_returned,
         overdue_modules=overdue_modules,
@@ -3261,26 +3281,35 @@ def _sanitize_portfolio(data) -> dict:
     }
 
 
-def _shape_assessment_scores(row: dict | None) -> dict:
+def _shape_assessment_scores(row: dict | None, learning_level: str | None = None) -> dict:
     scores = dict((row or {}).get("scores") or {})
     portfolio = (row or {}).get("portfolio") or {}
 
-    overall_pre = sum(
-        (scores.get(r) or {}).get("pre") or 0 for r in ASSESSMENT_FLT_ROW_IDS
+    # DO 001, s. 2026: BLP may have an FLT entry-level record, while FLT is
+    # the regular pre/during/post functional-literacy assessment for A&E
+    # Elementary and Junior High School. StayEd's A&E readiness percentage
+    # remains limited to the A&E programs.
+    has_flt_entry = learning_level in {"BLP", "ELEMENTARY", "JUNIOR_HIGH_SCHOOL"}
+    uses_ae_flt = learning_level in {"ELEMENTARY", "JUNIOR_HIGH_SCHOOL"}
+
+    overall_pre = (
+        sum((scores.get(r) or {}).get("pre") or 0 for r in ASSESSMENT_FLT_ROW_IDS)
+        if has_flt_entry else None
     )
-    overall_post = sum(
-        (scores.get(r) or {}).get("post") or 0 for r in ASSESSMENT_FLT_ROW_IDS
+    overall_post = (
+        sum((scores.get(r) or {}).get("post") or 0 for r in ASSESSMENT_FLT_ROW_IDS)
+        if uses_ae_flt else None
     )
-    overall_percentage = _assessment_overall_percentage(scores)
+    overall_percentage = _assessment_overall_percentage(scores) if uses_ae_flt else None
     computed_likelihood = _assessment_likelihood_from_percentage(overall_percentage)
-    if computed_likelihood:
-        scores["overall_likelihood"] = computed_likelihood
+    scores["overall_likelihood"] = computed_likelihood
     portfolio_total = sum(
         portfolio.get(f) or 0 for f in ASSESSMENT_PORTFOLIO_TOTAL_FIELD_IDS
     )
 
     return {
         "assessed": row is not None,
+        "learningLevel": learning_level,
         "dateOfAssessment": row["date_of_assessment"].isoformat() if row and row.get("date_of_assessment") else None,
         "scores": scores,
         "portfolio": portfolio,
@@ -3304,7 +3333,7 @@ def get_assessment_scores(learner_id: int):
         "SELECT * FROM als_assessment_scores WHERE enrollment_id = %s",
         (base["enrollment_id"],),
     )
-    return _shape_assessment_scores(row)
+    return _shape_assessment_scores(row, base.get("learning_level"))
 
 
 @bp.put("/learners/<int:learner_id>/assessment-scores")
@@ -3313,6 +3342,12 @@ def update_assessment_scores(learner_id: int):
     base = _profile_base(learner_id)
     if not base:
         return error("Learner not found.", 404)
+
+    if base.get("learning_level") == "SENIOR_HIGH_SCHOOL":
+        return error(
+            "Senior High assessment records are outside the current StayEd Assessment Scores module.",
+            422,
+        )
 
     data = request.get_json(silent=True) or {}
 
@@ -3332,11 +3367,14 @@ def update_assessment_scores(learner_id: int):
     # on every single save.
     overall_rating = _coerce_number(data.get("overallFinalAssessmentRating"))
 
-    # Do not ask the teacher to type a subjective likelihood. Derive the
-    # overall High/Low label from the FLT post-test total so the headline
-    # result always agrees with the row-level percentages and Overall Score.
-    scores["overall_likelihood"] = _assessment_likelihood_from_percentage(
-        _assessment_overall_percentage(scores)
+    # ABL is specific to BLP. BLP may also retain an FLT entry-level score,
+    # but the StayEd A&E readiness label is only generated for A&E Elementary
+    # and Junior High School learners. Senior High School uses separate
+    # assessment rules.
+    uses_ae_flt = base.get("learning_level") in {"ELEMENTARY", "JUNIOR_HIGH_SCHOOL"}
+    scores["overall_likelihood"] = (
+        _assessment_likelihood_from_percentage(_assessment_overall_percentage(scores))
+        if uses_ae_flt else None
     )
 
     row = execute(
@@ -3367,4 +3405,4 @@ def update_assessment_scores(learner_id: int):
         returning=True,
     )
 
-    return {"message": "Scores saved.", **_shape_assessment_scores(row)}
+    return {"message": "Scores saved.", **_shape_assessment_scores(row, base.get("learning_level"))}

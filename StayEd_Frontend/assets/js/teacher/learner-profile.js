@@ -33,8 +33,30 @@ class LearnerProfilePage {
       if (!btn) return;
 
       event.preventDefault();
+      if (this.isSeniorHigh()) {
+        Toast?.error("Senior High assessment records are outside the current Assessment Scores module.");
+        return;
+      }
       window.location.href = this.buildAssessmentScoresUrl();
     });
+  }
+
+  static isSeniorHigh() {
+    return String(this.profile?.level || "").toLowerCase().includes("senior");
+  }
+
+  static renderAssessmentScopeNotice() {
+    const list = document.querySelector("[data-assessment-list]");
+    const btn = document.querySelector("[data-add-assessment-btn]");
+    if (btn) btn.hidden = true;
+    if (!list) return;
+
+    list.innerHTML = `
+      <div class="st-assessment-summary-empty">
+        <p class="st-assessment-empty">Senior High assessment records are outside the current StayEd Assessment Scores module.</p>
+        <p class="st-assessment-empty-sub">The current module supports Basic Literacy, Elementary, and Junior High learners.</p>
+      </div>
+    `;
   }
 
   static async loadAssessmentSummary() {
@@ -140,7 +162,11 @@ class LearnerProfilePage {
       this.renderHero();
 
       this.renderOverview();
-      await this.loadAssessmentSummary();
+      if (this.isSeniorHigh()) {
+        this.renderAssessmentScopeNotice();
+      } else {
+        await this.loadAssessmentSummary();
+      }
 
       this.renderMonitoringHistory();
 

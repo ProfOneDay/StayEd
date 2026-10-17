@@ -98,6 +98,80 @@ class AssessmentScores {
     return Object.values(this.SUBJECT_MAX_SCORES).reduce((sum, value) => sum + value, 0);
   }
 
+  // DepEd ALS assessment applicability (DO 001, s. 2026):
+  // - Basic Literacy Program (BLP): ABL is the program-specific assessment.
+  //   The revised FLT may also be recorded here as the learner's entry-level
+  //   assessment before learning intervention; it is not used for StayEd's
+  //   A&E passing-likelihood calculation for BLP learners.
+  // - A&E Elementary / Junior High School: FLT is used before, during and
+  //   after ALS classes. PPA is part of the A&E certification process.
+  // - Senior High School: ABL, FLT and the Elementary/JHS PPA block are not
+  //   applicable on this screen.
+  static learningLevelCodeFrom(value) {
+    const raw = String(value || "").trim().toLowerCase();
+
+    if (raw === "blp" || raw.includes("basic literacy")) return "BLP";
+    if (raw.includes("junior")) return "JUNIOR_HIGH_SCHOOL";
+    if (raw.includes("senior")) return "SENIOR_HIGH_SCHOOL";
+    if (raw.includes("elementary")) return "ELEMENTARY";
+    return "UNKNOWN";
+  }
+
+  static currentLearningLevelCode() {
+    const learner = this.learners.find((item) => String(item.id) === String(this.selectedLearnerId));
+    return this.learningLevelCodeFrom(
+      this.classInfo?.level
+      || this.classInfo?.learningLevel
+      || learner?.level
+      || "",
+    );
+  }
+
+  static supportsAssessmentRecords(levelCode = this.currentLearningLevelCode()) {
+    return ["BLP", "ELEMENTARY", "JUNIOR_HIGH_SCHOOL"].includes(levelCode);
+  }
+
+  static usesAbl() {
+    return this.currentLearningLevelCode() === "BLP";
+  }
+
+  // FLT can appear for BLP as an entry-level assessment, and is the regular
+  // pre/during/post functional-literacy assessment for A&E Elementary/JHS.
+  static showsFlt() {
+    return ["BLP", "ELEMENTARY", "JUNIOR_HIGH_SCHOOL"].includes(this.currentLearningLevelCode());
+  }
+
+  // StayEd's internal A&E passing-likelihood display is only meaningful for
+  // the A&E Elementary and Junior High School programs.
+  static usesAeReadiness() {
+    return ["ELEMENTARY", "JUNIOR_HIGH_SCHOOL"].includes(this.currentLearningLevelCode());
+  }
+
+  static usesPortfolio() {
+    return ["ELEMENTARY", "JUNIOR_HIGH_SCHOOL"].includes(this.currentLearningLevelCode());
+  }
+
+  static visibleAf5Rows() {
+    const level = this.currentLearningLevelCode();
+
+    // BLP keeps ABL and the entry-level FLT visible. The render helpers below
+    // make the FLT rows entry-only rather than treating them as BLP post-tests.
+    if (level === "BLP") return this.AF5_ROWS;
+
+    if (["ELEMENTARY", "JUNIOR_HIGH_SCHOOL"].includes(level)) {
+      return this.AF5_ROWS.filter((row) =>
+        row.type !== "abl"
+        && !(row.type === "section" && row.label.includes("Basic Literacy")),
+      );
+    }
+
+    if (level === "SENIOR_HIGH_SCHOOL") return [];
+
+    // Backward-compatible fallback if the class context cannot be resolved.
+    // This should be rare because the assessment page normally opens from a class.
+    return this.AF5_ROWS;
+  }
+
   static async init() {
     if (window.Guards) Guards.teacher();
 
@@ -146,7 +220,18 @@ class AssessmentScores {
 
     try {
       const res = await API.getLearners(this.classId ? { class: this.classId } : {});
-      this.learners = res.data || [];
+      const allLearners = res.data || [];
+
+      // The current Assessment Scores module covers BLP, A&E Elementary,
+      // and A&E Junior High only. Senior High learners remain available in
+      // enrollment/learner management, but are intentionally excluded here.
+      if (this.currentLearningLevelCode() === "SENIOR_HIGH_SCHOOL") {
+        this.learners = [];
+      } else {
+        this.learners = allLearners.filter(
+          (learner) => this.learningLevelCodeFrom(learner.level) !== "SENIOR_HIGH_SCHOOL",
+        );
+      }
 
       this.renderLearnerList();
     } catch (error) {
@@ -179,8 +264,21 @@ class AssessmentScores {
     const filtered = this.filteredLearners();
     if (countEl) countEl.textContent = this.learners.length;
 
+    const searchInput = document.querySelector("[data-learner-search]");
+    if (this.currentLearningLevelCode() === "SENIOR_HIGH_SCHOOL") {
+      if (searchInput) searchInput.disabled = true;
+      list.innerHTML = `
+        <p class="st-assessment-empty">
+          Senior High assessment records are outside the current StayEd Assessment Scores module.
+          This module supports Basic Literacy, Elementary, and Junior High learners.
+        </p>
+      `;
+      return;
+    }
+    if (searchInput) searchInput.disabled = false;
+
     if (!filtered.length) {
-      list.innerHTML = `<p class="st-assessment-empty">No learners found.</p>`;
+      list.innerHTML = `<p class="st-assessment-empty">No supported learners found.</p>`;
       return;
     }
 
@@ -208,6 +306,12 @@ class AssessmentScores {
   }
 
   static async selectLearner(learnerId) {
+    const learner = this.learners.find((item) => String(item.id) === String(learnerId));
+    if (this.learningLevelCodeFrom(learner?.level) === "SENIOR_HIGH_SCHOOL") {
+      Toast?.error("Senior High assessment records are outside the current Assessment Scores module.");
+      return;
+    }
+
     this.selectedLearnerId = learnerId;
     this.renderLearnerList();
 
@@ -215,7 +319,6 @@ class AssessmentScores {
     const panel = document.querySelector("[data-detail-panel]");
     panel.hidden = false;
 
-    const learner = this.learners.find((l) => l.id === learnerId);
     if (learner) {
       document.querySelector("[data-detail-avatar]").textContent = Utils.initials(learner.name);
       document.querySelector("[data-detail-name]").textContent = learner.name;
@@ -261,12 +364,44 @@ class AssessmentScores {
     const revalidaTotal = this.portfolioRevalidaTotal(portfolio);
     const portfolioRawTotal = this.portfolioRawTotal(portfolio);
     const finalPercentage = this.portfolioPercentageGrade(portfolio);
+    const learningLevel = this.currentLearningLevelCode();
+    const visibleAf5Rows = this.visibleAf5Rows();
+    const isBlp = learningLevel === "BLP";
+    const isSeniorHigh = learningLevel === "SENIOR_HIGH_SCHOOL";
+    const showAeReadiness = this.usesAeReadiness();
+    const showPortfolio = this.usesPortfolio() || learningLevel === "UNKNOWN";
+
+    const contextLabel = document.querySelector("[data-assessment-context-label]");
+    if (contextLabel) {
+      contextLabel.textContent = isBlp
+        ? "AF5 · Basic Literacy & Entry Assessment"
+        : isSeniorHigh
+          ? "SHS · Outside current assessment module"
+          : "AF5 · Assessment Results & Portfolio";
+    }
+
+    const saveButton = document.querySelector("[data-save-scores-btn]");
+    if (saveButton) saveButton.hidden = isSeniorHigh;
+
+    if (isSeniorHigh) {
+      root.innerHTML = `
+        <div class="st-assessment-table-card">
+          <div class="st-assessment-table-head">
+            <h3>Senior High School Assessment</h3>
+          </div>
+          <p class="st-assessment-empty">
+            Senior High assessment records are outside the current StayEd Assessment Scores module. This module currently supports Basic Literacy, Elementary, and Junior High learners.
+          </p>
+        </div>
+      `;
+      return;
+    }
 
     root.innerHTML = `
       <div class="st-assessment-table-card">
         <div class="st-assessment-table-head">
           <h3>AF5 · Assessment Results</h3>
-          <span class="st-assessment-table-head-subtitle">Pre-Test and Post-Test Scores</span>
+          <span class="st-assessment-table-head-subtitle">${isBlp ? "ABL progress scores and entry-level FLT" : "Pre-Test and Post-Test Scores"}</span>
         </div>
         <table class="st-assessment-table st-assessment-table--af5">
           <colgroup>
@@ -278,116 +413,134 @@ class AssessmentScores {
           <thead>
             <tr>
               <th>Component / Learning Area</th>
-              <th>Pre</th>
-              <th>Post</th>
-              <th>Likelihood / Competency</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${this.AF5_ROWS.map((row) => this.renderAf5Row(row, scores)).join("")}
-            <tr class="st-assessment-total-row">
-              <td>Overall Score</td>
-              <td>${this.renderOverallScoreTotal(overallPre, "pre")}</td>
-              <td>${this.renderOverallScoreTotal(overallPost, "post")}</td>
-              <td class="st-assessment-result-cell" data-overall-grade-cell>${this.renderOverallLikelihoodCell(overallPost, hasAnyPost)}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="st-assessment-table-card">
-        <div class="st-assessment-table-head">
-          <h3>Presentation Portfolio Assessment</h3>
-        </div>
-        <table class="st-assessment-table">
-          <thead>
-            <tr>
-              <th>Activity / Component</th>
-              <th>Remarks / Raw Score</th>
+              <th>${isBlp ? "Pre / Entry" : "Pre"}</th>
+              <th>${isBlp ? "Post (ABL only)" : "Post"}</th>
+              <th>${isBlp ? "Competency / Notes" : "Likelihood / Competency"}</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>Date of Assessment</td>
-              <td><input type="date" class="st-assessment-input st-assessment-input--date" data-date-of-assessment value="${f.dateOfAssessment || ""}"></td>
+              <td colspan="3"><input type="date" class="st-assessment-input st-assessment-input--date" data-date-of-assessment value="${f.dateOfAssessment || ""}"></td>
             </tr>
-            <tr class="st-assessment-section-row"><td colspan="2">Final Assessment of Work Samples (Raw Score)</td></tr>
-            ${this.PORTFOLIO_WORK_SAMPLE_ROWS.map(
-              (row) => `
-                <tr>
-                  <td class="st-assessment-indent">${this.esc(row.label)}</td>
-                  <td><input type="number" min="0" max="${this.PORTFOLIO_WORK_SAMPLE_HPS}" step="0.5" class="st-assessment-input st-assessment-portfolio-work-sample-score" data-portfolio-field="${row.id}" value="${this.escAttr(this.validNumber(portfolio[row.id], this.PORTFOLIO_WORK_SAMPLE_HPS) ?? "")}" aria-label="${this.esc(row.label)} raw score, highest possible score ${this.PORTFOLIO_WORK_SAMPLE_HPS}"></td>
-                </tr>
-              `,
-            ).join("")}
-            <tr class="st-assessment-total-row">
-              <td>Total Work Samples Raw Score</td>
-              <td>
-                <span class="st-assessment-score-entry st-assessment-score-entry--total">
-                  <input type="text" class="st-assessment-input st-assessment-portfolio-work-sample-total" data-portfolio-total readonly value="${workSampleTotal ?? ""}" aria-label="Total Work Samples raw score out of ${this.PORTFOLIO_WORK_SAMPLE_MAX_SCORE}">
-                  <span class="st-assessment-score-denominator">/ ${this.PORTFOLIO_WORK_SAMPLE_MAX_SCORE}</span>
-                </span>
-              </td>
-            </tr>
-            <tr class="st-assessment-section-row"><td colspan="2">Inter-District Revalida</td></tr>
-            ${this.PORTFOLIO_REVALIDA_ROWS.map(
-              (row) => `
-                <tr>
-                  <td class="st-assessment-indent">${this.esc(row.label)}</td>
-                  <td><input type="number" min="0" max="${this.PORTFOLIO_REVALIDA_MAX_SCORES[row.id]}" step="0.5" class="st-assessment-input" data-portfolio-field="${row.id}" value="${this.escAttr(this.validNumber(portfolio[row.id], this.PORTFOLIO_REVALIDA_MAX_SCORES[row.id]) ?? "")}" aria-label="${this.esc(row.label)} raw score, highest possible score ${this.PORTFOLIO_REVALIDA_MAX_SCORES[row.id]}"></td>
-                </tr>
-              `,
-            ).join("")}
-            <tr class="st-assessment-total-row">
-              <td>Total Inter-District Revalida Raw Score</td>
-              <td>
-                <span class="st-assessment-score-entry st-assessment-score-entry--total">
-                  <input type="text" class="st-assessment-input" data-revalida-total readonly value="${revalidaTotal ?? ""}" aria-label="Total Inter-District Revalida raw score out of ${this.PORTFOLIO_REVALIDA_MAX_SCORE}">
-                  <span class="st-assessment-score-denominator">/ ${this.PORTFOLIO_REVALIDA_MAX_SCORE}</span>
-                </span>
-              </td>
-            </tr>
-            <tr class="st-assessment-total-row">
-              <td>Total Presentation Portfolio Assessment Raw Score</td>
-              <td>
-                <span class="st-assessment-score-entry st-assessment-score-entry--total">
-                  <input type="text" class="st-assessment-input" data-portfolio-raw-total readonly value="${portfolioRawTotal ?? ""}" aria-label="Total Presentation Portfolio Assessment raw score out of ${this.PORTFOLIO_MAX_SCORE}">
-                  <span class="st-assessment-score-denominator">/ ${this.PORTFOLIO_MAX_SCORE}</span>
-                </span>
-              </td>
-            </tr>
-            <tr class="st-assessment-total-row">
-              <td>Final Score Percentage Grade</td>
-              <td><input type="text" class="st-assessment-input st-assessment-input--rating" data-final-grade readonly value="${finalPercentage == null ? "" : `${this.escAttr(finalPercentage)}%`}" aria-label="Final score percentage grade"></td>
-            </tr>
+            ${visibleAf5Rows.map((row) => this.renderAf5Row(row, scores)).join("")}
+            ${isBlp ? `
+              <tr class="st-assessment-total-row">
+                <td>Entry-Level FLT Score</td>
+                <td>${this.renderOverallScoreTotal(overallPre, "pre")}</td>
+                <td><span class="st-assessment-computed-empty">—</span></td>
+                <td class="st-assessment-result-cell"><span class="st-assessment-result-note">Entry-level reference only</span></td>
+              </tr>
+            ` : `
+              <tr class="st-assessment-total-row">
+                <td>Overall FLT Score</td>
+                <td>${this.renderOverallScoreTotal(overallPre, "pre")}</td>
+                <td>${this.renderOverallScoreTotal(overallPost, "post")}</td>
+                <td class="st-assessment-result-cell" data-overall-grade-cell>${this.renderOverallLikelihoodCell(overallPost, hasAnyPost)}</td>
+              </tr>
+            `}
           </tbody>
         </table>
-
-        <div class="st-assessment-likelihood-summary">
-          <div class="st-assessment-likelihood-main">
-            <span class="material-symbols-outlined" aria-hidden="true">analytics</span>
-            <div class="st-assessment-likelihood-result">
-              <p class="st-assessment-likelihood-kicker">Likelihood of Passing A&amp;E Exam</p>
-              <strong aria-live="polite" data-overall-likelihood-preview data-level="${hasAnyPost ? "readiness" : "neutral"}">${(() => {
-                if (!hasAnyPost) return "Waiting for post-test scores";
-                const percentage = this.overallLikelihoodPercentage(overallPost);
-                if (percentage == null) return "Waiting for post-test scores";
-                const { label } = this.componentLikelihoodMeta(percentage);
-                return `${percentage}% · ${label} Likelihood`;
-              })()}</strong>
-            </div>
-          </div>
-          <p class="st-assessment-likelihood-note">Calculated from the learner's <strong>FLT post-test total</strong>. StayEd internal threshold: <strong>High likelihood = 70% or above</strong>; <strong>Low likelihood = below 70%</strong>. This is a project readiness rule, not an official DepEd A&amp;E passing mark.</p>
-        </div>
       </div>
+
+      ${showPortfolio ? `
+        <div class="st-assessment-table-card">
+          <div class="st-assessment-table-head">
+            <h3>Presentation Portfolio Assessment</h3>
+          </div>
+          <table class="st-assessment-table">
+            <thead>
+              <tr>
+                <th>Activity / Component</th>
+                <th>Remarks / Raw Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="st-assessment-section-row"><td colspan="2">Final Assessment of Work Samples (Raw Score)</td></tr>
+              ${this.PORTFOLIO_WORK_SAMPLE_ROWS.map(
+                (row) => `
+                  <tr>
+                    <td class="st-assessment-indent">${this.esc(row.label)}</td>
+                    <td><input type="number" min="0" max="${this.PORTFOLIO_WORK_SAMPLE_HPS}" step="0.5" class="st-assessment-input st-assessment-portfolio-work-sample-score" data-portfolio-field="${row.id}" value="${this.escAttr(this.validNumber(portfolio[row.id], this.PORTFOLIO_WORK_SAMPLE_HPS) ?? "")}" aria-label="${this.esc(row.label)} raw score, highest possible score ${this.PORTFOLIO_WORK_SAMPLE_HPS}"></td>
+                  </tr>
+                `,
+              ).join("")}
+              <tr class="st-assessment-total-row">
+                <td>Total Work Samples Raw Score</td>
+                <td>
+                  <span class="st-assessment-score-entry st-assessment-score-entry--total">
+                    <input type="text" class="st-assessment-input st-assessment-portfolio-work-sample-total" data-portfolio-total readonly value="${workSampleTotal ?? ""}" aria-label="Total Work Samples raw score out of ${this.PORTFOLIO_WORK_SAMPLE_MAX_SCORE}">
+                    <span class="st-assessment-score-denominator">/ ${this.PORTFOLIO_WORK_SAMPLE_MAX_SCORE}</span>
+                  </span>
+                </td>
+              </tr>
+              <tr class="st-assessment-section-row"><td colspan="2">Inter-District Revalida</td></tr>
+              ${this.PORTFOLIO_REVALIDA_ROWS.map(
+                (row) => `
+                  <tr>
+                    <td class="st-assessment-indent">${this.esc(row.label)}</td>
+                    <td><input type="number" min="0" max="${this.PORTFOLIO_REVALIDA_MAX_SCORES[row.id]}" step="0.5" class="st-assessment-input" data-portfolio-field="${row.id}" value="${this.escAttr(this.validNumber(portfolio[row.id], this.PORTFOLIO_REVALIDA_MAX_SCORES[row.id]) ?? "")}" aria-label="${this.esc(row.label)} raw score, highest possible score ${this.PORTFOLIO_REVALIDA_MAX_SCORES[row.id]}"></td>
+                  </tr>
+                `,
+              ).join("")}
+              <tr class="st-assessment-total-row">
+                <td>Total Inter-District Revalida Raw Score</td>
+                <td>
+                  <span class="st-assessment-score-entry st-assessment-score-entry--total">
+                    <input type="text" class="st-assessment-input" data-revalida-total readonly value="${revalidaTotal ?? ""}" aria-label="Total Inter-District Revalida raw score out of ${this.PORTFOLIO_REVALIDA_MAX_SCORE}">
+                    <span class="st-assessment-score-denominator">/ ${this.PORTFOLIO_REVALIDA_MAX_SCORE}</span>
+                  </span>
+                </td>
+              </tr>
+              <tr class="st-assessment-total-row">
+                <td>Total Presentation Portfolio Assessment Raw Score</td>
+                <td>
+                  <span class="st-assessment-score-entry st-assessment-score-entry--total">
+                    <input type="text" class="st-assessment-input" data-portfolio-raw-total readonly value="${portfolioRawTotal ?? ""}" aria-label="Total Presentation Portfolio Assessment raw score out of ${this.PORTFOLIO_MAX_SCORE}">
+                    <span class="st-assessment-score-denominator">/ ${this.PORTFOLIO_MAX_SCORE}</span>
+                  </span>
+                </td>
+              </tr>
+              <tr class="st-assessment-total-row">
+                <td>Final Score Percentage Grade</td>
+                <td><input type="text" class="st-assessment-input st-assessment-input--rating" data-final-grade readonly value="${finalPercentage == null ? "" : `${this.escAttr(finalPercentage)}%`}" aria-label="Final score percentage grade"></td>
+              </tr>
+            </tbody>
+          </table>
+
+          ${showAeReadiness ? `
+            <div class="st-assessment-likelihood-summary">
+              <div class="st-assessment-likelihood-main">
+                <span class="material-symbols-outlined" aria-hidden="true">analytics</span>
+                <div class="st-assessment-likelihood-result">
+                  <p class="st-assessment-likelihood-kicker">Likelihood of Passing A&amp;E Exam</p>
+                  <strong aria-live="polite" data-overall-likelihood-preview data-level="${hasAnyPost ? "readiness" : "neutral"}">${(() => {
+                    if (!hasAnyPost) return "Waiting for post-test scores";
+                    const percentage = this.overallLikelihoodPercentage(overallPost);
+                    if (percentage == null) return "Waiting for post-test scores";
+                    const { label } = this.componentLikelihoodMeta(percentage);
+                    return `${percentage}% · ${label} Likelihood`;
+                  })()}</strong>
+                </div>
+              </div>
+              <p class="st-assessment-likelihood-note">Calculated from the learner's <strong>FLT post-test total</strong>. StayEd internal threshold: <strong>High likelihood = 70% or above</strong>; <strong>Low likelihood = below 70%</strong>. This is a project readiness rule, not an official DepEd A&amp;E passing mark.</p>
+            </div>
+          ` : ""}
+        </div>
+      ` : ""}
     `;
 
     this.bindLivePreview();
   }
 
   static renderAf5Row(row, scores) {
+    const isBlp = this.currentLearningLevelCode() === "BLP";
+
     if (row.type === "section") {
-      return `<tr class="st-assessment-section-row"><td colspan="4">${this.esc(row.label)}</td></tr>`;
+      const label = isBlp && row.label.includes("Functional Literacy")
+        ? `${row.label} · Entry-Level Assessment`
+        : row.label;
+      return `<tr class="st-assessment-section-row"><td colspan="4">${this.esc(label)}</td></tr>`;
     }
 
     if (row.type === "subsection") {
@@ -398,7 +551,7 @@ class AssessmentScores {
         <tr class="st-assessment-subsection-row">
           <td>${this.esc(row.label)}</td>
           <td>${this.renderScoreTotal(preTotal, maxScore, row.group, "pre")}</td>
-          <td>${this.renderScoreTotal(postTotal, maxScore, row.group, "post")}</td>
+          <td>${isBlp ? `<span class="st-assessment-computed-empty">—</span>` : this.renderScoreTotal(postTotal, maxScore, row.group, "post")}</td>
           <td class="st-assessment-result-cell" data-subject-group-cell="${row.group}">${this.renderSubjectGroupResult(row.group, scores)}</td>
         </tr>
       `;
@@ -420,7 +573,6 @@ class AssessmentScores {
 
     const directMax = this.SUBJECT_MAX_SCORES[row.id] || null;
     const grouped = this.isGroupedScoreRow(row.id);
-    const groupKey = grouped ? this.groupForRow(row.id) : null;
     const inputMax = grouped ? this.GROUP_COMPONENT_MAX_SCORE : directMax;
     const displayMax = inputMax;
 
@@ -428,7 +580,7 @@ class AssessmentScores {
       <tr>
         <td class="${labelClass}">${this.esc(row.label)}</td>
         <td>${this.renderScoreInput(row.id, "pre", r.pre, displayMax, inputMax)}</td>
-        <td>${this.renderScoreInput(row.id, "post", r.post, displayMax, inputMax)}</td>
+        <td>${isBlp ? `<span class="st-assessment-computed-empty">—</span>` : this.renderScoreInput(row.id, "post", r.post, displayMax, inputMax)}</td>
         <td class="st-assessment-result-cell" data-computed-cell="${row.id}">${this.renderComputedRowResult(row.id, r)}</td>
       </tr>
     `;
@@ -483,9 +635,21 @@ class AssessmentScores {
   }
 
   static renderComputedRowResult(rowId, rowData = {}) {
-    const percentage = this.rowPercentage(rowId, rowData);
+    const isBlp = this.currentLearningLevelCode() === "BLP";
+    const percentage = isBlp
+      ? this.rowPercentageForPart(rowId, rowData, "pre")
+      : this.rowPercentage(rowId, rowData);
     if (percentage == null) {
       return `<span class="st-assessment-computed-empty">—</span>`;
+    }
+
+    if (isBlp) {
+      return `
+        <div class="st-assessment-result">
+          <span class="st-assessment-result-pill is-competency">${percentage}%</span>
+          <span class="st-assessment-result-note">Entry-level</span>
+        </div>
+      `;
     }
 
     if (rowId === "pis") {
@@ -517,8 +681,24 @@ class AssessmentScores {
   }
 
   static renderSubjectGroupResult(groupKey, scores = {}) {
-    const percentage = this.subjectGroupPercentage(groupKey, scores);
+    const isBlp = this.currentLearningLevelCode() === "BLP";
+    const total = this.subjectGroupTotal(groupKey, scores, isBlp ? "pre" : "post")
+      ?? this.subjectGroupTotal(groupKey, scores, "pre");
+    const maxScore = this.SUBJECT_MAX_SCORES[groupKey];
+    const percentage = total == null || !maxScore
+      ? null
+      : this.roundPercent((total / maxScore) * 100);
     if (percentage == null) return `<span class="st-assessment-computed-empty">—</span>`;
+
+    if (isBlp) {
+      return `
+        <div class="st-assessment-result">
+          <span class="st-assessment-result-pill is-competency">${percentage}%</span>
+          <span class="st-assessment-result-note">Entry-level</span>
+        </div>
+      `;
+    }
+
     const { label, tone } = this.componentLikelihoodMeta(percentage);
     return `
       <div class="st-assessment-result">
@@ -591,6 +771,16 @@ class AssessmentScores {
 
   static rowPercentage(rowId, rowData = {}) {
     const value = rowData.post ?? rowData.pre;
+    const groupKey = this.groupForRow(rowId);
+    const maxScore = this.SUBJECT_MAX_SCORES[rowId] || (groupKey ? this.GROUP_COMPONENT_MAX_SCORE : null);
+    if (value == null || value === "" || !maxScore) return null;
+    const numericValue = this.validNumber(value, maxScore);
+    if (numericValue == null) return null;
+    return this.roundPercent((numericValue / maxScore) * 100);
+  }
+
+  static rowPercentageForPart(rowId, rowData = {}, part = "pre") {
+    const value = rowData?.[part];
     const groupKey = this.groupForRow(rowId);
     const maxScore = this.SUBJECT_MAX_SCORES[rowId] || (groupKey ? this.GROUP_COMPONENT_MAX_SCORE : null);
     if (value == null || value === "" || !maxScore) return null;
@@ -800,6 +990,9 @@ class AssessmentScores {
   static readAllScoresFromDom() {
     const scores = {};
     this.AF5_ROWS.filter((row) => row.id).forEach((row) => {
+      const preInput = document.querySelector(`[data-score-field="${row.id}"][data-score-part="pre"]`);
+      const postInput = document.querySelector(`[data-score-field="${row.id}"][data-score-part="post"]`);
+      if (!preInput && !postInput) return;
       scores[row.id] = this.readScoreRowFromDom(row.id);
     });
     return scores;
@@ -924,6 +1117,53 @@ class AssessmentScores {
     });
   }
 
+  static buildScoresPayload() {
+    const existing = this.currentForm?.scores || {};
+    const scores = {};
+
+    this.AF5_ROWS.filter((row) => row.id).forEach((row) => {
+      const preInput = document.querySelector(`[data-score-field="${row.id}"][data-score-part="pre"]`);
+      const postInput = document.querySelector(`[data-score-field="${row.id}"][data-score-part="post"]`);
+      const previous = existing[row.id] || {};
+
+      // Only overwrite rows that are applicable to the learner's current level
+      // and therefore rendered on screen. Hidden legacy rows are preserved.
+      if (preInput || postInput) {
+        scores[row.id] = {
+          // Preserve a stored value when one side is intentionally hidden for
+          // the current level (for example BLP FLT post-test fields).
+          pre: preInput
+            ? this.readNumber(`[data-score-field="${row.id}"][data-score-part="pre"]`)
+            : (previous.pre ?? null),
+          post: postInput
+            ? this.readNumber(`[data-score-field="${row.id}"][data-score-part="post"]`)
+            : (previous.post ?? null),
+          likelihood: previous.likelihood ?? null,
+          status: row.type === "abl" ? null : (previous.status ?? null),
+        };
+      } else if (Object.keys(previous).length) {
+        scores[row.id] = {
+          pre: previous.pre ?? null,
+          post: previous.post ?? null,
+          likelihood: previous.likelihood ?? null,
+          status: previous.status ?? null,
+        };
+      }
+    });
+
+    if (this.usesAeReadiness()) {
+      const overallPostForLikelihood = this.sumRowScores("post");
+      const overallPercentage = this.overallLikelihoodPercentage(overallPostForLikelihood);
+      scores.overall_likelihood = overallPercentage == null
+        ? null
+        : `${this.componentLikelihoodMeta(overallPercentage).label.toUpperCase()} LIKELIHOOD`;
+    } else {
+      scores.overall_likelihood = null;
+    }
+
+    return scores;
+  }
+
   static bindSave() {
     document.querySelector("[data-save-scores-btn]")?.addEventListener("click", () => this.save());
   }
@@ -939,32 +1179,21 @@ class AssessmentScores {
       return;
     }
 
-    const scores = {};
-    this.AF5_ROWS.filter((r) => r.id).forEach((row) => {
-      scores[row.id] = {
-        pre: this.readNumber(`[data-score-field="${row.id}"][data-score-part="pre"]`),
-        post: this.readNumber(`[data-score-field="${row.id}"][data-score-part="post"]`),
-        likelihood: this.currentForm?.scores?.[row.id]?.likelihood ?? null,
-        // ABL achievement status is intentionally not manually encoded.
-        // Keep it unset until the official score threshold is confirmed.
-        status: row.type === "abl"
-          ? null
-          : (this.currentForm?.scores?.[row.id]?.status ?? null),
-      };
-    });
-    const overallPostForLikelihood = this.sumRowScores("post");
-    const overallPercentage = this.overallLikelihoodPercentage(overallPostForLikelihood);
-    scores.overall_likelihood = overallPercentage == null
-      ? null
-      : `${this.componentLikelihoodMeta(overallPercentage).label.toUpperCase()} LIKELIHOOD`;
+    const scores = this.buildScoresPayload();
 
-    const portfolio = this.readPortfolioFromDom();
+    const portfolio = this.usesPortfolio()
+      ? this.readPortfolioFromDom()
+      : { ...(this.currentForm?.portfolio || {}) };
 
     const payload = {
-      dateOfAssessment: document.querySelector("[data-date-of-assessment]")?.value || null,
+      dateOfAssessment: document.querySelector("[data-date-of-assessment]")?.value || this.currentForm?.dateOfAssessment || null,
       scores,
+      // Hidden non-applicable portfolio values are preserved rather than
+      // silently erased when a BLP learner is saved.
       portfolio,
-      finalScorePercentageGrade: this.portfolioPercentageGrade(portfolio),
+      finalScorePercentageGrade: this.usesPortfolio()
+        ? this.portfolioPercentageGrade(portfolio)
+        : (this.currentForm?.finalScorePercentageGrade ?? null),
     };
 
     const btn = document.querySelector("[data-save-scores-btn]");

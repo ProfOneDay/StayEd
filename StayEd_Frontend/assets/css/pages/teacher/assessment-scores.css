@@ -1785,10 +1785,12 @@ body[data-page="Assessment Scores"] .st-badge-info {
   border-left: 1px solid var(--st-outline-variant);
   color: var(--st-on-surface-variant);
   font-family: var(--st-font-body);
-  /* Keep the likelihood explanation comfortably readable. */
-  font-size: 16px;
+  /* Was --st-font-size-small (16px) -- standard secondary/description
+     text elsewhere in the app is --st-fs-sm (13px); at 16px this long
+     paragraph read noticeably larger than any other card's body copy. */
+  font-size: var(--st-fs-sm);
   font-weight: var(--st-font-weight-regular);
-  line-height: 1.6;
+  line-height: var(--st-line-height-body);
   overflow-wrap: normal;
   word-break: normal;
 }
@@ -1838,8 +1840,7 @@ body[data-page="Assessment Scores"] .st-badge-info {
   }
 
   .st-assessment-likelihood-note {
-    font-size: 15px;
-    line-height: 1.6;
+    font-size: var(--st-fs-xs);
   }
 }
 
@@ -1885,75 +1886,29 @@ body[data-page="Assessment Scores"] .st-badge-info {
   color: var(--st-on-surface-variant) !important;
 }
 
-/* ============================================================
-   2026-10-16 — Final box sizing pass
-   Keep every score/computed value box identical to AF5 (62 x 34).
-   The date control is the only wider field and is sized just large
-   enough for MM/DD/YYYY plus the browser calendar icon.
-   ============================================================ */
-[data-assessment-form] > .st-assessment-table-card:nth-child(2)
-  .st-assessment-table td:last-child > .st-assessment-input:not(.st-assessment-input--date),
-[data-assessment-form] > .st-assessment-table-card:nth-child(2)
-  .st-assessment-table td:last-child > [data-portfolio-total],
-[data-assessment-form] > .st-assessment-table-card:nth-child(2)
-  .st-assessment-table td:last-child > [data-revalida-total],
-[data-assessment-form] > .st-assessment-table-card:nth-child(2)
-  .st-assessment-table td:last-child > [data-portfolio-raw-total] {
-  box-sizing: border-box !important;
-  width: 62px !important;
-  min-width: 62px !important;
-  max-width: 62px !important;
-  height: 34px !important;
-  min-height: 34px !important;
-  max-height: 34px !important;
-  padding: 0 6px !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  border-radius: var(--st-radius-xs) !important;
-  text-align: center !important;
-  line-height: 1 !important;
-}
-
-[data-assessment-form] > .st-assessment-table-card:nth-child(2)
-  .st-assessment-input--date {
-  box-sizing: border-box !important;
-  width: 128px !important;
-  min-width: 128px !important;
-  max-width: 128px !important;
-  height: 34px !important;
-  min-height: 34px !important;
-  max-height: 34px !important;
-  padding: 0 7px !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  border-radius: var(--st-radius-xs) !important;
-}
 
 /* ============================================================
-   2026-10-16 — Nested portfolio total-box override
-   Total Revalida / Total PPA inputs sit inside .st-assessment-score-entry,
-   so target the nested input itself to guarantee the same AF5 footprint.
+   2026-10-17 — BLP cleanup + readable Date of Assessment field
+   Removes the need for extra helper text and keeps the AF5 date
+   control wide enough to show the full date value cleanly.
    ============================================================ */
-[data-assessment-form] > .st-assessment-table-card:nth-child(2)
-  .st-assessment-score-entry .st-assessment-input,
-[data-assessment-form] > .st-assessment-table-card:nth-child(2)
-  input[data-revalida-total],
-[data-assessment-form] > .st-assessment-table-card:nth-child(2)
-  input[data-portfolio-raw-total],
-[data-assessment-form] > .st-assessment-table-card:nth-child(2)
-  input[data-portfolio-total],
-[data-assessment-form] > .st-assessment-table-card:nth-child(2)
-  input[data-final-grade] {
+
+[data-assessment-form] > .st-assessment-table-card:first-child .st-assessment-table td:has([data-date-of-assessment]) {
+  text-align: center;
+}
+
+[data-assessment-form] > .st-assessment-table-card:first-child [data-date-of-assessment] {
+  display: block !important;
   box-sizing: border-box !important;
-  width: 62px !important;
-  min-width: 62px !important;
-  max-width: 62px !important;
-  height: 34px !important;
-  min-height: 34px !important;
-  max-height: 34px !important;
-  flex: 0 0 62px !important;
-  padding: 0 6px !important;
-  border-radius: var(--st-radius-xs) !important;
-  text-align: center !important;
-  line-height: 1 !important;
+  width: 170px !important;
+  min-width: 170px !important;
+  max-width: 170px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: 0 10px !important;
+  text-align: left !important;
+  font-size: 14px !important;
 }
