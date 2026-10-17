@@ -840,7 +840,9 @@
   flex-direction: column;
   font-family: var(--st-font-body);
   color: var(--st-on-surface);
-  background: var(--st-surface);
+  /* Same page background as the signed-in app pages (body / .st-app in
+     layout.css), so the legal pages don't shift colour between the two. */
+  background: var(--st-background);
 }
 
 .st-public .st-landing-nav {
