@@ -75,6 +75,52 @@ const ST_CENTER_TOTAL = {
   },
 };
 
+// Always-visible values on the Learning Level / Modality charts, so a
+// screenshot of the dashboard carries the numbers without hovering:
+// "count · share%" just past the end of each horizontal bar, and "share%"
+// centred on each doughnut slice (skipped on slivers under 6%, which the
+// value legend below the chart still lists).
+const ST_VALUE_LABELS = {
+  id: "valueLabels",
+  afterDatasetsDraw(chart) {
+    const { ctx } = chart;
+    const data = chart.data.datasets[0]?.data || [];
+    const total = data.reduce((sum, v) => sum + (Number(v) || 0), 0);
+    const meta = chart.getDatasetMeta(0);
+    const pct = (v) => (total ? Math.round((v / total) * 100) : 0);
+    ctx.save();
+    ctx.textBaseline = "middle";
+
+    if (chart.config.type === "doughnut") {
+      ctx.textAlign = "center";
+      ctx.font = "700 12px Inter, sans-serif";
+      const colors = chart.data.datasets[0].backgroundColor || [];
+      meta.data.forEach((arc, i) => {
+        const value = Number(data[i]) || 0;
+        if (!value || pct(value) < 6) return;
+        const { x, y, startAngle, endAngle, innerRadius, outerRadius } = arc.getProps(
+          ["x", "y", "startAngle", "endAngle", "innerRadius", "outerRadius"], false,
+        );
+        const mid = (startAngle + endAngle) / 2;
+        const r = (innerRadius + outerRadius) / 2;
+        // Dark text on the one light slice colour, white on the rest.
+        ctx.fillStyle = String(colors[i]).toLowerCase() === "#9db5d3" ? "#111a36" : "#ffffff";
+        ctx.fillText(`${pct(value)}%`, x + Math.cos(mid) * r, y + Math.sin(mid) * r);
+      });
+    } else {
+      ctx.textAlign = "left";
+      ctx.font = "600 12px Inter, sans-serif";
+      ctx.fillStyle = "#43474e";
+      meta.data.forEach((bar, i) => {
+        const value = Number(data[i]) || 0;
+        const { x, y } = bar.getProps(["x", "y"], false);
+        ctx.fillText(value ? `${value} · ${pct(value)}%` : "0", x + 8, y);
+      });
+    }
+    ctx.restore();
+  },
+};
+
 class TeacherDashboard {
   static state = {
     learners: [],
@@ -579,6 +625,7 @@ class TeacherDashboard {
       key: "level",
       canvasId: "levelChartCanvas",
       noteId: "levelChartNote",
+      legendId: "levelChartLegend",
       labels: levelOrder,
       values: countBy(levelOrder, "level"),
       colors: catColors,
@@ -589,6 +636,7 @@ class TeacherDashboard {
       key: "modality",
       canvasId: "modalityChartCanvas",
       noteId: "modalityChartNote",
+      legendId: "modalityChartLegend",
       labels: modalityOrder,
       values: countBy(modalityOrder, "modality"),
       colors: catColors.slice(0, 3),
@@ -599,18 +647,19 @@ class TeacherDashboard {
   // Shared renderer for the Learning Level / Modality panels -- both only
   // ever toggle between Bar and Doughnut (no custom CSS bar view to preserve like
   // Risk Distribution has), so a single Chart.js bar/pie is swapped in place.
-  static renderDistributionChart({ key, canvasId, noteId, labels, values, colors, noteText }) {
+  static renderDistributionChart({ key, canvasId, noteId, legendId, labels, values, colors, noteText }) {
     const note = document.getElementById(noteId);
     const canvas = document.getElementById(canvasId);
     this.chartInstances[key]?.destroy();
     this.chartInstances[key] = null;
+    this.renderValueLegend(document.getElementById(legendId), labels, values, colors);
     if (!canvas || !this.chartJsReady(note)) return;
 
     note.textContent = noteText;
     const type = this.chartType[key] === "pie" ? "doughnut" : "bar";
     this.chartInstances[key] = new Chart(canvas.getContext("2d"), {
       type,
-      plugins: type === "doughnut" ? [ST_CENTER_TOTAL] : [],
+      plugins: type === "doughnut" ? [ST_CENTER_TOTAL, ST_VALUE_LABELS] : [ST_VALUE_LABELS],
       data: {
         labels,
         datasets: [
@@ -623,11 +672,14 @@ class TeacherDashboard {
         responsive: true,
         maintainAspectRatio: false,
         indexAxis: type === "bar" ? "y" : undefined,
+        // Room past the longest bar for its "count · %" label.
+        layout: type === "bar" ? { padding: { right: 64 } } : undefined,
         animation:
           type === "doughnut"
             ? ST_REDUCE_MOTION ? false : { animateRotate: true, animateScale: false, duration: 1000, easing: "easeOutQuart" }
             : ST_REDUCE_MOTION ? false : { duration: 900, easing: "easeOutQuart", ...ST_CHART_STAGGER(90) },
-        plugins: { legend: type === "doughnut" ? ST_LEGEND_BOTTOM : { display: false }, tooltip: ST_TOOLTIP_COMPOSE },
+        // The HTML value legend (renderValueLegend) replaces Chart.js's own.
+        plugins: { legend: { display: false }, tooltip: ST_TOOLTIP_COMPOSE },
         cutout: type === "doughnut" ? "68%" : undefined,
         scales:
           type === "doughnut"
@@ -638,6 +690,23 @@ class TeacherDashboard {
               },
       },
     });
+  }
+
+  // Pill legend under a chart: colour dot, category, then "count · share%"
+  // -- every category listed, zeros included, so nothing needs a hover.
+  static renderValueLegend(el, labels, values, colors) {
+    if (!el) return;
+    const total = values.reduce((sum, v) => sum + (Number(v) || 0), 0);
+    el.innerHTML = labels
+      .map((label, i) => {
+        const value = Number(values[i]) || 0;
+        const share = total ? Math.round((value / total) * 100) : 0;
+        return `<span class="st-chart-legend-item${value ? "" : " is-zero"}">
+            <i class="dot" style="background:${colors[i]}"></i>${label}
+            <span class="count num">${value}<small>&nbsp;·&nbsp;${share}%</small></span>
+          </span>`;
+      })
+      .join("");
   }
 
   static renderAttentionList(learners = []) {

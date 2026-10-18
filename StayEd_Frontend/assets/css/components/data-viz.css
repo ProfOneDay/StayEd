@@ -254,6 +254,70 @@
   max-width: 100%;
 }
 
+/* Value legend under a chart (teacher dashboard Learning Level / Modality):
+   each category with its count and share always visible, so the chart reads
+   as a report in a screenshot without hovering. Pill style matches the
+   admin dashboard's map legend. */
+.chart-canvas-wrap--legend {
+  height: 310px;
+}
+
+.st-chart-legend {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.st-chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 30px;
+  padding: 0 6px 0 12px;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-pill);
+  background: #fff;
+  font-size: var(--st-fs-sm);
+  font-weight: 500;
+  color: var(--st-on-surface);
+  white-space: nowrap;
+}
+
+.st-chart-legend-item .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.st-chart-legend-item .count {
+  min-width: 22px;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: var(--st-radius-pill);
+  background: var(--st-background);
+  font-size: var(--st-fs-xs);
+  font-weight: 700;
+  color: var(--st-on-surface);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.st-chart-legend-item .count small {
+  font-weight: 600;
+  color: var(--st-ink-muted);
+}
+
+.st-chart-legend-item.is-zero {
+  color: var(--st-ink-muted);
+}
+
 .chart-canvas-note {
   flex-shrink: 0;
   margin: 10px 0 0;
