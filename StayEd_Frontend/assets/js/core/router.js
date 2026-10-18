@@ -55,55 +55,64 @@ class Router {
       { label: "CLC Overview", href: "clc-overview.html" },
       { label: "Class Management" },
     ],
+    // Learner Records and everything reached from it sit under CLC Overview
+    // in the sidebar (CLC Overview -> Class Management -> a class), so the
+    // trail follows that same path. Every crumb except the last is a link.
     "learner-records.html": [
       { label: "Dashboard", href: "dashboard.html" },
-      { label: "Learner" },
+      { label: "CLC Overview", href: "clc-overview.html" },
       { label: "Class Management", href: "class-management.html" },
       { label: "Learner Records" },
     ],
     "module-management.html": [
       { label: "Dashboard", href: "dashboard.html" },
-      { label: "Learner" },
+      { label: "CLC Overview", href: "clc-overview.html" },
       { label: "Class Management", href: "class-management.html" },
       { label: "Learner Records", href: "learner-records.html", preserveQuery: true },
       { label: "Manage Modules" },
     ],
     "assessment-scores.html": [
       { label: "Dashboard", href: "dashboard.html" },
-      { label: "Learner" },
+      { label: "CLC Overview", href: "clc-overview.html" },
       { label: "Class Management", href: "class-management.html" },
       { label: "Learner Records", href: "learner-records.html", preserveQuery: true },
       { label: "Assessment Scores" },
     ],
-    "student-registry.html": [
-      { label: "Dashboard", href: "dashboard.html" },
-      { label: "Learner" },
-      { label: "Student Registry" },
-    ],
-    "learner-profile.html": [
-      { label: "Dashboard", href: "dashboard.html" },
-      { label: "Learner" },
-      { label: "Student Registry", href: "student-registry.html" },
-      { label: "Learner Profile" },
-    ],
     "learner-import.html": [
       { label: "Dashboard", href: "dashboard.html" },
-      { label: "Learner" },
+      { label: "CLC Overview", href: "clc-overview.html" },
       { label: "Class Management", href: "class-management.html" },
       { label: "Learner Records", href: "learner-records.html", preserveQuery: true },
       { label: "Import Students" },
     ],
     "learner-enroll.html": [
       { label: "Dashboard", href: "dashboard.html" },
-      { label: "Learner" },
+      { label: "CLC Overview", href: "clc-overview.html" },
       { label: "Class Management", href: "class-management.html" },
       { label: "Learner Records", href: "learner-records.html", preserveQuery: true },
       { label: "Enroll Student" },
     ],
+    "student-registry.html": [
+      { label: "Dashboard", href: "dashboard.html" },
+      { label: "Student Registry" },
+    ],
+    // Default trail only -- Learner Profile is opened from many pages, so
+    // breadcrumbFor() swaps in the page the teacher actually came from
+    // (see ORIGIN_PARENTS).
+    "learner-profile.html": [
+      { label: "Dashboard", href: "dashboard.html" },
+      { label: "Student Registry", href: "student-registry.html" },
+      { label: "Learner Profile" },
+    ],
 
     "early-warning.html": [
       { label: "Dashboard", href: "dashboard.html" },
-      { label: "Early Warning Alerts" },
+      { label: "Early Warnings" },
+    ],
+
+    "reports.html": [
+      { label: "Dashboard", href: "dashboard.html" },
+      { label: "Reports" },
     ],
 
     "notifications.html": [
@@ -156,7 +165,68 @@ class Router {
     ],
   };
 
-  static breadcrumbFor(filename, fallbackTitle, sectionKey) {
+  // Teacher pages reachable from several places: their trail follows the
+  // page the teacher actually came from (if it's one of these), instead of
+  // always claiming one fixed parent. Anything else falls back to the
+  // default trail in BREADCRUMBS.
+  static ORIGIN_PARENTS = {
+    "learner-profile.html": [
+      "dashboard.html", "student-registry.html", "early-warning.html",
+      "learner-records.html", "notifications.html", "calendar.html", "reports.html",
+    ],
+    "assessment-scores.html": ["learner-records.html", "learner-profile.html"],
+  };
+
+  static ORIGIN_KEY = "stayed_breadcrumb_origin:";
+
+  // The parent page (filename + query) this page was opened from: the
+  // referrer when it's an allowed parent, otherwise whatever was remembered
+  // for this page earlier in the tab (so a refresh, or coming back from a
+  // child page, keeps the same trail).
+  static originFor(filename) {
+    const allowed = this.ORIGIN_PARENTS[filename];
+    if (!allowed) return null;
+
+    let fromReferrer = null;
+    try {
+      const ref = document.referrer ? new URL(document.referrer) : null;
+      if (ref && ref.origin === window.location.origin && ref.pathname !== window.location.pathname) {
+        const refFile = ref.pathname.split("/").pop();
+        if (allowed.includes(refFile)) fromReferrer = { file: refFile, href: refFile + ref.search };
+      }
+    } catch {
+      fromReferrer = null;
+    }
+
+    const key = this.ORIGIN_KEY + filename;
+    try {
+      if (fromReferrer) {
+        sessionStorage.setItem(key, JSON.stringify(fromReferrer));
+        return fromReferrer;
+      }
+      const saved = JSON.parse(sessionStorage.getItem(key) || "null");
+      return saved && allowed.includes(saved.file) ? saved : null;
+    } catch {
+      return fromReferrer;
+    }
+  }
+
+  static breadcrumbFor(filename, fallbackTitle, sectionKey, depth = 0) {
+    const origin = depth < 3 ? this.originFor(filename) : null;
+    if (origin) {
+      const own = this.BREADCRUMBS[filename];
+      const ownLabel = own ? own[own.length - 1].label : fallbackTitle || filename;
+      const parentTrail = this.breadcrumbFor(origin.file, origin.file, null, depth + 1);
+      // The parent's own last crumb becomes a link back to the exact page
+      // (with its ?class= / ?id= query) the teacher came from.
+      parentTrail[parentTrail.length - 1] = {
+        ...parentTrail[parentTrail.length - 1],
+        href: origin.href,
+        preserveQuery: false,
+      };
+      return [...parentTrail, { label: ownLabel }];
+    }
+
     if (sectionKey && this.BREADCRUMBS[sectionKey]) {
       return this.BREADCRUMBS[sectionKey].map((c) => ({ ...c }));
     }

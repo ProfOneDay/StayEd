@@ -189,12 +189,13 @@ class LearnerProfilePage {
   static updatePageBreadcrumb() {
     if (!window.Layout || !this.profile) return;
 
-    Layout.options.breadcrumb = [
-      { label: "Dashboard", href: "dashboard.html" },
-      { label: "Learner", href: "student-registry.html" },
-      { label: "Student Registry", href: "student-registry.html" },
-      { label: this.profile.name },
-    ];
+    // Same trail Router builds for this page (following where the teacher
+    // came from), with the learner's name as the last crumb.
+    const items = window.Router
+      ? Router.breadcrumbFor("learner-profile.html", "Learner Profile")
+      : [{ label: "Dashboard", href: "dashboard.html" }, { label: "Learner Profile" }];
+    items[items.length - 1] = { label: this.profile.name };
+    Layout.options.breadcrumb = items;
 
     Layout.updateBreadcrumb();
   }
