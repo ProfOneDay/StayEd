@@ -142,6 +142,15 @@ class API {
       }
     }
 
+    // Backstop for a session that's still on a temporary password (e.g. a
+    // stale tab): send the user to pick their own instead of failing.
+    if (error.status === 403 && error?.data?.code === "PASSWORD_CHANGE_REQUIRED" && window.Auth) {
+      Auth.updateUser({ mustChangePassword: true });
+      if (!window.location.pathname.endsWith("set-password.html")) {
+        window.location.href = Auth.SET_PASSWORD_PAGE;
+      }
+    }
+
     // For every real HTTP error response, prefer the backend's own message
     // (error.data.message, set by the shared `error()` helper server-side)
     // over a generic fallback -- discarding it here previously meant a

@@ -158,7 +158,15 @@ class LearnerEnrollWizard {
       }
     };
 
-    set("wFullName", learner.name);
+    // Separate fields when the record has them; an older record with only a
+    // combined name falls back to putting it all in First Name for review.
+    if (learner.first_name || learner.last_name) {
+      set("wFirstName", learner.first_name);
+      set("wMiddleName", learner.middle_name);
+      set("wLastName", learner.last_name);
+    } else {
+      set("wFirstName", learner.name);
+    }
     set("wLrn", learner.lrn);
     set("wSex", learner.sex);
     set("wBirthdate", learner.birthdate);
@@ -435,8 +443,9 @@ class LearnerEnrollWizard {
 
   static validateStep(step) {
     const requiredByStep = {
-      1: ["wFullName", "wLrn", "wSex", "wBirthdate"],
+      1: ["wFirstName", "wLastName", "wLrn", "wSex", "wBirthdate", "wCivilStatus"],
       2: ["wAddress"],
+      6: ["wOccupation"],
     };
 
     const ids = requiredByStep[step];
@@ -493,7 +502,9 @@ class LearnerEnrollWizard {
         title: "Personal information",
         icon: "person",
         rows: [
-          ["Full Name", val("wFullName")],
+          ["First Name", val("wFirstName")],
+          ["Middle Name", val("wMiddleName")],
+          ["Surname", val("wLastName")],
           ["LRN", val("wLrn")],
           ["Sex", val("wSex")],
           ["Birthdate", val("wBirthdate")],
@@ -586,7 +597,9 @@ class LearnerEnrollWizard {
     const distanceCategory = document.getElementById("wDistance")?.value;
 
     const payload = {
-      name: document.getElementById("wFullName").value.trim(),
+      first_name: document.getElementById("wFirstName").value.trim(),
+      middle_name: document.getElementById("wMiddleName")?.value.trim() || "",
+      last_name: document.getElementById("wLastName").value.trim(),
       lrn: document.getElementById("wLrn").value.trim(),
       sex: document.getElementById("wSex").value,
       birthdate: document.getElementById("wBirthdate").value,

@@ -64,6 +64,41 @@ def create_app(config_object=Config):
     ):
         app.register_blueprint(bp, url_prefix="/api")
 
+    # Someone still on an admin-issued temporary password can do nothing but
+    # pick their own (sql/38_must_change_password.sql). Checked once here
+    # instead of in every route's decorator.
+    password_change_allowed = {
+        "/api/auth/set-initial-password",
+        "/api/auth/me",
+        "/api/auth/logout",
+        "/api/auth/login",
+        "/api/auth/forgot-password",
+        "/api/auth/reset-password",
+        "/api/health",
+    }
+
+    @app.before_request
+    def require_initial_password_change():
+        from flask import request
+        from flask_jwt_extended import get_jwt, verify_jwt_in_request
+
+        if request.method == "OPTIONS" or request.path in password_change_allowed:
+            return None
+        if not request.path.startswith("/api/"):
+            return None
+        try:
+            verify_jwt_in_request(optional=True)
+        except Exception:
+            # Bad/expired token: let the route's own auth produce its usual
+            # 401, or a public route ignore it.
+            return None
+        if get_jwt().get("must_change_password"):
+            return jsonify({
+                "message": "Please set a new password before continuing.",
+                "code": "PASSWORD_CHANGE_REQUIRED",
+            }), 403
+        return None
+
     @app.get("/api/health")
     def health():
         from .db import fetch_one

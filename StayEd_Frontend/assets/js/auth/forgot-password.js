@@ -37,7 +37,7 @@ class ForgotPasswordPage {
     try {
       await Auth.forgotPassword(email);
 
-      Toast.success("Password reset instructions have been sent.");
+      Toast.success("If an account uses that email, we've sent a reset link. Check your inbox.");
 
       setTimeout(
         () => {

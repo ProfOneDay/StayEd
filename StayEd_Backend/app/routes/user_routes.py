@@ -7,7 +7,7 @@ from flask_jwt_extended import jwt_required
 
 from ..authz import current_user_id, teacher_for_user
 from ..db import execute, fetch_one, get_db
-from ..helpers import EMAIL_RE, error, split_name
+from ..helpers import EMAIL_RE, clean_contact_number, error, name_parts, split_name
 
 bp = Blueprint("users", __name__)
 
@@ -21,18 +21,30 @@ def update_profile():
     if not teacher:
         return error("Teacher profile not found.", 404)
 
+    middle_name = teacher.get("middle_name")
+    parts = name_parts(data)
     full_name = str(data.get("full_name") or "").strip()
-    if full_name:
+    if parts is not None:
+        # Separate fields win: never re-split "Juan Carlos" + "Reyes".
+        first_name = parts[0] or teacher["first_name"]
+        last_name = parts[2] or teacher["last_name"]
+        if any(k in data for k in ("middle_name", "middleName")):
+            middle_name = parts[1]
+    elif full_name:
         first_name, last_name = split_name(full_name)
     else:
-        first_name = str(data.get("first_name") or teacher["first_name"]).strip()
-        last_name = str(data.get("last_name") or teacher["last_name"]).strip()
+        first_name = teacher["first_name"]
+        last_name = teacher["last_name"]
 
     email = str(data.get("email") or teacher.get("email") or "").strip().lower()
     if email and not EMAIL_RE.match(email):
         return error("Enter a valid email address.", 422)
     municipality = str(data.get("municipality") or teacher.get("municipality") or "Unassigned").strip()
     contact_number = str(data.get("contact_number") or data.get("phone") or teacher.get("contact_number") or "").strip() or None
+    try:
+        contact_number = clean_contact_number(contact_number, "Phone number")
+    except ValueError as exc:
+        return error(str(exc), 422)
 
     db = get_db()
     try:
@@ -41,10 +53,10 @@ def update_profile():
             cur.execute(
                 """
                 UPDATE teacher
-                SET first_name = %s, last_name = %s, municipality = %s, contact_number = %s
+                SET first_name = %s, middle_name = %s, last_name = %s, municipality = %s, contact_number = %s
                 WHERE user_id = %s
                 """,
-                (first_name, last_name, municipality, contact_number, user_id),
+                (first_name, middle_name, last_name, municipality, contact_number, user_id),
             )
         db.commit()
     except Exception:

@@ -390,12 +390,12 @@ function renderRiskChart(){
     canvas.dataset.unit='assessed';
     riskChartInstance=new Chart(canvas.getContext('2d'),{
       type:'doughnut',
-      plugins:[ST_CENTER_TOTAL],
+      plugins:[ST_CENTER_TOTAL,ST_SLICE_PERCENT],
       data:{
         labels:['High Risk','Moderate Risk','Low Risk'],
         datasets:[{data:[currentRiskCounts.high,currentRiskCounts.moderate,currentRiskCounts.low],backgroundColor:['#D64545','#F39422','#6BBF59'],borderColor:'#fff',borderWidth:3,hoverOffset:6}],
       },
-      options:{responsive:true,maintainAspectRatio:false,cutout:'68%',animation:ST_REDUCE_MOTION?false:{animateRotate:true,animateScale:false,duration:1000},plugins:{legend:ST_LEGEND_BOTTOM,tooltip:ST_TOOLTIP_SHARE}},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'60%',animation:ST_REDUCE_MOTION?false:{animateRotate:true,animateScale:false,duration:1000},plugins:{legend:ST_LEGEND_VALUES(ST_LEGEND_BOTTOM),tooltip:ST_TOOLTIP_SHARE}},
     });
     return;
   }
@@ -444,12 +444,12 @@ function renderLevelChart(){
   canvas.dataset.unit='learners';
   levelChartInstance=new Chart(canvas.getContext('2d'),{
     type:'doughnut',
-    plugins:[ST_CENTER_TOTAL],
+    plugins:[ST_CENTER_TOTAL,ST_SLICE_PERCENT],
     data:{
       labels:levelKeys.map(k=>levelLabels[k]),
       datasets:[{data:levelKeys.map(k=>currentLevelCounts[k]||0),backgroundColor:['#12355b','#4c6f95','#006a68','#9db5d3'],borderColor:'#fff',borderWidth:3,hoverOffset:6}],
     },
-    options:{responsive:true,maintainAspectRatio:false,cutout:'68%',animation:ST_REDUCE_MOTION?false:{animateRotate:true,animateScale:false,duration:1000},plugins:{legend:ST_LEGEND_BOTTOM,tooltip:ST_TOOLTIP_SHARE}},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'60%',animation:ST_REDUCE_MOTION?false:{animateRotate:true,animateScale:false,duration:1000},plugins:{legend:ST_LEGEND_VALUES(ST_LEGEND_BOTTOM),tooltip:ST_TOOLTIP_SHARE}},
   });
 }
 
@@ -478,6 +478,7 @@ function renderGenderChart(){
     note.textContent='Risk-level counts compared side by side, male vs female.';
     genderChartInstance=new Chart(canvas.getContext('2d'),{
       type:'bar',
+      plugins:[ST_BAR_VALUES],
       data:{
         labels:['High Risk','Moderate Risk','Low Risk'],
         datasets:[
@@ -485,7 +486,7 @@ function renderGenderChart(){
           {label:'Female',data:[female.high,female.moderate,female.low],backgroundColor:'#4c6f95',borderRadius:6,barThickness:26},
         ],
       },
-      options:{responsive:true,maintainAspectRatio:false,animation:ST_REDUCE_MOTION?false:{duration:900,...ST_CHART_STAGGER(100)},plugins:{legend:ST_LEGEND_BOTTOM,tooltip:ST_TOOLTIP},scales:{y:{beginAtZero:true,ticks:{precision:0},grid:{color:'#eef1f5'},border:{display:false}},x:{grid:{display:false},border:{display:false}}}},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:18}},animation:ST_REDUCE_MOTION?false:{duration:900,...ST_CHART_STAGGER(100)},plugins:{legend:ST_LEGEND_BOTTOM,tooltip:ST_TOOLTIP},scales:{y:{beginAtZero:true,ticks:{precision:0},grid:{color:'#eef1f5'},border:{display:false}},x:{grid:{display:false},border:{display:false}}}},
     });
     return;
   }
@@ -495,12 +496,12 @@ function renderGenderChart(){
     canvas.dataset.unit='high risk';
     genderChartInstance=new Chart(canvas.getContext('2d'),{
       type:'doughnut',
-      plugins:[ST_CENTER_TOTAL],
+      plugins:[ST_CENTER_TOTAL,ST_SLICE_PERCENT],
       data:{
         labels:['Male (High Risk)','Female (High Risk)'],
         datasets:[{data:[male.high,female.high],backgroundColor:['#12355b','#4c6f95'],borderColor:'#fff',borderWidth:3,hoverOffset:6}],
       },
-      options:{responsive:true,maintainAspectRatio:false,cutout:'68%',animation:ST_REDUCE_MOTION?false:{animateRotate:true,animateScale:false,duration:1000},plugins:{legend:ST_LEGEND_BOTTOM,tooltip:ST_TOOLTIP_SHARE}},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'60%',animation:ST_REDUCE_MOTION?false:{animateRotate:true,animateScale:false,duration:1000},plugins:{legend:ST_LEGEND_VALUES(ST_LEGEND_BOTTOM),tooltip:ST_TOOLTIP_SHARE}},
     });
   }
 }

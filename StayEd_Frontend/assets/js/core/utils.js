@@ -1,66 +1,4 @@
 class Utils {
-  static downloadLearnerImportTemplate() {
-    const headers = [
-      "LRN",
-      "Last Name",
-      "First Name",
-      "Middle Name (optional)",
-      "Sex",
-      "Date of Birth",
-      "Learning Modality",
-      "Re-enrollee (Yes/No)",
-      "Employment Status",
-      "Distance from CLC (km)",
-      "Civil Status (if applicable)",
-      "Contact Number",
-      "Guardian Contact Number (if applicable)",
-      "Monthly Income",
-      "Socio-economic Status",
-    ];
-
-    const sampleRow = [
-      "123456789012",
-      "Dela Cruz",
-      "Juan",
-      "Reyes",
-      "Male",
-      "5/14/2008",
-      "Face-to-Face",
-      "No",
-      "Employed",
-      "5.5",
-      "Single",
-      "09171234567",
-      "09181234567",
-      "8000",
-      "Formal Employment",
-    ];
-
-    const csvContent = [headers, sampleRow]
-      .map((row) =>
-        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
-      )
-      .join("\r\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-
-    link.href = url;
-
-    link.download = "StayEd_Learner_Import_Template.csv";
-
-    document.body.appendChild(link);
-
-    link.click();
-
-    document.body.removeChild(link);
-
-    URL.revokeObjectURL(url);
-  }
-
   static downloadCsv(filename, headers, rows) {
     const csvContent = [headers, ...rows]
       .map((row) =>
@@ -636,6 +574,35 @@ Utils.limitDigits = function (input, max) {
 
 // Official DepEd employee number: exactly 7 digits.
 Utils.isEmployeeId = (value) => /^\d{7}$/.test(String(value || ""));
+
+// PH mobile number, the one format StayEd stores: 11 digits starting 09.
+// Same rule as the backend's clean_contact_number() and the database CHECK
+// (sql/39_contact_number_digits.sql).
+Utils.isContactNumber = (value) => /^09\d{9}$/.test(String(value || ""));
+
+// "+63 917 123 4567" / "0917-123-4567" / "9171234567" -> "09171234567".
+// Anything else is just reduced to its digits (max 11).
+Utils.normalizeContactNumber = function (value) {
+  const raw = String(value || "");
+  let digits = raw.replace(/\D/g, "");
+  if ((raw.trim().startsWith("+63") || digits.length === 12) && digits.startsWith("63")) {
+    digits = "0" + digits.slice(2);
+  } else if (digits.length === 10 && digits.startsWith("9") && /[\s\-+()]/.test(raw)) {
+    digits = "0" + digits;
+  }
+  return digits.slice(0, 11);
+};
+
+// Every <input data-contact-number> on any page -- including ones built
+// later inside modals -- accepts digits only, at most 11, so "+" or letters
+// can't be typed, and a pasted international number is converted.
+document.addEventListener("input", (event) => {
+  const input = event.target;
+  if (!(input instanceof HTMLInputElement) || !input.hasAttribute("data-contact-number")) return;
+  const clean = Utils.normalizeContactNumber(input.value);
+  if (clean !== input.value) input.value = clean;
+  input.setCustomValidity(clean && !Utils.isContactNumber(clean) ? "Enter 11 digits starting with 09." : "");
+});
 
 // Empty state for the Risk Distribution "Trend" view (teacher + admin
 // dashboards) when no learner has an assessed prediction yet. Built in

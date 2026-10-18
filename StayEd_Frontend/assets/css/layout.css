@@ -137,8 +137,13 @@ body {
   padding: 12px;
 }
 
-.st-sidebar.is-collapsed .st-sidebar-nav a,
-.st-sidebar.is-collapsed .st-submenu-trigger {
+/* The icon-only rail fits without scrolling, and a scrolling nav would
+   clip the hover labels below (overflow-y:auto forces overflow-x too). */
+.st-sidebar.is-collapsed .st-sidebar-nav {
+  overflow: visible;
+}
+
+.st-sidebar.is-collapsed [data-tooltip] {
   position: relative;
 }
 
@@ -146,8 +151,7 @@ body {
   display: none;
 }
 
-.st-sidebar.is-collapsed .st-sidebar-nav a::after,
-.st-sidebar.is-collapsed .st-submenu-trigger::after {
+.st-sidebar.is-collapsed [data-tooltip]::after {
   content: attr(data-tooltip);
 
   position: absolute;
@@ -183,8 +187,8 @@ body {
   box-shadow: var(--st-shadow-md);
 }
 
-.st-sidebar.is-collapsed .st-sidebar-nav a:hover::after,
-.st-sidebar.is-collapsed .st-submenu-trigger:hover::after {
+.st-sidebar.is-collapsed [data-tooltip]:hover::after,
+.st-sidebar.is-collapsed [data-tooltip]:focus-visible::after {
   opacity: 1;
 }
 
@@ -450,42 +454,6 @@ body {
 
 .st-submenu-list a .material-symbols-outlined {
   font-size: var(--st-fs-lg);
-}
-
-.st-sidebar.is-collapsed .st-submenu-list {
-  max-height: none;
-
-  display: none;
-
-  position: absolute;
-
-  left: calc(100% + 8px);
-
-  top: 0;
-
-  background: var(--st-inverse-surface, #262f4c);
-
-  border-radius: var(--st-radius-sm);
-
-  padding: 8px;
-
-  min-width: 200px;
-
-  box-shadow: var(--st-shadow-md);
-
-  z-index: 60;
-}
-
-.st-sidebar.is-collapsed .st-submenu {
-  position: relative;
-}
-
-.st-sidebar.is-collapsed .st-submenu:hover .st-submenu-list {
-  display: flex;
-}
-
-.st-sidebar.is-collapsed .st-submenu-trigger::after {
-  content: attr(data-tooltip);
 }
 
 .st-sidebar-footer {

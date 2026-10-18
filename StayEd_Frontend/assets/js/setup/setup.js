@@ -381,13 +381,14 @@ class SetupWizard {
       downloadTemplateLink.addEventListener(
         "click",
 
-        (event) => {
+        async (event) => {
           event.preventDefault();
 
-          LearnerImportCore.downloadTemplate();
-
-          if (window.Toast) {
-            Toast.success("Template downloaded.");
+          try {
+            await LearnerImportCore.downloadTemplate();
+            window.Toast?.success("Template downloaded.");
+          } catch (error) {
+            window.Toast?.error("We could not download the template. Please try again.");
           }
         },
       );
@@ -574,6 +575,10 @@ class SetupWizard {
     // so "Confirm Import" always submits the latest edited rows and a
     // refresh doesn't silently revert them.
     const state = { rows: preview.rows || [] };
+
+    // This page loads fresh, so hand the stored dropdown options and
+    // required fields back to the edit-row modal.
+    LearnerImportCore.remember(preview);
 
     LearnerImportCore.renderPreviewRows(learnerTable, state.rows);
 

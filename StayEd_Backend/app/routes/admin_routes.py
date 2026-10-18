@@ -9,7 +9,15 @@ from werkzeug.security import generate_password_hash
 
 from ..authz import admin_permission_required, current_user_id, role_required, super_admin_required
 from ..db import execute, fetch_all, fetch_one, get_db
-from ..helpers import EMPLOYEE_ID_ERROR, EMPLOYEE_ID_RE, error, is_deped_email, split_name
+from ..helpers import (
+    EMPLOYEE_ID_ERROR,
+    EMPLOYEE_ID_RE,
+    clean_contact_number,
+    error,
+    is_deped_email,
+    name_parts,
+    split_name,
+)
 from ..services.learner_service import _monitoring_engaged_sql
 from ..services.mailer import ACCENT_WARNING, render_email, send_email
 from ..services.roster_service import find_roster_assignment
@@ -91,6 +99,55 @@ def _merge_field(data: dict, key: str, current):
 def _generate_temp_password() -> str:
     alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789"
     return "StayEd-" + "".join(secrets.choice(alphabet) for _ in range(8))
+
+
+def _send_temp_password_email(email: str, first_name: str, role: str, temp_password: str, reset: bool) -> bool:
+    """Email a user the temporary password an admin just issued them --
+    either for a brand-new account or after an admin password reset. The
+    account is flagged must_change_password, so this password only works
+    long enough to pick their own. Returns whether the email went out, so
+    the admin's screen can say "share it manually" if it didn't."""
+    if not email:
+        return False
+
+    account = "admin" if role == "admin" else "teacher"
+    if reset:
+        subject = "Your StayEd password was reset"
+        heading = "Your password was reset"
+        intro = "A Division Administrator has reset the password for your StayEd account. Your old password no longer works."
+    else:
+        subject = "Your StayEd account has been created"
+        heading = "Welcome to StayEd"
+        intro = f"A Division Administrator has created a StayEd {account} account for you."
+
+    paragraphs = [intro, f"Log in with your email ({email}) and the temporary password below."]
+    closing = [
+        "You'll be asked to choose your own password right after you log in. "
+        "Don't share this temporary password with anyone.",
+        "If you weren't expecting this email, please contact your Division Administrator.",
+    ]
+    login_url = current_app.config["PUBLIC_SITE_URL"] + "/"
+    return send_email(
+        email,
+        subject,
+        "\n\n".join([
+            f"Hi {first_name}," if first_name else "Hi,",
+            *paragraphs,
+            f"Temporary password: {temp_password}",
+            f"Log in: {login_url}",
+            *closing,
+            "— StayEd",
+        ]),
+        html=render_email(
+            heading,
+            first_name,
+            paragraphs,
+            accent=ACCENT_WARNING,
+            callout=("Temporary password", temp_password),
+            button=("Log in to StayEd", login_url),
+            closing=closing,
+        ),
+    )
 
 
 @bp.get("/admin/users")
@@ -426,6 +483,10 @@ def update_user(user_id: int):
     last_name = _merge_field(data, "lastName", existing["last_name"])
     employee_id = _merge_field(data, "employeeId", existing["employee_id"])
     contact_number = _merge_field(data, "phone", existing.get("contact_number"))
+    try:
+        contact_number = clean_contact_number(contact_number, "Phone number")
+    except ValueError as exc:
+        return error(str(exc), 422)
     email = _merge_field(data, "email", existing["email"])
     municipality = _merge_field(data, "municipality", existing.get("municipality")) or "Unassigned"
 
@@ -504,7 +565,12 @@ def update_user(user_id: int):
 @admin_permission_required("can_manage_users")
 def reset_user_password(user_id: int):
     row = fetch_one(
-        "SELECT user_id FROM users WHERE user_id=%s AND role='TEACHER'",
+        """
+        SELECT u.user_id, u.email, COALESCE(t.first_name, u.first_name) AS first_name
+        FROM users u
+        LEFT JOIN teacher t ON t.user_id = u.user_id
+        WHERE u.user_id=%s AND u.role='TEACHER'
+        """,
         (user_id,),
     )
     if not row:
@@ -512,10 +578,11 @@ def reset_user_password(user_id: int):
 
     temp_password = _generate_temp_password()
     execute(
-        "UPDATE users SET password_hash=%s WHERE user_id=%s",
+        "UPDATE users SET password_hash=%s, must_change_password=TRUE WHERE user_id=%s",
         (generate_password_hash(temp_password), user_id),
     )
-    return {"success": True, "message": "Password reset.", "temp_password": temp_password}
+    email_sent = _send_temp_password_email(row["email"], row.get("first_name") or "", "teacher", temp_password, reset=True)
+    return {"success": True, "message": "Password reset.", "temp_password": temp_password, "email_sent": email_sent}
 
 
 @bp.post("/admin/users")
@@ -544,6 +611,10 @@ def create_user():
 
     middle_name = str(data.get("middleName") or "").strip() or None
     contact_number = str(data.get("phone") or "").strip() or None
+    try:
+        contact_number = clean_contact_number(contact_number, "Phone number")
+    except ValueError as exc:
+        return error(str(exc), 422)
 
     username_base = email.split("@", 1)[0][:80] or account_role
     username = username_base
@@ -564,9 +635,9 @@ def create_user():
                     """
                     INSERT INTO users (
                         username, password_hash, email, role, account_status,
-                        first_name, last_name, contact_number
+                        first_name, last_name, contact_number, must_change_password
                     )
-                    VALUES (%s, %s, %s, 'ADMIN', 'ACTIVE', %s, %s, %s)
+                    VALUES (%s, %s, %s, 'ADMIN', 'ACTIVE', %s, %s, %s, TRUE)
                     RETURNING user_id
                     """,
                     (username, generate_password_hash(temp_password), email, first_name, last_name, contact_number),
@@ -590,8 +661,8 @@ def create_user():
 
                 cur.execute(
                     """
-                    INSERT INTO users (username, password_hash, email, role, account_status)
-                    VALUES (%s, %s, %s, 'TEACHER', 'ACTIVE')
+                    INSERT INTO users (username, password_hash, email, role, account_status, must_change_password)
+                    VALUES (%s, %s, %s, 'TEACHER', 'ACTIVE', TRUE)
                     RETURNING user_id
                     """,
                     (username, generate_password_hash(temp_password), email),
@@ -632,6 +703,8 @@ def create_user():
         db.rollback()
         raise
 
+    email_sent = _send_temp_password_email(email, first_name, account_role, temp_password, reset=False)
+
     if account_role == "admin":
         return {
             "message": "Admin account created.",
@@ -642,12 +715,14 @@ def create_user():
                 "role": "admin",
             },
             "temp_password": temp_password,
+            "email_sent": email_sent,
         }, 201
 
     return {
         "message": "Teacher account created.",
         "data": _load_admin_user(user_id),
         "temp_password": temp_password,
+        "email_sent": email_sent,
     }, 201
 
 
@@ -690,7 +765,7 @@ def list_admins():
 @super_admin_required
 def reset_admin_password(user_id: int):
     row = fetch_one(
-        "SELECT user_id FROM users WHERE user_id=%s AND role='ADMIN' AND account_status='ACTIVE'",
+        "SELECT user_id, email, first_name FROM users WHERE user_id=%s AND role='ADMIN' AND account_status='ACTIVE'",
         (user_id,),
     )
     if not row:
@@ -698,10 +773,11 @@ def reset_admin_password(user_id: int):
 
     temp_password = _generate_temp_password()
     execute(
-        "UPDATE users SET password_hash=%s WHERE user_id=%s",
+        "UPDATE users SET password_hash=%s, must_change_password=TRUE WHERE user_id=%s",
         (generate_password_hash(temp_password), user_id),
     )
-    return {"success": True, "message": "Password reset.", "temp_password": temp_password}
+    email_sent = _send_temp_password_email(row["email"], row.get("first_name") or "", "admin", temp_password, reset=True)
+    return {"success": True, "message": "Password reset.", "temp_password": temp_password, "email_sent": email_sent}
 
 
 @bp.delete("/admin/admins/<int:user_id>")
@@ -831,14 +907,22 @@ def update_own_admin_profile():
         return error("Account not found.", 404)
 
     data = request.get_json(silent=True) or {}
+    parts = name_parts(data)
     full_name = str(data.get("fullName") or "").strip()
-    if full_name:
+    if parts is not None:
+        # Separate First/Last fields are saved as typed (never re-split).
+        first_name, _, last_name = parts
+    elif full_name:
         first_name, last_name = split_name(full_name)
     else:
         first_name = existing.get("first_name") or ""
         last_name = existing.get("last_name") or ""
 
     contact_number = _merge_field(data, "phone", existing.get("contact_number"))
+    try:
+        contact_number = clean_contact_number(contact_number, "Phone number")
+    except ValueError as exc:
+        return error(str(exc), 422)
     email = _merge_field(data, "email", existing.get("email"))
     if not first_name or not last_name or not email:
         return error("Full name and email are required.", 422)

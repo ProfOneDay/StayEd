@@ -2,6 +2,13 @@ class Guards {
   static auth() {
     if (!Auth.validateSession()) {
       window.location.href = "/index.html";
+      return;
+    }
+
+    // Still on an admin-issued temporary password: nothing else works
+    // until it's replaced (the backend refuses every other call).
+    if (Auth.mustChangePassword()) {
+      window.location.href = Auth.SET_PASSWORD_PAGE;
     }
   }
 

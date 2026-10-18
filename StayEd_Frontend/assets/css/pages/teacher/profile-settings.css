@@ -535,6 +535,25 @@ body[data-page="Profile Settings"] [data-animate-cards].is-inview > *{
     font-weight:700;
 }
 
+.st-cp-link:disabled{
+    color:var(--st-on-surface-variant);
+    font-weight:600;
+    cursor:default;
+}
+
+/* 6-digit verification code on the Change Password "Check your email" step */
+.st-cp-code{
+    font-size:var(--st-fs-xl);
+    font-weight:700;
+    letter-spacing:.4em;
+    text-align:center;
+    font-variant-numeric:tabular-nums;
+}
+
+[data-cp-view="verify"] .st-cp-link{
+    margin-top:10px;
+}
+
 .st-cp-reqs{
     list-style:none;
     margin:14px 0 0;

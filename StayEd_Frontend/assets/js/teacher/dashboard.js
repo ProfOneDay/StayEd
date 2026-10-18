@@ -510,7 +510,7 @@ class TeacherDashboard {
       note.textContent = "Current risk distribution for your filtered learners.";
       this.chartInstances.risk = new Chart(canvas.getContext("2d"), {
         type: "doughnut",
-        plugins: [ST_CENTER_TOTAL],
+        plugins: [ST_CENTER_TOTAL, ST_SLICE_PERCENT],
         data: {
           labels: ["High risk", "Moderate risk", "Low risk", "Not yet assessed"],
           datasets: [{ data: [high, moderate, low, unassessed], backgroundColor: ["#ba1a1a", "#f39422", "#6bbf59", "#c4cad4"], borderColor: "#fff", borderWidth: 3, hoverOffset: 4 }],
@@ -518,9 +518,9 @@ class TeacherDashboard {
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          cutout: "68%",
+          cutout: "60%",
           animation: ST_REDUCE_MOTION ? false : { animateRotate: true, animateScale: false, duration: 1000, easing: "easeOutQuart" },
-          plugins: { legend: ST_LEGEND_BOTTOM, tooltip: ST_TOOLTIP_COMPOSE },
+          plugins: { legend: ST_LEGEND_VALUES(ST_LEGEND_BOTTOM), tooltip: ST_TOOLTIP_COMPOSE },
         },
       });
       return;
@@ -657,7 +657,7 @@ class TeacherDashboard {
     if (!canvas || !this.chartJsReady(note)) return;
     this.chartInstances[key] = new Chart(canvas.getContext("2d"), {
       type: "doughnut",
-      plugins: [ST_CENTER_TOTAL],
+      plugins: [ST_CENTER_TOTAL, ST_SLICE_PERCENT],
       data: {
         labels,
         datasets: [{ data: values, backgroundColor: colors, borderColor: "#fff", borderWidth: 3, hoverOffset: 4 }],
@@ -665,7 +665,7 @@ class TeacherDashboard {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        cutout: "66%",
+        cutout: "58%",
         animation: ST_REDUCE_MOTION ? false : { animateRotate: true, animateScale: false, duration: 1000, easing: "easeOutQuart" },
         plugins: { legend: { display: false }, tooltip: ST_TOOLTIP_COMPOSE },
       },

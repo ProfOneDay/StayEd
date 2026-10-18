@@ -8,20 +8,30 @@ from datetime import date, datetime, timedelta
 from io import BytesIO
 
 import pandas as pd
-from flask import Blueprint, current_app, request
+from flask import Blueprint, current_app, request, send_file
 
 from ..services.ai_intervention_service import generate_ai_recommendation
 
 from ..authz import current_user_id, role_required, teacher_for_user
 from ..db import execute, fetch_all, fetch_one, get_db
 from ..helpers import (
+    CIVIL_STATUS_OPTIONS,
+    CONTACT_NUMBER_RE,
+    EMPLOYMENT_STATUS_OPTIONS,
+    LEARNER_FIELD_OPTIONS,
     LRN_RE,
+    SOCIO_ECONOMIC_OPTIONS,
     enum_level,
     enum_modality,
+    display_name,
+    name_parts,
     error,
+    match_option,
+    normalise_contact_number,
     split_name,
     title_enum,
 )
+from ..services.import_template import IMPORT_COLUMNS, build_import_template
 from ..services.learner_service import (
     ACTIVITY_DANGER_DAYS,
     ACTIVITY_WARNING_DAYS,
@@ -136,7 +146,7 @@ def lookup_learner_by_lrn():
 
     row = fetch_one(
         """
-        SELECT learner_id, lrn, first_name, last_name
+        SELECT learner_id, lrn, first_name, middle_name, last_name
         FROM learner
         WHERE lrn = %s
         LIMIT 1
@@ -151,7 +161,10 @@ def lookup_learner_by_lrn():
         "data": {
             "id": row["learner_id"],
             "lrn": row["lrn"],
-            "name": f"{row.get('first_name') or ''} {row.get('last_name') or ''}".strip(),
+            "first_name": row.get("first_name") or "",
+            "middle_name": row.get("middle_name") or "",
+            "last_name": row.get("last_name") or "",
+            "name": display_name(row.get("first_name"), row.get("middle_name"), row.get("last_name")),
         },
     }
 
@@ -177,17 +190,27 @@ def _validate_learner_payload(data, *, partial=False):
             raise ValueError("LRN must contain exactly 12 digits.")
         result["lrn"] = lrn
 
-    if "name" in data or "full_name" in data:
+    parts = name_parts(data)
+    if parts is not None:
+        # Separate First/Middle/Surname fields -- stored exactly as typed.
+        first, middle, last = parts
+        if not partial or any(k in data for k in ("first_name", "firstName")):
+            if not first:
+                raise ValueError("Learner first name is required.")
+            result["first_name"] = first
+        if not partial or any(k in data for k in ("last_name", "lastName")):
+            if not last:
+                raise ValueError("Learner surname is required.")
+            result["last_name"] = last
+        if not partial or any(k in data for k in ("middle_name", "middleName")):
+            result["middle_name"] = middle
+    elif "name" in data or "full_name" in data:
+        # Legacy single full-name box: only reliable as "Surname, First Name".
         first, last = split_name(data.get("name") or data.get("full_name"))
         if not first or not last:
             raise ValueError("Learner full name is required.")
         result["first_name"] = first
         result["last_name"] = last
-    else:
-        if "first_name" in data:
-            result["first_name"] = str(data["first_name"]).strip()
-        if "last_name" in data:
-            result["last_name"] = str(data["last_name"]).strip()
 
     if not partial or "sex" in data:
         sex = str(data.get("sex") or "").strip().upper()
@@ -202,17 +225,47 @@ def _validate_learner_payload(data, *, partial=False):
         except ValueError as exc:
             raise ValueError("Please enter a valid birthdate.") from exc
 
+    # Civil status and socio-economic status are mandatory; they and the
+    # other dropdown fields only take their standard values
+    # (helpers.LEARNER_FIELD_OPTIONS).
+    for field, label, options in (
+        ("civil_status", "Civil status", CIVIL_STATUS_OPTIONS),
+        ("occupation", "Socio-economic status", SOCIO_ECONOMIC_OPTIONS),
+    ):
+        if not partial or field in data:
+            match = match_option(data.get(field), options)
+            if not match:
+                raise ValueError(f"{label} is required ({', '.join(options)}).")
+            result[field] = match
+
+    for field, label, options in (
+        ("employment_status", "Employment status", EMPLOYMENT_STATUS_OPTIONS),
+    ):
+        if field in data:
+            if not str(data.get(field) or "").strip():
+                result[field] = None
+                continue
+            match = match_option(data.get(field), options)
+            if not match:
+                raise ValueError(f"{label} must be one of: {', '.join(options)}.")
+            result[field] = match
+
+    for field, label in (
+        ("contact_number", "Contact number"),
+        ("guardian_contact_number", "Guardian contact number"),
+    ):
+        if field in data:
+            number = normalise_contact_number(data.get(field))
+            if number and not CONTACT_NUMBER_RE.match(number):
+                raise ValueError(f"{label} must be 11 digits starting with 09.")
+            result[field] = number
+
     for src, dest in (
-        ("employment_status", "employment_status"),
-        ("civil_status", "civil_status"),
-        ("contact_number", "contact_number"),
-        ("guardian_contact_number", "guardian_contact_number"),
         ("email", "email"),
         ("address", "address"),
         ("guardian_name", "guardian_name"),
         ("guardian_relationship", "guardian_relationship"),
         ("last_grade_completed", "last_grade_completed"),
-        ("occupation", "occupation"),
     ):
         if src in data:
             result[dest] = data.get(src) or None
@@ -282,15 +335,15 @@ def create_learner():
                 cur.execute(
                     """
                     INSERT INTO learner (
-                        lrn, first_name, last_name, sex, date_of_birth,
+                        lrn, first_name, middle_name, last_name, sex, date_of_birth,
                         employment_status, civil_status, contact_number, guardian_contact_number,
                         email, address, guardian_name, guardian_relationship, last_grade_completed,
                         monthly_income, occupation
-                    ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                     RETURNING learner_id
                     """,
                     (
-                        clean["lrn"], clean["first_name"], clean["last_name"], clean["sex"],
+                        clean["lrn"], clean["first_name"], clean.get("middle_name"), clean["last_name"], clean["sex"],
                         clean["date_of_birth"], clean.get("employment_status"), clean.get("civil_status"),
                         clean.get("contact_number"), clean.get("guardian_contact_number"),
                         clean.get("email"), clean.get("address"), clean.get("guardian_name"),
@@ -391,7 +444,8 @@ def update_learner(learner_id: int):
             raise
 
     editable = {k: v for k, v in data.items() if k in {
-        "lrn", "name", "full_name", "first_name", "last_name", "sex", "birthdate", "date_of_birth",
+        "lrn", "name", "full_name", "first_name", "last_name", "middle_name",
+        "firstName", "lastName", "middleName", "sex", "birthdate", "date_of_birth",
         "employment_status", "civil_status", "contact_number", "guardian_contact_number",
         "is_4ps_beneficiary", "is4Ps",
         "email", "address", "guardian_name", "guardian_relationship", "last_grade_completed",
@@ -2604,7 +2658,13 @@ def _read_upload(file_storage):
     if name.endswith(".csv"):
         return pd.read_csv(BytesIO(raw), dtype=str)
     if name.endswith(".xlsx") or name.endswith(".xls"):
-        return pd.read_excel(BytesIO(raw), dtype=str)
+        # The StayEd template opens with an Instructions sheet; the data is
+        # on "Learners". Other workbooks fall back to their first sheet.
+        book = pd.ExcelFile(BytesIO(raw))
+        sheet = "Learners" if "Learners" in book.sheet_names else 0
+        # The template pre-formats empty rows, which can come back as
+        # all-blank rows -- drop those rather than flag them as errors.
+        return book.parse(sheet, dtype=str).dropna(how="all")
     raise ValueError("Please upload an Excel or CSV file.")
 
 
@@ -2622,7 +2682,11 @@ def _normalise_import_value(value):
 
 def _canonical_rows(frame: pd.DataFrame):
     frame = frame.copy()
-    frame.columns = [str(c).strip().lower().replace(" ", "_") for c in frame.columns]
+    # The template marks required columns with a trailing "*" ("Civil
+    # Status *"); drop it so the header still maps to its field.
+    frame.columns = [
+        str(c).replace("*", "").strip().lower().replace(" ", "_") for c in frame.columns
+    ]
     aliases = {
         "learner_reference_number": "lrn", "full_name": "name", "learner_name": "name",
         "date_of_birth": "birthdate", "dob": "birthdate", "learning_level": "level",
@@ -2676,40 +2740,120 @@ def _parse_import_income(value):
         return None
 
 
+_YES_NO_ALIASES = {"y": "Yes", "true": "Yes", "1": "Yes", "n": "No", "false": "No", "0": "No"}
+
+
+def _import_choice(raw, field, label, issues, *, required=False):
+    """Validate a dropdown column against its standard list. Returns the
+    standard spelling, or the value as typed (so the preview still shows
+    what was wrong) with an issue recorded."""
+    value = raw.get(field)
+    text = str(value or "").strip()
+    if not text:
+        if required:
+            issues.append(f"{label} is required")
+        return None
+    if field == "re_enrollee":
+        text = _YES_NO_ALIASES.get(text.lower(), text)
+    options = LEARNER_FIELD_OPTIONS[field]
+    match = match_option(text, options)
+    if match is None:
+        issues.append(f"{label} must be one of: {', '.join(options)}")
+        return text
+    return match
+
+
+def _import_contact(raw, field, label, issues):
+    number = normalise_contact_number(raw.get(field))
+    if number and not CONTACT_NUMBER_RE.match(number):
+        issues.append(f"{label} must be 11 digits starting with 09")
+    return number
+
+
+def _import_amount(raw, field, label, issues):
+    value = raw.get(field)
+    if value in (None, "") or not str(value).strip():
+        return None
+    try:
+        amount = float(str(value).replace(",", "").strip())
+    except ValueError:
+        issues.append(f"{label} must be a number")
+        return value
+    if amount < 0:
+        issues.append(f"{label} cannot be negative")
+    return amount
+
+
+def _check_import_row(raw):
+    """Field-level validation for one import row (everything except the LRN
+    duplicate check, which needs the database). Returns the row with its
+    values converted to the standard spellings, plus a list of problems."""
+    issues = []
+    name = str(raw.get("name") or "").strip()
+    if not name and not (str(raw.get("first_name") or "").strip() and str(raw.get("last_name") or "").strip()):
+        issues.append("Last Name and First Name are required")
+
+    birthdate = _parse_import_birthdate(raw.get("birthdate"))
+    if not raw.get("birthdate"):
+        issues.append("Date of Birth is required")
+    elif birthdate is None:
+        issues.append("Date of Birth must be a valid date (YYYY-MM-DD)")
+    elif birthdate > date.today():
+        issues.append("Date of Birth cannot be in the future")
+
+    clean = {
+        **raw,
+        "name": name or f"{raw.get('first_name') or ''} {raw.get('last_name') or ''}".strip(),
+        "birthdate": birthdate.isoformat() if birthdate else raw.get("birthdate"),
+        "sex": _import_choice(raw, "sex", "Sex", issues, required=True),
+        "modality": _import_choice(raw, "modality", "Learning Modality", issues, required=True),
+        "civil_status": _import_choice(raw, "civil_status", "Civil Status", issues, required=True),
+        "re_enrollee": _import_choice(raw, "re_enrollee", "Re-enrollee", issues),
+        "employment_status": _import_choice(raw, "employment_status", "Employment Status", issues),
+        "occupation": _import_choice(raw, "occupation", "Socio-economic Status", issues, required=True),
+        "contact_number": _import_contact(raw, "contact_number", "Contact Number", issues),
+        "guardian_contact_number": _import_contact(
+            raw, "guardian_contact_number", "Guardian Contact Number", issues,
+        ),
+        "distance_from_clc_km": _import_amount(raw, "distance_from_clc_km", "Distance from CLC", issues),
+        "monthly_income": _import_amount(raw, "monthly_income", "Monthly Income", issues),
+        "level": raw.get("level") or "Basic Literacy",
+    }
+    return clean, issues
+
+
 def _preview_rows(rows):
     existing_lrns = {r["lrn"] for r in fetch_all("SELECT lrn FROM learner")}
     seen = set()
     preview = []
     for raw in rows:
         lrn = str(raw.get("lrn") or "").strip()
-        name = str(raw.get("name") or "").strip()
+        clean, issues = _check_import_row(raw)
         status = "valid"
         issue = None
         if not LRN_RE.match(lrn):
-            status, issue = "error", "LRN must contain exactly 12 digits"
+            status, issue = "error", "; ".join(["LRN must contain exactly 12 digits", *issues])
         elif lrn in existing_lrns or lrn in seen:
+            # The learner record already exists, so only the enrollment is
+            # added (see _insert_import_rows) -- their intake fields aren't
+            # re-checked here.
             status, issue = "duplicate", "This LRN is already registered or appears twice in the file"
-        elif not name and not (raw.get("first_name") and raw.get("last_name")):
-            status, issue = "error", "Missing learner name"
-        elif not raw.get("birthdate"):
-            status, issue = "error", "Birthdate is missing"
-        elif _parse_import_birthdate(raw.get("birthdate")) is None:
-            status, issue = "error", "Birthdate must be a valid date"
-        elif str(raw.get("sex") or "MALE").strip().upper() not in {"MALE", "FEMALE"}:
-            status, issue = "error", "Sex must be Male or Female"
+        elif issues:
+            status, issue = "error", "; ".join(issues)
         seen.add(lrn)
-        birthdate = _parse_import_birthdate(raw.get("birthdate"))
-        preview.append({
-            **raw,
-            "lrn": lrn,
-            "name": name or f"{raw.get('first_name','')} {raw.get('last_name','')}".strip(),
-            "birthdate": birthdate.isoformat() if birthdate else raw.get("birthdate"),
-            "level": raw.get("level") or "Basic Literacy",
-            "modality": raw.get("modality") or "Face-to-Face",
-            "status": status,
-            "issue": issue,
-        })
+        preview.append({**clean, "lrn": lrn, "status": status, "issue": issue})
     return preview
+
+
+@bp.get("/learners/import/template")
+@role_required("teacher")
+def import_template():
+    return send_file(
+        build_import_template(),
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name="StayEd_Learner_Import_Template.xlsx",
+    )
 
 
 @bp.post("/learners/import/preview")
@@ -2736,6 +2880,10 @@ def import_preview():
         "errors": sum(r["status"] == "error" for r in preview),
         "filename": filename,
         "rows": preview,
+        # The standard dropdown values, so the preview's edit-row form
+        # offers exactly what the validation accepts.
+        "options": LEARNER_FIELD_OPTIONS,
+        "required": [field for _h, field, required, *_ in IMPORT_COLUMNS if required],
     }
 
 
@@ -2763,8 +2911,14 @@ def _insert_import_rows(rows, teacher, class_id=None):
     try:
         with db.cursor() as cur:
             for row in valid:
-                name = row.get("name") or f"{row.get('first_name','')} {row.get('last_name','')}"
-                first, last = split_name(name)
+                # Separate First/Last Name columns are used as-is -- joining
+                # and re-splitting them turned "Juan Carlos" + "Reyes" into
+                # first "Juan", surname "Carlos Reyes".
+                first = " ".join(str(row.get("first_name") or "").split())[:100]
+                last = " ".join(str(row.get("last_name") or "").split())[:100]
+                if not (first and last):
+                    first, last = split_name(row.get("name"))
+                name = f"{first} {last}".strip()
                 sex = str(row.get("sex") or "MALE").strip().upper()
                 if sex not in {"MALE", "FEMALE"}:
                     sex = "MALE"

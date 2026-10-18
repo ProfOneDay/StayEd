@@ -88,7 +88,7 @@
       <div class="field st-field-grid-2">
         <div>
           <label for="newAdminPhone">Contact Number (Optional)</label>
-          <input id="newAdminPhone" type="text" placeholder="+63 9xx xxx xxxx" autocomplete="tel" />
+          <input id="newAdminPhone" type="tel" placeholder="09XXXXXXXXX" autocomplete="tel" data-contact-number inputmode="numeric" />
         </div>
       </div>
       <div class="modal-actions">
@@ -117,7 +117,7 @@
         <span class="material-symbols-outlined">content_copy</span>
       </button>
     </div>
-    <div class="info-banner">Share this temporary password securely with the admin. Assign their access from the table.</div>
+    <div class="info-banner" id="adminCreatedNote">Share this temporary password securely with the admin. Assign their access from the table.</div>
     <div class="modal-actions">
       <button class="st-btn st-btn-primary st-btn-block" type="button" data-close-admin-modal>Done</button>
     </div>
@@ -154,7 +154,7 @@
         <span class="material-symbols-outlined">content_copy</span>
       </button>
     </div>
-    <div class="info-banner">Share this temporary password securely with the admin.</div>
+    <div class="info-banner" id="adminResetNote">Share this temporary password securely with the admin.</div>
     <div class="modal-actions">
       <button class="st-btn st-btn-primary st-btn-block" type="button" data-close-admin-modal>Done</button>
     </div>

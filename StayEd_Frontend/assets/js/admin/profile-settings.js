@@ -171,7 +171,9 @@ class AdminProfileSettingsPage {
 
       try {
         const fullName = `${firstName} ${lastName}`.trim();
-        const response = await API.put("/admin/profile", { fullName, phone, email });
+        // Sent as separate parts so the server never re-splits "Maria Clara"
+        // + "Santos" into first "Maria", surname "Clara Santos".
+        const response = await API.put("/admin/profile", { firstName, lastName, fullName, phone, email });
 
         Auth.updateUser({
           full_name: response.data.fullName,

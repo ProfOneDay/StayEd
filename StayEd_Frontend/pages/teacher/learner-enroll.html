@@ -214,14 +214,37 @@
                   </span>
                 </h3>
                 <div class="st-enroll-fields">
-                  <div class="st-enroll-field st-enroll-field--full">
-                    <label for="wFullName"
-                      >Full Name <span class="required">*</span></label
+                  <div class="st-enroll-field">
+                    <label for="wFirstName"
+                      >First Name <span class="required">*</span></label
                     >
                     <input
-                      id="wFullName"
+                      id="wFirstName"
                       type="text"
-                      placeholder="Surname, First Name M.I."
+                      placeholder="e.g. Juan Carlos"
+                      autocomplete="off"
+                      required
+                    />
+                    <p class="st-field-hint">Include all given names.</p>
+                  </div>
+                  <div class="st-enroll-field">
+                    <label for="wMiddleName">Middle Name</label>
+                    <input
+                      id="wMiddleName"
+                      type="text"
+                      placeholder="Leave blank if none"
+                      autocomplete="off"
+                    />
+                  </div>
+                  <div class="st-enroll-field st-enroll-field--full">
+                    <label for="wLastName"
+                      >Surname <span class="required">*</span></label
+                    >
+                    <input
+                      id="wLastName"
+                      type="text"
+                      placeholder="e.g. Dela Cruz"
+                      autocomplete="off"
                       required
                     />
                   </div>
@@ -257,8 +280,10 @@
                     <input id="wBirthdate" type="date" required />
                   </div>
                   <div class="st-enroll-field">
-                    <label for="wCivilStatus">Civil Status</label>
-                    <select id="wCivilStatus">
+                    <label for="wCivilStatus"
+                      >Civil Status <span class="required">*</span></label
+                    >
+                    <select id="wCivilStatus" required>
                       <option value="" disabled selected>Select Status</option>
                       <option>Single</option>
                       <option>Married</option>
@@ -285,7 +310,7 @@
                 <div class="st-enroll-fields">
                   <div class="st-enroll-field">
                     <label for="wPhone">Contact Number</label>
-                    <input id="wPhone" type="tel" placeholder="09XX XXX XXXX" />
+                    <input id="wPhone" type="tel" placeholder="09XXXXXXXXX" data-contact-number inputmode="numeric" />
                   </div>
                   <div class="st-enroll-field">
                     <label for="wEmail">Email Address</label>
@@ -350,7 +375,9 @@
                     <input
                       id="wGuardianContact"
                       type="tel"
-                      placeholder="09XX XXX XXXX"
+                      placeholder="09XXXXXXXXX"
+                      data-contact-number
+                      inputmode="numeric"
                     />
                   </div>
                 </div>
@@ -485,8 +512,10 @@
                     </select>
                   </div>
                   <div class="st-enroll-field">
-                    <label for="wOccupation">Socio-economic Status</label>
-                    <select id="wOccupation">
+                    <label for="wOccupation"
+                      >Socio-economic Status <span class="required">*</span></label
+                    >
+                    <select id="wOccupation" required>
                       <option value="" disabled selected>Select Status</option>
                       <option>Unemployed / No Income</option>
                       <option>Informal / Contractual Worker</option>

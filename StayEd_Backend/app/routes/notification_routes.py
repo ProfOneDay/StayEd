@@ -176,13 +176,23 @@ def delete_notification(notification_id: int):
 @role_required("admin")
 def list_notifiable_teachers():
     """Active teachers an admin can pick as recipients when sending an
-    announcement or report request."""
+    announcement or report request, each with the active CLC(s) they're
+    assigned to so the picker can group and bulk-select them per CLC."""
     rows = fetch_all(
         """
-        SELECT u.user_id AS id, CONCAT_WS(' ', t.first_name, t.last_name) AS name, t.municipality
+        SELECT u.user_id AS id, CONCAT_WS(' ', t.first_name, t.last_name) AS name, t.municipality,
+               COALESCE(
+                   jsonb_agg(DISTINCT jsonb_build_object(
+                       'id', c.clc_id, 'name', c.clc_name, 'municipality', c.municipality
+                   )) FILTER (WHERE c.clc_id IS NOT NULL),
+                   '[]'::jsonb
+               ) AS clcs
         FROM users u
         JOIN teacher t ON t.user_id = u.user_id
+        LEFT JOIN teacher_clc tc ON tc.teacher_id = t.teacher_id AND tc.assignment_status = 'ACTIVE'
+        LEFT JOIN clc c ON c.clc_id = tc.clc_id AND c.status = 'ACTIVE'
         WHERE u.role = 'TEACHER' AND u.account_status = 'ACTIVE'
+        GROUP BY u.user_id, t.first_name, t.last_name, t.municipality
         ORDER BY t.last_name, t.first_name
         """
     )

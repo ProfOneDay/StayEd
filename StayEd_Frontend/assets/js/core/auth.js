@@ -162,8 +162,29 @@ class Auth {
     return updated;
   }
 
+  static SET_PASSWORD_PAGE = "/pages/auth/set-password.html";
+
+  // True while the account still holds an admin-issued temporary password
+  // (created directly by an admin, or after an admin reset). The backend
+  // refuses every other API call until it's replaced.
+  static mustChangePassword() {
+    return this.user()?.mustChangePassword === true;
+  }
+
+  static async setInitialPassword(data) {
+    const response = await API.post("/auth/set-initial-password", data);
+    if (response?.token) this.saveSession(response.token, response.user);
+    return response;
+  }
+
   static async redirectAfterLogin() {
     const role = this.role();
+
+    if (this.mustChangePassword()) {
+      window.location.href = this.SET_PASSWORD_PAGE;
+
+      return;
+    }
 
     // A teacher who hasn't been through the setup wizard yet (class
     // creation + learner import) gets sent there instead of an empty
@@ -243,6 +264,14 @@ class Auth {
     }
 
     return true;
+  }
+
+  static async requestPasswordChangeCode(data) {
+    return API.post(
+      "/auth/change-password/request-code",
+
+      data,
+    );
   }
 
   static async changePassword(data) {

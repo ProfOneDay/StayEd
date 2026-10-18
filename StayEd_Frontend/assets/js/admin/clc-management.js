@@ -185,8 +185,24 @@ function closeModal(id){document.getElementById(id).classList.remove('show')}
 document.querySelectorAll('.overlay').forEach(ov=>ov.addEventListener('click',e=>{if(e.target===ov)ov.classList.remove('show')}));
 
 const muniSelect=document.getElementById('new-clc-muni');
-const brgyInput=document.getElementById('new-clc-brgy');
+const brgySelect=document.getElementById('new-clc-brgy');
 let editingClcId=null;
+
+// Fill the Barangay dropdown with the selected municipality's barangays.
+// `current` is kept as an option even when it isn't in the list (legacy
+// free-text records), so editing such a CLC doesn't silently drop it.
+function populateBarangays(muni,current=''){
+  if(!muni){
+    brgySelect.innerHTML='<option value="">Select Municipality first</option>';
+    brgySelect.disabled=true;
+    return;
+  }
+  const list=getDivisionIIBarangays(muni);
+  const names=current&&!list.includes(current)?[...list,current].sort():list;
+  brgySelect.innerHTML='<option value="">Select Barangay</option>'+names.map(b=>`<option ${b===current?'selected':''}>${b}</option>`).join('');
+  brgySelect.disabled=false;
+}
+muniSelect.addEventListener('change',()=>populateBarangays(muniSelect.value));
 
 // Every Division II municipality is offered up front, not just the ones
 // that already have a CLC on record -- otherwise the first CLC in a
@@ -201,7 +217,7 @@ function openAddClcModal(){
   document.getElementById('new-clc-name').value='';
   document.getElementById('new-clc-street').value='';
   muniSelect.innerHTML='<option value="">Select Municipality</option>'+DIVISION_II_MUNI_NAMES.map(m=>`<option>${m}</option>`).join('');
-  brgyInput.value='';
+  populateBarangays('');
   document.getElementById('clc-quick-actions').hidden=true;
   openModal('modal-add-clc');
 }
@@ -217,7 +233,7 @@ function openEditClc(id){
   // registered outside Division II, so editing it doesn't silently drop it.
   const munis=[...new Set([...DIVISION_II_MUNI_NAMES,c.muni])].sort();
   muniSelect.innerHTML=munis.map(m=>`<option ${m===c.muni?'selected':''}>${m}</option>`).join('');
-  brgyInput.value=c.barangay||'';
+  populateBarangays(c.muni,c.barangay||'');
   const qaBtn=document.getElementById('qa-assign-btn');
   const qaCount=document.getElementById('qa-teacher-count');
   document.getElementById('clc-quick-actions').hidden=false;
@@ -239,7 +255,7 @@ document.getElementById('qa-assign-btn').addEventListener('click',()=>{
 document.getElementById('addClcSaveBtn').addEventListener('click',async()=>{
   const name=document.getElementById('new-clc-name').value.trim();
   const muni=muniSelect.value;
-  const barangay=brgyInput.value.trim();
+  const barangay=brgySelect.value;
   const street=document.getElementById('new-clc-street').value.trim();
   if(!name||!muni||!barangay){ showToast('Please fill in CLC name, municipality, and barangay','warning'); return; }
   const address=`${street?street+', ':''}Brgy. ${barangay}, ${muni}`;

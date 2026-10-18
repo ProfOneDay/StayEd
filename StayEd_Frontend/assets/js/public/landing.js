@@ -127,7 +127,10 @@ const Landing = {
 
       try {
         const response = await Auth.register({
-          full_name: data.full_name.trim(),
+          first_name: data.first_name.trim(),
+          middle_name: (data.middle_name || "").trim(),
+          last_name: data.last_name.trim(),
+          full_name: [data.first_name, data.middle_name, data.last_name].map((p) => (p || "").trim()).filter(Boolean).join(" "),
           employee_id: data.employee_id.trim(),
           email: data.email.trim(),
           password: data.password,

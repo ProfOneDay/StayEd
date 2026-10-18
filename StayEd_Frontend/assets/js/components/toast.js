@@ -16,6 +16,13 @@ class Toast {
   }
 
   static show(message, type = "success", duration) {
+    // Problems raised while the user is filling in a modal form belong in
+    // that form, next to what they're fixing -- not in a corner toast that
+    // can disappear behind the overlay. Confirmations still toast.
+    if ((type === "error" || type === "warning") && ModalInlineError.show(message, type)) {
+      return;
+    }
+
     const container = document.getElementById("st-toast-container");
 
     if (!container) {
@@ -122,4 +129,100 @@ class Toast {
   }
 }
 
+// Error/warning banner shown inside whichever input modal is open on top.
+// Covers both modal systems -- the admin .overlay.show > .modal dialogs and
+// the shared #st-modal -- plus any other [role="dialog"] / <dialog open>.
+class ModalInlineError {
+  static DIALOGS = [
+    ".overlay.show .modal",
+    "#st-modal:not(.hidden) .st-modal-card",
+    '[role="dialog"]',
+    '[aria-modal="true"]',
+    "dialog[open]",
+  ].join(",");
+
+  static FIELDS = 'input:not([type="hidden"]), select, textarea';
+
+  static ACTIONS = ".modal-actions, .st-modal-footer, .st-module-modal-footer";
+
+  // Bumped every time an error lands in a modal, so Modal can tell whether
+  // its onConfirm reported a problem (and should stay open).
+  static count = 0;
+
+  static isVisible(el) {
+    return el.getClientRects().length > 0 && getComputedStyle(el).visibility !== "hidden";
+  }
+
+  static activeDialog() {
+    const open = [...document.querySelectorAll(this.DIALOGS)].filter(
+      (el) => this.isVisible(el) && [...el.querySelectorAll(this.FIELDS)].some((f) => this.isVisible(f))
+    );
+
+    if (open.length <= 1) return open[0] || null;
+
+    // Several open (e.g. a nested dialog): take the one actually on top.
+    return (
+      open.find((el) => {
+        const r = el.getBoundingClientRect();
+        const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        return hit && el.contains(hit);
+      }) || open[open.length - 1]
+    );
+  }
+
+  static show(message, type = "error") {
+    const dialog = this.activeDialog();
+
+    if (!dialog) return false;
+
+    this.clear(dialog);
+
+    const banner = document.createElement("div");
+    banner.className = `st-inline-error st-inline-error--${type}`;
+    banner.setAttribute("role", "alert");
+
+    const icon = document.createElement("span");
+    icon.className = "material-symbols-outlined";
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = type === "warning" ? "warning" : "error";
+
+    // textContent: server messages must never be run as markup.
+    const text = document.createElement("span");
+    text.textContent = message;
+
+    banner.append(icon, text);
+
+    // Sit just above the modal's button row so it's next to the button the
+    // user just pressed; fall back to the end of the dialog.
+    const actions = [...dialog.querySelectorAll(this.ACTIONS)].filter((el) => this.isVisible(el)).pop();
+    if (actions) actions.before(banner);
+    else dialog.appendChild(banner);
+
+    banner.scrollIntoView({ block: "nearest" });
+
+    // Gone once the user starts fixing things, or the modal closes.
+    const onEdit = () => this.clear(dialog);
+    dialog.addEventListener("input", onEdit, { once: true });
+    dialog.addEventListener("change", onEdit, { once: true });
+
+    const root = dialog.closest(".overlay, #st-modal") || dialog;
+    const observer = new MutationObserver(() => {
+      if (!this.isVisible(dialog)) this.clear(dialog);
+    });
+    observer.observe(root, { attributes: true, attributeFilter: ["class", "hidden", "style", "open"] });
+    banner._observer = observer;
+
+    this.count += 1;
+    return true;
+  }
+
+  static clear(dialog) {
+    dialog.querySelectorAll(".st-inline-error").forEach((el) => {
+      el._observer?.disconnect();
+      el.remove();
+    });
+  }
+}
+
 window.Toast = Toast;
+window.ModalInlineError = ModalInlineError;

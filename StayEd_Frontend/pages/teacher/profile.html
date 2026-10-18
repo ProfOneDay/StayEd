@@ -196,7 +196,9 @@
                         class="st-input"
                         id="settingsMobile"
                         type="tel"
-                        value="+63 917 123 4567"
+                        placeholder="09XXXXXXXXX"
+                        data-contact-number
+                        inputmode="numeric"
                         data-profile-editable
                         readonly
                       />
@@ -285,32 +287,11 @@
                       Change password
                     </button>
                   </div>
-                  <div class="st-toggle-row">
-                    <div>
-                      <p class="st-toggle-row-title">
-                        Two-factor authentication
-                      </p>
-                      <p class="st-toggle-row-sub">
-                        Preference saved — verification at sign-in is not yet
-                        enforced
-                      </p>
-                    </div>
-                    <label class="st-toggle">
-                      <input
-                        type="checkbox"
-                        data-mfa-toggle
-                        aria-label="Two-factor authentication"
-                      />
-                      <span class="st-toggle-track"
-                        ><span class="st-toggle-thumb"></span
-                      ></span>
-                    </label>
-                  </div>
                 </div>
               </div>
             </section>
 
-            <!-- Danger Zone (shared with the admin Profile Settings page) -->
+            <!-- Account Security (shared with the admin Profile Settings page) -->
             <div data-component="profile/danger-zone"></div>
           </div>
         </div>

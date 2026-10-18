@@ -5,6 +5,7 @@ class Router {
     "/register": "auth/register.html",
     "/forgot-password": "auth/forgot-password.html",
     "/reset-password": "auth/reset-password.html",
+    "/set-password": "auth/set-password.html",
     "/pending": "auth/pending.html",
 
     "/setup": "setup/setup-wizard-1.html",

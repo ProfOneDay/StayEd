@@ -28,12 +28,29 @@ class LearnerImportCore {
     return Utils.formatFileSize(bytes);
   }
 
+  // Standard dropdown values ({ civil_status: [...], ... }) and required
+  // fields, as sent by the backend with every preview -- the edit-row modal
+  // offers exactly the values the import validation accepts.
+  static options = {};
+  // Fallback until a preview arrives; mirrors the "*" columns in
+  // import_template.IMPORT_COLUMNS.
+  static required = [
+    "lrn", "last_name", "first_name", "sex", "birthdate", "modality", "civil_status",
+    "occupation",
+  ];
+
+  static remember(preview) {
+    if (preview?.options) this.options = preview.options;
+    if (preview?.required) this.required = preview.required;
+    return preview;
+  }
+
   static preview(file) {
-    return API.getImportPreview(file);
+    return API.getImportPreview(file).then((r) => this.remember(r));
   }
 
   static revalidate(rows) {
-    return API.revalidateImportRows(rows);
+    return API.revalidateImportRows(rows).then((r) => this.remember(r));
   }
 
   // class_id is intentionally optional: the backend falls back to the
@@ -46,8 +63,13 @@ class LearnerImportCore {
     });
   }
 
+  // Excel template built by the backend: dropdowns for every fixed-choice
+  // column, required columns marked with *, and an Instructions sheet.
   static downloadTemplate() {
-    Utils.downloadLearnerImportTemplate();
+    return API.download(
+      "/learners/import/template",
+      "StayEd_Learner_Import_Template.xlsx",
+    );
   }
 
   static cell(value) {
@@ -259,12 +281,37 @@ class LearnerImportCore {
 
     const row = state.rows[index];
 
-    const field = (id, label, value, type = "text") => `
+    const mark = (key, label) =>
+      this.required.includes(key) ? `${label} <span class="required">*</span>` : label;
+
+    const field = (id, label, value, type = "text", key = null) => `
       <div class="st-schedule-modal-field">
-        <label for="${id}">${label}</label>
+        <label for="${id}">${mark(key, label)}</label>
         <input id="${id}" type="${type}" value="${value ?? ""}">
       </div>
     `;
+
+    // A value that isn't one of the standard options (e.g. "singel" typed
+    // in Excel) leaves the blank option selected, so the teacher has to
+    // pick a real one instead of re-saving the typo.
+    const select = (id, label, key, value) => {
+      const options = this.options[key] || [];
+      const current = String(value ?? "").trim().toLowerCase();
+      return `
+        <div class="st-schedule-modal-field">
+          <label for="${id}">${mark(key, label)}</label>
+          <select id="${id}">
+            <option value="">Select ${label.toLowerCase()}</option>
+            ${options
+              .map(
+                (opt) =>
+                  `<option value="${opt}" ${opt.toLowerCase() === current ? "selected" : ""}>${opt}</option>`,
+              )
+              .join("")}
+          </select>
+        </div>
+      `;
+    };
 
     Modal.show({
       title: "Edit learner row",
@@ -272,36 +319,19 @@ class LearnerImportCore {
       confirmLabel: "Save row",
       message: `
         <div class="st-schedule-modal-row">
-          ${field("editLrn", "LRN", row.lrn)}
-          ${field("editLastName", "Last name", row.last_name)}
-          ${field("editFirstName", "First name", row.first_name)}
+          ${field("editLrn", "LRN", row.lrn, "text", "lrn")}
+          ${field("editLastName", "Last name", row.last_name, "text", "last_name")}
+          ${field("editFirstName", "First name", row.first_name, "text", "first_name")}
           ${field("editMiddleName", "Middle name", row.middle_name)}
-          <div class="st-schedule-modal-field">
-            <label for="editSex">Sex</label>
-            <select id="editSex">
-              <option value="Male" ${row.sex?.toUpperCase() === "MALE" ? "selected" : ""}>Male</option>
-              <option value="Female" ${row.sex?.toUpperCase() === "FEMALE" ? "selected" : ""}>Female</option>
-            </select>
-          </div>
-          ${field("editBirthdate", "Date of birth", row.birthdate, "date")}
-          <div class="st-schedule-modal-field">
-            <label for="editModality">Learning modality</label>
-            <select id="editModality">
-              <option ${row.modality === "Face-to-Face" ? "selected" : ""}>Face-to-Face</option>
-              <option ${row.modality === "Modular" ? "selected" : ""}>Modular</option>
-              <option ${row.modality === "Blended" ? "selected" : ""}>Blended</option>
-            </select>
-          </div>
-          <div class="st-schedule-modal-field">
-            <label for="editReenrollee">Re-enrollee</label>
-            <select id="editReenrollee">
-              <option value="No" ${String(row.re_enrollee).toLowerCase() !== "yes" ? "selected" : ""}>No</option>
-              <option value="Yes" ${String(row.re_enrollee).toLowerCase() === "yes" ? "selected" : ""}>Yes</option>
-            </select>
-          </div>
-          ${field("editEmployment", "Employment status", row.employment_status)}
+          ${select("editSex", "Sex", "sex", row.sex)}
+          ${field("editBirthdate", "Date of birth", row.birthdate, "date", "birthdate")}
+          ${select("editModality", "Learning modality", "modality", row.modality)}
+          ${select("editCivilStatus", "Civil status", "civil_status", row.civil_status)}
+          ${select("editReenrollee", "Re-enrollee", "re_enrollee", row.re_enrollee || "No")}
+          ${select("editEmployment", "Employment status", "employment_status", row.employment_status)}
+          ${select("editOccupation", "Socio-economic status", "occupation", row.occupation)}
+          ${field("editIncome", "Monthly income (₱)", row.monthly_income, "number")}
           ${field("editDistance", "Distance from CLC (km)", row.distance_from_clc_km, "number")}
-          ${field("editCivilStatus", "Civil status", row.civil_status)}
           ${field("editContact", "Contact number", row.contact_number)}
           ${field("editGuardianContact", "Guardian contact number", row.guardian_contact_number)}
         </div>
@@ -323,6 +353,8 @@ class LearnerImportCore {
           employment_status: val("editEmployment"),
           distance_from_clc_km: val("editDistance"),
           civil_status: val("editCivilStatus"),
+          occupation: val("editOccupation"),
+          monthly_income: val("editIncome"),
           contact_number: val("editContact"),
           guardian_contact_number: val("editGuardianContact"),
         };

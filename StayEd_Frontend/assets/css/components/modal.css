@@ -173,3 +173,58 @@
     align-items: stretch;
   }
 }
+
+/* Inline error/warning banner a modal form shows instead of a toast
+   (ModalInlineError in components/toast.js). Sits just above the
+   modal's button row. */
+.st-inline-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--st-risk-high-ring);
+  border-left: 4px solid var(--st-risk-high);
+  border-radius: var(--st-radius-sm, 8px);
+  background: var(--st-risk-high-soft);
+  color: var(--st-risk-high-ink);
+  font-size: var(--st-fs-sm, 0.875rem);
+  line-height: 1.4;
+  animation: stInlineErrorIn 0.18s ease;
+}
+
+.st-inline-error .material-symbols-outlined {
+  flex: none;
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+.st-inline-error--warning {
+  border-color: var(--st-risk-moderate-ring);
+  border-left-color: var(--st-risk-moderate);
+  background: var(--st-risk-moderate-soft);
+  color: var(--st-risk-moderate-ink);
+}
+
+/* Shared #st-modal: the banner lands between the padded body and the
+   footer, so it needs the body's side gutters. */
+.st-modal-card > .st-inline-error {
+  margin: 0 24px 16px;
+}
+
+@keyframes stInlineErrorIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .st-inline-error {
+    animation: none;
+  }
+}

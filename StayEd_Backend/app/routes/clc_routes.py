@@ -4,7 +4,7 @@ from flask import Blueprint, request
 
 from ..authz import admin_permission_required, current_user_id, role_required, teacher_for_user
 from ..db import execute, fetch_all, fetch_one, get_db
-from ..helpers import enum_level, error, title_enum
+from ..helpers import clean_contact_number, enum_level, error, title_enum
 from ..services.learner_service import _latest_risk_join_sql, _monitoring_engaged_sql
 from ..services.settings_service import get_active_school_year
 
@@ -328,6 +328,10 @@ def create_clc():
     province = str(data.get("province") or "").strip() or None
     zip_code = str(data.get("zip") or data.get("zipCode") or "").strip() or None
     phone = str(data.get("phone") or data.get("contact_number") or "").strip() or None
+    try:
+        phone = clean_contact_number(phone, "Contact number")
+    except ValueError as exc:
+        return error(str(exc), 422)
     email = str(data.get("email") or "").strip() or None
     coordinator_name = str(data.get("coordinatorName") or "").strip() or None
     coordinator_email = str(data.get("coordinatorEmail") or "").strip() or None
@@ -453,6 +457,10 @@ def update_clc(clc_id: int):
     province = _merge_field(data, "province", existing.get("province"))
     zip_code = _merge_field(data, "zip", existing.get("zip_code"), "zipCode")
     phone = _merge_field(data, "phone", existing.get("contact_number"), "contact_number")
+    try:
+        phone = clean_contact_number(phone, "Contact number")
+    except ValueError as exc:
+        return error(str(exc), 422)
     email = _merge_field(data, "email", existing.get("email"))
     coordinator_name = _merge_field(data, "coordinatorName", existing.get("coordinator_name"))
     coordinator_email = _merge_field(data, "coordinatorEmail", existing.get("coordinator_email"))

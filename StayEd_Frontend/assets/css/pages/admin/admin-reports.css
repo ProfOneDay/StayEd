@@ -192,3 +192,12 @@ body.st-admin[data-page="Reports"] [data-animate-rows].is-inview tr{
 
 body.st-admin[data-page="Reports"] .chart-type-toggle--inline{width:fit-content}
 body.st-admin[data-page="Reports"] .st-notify-municipality{color:var(--st-on-surface-variant)}
+
+/* Notify Teachers: recipients grouped by CLC */
+body.st-admin[data-page="Reports"] .st-notify-checklist{max-height:300px;overflow-y:auto;border:1px solid var(--st-outline-variant);border-radius:var(--st-radius-control);padding:4px 12px}
+body.st-admin[data-page="Reports"] .st-notify-search{margin-bottom:8px}
+body.st-admin[data-page="Reports"] .st-notify-selected-count{font-weight:400;text-transform:none;letter-spacing:normal;color:var(--st-on-surface-variant)}
+body.st-admin[data-page="Reports"] .st-notify-group-head label{font-weight:600}
+body.st-admin[data-page="Reports"] .st-notify-group-teacher{padding-left:26px}
+body.st-admin[data-page="Reports"] .st-notify-group:last-of-type .st-notify-group-teacher:last-child{border-bottom:none}
+body.st-admin[data-page="Reports"] .st-notify-empty{padding:12px 0;color:var(--st-on-surface-variant);font-size:var(--st-font-size-label)}

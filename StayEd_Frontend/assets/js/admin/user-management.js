@@ -399,6 +399,14 @@ document.getElementById('edit-reset-btn').addEventListener('click',()=>{
   openReset(activeTeacherId);
 });
 
+// The backend emails the temporary password itself; this tells the admin
+// whether that worked or they need to pass it on by hand.
+function tempPasswordNote(emailSent,email){
+  return emailSent
+    ? `We emailed this temporary password to ${email}. The teacher will be asked to choose their own password when they log in.`
+    : `We couldn't email this password. Share it securely with the teacher yourself. They'll be asked to choose their own password when they log in.`;
+}
+
 function openReset(id){
   activeTeacherId=id; const t=teachers.find(x=>x.id===id);
   document.getElementById('rs-name').textContent=t.name;
@@ -415,7 +423,7 @@ document.getElementById('rs-confirm-btn').addEventListener('click',async()=>{
     document.getElementById('ps-subtitle').textContent="The teacher's credentials have been updated.";
     document.getElementById('ps-name-label').textContent='Teacher Name';
     document.getElementById('ps-name').textContent=t.name;
-    document.getElementById('ps-password-note').textContent='Share this temporary password securely with the teacher.';
+    document.getElementById('ps-password-note').textContent=tempPasswordNote(response.email_sent,t.email);
     document.getElementById('temp-pass-val').textContent='••••••••••••';
     openModal('modal-reset-success');
   }catch(error){
@@ -538,7 +546,7 @@ document.getElementById('cr-save-btn').addEventListener('click',async()=>{
     document.getElementById('ps-subtitle').textContent='The new teacher account is ready.';
     document.getElementById('ps-name-label').textContent='Teacher Name';
     document.getElementById('ps-name').textContent=response.data.name;
-    document.getElementById('ps-password-note').textContent='Share this temporary password securely with the teacher.';
+    document.getElementById('ps-password-note').textContent=tempPasswordNote(response.email_sent,email);
     document.getElementById('temp-pass-val').textContent='••••••••••••';
     openModal('modal-reset-success');
     showToast('Teacher account created');

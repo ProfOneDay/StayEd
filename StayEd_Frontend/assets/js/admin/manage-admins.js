@@ -14,6 +14,14 @@ function esc(value) {
   return div.innerHTML;
 }
 
+// The backend emails the temporary password itself; this tells the super
+// admin whether that worked or they need to pass it on by hand.
+function tempPasswordNote(emailSent, email) {
+  return emailSent
+    ? `We emailed this temporary password to ${email || "the admin"}. They'll be asked to choose their own password when they log in.`
+    : "We couldn't email this password. Share it securely with the admin yourself. They'll be asked to choose their own password when they log in.";
+}
+
 function openAdminModal(id) {
   const modal = document.getElementById(id);
   modal.classList.add("show");
@@ -231,6 +239,7 @@ document.getElementById("confirmResetAdmin").addEventListener("click", async (ev
     resetAdminTempPassword = response.temp_password;
     resetAdminPasswordVisible = false;
     document.getElementById("resetAdminResultName").textContent = admin?.name || "Admin";
+    document.getElementById("adminResetNote").textContent = tempPasswordNote(response.email_sent, admin?.email);
     document.getElementById("resetAdminTempPassword").value = resetAdminTempPassword;
     document.getElementById("resetAdminTempPassword").type = "password";
     document.getElementById("toggleResetAdminPassword").querySelector("span").textContent = "visibility";
@@ -329,6 +338,8 @@ document.getElementById("adminCreateForm").addEventListener("submit", async (eve
     document.getElementById("toggleAdminTempPassword").setAttribute("aria-label", "Show temporary password");
     document.getElementById("toggleAdminTempPassword").title = "Show password";
     document.getElementById("adminCreateResultName").textContent = response.data.name;
+    document.getElementById("adminCreatedNote").textContent =
+      `${tempPasswordNote(response.email_sent, email)} Assign their access from the table.`;
     form.reset();
     closeAdminModal("modal-create-admin");
     openAdminModal("modal-admin-created");

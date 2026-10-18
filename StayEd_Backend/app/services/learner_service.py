@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date
 
 from ..db import fetch_one
-from ..helpers import title_enum
+from ..helpers import display_name, title_enum
 
 ACTIVITY_WARNING_DAYS = 21
 ACTIVITY_DANGER_DAYS = 30
@@ -156,8 +156,9 @@ def _shape_learner(row):
         "id": row["learner_id"],
         "lrn": row["lrn"],
         "first_name": first,
+        "middle_name": row.get("middle_name") or "",
         "last_name": last,
-        "name": f"{first} {last}".strip(),
+        "name": display_name(first, row.get("middle_name"), last),
         "sex": str(row.get("sex") or "").title(),
         "age": int(row.get("age") or 0),
         "birthdate": row["date_of_birth"].isoformat() if row.get("date_of_birth") else None,
@@ -206,7 +207,7 @@ def _learner_query(
 ):
     return f"""
         SELECT
-            l.learner_id, l.lrn, l.first_name, l.last_name, l.sex,
+            l.learner_id, l.lrn, l.first_name, l.middle_name, l.last_name, l.sex,
             DATE_PART('year', AGE(CURRENT_DATE, l.date_of_birth))::INT AS age,
             l.date_of_birth, l.employment_status, l.civil_status,
             l.contact_number, l.guardian_contact_number, l.is_4ps_beneficiary,

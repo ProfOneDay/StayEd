@@ -51,10 +51,13 @@ class LearnerImportPage {
     return params.get("class") || params.get("class_id") || null;
   }
 
-  static downloadTemplate() {
-    LearnerImportCore.downloadTemplate();
-
-    Toast?.success("Template downloaded.");
+  static async downloadTemplate() {
+    try {
+      await LearnerImportCore.downloadTemplate();
+      Toast?.success("Template downloaded.");
+    } catch (error) {
+      Toast?.error("We could not download the template. Please try again.");
+    }
   }
 
   static bindDropzone() {

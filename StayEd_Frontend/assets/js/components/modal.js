@@ -1,6 +1,10 @@
 class Modal {
   static _escapeBound = false;
 
+  // Incremented on every show/showCustom, so a confirm handler can tell
+  // whether a different modal has replaced the one it belongs to.
+  static _generation = 0;
+
   static show({
     title = "Confirmation",
 
@@ -48,6 +52,9 @@ class Modal {
 
     const card = modal.querySelector(".st-modal-card");
     if (card) card.className = "st-modal-card";
+    if (card) window.ModalInlineError?.clear(card);
+
+    const generation = ++this._generation;
 
     document.getElementById("st-modal-title").textContent = title;
 
@@ -67,8 +74,14 @@ class Modal {
 
         confirmBtn.disabled = true;
 
+        const errorsBefore = window.ModalInlineError?.count ?? 0;
+
         try {
           if (onConfirm) await onConfirm();
+
+          // A validation message shown inside the modal means "stay open".
+          if ((window.ModalInlineError?.count ?? 0) !== errorsBefore) return;
+          if (generation !== this._generation) return;
 
           this.hide();
         } catch (err) {
@@ -78,8 +91,39 @@ class Modal {
         }
       };
     } else {
-      confirmBtn.onclick = () => {
-        if (onConfirm) onConfirm();
+      // An error reported while onConfirm runs is shown inside this modal
+      // (see ModalInlineError in toast.js), so the modal must stay open for
+      // the user to read it and fix their input. When onConfirm is async,
+      // wait for it before closing so server errors land here too.
+      confirmBtn.onclick = async () => {
+        if (confirmBtn.disabled) return;
+
+        const errorsBefore = window.ModalInlineError?.count ?? 0;
+        const errorShown = () => (window.ModalInlineError?.count ?? 0) !== errorsBefore;
+
+        let result;
+        try {
+          result = onConfirm ? onConfirm() : undefined;
+        } catch (err) {
+          console.error("[Modal] onConfirm failed", err);
+        }
+
+        if (errorShown()) return;
+
+        if (result && typeof result.then === "function") {
+          confirmBtn.disabled = true;
+          try {
+            await result;
+          } catch (err) {
+            console.error("[Modal] onConfirm failed", err);
+          } finally {
+            confirmBtn.disabled = false;
+          }
+
+          // onConfirm opened another modal in this one's place -- leave it be.
+          if (generation !== this._generation) return;
+          if (errorShown()) return;
+        }
 
         this.hide();
       };
@@ -157,6 +201,9 @@ class Modal {
 
     const card = modal.querySelector(".st-modal-card");
     if (card) card.className = "st-modal-card";
+    if (card) window.ModalInlineError?.clear(card);
+
+    ++this._generation;
 
     document.getElementById("st-modal-title").textContent = title;
 

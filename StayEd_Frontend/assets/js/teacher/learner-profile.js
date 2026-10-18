@@ -332,6 +332,13 @@ class LearnerProfilePage {
     const bg = this.profile.background || {};
     const currentModality = this.profile.modality || "Face-to-Face";
     const modalities = ["Face-to-Face", "Modular", "Blended"];
+    // Same standard values the backend accepts (helpers.LEARNER_FIELD_OPTIONS).
+    const civilStatuses = ["Single", "Married", "Widowed", "Separated"];
+    const employmentStatuses = ["Employed", "Unemployed"];
+    const optionList = (options, current) =>
+      options
+        .map((opt) => `<option ${opt.toLowerCase() === String(current || "").toLowerCase() ? "selected" : ""}>${opt}</option>`)
+        .join("");
     const today = new Date().toISOString().slice(0, 10);
 
     Modal.show({
@@ -339,6 +346,18 @@ class LearnerProfilePage {
       size: "md",
       confirmLabel: "Save Changes",
       message: `
+        <div class="st-schedule-modal-field">
+          <label for="elFirstName">First Name <span class="required">*</span></label>
+          <input id="elFirstName" type="text" value="${Utils.esc(this.profile.first_name || "")}" placeholder="Include all given names" required>
+        </div>
+        <div class="st-schedule-modal-field">
+          <label for="elMiddleName">Middle Name</label>
+          <input id="elMiddleName" type="text" value="${Utils.esc(this.profile.middle_name || "")}" placeholder="Leave blank if none">
+        </div>
+        <div class="st-schedule-modal-field">
+          <label for="elLastName">Surname <span class="required">*</span></label>
+          <input id="elLastName" type="text" value="${Utils.esc(this.profile.last_name || "")}" required>
+        </div>
         <div class="st-schedule-modal-field">
           <label for="elModality">Modality</label>
           <select id="elModality">
@@ -354,20 +373,26 @@ class LearnerProfilePage {
           <input id="elModalityReason" type="text" placeholder="e.g. Schedule constraints">
         </div>
         <div class="st-schedule-modal-field">
-          <label for="elCivil">Civil Status</label>
-          <input id="elCivil" type="text" value="${bg.civilStatusRaw || ""}" placeholder="e.g. Single">
+          <label for="elCivil">Civil Status <span class="required">*</span></label>
+          <select id="elCivil" required>
+            <option value="">Select Status</option>
+            ${optionList(civilStatuses, bg.civilStatusRaw)}
+          </select>
         </div>
         <div class="st-schedule-modal-field">
           <label for="elEmployment">Employment Status</label>
-          <input id="elEmployment" type="text" value="${bg.employmentRaw || ""}" placeholder="e.g. Unemployed">
+          <select id="elEmployment">
+            <option value="">Select Status</option>
+            ${optionList(employmentStatuses, bg.employmentRaw)}
+          </select>
         </div>
         <div class="st-schedule-modal-field">
           <label for="elDistance">Distance from CLC (km)</label>
           <input id="elDistance" type="number" step="0.1" min="0" value="${bg.distanceKm || 0}">
         </div>
         <div class="st-schedule-modal-field">
-          <label for="elOccupation">Socio-economic Status</label>
-          <select id="elOccupation">
+          <label for="elOccupation">Socio-economic Status <span class="required">*</span></label>
+          <select id="elOccupation" required>
             <option value="" ${!bg.occupation ? "selected" : ""}>Select Status</option>
             ${[
               "Unemployed / No Income",
@@ -403,7 +428,17 @@ class LearnerProfilePage {
         const modalityReason = document.getElementById("elModalityReason")?.value.trim();
         const modalityEffective = document.getElementById("elModalityEffective")?.value;
 
+        const firstName = document.getElementById("elFirstName")?.value.trim() || "";
+        const lastName = document.getElementById("elLastName")?.value.trim() || "";
+        if (!firstName || !lastName) {
+          Toast?.error("First name and surname are required.");
+          return;
+        }
+
         const otherFields = {
+          first_name: firstName,
+          middle_name: document.getElementById("elMiddleName")?.value.trim() || "",
+          last_name: lastName,
           civil_status: document.getElementById("elCivil")?.value.trim(),
           employment_status: document.getElementById("elEmployment")?.value.trim(),
           occupation: document.getElementById("elOccupation")?.value.trim(),

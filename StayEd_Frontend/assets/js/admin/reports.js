@@ -353,6 +353,53 @@ class AdminReports {
       return;
     }
 
+    const esc = (value) => {
+      const div = document.createElement("div");
+      div.textContent = value == null ? "" : String(value);
+      return div.innerHTML;
+    };
+
+    // Group recipients by the CLC(s) they're assigned to, so the admin can
+    // notify a whole CLC in one tick. A teacher in two CLCs appears under
+    // both (their checkboxes stay in sync); one with none goes under
+    // "Unassigned" so they're still reachable.
+    const groupMap = new Map();
+    teachers.forEach((t) => {
+      const clcs = t.clcs?.length ? t.clcs : [{ id: "none", name: "Unassigned", municipality: "" }];
+      clcs.forEach((c) => {
+        if (!groupMap.has(c.id)) groupMap.set(c.id, { ...c, teachers: [] });
+        groupMap.get(c.id).teachers.push(t);
+      });
+    });
+    const groups = [...groupMap.values()].sort((a, b) => {
+      if (a.id === "none") return 1;
+      if (b.id === "none") return -1;
+      return (a.municipality || "").localeCompare(b.municipality || "") || a.name.localeCompare(b.name);
+    });
+
+    const groupsHtml = groups
+      .map(
+        (g) => `
+      <div class="st-notify-group" data-notify-group="${g.id}" data-search="${esc(`${g.name} ${g.municipality}`.toLowerCase())}">
+        <div class="st-roster-checklist-row st-notify-group-head">
+          <input type="checkbox" id="notifyClc-${g.id}" data-notify-clc="${g.id}">
+          <label for="notifyClc-${g.id}">${esc(g.name)} <span class="st-notify-municipality">${g.municipality ? `· ${esc(g.municipality)} ` : ""}· ${g.teachers.length} ${g.teachers.length === 1 ? "teacher" : "teachers"}</span></label>
+        </div>
+        ${g.teachers
+          .map(
+            (t) => `
+        <div class="st-roster-checklist-row st-notify-group-teacher" data-search="${esc(t.name.toLowerCase())}">
+          <input type="checkbox" id="notifyTeacher${t.id}-${g.id}" data-notify-teacher="${t.id}">
+          <label for="notifyTeacher${t.id}-${g.id}">${esc(t.name)}</label>
+        </div>
+        `,
+          )
+          .join("")}
+      </div>
+    `,
+      )
+      .join("");
+
     const presets = {
       ANNOUNCEMENT: { title: "", message: "" },
       REPORT_REQUEST: {
@@ -383,22 +430,15 @@ class AdminReports {
           <textarea id="notifyMessage" rows="4" placeholder="What do you want teachers to know or do?">${presets.ANNOUNCEMENT.message}</textarea>
         </div>
         <div class="st-schedule-modal-field">
-          <label>Recipients</label>
-          <div class="st-roster-checklist" id="notifyTeacherChecklist">
+          <label for="notifyRecipientSearch">Recipients <span class="st-notify-selected-count" id="notifySelectedCount">· 0 selected</span></label>
+          <input type="search" id="notifyRecipientSearch" class="st-notify-search" placeholder="Search CLC, municipality, or teacher">
+          <div class="st-roster-checklist st-notify-checklist" id="notifyTeacherChecklist">
             <div class="st-roster-checklist-row st-text-strong">
               <input type="checkbox" id="notifySelectAll">
               <label for="notifySelectAll">Select All Teachers (${teachers.length})</label>
             </div>
-            ${teachers
-              .map(
-                (t) => `
-              <div class="st-roster-checklist-row">
-                <input type="checkbox" id="notifyTeacher${t.id}" data-notify-teacher="${t.id}">
-                <label for="notifyTeacher${t.id}">${t.name}${t.municipality ? ` <span class="st-notify-municipality">· ${t.municipality}</span>` : ""}</label>
-              </div>
-            `,
-              )
-              .join("")}
+            ${groupsHtml}
+            <div class="st-notify-empty" id="notifyRecipientEmpty" hidden>No CLC or teacher matches your search.</div>
           </div>
         </div>
       `,
@@ -406,9 +446,14 @@ class AdminReports {
         const kind = document.querySelector("#notifyKindToggle .chart-type-btn.is-active")?.dataset.notifyKind || "ANNOUNCEMENT";
         const title = document.getElementById("notifyTitle")?.value.trim();
         const message = document.getElementById("notifyMessage")?.value.trim();
-        const teacherUserIds = [...document.querySelectorAll("[data-notify-teacher]")]
-          .filter((cb) => cb.checked)
-          .map((cb) => Number(cb.dataset.notifyTeacher));
+        // A teacher listed under two CLCs has two checkboxes -- send once.
+        const teacherUserIds = [
+          ...new Set(
+            [...document.querySelectorAll("[data-notify-teacher]")]
+              .filter((cb) => cb.checked)
+              .map((cb) => Number(cb.dataset.notifyTeacher)),
+          ),
+        ];
 
         if (!title || !message) {
           Toast?.error("A title and message are required.");
@@ -444,16 +489,74 @@ class AdminReports {
       });
     });
 
-    document.getElementById("notifySelectAll")?.addEventListener("change", (e) => {
-      document.querySelectorAll("[data-notify-teacher]").forEach((cb) => {
-        cb.checked = e.target.checked;
+    const teacherBoxes = () => [...document.querySelectorAll("[data-notify-teacher]")];
+
+    // Keep every derived checkbox honest after any change: CLC headers are
+    // checked when all their teachers are (indeterminate when some are),
+    // Select All likewise, plus the live "N selected" count.
+    const syncRecipientState = () => {
+      document.querySelectorAll("[data-notify-group]").forEach((group) => {
+        const head = group.querySelector("[data-notify-clc]");
+        const boxes = [...group.querySelectorAll("[data-notify-teacher]")];
+        const checked = boxes.filter((cb) => cb.checked).length;
+        head.checked = boxes.length > 0 && checked === boxes.length;
+        head.indeterminate = checked > 0 && checked < boxes.length;
       });
-    });
-    document.getElementById("notifyTeacherChecklist")?.addEventListener("change", (e) => {
-      if (!e.target.matches("[data-notify-teacher]")) return;
-      const all = [...document.querySelectorAll("[data-notify-teacher]")];
+
+      const all = teacherBoxes();
+      const selectedIds = new Set(all.filter((cb) => cb.checked).map((cb) => cb.dataset.notifyTeacher));
       const selectAll = document.getElementById("notifySelectAll");
-      if (selectAll) selectAll.checked = all.length > 0 && all.every((cb) => cb.checked);
+      if (selectAll) {
+        selectAll.checked = selectedIds.size === teachers.length;
+        selectAll.indeterminate = selectedIds.size > 0 && selectedIds.size < teachers.length;
+      }
+      const count = document.getElementById("notifySelectedCount");
+      if (count) count.textContent = `· ${selectedIds.size} selected`;
+    };
+
+    const setTeacher = (id, checked) => {
+      document.querySelectorAll(`[data-notify-teacher="${id}"]`).forEach((cb) => {
+        cb.checked = checked;
+      });
+    };
+
+    document.getElementById("notifyTeacherChecklist")?.addEventListener("change", (e) => {
+      const target = e.target;
+      if (target.id === "notifySelectAll") {
+        teacherBoxes().forEach((cb) => {
+          cb.checked = target.checked;
+        });
+      } else if (target.matches("[data-notify-clc]")) {
+        target
+          .closest("[data-notify-group]")
+          .querySelectorAll("[data-notify-teacher]")
+          .forEach((cb) => setTeacher(cb.dataset.notifyTeacher, target.checked));
+      } else if (target.matches("[data-notify-teacher]")) {
+        // Same teacher under another CLC follows along.
+        setTeacher(target.dataset.notifyTeacher, target.checked);
+      } else {
+        return;
+      }
+      syncRecipientState();
+    });
+
+    // Search narrows the list without touching selections: a CLC/municipality
+    // match shows that whole CLC, otherwise only the matching teachers.
+    document.getElementById("notifyRecipientSearch")?.addEventListener("input", (e) => {
+      const term = e.target.value.trim().toLowerCase();
+      let anyVisible = false;
+      document.querySelectorAll("[data-notify-group]").forEach((group) => {
+        const groupMatch = !term || group.dataset.search.includes(term);
+        let teacherMatch = false;
+        group.querySelectorAll(".st-notify-group-teacher").forEach((row) => {
+          const show = groupMatch || row.dataset.search.includes(term);
+          row.hidden = !show;
+          teacherMatch = teacherMatch || show;
+        });
+        group.hidden = !teacherMatch;
+        anyVisible = anyVisible || teacherMatch;
+      });
+      document.getElementById("notifyRecipientEmpty").hidden = anyVisible;
     });
   }
 
