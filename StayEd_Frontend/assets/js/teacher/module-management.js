@@ -134,7 +134,7 @@ class ModuleManagement {
       this.renderCatalogView(true);
     } catch (error) {
       console.error("[ModuleManagement] Unable to load module catalog", error);
-      Toast?.error("Unable to load this class's module catalog.");
+      Toast?.error("We could not load this class's modules.");
     }
   }
 

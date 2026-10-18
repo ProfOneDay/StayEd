@@ -123,7 +123,7 @@ def current_class():
         (teacher["teacher_id"],),
     )
     if not row:
-        return error("No active class found.", 404)
+        return error("You do not have a class yet. Please create one first.", 404)
     return _shape(row)
 
 
@@ -318,7 +318,7 @@ def create_class_session(class_id: int):
     try:
         session_date = date.fromisoformat(str(data.get("date")))
     except (TypeError, ValueError):
-        return error("Meet-up date must use YYYY-MM-DD.", 422)
+        return error("Please enter a valid meet-up date.", 422)
 
     existing = fetch_one(
         "SELECT session_id FROM class_session WHERE class_id=%s AND session_date=%s",
@@ -710,7 +710,7 @@ def update_class_module(class_id: int, class_module_id: int):
         try:
             updates["sequence_number"] = int(data.get("sequenceNumber"))
         except (TypeError, ValueError):
-            return error("Module number must be a number.", 422)
+            return error("The module number must be a number.", 422)
 
     if updates:
         columns = list(updates)
@@ -772,7 +772,7 @@ def release_class_module(class_id: int, class_module_id: int):
     try:
         release_date = date.fromisoformat(str(data.get("releaseDate"))) if data.get("releaseDate") else date.today()
     except ValueError:
-        return error("Release date must use YYYY-MM-DD.", 422)
+        return error("Please enter a valid release date.", 422)
 
     # Unlike the per-learner release endpoint (learner_routes.edit_module_batch),
     # this class-level release is also used from the Calendar's "Set Module
@@ -783,7 +783,7 @@ def release_class_module(class_id: int, class_module_id: int):
         try:
             planned_return_date = date.fromisoformat(str(data.get("plannedReturnDate")))
         except ValueError:
-            return error("Planned return date must use YYYY-MM-DD.", 422)
+            return error("Please enter a valid planned return date.", 422)
     else:
         planned_return_date = release_date + timedelta(days=get_default_module_duration_days())
 
@@ -799,7 +799,7 @@ def release_class_module(class_id: int, class_module_id: int):
         try:
             target_ids = {int(x) for x in requested_ids}
         except (TypeError, ValueError):
-            return error("learnerIds must be a list of enrollment ids.", 422)
+            return error("Please select learners from the list.", 422)
         invalid = target_ids - enrolled_ids
         if invalid:
             return error("One or more selected learners are not enrolled in this class.", 422)
@@ -903,7 +903,7 @@ def move_class_module_release_date(class_id: int, class_module_id: int):
         old_date = date.fromisoformat(str(data.get("oldDate")))
         new_date = date.fromisoformat(str(data.get("newDate")))
     except (TypeError, ValueError):
-        return error("Both oldDate and newDate must use YYYY-MM-DD.", 422)
+        return error("Please choose valid dates.", 422)
 
     # Class-level releases (this endpoint's release_class_module) always
     # create one release_batch_id per enrollment holding exactly this one
@@ -920,7 +920,7 @@ def move_class_module_release_date(class_id: int, class_module_id: int):
     )
     batch_ids = [r["release_batch_id"] for r in batch_rows]
     if not batch_ids:
-        return error("No pending (not yet returned) release found for this module on that date.", 404)
+        return error("There is no unreturned release of this module on that date.", 404)
 
     db = get_db()
     try:
@@ -957,7 +957,7 @@ def remove_class_module_release(class_id: int, class_module_id: int):
     try:
         release_date = date.fromisoformat(str(request.args.get("date")))
     except (TypeError, ValueError):
-        return error("A valid ?date=YYYY-MM-DD is required.", 422)
+        return error("Please choose a valid release date.", 422)
 
     total = fetch_one(
         "SELECT COUNT(*) AS n FROM module_record WHERE class_module_id=%s AND date_released=%s",

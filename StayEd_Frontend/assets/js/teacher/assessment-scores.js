@@ -191,7 +191,7 @@ class AssessmentScores {
       if (exists) {
         await this.selectLearner(this.requestedLearnerId);
       } else {
-        Toast?.error("Requested learner was not found in this assessment list.");
+        Toast?.error("We could not find this learner in the list.");
       }
     }
   }
@@ -308,7 +308,7 @@ class AssessmentScores {
   static async selectLearner(learnerId) {
     const learner = this.learners.find((item) => String(item.id) === String(learnerId));
     if (this.learningLevelCodeFrom(learner?.level) === "SENIOR_HIGH_SCHOOL") {
-      Toast?.error("Senior High assessment records are outside the current Assessment Scores module.");
+      Toast?.error("Assessment scores are not available for Senior High learners yet.");
       return;
     }
 

@@ -75,7 +75,7 @@ def run_prediction():
     data = request.get_json(silent=True) or {}
     learner_id = data.get("learner_id")
     if not learner_id:
-        return error("learner_id is required.", 422)
+        return error("Please choose a learner.", 422)
 
     teacher = teacher_for_user()
     enrollment = fetch_one(
@@ -89,13 +89,13 @@ def run_prediction():
         (learner_id, teacher["teacher_id"]),
     )
     if not enrollment:
-        return error("Learner enrollment not found for this teacher.", 404)
+        return error("This learner is not in any of your classes.", 404)
 
     try:
         monitoring_end = date.fromisoformat(str(data.get("monitoring_end_date"))) if data.get("monitoring_end_date") else None
         monitoring_start = date.fromisoformat(str(data.get("monitoring_start_date"))) if data.get("monitoring_start_date") else None
     except ValueError:
-        return error("Monitoring dates must use YYYY-MM-DD.", 422)
+        return error("Please enter valid monitoring dates.", 422)
 
     try:
         outcome = trigger_prediction(
@@ -107,7 +107,7 @@ def run_prediction():
     except RuntimeError as exc:
         return error(str(exc), 503)
     except (ValueError, KeyError) as exc:
-        return error(f"Prediction bridge failed: {exc}", 502)
+        return error("Risk checking failed. Please try again later.", 502)
 
     saved, model = outcome["saved"], outcome["model"]
     return {

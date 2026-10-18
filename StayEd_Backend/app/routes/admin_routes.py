@@ -306,7 +306,7 @@ def delete_deactivated_user(user_id: int):
         (user_id,),
     )
     if not row:
-        return error("Deactivated teacher account not found.", 404)
+        return error("Only deactivated accounts can be removed. Please refresh the page.", 404)
 
     db = get_db()
     try:
@@ -341,7 +341,7 @@ def reject_user(user_id: int):
         (user_id,),
     )
     if not row:
-        return error("Pending teacher registration not found.", 404)
+        return error("This registration was already handled or no longer exists. Please refresh the page.", 404)
 
     db = get_db()
     try:
@@ -534,7 +534,7 @@ def create_user():
 
     account_role = str(data.get("role") or "teacher").strip().lower()
     if account_role not in {"teacher", "admin"}:
-        return error("Role must be either 'teacher' or 'admin'.", 422)
+        return error("Please choose Teacher or Admin as the account type.", 422)
 
     # Creating a new admin account hands out admin power, which is reserved
     # for a super admin -- can_manage_users (checked above) only covers the
@@ -586,7 +586,7 @@ def create_user():
                     "SELECT clc_id FROM clc WHERE LOWER(clc_name)=LOWER(%s) AND LOWER(municipality)=LOWER(%s) AND status='ACTIVE'",
                     (clc_name, municipality),
                 ):
-                    return error("The selected CLC is not available for assignment.", 422)
+                    return error("The selected CLC is not available. Please choose another one.", 422)
 
                 cur.execute(
                     """
@@ -1077,7 +1077,7 @@ def update_school_year():
     data = request.get_json(silent=True) or {}
     value = str(data.get("schoolYear") or "").strip()
     if not re.match(r"^\d{4}-\d{4}$", value):
-        return error("School year must be in the format YYYY-YYYY.", 422)
+        return error("Please enter the school year like this: 2026-2027.", 422)
     set_active_school_year(value, current_user_id())
     return {"schoolYear": value}
 
@@ -1095,7 +1095,7 @@ def update_module_duration():
     try:
         value = int(data.get("defaultDurationDays"))
     except (TypeError, ValueError):
-        return error("Default duration must be a whole number of days.", 422)
+        return error("Please enter the number of days as a whole number (for example, 21).", 422)
     if value < 1 or value > 180:
         return error("Default duration must be between 1 and 180 days.", 422)
     set_default_module_duration_days(value, current_user_id())

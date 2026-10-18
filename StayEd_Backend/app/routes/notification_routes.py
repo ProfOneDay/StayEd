@@ -203,7 +203,7 @@ def broadcast_notification():
     teacher_user_ids = data.get("teacherUserIds")
 
     if kind not in BROADCAST_KINDS:
-        return error("Notification kind must be ANNOUNCEMENT or REPORT_REQUEST.", 422)
+        return error("Please choose Announcement or Report Request.", 422)
     if not title or not message:
         return error("A title and message are required.", 422)
     if not isinstance(teacher_user_ids, list) or not teacher_user_ids:
@@ -212,7 +212,7 @@ def broadcast_notification():
     try:
         target_ids = list({int(x) for x in teacher_user_ids})
     except (TypeError, ValueError):
-        return error("teacherUserIds must be a list of user ids.", 422)
+        return error("Please select teachers from the list.", 422)
 
     valid_rows = fetch_all(
         "SELECT user_id FROM users WHERE user_id = ANY(%s) AND role='TEACHER' AND account_status='ACTIVE'",

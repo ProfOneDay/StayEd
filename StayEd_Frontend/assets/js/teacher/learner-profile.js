@@ -34,7 +34,7 @@ class LearnerProfilePage {
 
       event.preventDefault();
       if (this.isSeniorHigh()) {
-        Toast?.error("Senior High assessment records are outside the current Assessment Scores module.");
+        Toast?.error("Assessment scores are not available for Senior High learners yet.");
         return;
       }
       window.location.href = this.buildAssessmentScoresUrl();

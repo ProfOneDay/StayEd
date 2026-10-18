@@ -138,7 +138,7 @@ class ClcUpload {
         this.renderPreviewSummary();
       } catch (error) {
         console.error(error);
-        Toast?.error("Unable to validate the file. Please try again.");
+        Toast?.error("We could not read this file. Please use the learner list template and try again.");
       }
     }
   }
@@ -255,14 +255,14 @@ class ClcUpload {
 
   static async createRecords() {
     if (!this.preview?.rows?.length) {
-      Toast?.error("No validated rows to import. Please select a file first.");
+      Toast?.error("There is nothing to add yet. Please choose a file first.");
       return;
     }
 
     const validRows = this.preview.rows.filter((r) => r.status === "valid");
 
     if (!validRows.length) {
-      Toast?.error("None of the rows in this file passed validation.");
+      Toast?.error("None of the learners in this file could be added. Please fix the problems shown and try again.");
       return;
     }
 
@@ -290,11 +290,11 @@ class ClcUpload {
 
       success?.classList.remove("st-hidden");
 
-      Toast?.success("Learner records created successfully.");
+      Toast?.success("Learners added successfully.");
     } catch (error) {
       console.error(error);
 
-      Toast?.error("Unable to create learner records.");
+      Toast?.error("We could not add the learners. Please try again.");
 
       btn.disabled = false;
 

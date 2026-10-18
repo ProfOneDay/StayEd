@@ -473,7 +473,7 @@ class SetupWizard {
           console.error(error);
 
           Utils.toast(
-            error?.message || "Unable to validate the file. Please try again.",
+            error?.message || "We could not read this file. Please use the learner list template and try again.",
 
             "error",
           );
@@ -617,7 +617,7 @@ class SetupWizard {
           } catch (error) {
             console.error(error);
 
-            Utils.toast("Import failed. Please try again.", "error");
+            Utils.toast("We could not add the learners. Please try again.", "error");
 
             finishBtn.disabled = false;
 

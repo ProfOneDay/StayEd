@@ -244,7 +244,7 @@ class LearnerImportCore {
       onRevalidated?.(updated);
     } catch (error) {
       console.error("[LearnerImportCore] Unable to revalidate rows", error);
-      Toast?.error("Unable to revalidate the updated rows.");
+      Toast?.error("We could not re-check your changes. Please try again.");
     }
   }
 

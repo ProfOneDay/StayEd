@@ -117,7 +117,7 @@ class ReportPrinter {
     const win = window.open("", "_blank");
 
     if (!win) {
-      if (window.Toast) Toast.error("Please allow pop-ups to generate the report.");
+      if (window.Toast) Toast.error("Your browser blocked the report window. Please allow pop-ups for this site, then try again.");
       return;
     }
 

@@ -38,7 +38,7 @@ document.getElementById('openEditSchoolYearBtn').addEventListener('click',()=>{
 });
 document.getElementById('ay-save-btn').addEventListener('click',async()=>{
   const value=document.getElementById('ay-school-year').value.trim();
-  if(!/^\d{4}-\d{4}$/.test(value)){ Utils.toast('School year must be in the format YYYY-YYYY','error'); return; }
+  if(!/^\d{4}-\d{4}$/.test(value)){ Utils.toast('Please enter the school year like this: 2026-2027','error'); return; }
   try{
     await API.updateActiveSchoolYear(value);
     document.getElementById('activeSchoolYearDisplay').textContent=value;

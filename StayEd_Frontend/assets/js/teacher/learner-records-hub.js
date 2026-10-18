@@ -71,7 +71,7 @@ class LearnerRecordsHub {
 
         input.select();
 
-        Toast?.error("Couldn't copy automatically -- link is selected, copy it manually.");
+        Toast?.error("We could not copy the link automatically. It is highlighted, so press Ctrl+C to copy it.");
       }
     });
   }

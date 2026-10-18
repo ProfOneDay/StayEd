@@ -93,9 +93,9 @@ def login():
 
     user = _user_by_email(email)
     if not user or not check_password_hash(user["password_hash"], password):
-        return error("Invalid email or password.", 401)
+        return error("The email or password is incorrect.", 401)
     if user["account_status"] != "ACTIVE":
-        return error("Your account is not active yet.", 403)
+        return error("Your account is not active yet. Please wait for a Division Administrator to approve it.", 403)
 
     token = create_access_token(
         identity=str(user["user_id"]),
@@ -137,7 +137,7 @@ def me():
         (current_user_id(),),
     )
     if not row:
-        return error("User not found.", 404)
+        return error("We could not find your account. Please log in again.", 404)
     return _safe_user(row)
 
 
@@ -229,9 +229,9 @@ def register():
                         admin["user_id"],
                         "New Teacher Registration",
                         f"{full_name} ({email}) has registered and is awaiting approval."
-                        + ("" if on_roster else " Not found on the official ALS Teachers roster -- verify manually."),
+                        + ("" if on_roster else " Their name is not on the official ALS teachers list, so please check their details before approving."),
                         "user-management.html",
-                        "Pending" if on_roster else "Not on Roster",
+                        "Pending" if on_roster else "Not on teacher list",
                         f"registration:{user_id}",
                     ),
                 )
@@ -297,7 +297,7 @@ def reset_password():
     token = str(data.get("token", ""))
     password = str(data.get("password", ""))
     if not token or len(password) < 8:
-        return error("A valid reset token and an 8-character password are required.", 422)
+        return error("This reset link is not valid. Please request a new one, and use a password with at least 8 characters.", 422)
 
     row = fetch_one(
         """
@@ -308,7 +308,7 @@ def reset_password():
         (token,),
     )
     if not row:
-        return error("Reset token is invalid or expired.", 422)
+        return error("This password reset link has expired or was already used. Please request a new one.", 422)
 
     db = get_db()
     try:
@@ -335,5 +335,5 @@ def verify_email():
     data = request.get_json(silent=True) or {}
     token = str(data.get("token", ""))
     if not token:
-        return error("Verification token is required.", 422)
+        return error("This verification link is not valid.", 422)
     return {"success": True, "message": "Email verification endpoint is ready for provider integration."}

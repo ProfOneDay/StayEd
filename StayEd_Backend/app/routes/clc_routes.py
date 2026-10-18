@@ -279,7 +279,7 @@ def current_clc():
         (teacher["teacher_id"],),
     )
     if not row:
-        return error("No active CLC assignment found.", 404)
+        return error("You are not assigned to a CLC yet. Please contact your Division Administrator.", 404)
     return {
         "id": row["clc_id"],
         "name": row["clc_name"],

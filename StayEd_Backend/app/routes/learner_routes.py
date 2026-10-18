@@ -200,7 +200,7 @@ def _validate_learner_payload(data, *, partial=False):
         try:
             result["date_of_birth"] = date.fromisoformat(dob)
         except ValueError as exc:
-            raise ValueError("Birthdate must use YYYY-MM-DD.") from exc
+            raise ValueError("Please enter a valid birthdate.") from exc
 
     for src, dest in (
         ("employment_status", "employment_status"),
@@ -265,7 +265,7 @@ def create_learner():
 
     class_row = class_row or _active_class(teacher["teacher_id"], data.get("clc")) or _active_class(teacher["teacher_id"])
     if not class_row:
-        return error("Create an active class before enrolling learners.", 422)
+        return error("Please create a class first before adding learners.", 422)
 
     db = get_db()
     try:
@@ -380,7 +380,7 @@ def update_learner(learner_id: int):
     if status:
         mapped = {"archived": "WITHDRAWN", "active": "ENROLLED", "inactive": "DROPPED", "completed": "COMPLETED"}.get(status)
         if not mapped:
-            return error("Unsupported learner status.", 422)
+            return error("Please choose a learner status from the list.", 422)
         db = get_db()
         try:
             with db.cursor() as cur:
@@ -447,10 +447,10 @@ def update_learner(learner_id: int):
                     else date.today()
                 )
             except ValueError:
-                return error("Effective date must use YYYY-MM-DD.", 422)
+                return error("Please enter a valid effective date.", 422)
 
             if effective_date > date.today():
-                return error("Effective date cannot be later than the current date.", 422)
+                return error("The effective date cannot be in the future.", 422)
 
             enrollment_date = row.get("enrollment_date")
             if enrollment_date and effective_date < enrollment_date:
@@ -632,7 +632,7 @@ def _validate_learner_session_schedule(data: dict, enrollment_date: date | None)
     try:
         session_date = date.fromisoformat(raw_date)
     except ValueError as exc:
-        raise ValueError("Session date must use YYYY-MM-DD.") from exc
+        raise ValueError("Please enter a valid session date.") from exc
 
     if enrollment_date and session_date < enrollment_date:
         raise ValueError("Session date cannot be before the learner's enrollment date.")
@@ -643,7 +643,7 @@ def _validate_learner_session_schedule(data: dict, enrollment_date: date | None)
     try:
         session_time = datetime.strptime(raw_time, "%H:%M").time()
     except ValueError as exc:
-        raise ValueError("Session time must use HH:MM in 24-hour time.") from exc
+        raise ValueError("Please enter a valid session time.") from exc
 
     schedule_status = (
         str(data.get("status") or "")
@@ -656,7 +656,7 @@ def _validate_learner_session_schedule(data: dict, enrollment_date: date | None)
         allowed = ", ".join(
             title_enum(value) for value in sorted(LEARNER_SESSION_SCHEDULE_STATUSES)
         )
-        raise ValueError(f"Status must be one of: {allowed}.")
+        raise ValueError("Please choose a session status from the list.")
 
     note = str(data.get("note") or "").strip() or None
     if note and len(note) > LEARNER_SESSION_SCHEDULE_NOTE_MAX_LENGTH:
@@ -1749,7 +1749,7 @@ def _ensure_risk_assessment_id(enrollment_id: int) -> int:
         "SELECT model_id FROM model_info WHERE model_status='ACTIVE' ORDER BY training_date DESC LIMIT 1"
     )
     if not model:
-        raise ValueError("No ACTIVE model is registered in model_info.")
+        raise ValueError("Risk checking is not set up yet, so this cannot be saved. Please contact your Division Administrator.")
 
     today = date.today()
     created = execute(
@@ -1784,7 +1784,7 @@ def create_intervention(learner_id: int):
     try:
         target_date = date.fromisoformat(str(data["targetDate"]))
     except ValueError:
-        return error("Target date must use YYYY-MM-DD.", 422)
+        return error("Please enter a valid target date.", 422)
 
     try:
         risk_assessment_id = _ensure_risk_assessment_id(base["enrollment_id"])
@@ -2049,16 +2049,16 @@ def release_module_batch(learner_id: int):
     try:
         release_date = date.fromisoformat(str(data.get("releaseDate"))) if data.get("releaseDate") else date.today()
     except ValueError:
-        return error("Release date must use YYYY-MM-DD.", 422)
+        return error("Please enter a valid release date.", 422)
 
     if release_date > date.today():
-        return error("Release date cannot be later than the current date.", 422)
+        return error("The release date cannot be in the future.", 422)
 
     if data.get("plannedReturnDate"):
         try:
             planned_return_date = date.fromisoformat(str(data.get("plannedReturnDate")))
         except ValueError:
-            return error("Planned return date must use YYYY-MM-DD.", 422)
+            return error("Please enter a valid planned return date.", 422)
     else:
         planned_return_date = release_date + timedelta(days=get_default_module_duration_days())
 
@@ -2152,7 +2152,7 @@ def return_module_batch(learner_id: int, batch_id: int):
         (batch_id, base["enrollment_id"]),
     )
     if not batch:
-        return error("Release batch not found.", 404)
+        return error("This module release no longer exists. Please refresh the page.", 404)
 
     data = request.get_json(silent=True) or {}
     module_ids = [int(m) for m in (data.get("moduleIds") or []) if str(m).strip().lstrip("-").isdigit()]
@@ -2162,10 +2162,10 @@ def return_module_batch(learner_id: int, batch_id: int):
     try:
         return_date = date.fromisoformat(str(data.get("returnDate"))) if data.get("returnDate") else date.today()
     except ValueError:
-        return error("Return date must use YYYY-MM-DD.", 422)
+        return error("Please enter a valid return date.", 422)
 
     if return_date > date.today():
-        return error("Return date cannot be later than the current date.", 422)
+        return error("The return date cannot be in the future.", 422)
     if return_date < batch["release_date"]:
         return error("Return date cannot be earlier than the module release date.", 422)
 
@@ -2176,7 +2176,7 @@ def return_module_batch(learner_id: int, batch_id: int):
         (batch_id, module_ids),
     )
     if len(owned) != len(set(module_ids)):
-        return error("One or more selected modules do not belong to this batch.", 422)
+        return error("Some of the selected modules are not part of this release. Please refresh the page and try again.", 422)
     if any(r["module_status"] == "RETURNED" for r in owned):
         return error("One or more selected modules have already been returned.", 422)
 
@@ -2223,7 +2223,7 @@ def undo_return_module_batch(learner_id: int, batch_id: int):
         (batch_id, base["enrollment_id"]),
     )
     if not batch:
-        return error("Release batch not found.", 404)
+        return error("This module release no longer exists. Please refresh the page.", 404)
 
     data = request.get_json(silent=True) or {}
     module_ids = [int(m) for m in (data.get("moduleIds") or []) if str(m).strip().lstrip("-").isdigit()]
@@ -2235,7 +2235,7 @@ def undo_return_module_batch(learner_id: int, batch_id: int):
         (batch_id, module_ids),
     )
     if len(owned) != len(set(module_ids)):
-        return error("One or more selected modules do not belong to this batch.", 422)
+        return error("Some of the selected modules are not part of this release. Please refresh the page and try again.", 422)
     if any(r["module_status"] != "RETURNED" for r in owned):
         return error("One or more selected modules have not been returned yet.", 422)
 
@@ -2290,7 +2290,7 @@ def update_module_planned_return(learner_id: int, batch_id: int, module_record_i
     try:
         planned_return_date = date.fromisoformat(str(data.get("plannedReturnDate")))
     except (TypeError, ValueError):
-        return error("Planned return date must use YYYY-MM-DD.", 422)
+        return error("Please enter a valid planned return date.", 422)
     if planned_return_date < module["date_released"]:
         return error("Planned return date cannot be earlier than the module's release date.", 422)
 
@@ -2347,7 +2347,7 @@ def edit_module_batch(learner_id: int, batch_id: int):
         (batch_id, base["enrollment_id"]),
     )
     if not batch:
-        return error("Release batch not found.", 404)
+        return error("This module release no longer exists. Please refresh the page.", 404)
 
     data = request.get_json(silent=True) or {}
     today = date.today()
@@ -2357,9 +2357,9 @@ def edit_module_batch(learner_id: int, batch_id: int):
         try:
             new_release_date = date.fromisoformat(str(data.get("releaseDate")))
         except ValueError:
-            return error("Release date must use YYYY-MM-DD.", 422)
+            return error("Please enter a valid release date.", 422)
         if new_release_date > today:
-            return error("Release date cannot be later than the current date.", 422)
+            return error("The release date cannot be in the future.", 422)
 
     existing_modules = fetch_all(
         """
@@ -2372,7 +2372,7 @@ def edit_module_batch(learner_id: int, batch_id: int):
 
     module_edits_in = data.get("modules") or []
     if not isinstance(module_edits_in, list):
-        return error("modules must be a list.", 422)
+        return error("These module changes could not be saved. Please refresh the page and try again.", 422)
 
     planned: list[dict] = []
     strand_cache: dict[str, int] = {}
@@ -2380,10 +2380,10 @@ def edit_module_batch(learner_id: int, batch_id: int):
         try:
             module_id = int(edit.get("id"))
         except (TypeError, ValueError):
-            return error("Each module edit requires a valid id.", 422)
+            return error("These module changes could not be saved. Please refresh the page and try again.", 422)
         current = existing_by_id.get(module_id)
         if not current:
-            return error(f"Module {module_id} does not belong to this release batch.", 422)
+            return error("One of these modules is not part of this release. Please refresh the page and try again.", 422)
 
         plan = {"id": module_id, "current": current}
 
@@ -2413,7 +2413,7 @@ def edit_module_batch(learner_id: int, batch_id: int):
                 try:
                     plan["date_returned"] = date.fromisoformat(str(raw))
                 except ValueError:
-                    return error("Return date must use YYYY-MM-DD.", 422)
+                    return error("Please enter a valid return date.", 422)
 
         planned.append(plan)
 
@@ -2427,7 +2427,7 @@ def edit_module_batch(learner_id: int, batch_id: int):
         if effective_return is None:
             continue
         if effective_return > today:
-            return error("Return date cannot be later than the current date.", 422)
+            return error("The return date cannot be in the future.", 422)
         if effective_return < new_release_date:
             return error("Return date cannot be earlier than the module release date.", 422)
 
@@ -2519,7 +2519,7 @@ def delete_module_batch(learner_id: int, batch_id: int):
         (batch_id, base["enrollment_id"]),
     )
     if not batch:
-        return error("Release batch not found.", 404)
+        return error("This module release no longer exists. Please refresh the page.", 404)
 
     db = get_db()
     try:
@@ -2568,14 +2568,14 @@ def record_consultation(learner_id: int):
     try:
         contact_date = date.fromisoformat(str(data.get("date"))) if data.get("date") else date.today()
     except ValueError:
-        return error("Consultation date must use YYYY-MM-DD.", 422)
+        return error("Please enter a valid consultation date.", 422)
 
     method = str(data.get("method") or "").strip().upper()
     result = str(data.get("result") or "").strip().upper()
     if method not in CONTACT_METHODS:
-        return error(f"Method must be one of: {', '.join(sorted(CONTACT_METHODS))}.", 422)
+        return error("Please choose how you contacted the learner.", 422)
     if result not in CONTACT_RESULTS:
-        return error(f"Result must be one of: {', '.join(sorted(CONTACT_RESULTS))}.", 422)
+        return error("Please choose whether the contact was successful.", 422)
 
     notes = (data.get("notes") or "").strip() or None
 
@@ -2605,7 +2605,7 @@ def _read_upload(file_storage):
         return pd.read_csv(BytesIO(raw), dtype=str)
     if name.endswith(".xlsx") or name.endswith(".xls"):
         return pd.read_excel(BytesIO(raw), dtype=str)
-    raise ValueError("Only CSV, XLSX, or XLS files are supported.")
+    raise ValueError("Please upload an Excel or CSV file.")
 
 
 def _normalise_import_value(value):
@@ -2688,11 +2688,11 @@ def _preview_rows(rows):
         if not LRN_RE.match(lrn):
             status, issue = "error", "LRN must contain exactly 12 digits"
         elif lrn in existing_lrns or lrn in seen:
-            status, issue = "duplicate", "LRN already exists in the system or file"
+            status, issue = "duplicate", "This LRN is already registered or appears twice in the file"
         elif not name and not (raw.get("first_name") and raw.get("last_name")):
             status, issue = "error", "Missing learner name"
         elif not raw.get("birthdate"):
-            status, issue = "error", "Missing required field: Birthdate"
+            status, issue = "error", "Birthdate is missing"
         elif _parse_import_birthdate(raw.get("birthdate")) is None:
             status, issue = "error", "Birthdate must be a valid date"
         elif str(raw.get("sex") or "MALE").strip().upper() not in {"MALE", "FEMALE"}:
@@ -2724,7 +2724,7 @@ def import_preview():
             rows = data.get("learners") or data.get("rows") or []
             filename = data.get("filename") or "learner_import"
         if not rows:
-            return error("Attach a CSV/XLSX file or provide learner rows.", 422)
+            return error("Please choose a learner list file (Excel or CSV) to upload.", 422)
         preview = _preview_rows(rows)
     except ValueError as exc:
         return error(str(exc), 422)
@@ -2754,7 +2754,7 @@ def _insert_import_rows(rows, teacher, class_id=None):
     if not class_row:
         class_row = _active_class(teacher["teacher_id"])
     if not class_row:
-        raise ValueError("Create an active class before importing learners.")
+        raise ValueError("Please create a class first before adding learners.")
     preview = _preview_rows(rows)
     valid = [r for r in preview if r["status"] == "valid"]
     duplicates = [r for r in preview if r["status"] == "duplicate"]
@@ -2881,7 +2881,7 @@ def import_learners():
             rows = data.get("learners") or []
             class_id = data.get("class_id") or data.get("class")
         if not rows:
-            return error("No learner rows were provided.", 422)
+            return error("There are no learners to add.", 422)
         summary = _insert_import_rows(rows, teacher, class_id=class_id)
     except ValueError as exc:
         return error(str(exc), 422)
@@ -3356,7 +3356,7 @@ def update_assessment_scores(learner_id: int):
         try:
             date_of_assessment = date.fromisoformat(str(data.get("dateOfAssessment")))
         except ValueError:
-            return error("Date of assessment must use YYYY-MM-DD.", 422)
+            return error("Please enter a valid date of assessment.", 422)
 
     scores = _sanitize_score_rows(data.get("scores"))
     portfolio = _sanitize_portfolio(data.get("portfolio"))

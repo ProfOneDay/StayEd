@@ -285,7 +285,13 @@ select:disabled {
 }
 
 .st-toast {
+  position: relative;
+
+  overflow: hidden;
+
   min-width: 320px;
+
+  max-width: 420px;
 
   display: flex;
 
@@ -312,6 +318,89 @@ select:disabled {
 
 .st-toast.show {
   animation: stToast 0.25s ease;
+}
+
+.st-toast-text {
+  flex: 1;
+
+  line-height: 1.45;
+}
+
+.st-toast-close {
+  flex-shrink: 0;
+
+  align-self: flex-start;
+
+  display: grid;
+
+  place-items: center;
+
+  width: 28px;
+
+  height: 28px;
+
+  margin: -4px -6px 0 0;
+
+  border: 0;
+
+  border-radius: 50%;
+
+  background: transparent;
+
+  color: var(--st-ink-muted);
+
+  cursor: pointer;
+}
+
+.st-toast-close:hover,
+.st-toast-close:focus-visible {
+  background: var(--st-background);
+
+  color: var(--st-on-surface);
+}
+
+.st-toast-close .material-symbols-outlined {
+  font-size: 18px;
+}
+
+/* Countdown bar: shrinks over the toast's lifetime; pauses on hover. */
+.st-toast-timer {
+  position: absolute;
+
+  left: 0;
+
+  bottom: 0;
+
+  height: 3px;
+
+  width: 100%;
+
+  background: currentColor;
+
+  opacity: 0.18;
+
+  transform-origin: left;
+
+  animation: stToastTimer linear forwards;
+}
+
+.st-toast-success .st-toast-timer { color: var(--st-risk-low); }
+.st-toast-warning .st-toast-timer { color: var(--st-risk-moderate); }
+.st-toast-error .st-toast-timer,
+.st-toast-danger .st-toast-timer { color: var(--st-risk-high); }
+.st-toast-info .st-toast-timer { color: var(--st-info); }
+
+.st-toast.is-paused .st-toast-timer {
+  animation-play-state: paused;
+}
+
+@keyframes stToastTimer {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .st-toast-timer { display: none; }
 }
 
 .st-toast:not(.show) {

@@ -116,7 +116,7 @@ class LearnerImportPage {
       this.renderPreview();
     } catch (error) {
       console.error(error);
-      Toast?.error("Unable to validate the file. Please try again.");
+      Toast?.error("We could not read this file. Please use the learner list template and try again.");
     }
   }
 
@@ -212,7 +212,7 @@ class LearnerImportPage {
         } catch (error) {
           console.error(error);
 
-          Toast?.error("Import failed. Please try again.");
+          Toast?.error("We could not add the learners. Please try again.");
 
           btn.disabled = false;
 

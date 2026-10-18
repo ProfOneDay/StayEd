@@ -81,7 +81,7 @@ def update_settings():
     data = request.get_json(silent=True) or {}
     incoming = data.get("preferences")
     if not isinstance(incoming, dict):
-        return error("preferences must be an object.", 422)
+        return error("That setting could not be saved. Please try again.", 422)
 
     row = fetch_one("SELECT preferences FROM users WHERE user_id = %s", (user_id,))
     if not row:

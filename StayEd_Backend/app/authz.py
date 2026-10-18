@@ -20,7 +20,7 @@ def role_required(*roles: str):
             verify_jwt_in_request()
             role = str(get_jwt().get("role", "")).lower()
             if role not in allowed:
-                return {"message": "You are not authorized to perform this action."}, 403
+                return {"message": "Your account does not have permission to do this."}, 403
             return fn(*args, **kwargs)
 
         return wrapper
@@ -28,7 +28,7 @@ def role_required(*roles: str):
     return decorator
 
 
-_UNAUTHORIZED = {"message": "You are not authorized to perform this action."}, 403
+_UNAUTHORIZED = {"message": "Your account does not have permission to do this."}, 403
 
 
 def super_admin_required(fn):

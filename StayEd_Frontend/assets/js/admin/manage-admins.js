@@ -268,7 +268,7 @@ document.getElementById("confirmRemoveAdmin").addEventListener("click", async (e
     closeAdminModal("modal-remove-admin");
     removeAdminId = null;
     await loadAdmins();
-    Utils.toast("Admin account removed. Historical records were retained.", "success");
+    Utils.toast("Admin account removed. Their past work is kept.", "success");
   } catch (error) {
     console.error("[ManageAdmins] Failed to remove admin account", error);
     Utils.toast(error?.data?.message || "Unable to remove this admin account.", "error");

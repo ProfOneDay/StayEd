@@ -472,7 +472,7 @@ class AdminReports {
       this.apply();
     } catch (error) {
       console.error("[AdminReports]", error);
-      Toast?.error("Unable to load enrollment data.");
+      Toast?.error("We could not load the enrollment list.");
     } finally {
       if (window.Layout) Layout.hideLoader();
     }
@@ -654,7 +654,7 @@ class AdminReports {
     const rows = this.state.filtered;
 
     if (!rows.length) {
-      Toast?.error("No enrollment records match the current filters.");
+      Toast?.error("No learners match the filters you chose.");
       return;
     }
 
@@ -690,7 +690,7 @@ class AdminReports {
             `${r.school_year || "—"} · ${REPORT_SEMESTER_LABELS[r.semester] || r.semester || "—"}`,
             r.enrollment_status || "—",
           ]),
-          emptyText: "No enrollment records match the current filters.",
+          emptyText: "No learners match the filters you chose.",
         },
       ],
     });

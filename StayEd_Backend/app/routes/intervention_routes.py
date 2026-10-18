@@ -74,7 +74,7 @@ def update_intervention_status(intervention_id: int):
                 try:
                     params.append(date.fromisoformat(str(raw)))
                 except ValueError:
-                    return error("Target date must use YYYY-MM-DD.", 422)
+                    return error("Please enter a valid target date.", 422)
             else:
                 params.append(None)
             sets.append("target_date=%s")
@@ -85,7 +85,7 @@ def update_intervention_status(intervention_id: int):
 
     status = str(data.get("status") or "").strip().upper()
     if status not in INTERVENTION_STATUSES:
-        return error(f"Status must be one of {', '.join(sorted(INTERVENTION_STATUSES))}.", 422)
+        return error("Please choose a status from the list.", 422)
 
     if status == "COMPLETED":
         execute(

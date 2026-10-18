@@ -648,13 +648,13 @@ class ModuleManagementModal {
         this.meta = response.learner || this.meta;
         this.batches = response.batches || [];
         this.expandedBatchId = this.batches.length ? this.batches[0].id : null;
-        Toast?.success("Module batch released.");
+        Toast?.success("Modules released.");
         this.view = "logbook";
         this.renderAll();
         this.onUpdate?.();
       } catch (error) {
         console.error("[ModuleManagementModal] Release failed", error);
-        Toast?.error(error?.data?.message || "Unable to release this module batch.");
+        Toast?.error(error?.data?.message || "We could not release these modules.");
         btn.disabled = false;
       }
     });
@@ -1003,7 +1003,7 @@ class ModuleManagementModal {
         this.meta = response.learner || this.meta;
         this.batches = response.batches || [];
         this.expandedBatchId = state.batchId;
-        Toast?.success("Release batch updated.");
+        Toast?.success("Module release updated.");
         this.view = "logbook";
         this.renderAll();
         this.onUpdate?.();

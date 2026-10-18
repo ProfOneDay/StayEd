@@ -78,15 +78,15 @@ def create_app(config_object=Config):
 
     @app.errorhandler(413)
     def too_large(_error):
-        return jsonify(message="File is larger than the 5 MB limit."), 413
+        return jsonify(message="This file is too big. Please use a file smaller than 5 MB."), 413
 
     @app.errorhandler(pg_errors.UniqueViolation)
     def unique_violation(_error):
-        return jsonify(message="A record with the same unique value already exists."), 409
+        return jsonify(message="This already exists, so it was not saved again."), 409
 
     @app.errorhandler(pg_errors.CheckViolation)
     def check_violation(error):
-        return jsonify(message="Submitted data violates a database validation rule.", detail=str(error)), 422
+        return jsonify(message="Some of the information entered is not allowed. Please check it and try again.", detail=str(error)), 422
 
     @app.errorhandler(HTTPException)
     def http_error(error):
@@ -95,7 +95,7 @@ def create_app(config_object=Config):
     @app.errorhandler(Exception)
     def unhandled(error):
         app.logger.exception("Unhandled StayEd API error")
-        payload = {"message": "The server encountered an unexpected error."}
+        payload = {"message": "Something went wrong on our side. Please try again in a moment."}
         if app.debug:
             payload["detail"] = str(error)
         return jsonify(payload), 500

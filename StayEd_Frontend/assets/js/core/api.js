@@ -127,7 +127,13 @@ class API {
     );
 
     if (error.name === "AbortError") {
-      throw new Error("The request timed out.");
+      throw new Error("This is taking too long. Please check your internet connection and try again.");
+    }
+
+    // No response at all (offline, server unreachable): the browser's own
+    // message here is a technical "Failed to fetch" -- replace it.
+    if (error instanceof TypeError && !error.status) {
+      throw new Error("We could not connect. Please check your internet connection and try again.");
     }
 
     if (error.status === 401) {
@@ -143,10 +149,10 @@ class API {
     // when the server sent a specific, useful reason for the failure.
     if (error.status) {
       const fallback = {
-        401: "Your session has expired.",
-        403: "You are not authorized to perform this action.",
-        404: "The requested resource could not be found.",
-      }[error.status] || (error.status >= 500 ? "The server encountered an unexpected error." : "The request could not be completed.");
+        401: "You have been signed out. Please log in again.",
+        403: "Your account does not have permission to do this.",
+        404: "We could not find what you were looking for. It may have been removed.",
+      }[error.status] || (error.status >= 500 ? "Something went wrong on our side. Please try again in a moment." : "That did not go through. Please try again.");
 
       const apiError = new Error(error?.data?.message || fallback);
       apiError.status = error.status;
