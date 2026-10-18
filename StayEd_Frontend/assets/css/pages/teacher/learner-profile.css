@@ -401,7 +401,9 @@ body[data-page="Learner Profile"] .st-profile-tabs {
   overflow-x: auto;
   scrollbar-width: none;
   position: sticky;
-  top: 72px;
+  /* Flush under the (sticky) navbar -- no strip of page content showing
+     between the two while scrolling. */
+  top: var(--st-navbar-height);
   z-index: 8;
 }
 body[data-page="Learner Profile"] .st-profile-tabs::-webkit-scrollbar {
@@ -457,7 +459,7 @@ body[data-page="Learner Profile"] .st-profile-panel.is-active {
 }
 @media (max-width: 767px) {
   body[data-page="Learner Profile"] .st-profile-tabs {
-    top: 60px;
+    top: 56px; /* mobile navbar height */
   }
   body[data-page="Learner Profile"] .st-profile-tab {
     flex: none;

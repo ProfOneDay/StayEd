@@ -650,6 +650,18 @@ body {
   z-index: var(--st-z-navbar);
 }
 
+/* The navbar is injected by component-loader.js into a wrapper
+   <div data-component="layout/navbar">, which is exactly as tall as the
+   navbar -- and a sticky element can't move outside its parent, so the
+   navbar scrolled away with the page instead of staying pinned (and page
+   elements meant to stick just below it, e.g. the Learner Profile tabs,
+   floated 72px down with content showing above them). display: contents
+   drops the wrapper's own box so .st-main becomes the navbar's sticky
+   container. */
+[data-component="layout/navbar"] {
+  display: contents;
+}
+
 /* backdrop-filter and position:sticky on the same element is a known
    WebKit/Safari combination that can silently stop the element from
    sticking at all (the filter forces its own compositing layer in a way
