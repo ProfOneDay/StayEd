@@ -140,7 +140,7 @@ function renderTable(){
   tbody.innerHTML=pageRows.map((c,i)=>{
     let actions=c.status==='active'
       ? `<button class="st-btn st-btn-outline st-btn-xs" onclick="openEditClc(${c.id})">Edit</button><button class="st-btn st-btn-danger-outline st-btn-xs" onclick="openArchive(${c.id})">Archive</button>`
-      : `<button class="st-btn st-btn-outline st-btn-xs" onclick="openEditClc(${c.id})">Edit</button><button class="st-btn st-btn-primary st-btn-xs" onclick="openRestore(${c.id})">Restore</button>`;
+      : `<button class="st-btn st-btn-outline st-btn-xs" onclick="openEditClc(${c.id})">Edit</button><button class="st-btn st-btn-primary st-btn-xs" onclick="openRestore(${c.id})">Restore</button><button class="st-btn st-btn-danger-outline st-btn-xs" onclick="openDeleteClc(${c.id})">Delete</button>`;
     const archivedMeta=c.status==='archived'&&c.archivedDate?`<span class="archived-meta">Archived ${c.archivedDate}${c.archivedBy?' · '+c.archivedBy:''}</span>`:'';
     return `<tr style="--i:${i}">
       <td data-col="learner"><div class="st-clc-cell${c.status==='archived'?' is-archived':''}"><span class="st-clc-tile"><span class="material-symbols-outlined">hub</span></span><div><div class="clcname">${c.name}</div><div class="addr">ID: ${clcCode(c)}</div></div></div></td>
@@ -360,6 +360,34 @@ document.getElementById('rs-confirm-btn').addEventListener('click',async()=>{
   }catch(error){
     console.error('[AdminClcManagement] Restore failed',error);
     showToast(error?.data?.message||'Unable to restore this CLC.','error');
+  }finally{
+    btn.disabled=false; btn.textContent=originalText;
+  }
+});
+
+// Permanent delete -- archived CLCs only. The server refuses (and explains
+// why) if any class with learner records was ever created under the CLC.
+function openDeleteClc(id){
+  activeClcId=id; const c=clcs.find(x=>x.id===id);
+  document.getElementById('dl-name').textContent=c.name;
+  document.getElementById('dl-info-name').textContent=c.name;
+  document.getElementById('dl-info-muni').textContent=c.muni;
+  document.getElementById('dl-info-date').textContent=c.archivedDate||'—';
+  openModal('modal-delete-clc');
+}
+document.getElementById('dl-confirm-btn').addEventListener('click',async()=>{
+  const c=clcs.find(x=>x.id===activeClcId);
+  const btn=document.getElementById('dl-confirm-btn');
+  const originalText=btn.textContent;
+  btn.disabled=true; btn.textContent='Deleting…';
+  try{
+    await API.deleteAdminClc(activeClcId);
+    await loadClcs();
+    closeModal('modal-delete-clc'); renderKPIs(); renderTable(); showToast(`${c.name} was deleted`);
+  }catch(error){
+    console.error('[AdminClcManagement] Delete failed',error);
+    closeModal('modal-delete-clc');
+    showToast(error?.data?.message||'We could not delete this CLC. Please try again.','error');
   }finally{
     btn.disabled=false; btn.textContent=originalText;
   }

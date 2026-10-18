@@ -126,6 +126,9 @@ def list_clcs():
         LEFT JOIN learning_class lc ON lc.clc_id = c.clc_id
         LEFT JOIN class_enrollment ce ON ce.class_id = lc.class_id
         {_latest_risk_join_sql()}
+        -- Archived CLCs (admin CLC Management) never appear on teacher-facing
+        -- lists or pickers; admins manage them through /admin/clcs instead.
+        WHERE c.status = 'ACTIVE'
         GROUP BY c.clc_id
         ORDER BY c.clc_name
         """
@@ -167,6 +170,7 @@ def list_teacher_clcs():
             LEFT JOIN teacher_clc tc_all
               ON tc_all.clc_id = c.clc_id
             WHERE LOWER(c.municipality) = LOWER(%s)
+              AND c.status = 'ACTIVE'
             GROUP BY c.clc_id
             ORDER BY c.clc_name
             """,
@@ -193,7 +197,8 @@ def list_teacher_clcs():
             LEFT JOIN learning_class lc_self
               ON lc_self.clc_id = c.clc_id
              AND lc_self.teacher_id = %s
-            WHERE tc_self.teacher_clc_id IS NOT NULL
+            WHERE c.status = 'ACTIVE'
+              AND (tc_self.teacher_clc_id IS NOT NULL
                OR EXISTS (
                     SELECT 1
                     FROM learning_class lc_enrolled
@@ -202,7 +207,7 @@ def list_teacher_clcs():
                     WHERE lc_enrolled.clc_id = c.clc_id
                       AND lc_enrolled.teacher_id = %s
                       AND ce_enrolled.enrollment_status = 'ENROLLED'
-               )
+               ))
             GROUP BY c.clc_id
             ORDER BY c.clc_name
             """,
@@ -273,6 +278,7 @@ def current_clc():
             LIMIT 1
         ) lc ON TRUE
         WHERE tc.teacher_id = %s AND tc.assignment_status = 'ACTIVE'
+          AND c.status = 'ACTIVE'
         ORDER BY tc.assigned_at DESC
         LIMIT 1
         """,
@@ -375,7 +381,7 @@ def create_clc():
             else:
                 cur.execute(
                     """
-                    SELECT clc_id FROM clc
+                    SELECT clc_id, status FROM clc
                     WHERE LOWER(clc_name) = LOWER(%s)
                       AND LOWER(municipality) = LOWER(%s)
                       AND LOWER(COALESCE(barangay, '')) = LOWER(COALESCE(%s, ''))
@@ -383,7 +389,17 @@ def create_clc():
                     """,
                     (name, municipality, barangay),
                 )
-                clc_id = cur.fetchone()["clc_id"]
+                existing = cur.fetchone()
+                # Reusing an archived CLC would assign the teacher to a center
+                # that is hidden from them -- send them to the admin instead.
+                if existing["status"] != "ACTIVE":
+                    db.rollback()
+                    return error(
+                        "A CLC with this name was archived by your Division Administrator. "
+                        "Please ask them to restore it.",
+                        409,
+                    )
+                clc_id = existing["clc_id"]
 
             cur.execute(
                 """
@@ -595,6 +611,42 @@ def admin_restore_clc(clc_id: int):
         (clc_id,),
     )
     return {"message": "CLC restored."}
+
+
+@bp.delete("/admin/clcs/<int:clc_id>")
+@role_required("admin")
+@admin_permission_required("can_manage_clcs")
+def admin_delete_clc(clc_id: int):
+    """Permanently delete an archived CLC. Only archived ones can be deleted
+    (archive first, so nothing active disappears by accident), and only when
+    no class was ever created under it -- learning_class references clc with
+    ON DELETE RESTRICT, and those classes hold learner records that must not
+    be lost. Teacher assignments (teacher_clc) are removed with it."""
+    existing = fetch_one("SELECT clc_id, clc_name, status FROM clc WHERE clc_id=%s", (clc_id,))
+    if not existing:
+        return error("Community Learning Center not found.", 404)
+    if existing["status"] == "ACTIVE":
+        return error("Please archive this CLC first before deleting it.", 409)
+
+    classes = fetch_one("SELECT COUNT(*) AS n FROM learning_class WHERE clc_id=%s", (clc_id,))["n"]
+    if classes:
+        return error(
+            f"{existing['clc_name']} still has {classes} class{'es' if classes != 1 else ''} with learner records, "
+            "so it cannot be deleted. It stays archived and hidden from teachers.",
+            409,
+        )
+
+    db = get_db()
+    try:
+        with db.cursor() as cur:
+            cur.execute("DELETE FROM teacher_clc WHERE clc_id=%s", (clc_id,))
+            cur.execute("DELETE FROM notification WHERE dedup_key=%s", (f"new_clc:{clc_id}",))
+            cur.execute("DELETE FROM clc WHERE clc_id=%s", (clc_id,))
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    return {"message": f"{existing['clc_name']} was deleted."}
 
 
 @bp.put("/admin/clcs/<int:clc_id>/teachers")

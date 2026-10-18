@@ -149,13 +149,14 @@ def create_class():
             SELECT clc_id FROM clc
             WHERE LOWER(clc_name) = LOWER(%s)
               AND LOWER(municipality) = LOWER(%s)
+              AND status = 'ACTIVE'
             LIMIT 1
             """,
             (clc_name, municipality),
         )
     else:
         clc = fetch_one(
-            "SELECT clc_id FROM clc WHERE LOWER(clc_name) = LOWER(%s) LIMIT 1",
+            "SELECT clc_id FROM clc WHERE LOWER(clc_name) = LOWER(%s) AND status = 'ACTIVE' LIMIT 1",
             (clc_name,),
         )
     if not clc:

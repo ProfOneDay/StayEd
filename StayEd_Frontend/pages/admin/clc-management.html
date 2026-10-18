@@ -165,9 +165,26 @@
   </div>
 </div>
 
+<div class="overlay" id="modal-delete-clc">
+  <div class="modal">
+    <div class="icon-circle danger"><span class="material-symbols-outlined">delete_forever</span></div>
+    <h2>Delete <span id="dl-name">this CLC</span> permanently?</h2>
+    <div class="info-card">
+      <div><small>CLC Name</small><b id="dl-info-name">—</b></div>
+      <div><small>Municipality</small><b id="dl-info-muni">—</b></div>
+      <div><small>Date Archived</small><b id="dl-info-date">—</b></div>
+    </div>
+    <div class="warning-banner">This cannot be undone. The CLC will be removed for good and its teacher assignments cleared. A CLC that still has classes with learner records cannot be deleted &mdash; it will stay archived and hidden from teachers.</div>
+    <div class="modal-actions">
+      <button class="st-btn st-btn-outline" onclick="closeModal('modal-delete-clc')">Cancel</button>
+      <button class="st-btn st-btn-danger" id="dl-confirm-btn">Delete permanently</button>
+    </div>
+  </div>
+</div>
+
 <script src="../../assets/js/config.js"></script>
 <script src="../../assets/js/core/utils.js"></script>
-<script src="../../assets/js/core/api.js"></script>
+<script src="../../assets/js/core/api.js?v=2"></script>
 <script src="../../assets/js/core/auth.js"></script>
 <script src="../../assets/js/core/guards.js"></script>
 <script src="../../assets/js/core/router.js"></script>
@@ -177,6 +194,6 @@
 <script src="../../assets/js/components/toast.js"></script>
 <script src="../../assets/js/components/modal.js"></script>
 <script src="../../assets/js/admin/division-ii-municipalities.js?v=2"></script>
-<script src="../../assets/js/admin/clc-management.js?v=3"></script>
+<script src="../../assets/js/admin/clc-management.js?v=4"></script>
 </body>
 </html>

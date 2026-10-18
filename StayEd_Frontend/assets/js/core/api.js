@@ -974,6 +974,10 @@ class API {
     return this.put(`/admin/clcs/${id}`, payload);
   }
 
+  static deleteAdminClc(id) {
+    return this.delete(`/admin/clcs/${id}`);
+  }
+
   static archiveAdminClc(id) {
     return this.post(`/admin/clcs/${id}/archive`, {});
   }
