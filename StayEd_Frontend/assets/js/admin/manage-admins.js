@@ -133,7 +133,7 @@ function renderTable() {
       <td>${toggleCell(a.id, "isSuperAdmin", a.isSuperAdmin)}</td>
       <td>
         <div class="st-admin-row-actions">
-          <button class="st-btn st-btn-outline st-btn-xs" data-admin-save="${a.id}">Save</button>
+          <button class="st-btn st-btn-outline st-btn-xs" data-admin-save="${a.id}">Save changes</button>
           <button class="st-btn st-btn-outline st-btn-xs" data-admin-reset-password="${a.id}">Reset password</button>
           <button class="st-btn st-btn-danger st-btn-xs" data-admin-remove="${a.id}">Remove</button>
         </div>

@@ -221,6 +221,109 @@
   transform: scale(0.94);
 }
 
+/* ---- Row actions dropdown (Utils.js RowActions): one "Actions" button per
+   table row in place of a row of buttons; menu is appended to <body>. ---- */
+.st-row-actions--menu {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.st-row-actions-toggle {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  padding: 0 8px 0 14px;
+  border: 1px solid var(--st-line-strong);
+  border-radius: var(--st-radius-control);
+  background: #fff;
+  font: inherit;
+  font-size: var(--st-fs-sm);
+  font-weight: 600;
+  color: var(--st-on-surface);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--st-t-hover, 150ms), border-color var(--st-t-hover, 150ms), transform var(--st-t-press, 90ms);
+}
+
+.st-row-actions-toggle .material-symbols-outlined {
+  font-size: 20px;
+  transition: transform 0.18s ease;
+}
+
+.st-row-actions-toggle:hover,
+.st-row-actions-toggle.is-open {
+  border-color: var(--st-primary);
+  background: var(--st-navy-soft);
+  color: var(--st-primary);
+}
+
+.st-row-actions-toggle.is-open .material-symbols-outlined {
+  transform: rotate(180deg);
+}
+
+.st-row-actions-toggle:active {
+  transform: scale(0.97);
+}
+
+.st-row-actions-menu {
+  position: fixed;
+  z-index: var(--st-z-dropdown, 400);
+  min-width: 180px;
+  padding: 6px;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-card);
+  background: #fff;
+  box-shadow: var(--st-shadow-lg);
+  animation: stPopIn 0.14s var(--st-ease-out, ease);
+}
+
+.st-row-actions-item {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: var(--st-radius-control);
+  background: transparent;
+  font: inherit;
+  font-size: var(--st-fs-sm);
+  font-weight: 500;
+  color: var(--st-on-surface);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.st-row-actions-item .material-symbols-outlined {
+  font-size: 19px;
+  color: var(--st-ink-muted);
+}
+
+.st-row-actions-item:hover,
+.st-row-actions-item:focus-visible {
+  outline: none;
+  background: var(--st-background);
+}
+
+.st-row-actions-item.is-danger,
+.st-row-actions-item.is-danger .material-symbols-outlined {
+  color: var(--st-risk-high);
+}
+
+.st-row-actions-item.is-danger:hover,
+.st-row-actions-item.is-danger:focus-visible {
+  background: var(--st-risk-high-soft);
+}
+
+.st-row-actions-item:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 /* ---- Bulk selection bar (Student Registry, User Management, CLC
    Management) -- moved here from learner-records.css, see the note left
    in its place. ---- */

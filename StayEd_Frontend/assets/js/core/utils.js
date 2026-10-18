@@ -702,6 +702,174 @@ Utils.hideEmptyTrend = function (wrap) {
 
 window.Utils = Utils;
 
+// ---------------------------------------------------------------------------
+// Row actions dropdown -- applied to every table in the app.
+//
+// Any table cell holding two or more actions (.st-row-actions,
+// .st-admin-row-actions, .st-table-actions, including the items inside an
+// older "more" (kebab) menu) is turned into a single "Actions" button that
+// opens a menu. The original buttons stay in the page, hidden, and each menu
+// item simply clicks its original -- so every page's existing click handlers
+// keep working untouched. Cells with a single action stay a normal button.
+// Runs automatically whenever table rows are (re)rendered.
+// ---------------------------------------------------------------------------
+const RowActions = {
+  SELECTOR: "td .st-row-actions, td .st-admin-row-actions, td .st-table-actions",
+  ICONS: [
+    [/save/i, "save"],
+    [/reset password/i, "lock_reset"],
+    [/remove|delete/i, "delete"],
+    [/restore|unarchive/i, "restore"],
+    [/archive/i, "archive"],
+    [/edit/i, "edit"],
+    [/review/i, "task_alt"],
+    [/view|open|profile|logbook/i, "visibility"],
+    [/approve|activate/i, "check_circle"],
+    [/reject|deactivate|suspend/i, "block"],
+  ],
+  openMenu: null,
+
+  actionsIn(group) {
+    // Real action elements only: not the old kebab trigger, and the old
+    // kebab menu's items count as actions in their own right.
+    return [...group.querySelectorAll("button, a[href]")].filter(
+      (el) =>
+        !el.matches("[data-row-menu-trigger], .st-row-actions-toggle") &&
+        !el.closest(".st-row-actions-menu"),
+    );
+  },
+
+  labelFor(el) {
+    const clone = el.cloneNode(true);
+    clone.querySelectorAll(".material-symbols-outlined").forEach((n) => n.remove());
+    const text = clone.textContent.replace(/\s+/g, " ").trim();
+    return text || el.getAttribute("aria-label") || el.getAttribute("title") || "Action";
+  },
+
+  iconFor(el, label) {
+    const own = el.querySelector(".material-symbols-outlined");
+    if (own && own.textContent.trim()) return own.textContent.trim();
+    const match = this.ICONS.find(([re]) => re.test(label));
+    return match ? match[1] : "chevron_right";
+  },
+
+  isDanger(el, label) {
+    return /danger/.test(el.className) || /^(remove|delete)\b/i.test(label);
+  },
+
+  enhance(root = document) {
+    root.querySelectorAll(this.SELECTOR).forEach((group) => {
+      if (group.dataset.rowActions === "done") return;
+      const actions = this.actionsIn(group);
+      if (actions.length < 2) return;
+      group.dataset.rowActions = "done";
+
+      const source = document.createElement("div");
+      source.className = "st-row-actions-source";
+      source.hidden = true;
+      while (group.firstChild) source.appendChild(group.firstChild);
+
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "st-row-actions-toggle";
+      toggle.setAttribute("aria-haspopup", "menu");
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.innerHTML =
+        'Actions<span class="material-symbols-outlined" aria-hidden="true">expand_more</span>';
+
+      group.classList.add("st-row-actions--menu");
+      group.append(toggle, source);
+      toggle.addEventListener("click", (event) => {
+        event.stopPropagation();
+        if (this.openMenu?.toggle === toggle) this.close();
+        else this.open(toggle, this.actionsIn(source));
+      });
+    });
+  },
+
+  open(toggle, actions) {
+    this.close();
+    const menu = document.createElement("div");
+    menu.className = "st-row-actions-menu";
+    menu.setAttribute("role", "menu");
+
+    actions.forEach((el) => {
+      const label = this.labelFor(el);
+      const item = document.createElement("button");
+      item.type = "button";
+      item.setAttribute("role", "menuitem");
+      item.className = `st-row-actions-item${this.isDanger(el, label) ? " is-danger" : ""}`;
+      item.disabled = Boolean(el.disabled);
+      item.innerHTML = '<span class="material-symbols-outlined" aria-hidden="true"></span><span></span>';
+      item.firstChild.textContent = this.iconFor(el, label);
+      item.lastChild.textContent = label;
+      item.addEventListener("click", (event) => {
+        event.stopPropagation();
+        this.close();
+        el.click();
+      });
+      menu.appendChild(item);
+    });
+
+    // Appended to <body> with fixed positioning so a scrolling table never
+    // clips it; opens upward when there isn't room below.
+    document.body.appendChild(menu);
+    const r = toggle.getBoundingClientRect();
+    const width = Math.max(menu.offsetWidth, 180);
+    const below = window.innerHeight - r.bottom;
+    const top = below < menu.offsetHeight + 12 && r.top > menu.offsetHeight + 12
+      ? r.top - menu.offsetHeight - 6
+      : r.bottom + 6;
+    menu.style.top = `${Math.round(top)}px`;
+    menu.style.left = `${Math.round(Math.min(Math.max(8, r.right - width), window.innerWidth - width - 8))}px`;
+
+    toggle.setAttribute("aria-expanded", "true");
+    toggle.classList.add("is-open");
+    this.openMenu = { menu, toggle };
+    menu.querySelector(".st-row-actions-item:not(:disabled)")?.focus({ preventScroll: true });
+
+    menu.addEventListener("keydown", (event) => {
+      const items = [...menu.querySelectorAll(".st-row-actions-item:not(:disabled)")];
+      const i = items.indexOf(document.activeElement);
+      if (event.key === "ArrowDown") { event.preventDefault(); items[(i + 1) % items.length]?.focus(); }
+      if (event.key === "ArrowUp") { event.preventDefault(); items[(i - 1 + items.length) % items.length]?.focus(); }
+    });
+  },
+
+  close() {
+    if (!this.openMenu) return;
+    const { menu, toggle } = this.openMenu;
+    menu.remove();
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.classList.remove("is-open");
+    this.openMenu = null;
+  },
+
+  init() {
+    this.enhance();
+    new MutationObserver(() => this.enhance()).observe(document.body, { childList: true, subtree: true });
+    document.addEventListener("click", (event) => {
+      if (this.openMenu && !this.openMenu.menu.contains(event.target)) this.close();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && this.openMenu) {
+        const { toggle } = this.openMenu;
+        this.close();
+        toggle.focus();
+      }
+    });
+    window.addEventListener("resize", () => this.close());
+    window.addEventListener("scroll", () => this.close(), true);
+  },
+};
+
+window.RowActions = RowActions;
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => RowActions.init());
+} else {
+  RowActions.init();
+}
+
 document.addEventListener(
   "DOMContentLoaded",
 
