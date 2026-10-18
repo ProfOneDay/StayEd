@@ -175,7 +175,23 @@ function renderTable() {
         if (checkbox.dataset.adminField === "isSuperAdmin" && !checkbox.checked) {
           if (otherSuperAdminCount(Number(id)) === 0) {
             checkbox.checked = true;
-            Utils.toast("There should always be at least one super admin.", "warning");
+            // Another row may already show Super Admin switched on but not
+            // saved yet -- it doesn't count until saved (the server would
+            // refuse this demotion too), so say which row to save first.
+            const pending = admins.filter((a) => {
+              if (a.id === Number(id) || a.isSuperAdmin) return false;
+              return document.querySelector(`[data-admin-row="${a.id}"] [data-admin-field="isSuperAdmin"]`)?.checked;
+            });
+            if (pending.length) {
+              const names = pending.map((a) => a.name).join(", ");
+              Utils.toast(
+                `${names} isn't a super admin yet -- click Save changes on that row first, then remove this one.`,
+                "warning",
+              );
+              document.querySelector(`[data-admin-save="${pending[0].id}"]`)?.focus();
+            } else {
+              Utils.toast("There should always be at least one super admin. Make another admin a super admin and save it first.", "warning");
+            }
           }
         }
 
