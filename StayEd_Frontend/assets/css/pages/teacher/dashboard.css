@@ -717,7 +717,6 @@ body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-regis
   .st-hbar-scale { grid-template-columns: 74px minmax(0, 1fr) 64px; gap: 10px; }
   .st-hbar-label { font-size: var(--st-fs-sm); }
   .chart-canvas-wrap { height: 230px; }
-  .chart-canvas-wrap.chart-canvas-wrap--legend { height: auto; min-height: 300px; } /* room for the wrapped value legend */
   body:is([data-page="Teacher Dashboard"],[data-page="Admin Dashboard"]) .st-registry-head { padding: 16px; }
   /* Base .st-registry-tools is flex-wrap:nowrap (fine on desktop, where
      .st-search has a fixed 260px width) -- at this width .st-search below

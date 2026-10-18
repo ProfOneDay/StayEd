@@ -254,68 +254,102 @@
   max-width: 100%;
 }
 
-/* Value legend under a chart (teacher dashboard Learning Level / Modality):
-   each category with its count and share always visible, so the chart reads
-   as a report in a screenshot without hovering. Pill style matches the
-   admin dashboard's map legend. */
-.chart-canvas-wrap--legend {
-  height: 310px;
-}
-
-.st-chart-legend {
-  flex-shrink: 0;
+/* Teacher dashboard Learning Level / Modality ("distribution") panels.
+   Bar view reuses .st-hbars (HTML, crisp text, values always shown);
+   donut view puts the Chart.js donut in a fixed-size box -- a canvas that
+   shares a flex column with other content gets its drawing buffer and its
+   displayed size out of step, which stretches and blurs its text -- with
+   an HTML value list beside it. */
+.st-dist {
+  min-height: 248px;
+  margin-top: 14px;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   justify-content: center;
-  gap: 8px;
-  margin-top: 12px;
 }
 
-.st-chart-legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  height: 30px;
-  padding: 0 6px 0 12px;
-  border: 1px solid var(--st-line);
-  border-radius: var(--st-radius-pill);
-  background: #fff;
+.st-dist-bars .st-hbar-row {
+  grid-template-columns: 112px minmax(0, 1fr) 58px;
+}
+
+.st-dist-bars .st-hbar-label {
   font-size: var(--st-fs-sm);
-  font-weight: 500;
-  color: var(--st-on-surface);
-  white-space: nowrap;
 }
 
-.st-chart-legend-item .dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
+.st-dist-bars .st-hbar-value {
+  font-weight: 700;
+}
+
+.st-dist-donut {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.st-dist-donut-chart {
+  position: relative;
+  width: 210px;
+  height: 210px;
   flex-shrink: 0;
 }
 
-.st-chart-legend-item .count {
-  min-width: 22px;
-  height: 20px;
-  padding: 0 7px;
-  border-radius: var(--st-radius-pill);
-  background: var(--st-background);
-  font-size: var(--st-fs-xs);
-  font-weight: 700;
-  color: var(--st-on-surface);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
+.st-dist-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1 1 200px;
+  max-width: 280px;
 }
 
-.st-chart-legend-item .count small {
+.st-dist-list li {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto 44px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--st-line);
+  font-size: var(--st-fs-sm);
+  color: var(--st-on-surface);
+}
+
+.st-dist-list li:last-child {
+  border-bottom: 0;
+}
+
+.st-dist-list .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.st-dist-list .name {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.st-dist-list .count {
+  font-family: var(--st-font-heading);
+  font-weight: 800;
+  font-size: var(--st-fs-base);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.st-dist-list .pct {
+  font-size: var(--st-fs-xs);
   font-weight: 600;
   color: var(--st-ink-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 
-.st-chart-legend-item.is-zero {
-  color: var(--st-ink-muted);
+.st-dist-list li.is-zero .name,
+.st-dist-list li.is-zero .count {
+  color: var(--st-ink-faint);
 }
 
 .chart-canvas-note {

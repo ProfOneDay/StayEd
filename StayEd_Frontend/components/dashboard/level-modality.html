@@ -11,11 +11,17 @@
       <button type="button" class="chart-type-btn" data-chart-type="pie">Donut</button>
     </div>
   </div>
-  <div class="chart-canvas-wrap chart-canvas-wrap--legend">
-    <canvas id="levelChartCanvas" height="220"></canvas>
-    <div class="st-chart-legend" id="levelChartLegend"></div>
-    <p class="chart-canvas-note" id="levelChartNote"></p>
+  <!-- Bar view = HTML bars (crisp text, same component as Risk
+       Distribution). Donut view = Chart.js donut in its own fixed-size box
+       (so the canvas is never stretched) plus an HTML value list. -->
+  <div class="st-dist" id="levelDist">
+    <div class="st-hbars st-dist-bars" data-dist-bars hidden></div>
+    <div class="st-dist-donut" data-dist-donut hidden>
+      <div class="st-dist-donut-chart"><canvas id="levelChartCanvas"></canvas></div>
+      <ul class="st-dist-list" data-dist-list></ul>
+    </div>
   </div>
+  <p class="chart-canvas-note" id="levelChartNote"></p>
 </div>
 
 <div class="st-panel st-panel-pad col-6" data-animate>
@@ -31,9 +37,15 @@
       <button type="button" class="chart-type-btn is-active" data-chart-type="pie">Donut</button>
     </div>
   </div>
-  <div class="chart-canvas-wrap chart-canvas-wrap--legend">
-    <canvas id="modalityChartCanvas" height="220"></canvas>
-    <div class="st-chart-legend" id="modalityChartLegend"></div>
-    <p class="chart-canvas-note" id="modalityChartNote"></p>
+  <!-- Bar view = HTML bars (crisp text, same component as Risk
+       Distribution). Donut view = Chart.js donut in its own fixed-size box
+       (so the canvas is never stretched) plus an HTML value list. -->
+  <div class="st-dist" id="modalityDist">
+    <div class="st-hbars st-dist-bars" data-dist-bars hidden></div>
+    <div class="st-dist-donut" data-dist-donut hidden>
+      <div class="st-dist-donut-chart"><canvas id="modalityChartCanvas"></canvas></div>
+      <ul class="st-dist-list" data-dist-list></ul>
+    </div>
   </div>
+  <p class="chart-canvas-note" id="modalityChartNote"></p>
 </div>
