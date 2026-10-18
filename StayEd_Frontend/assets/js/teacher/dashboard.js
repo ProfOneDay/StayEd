@@ -84,7 +84,11 @@ class TeacherDashboard {
     search: "",
     sortKey: "risk",
     sortDir: 1,
-    filtersApplied: false,
+    // Dropdown filters (CLC, school year, modality) only take effect when
+    // "Apply filters" is clicked, so their values are snapshotted here at
+    // that moment. The Learning level buttons apply instantly instead and
+    // are read live from the active button (see applyRegistry).
+    appliedFilters: { clc: null, schoolYear: null, modality: null },
     riskTrend: [],
     currentRiskCounts: { high: 0, moderate: 0, low: 0, unassessed: 0 },
   };
@@ -168,6 +172,10 @@ class TeacherDashboard {
         .forEach((b) => b.classList.remove("is-active"));
 
       btn.classList.add("is-active");
+
+      // Learning level applies immediately -- no "Apply filters" needed.
+      this.state.page = 1;
+      this.applyRegistry({ recomputeStats: true });
     });
 
     document
@@ -176,7 +184,11 @@ class TeacherDashboard {
         if (window.Toast) {
           Toast.success("Filters applied.");
         }
-        this.state.filtersApplied = true;
+        this.state.appliedFilters = {
+          clc: document.querySelector("[data-filter-clc]")?.value || null,
+          schoolYear: document.querySelector("[data-filter-school-year]")?.value || null,
+          modality: document.querySelector("[data-filter-modality]")?.value || null,
+        };
         this.state.page = 1;
         this.applyRegistry({ recomputeStats: true });
       });
@@ -694,34 +706,28 @@ class TeacherDashboard {
   static applyRegistry({ recomputeStats = false } = {}) {
     let rows = [...this.state.learners];
 
-    if (this.state.filtersApplied) {
-      const activeLevel = document.querySelector(
-        "[data-filter-level] button.is-active",
-      );
+    // Learning level: live, from whichever button is active.
+    const activeLevel = document.querySelector(
+      "[data-filter-level] button.is-active",
+    );
 
-      if (activeLevel && activeLevel.dataset.level && activeLevel.dataset.level !== "All") {
-        rows = rows.filter((l) => l.level === activeLevel.dataset.level);
-      }
+    if (activeLevel && activeLevel.dataset.level && activeLevel.dataset.level !== "All") {
+      rows = rows.filter((l) => l.level === activeLevel.dataset.level);
+    }
 
-      const modality = document.querySelector("[data-filter-modality]")?.value;
+    // Dropdowns: only the values captured by the last "Apply filters".
+    const { modality, clc, schoolYear } = this.state.appliedFilters;
 
-      if (modality && modality !== "All Modalities") {
-        rows = rows.filter((l) => l.modality === modality);
-      }
+    if (modality && modality !== "All Modalities") {
+      rows = rows.filter((l) => l.modality === modality);
+    }
 
-      const clc = document.querySelector("[data-filter-clc]")?.value;
+    if (clc && clc !== "All CLCs") {
+      rows = rows.filter((l) => l.clc === clc);
+    }
 
-      if (clc && clc !== "All CLCs") {
-        rows = rows.filter((l) => l.clc === clc);
-      }
-
-      const schoolYear = document.querySelector(
-        "[data-filter-school-year]",
-      )?.value;
-
-      if (schoolYear && schoolYear !== "All School Years") {
-        rows = rows.filter((l) => l.school_year === schoolYear);
-      }
+    if (schoolYear && schoolYear !== "All School Years") {
+      rows = rows.filter((l) => l.school_year === schoolYear);
     }
 
     if (this.state.search) {
