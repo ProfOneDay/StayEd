@@ -221,6 +221,28 @@
   transform: scale(0.94);
 }
 
+/* ---- Actions column (tagged .st-col-actions by RowActions in utils.js):
+   centred in a column of its own width, with breathing room from the table
+   edge, on every table -- instead of pushed against the right edge.
+   Tablet/desktop only; phone layouts that stack rows into cards keep their
+   own placement. ---- */
+@media (min-width: 768px) {
+  table th.st-col-actions,
+  table td.st-col-actions {
+    width: 200px;
+    min-width: 160px;
+    padding-left: 24px;
+    padding-right: 24px;
+    text-align: center !important;
+  }
+
+  table td.st-col-actions .st-row-actions,
+  table td.st-col-actions .st-admin-row-actions,
+  table td.st-col-actions .st-table-actions {
+    justify-content: center;
+  }
+}
+
 /* ---- Row actions dropdown (Utils.js RowActions): one "Actions" button per
    table row in place of a row of buttons; menu is appended to <body>. ---- */
 .st-row-actions--menu {

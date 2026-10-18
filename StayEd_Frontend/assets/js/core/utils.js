@@ -757,7 +757,23 @@ const RowActions = {
     return /danger/.test(el.className) || /^(remove|delete)\b/i.test(label);
   },
 
+  // Marks a table's Actions column (the cell and its header) so CSS can give
+  // it one consistent look everywhere -- centred, with room around it --
+  // whether the cell holds a dropdown or a single button.
+  markColumn(cell) {
+    if (!cell || cell.classList.contains("st-col-actions")) return;
+    cell.classList.add("st-col-actions");
+    const table = cell.closest("table");
+    const headRow = table?.tHead?.rows?.[0];
+    const th = headRow?.cells?.[cell.cellIndex];
+    if (th && !th.classList.contains("st-col-actions")) th.classList.add("st-col-actions");
+  },
+
   enhance(root = document) {
+    root.querySelectorAll(`${this.SELECTOR}, td[data-col="actions"]`).forEach((el) => {
+      this.markColumn(el.closest("td"));
+    });
+
     root.querySelectorAll(this.SELECTOR).forEach((group) => {
       if (group.dataset.rowActions === "done") return;
       const actions = this.actionsIn(group);
