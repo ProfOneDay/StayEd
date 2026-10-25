@@ -105,15 +105,20 @@ def dashboard():
     }
 
     reminder = fetch_one(
-        """
+        f"""
         SELECT COUNT(*) FILTER (WHERE i.target_date < CURRENT_DATE) AS overdue,
                COUNT(*) FILTER (WHERE i.target_date = CURRENT_DATE) AS due_today,
                COUNT(*) FILTER (WHERE i.target_date > CURRENT_DATE) AS due_soon
         FROM intervention i
+        JOIN risk_assessment ra ON ra.risk_assessment_id = i.risk_assessment_id
         WHERE i.assigned_to_teacher_id = %s
           AND i.status IN ('PLANNED', 'ONGOING')
           AND i.target_date IS NOT NULL
           AND i.target_date <= CURRENT_DATE + 3
+          -- Don't nag about an intervention whose own risk basis is hidden
+          -- as unearned everywhere else (Risk Distribution, admin
+          -- dashboard) -- same engagement gate as both of those.
+          AND {_monitoring_engaged_sql("ra.enrollment_id")}
         """,
         (teacher["teacher_id"],),
     )

@@ -7,7 +7,7 @@ from flask import Blueprint, request
 from ..authz import current_user_id, role_required, teacher_for_user
 from ..db import execute, fetch_all, fetch_one
 from ..helpers import error
-from ..services.learner_service import _learner_query, _shape_learner
+from ..services.learner_service import _learner_query, _monitoring_engaged_sql, _shape_learner
 
 bp = Blueprint("notifications", __name__)
 
@@ -92,7 +92,7 @@ def _generate_alerts(teacher_id: int, user_id: int) -> None:
     # Intervention-due reminders are a separate category from risk alerts --
     # they run regardless of the "Risk Alert Notifications" toggle above.
     due_interventions = fetch_all(
-        """
+        f"""
         SELECT i.intervention_id, i.intervention_type, i.target_date, i.assigned_to_teacher_id,
                ce.learner_id, CONCAT_WS(' ', l.first_name, l.last_name) AS learner_name
         FROM intervention i
@@ -103,6 +103,10 @@ def _generate_alerts(teacher_id: int, user_id: int) -> None:
           AND i.status IN ('PLANNED', 'ONGOING')
           AND i.target_date IS NOT NULL
           AND i.target_date <= CURRENT_DATE + 3
+          -- Same engagement gate as the dashboard reminder card: don't
+          -- alert on an intervention whose own risk basis is hidden as
+          -- unearned everywhere else.
+          AND {_monitoring_engaged_sql("ra.enrollment_id")}
         """,
         (teacher_id,),
     )
