@@ -2,7 +2,7 @@
 
 > **For the AI assistant reading this:** you're helping King (student, capstone group) maintain and patch **StayEd**, which is already deployed and live. Read this whole file before suggesting changes. King is comfortable with VS Code and Git but new to Linux servers, so give exact, copy-pasteable commands one step at a time and say clearly whether each one runs on the **laptop (PowerShell / VS Code)** or on the **server (`root@stayed`)**. Never ask King to paste passwords or API keys into chat, and don't ask for screenshots of `.env`.
 
-*Last updated: Oct 15, 2026 (Brevo SMTP configured, see §6.8)*
+*Last updated: Oct 25, 2026 (password-OTP/rate-limiting batch deployed, see §6.9)*
 
 ---
 
@@ -81,8 +81,10 @@ The frontend and API share one origin, so CORS isn't involved in production.
 | same | `deploy/setup_server.sh` | Seeding now runs whenever **no ADMIN user exists** (self-heals a half-finished run), and model training runs **after** seeding so the real XGBoost model ends up as the single ACTIVE `model_info` row (the seed inserts a demo `rf-v1-demo` row as ACTIVE) |
 | `ae2cdc8` *Keep HTTPS: re-attach existing Let's Encrypt cert when setup_server.sh re-runs* (Oct 13) | `deploy/setup_server.sh` | Re-attaches the existing HTTPS cert after rewriting the nginx config. Before this fix, re-running the script for an update reverted the site to HTTP-only |
 | `cf13de1` *Setup wizard: Back to Login signs out so landing.js does not redirect back* (Oct 13) | `StayEd_Frontend/assets/js/setup/setup.js` | The wizard's step-1 "Back to Login" only called `Router.go("/login")` → `/index.html`, but `index.html` loads `assets/js/public/landing.js`, which calls `Auth.redirectAfterLogin()` when a session is valid, and a teacher with `setup_completed === false` is sent straight back to `setup-wizard-1.html` (a loop, so the button looked dead). It now calls `Auth.logout()` first. Frontend-only; deployed Oct 13 with the §6.1 quick rsync path |
+| `d10c52a`…`325bcfe` (Oct 15-16) | Various | Admin dashboard risk gating, label standardization (BLP/"Learning Level"/"Risk Level"), assessment-score fixes. First backend `tests/` added. |
+| `bf9d1e2`/`961e4f8` *"update gio"* (Oct 19, by teammate Gio) + 12 more commits through `cc1c947` (Oct 19-25) | 60+ files across backend and frontend | Large batch: a new **password-change OTP flow** (`password_change_otp` table, email-a-code-to-change-your-password), a **must-change-password** enforcement (admin-issued/reset passwords force the user to pick a new one before anything else works, enforced via the JWT), a new **rate-limiting service** (`app/services/rate_limit.py`), a **contact-number format migration** (DB-level CHECK constraint: exactly 11 digits starting with `09`, existing bad values cleaned/logged first), plus teacher dashboard chart redesigns, a unified row-actions dropdown, archived-CLC handling, and other UI polish. Deployed Oct 25, 2026 (see §6.9) — **not individually itemized here**; see `git log` for the full commit list. |
 
-Nothing else in the app code was changed.
+Nothing else in the app code was changed beyond what's listed above.
 
 ---
 
@@ -238,6 +240,29 @@ Expect `UPDATE 1`. The flags live in the JWT, so the admin must **log out and lo
 **Note on the old TODO about SPF:** item 4 below previously assumed there was an existing Namecheap email-forwarding SPF TXT record on `@` that would need merging with Brevo's. At the time of this setup, no such record was present in Advanced DNS — only the records listed in step 2 above. Domain authentication succeeded without adding a separate SPF record (DKIM + DMARC were sufficient for Brevo). If email forwarding is set up on `@` later, double-check for an SPF conflict then.
 
 **If the key ever needs rotating again:** repeat steps 4–6 above (generate a new key in the same Brevo account under the same sender/domain — no need to redo DNS or domain authentication).
+
+### 6.9 Password-OTP / rate-limiting batch deployed (Oct 25, 2026)
+
+**Background:** this chat hadn't touched the server since Oct 15. In the meantime a teammate (Gio) pushed 14 commits (Oct 19-25) including 3 new SQL migrations and a large backend change (see §3). Found via routine check: `git log` locally had 14 commits the server didn't; the server's own `/root/stayed-repo` clone turned out to already be partway caught up (through `cc1c947`) but hadn't been pulled the rest of the way or redeployed.
+
+**What was done:**
+1. Backed up the DB first: `/root/stayed_before_oct25_migrations_2026-10-25.sql.gz`.
+2. `cd /root/stayed-repo && git pull` to get the final 2 commits (`bf9d1e2`, `961e4f8`).
+3. Applied the 3 new migrations manually, in order, as root (not `sudo -u stayed` — `/root` isn't traversable by that user, so point `psql` at `.env`-sourced `$DATABASE_URL` while running as root):
+   ```bash
+   cd /opt/stayed/StayEd_Backend
+   set -a; . ./.env; set +a
+   psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /root/stayed-repo/StayEd_Backend/sql/37_password_change_otp.sql
+   psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /root/stayed-repo/StayEd_Backend/sql/38_must_change_password.sql
+   psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /root/stayed-repo/StayEd_Backend/sql/39_contact_number_digits.sql
+   ```
+   All three are idempotent/additive (`IF NOT EXISTS` guards). Migration 39 also cleans existing bad contact-number data and logs anything it has to clear to `contact_number_cleanup_log` — checked after running, **0 rows needed cleanup** on this DB.
+4. Deployed the code (§6.1 fast path) plus a `pip install -r requirements.txt` as a precaution given the batch's size — **no new dependencies** were actually needed, everything was already satisfied.
+5. Confirmed: `systemctl status stayed` active, `/api/health` OK, and a spot-check `diff` between `/root/stayed-repo` and `/opt/stayed` on a couple of the most-changed files (`auth_routes.py`, `clc_routes.py`) confirmed the deploy actually landed. Logged into stay-ed.site afterward to confirm normal login still works (no regression from the new must-change-password enforcement for existing accounts that aren't flagged).
+
+**New behavior to know about:** `must_change_password` (set by admin-issued/reset passwords) blocks every API call except setting a new password until the user changes it — don't be surprised if a freshly-reset account can't do anything else until that happens; that's intentional (see the comment in `sql/38_must_change_password.sql`).
+
+**Lesson for next time:** when this chat hasn't touched the server in a while, check `git log` locally vs. what's actually deployed *before* assuming things are current — a teammate's own Claude session or manual work can get ahead of what's documented here. §6.1's deploy command pulls and deploys in one step specifically to avoid this gap.
 
 ---
 
