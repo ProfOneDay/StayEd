@@ -8,6 +8,7 @@ from ..authz import current_user_id, role_required, teacher_for_user
 from ..db import execute, fetch_all, fetch_one
 from ..helpers import error
 from ..services.learner_service import _learner_query, _monitoring_engaged_sql, _shape_learner
+from .learner_routes import MODULE_DUE_SOON_DAYS
 
 bp = Blueprint("notifications", __name__)
 
@@ -131,6 +132,50 @@ def _generate_alerts(teacher_id: int, user_id: int) -> None:
             f"learner-profile.html?id={row['learner_id']}&tab=monitoring",
             f"{count} Overdue",
             f"module_overdue:{row['enrollment_id']}:{row['newest_overdue_id']}",
+        )
+
+    # Early heads-up before a module goes overdue, using the same window the
+    # module page labels "Due Soon". Two stages per learner -- within the
+    # window, then on the due date itself -- each sent once, so the teacher
+    # can nudge the learner while the module can still be returned on time.
+    due_modules = fetch_all(
+        """
+        SELECT ce.enrollment_id, ce.learner_id,
+               CONCAT_WS(' ', l.first_name, l.last_name) AS learner_name,
+               COUNT(*)::INT AS due_count,
+               MIN(mr.planned_return_date) AS nearest_due,
+               MAX(mr.module_record_id) AS newest_due_id
+        FROM module_record mr
+        JOIN class_enrollment ce ON ce.enrollment_id = mr.enrollment_id
+        JOIN learning_class lc ON lc.class_id = ce.class_id
+        JOIN learner l ON l.learner_id = ce.learner_id
+        WHERE lc.teacher_id = %s
+          AND ce.enrollment_status = 'ENROLLED'
+          AND mr.date_returned IS NULL
+          AND mr.planned_return_date BETWEEN CURRENT_DATE AND CURRENT_DATE + %s
+        GROUP BY ce.enrollment_id, ce.learner_id, l.first_name, l.last_name
+        """,
+        (teacher_id, MODULE_DUE_SOON_DAYS),
+    )
+    for row in due_modules:
+        count = row["due_count"]
+        days_left = (row["nearest_due"] - date.today()).days
+        modules = "module" if count == 1 else "modules"
+        due_on = row["nearest_due"].strftime("%B %d, %Y")
+        if days_left == 0:
+            stage, title, label = "today", "Module Return Due Today", "Due Today"
+            when = f"due for return today ({due_on})"
+        else:
+            stage, title, label = "soon", "Module Return Due Soon", "Due Soon"
+            when = f"due for return on {due_on} (in {days_left} {'day' if days_left == 1 else 'days'})"
+        _insert_alert(
+            user_id,
+            "RISK",
+            title,
+            f"{row['learner_name']} has {count} {modules} {when}. A reminder now can keep it from going overdue.",
+            f"learner-profile.html?id={row['learner_id']}&tab=monitoring",
+            label,
+            f"module_due:{row['enrollment_id']}:{row['newest_due_id']}:{stage}",
         )
 
     # Intervention-due reminders are a separate category from risk alerts --
