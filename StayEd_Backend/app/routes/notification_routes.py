@@ -89,6 +89,50 @@ def _generate_alerts(teacher_id: int, user_id: int) -> None:
                     f"inactivity:{row['enrollment_id']}:{learner['activity_status']}",
                 )
 
+    # Overdue module returns: one alert per learner, not per module, so a
+    # learner with several late modules doesn't flood the bell. Keyed on the
+    # newest overdue module, so a learner gets a fresh alert each time another
+    # module goes overdue, but not again for the same set. Same overdue rule
+    # as the learner profile (not returned, past planned_return_date). Not
+    # engagement-gated like risk is: a late module is a recorded fact, not a
+    # model verdict, and a learner who never returned anything is exactly
+    # who this should catch.
+    overdue_modules = fetch_all(
+        """
+        SELECT ce.enrollment_id, ce.learner_id,
+               CONCAT_WS(' ', l.first_name, l.last_name) AS learner_name,
+               COUNT(*)::INT AS overdue_count,
+               MIN(mr.planned_return_date) AS oldest_due,
+               MAX(mr.module_record_id) AS newest_overdue_id
+        FROM module_record mr
+        JOIN class_enrollment ce ON ce.enrollment_id = mr.enrollment_id
+        JOIN learning_class lc ON lc.class_id = ce.class_id
+        JOIN learner l ON l.learner_id = ce.learner_id
+        WHERE lc.teacher_id = %s
+          AND ce.enrollment_status = 'ENROLLED'
+          AND mr.date_returned IS NULL
+          AND mr.planned_return_date IS NOT NULL
+          AND mr.planned_return_date < CURRENT_DATE
+        GROUP BY ce.enrollment_id, ce.learner_id, l.first_name, l.last_name
+        """,
+        (teacher_id,),
+    )
+    for row in overdue_modules:
+        count = row["overdue_count"]
+        days_late = (date.today() - row["oldest_due"]).days
+        modules = "module" if count == 1 else "modules"
+        _insert_alert(
+            user_id,
+            "RISK",
+            "Module Return Overdue",
+            f"{row['learner_name']} has {count} overdue {modules} not yet returned "
+            f"(oldest was due {row['oldest_due'].strftime('%B %d, %Y')}, {days_late} "
+            f"{'day' if days_late == 1 else 'days'} ago).",
+            f"learner-profile.html?id={row['learner_id']}&tab=monitoring",
+            f"{count} Overdue",
+            f"module_overdue:{row['enrollment_id']}:{row['newest_overdue_id']}",
+        )
+
     # Intervention-due reminders are a separate category from risk alerts --
     # they run regardless of the "Risk Alert Notifications" toggle above.
     due_interventions = fetch_all(
