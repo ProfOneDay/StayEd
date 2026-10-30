@@ -54,7 +54,9 @@ class EarlyWarningPage {
       const learners = res.data || [];
 
       this.state.all = learners
-        .filter((l) => l.risk === "High" || l.risk === "Moderate")
+        // Low is kept so its summary card and the Low filter can list those
+        // learners; apply() still shows only High/Moderate by default.
+        .filter((l) => ["High", "Moderate", "Low"].includes(l.risk))
         .map((l) => ({
           ...l,
           program: l.level,
@@ -167,9 +169,9 @@ class EarlyWarningPage {
   }
 
   static renderSummary(allLearners) {
-    const total = this.state.all.length;
     const high = allLearners.filter((l) => l.risk === "High").length;
     const moderate = allLearners.filter((l) => l.risk === "Moderate").length;
+    const total = high + moderate;
     const low = allLearners.filter((l) => l.risk === "Low").length;
 
     this.countTo(document.querySelector("[data-ewa-total]"), total);
@@ -241,6 +243,8 @@ class EarlyWarningPage {
 
     if (this.state.riskLevel) {
       rows = rows.filter((l) => l.risk === this.state.riskLevel);
+    } else {
+      rows = rows.filter((l) => l.risk === "High" || l.risk === "Moderate");
     }
 
     if (this.state.clc) {
