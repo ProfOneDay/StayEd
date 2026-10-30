@@ -267,6 +267,24 @@ body[data-page="Learner Records"] .st-lr-table .st-consult-dot{
     margin-top:6px;
 }
 
+/* Overdue-module flags: tag under the Modules progress bar, plus a line
+   under the activity text. Tag is the shared .st-pill--high. */
+body[data-page="Learner Records"] .st-lr-table .st-lr-overdue-tag{
+    align-self:flex-start;
+    gap:4px;
+}
+
+body[data-page="Learner Records"] .st-lr-table .st-lr-overdue-tag .material-symbols-outlined{
+    font-size: var(--st-fs-sm);
+}
+
+body[data-page="Learner Records"] .st-lr-table .st-lr-overdue-text{
+    display:block;
+    font-size: var(--st-fs-xs);
+    font-weight:600;
+    color:var(--st-risk-high);
+}
+
 @media (prefers-reduced-motion:reduce){
     body[data-page="Learner Records"] .st-lr-table .st-progress-fill{
         width:var(--w);

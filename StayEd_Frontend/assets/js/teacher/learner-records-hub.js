@@ -457,13 +457,30 @@ class LearnerRecordsHub {
                 <div class="st-progress-track">
                     <div class="st-progress-fill st-progress-fill--primary" style="--w:${pct}%;"></div>
                 </div>
+                ${this.overdueTag(l)}
             </div>
         `;
   }
 
+  // Flags overdue modules right in the list, so the teacher doesn't have to
+  // open the Module Release Logbook to notice them.
+  static overdueTag(l) {
+    const n = l.overdue_modules || 0;
+    if (!n) return "";
+    return `<span class="st-pill st-pill--high st-lr-overdue-tag"><span class="material-symbols-outlined">warning</span>${n} overdue</span>`;
+  }
+
   static activityCell(l) {
+    // A new release resets "latest activity" to ok/green even while older
+    // modules are overdue, so overdue modules force the danger dot and add
+    // a line under the activity text.
+    const overdue = l.overdue_modules || 0;
+    const days = l.max_overdue_days || 0;
+    const overdueLine = overdue
+      ? `<span class="st-lr-overdue-text">${overdue} ${overdue === 1 ? "module" : "modules"} overdue · ${days} ${days === 1 ? "day" : "days"} late</span>`
+      : "";
     const dotClass =
-      l.activity_status === "danger"
+      overdue || l.activity_status === "danger"
         ? "st-consult-dot--danger"
         : l.activity_status === "warning"
           ? "st-consult-dot--warning"
@@ -474,7 +491,7 @@ class LearnerRecordsHub {
     return `
             <div class="st-activity${l.activity_status === "none" ? " st-activity--none" : ""}">
                 <span class="st-consult-dot ${dotClass}"></span>
-                <span>${l.activity_text || "\u2014"}</span>
+                <span>${l.activity_text || "\u2014"}${overdueLine}</span>
             </div>
         `;
   }

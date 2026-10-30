@@ -183,6 +183,13 @@ def _shape_learner(row):
         "activity_text": activity_text,
         "activity_status": activity_status,
         "days_inactive": days_inactive,
+        # Separate from activity_status: a fresh release resets "latest
+        # activity" even while older modules sit overdue, so the list needs
+        # this to flag them without the teacher opening the logbook.
+        "overdue_modules": int(row.get("overdue_modules") or 0),
+        "max_overdue_days": (
+            (date.today() - row["oldest_overdue_due"]).days if row.get("oldest_overdue_due") else 0
+        ),
         "distance_km": float(row.get("distance_from_clc_km") or 0),
         "date_generated": row["assessment_date"].isoformat() if row.get("assessment_date") else None,
         "assigned_teacher": row.get("assigned_teacher") or "",
@@ -222,6 +229,7 @@ def _learner_query(
             0 AS assessment_avg,
             latest_event.event_label, latest_event.event_date,
             (SELECT COUNT(*) FROM module_release_batch mrb WHERE mrb.enrollment_id = ce.enrollment_id) AS batch_count,
+            overdue.overdue_modules, overdue.oldest_overdue_due,
             (
                 EXISTS (
                     SELECT 1 FROM module_record mr2
@@ -261,6 +269,15 @@ def _learner_query(
             ORDER BY event_date DESC, priority ASC
             LIMIT 1
         ) latest_event ON TRUE
+        LEFT JOIN LATERAL (
+            -- Same overdue rule as the learner profile and the bell alert:
+            -- not returned and past its planned return date.
+            SELECT COUNT(*) AS overdue_modules, MIN(mr.planned_return_date) AS oldest_overdue_due
+            FROM module_record mr
+            WHERE mr.enrollment_id = ce.enrollment_id
+              AND mr.date_returned IS NULL
+              AND mr.planned_return_date < CURRENT_DATE
+        ) overdue ON TRUE
         {where}
         ORDER BY {order}
     """
