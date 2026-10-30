@@ -66,6 +66,10 @@ def _top_factors(pipeline, row: pd.DataFrame, limit: int = 3) -> list[dict]:
         grouped[base_feature] = grouped.get(base_feature, 0.0) + float(contribution)
 
     ranked = sorted(grouped.items(), key=lambda pair: abs(pair[1]), reverse=True)
+    # Raw contributions are log-odds and can exceed 1, but risk_factors.
+    # importance_score is CHECKed to 0-1 and the profile page reads it as a
+    # share (>=.6 High). Report each factor's share of the total instead.
+    total = sum(abs(c) for c in grouped.values()) or 1.0
 
     factors = []
     for base_feature, contribution in ranked[:limit]:
@@ -84,7 +88,7 @@ def _top_factors(pipeline, row: pd.DataFrame, limit: int = 3) -> list[dict]:
                 "name": base_feature,
                 "value": value,
                 "value_text": value_text,
-                "importance": round(abs(contribution), 6),
+                "importance": round(abs(contribution) / total, 6),
             }
         )
     return factors
