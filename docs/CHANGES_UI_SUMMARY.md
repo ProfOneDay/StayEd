@@ -58,6 +58,26 @@ are relative to the repo root.
   (`returned / released × 100`, plus "N of M modules returned" and a small progress bar);
   reordered the KPI row.
 
+## 2026-08-21 — Learner enrollment context, admin dashboard map, admin notifications & user/CLC management
+
+- **Learner Enroll / Import**: Back button and Learner Records' "Import Students"/"Enroll Student"
+  links now carry the specific class context forward and back (`?class=&clc=`) instead of returning
+  to the unfiltered view. `learner-enroll.html` gained an initial "New Student or Existing Student"
+  gate before the wizard — selecting an existing learner prefills and locks their Personal/Contact/
+  Guardian fields and marks them as a re-enrollee. `learner-import.html` no longer skips duplicate
+  rows; the existing learner is attached to the class instead, keeping a "Duplicate" status in the
+  preview/summary.
+- **Admin Dashboard map**: scoped to Pangasinan School Division II's 24 municipalities/cities (rest
+  of the province still renders for context but stays non-interactive/gray); every Division II
+  municipality is now risk-colored (green by default), not just ones with a registered CLC;
+  selecting one lists its CLCs 3 at a time with prev/next paging.
+- **Admin notifications**: added the admin notification bell page/wiring (`pages/admin/
+  notifications.html`) — it was 404ing before.
+- **Admin User Management**: "Create Teacher Account" renamed to "Create Account" with a Teacher/
+  Admin toggle; choosing Admin hides the teacher-only fields.
+- **Admin CLC Management**: "Add New CLC" municipality dropdown now lists all 24 Division II
+  municipalities up front (removed the old "+ New municipality…" manual-entry option).
+
 ## 2026-08-23 — Modality history, attendance, overdue tracking
 
 - **Learner Profile**: now shows "Modality: X (Since [date])"; Edit Learner modal gained a real
@@ -71,6 +91,65 @@ are relative to the repo root.
   at release time (auto-suggested, editable) and show a red "Overdue by N days" flag once passed;
   Learner Profile gained an "Overdue Modules" stat; Admin Settings gained a "Module Return Default"
   control.
+
+## 2026-08-23 — Reports section (new feature)
+
+Added a Reports section for both roles (new "Reports" link in both sidebars). Every report opens
+in a new tab as a formatted, printable page with a "Print / Save as PDF" button.
+
+- **Teacher Reports**: Individual Learner Progress (risk trend, module history, intervention
+  history, contributors, recommended actions), At-Risk Learners List (High/Moderate risk, optional
+  class filter), Intervention Tracking Report (every logged intervention, optional class/status
+  filter).
+- **Admin Reports**: Master Enrollment Listing — enrollment records across every learning center
+  with a live filterable/groupable preview table (filters: learning center, school year, semester,
+  assigned teacher, delivery mode; flat or grouped output).
+- **UI polish**: fixed the "Group report by" dropdown rendering unstyled; fixed inconsistent
+  toolbar/group-by row spacing; removed the Master Enrollment Listing's descriptive subtitle.
+- **Bug fixed**: Student Registry's "Unable to load learner profile" error (a mangled leftover
+  merge-conflict if-block referenced a variable outside its defining block) for any learner with no
+  logged consultation yet.
+
+## 2026-08-24 — Admin notification events, unread-dot fix, About page
+
+- **Admin notifications — new events**: admins now get a notification on new teacher registration
+  (linked to User Management) and on a teacher adding a genuinely new CLC (linked to CLC
+  Management); both auto-clear once resolved; added missing icon/badge colors for the two new
+  types.
+- **Notification bell unread-dot fix**: the red unread dot was static (always shown) — now reflects
+  the real unread count on load and updates immediately after marking read/deleting, for both
+  teacher and admin.
+- **Admin About page**: added (same content as the teacher About page), linked from the admin
+  sidebar footer above Logout.
+
+## 2026-08-27 — Admin/teacher UI unification, class banner rework, Module Management v1, date-format fix
+
+- **Admin/Teacher UI unification**: admin pages moved off their own hand-rolled sidebar/header onto
+  the shared `layout/sidebar-admin` + `layout/navbar` components (same breadcrumb, notification
+  bell, settings icon, avatar as teacher pages); added the missing Material Symbols font link to
+  all 4 admin pages (icons were silently falling back to plain text); removed admin JS files'
+  duplicated sidebar-toggle/user-info code in favor of shared `Layout.js`.
+- **Class-context banner (Learner Records)**: split the flat "CLC Name — Class Level" line into a
+  small CLC eyebrow + large bold heading, on a solid navy background instead of a pale tint; added
+  a retry-once safety net for transient API hiccups; Class Management's own single-line banner got
+  the same fix.
+- **Learner Modality edit refinement**: added an Effective Date field (defaults to today) and a
+  "Change Modality?" confirmation step to the existing modality dropdown/reason/audit-log flow;
+  backend validation blocks future dates, dates before enrollment, or dates before the last
+  recorded change.
+- **Module Management v1 (class-level module catalog)**: new page (`pages/teacher/
+  module-management.html`, reached from Learner Records) replacing per-student module re-entry — a
+  Module Catalog view (stats, search/filter/sort, add/edit/archive) and a Module Detail view
+  showing every learner's stage (Not Released/Released/Returned) by default, with single/bulk
+  release and per-learner return. Root-caused and fixed the bug where bulk release could show a
+  false failure dialog: risk-prediction recalculation was running synchronously per learner inside
+  the request (22 sequential subprocess calls for a 22-student bulk release) — moved to a
+  background thread. Also fixed the shared `Modal` (new `asyncConfirm` mode so double-clicking the
+  confirm button can't fire duplicate requests) and the shared API error handler (was discarding
+  the backend's real error message on 401/403/404/5xx).
+- **Date format fix (Early Warning)**: "Date Generated" used `toLocaleDateString()` with no locale
+  argument, so it rendered DD/MM under non-US browser locales — fixed to always format MM/DD/YYYY.
+  Audited every other date display/input in the app; no other instance of the bug found.
 
 ## 2026-09-25 — Teacher Dashboard redesign
 
