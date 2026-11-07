@@ -159,7 +159,13 @@ def _build_instructions_sheet(wb):
     for offset, (header, field, required, rule, example, _w) in enumerate(IMPORT_COLUMNS, start=1):
         row = header_row + offset
         options = LEARNER_FIELD_OPTIONS.get(field)
-        allowed = f"Dropdown: {', '.join(options)}" if options else rule
+        if field == "employment_status":
+            allowed = (
+                "Employed or Unemployed. Self-employed learners are recorded as Employed; "
+                "use Socio-economic Status → Self-Employed / Business Owner for the detail."
+            )
+        else:
+            allowed = f"Dropdown: {', '.join(options)}" if options else rule
         values = (_header_label(header, required), "Required" if required else "Optional", allowed, example)
         for col, value in enumerate(values, start=1):
             cell = ws.cell(row=row, column=col, value=value)

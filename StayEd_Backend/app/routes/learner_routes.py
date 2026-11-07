@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import secrets
 import threading
 import time
@@ -20,6 +21,7 @@ from ..helpers import (
     EMPLOYMENT_STATUS_OPTIONS,
     LEARNER_FIELD_OPTIONS,
     LRN_RE,
+    MODALITY_OPTIONS,
     SOCIO_ECONOMIC_OPTIONS,
     enum_level,
     enum_modality,
@@ -27,9 +29,15 @@ from ..helpers import (
     name_parts,
     error,
     match_option,
+    natural_option_list,
     normalise_contact_number,
+    resolve_employment_alias,
+    resolve_modality_alias,
     split_name,
+    strict_modality,
+    strict_yes_no,
     title_enum,
+    today_ph,
 )
 from ..services.import_template import IMPORT_COLUMNS, build_import_template
 from ..services.learner_service import (
@@ -320,6 +328,10 @@ def create_learner():
     if not class_row:
         return error("Please create a class first before adding learners.", 422)
 
+    modality = match_option(data.get("modality"), MODALITY_OPTIONS)
+    if not modality:
+        return error("Learning modality must be Face-to-Face, Modular or Blended.", 422)
+
     db = get_db()
     try:
         with db.cursor() as cur:
@@ -378,7 +390,7 @@ def create_learner():
                     WHERE enrollment_id = %s
                     """,
                     (
-                        enum_modality(data.get("modality")),
+                        enum_modality(modality),
                         is_re_enrollee,
                         data.get("distance_km") or None,
                         prior_enrollment["enrollment_id"],
@@ -393,7 +405,7 @@ def create_learner():
                     ) VALUES (%s,%s,%s,%s,%s,'ENROLLED')
                     """,
                     (
-                        class_row["class_id"], learner_id, enum_modality(data.get("modality")),
+                        class_row["class_id"], learner_id, enum_modality(modality),
                         is_re_enrollee, data.get("distance_km") or None,
                     ),
                 )
@@ -489,7 +501,10 @@ def update_learner(learner_id: int):
             raise
 
     if "modality" in data:
-        new_modality = enum_modality(data.get("modality"))
+        modality_match = match_option(data.get("modality"), MODALITY_OPTIONS)
+        if not modality_match:
+            return error("Learning modality must be Face-to-Face, Modular or Blended.", 422)
+        new_modality = enum_modality(modality_match)
         old_modality = row.get("learning_modality")
         if new_modality != old_modality:
             reason = str(data.get("modality_change_reason") or "").strip() or None
@@ -1840,6 +1855,9 @@ def create_intervention(learner_id: int):
     except ValueError:
         return error("Please enter a valid target date.", 422)
 
+    if target_date < today_ph():
+        return error("The follow-up date can't be in the past. Please choose today or a later date.", 422)
+
     try:
         risk_assessment_id = _ensure_risk_assessment_id(base["enrollment_id"])
     except ValueError as exc:
@@ -2668,6 +2686,9 @@ def _read_upload(file_storage):
     raise ValueError("Please upload an Excel or CSV file.")
 
 
+_EXCEL_TEXT_WRAPPER_RE = re.compile(r'^="(.*)"$')
+
+
 def _normalise_import_value(value):
     if value is None or (isinstance(value, float) and pd.isna(value)):
         return None
@@ -2677,6 +2698,19 @@ def _normalise_import_value(value):
         return value.date().isoformat()
     if isinstance(value, date):
         return value.isoformat()
+    if isinstance(value, str):
+        text = value.strip()
+        # Our own CSV export wraps text columns (LRN, contact numbers) as
+        # ="123456789012" so Excel/Sheets don't re-parse them as numbers
+        # (Utils.csvRow, core/utils.js) -- unwrap that on the way back in,
+        # so a teacher can re-upload a file they just exported.
+        wrapped = _EXCEL_TEXT_WRAPPER_RE.match(text)
+        if wrapped:
+            return wrapped.group(1)
+        # The other common "force text" convention (a leading apostrophe
+        # Excel hides from view, but which survives into a plain CSV/paste).
+        if text.startswith("'"):
+            return text[1:]
     return value
 
 
@@ -2722,10 +2756,6 @@ def _parse_import_birthdate(value):
         return parsed.date()
 
 
-def _parse_import_bool(value):
-    return str(value or "").strip().lower() in {"yes", "y", "true", "1"}
-
-
 def _parse_import_distance(value):
     try:
         return float(value) if value not in (None, "") else None
@@ -2743,83 +2773,136 @@ def _parse_import_income(value):
 _YES_NO_ALIASES = {"y": "Yes", "true": "Yes", "1": "Yes", "n": "No", "false": "No", "0": "No"}
 
 
-def _import_choice(raw, field, label, issues, *, required=False):
+def _import_choice(raw, field, label, issues, field_issues, *, required=False, show_value=False):
     """Validate a dropdown column against its standard list. Returns the
     standard spelling, or the value as typed (so the preview still shows
-    what was wrong) with an issue recorded."""
+    what was wrong) with an issue recorded.
+
+    `show_value=True` fields (the ones we got real teacher complaints
+    about) get the fuller "X must be A or B (you entered 'Y')" message;
+    the rest keep the older, terser wording unchanged."""
     value = raw.get(field)
     text = str(value or "").strip()
     if not text:
         if required:
-            issues.append(f"{label} is required")
+            msg = f"{label} is required"
+            issues.append(msg)
+            field_issues[field] = msg
         return None
     if field == "re_enrollee":
         text = _YES_NO_ALIASES.get(text.lower(), text)
+    elif field == "modality":
+        text = resolve_modality_alias(text) or text
     options = LEARNER_FIELD_OPTIONS[field]
     match = match_option(text, options)
     if match is None:
-        issues.append(f"{label} must be one of: {', '.join(options)}")
+        if show_value:
+            msg = f"{label} must be {natural_option_list(options)} (you entered '{value}')."
+        else:
+            msg = f"{label} must be one of: {', '.join(options)}"
+        issues.append(msg)
+        field_issues[field] = msg
         return text
     return match
 
 
-def _import_contact(raw, field, label, issues):
+def _import_contact(raw, field, label, issues, field_issues):
     number = normalise_contact_number(raw.get(field))
     if number and not CONTACT_NUMBER_RE.match(number):
-        issues.append(f"{label} must be 11 digits starting with 09")
+        msg = f"{label} must be 11 digits starting with 09"
+        issues.append(msg)
+        field_issues[field] = msg
     return number
 
 
-def _import_amount(raw, field, label, issues):
+def _import_amount(raw, field, label, issues, field_issues):
     value = raw.get(field)
     if value in (None, "") or not str(value).strip():
         return None
     try:
         amount = float(str(value).replace(",", "").strip())
     except ValueError:
-        issues.append(f"{label} must be a number")
+        msg = f"{label} must be a number"
+        issues.append(msg)
+        field_issues[field] = msg
         return value
     if amount < 0:
-        issues.append(f"{label} cannot be negative")
+        msg = f"{label} cannot be negative"
+        issues.append(msg)
+        field_issues[field] = msg
     return amount
 
 
 def _check_import_row(raw):
     """Field-level validation for one import row (everything except the LRN
-    duplicate check, which needs the database). Returns the row with its
-    values converted to the standard spellings, plus a list of problems."""
-    issues = []
+    duplicate check, which needs the database). Returns:
+    - clean: the row with its values converted to the standard spellings
+    - issues: a flat list of problem messages (unchanged shape, for callers
+      that only want the row-level summary)
+    - field_issues: {field: message} for the preview table / Edit row modal
+      to point at the exact cell that's wrong
+    - field_notes: {field: note} for a value that was accepted but changed
+      (currently just the Employment Status "Self-employed" alias)
+    """
+    issues: list[str] = []
+    field_issues: dict[str, str] = {}
+    field_notes: dict[str, str] = {}
+
     name = str(raw.get("name") or "").strip()
     if not name and not (str(raw.get("first_name") or "").strip() and str(raw.get("last_name") or "").strip()):
-        issues.append("Last Name and First Name are required")
+        msg = "Last Name and First Name are required"
+        issues.append(msg)
+        field_issues["name"] = msg
 
     birthdate = _parse_import_birthdate(raw.get("birthdate"))
     if not raw.get("birthdate"):
-        issues.append("Date of Birth is required")
+        msg = "Date of Birth is required"
+        issues.append(msg)
+        field_issues["birthdate"] = msg
     elif birthdate is None:
-        issues.append("Date of Birth must be a valid date (YYYY-MM-DD)")
-    elif birthdate > date.today():
-        issues.append("Date of Birth cannot be in the future")
+        msg = "Date of Birth must be a valid date (YYYY-MM-DD)"
+        issues.append(msg)
+        field_issues["birthdate"] = msg
+    elif birthdate > today_ph():
+        msg = "Date of Birth cannot be in the future"
+        issues.append(msg)
+        field_issues["birthdate"] = msg
+
+    # "Self-employed" (and its spelling variants) is accepted but recorded
+    # as Employed -- EMPLOYMENT_STATUS_OPTIONS has no third value for it,
+    # the detail belongs in Socio-economic Status instead. Resolve the
+    # alias *before* _import_choice so a valid alias never becomes an error.
+    employment_raw = raw.get("employment_status")
+    employment_alias = resolve_employment_alias(employment_raw) if str(employment_raw or "").strip() else None
+    employment_input = {**raw, "employment_status": employment_alias} if employment_alias else raw
+    if employment_alias:
+        field_notes["employment_status"] = f"Changed from '{str(employment_raw).strip()}'"
 
     clean = {
         **raw,
         "name": name or f"{raw.get('first_name') or ''} {raw.get('last_name') or ''}".strip(),
         "birthdate": birthdate.isoformat() if birthdate else raw.get("birthdate"),
-        "sex": _import_choice(raw, "sex", "Sex", issues, required=True),
-        "modality": _import_choice(raw, "modality", "Learning Modality", issues, required=True),
-        "civil_status": _import_choice(raw, "civil_status", "Civil Status", issues, required=True),
-        "re_enrollee": _import_choice(raw, "re_enrollee", "Re-enrollee", issues),
-        "employment_status": _import_choice(raw, "employment_status", "Employment Status", issues),
-        "occupation": _import_choice(raw, "occupation", "Socio-economic Status", issues, required=True),
-        "contact_number": _import_contact(raw, "contact_number", "Contact Number", issues),
-        "guardian_contact_number": _import_contact(
-            raw, "guardian_contact_number", "Guardian Contact Number", issues,
+        "sex": _import_choice(raw, "sex", "Sex", issues, field_issues, required=True),
+        "modality": _import_choice(
+            raw, "modality", "Learning Modality", issues, field_issues, required=True, show_value=True,
         ),
-        "distance_from_clc_km": _import_amount(raw, "distance_from_clc_km", "Distance from CLC", issues),
-        "monthly_income": _import_amount(raw, "monthly_income", "Monthly Income", issues),
+        "civil_status": _import_choice(raw, "civil_status", "Civil Status", issues, field_issues, required=True),
+        "re_enrollee": _import_choice(
+            raw, "re_enrollee", "Re-enrollee", issues, field_issues, show_value=True,
+        ),
+        "employment_status": _import_choice(
+            employment_input, "employment_status", "Employment Status", issues, field_issues, show_value=True,
+        ),
+        "occupation": _import_choice(raw, "occupation", "Socio-economic Status", issues, field_issues, required=True),
+        "contact_number": _import_contact(raw, "contact_number", "Contact Number", issues, field_issues),
+        "guardian_contact_number": _import_contact(
+            raw, "guardian_contact_number", "Guardian Contact Number", issues, field_issues,
+        ),
+        "distance_from_clc_km": _import_amount(raw, "distance_from_clc_km", "Distance from CLC", issues, field_issues),
+        "monthly_income": _import_amount(raw, "monthly_income", "Monthly Income", issues, field_issues),
         "level": raw.get("level") or "Basic Literacy",
     }
-    return clean, issues
+    return clean, issues, field_issues, field_notes
 
 
 def _preview_rows(rows):
@@ -2828,12 +2911,22 @@ def _preview_rows(rows):
     preview = []
     for raw in rows:
         lrn = str(raw.get("lrn") or "").strip()
-        clean, issues = _check_import_row(raw)
+        clean, issues, field_issues, field_notes = _check_import_row(raw)
         status = "valid"
         issue = None
+        is_duplicate = lrn in existing_lrns or lrn in seen
         if not LRN_RE.match(lrn):
-            status, issue = "error", "; ".join(["LRN must contain exactly 12 digits", *issues])
-        elif lrn in existing_lrns or lrn in seen:
+            msg = "LRN must contain exactly 12 digits"
+            field_issues = {**field_issues, "lrn": msg}
+            status, issue = "error", "; ".join([msg, *issues])
+        elif is_duplicate and issues:
+            # The LRN already exists, but this row also has its own
+            # problems -- flag it as an error instead of silently
+            # attaching a duplicate with a guessed/invalid value (see
+            # _insert_import_rows, which never guesses).
+            field_issues = {**field_issues, "lrn": "This LRN is already registered"}
+            status, issue = "error", "This LRN is already registered. " + " ".join(issues)
+        elif is_duplicate:
             # The learner record already exists, so only the enrollment is
             # added (see _insert_import_rows) -- their intake fields aren't
             # re-checked here.
@@ -2841,7 +2934,10 @@ def _preview_rows(rows):
         elif issues:
             status, issue = "error", "; ".join(issues)
         seen.add(lrn)
-        preview.append({**clean, "lrn": lrn, "status": status, "issue": issue})
+        preview.append({
+            **clean, "lrn": lrn, "status": status, "issue": issue,
+            "field_issues": field_issues, "field_notes": field_notes,
+        })
     return preview
 
 
@@ -2908,6 +3004,11 @@ def _insert_import_rows(rows, teacher, class_id=None):
     duplicates = [r for r in preview if r["status"] == "duplicate"]
     db = get_db()
     imported = []
+    # Safety net only -- 1a's validation should mean this never actually
+    # fires. Never guess a value here: a row that somehow still has an
+    # unrecognised modality/re-enrollee at insert time is skipped and
+    # counted as invalid, not saved with a made-up default.
+    invalid_skipped = 0
     try:
         with db.cursor() as cur:
             for row in valid:
@@ -2924,6 +3025,14 @@ def _insert_import_rows(rows, teacher, class_id=None):
                     sex = "MALE"
                 dob = _parse_import_birthdate(row.get("birthdate"))
                 if not dob:
+                    continue
+                modality_enum = strict_modality(row.get("modality"))
+                re_enrollee_text = str(row.get("re_enrollee") or "").strip()
+                # Blank means No for a new learner (the standing rule);
+                # anything else must be a clean Yes/No or the row is skipped.
+                re_enrollee_value = strict_yes_no(row.get("re_enrollee")) if re_enrollee_text else False
+                if modality_enum is None or (re_enrollee_text and re_enrollee_value is None):
+                    invalid_skipped += 1
                     continue
                 cur.execute(
                     """
@@ -2954,8 +3063,8 @@ def _insert_import_rows(rows, teacher, class_id=None):
                     VALUES (%s,%s,%s,%s,%s,'ENROLLED')
                     """,
                     (
-                        class_row["class_id"], learner_id, enum_modality(row.get("modality")),
-                        _parse_import_bool(row.get("re_enrollee")),
+                        class_row["class_id"], learner_id, modality_enum,
+                        re_enrollee_value,
                         _parse_import_distance(row.get("distance_from_clc_km")),
                     ),
                 )
@@ -2984,6 +3093,15 @@ def _insert_import_rows(rows, teacher, class_id=None):
                 )
                 if cur.fetchone():
                     continue
+                modality_enum = strict_modality(row.get("modality"))
+                re_enrollee_text = str(row.get("re_enrollee") or "").strip()
+                # Blank means Yes here (re-attaching an existing learner to a
+                # new class is itself a re-enrollment) -- the one case where
+                # blank isn't "No"; preserved from the pre-existing behavior.
+                re_enrollee_value = strict_yes_no(row.get("re_enrollee")) if re_enrollee_text else True
+                if modality_enum is None or (re_enrollee_text and re_enrollee_value is None):
+                    invalid_skipped += 1
+                    continue
                 cur.execute(
                     """
                     INSERT INTO class_enrollment (
@@ -2993,8 +3111,8 @@ def _insert_import_rows(rows, teacher, class_id=None):
                     VALUES (%s,%s,%s,%s,%s,'ENROLLED')
                     """,
                     (
-                        class_row["class_id"], existing["learner_id"], enum_modality(row.get("modality")),
-                        _parse_import_bool(row.get("re_enrollee")) if row.get("re_enrollee") is not None else True,
+                        class_row["class_id"], existing["learner_id"], modality_enum,
+                        re_enrollee_value,
                         _parse_import_distance(row.get("distance_from_clc_km")),
                     ),
                 )
@@ -3005,7 +3123,7 @@ def _insert_import_rows(rows, teacher, class_id=None):
                 "imported": len(imported),
                 "attached": attached,
                 "duplicates": len(duplicates),
-                "invalid": sum(r["status"] == "error" for r in preview),
+                "invalid": sum(r["status"] == "error" for r in preview) + invalid_skipped,
                 "learners": imported[:25],
             }
             cur.execute(

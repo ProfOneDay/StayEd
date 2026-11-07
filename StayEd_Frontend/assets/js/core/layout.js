@@ -18,6 +18,8 @@ class Layout {
 
     this.initializeSidebar();
 
+    this.bindSidebarNavRoot();
+
     this.initializeNavbar();
 
     this.initializeFooter();
@@ -316,6 +318,27 @@ class Layout {
 
     trigger.addEventListener("click", () => {
       Router?.go("/profile") ?? (window.location.href = "profile.html");
+    });
+  }
+
+  // Records the sidebar item the teacher clicked (its filename, e.g.
+  // "clc-overview.html") as Router's "nav root" -- the fallback breadcrumb
+  // parent for a page reachable from several places (Learner Profile,
+  // Assessment Scores) when it's opened some other way the referrer check
+  // doesn't recognise (a notification, a Quick View link). Delegated on
+  // the sidebar itself so it keeps working after a submenu re-render.
+  static bindSidebarNavRoot() {
+    if (!this.sidebar || !window.Router) return;
+
+    this.sidebar.addEventListener("click", (event) => {
+      const link = event.target.closest("a[href]");
+      if (!link) return;
+
+      const href = link.getAttribute("href") || "";
+      if (!href || href.startsWith("#") || href.startsWith("javascript:")) return;
+
+      const filename = href.split("?")[0].split("/").pop();
+      if (filename) Router.rememberNavRoot(filename);
     });
   }
 

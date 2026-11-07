@@ -132,15 +132,25 @@ open a NEW PowerShell terminal (leave the other two running) and run:
 
   cd StayEd_Backend
   .\.venv\Scripts\Activate.ps1
-  python seed_demo.py
+  python seed_demo.py --sample-data
 
 This creates:
   - A demo teacher account: teacher@stayed.com / 12345678
   - A demo admin account:   admin@stayed.com / 12345678
-  - Some sample learners and CLC records to look at
+  - The reference CLC list
+  - --sample-data additionally adds 12 sample learners, demo risk
+    assessments/interventions, and two demo notifications, so there's
+    something to click through right away
 
 You only need to run this once. If you run it again later, it's
 safe - it won't create duplicates.
+
+IMPORTANT: --sample-data is for local development only. The live
+server must never be run with this flag -- a real teacher account
+(e.g. "Trisha Santos") would otherwise show these 12 made-up
+learners and their notifications mixed in with real ones. Without
+--sample-data, seed_demo.py only creates the login accounts and
+CLC list, which is safe to run anywhere.
 
 
 --------------------------------------------------------------------

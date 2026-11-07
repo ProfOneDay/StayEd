@@ -179,48 +179,52 @@ class LearnerImportPage {
       ?.addEventListener("click", async () => {
         const btn = document.querySelector("[data-preview-confirm]");
 
-        const originalHtml = btn.innerHTML;
+        const proceed = async () => {
+          const originalHtml = btn.innerHTML;
 
-        btn.disabled = true;
+          btn.disabled = true;
 
-        btn.innerHTML = `<span class="material-symbols-outlined">progress_activity</span> Importing…`;
+          btn.innerHTML = `<span class="material-symbols-outlined">progress_activity</span> Importing…`;
 
-        try {
-          // Duplicates are bypassed, not skipped: the row keeps its
-          // "Duplicate" status in the preview, but the matching existing
-          // learner is still attached to this class. Only error rows are
-          // left out of the submission.
-          const classId = this.getClassId();
+          try {
+            // Duplicates are bypassed, not skipped: the row keeps its
+            // "Duplicate" status in the preview, but the matching existing
+            // learner is still attached to this class. Only error rows are
+            // left out of the submission.
+            const classId = this.getClassId();
 
-          const result = await LearnerImportCore.confirm(this.preview.rows, classId);
+            const result = await LearnerImportCore.confirm(this.preview.rows, classId);
 
-          document
-            .getElementById("importPreviewSection")
-            ?.classList.add("st-hidden");
+            document
+              .getElementById("importPreviewSection")
+              ?.classList.add("st-hidden");
 
-          const success = document.getElementById("importSuccessSection");
+            const success = document.getElementById("importSuccessSection");
 
-          success?.classList.remove("st-hidden");
+            success?.classList.remove("st-hidden");
 
-          this.setImportStep(3);
+            this.setImportStep(3);
 
-          const addedCount = result.imported + result.attached;
+            const addedCount = result.imported + result.attached;
 
-          this.countUp("[data-success-total]", this.preview.total);
-          this.countUp("[data-success-imported]", addedCount);
-          this.countUp("[data-success-duplicates]", this.preview.duplicates);
-          this.countUp("[data-success-errors]", this.preview.errors);
+            this.countUp("[data-success-total]", this.preview.total);
+            this.countUp("[data-success-imported]", addedCount);
+            this.countUp("[data-success-duplicates]", this.preview.duplicates);
+            this.countUp("[data-success-errors]", this.preview.errors);
 
-          Toast?.success(`${addedCount} learner(s) added to this class.`);
-        } catch (error) {
-          console.error(error);
+            Toast?.success(`${addedCount} learner(s) added to this class.`);
+          } catch (error) {
+            console.error(error);
 
-          Toast?.error("We could not add the learners. Please try again.");
+            Toast?.error("We could not add the learners. Please try again.");
 
-          btn.disabled = false;
+            btn.disabled = false;
 
-          btn.innerHTML = originalHtml;
-        }
+            btn.innerHTML = originalHtml;
+          }
+        };
+
+        await LearnerImportCore.confirmSkipWarning(this.preview, proceed);
       });
   }
 

@@ -19,7 +19,7 @@ Copy-Item .env.example .env
 
 StayEd2026DB
 
-python seed_demo.py
+python seed_demo.py --sample-data
 
 python run.py
 

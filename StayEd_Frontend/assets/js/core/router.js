@@ -27,32 +27,30 @@ class Router {
     "/admin/dashboard": "admin/dashboard.html",
   };
 
+  // Each trail starts at the sidebar item the teacher actually clicked to
+  // get here, not always at Dashboard -- Dashboard is just one sidebar
+  // item among several, not the root of every trail. A page nested under
+  // another one in the sidebar (e.g. Learner Records lives under CLC
+  // Overview -> Class Management -> a class) still shows that real path;
+  // it just no longer starts with a Dashboard crumb that isn't where the
+  // teacher came from.
   static BREADCRUMBS = {
     "dashboard.html": [{ label: "Dashboard" }],
 
-    "calendar.html": [
-      { label: "Dashboard", href: "dashboard.html" },
-      { label: "Calendar" },
-    ],
+    "calendar.html": [{ label: "Calendar" }],
 
-    "clc-overview.html": [
-      { label: "Dashboard", href: "dashboard.html" },
-      { label: "CLC Overview" },
-    ],
+    "clc-overview.html": [{ label: "CLC Overview" }],
     "clc-details.html": [
-      { label: "Dashboard", href: "dashboard.html" },
       { label: "CLC Overview", href: "clc-overview.html" },
       { label: "Add New CLC" },
     ],
     "clc-upload.html": [
-      { label: "Dashboard", href: "dashboard.html" },
       { label: "CLC Overview", href: "clc-overview.html" },
       { label: "Add New CLC", href: "clc-details.html" },
       { label: "Upload Records" },
     ],
 
     "class-management.html": [
-      { label: "Dashboard", href: "dashboard.html" },
       { label: "CLC Overview", href: "clc-overview.html" },
       { label: "Class Management" },
     ],
@@ -60,110 +58,62 @@ class Router {
     // in the sidebar (CLC Overview -> Class Management -> a class), so the
     // trail follows that same path. Every crumb except the last is a link.
     "learner-records.html": [
-      { label: "Dashboard", href: "dashboard.html" },
       { label: "CLC Overview", href: "clc-overview.html" },
       { label: "Class Management", href: "class-management.html" },
       { label: "Learner Records" },
     ],
     "module-management.html": [
-      { label: "Dashboard", href: "dashboard.html" },
       { label: "CLC Overview", href: "clc-overview.html" },
       { label: "Class Management", href: "class-management.html" },
       { label: "Learner Records", href: "learner-records.html", preserveQuery: true },
       { label: "Manage Modules" },
     ],
     "assessment-scores.html": [
-      { label: "Dashboard", href: "dashboard.html" },
       { label: "CLC Overview", href: "clc-overview.html" },
       { label: "Class Management", href: "class-management.html" },
       { label: "Learner Records", href: "learner-records.html", preserveQuery: true },
       { label: "Assessment Scores" },
     ],
     "learner-import.html": [
-      { label: "Dashboard", href: "dashboard.html" },
       { label: "CLC Overview", href: "clc-overview.html" },
       { label: "Class Management", href: "class-management.html" },
       { label: "Learner Records", href: "learner-records.html", preserveQuery: true },
       { label: "Import Students" },
     ],
     "learner-enroll.html": [
-      { label: "Dashboard", href: "dashboard.html" },
       { label: "CLC Overview", href: "clc-overview.html" },
       { label: "Class Management", href: "class-management.html" },
       { label: "Learner Records", href: "learner-records.html", preserveQuery: true },
       { label: "Enroll Student" },
     ],
-    "student-registry.html": [
-      { label: "Dashboard", href: "dashboard.html" },
-      { label: "Student Registry" },
-    ],
+    "student-registry.html": [{ label: "Student Registry" }],
     // Default trail only -- Learner Profile is opened from many pages, so
     // breadcrumbFor() swaps in the page the teacher actually came from
     // (see ORIGIN_PARENTS).
     "learner-profile.html": [
-      { label: "Dashboard", href: "dashboard.html" },
       { label: "Student Registry", href: "student-registry.html" },
       { label: "Learner Profile" },
     ],
 
-    "early-warning.html": [
-      { label: "Dashboard", href: "dashboard.html" },
-      { label: "Early Warnings" },
-    ],
+    "early-warning.html": [{ label: "Early Warnings" }],
 
-    "reports.html": [
-      { label: "Dashboard", href: "dashboard.html" },
-      { label: "Reports" },
-    ],
+    "reports.html": [{ label: "Reports" }],
 
-    "notifications.html": [
-      { label: "Dashboard", href: "dashboard.html" },
-      { label: "Notifications" },
-    ],
+    "notifications.html": [{ label: "Notifications" }],
 
-    "settings.html": [
-      { label: "Dashboard", href: "dashboard.html" },
-      { label: "System Settings" },
-    ],
+    "settings.html": [{ label: "System Settings" }],
 
-    "profile.html": [
-      { label: "Dashboard", href: "dashboard.html" },
-      { label: "Profile Settings" },
-    ],
-    "help.html": [
-      { label: "Dashboard", href: "dashboard.html" },
-      { label: "Help & User Manual" },
-    ],
-    "about.html": [
-      { label: "Dashboard", href: "dashboard.html" },
-      { label: "About StayEd" },
-    ],
+    "profile.html": [{ label: "Profile Settings" }],
+    "help.html": [{ label: "Help & User Manual" }],
+    "about.html": [{ label: "About StayEd" }],
 
     "admin/dashboard.html": [{ label: "Dashboard" }],
-    "admin/notifications.html": [
-      { label: "Dashboard", href: "dashboard.html" },
-      { label: "Notifications" },
-    ],
-    "admin/reports.html": [
-      { label: "Dashboard", href: "dashboard.html" },
-      { label: "Reports" },
-    ],
-    "admin/user-management.html": [
-      { label: "Dashboard", href: "dashboard.html" },
-      { label: "User Management" },
-    ],
-    "admin/clc-management.html": [
-      { label: "Dashboard", href: "dashboard.html" },
-      { label: "CLC Management" },
-    ],
-    "admin/settings.html": [
-      { label: "Dashboard", href: "dashboard.html" },
-      { label: "System Settings" },
-    ],
-    "admin/manage-admins.html": [
-      { label: "Dashboard", href: "dashboard.html" },
-      { label: "Manage Admins" },
-    ],
+    "admin/notifications.html": [{ label: "Notifications" }],
+    "admin/reports.html": [{ label: "Reports" }],
+    "admin/user-management.html": [{ label: "User Management" }],
+    "admin/clc-management.html": [{ label: "CLC Management" }],
+    "admin/settings.html": [{ label: "System Settings" }],
+    "admin/manage-admins.html": [{ label: "Manage Admins" }],
   };
 
   // Teacher pages reachable from several places: their trail follows the
@@ -179,6 +129,32 @@ class Router {
   };
 
   static ORIGIN_KEY = "stayed_breadcrumb_origin:";
+
+  // The sidebar item the teacher most recently clicked (layout.js records
+  // this on every click inside .st-sidebar/.st-sidebar-admin) -- the
+  // fallback root for a flexible page (ORIGIN_PARENTS) reached from
+  // somewhere that isn't itself a recognised parent, e.g. a notification
+  // bell item or a Quick View "View full profile" link clicked from a
+  // page not already in that page's ORIGIN_PARENTS list. A fixed-location
+  // page (everything else in BREADCRUMBS) ignores this entirely -- its
+  // trail never changes based on how the teacher got there.
+  static NAV_ROOT_KEY = "stayed_nav_root";
+
+  static rememberNavRoot(filename) {
+    try {
+      sessionStorage.setItem(this.NAV_ROOT_KEY, filename);
+    } catch {
+      /* private-browsing storage errors are not worth surfacing here */
+    }
+  }
+
+  static navRoot() {
+    try {
+      return sessionStorage.getItem(this.NAV_ROOT_KEY);
+    } catch {
+      return null;
+    }
+  }
 
   // The parent page (filename + query) this page was opened from: the
   // referrer when it's an allowed parent, otherwise whatever was remembered
@@ -213,7 +189,20 @@ class Router {
   }
 
   static breadcrumbFor(filename, fallbackTitle, sectionKey, depth = 0) {
-    const origin = depth < 3 ? this.originFor(filename) : null;
+    let origin = depth < 3 ? this.originFor(filename) : null;
+
+    // No real referrer/remembered match -- for a flexible page, fall back
+    // to the sidebar section the teacher is actually working in (set by
+    // layout.js) when that section is one of this page's valid parents,
+    // rather than always defaulting to the same fixed guess.
+    if (!origin && depth < 3) {
+      const allowed = this.ORIGIN_PARENTS[filename];
+      const root = this.navRoot();
+      if (allowed && root && root !== filename && allowed.includes(root)) {
+        origin = { file: root, href: root };
+      }
+    }
+
     if (origin) {
       const own = this.BREADCRUMBS[filename];
       const ownLabel = own ? own[own.length - 1].label : fallbackTitle || filename;

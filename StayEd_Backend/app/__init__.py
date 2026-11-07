@@ -121,7 +121,14 @@ def create_app(config_object=Config):
 
     @app.errorhandler(pg_errors.CheckViolation)
     def check_violation(error):
-        return jsonify(message="Some of the information entered is not allowed. Please check it and try again.", detail=str(error)), 422
+        from .helpers import constraint_message
+
+        constraint_name = getattr(getattr(error, "diag", None), "constraint_name", None)
+        app.logger.warning("CheckViolation on constraint %s: %s", constraint_name, error)
+        payload = {"message": constraint_message(constraint_name)}
+        if app.debug:
+            payload["detail"] = str(error)
+        return jsonify(payload), 422
 
     @app.errorhandler(HTTPException)
     def http_error(error):

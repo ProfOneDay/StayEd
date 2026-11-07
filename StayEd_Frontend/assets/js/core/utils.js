@@ -1,28 +1,62 @@
 class Utils {
-  static downloadCsv(filename, headers, rows) {
-    const csvContent = [headers, ...rows]
-      .map((row) =>
-        row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(","),
-      )
-      .join("\r\n");
+  // The shared low-level pieces every CSV export in the app is built from
+  // (see report-printer.js, which has its own multi-section shape and
+  // calls these directly instead of downloadCsv below). Centralising
+  // these two is what let us fix, in one place instead of three, Excel/
+  // Sheets showing a 12-digit LRN as "1.23457E+11" and a contact number
+  // losing its leading 0 -- both happen because Excel reads an all-digit
+  // cell as a number.
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  // One CSV row: `textFlags[i]` true writes that cell as ="12345..."
+  // (CSV-escaped), which both Excel and Google Sheets render as the full
+  // digit string instead of re-parsing it as a number.
+  static csvRow(cells, textFlags = []) {
+    return cells
+      .map((cell, i) => {
+        const text = String(cell ?? "");
+        if (textFlags[i] && text) return `"=""${text.replace(/"/g, '""')}"""`;
+        return `"${text.replace(/"/g, '""')}"`;
+      })
+      .join(",");
+  }
 
+  // Builds the Blob, triggers the download, and cleans up -- the part
+  // every exporter did with a hand-copied 6-line block.
+  static saveCsv(filename, csvContent) {
+    // UTF-8 BOM so Excel doesn't mis-detect the encoding on special characters.
+    const blob = new Blob(["﻿" + csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-
     const link = document.createElement("a");
-
     link.href = url;
-
-    link.download = filename;
-
+    link.download = filename.endsWith(".csv") ? filename : `${filename}.csv`;
     document.body.appendChild(link);
-
     link.click();
-
     document.body.removeChild(link);
-
     URL.revokeObjectURL(url);
+  }
+
+  // The plain single-table case (one header row, uniform columns) --
+  // Student Registry and anything else exporting a flat list.
+  // `textColumns` names the columns (by header, case-insensitive) that
+  // must stay literal text -- at minimum LRN and any contact-number column.
+  static downloadCsv(filename, headers, rows, { textColumns = [] } = {}) {
+    const textSet = new Set(textColumns.map((h) => String(h).trim().toLowerCase()));
+    const textFlags = headers.map((h) => textSet.has(String(h).trim().toLowerCase()));
+    const csvContent = [
+      this.csvRow(headers),
+      ...rows.map((row) => this.csvRow(row, textFlags)),
+    ].join("\r\n");
+    this.saveCsv(filename, csvContent);
+  }
+
+  // "Today" as the browser actually sees it on the device's own clock --
+  // NOT new Date().toISOString().slice(0,10), which converts to UTC first
+  // and so reports yesterday's date in the Philippines before 8 AM.
+  static todayIso() {
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${now.getFullYear()}-${month}-${day}`;
   }
 
   static qs(selector, scope = document) {
@@ -175,36 +209,68 @@ class Utils {
     if (!window.Modal || !learnerId) return;
 
     const types = this.INTERVENTION_TYPES;
+    const today = this.todayIso();
 
     Modal.show({
       title: "Assign Intervention",
       size: "md",
       confirmLabel: "Select Intervention",
       message: `
+        <p class="st-required-note">* Required</p>
         <div class="st-schedule-modal-field">
-          <label for="ivType">Intervention Type</label>
-          <select id="ivType">${types.map((t) => `<option value="${t}">${t}</option>`).join("")}</select>
+          <label for="ivType">Intervention Type <span class="required">*</span></label>
+          <select id="ivType">${types.map((t) => `<option value="${this.esc(t)}">${this.esc(t)}</option>`).join("")}</select>
         </div>
         <div class="st-schedule-modal-field">
-          <label for="ivDescription">Description</label>
-          <textarea id="ivDescription" rows="3" placeholder="What will this intervention involve?">${prefillDescription}</textarea>
+          <label for="ivDescription">Description <span class="required">*</span></label>
+          <textarea id="ivDescription" rows="3" placeholder="What will this intervention involve?">${this.esc(prefillDescription)}</textarea>
         </div>
         <div class="st-schedule-modal-field">
-          <label for="ivTargetDate">Target Follow-up Date (required)</label>
-          <input type="date" id="ivTargetDate">
+          <label for="ivTargetDate">Target Follow-up Date <span class="required">*</span></label>
+          <input type="date" id="ivTargetDate" min="${today}">
         </div>
       `,
       onConfirm: async () => {
-        const type = document.getElementById("ivType")?.value;
-        const description = document.getElementById("ivDescription")?.value.trim();
-        const targetDate = document.getElementById("ivTargetDate")?.value;
+        const typeField = document.getElementById("ivType");
+        const descField = document.getElementById("ivDescription");
+        const dateField = document.getElementById("ivTargetDate");
+
+        const clearFieldError = (field) => {
+          field?.classList.remove("is-invalid");
+          field?.removeAttribute("aria-invalid");
+          if (field) document.getElementById(`${field.id}-hint`)?.remove();
+        };
+        const markInvalid = (field, message) => {
+          if (!field) return;
+          clearFieldError(field);
+          field.classList.add("is-invalid");
+          field.setAttribute("aria-invalid", "true");
+          const hint = document.createElement("p");
+          hint.id = `${field.id}-hint`;
+          hint.className = "st-field-hint st-field-hint--error";
+          hint.textContent = message;
+          field.insertAdjacentElement("afterend", hint);
+        };
+
+        [descField, dateField].forEach(clearFieldError);
+
+        const type = typeField?.value;
+        const description = descField?.value.trim();
+        const targetDate = dateField?.value;
 
         if (!description) {
+          markInvalid(descField, "Please describe the intervention.");
           Toast?.error("Please describe the intervention.");
           return;
         }
         if (!targetDate) {
+          markInvalid(dateField, "Please set a target follow-up date.");
           Toast?.error("Please set a target follow-up date.");
+          return;
+        }
+        if (targetDate < today) {
+          markInvalid(dateField, "The follow-up date can't be in the past. Please choose today or a later date.");
+          Toast?.error("The follow-up date can't be in the past. Please choose today or a later date.");
           return;
         }
 

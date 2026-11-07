@@ -677,6 +677,15 @@ body[data-page="Manage Modules"] .st-roster-checklist {
   margin-left: 2px;
 }
 
+/* "* Required" note at the top of a modal that uses the .required
+   asterisk above -- same faint caption treatment as .st-field-hint, just
+   not tied to one field. */
+.st-required-note {
+  font-size: var(--st-fs-xs, var(--st-font-size-caption));
+  color: var(--st-ink-faint, var(--st-on-surface-variant));
+  margin: 0 0 12px;
+}
+
 /* ---------- Entrance motion ---------- */
 body[data-page="Manage Modules"] [data-animate] {
   opacity: 0;

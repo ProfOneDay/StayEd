@@ -249,11 +249,15 @@ class ClcUpload {
     document
       .getElementById("clcCreateRecordsBtn")
       ?.addEventListener("click", async () => {
-        await this.createRecords();
+        await this.confirmAndCreateRecords();
       });
   }
 
-  static async createRecords() {
+  // Same "N will be imported, M will be skipped" warning as Import
+  // Students and the setup wizard (LearnerImportCore.confirmSkipWarning)
+  // -- this page shares the exact same /learners/import/preview response,
+  // it just renders a summary instead of a row table.
+  static async confirmAndCreateRecords() {
     if (!this.preview?.rows?.length) {
       Toast?.error("There is nothing to add yet. Please choose a file first.");
       return;
@@ -266,6 +270,10 @@ class ClcUpload {
       return;
     }
 
+    await LearnerImportCore.confirmSkipWarning(this.preview, () => this.createRecords(validRows));
+  }
+
+  static async createRecords(validRows) {
     const btn = document.getElementById("clcCreateRecordsBtn");
 
     const originalHtml = btn.innerHTML;
@@ -273,6 +281,8 @@ class ClcUpload {
     btn.disabled = true;
 
     btn.innerHTML = `<span class="material-symbols-outlined">progress_activity</span> Creating…`;
+
+    const skipped = (this.preview?.errors ?? this.preview?.invalid) || 0;
 
     try {
       const result = await API.importLearners({ learners: validRows });
@@ -283,7 +293,8 @@ class ClcUpload {
 
       this.set(
         "[data-success-summary]",
-        `${imported} learner profile${imported === 1 ? "" : "s"} have been generated for this CLC.`,
+        `${imported} learner profile${imported === 1 ? "" : "s"} have been generated for this CLC.` +
+          (skipped ? ` ${skipped} row${skipped === 1 ? "" : "s"} with errors ${skipped === 1 ? "was" : "were"} skipped.` : ""),
       );
 
       const success = document.getElementById("clcSuccessSection");

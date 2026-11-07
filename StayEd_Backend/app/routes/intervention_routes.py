@@ -6,7 +6,7 @@ from flask import Blueprint, request
 
 from ..authz import current_user_id, role_required, teacher_for_user
 from ..db import execute, fetch_all, fetch_one
-from ..helpers import error
+from ..helpers import error, today_ph
 from ..services.prediction_service import trigger_prediction
 from ..services.ai_intervention_service import generate_next_step
 
@@ -51,7 +51,7 @@ def interventions():
 def update_intervention_status(intervention_id: int):
     teacher = teacher_for_user()
     row = fetch_one(
-        "SELECT intervention_id, risk_assessment_id FROM intervention WHERE intervention_id=%s AND assigned_to_teacher_id=%s",
+        "SELECT intervention_id, risk_assessment_id, target_date FROM intervention WHERE intervention_id=%s AND assigned_to_teacher_id=%s",
         (intervention_id, teacher["teacher_id"]),
     )
     if not row:
@@ -72,9 +72,15 @@ def update_intervention_status(intervention_id: int):
             raw = data.get("targetDate")
             if raw:
                 try:
-                    params.append(date.fromisoformat(str(raw)))
+                    new_target_date = date.fromisoformat(str(raw))
                 except ValueError:
                     return error("Please enter a valid target date.", 422)
+                # An unchanged date on an existing (possibly already-past)
+                # record is still allowed -- only a real change to a past
+                # date is rejected.
+                if new_target_date != row.get("target_date") and new_target_date < today_ph():
+                    return error("The follow-up date can't be in the past. Please choose today or a later date.", 422)
+                params.append(new_target_date)
             else:
                 params.append(None)
             sets.append("target_date=%s")

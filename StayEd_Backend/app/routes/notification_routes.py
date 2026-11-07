@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from datetime import date
 
 from flask import Blueprint, request
@@ -54,7 +55,9 @@ def _generate_alerts(teacher_id: int, user_id: int) -> None:
 
     if risk_alerts_enabled:
         rows = fetch_all(
-            _learner_query("WHERE lc.teacher_id = %s AND ce.enrollment_status = 'ENROLLED'"),
+            _learner_query(
+                "WHERE lc.teacher_id = %s AND ce.enrollment_status = 'ENROLLED' AND lc.status = 'ACTIVE'"
+            ),
             (teacher_id,),
         )
         seen_learners = set()
@@ -111,6 +114,7 @@ def _generate_alerts(teacher_id: int, user_id: int) -> None:
         JOIN learner l ON l.learner_id = ce.learner_id
         WHERE lc.teacher_id = %s
           AND ce.enrollment_status = 'ENROLLED'
+          AND lc.status = 'ACTIVE'
           AND mr.date_returned IS NULL
           AND mr.planned_return_date IS NOT NULL
           AND mr.planned_return_date < CURRENT_DATE
@@ -151,6 +155,7 @@ def _generate_alerts(teacher_id: int, user_id: int) -> None:
         JOIN learner l ON l.learner_id = ce.learner_id
         WHERE lc.teacher_id = %s
           AND ce.enrollment_status = 'ENROLLED'
+          AND lc.status = 'ACTIVE'
           AND mr.date_returned IS NULL
           AND mr.planned_return_date BETWEEN CURRENT_DATE AND CURRENT_DATE + %s
         GROUP BY ce.enrollment_id, ce.learner_id, l.first_name, l.last_name
@@ -187,11 +192,14 @@ def _generate_alerts(teacher_id: int, user_id: int) -> None:
         FROM intervention i
         JOIN risk_assessment ra ON ra.risk_assessment_id = i.risk_assessment_id
         JOIN class_enrollment ce ON ce.enrollment_id = ra.enrollment_id
+        JOIN learning_class lc ON lc.class_id = ce.class_id
         JOIN learner l ON l.learner_id = ce.learner_id
         WHERE i.assigned_to_teacher_id = %s
           AND i.status IN ('PLANNED', 'ONGOING')
           AND i.target_date IS NOT NULL
           AND i.target_date <= CURRENT_DATE + 3
+          AND ce.enrollment_status = 'ENROLLED'
+          AND lc.status = 'ACTIVE'
           -- Same engagement gate as the dashboard reminder card: don't
           -- alert on an intervention whose own risk basis is hidden as
           -- unearned everywhere else.
@@ -220,6 +228,37 @@ def _generate_alerts(teacher_id: int, user_id: int) -> None:
         )
 
 
+_LEARNER_LINK_ID_RE = re.compile(r"[?&]id=(\d+)")
+
+GENERATED_ALERT_TYPES = ("RISK", "INTERVENTION")
+
+
+def _qualifying_learner_ids(teacher_id: int) -> set[int]:
+    """Learners this teacher can currently see generated alerts about:
+    still ENROLLED, in a class that's still ACTIVE. Used to hide (not
+    delete) a RISK/INTERVENTION alert that was generated before the
+    learner was archived/withdrawn or their class was archived."""
+    rows = fetch_all(
+        """
+        SELECT DISTINCT ce.learner_id
+        FROM class_enrollment ce
+        JOIN learning_class lc ON lc.class_id = ce.class_id
+        WHERE lc.teacher_id = %s AND ce.enrollment_status = 'ENROLLED' AND lc.status = 'ACTIVE'
+        """,
+        (teacher_id,),
+    )
+    return {r["learner_id"] for r in rows}
+
+
+def _is_stale_generated_alert(row, qualifying_learner_ids: set[int]) -> bool:
+    if row["notification_type"] not in GENERATED_ALERT_TYPES:
+        return False
+    match = _LEARNER_LINK_ID_RE.search(row.get("link") or "")
+    if not match:
+        return False
+    return int(match.group(1)) not in qualifying_learner_ids
+
+
 @bp.get("/notifications")
 @role_required("teacher", "admin", "coordinator")
 def list_notifications():
@@ -231,6 +270,9 @@ def list_notifications():
         "SELECT * FROM notification WHERE user_id=%s ORDER BY created_at DESC",
         (current_user_id(),),
     )
+    if teacher:
+        qualifying = _qualifying_learner_ids(teacher["teacher_id"])
+        rows = [r for r in rows if not _is_stale_generated_alert(r, qualifying)]
     data = [_shape(r) for r in rows]
     return {"total": len(data), "unread": sum(not n["read"] for n in data), "data": data}
 

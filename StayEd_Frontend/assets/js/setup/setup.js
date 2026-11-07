@@ -607,27 +607,31 @@ class SetupWizard {
         "click",
 
         async () => {
-          const originalHtml = finishBtn.innerHTML;
+          const proceed = async () => {
+            const originalHtml = finishBtn.innerHTML;
 
-          finishBtn.disabled = true;
+            finishBtn.disabled = true;
 
-          finishBtn.innerHTML = `<span class="material-symbols-outlined">progress_activity</span> Importing…`;
+            finishBtn.innerHTML = `<span class="material-symbols-outlined">progress_activity</span> Importing…`;
 
-          try {
-            await LearnerImportCore.confirm(state.rows, null);
+            try {
+              await LearnerImportCore.confirm(state.rows, null);
 
-            sessionStorage.removeItem(SetupWizard.IMPORT_PREVIEW_KEY);
+              sessionStorage.removeItem(SetupWizard.IMPORT_PREVIEW_KEY);
 
-            Router.go("/setup/wizard-5");
-          } catch (error) {
-            console.error(error);
+              Router.go("/setup/wizard-5");
+            } catch (error) {
+              console.error(error);
 
-            Utils.toast("We could not add the learners. Please try again.", "error");
+              Utils.toast("We could not add the learners. Please try again.", "error");
 
-            finishBtn.disabled = false;
+              finishBtn.disabled = false;
 
-            finishBtn.innerHTML = originalHtml;
-          }
+              finishBtn.innerHTML = originalHtml;
+            }
+          };
+
+          await LearnerImportCore.confirmSkipWarning(preview, proceed);
         },
       );
     }

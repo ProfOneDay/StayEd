@@ -326,6 +326,37 @@ body[data-page="Import Learners"] .st-import-stat-card--error{
     color:var(--st-ink-faint);
 }
 
+/* A single wrong cell inside an otherwise-fine-looking row (e.g. the
+   modality column when only "Learning Modality" is invalid) -- the row
+   tint above (.st-import-row--error) marks the whole row, this marks
+   exactly which value is the problem. The tooltip (title) repeats the
+   same message _check_import_row() put in field_issues. */
+.st-import-cell--error{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    padding:1px 6px;
+    border-radius:var(--st-radius-sm, 4px);
+    background:var(--st-risk-high-soft);
+    color:var(--st-risk-high);
+    cursor:help;
+}
+
+.st-import-cell--error .st-import-cell-icon{
+    font-size:14px;
+    width:14px;
+    height:14px;
+}
+
+/* A value that was accepted but changed (currently just Employment
+   Status's "Self-employed" -> "Employed" alias) -- not an error, just
+   worth the teacher knowing it happened. */
+.st-import-cell-note{
+    display:block;
+    font-size: var(--st-fs-xs);
+    color:var(--st-ink-faint);
+}
+
 .st-import-learner-cell{
     display:flex;
     flex-direction:column;
@@ -995,6 +1026,18 @@ body[data-page="Import Learners"] #importPreviewBtn:hover .material-symbols-outl
     font-size: var(--st-font-size-micro);
     color:var(--st-on-surface-variant);
     margin-top:4px;
+}
+
+.st-field-hint--error{
+    color:var(--st-risk-high);
+}
+
+/* Edit-row modal: a dropdown whose current value isn't one of the
+   options (e.g. "Notepad" for Learning Modality) -- same red-border
+   convention as .st-assessment-input.is-invalid. */
+.st-schedule-modal-field select.is-invalid{
+    border-color:var(--st-risk-high);
+    box-shadow:0 0 0 2px rgba(214,69,69,.12);
 }
 
 .st-enroll-field-locked{

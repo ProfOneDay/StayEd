@@ -200,9 +200,10 @@ class StudentRegistry {
     }
 
     Utils.downloadCsv(
-      `StayEd_Student_Registry_${new Date().toISOString().slice(0, 10)}.csv`,
+      `StayEd_Student_Registry_${Utils.todayIso()}.csv`,
       ["LRN", "Name", "Learning Level", "Modality", "CLC", "Risk Level", "Status"],
       learners.map((l) => [l.lrn, l.name, l.level, l.modality, l.clc, l.risk, l.status]),
+      { textColumns: ["LRN"] },
     );
 
     Toast?.success(`Exported ${learners.length} learner(s).`);

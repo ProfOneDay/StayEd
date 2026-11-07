@@ -124,7 +124,12 @@ sudo -u "$APP_USER" "$BACKEND/.venv/bin/pip" install -r "$BACKEND/requirements.t
 SEEDED=0
 HAS_ADMIN="$(psql "$DATABASE_URL" -tAc "SELECT EXISTS (SELECT 1 FROM users WHERE role='ADMIN')")"
 if [ "$HAS_ADMIN" != "t" ]; then
-  say "Seeding the admin account and demo data"
+  say "Seeding the teacher/admin login accounts and reference CLC list"
+  # Deliberately NOT --sample-data: this is the live server, and that flag
+  # also adds 12 made-up sample learners (plus their demo interventions and
+  # notifications) that a real teacher account would otherwise see mixed in
+  # with real data. See docs/SETUP.txt for the local-dev-only --sample-data
+  # workflow.
   (cd "$BACKEND" && sudo -u "$APP_USER" bash -c "set -a; . ./.env; set +a; .venv/bin/python seed_demo.py")
   SEEDED=1
 fi

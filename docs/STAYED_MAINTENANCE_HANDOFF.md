@@ -287,6 +287,7 @@ Expect `UPDATE 1`. The flags live in the JWT, so the admin must **log out and lo
 8. **`config.js`** still has `MODE: "development"` and `DEBUG: true` (cosmetic/logging only; the API URL logic is already production-safe).
 9. **Local repo housekeeping:** `seed_demo.py` has CRLF line endings (fine). Git warns "LF will be replaced by CRLF" on Windows, which is harmless; the server checkout uses LF.
 10. ✅ **DONE (Oct 13, 2026):** promoted `admin@stayed.com` to super admin on the live DB (§6.7). **Optional code fix:** make `seed_demo.py` (or `setup_server.sh`) set the super-admin flags for the seeded admin, so a future fresh deploy doesn't need the manual `UPDATE`. This is a code change, so discuss and test before pushing.
+11. ✅ **DONE (Nov 7, 2026):** `seed_demo.py` no longer seeds the 12 sample learners (plus their demo risk assessments/interventions/notifications) unless it's explicitly run with `--sample-data`. Without the flag it only creates the teacher/admin login accounts and the reference CLC list. `deploy/setup_server.sh` already never passed the flag, so this closes a real bug on the live server: a real teacher account was getting "Intervention Follow-up Overdue" notifications for the seeded sample learners. The live server must keep calling it without `--sample-data`; only local dev/demos should add it (see `docs/SETUP.txt`).
 
 ---
 

@@ -28,43 +28,42 @@ class ReportPrinter {
     return { html: `<span class="badge badge-${key}">${this.escape(label)}</span>` };
   }
 
-  static downloadCsv(filename, headers, rows) {
-    const allRows = [headers, ...(rows || [])];
-    const csvContent = allRows
-      .map((row) =>
-        row
-          .map((cell) => `"${String(this.stripHtml(cell)).replace(/"/g, '""')}"`)
-          .join(","),
-      )
-      .join("\r\n");
+  // Columns that must be written as literal text (not a number Excel can
+  // re-format into scientific notation or strip a leading 0 from). Kept
+  // as a plain list of lowercase header names, not a regex, so a report
+  // column just has to be named one of these to get the fix for free --
+  // see Utils.csvRow in core/utils.js, the one place that does the
+  // ="..." escaping. The printable report window (render(), below)
+  // keeps its own copy of this list: it runs in a separate window with
+  // no access to this class, only to window.opener.Utils.
+  static TEXT_COLUMNS = ["lrn", "contact number", "guardian contact number"];
 
-    const blob = new Blob(["\uFEFF" + csvContent], {
-      type: "text/csv;charset=utf-8;",
+  static textFlagsFor(columns = []) {
+    return columns.map((c) =>
+      this.TEXT_COLUMNS.includes(String(this.stripHtml(c)).trim().toLowerCase()),
+    );
+  }
+
+  static downloadCsv(filename, headers, rows) {
+    Utils.downloadCsv(filename, headers, (rows || []).map((r) => r.map((c) => this.stripHtml(c))), {
+      textColumns: headers.filter((h) => this.TEXT_COLUMNS.includes(String(h).trim().toLowerCase())),
     });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename.endsWith(".csv") ? filename : `${filename}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   }
 
   static exportCsv({ filename, title, subtitle, meta = [], sections = [] }) {
     const lines = [];
 
     // Header information
-    if (title) lines.push(`"${String(title).replace(/"/g, '""')}"`);
-    if (subtitle) lines.push(`"${String(subtitle).replace(/"/g, '""')}"`);
-    lines.push(`"Generated: ${new Date().toLocaleString("en-PH")}"`);
+    if (title) lines.push(Utils.csvRow([title]));
+    if (subtitle) lines.push(Utils.csvRow([subtitle]));
+    lines.push(Utils.csvRow([`Generated: ${new Date().toLocaleString("en-PH")}`]));
     lines.push("");
 
     // Metadata
     if (meta && meta.length) {
-      lines.push('"Report Summary / Filters:"');
+      lines.push(Utils.csvRow(["Report Summary / Filters:"]));
       meta.forEach((m) => {
-        lines.push(`"${String(m.label).replace(/"/g, '""')}","${String(m.value).replace(/"/g, '""')}"`);
+        lines.push(Utils.csvRow([m.label, m.value]));
       });
       lines.push("");
     }
@@ -72,45 +71,27 @@ class ReportPrinter {
     // Sections
     sections.forEach((sec) => {
       if (sec.title) {
-        lines.push(`"${String(sec.title).replace(/"/g, '""')}"`);
+        lines.push(Utils.csvRow([sec.title]));
       }
+      const textFlags = this.textFlagsFor(sec.columns);
       if (sec.columns && sec.columns.length) {
-        lines.push(
-          sec.columns
-            .map((c) => `"${String(this.stripHtml(c)).replace(/"/g, '""')}"`)
-            .join(","),
-        );
+        lines.push(Utils.csvRow(sec.columns.map((c) => this.stripHtml(c))));
       }
       const rows = sec.rows || [];
       if (rows.length) {
         rows.forEach((r) => {
-          lines.push(
-            r
-              .map((c) => `"${String(this.stripHtml(c)).replace(/"/g, '""')}"`)
-              .join(","),
-          );
+          lines.push(Utils.csvRow(r.map((c) => this.stripHtml(c)), textFlags));
         });
       } else {
-        lines.push(`"${String(sec.emptyText || "No records found.").replace(/"/g, '""')}"`);
+        lines.push(Utils.csvRow([sec.emptyText || "No records found."]));
       }
       lines.push("");
     });
 
-    const csvContent = lines.join("\r\n");
-    const blob = new Blob(["\uFEFF" + csvContent], {
-      type: "text/csv;charset=utf-8;",
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
     const safeTitle = (filename || title || "StayEd_Report")
       .replace(/[^a-zA-Z0-9_-]/g, "_")
       .replace(/__+/g, "_");
-    link.href = url;
-    link.download = safeTitle.endsWith(".csv") ? safeTitle : `${safeTitle}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    Utils.saveCsv(safeTitle, lines.join("\r\n"));
   }
 
   static open({ title, subtitle, meta = [], sections = [], sendToAdmin = null }) {
@@ -310,52 +291,60 @@ class ReportPrinter {
     }
 
     function downloadReportCsv() {
+      // This window has no script tags of its own (it's a plain
+      // document.write() page) -- window.opener is the StayEd tab that
+      // opened it, same-origin, already carrying core/utils.js. Reuse its
+      // Utils.csvRow/saveCsv instead of a third hand-copied CSV writer, so
+      // the LRN/contact-number text-escaping fix lives in exactly one
+      // place (see Utils.downloadCsv in core/utils.js) instead of three.
+      const opener = window.opener;
+      if (!opener || opener.closed || !opener.Utils) {
+        window.alert("Please keep the original StayEd tab open, then try exporting again.");
+        return;
+      }
+      const csvRow = (cells, flags) => opener.Utils.csvRow(cells, flags);
+      const TEXT_COLUMNS = ["lrn", "contact number", "guardian contact number"];
+      const textFlagsFor = (columns) =>
+        (columns || []).map((c) => TEXT_COLUMNS.includes(String(stripHtml(c)).trim().toLowerCase()));
+
       const lines = [];
       const title = REPORT_DATA.title || "StayEd_Report";
       const subtitle = REPORT_DATA.subtitle || "";
       const meta = REPORT_DATA.meta || [];
       const sections = REPORT_DATA.sections || [];
 
-      if (title) lines.push('"' + String(title).replace(/"/g, '""') + '"');
-      if (subtitle) lines.push('"' + String(subtitle).replace(/"/g, '""') + '"');
-      lines.push('"Generated: ' + new Date().toLocaleString("en-PH") + '"');
+      if (title) lines.push(csvRow([title]));
+      if (subtitle) lines.push(csvRow([subtitle]));
+      lines.push(csvRow(["Generated: " + new Date().toLocaleString("en-PH")]));
       lines.push("");
 
       if (meta.length) {
-        lines.push('"Report Summary / Filters:"');
+        lines.push(csvRow(["Report Summary / Filters:"]));
         meta.forEach(m => {
-          lines.push('"' + String(m.label).replace(/"/g, '""') + '","' + String(m.value).replace(/"/g, '""') + '"');
+          lines.push(csvRow([m.label, m.value]));
         });
         lines.push("");
       }
 
       sections.forEach(sec => {
-        if (sec.title) lines.push('"' + String(sec.title).replace(/"/g, '""') + '"');
+        if (sec.title) lines.push(csvRow([sec.title]));
+        const textFlags = textFlagsFor(sec.columns);
         if (sec.columns && sec.columns.length) {
-          lines.push(sec.columns.map(c => '"' + String(stripHtml(c)).replace(/"/g, '""') + '"').join(","));
+          lines.push(csvRow(sec.columns.map(c => stripHtml(c))));
         }
         const rows = sec.rows || [];
         if (rows.length) {
           rows.forEach(r => {
-            lines.push(r.map(c => '"' + String(stripHtml(c)).replace(/"/g, '""') + '"').join(","));
+            lines.push(csvRow(r.map(c => stripHtml(c)), textFlags));
           });
         } else {
-          lines.push('"' + String(sec.emptyText || "No records found.").replace(/"/g, '""') + '"');
+          lines.push(csvRow([sec.emptyText || "No records found."]));
         }
         lines.push("");
       });
 
-      const csv = lines.join("\\r\\n");
-      const blob = new Blob(["\\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
       const safeTitle = title.replace(/[^a-zA-Z0-9_-]/g, "_").replace(/__+/g, "_");
-      link.href = url;
-      link.download = safeTitle + ".csv";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      opener.Utils.saveCsv(safeTitle, lines.join("\\r\\n"));
     }
 
     function sendReportToAdmin() {

@@ -63,6 +63,33 @@ class LearnerImportCore {
     });
   }
 
+  // Shown right before the actual import call, whenever at least one row
+  // will be skipped as an error -- so "N added" on the success screen
+  // isn't the first time the teacher learns some rows didn't make it in.
+  // `proceed` is the caller's own import call; it only runs after the
+  // teacher picks Continue (Go back/close just leaves the preview as is).
+  static confirmSkipWarning(preview, proceed) {
+    const invalid = preview?.errors ?? preview?.invalid ?? 0;
+    if (!invalid || !window.Modal) return proceed();
+
+    const importable = Math.max(0, (preview?.total ?? 0) - invalid);
+    return new Promise((resolve, reject) => {
+      Modal.show({
+        title: "Some rows will be skipped",
+        confirmLabel: "Continue",
+        cancelLabel: "Go back",
+        message: `<p>${importable} learner${importable === 1 ? "" : "s"} will be imported. ${invalid} row${invalid === 1 ? "" : "s"} with errors will be skipped. Fix them with Edit row first if you want to include them.</p>`,
+        onConfirm: async () => {
+          try {
+            resolve(await proceed());
+          } catch (err) {
+            reject(err);
+          }
+        },
+      });
+    });
+  }
+
   // Excel template built by the backend: dropdowns for every fixed-choice
   // column, required columns marked with *, and an Instructions sheet.
   static downloadTemplate() {
@@ -186,35 +213,64 @@ class LearnerImportCore {
     return map[status] || map.valid;
   }
 
+  // Wraps a cell's display value with a red tint + error icon + tooltip
+  // when _check_import_row() flagged that exact field, or a small gray
+  // note when the value was accepted but changed (e.g. "Self-employed"
+  // -> "Employed"). Either way the teacher still sees what they typed --
+  // this never substitutes or hides the original value.
+  static fieldCell(row, field, displayValue) {
+    const safeValue = Utils.esc(displayValue);
+    const issue = row.field_issues?.[field];
+    const note = row.field_notes?.[field];
+
+    if (issue) {
+      return `<span class="st-import-cell st-import-cell--error" title="${Utils.esc(issue)}">
+          <span class="material-symbols-outlined st-import-cell-icon" aria-hidden="true">error</span>
+          <span>${safeValue}</span>
+        </span>`;
+    }
+    if (note) {
+      return `<span class="st-import-cell">
+          <span>${safeValue}</span>
+          <span class="st-import-cell-note">${Utils.esc(note)}</span>
+        </span>`;
+    }
+    return safeValue;
+  }
+
   static renderPreviewRow(row, index) {
-    const name =
-      `${this.cell(row.last_name)}, ${this.cell(row.first_name)} ${row.middle_name ? row.middle_name : ""}`.trim();
+    const name = Utils.esc(
+      `${this.cell(row.last_name)}, ${this.cell(row.first_name)} ${row.middle_name ? row.middle_name : ""}`.trim(),
+    );
     const rowClass = row.status !== "valid" ? `st-import-row--${row.status}` : "";
+    const reEnrolleeDisplay = this.titleCase(row.re_enrollee) === "—" ? "No" : this.titleCase(row.re_enrollee);
+    const distanceDisplay =
+      row.distance_from_clc_km != null && row.distance_from_clc_km !== "" ? `${row.distance_from_clc_km} km` : "—";
 
     return `
       <tr class="${rowClass}">
           <td class="st-import-sticky-left">
               <div class="st-import-learner-cell">
                   <span class="st-import-learner-name">${name}</span>
-                  <span class="st-import-learner-lrn">${this.cell(row.lrn)}</span>
+                  <span class="st-import-learner-lrn">${this.fieldCell(row, "lrn", this.cell(row.lrn))}</span>
               </div>
           </td>
           <td>
               <div class="st-import-status-cell">
                   ${this.statusBadge(row.status)}
-                  ${row.issue ? `<span class="st-import-issue">${this.cell(row.issue)}</span>` : ""}
+                  ${row.issue ? `<span class="st-import-issue">${Utils.esc(row.issue)}</span>` : ""}
               </div>
           </td>
-          <td>${this.titleCase(row.sex)}</td>
-          <td>${this.cell(row.birthdate)}</td>
-          <td>${this.titleCase(row.modality)}</td>
-          <td>${this.cell(row.level)}</td>
-          <td>${this.titleCase(row.re_enrollee) === "—" ? "No" : this.titleCase(row.re_enrollee)}</td>
-          <td>${this.cell(row.employment_status)}</td>
-          <td>${row.distance_from_clc_km != null && row.distance_from_clc_km !== "" ? `${row.distance_from_clc_km} km` : "—"}</td>
-          <td>${this.cell(row.civil_status)}</td>
-          <td>${this.cell(row.contact_number)}</td>
-          <td>${this.cell(row.guardian_contact_number)}</td>
+          <td>${this.fieldCell(row, "sex", this.titleCase(row.sex))}</td>
+          <td>${this.fieldCell(row, "birthdate", this.cell(row.birthdate))}</td>
+          <td>${this.fieldCell(row, "modality", this.titleCase(row.modality))}</td>
+          <td>${Utils.esc(this.cell(row.level))}</td>
+          <td>${this.fieldCell(row, "re_enrollee", reEnrolleeDisplay)}</td>
+          <td>${this.fieldCell(row, "employment_status", this.cell(row.employment_status))}</td>
+          <td>${this.fieldCell(row, "distance_from_clc_km", distanceDisplay)}</td>
+          <td>${this.fieldCell(row, "civil_status", this.cell(row.civil_status))}</td>
+          <td>${this.fieldCell(row, "contact_number", this.cell(row.contact_number))}</td>
+          <td>${this.fieldCell(row, "guardian_contact_number", this.cell(row.guardian_contact_number))}</td>
           <td class="st-import-sticky-right">
               <div class="st-row-actions">
                   <button type="button" class="st-icon-btn-sm" data-edit-row="${index}" aria-label="Edit row" title="Edit">
@@ -287,31 +343,42 @@ class LearnerImportCore {
     const field = (id, label, value, type = "text", key = null) => `
       <div class="st-schedule-modal-field">
         <label for="${id}">${mark(key, label)}</label>
-        <input id="${id}" type="${type}" value="${value ?? ""}">
+        <input id="${id}" type="${type}" value="${Utils.esc(value ?? "")}">
       </div>
     `;
 
     // A value that isn't one of the standard options (e.g. "singel" typed
-    // in Excel) leaves the blank option selected, so the teacher has to
-    // pick a real one instead of re-saving the typo.
+    // in Excel, or "Notepad" for Learning Modality) leaves the blank
+    // option selected, so the teacher has to pick a real one instead of
+    // re-saving the typo -- and now also gets a red border + a hint
+    // naming exactly what was typed, instead of just silently resetting
+    // to blank with no explanation.
     const select = (id, label, key, value) => {
       const options = this.options[key] || [];
-      const current = String(value ?? "").trim().toLowerCase();
+      const current = String(value ?? "").trim();
+      const currentLower = current.toLowerCase();
+      const isInvalid = current !== "" && !options.some((opt) => opt.toLowerCase() === currentLower);
       return `
         <div class="st-schedule-modal-field">
           <label for="${id}">${mark(key, label)}</label>
-          <select id="${id}">
+          <select id="${id}" class="${isInvalid ? "is-invalid" : ""}" aria-invalid="${isInvalid}">
             <option value="">Select ${label.toLowerCase()}</option>
             ${options
               .map(
                 (opt) =>
-                  `<option value="${opt}" ${opt.toLowerCase() === current ? "selected" : ""}>${opt}</option>`,
+                  `<option value="${Utils.esc(opt)}" ${opt.toLowerCase() === currentLower ? "selected" : ""}>${Utils.esc(opt)}</option>`,
               )
               .join("")}
           </select>
+          ${isInvalid ? `<p class="st-field-hint st-field-hint--error">You entered '${Utils.esc(current)}'. Please choose one of the options.</p>` : ""}
         </div>
       `;
     };
+
+    // Blank truly means blank (re-enrollee's "No" default); an invalid
+    // typed value (e.g. "Maybe") must stay visible as-is so the select()
+    // above can flag it, instead of being silently swapped for "No".
+    const reEnrolleeValue = String(row.re_enrollee ?? "").trim() ? row.re_enrollee : "No";
 
     Modal.show({
       title: "Edit learner row",
@@ -327,7 +394,7 @@ class LearnerImportCore {
           ${field("editBirthdate", "Date of birth", row.birthdate, "date", "birthdate")}
           ${select("editModality", "Learning modality", "modality", row.modality)}
           ${select("editCivilStatus", "Civil status", "civil_status", row.civil_status)}
-          ${select("editReenrollee", "Re-enrollee", "re_enrollee", row.re_enrollee || "No")}
+          ${select("editReenrollee", "Re-enrollee", "re_enrollee", reEnrolleeValue)}
           ${select("editEmployment", "Employment status", "employment_status", row.employment_status)}
           ${select("editOccupation", "Socio-economic status", "occupation", row.occupation)}
           ${field("editIncome", "Monthly income (₱)", row.monthly_income, "number")}

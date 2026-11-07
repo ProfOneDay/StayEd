@@ -1,5 +1,11 @@
+"""Seeds the teacher/admin login accounts and the reference CLC list every
+environment needs. Pass --sample-data to also add the 12 sample learners,
+their risk assessments, demo interventions, and demo notifications -- for
+local development/demos only. The live server must never run this with
+--sample-data (see docs/SETUP.txt and deploy/setup_server.sh)."""
 from __future__ import annotations
 
+import argparse
 import os
 from datetime import date, timedelta
 
@@ -41,7 +47,7 @@ LEARNERS = [
 ]
 
 
-def main():
+def main(sample_data: bool = False):
     with psycopg.connect(DATABASE_URL, row_factory=dict_row) as conn:
         with conn.cursor() as cur:
             # Demo users. Passwords are intentionally only for local development.
@@ -150,6 +156,13 @@ def main():
                 """
             )
             model_id = cur.fetchone()["model_id"]
+
+            if not sample_data:
+                conn.commit()
+                print("StayEd base accounts/CLCs seeded (no sample learners -- pass --sample-data for those).")
+                print("Teacher: teacher@stayed.com / 12345678")
+                print("Admin:   admin@stayed.com / 12345678")
+                return
 
             monitoring_end = date.today()
             monitoring_start = monitoring_end - timedelta(days=30)
@@ -288,4 +301,16 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--sample-data",
+        action="store_true",
+        help=(
+            "Also seed the 12 sample learners, their risk assessments, the demo "
+            "interventions, and the two demo notifications. Omit this on a real "
+            "deployment -- without it, only the teacher/admin login accounts and "
+            "the reference CLC list are created."
+        ),
+    )
+    args = parser.parse_args()
+    main(sample_data=args.sample_data)

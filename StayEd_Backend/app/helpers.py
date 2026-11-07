@@ -4,8 +4,20 @@ import re
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from flask import jsonify
+
+
+_PH_TZ = ZoneInfo("Asia/Manila")
+
+
+def today_ph() -> date:
+    """"Today" in the Philippines, regardless of the server's own clock/
+    timezone. Use this everywhere a backend check means "today" for a
+    teacher -- the server clock can be in UTC, where it's still yesterday
+    in Manila until 8 AM."""
+    return datetime.now(_PH_TZ).date()
 
 
 LRN_RE = re.compile(r"^\d{12}$")
@@ -42,20 +54,84 @@ LEARNER_FIELD_OPTIONS = {
 }
 
 
+def _normalise_key(text) -> str:
+    # "face to face" and "Face-to-Face" count as the same answer.
+    return " ".join(str(text or "").replace("-", " ").split()).lower()
+
+
 def match_option(value, options) -> str | None:
     """Return the standard spelling of `value` from `options` (matched
     case-insensitively, ignoring extra spaces), or None when it isn't one
     of them."""
-    def key(text):
-        # "face to face" and "Face-to-Face" count as the same answer.
-        return " ".join(str(text or "").replace("-", " ").split()).lower()
-
-    wanted = key(value)
+    wanted = _normalise_key(value)
     if not wanted:
         return None
     for option in options:
-        if key(option) == wanted:
+        if _normalise_key(option) == wanted:
             return option
+    return None
+
+
+def natural_option_list(options) -> str:
+    """"Employed or Unemployed" / "Face-to-Face, Modular or Blended" --
+    a plain-English list for a teacher-facing message, not a code dump."""
+    options = list(options)
+    if len(options) <= 1:
+        return options[0] if options else ""
+    return ", ".join(options[:-1]) + " or " + options[-1]
+
+
+# Spellings of "self-employed" the Employment Status column should still
+# accept, saved as "Employed" (EMPLOYMENT_STATUS_OPTIONS has no third value
+# for it -- the detail belongs in Socio-economic Status instead). Keys are
+# pre-normalised with _normalise_key so lookups don't need to re-derive it.
+EMPLOYMENT_ALIASES = {
+    "self employed": "Employed",
+    "selfemployed": "Employed",
+    "self employed / business owner": "Employed",
+}
+
+
+def resolve_employment_alias(value) -> str | None:
+    """Canonical Employment Status for a Self-employed-family spelling
+    (see EMPLOYMENT_ALIASES), or None when `value` isn't one of them."""
+    return EMPLOYMENT_ALIASES.get(_normalise_key(value))
+
+
+# Modality spellings beyond what match_option's case/hyphen/space folding
+# already covers.
+_MODALITY_ALIASES = {"f2f": "Face-to-Face"}
+
+
+def resolve_modality_alias(value) -> str | None:
+    return _MODALITY_ALIASES.get(_normalise_key(value))
+
+
+def strict_modality(value) -> str | None:
+    """The database enum for a clean MODALITY_OPTIONS value (friendly
+    aliases included), or None for anything else -- including blank.
+    Unlike enum_modality(), this never guesses a default: the caller
+    (an import insert path) must treat None as "skip this row", not
+    "assume Face-to-Face"."""
+    text = resolve_modality_alias(value) or value
+    match = match_option(text, MODALITY_OPTIONS)
+    if not match:
+        return None
+    return {"Face-to-Face": "FACE_TO_FACE", "Modular": "MODULAR", "Blended": "BLENDED"}[match]
+
+
+def strict_yes_no(value) -> bool | None:
+    """True/False for a clean Yes/No (plus the existing Y/N, true/false,
+    1/0 aliases), or None for a blank cell or anything else not on that
+    list. Blank vs. "something unrecognised" are both None here on
+    purpose -- the caller decides what blank means (today, No)."""
+    text = str(value or "").strip().lower()
+    if not text:
+        return None
+    if text in {"y", "yes", "true", "1"}:
+        return True
+    if text in {"n", "no", "false", "0"}:
+        return False
     return None
 
 
@@ -223,6 +299,31 @@ def enum_level(value: str | None) -> str:
     if "elementary" in v:
         return "ELEMENTARY"
     return "BLP"
+
+
+# Plain-English messages for the CHECK constraints a teacher's own input
+# can realistically trip (sql/00_core_schema.sql and friends) -- so the
+# global CheckViolation handler (app/__init__.py) never has to fall back
+# to the raw PostgreSQL constraint text for these. Anything not listed
+# here gets the generic fallback message instead.
+CONSTRAINT_MESSAGES = {
+    "ck_intervention_dates": "The follow-up date can't be earlier than the day the intervention was assigned.",
+    "ck_module_record_dates": "The return date can't be earlier than the release date.",
+    "ck_class_enrollment_distance": "Distance from CLC can't be negative.",
+    "ck_learner_date_of_birth": "Please enter a valid date of birth.",
+    "ck_risk_monitoring_dates": "The monitoring end date can't be earlier than the start date.",
+    "ck_users_contact_number": "Contact number must be 11 digits starting with 09 (e.g. 09171234567).",
+    "ck_teacher_contact_number": "Contact number must be 11 digits starting with 09 (e.g. 09171234567).",
+    "ck_learner_contact_number": "Contact number must be 11 digits starting with 09 (e.g. 09171234567).",
+    "ck_learner_guardian_contact_number": "Guardian contact number must be 11 digits starting with 09 (e.g. 09171234567).",
+    "ck_clc_contact_number": "Contact number must be 11 digits starting with 09 (e.g. 09171234567).",
+}
+
+GENERIC_CONSTRAINT_MESSAGE = "Some of the information entered is not allowed. Please check it and try again."
+
+
+def constraint_message(constraint_name: str | None) -> str:
+    return CONSTRAINT_MESSAGES.get(constraint_name or "", GENERIC_CONSTRAINT_MESSAGE)
 
 
 def enum_semester(value: str | None) -> str:
