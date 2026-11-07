@@ -734,45 +734,89 @@ class TeacherCalendar {
     const container = document.getElementById("upcomingList");
     if (!container) return;
 
-    const items = [];
+    // Grouped by day, and within a day by event type: a day with several
+    // module releases becomes one row that opens the day panel, so the list
+    // stays short enough to keep the calendar in view however busy the week.
+    const days = [];
     for (let i = 0; i <= 7; i++) {
       const d = new Date(this.today);
       d.setDate(this.today.getDate() + i);
       const date = this._fmt(d);
-      (this.events[date] || []).forEach((e) => items.push({ date, ...e }));
+      const evts = this.events[date] || [];
+      if (evts.length) days.push({ date, d, offset: i, evts });
     }
 
-    if (!items.length) {
+    if (!days.length) {
       container.innerHTML = `<p class="st-cal-upcoming-empty">No upcoming events in the next 7 days.</p>`;
       return;
     }
 
-    container.innerHTML = items
-      .map((item) => {
-        const d = new Date(item.date + "T00:00:00");
-        const t = EVENT_TYPES[item.type] || ST_CAL_FALLBACK_TYPE;
+    container.innerHTML = days
+      .map(({ date, d, offset, evts }) => {
+        const dayName = d.toLocaleDateString("en-PH", { weekday: "short", month: "short", day: "numeric" });
+        const heading = offset === 0 ? `Today · ${dayName}` : offset === 1 ? `Tomorrow · ${dayName}` : dayName;
+
+        const byType = new Map();
+        evts.forEach((e) => {
+          if (!byType.has(e.type)) byType.set(e.type, []);
+          byType.get(e.type).push(e);
+        });
+
+        const rows = [...byType.entries()]
+          .map(([type, list]) => (list.length === 1 ? this._upcomingItemHtml(date, list[0]) : this._upcomingGroupHtml(date, type, list)))
+          .join("");
+
         return `
-          <button
-            type="button"
-            class="st-cal-upcoming-item"
-            data-cal-event-type="${this._esc(item.type)}"
-            data-cal-event-class-id="${this._esc(item.classId ?? "") }"
-            data-cal-event-session-id="${this._esc(item.sessionId ?? "") }"
-            data-cal-event-module-id="${this._esc(item.moduleId ?? "") }"
-            data-cal-event-date="${this._esc(item.date)}"
-            data-cal-event-label="${this._esc(item.label)}"
-            data-cal-event-meta="${this._esc(item.meta)}"
-          >
-            <span class="st-cal-upcoming-date"><b>${d.getDate()}</b><small>${d.toLocaleDateString("en-PH", { month: "short" })}</small></span>
-            <span class="st-cal-upcoming-info">
-              <span class="st-cal-upcoming-label"><span class="st-cal-upcoming-dot" style="--dot-color:${t.color}"></span>${this._esc(item.label)}</span>
-              <span class="st-cal-upcoming-meta">${t.name} · ${this._esc(item.meta)}</span>
-            </span>
-          </button>`;
+          <section class="st-cal-upcoming-day">
+            <p class="st-cal-upcoming-day-head"><span>${heading}</span><span class="st-cal-upcoming-count num">${evts.length}</span></p>
+            ${rows}
+          </section>`;
       })
       .join("");
 
     this._bindEventClicks(container);
+    container.querySelectorAll("[data-cal-open-day]").forEach((el) => {
+      el.addEventListener("click", () => this.openDayPanel(el.dataset.calOpenDay));
+    });
+  }
+
+  static _upcomingItemHtml(date, item) {
+    const t = EVENT_TYPES[item.type] || ST_CAL_FALLBACK_TYPE;
+    return `
+      <button
+        type="button"
+        class="st-cal-upcoming-item"
+        data-cal-event-type="${this._esc(item.type)}"
+        data-cal-event-class-id="${this._esc(item.classId ?? "")}"
+        data-cal-event-session-id="${this._esc(item.sessionId ?? "")}"
+        data-cal-event-module-id="${this._esc(item.moduleId ?? "")}"
+        data-cal-event-date="${this._esc(date)}"
+        data-cal-event-label="${this._esc(item.label)}"
+        data-cal-event-meta="${this._esc(item.meta)}"
+      >
+        <span class="st-cal-upcoming-dot" style="--dot-color:${t.color}"></span>
+        <span class="st-cal-upcoming-info">
+          <span class="st-cal-upcoming-label">${this._esc(item.label)}</span>
+          <span class="st-cal-upcoming-meta">${t.name} · ${this._esc(item.meta)}</span>
+        </span>
+      </button>`;
+  }
+
+  // Several events of one type on one day: one row naming the first two,
+  // which opens the day panel listing all of them.
+  static _upcomingGroupHtml(date, type, list) {
+    const t = EVENT_TYPES[type] || ST_CAL_FALLBACK_TYPE;
+    const names = list.slice(0, 2).map((e) => this._esc(e.label)).join(", ");
+    const rest = list.length > 2 ? ` +${list.length - 2} more` : "";
+    return `
+      <button type="button" class="st-cal-upcoming-item" data-cal-open-day="${this._esc(date)}" aria-label="${this._esc(`${list.length} ${t.name} events, open day`)}">
+        <span class="st-cal-upcoming-dot" style="--dot-color:${t.color}"></span>
+        <span class="st-cal-upcoming-info">
+          <span class="st-cal-upcoming-label">${t.name} <span class="st-cal-upcoming-count num">${list.length}</span></span>
+          <span class="st-cal-upcoming-meta">${names}${rest}</span>
+        </span>
+        <span class="material-symbols-outlined st-cal-upcoming-chevron">chevron_right</span>
+      </button>`;
   }
 
   // ── Day detail panel ───────────────────────────────────────────────────────
