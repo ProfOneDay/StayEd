@@ -76,6 +76,11 @@
   margin-top: 16px;
 }
 
+/* High/Moderate only (Early Warnings lists just the learners needing action). */
+.st-risk-legend--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .st-risk-legend-item {
   display: flex;
   flex-direction: column;

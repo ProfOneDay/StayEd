@@ -54,9 +54,9 @@ class EarlyWarningPage {
       const learners = res.data || [];
 
       this.state.all = learners
-        // Low is kept so its summary card and the Low filter can list those
-        // learners; apply() still shows only High/Moderate by default.
-        .filter((l) => ["High", "Moderate", "Low"].includes(l.risk))
+        // Action list only: Low learners are browsable (and filterable by
+        // risk) in Student Registry, so listing them here would duplicate it.
+        .filter((l) => l.risk === "High" || l.risk === "Moderate")
         .map((l) => ({
           ...l,
           program: l.level,
@@ -171,24 +171,20 @@ class EarlyWarningPage {
   static renderSummary(allLearners) {
     const high = allLearners.filter((l) => l.risk === "High").length;
     const moderate = allLearners.filter((l) => l.risk === "Moderate").length;
-    const low = allLearners.filter((l) => l.risk === "Low").length;
-    // Matches what the "show all" card lists: every assessed learner.
-    const total = high + moderate + low;
+    const total = high + moderate;
 
     this.countTo(document.querySelector("[data-ewa-total]"), total);
     this.countTo(document.querySelector("[data-ewa-high]"), high);
     this.countTo(document.querySelector("[data-ewa-moderate]"), moderate);
-    this.countTo(document.querySelector("[data-ewa-low]"), low);
 
-    // Percentages are of all learners (allLearners.length), including the
-    // Not Yet Assessed ones, not of `total` (assessed learners only).
+    // Percentages are of all the teacher's learners (allLearners.length),
+    // so they read as "share of my learners at High/Moderate risk".
     const setPct = (selector, value) => {
       const el = document.querySelector(selector);
       if (el) el.textContent = `${Utils.pct(value, allLearners.length)}%`;
     };
     setPct("[data-ewa-high-pct]", high);
     setPct("[data-ewa-moderate-pct]", moderate);
-    setPct("[data-ewa-low-pct]", low);
 
     const grow = (selector, value) => {
       const el = document.querySelector(selector);
@@ -196,11 +192,10 @@ class EarlyWarningPage {
     };
     grow("[data-risk-strip-high]", high);
     grow("[data-risk-strip-moderate]", moderate);
-    grow("[data-risk-strip-low]", low);
 
     const strip = document.querySelector("[data-risk-strip]");
     if (strip) {
-      strip.setAttribute("aria-label", `${high} high, ${moderate} moderate, ${low} low risk`);
+      strip.setAttribute("aria-label", `${high} high, ${moderate} moderate risk`);
     }
 
     // Reveals the risk strip (clip-path transition on [data-animate] .st-risk-strip,
@@ -240,8 +235,6 @@ class EarlyWarningPage {
       );
     }
 
-    // "All risk levels" lists every assessed learner (High, Moderate and
-    // Low), still sorted highest probability first so High/Moderate stay on top.
     if (this.state.riskLevel) {
       rows = rows.filter((l) => l.risk === this.state.riskLevel);
     }
@@ -254,7 +247,7 @@ class EarlyWarningPage {
 
     this.set(
       "[data-ewa-count]",
-      `${rows.length} learner${rows.length === 1 ? "" : "s"}`,
+      `${rows.length} alert${rows.length === 1 ? "" : "s"}`,
     );
 
     this.renderPage();
@@ -273,7 +266,7 @@ class EarlyWarningPage {
 
     if (!pageRows.length) {
       const clcSelected = this.state.clc;
-      const title = clcSelected ? "No assessed learners in this CLC." : "No assessed learners";
+      const title = clcSelected ? "No learners requiring attention in this CLC." : "No active alerts";
       const text = clcSelected
         ? "Try selecting a different CLC or clearing your filters."
         : "Try adjusting your search or filters.";
@@ -356,7 +349,7 @@ class EarlyWarningPage {
 
     this.set(
       "[data-ewa-info]",
-      `Showing ${start}\u2013${end} of ${total} learners`,
+      `Showing ${start}\u2013${end} of ${total} alerts`,
     );
 
     const container = document.querySelector("[data-ewa-pages]");

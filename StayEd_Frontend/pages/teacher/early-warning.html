@@ -51,18 +51,17 @@
         </div>
 
         <section class="st-panel st-panel-pad st-overview" data-animate aria-label="Alert summary">
-          <button type="button" class="st-overview-total is-active" data-filter-btn data-filter="" aria-label="Show all assessed learners">
+          <button type="button" class="st-overview-total is-active" data-filter-btn data-filter="" aria-label="Show all alerts">
             <div class="value num" data-ewa-total data-countup>0</div>
-            <div class="label">assessed learners</div>
+            <div class="label">active alerts</div>
             <span class="hint">Click a status to filter</span>
           </button>
           <div>
-            <div class="st-risk-strip" data-risk-strip role="img" aria-label="High, moderate and low risk alerts">
+            <div class="st-risk-strip" data-risk-strip role="img" aria-label="High and moderate risk alerts">
               <span class="high" data-risk-strip-high></span>
               <span class="mod" data-risk-strip-moderate></span>
-              <span class="low" data-risk-strip-low></span>
             </div>
-            <div class="st-risk-legend st-risk-legend--3">
+            <div class="st-risk-legend st-risk-legend--2">
               <button type="button" class="st-risk-legend-item high" data-filter-btn data-filter="High" aria-label="Filter to high risk alerts">
                 <span class="count num" data-ewa-high data-countup>0</span>
                 <span class="name">High risk</span>
@@ -73,11 +72,6 @@
                 <span class="name">Moderate risk</span>
                 <span class="pct num" data-ewa-moderate-pct>0%</span>
               </button>
-              <button type="button" class="st-risk-legend-item low" data-filter-btn data-filter="Low" aria-label="Filter to low risk alerts">
-                <span class="count num" data-ewa-low data-countup>0</span>
-                <span class="name">Low risk</span>
-                <span class="pct num" data-ewa-low-pct>0%</span>
-              </button>
             </div>
           </div>
         </section>
@@ -85,7 +79,7 @@
         <section class="st-panel st-table-card">
           <div class="st-table-card-head">
             <h2 class="st-table-card-title">Learners requiring attention</h2>
-            <span class="st-table-card-count" data-ewa-count>0 learners</span>
+            <span class="st-table-card-count" data-ewa-count>0 alerts</span>
           </div>
 
           <div class="st-toolbar st-ewa-filter-bar">
@@ -102,8 +96,7 @@
             <select class="st-select" data-ewa-filter-risk aria-label="Filter by risk level">
               <option value="">All risk levels</option>
               <option value="High">High Risk</option>
-              <option value="Moderate">Medium Risk</option>
-              <option value="Low">Low Risk</option>
+              <option value="Moderate">Moderate Risk</option>
             </select>
 
             <select class="st-select" data-ewa-filter-clc aria-label="Filter by CLC">
