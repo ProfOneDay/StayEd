@@ -10,6 +10,7 @@ from ..db import execute, fetch_all, fetch_one, get_db
 from ..helpers import enum_level, enum_semester, error, title_enum
 from ..services.prediction_service import trigger_prediction
 from ..services.settings_service import get_active_school_year, get_default_module_duration_days
+from .learner_routes import MODULE_DUE_SOON_DAYS
 
 bp = Blueprint("classes", __name__)
 
@@ -561,6 +562,11 @@ def _shape_class_module(r: dict, total_learners: int) -> dict:
         "sequenceNumber": r["sequence_number"],
         "releasedCount": released_count,
         "returnedCount": int(r["returned_count"] or 0),
+        # Enrolled learners holding this module unreturned: past its planned
+        # return date, or due within the "Due Soon" window.
+        "overdueCount": int(r.get("overdue_count") or 0),
+        "dueSoonCount": int(r.get("due_soon_count") or 0),
+        "nextDueDate": r["next_due_date"].strftime("%B %d, %Y") if r.get("next_due_date") else None,
         "totalLearners": total_learners,
         "lastReleaseDate": r["last_release_date"].strftime("%B %d, %Y") if r.get("last_release_date") else None,
         "isFullyReleased": total_learners > 0 and released_count >= total_learners,
@@ -589,19 +595,33 @@ def list_class_modules(class_id: int):
                ls.strand_code, ls.strand_name,
                COUNT(DISTINCT mr.enrollment_id) AS released_count,
                COUNT(DISTINCT mr.enrollment_id) FILTER (WHERE mr.date_returned IS NOT NULL) AS returned_count,
-               MAX(mr.date_released) AS last_release_date
+               MAX(mr.date_released) AS last_release_date,
+               COUNT(DISTINCT mr.enrollment_id) FILTER (
+                   WHERE mr.date_returned IS NULL AND ce.enrollment_status = 'ENROLLED'
+                     AND mr.planned_return_date < CURRENT_DATE
+               ) AS overdue_count,
+               COUNT(DISTINCT mr.enrollment_id) FILTER (
+                   WHERE mr.date_returned IS NULL AND ce.enrollment_status = 'ENROLLED'
+                     AND mr.planned_return_date BETWEEN CURRENT_DATE AND CURRENT_DATE + %s
+               ) AS due_soon_count,
+               MIN(mr.planned_return_date) FILTER (
+                   WHERE mr.date_returned IS NULL AND ce.enrollment_status = 'ENROLLED'
+                     AND mr.planned_return_date >= CURRENT_DATE
+               ) AS next_due_date
         FROM class_module cm
         JOIN learning_strand ls ON ls.learning_strand_id = cm.learning_strand_id
         LEFT JOIN module_record mr ON mr.class_module_id = cm.class_module_id
+        LEFT JOIN class_enrollment ce ON ce.enrollment_id = mr.enrollment_id
         WHERE cm.class_id = %s {"" if include_archived else "AND cm.is_archived = FALSE"}
         GROUP BY cm.class_module_id, cm.module_name, cm.topic, cm.description, cm.sequence_number,
                  cm.created_at, cm.is_archived, ls.strand_code, ls.strand_name
         ORDER BY cm.sequence_number NULLS LAST, cm.created_at
         """,
-        (class_id,),
+        (MODULE_DUE_SOON_DAYS, class_id),
     )
 
     data = [_shape_class_module(r, total_learners) for r in rows]
+    active = [m for m in data if not m["isArchived"]]
 
     released_modules = sum(1 for m in data if m["releasedCount"] > 0)
     active_transactions = sum(m["releasedCount"] - m["returnedCount"] for m in data)
@@ -616,6 +636,11 @@ def list_class_modules(class_id: int):
             "notYetReleased": len(data) - released_modules,
             "activeTransactions": active_transactions,
             "returnedTransactions": returned_transactions,
+            "overdueModules": sum(1 for m in active if m["overdueCount"]),
+            "overdueLearners": sum(m["overdueCount"] for m in active),
+            "dueSoonModules": sum(1 for m in active if m["dueSoonCount"]),
+            "dueSoonLearners": sum(m["dueSoonCount"] for m in active),
+            "dueSoonDays": MODULE_DUE_SOON_DAYS,
         },
         "data": data,
     }
@@ -1012,7 +1037,8 @@ def class_module_roster(class_id: int, class_module_id: int):
     rows = fetch_all(
         """
         SELECT ce.enrollment_id, l.learner_id, l.first_name, l.last_name, ce.learning_modality,
-               mr.module_record_id, mr.release_batch_id, mr.date_released, mr.date_returned
+               mr.module_record_id, mr.release_batch_id, mr.date_released, mr.date_returned,
+               mr.planned_return_date
         FROM class_enrollment ce
         JOIN learner l ON l.learner_id = ce.learner_id
         LEFT JOIN module_record mr
@@ -1022,10 +1048,27 @@ def class_module_roster(class_id: int, class_module_id: int):
         """,
         (class_module_id, class_id),
     )
+    today = date.today()
+
+    def _due_fields(r):
+        # Same overdue / Due Soon rules as the learner profile and the bell.
+        due = r["planned_return_date"]
+        if not due or r["date_returned"] is not None or r["date_released"] is None:
+            return {"plannedReturnDate": due.strftime("%B %d, %Y") if due else None,
+                    "overdue": False, "daysOverdue": None, "dueSoon": False, "daysUntilDue": None}
+        days_left = (due - today).days
+        return {
+            "plannedReturnDate": due.strftime("%B %d, %Y"),
+            "overdue": days_left < 0,
+            "daysOverdue": -days_left if days_left < 0 else None,
+            "dueSoon": 0 <= days_left <= MODULE_DUE_SOON_DAYS,
+            "daysUntilDue": days_left if days_left >= 0 else None,
+        }
 
     return {
         "data": [
             {
+                **_due_fields(r),
                 # enrollmentId is what release/return actions target (a
                 # learner can have more than one enrollment across classes
                 # or re-enrollment periods); learnerId is only for display

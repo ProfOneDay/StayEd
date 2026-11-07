@@ -168,6 +168,8 @@ class ModuleManagement {
       if (search && !m.title.toLowerCase().includes(search.toLowerCase())) return false;
       if (!inArchivedView && status === "released" && m.releaseStatus !== "Released") return false;
       if (!inArchivedView && status === "not_released" && m.releaseStatus !== "Not Released") return false;
+      if (!inArchivedView && status === "overdue" && !m.overdueCount) return false;
+      if (!inArchivedView && status === "due_soon" && !m.dueSoonCount) return false;
       return true;
     });
     list = [...list].sort((a, b) => {
@@ -223,6 +225,8 @@ class ModuleManagement {
         </div>
       </div>
 
+      ${isArchivedView ? "" : this.renderAttentionStrip(s)}
+
       <section class="st-panel st-table-card" data-catalog-panel>
         <div class="st-table-card-head">
           <h2 class="st-table-card-title">${isArchivedView ? "Archived modules" : "Module catalog"}</h2>
@@ -237,6 +241,8 @@ class ModuleManagement {
             <option value="all" ${this.catalogFilters.status === "all" ? "selected" : ""}>All statuses</option>
             <option value="released" ${this.catalogFilters.status === "released" ? "selected" : ""}>Released</option>
             <option value="not_released" ${this.catalogFilters.status === "not_released" ? "selected" : ""}>Not released</option>
+            <option value="overdue" ${this.catalogFilters.status === "overdue" ? "selected" : ""}>Has overdue returns</option>
+            <option value="due_soon" ${this.catalogFilters.status === "due_soon" ? "selected" : ""}>Due within ${s.dueSoonDays ?? 7} days</option>
           </select>
           <select class="st-select" data-catalog-sort>
             <option value="number" ${this.catalogFilters.sortBy === "number" ? "selected" : ""}>Sort by module number</option>
@@ -288,6 +294,14 @@ class ModuleManagement {
       this.catalogFilters.status = e.target.value;
       this.renderCatalogView();
     });
+    // Attention cards toggle the matching status filter (click again to clear).
+    root.querySelectorAll("[data-attention-filter]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const value = btn.dataset.attentionFilter;
+        this.catalogFilters.status = this.catalogFilters.status === value ? "all" : value;
+        this.renderCatalogView();
+      });
+    });
     root.querySelector("[data-catalog-clear]")?.addEventListener("click", () => {
       this.catalogFilters = { search: "", status: "all", sortBy: "number" };
       this.renderCatalogView();
@@ -311,6 +325,42 @@ class ModuleManagement {
     this.revealAnimated(root, animate);
   }
 
+  // Two cards under the summary: unreturned modules past their planned
+  // return date, and ones due within the Due Soon window. Each filters the
+  // catalog to the affected modules; opening one then lists who has and
+  // hasn't returned it.
+  static renderAttentionStrip(s) {
+    const days = s.dueSoonDays ?? 7;
+    const status = this.catalogFilters.status;
+    const card = (key, tone, icon, learners, modules, label) => `
+      <button type="button" class="st-mm-attention-card st-mm-attention-card--${tone}${status === key ? " is-active" : ""}"
+        data-attention-filter="${key}" aria-pressed="${status === key}" ${learners ? "" : "disabled"}>
+        <span class="material-symbols-outlined st-mm-attention-icon">${icon}</span>
+        <span class="st-mm-attention-text">
+          <span class="st-mm-attention-value"><b class="num">${learners}</b> ${label}</span>
+          <span class="st-mm-attention-sub">${
+            learners ? `across ${modules} module${modules === 1 ? "" : "s"} · ${status === key ? "showing these modules" : "click to view"}` : "nothing here right now"
+          }</span>
+        </span>
+      </button>`;
+    return `
+      <div class="st-mm-attention" aria-label="Module returns needing attention">
+        ${card("overdue", "overdue", "warning", s.overdueLearners ?? 0, s.overdueModules ?? 0, "overdue returns")}
+        ${card("due_soon", "due", "schedule", s.dueSoonLearners ?? 0, s.dueSoonModules ?? 0, `due within ${days} days`)}
+      </div>`;
+  }
+
+  static catalogAttentionTags(m) {
+    const tags = [];
+    if (m.overdueCount) {
+      tags.push(`<span class="st-pill st-pill--high st-mm-attention-tag"><span class="material-symbols-outlined">warning</span>${m.overdueCount} overdue</span>`);
+    }
+    if (m.dueSoonCount) {
+      tags.push(`<span class="st-pill st-pill--pending st-mm-attention-tag"><span class="material-symbols-outlined">schedule</span>${m.dueSoonCount} due soon</span>`);
+    }
+    return tags.length ? `<div class="st-mm-attention-tags">${tags.join("")}</div>` : "";
+  }
+
   static renderCatalogRow(m, i) {
     const statusClass = m.isArchived ? "info" : this.badgeClassFor(m.releaseStatus);
     const statusLabel = m.isArchived
@@ -329,7 +379,7 @@ class ModuleManagement {
           </div>
         </div>
       </td>
-      <td data-col="status"><span class="st-badge st-badge-${statusClass}">${statusLabel}</span></td>
+      <td data-col="status"><span class="st-badge st-badge-${statusClass}">${statusLabel}</span>${m.isArchived ? "" : this.catalogAttentionTags(m)}</td>
     `;
 
     if (m.isArchived) {
@@ -527,7 +577,10 @@ class ModuleManagement {
     this.view = "detail";
     this.activeModuleId = classModuleId;
     this.selectedEnrollmentIds = new Set();
-    this.detailFilters = { search: "", stage: "all", modality: "all" };
+    // Opened from the Overdue / Due soon view: list the late or soon-due
+    // learners first, but keep everyone (returned too) in the list.
+    const urgentFirst = ["overdue", "due_soon"].includes(this.catalogFilters.status);
+    this.detailFilters = { search: "", stage: "all", modality: "all", urgentFirst };
     document.querySelector("[data-add-module-btn]").style.display = "none";
     document.querySelector("[data-catalog-view-toggle]").style.display = "none";
 
@@ -600,13 +653,32 @@ class ModuleManagement {
     return "Not Released";
   }
 
+  // Overdue first (most days late), then due soon (soonest), then everyone
+  // else in name order -- used when the module was opened from the
+  // Overdue / Due soon view.
+  static urgencyRank(r) {
+    if (r.overdue) return [0, -(r.daysOverdue || 0)];
+    if (r.dueSoon) return [1, r.daysUntilDue || 0];
+    return [2, 0];
+  }
+
   static filteredRoster() {
-    const { search, stage, modality } = this.detailFilters;
-    return this.roster.filter((r) => {
+    const { search, stage, modality, urgentFirst } = this.detailFilters;
+    const list = this.roster.filter((r) => {
       if (search && !r.name.toLowerCase().includes(search.toLowerCase())) return false;
-      if (stage !== "all" && this.stageFor(r) !== stage) return false;
+      if (stage === "overdue") {
+        if (!r.overdue) return false;
+      } else if (stage === "due_soon") {
+        if (!r.dueSoon) return false;
+      } else if (stage !== "all" && this.stageFor(r) !== stage) return false;
       if (modality !== "all" && r.modality !== modality) return false;
       return true;
+    });
+    if (!urgentFirst) return list;
+    return [...list].sort((a, b) => {
+      const [ga, ka] = this.urgencyRank(a);
+      const [gb, kb] = this.urgencyRank(b);
+      return ga - gb || ka - kb;
     });
   }
 
@@ -630,6 +702,8 @@ class ModuleManagement {
     const notCount = this.roster.filter((r) => this.stageFor(r) === "Not Released").length;
     const relCount = this.roster.filter((r) => this.stageFor(r) === "Released").length;
     const retCount = this.roster.filter((r) => this.stageFor(r) === "Returned").length;
+    const overdueCount = this.roster.filter((r) => r.overdue).length;
+    const dueSoonCount = this.roster.filter((r) => r.dueSoon).length;
 
     root.innerHTML = `
       <button type="button" class="st-back-link" data-back-to-catalog>
@@ -666,6 +740,8 @@ class ModuleManagement {
             <span><i class="st-stage-legend-dot--not"></i><b>${notCount}</b> not released</span>
             <span><i class="st-stage-legend-dot--rel"></i><b>${relCount}</b> released</span>
             <span><i class="st-stage-legend-dot--ret"></i><b>${retCount}</b> returned</span>
+            ${overdueCount ? `<span class="st-mm-legend-overdue"><span class="material-symbols-outlined">warning</span><b>${overdueCount}</b> overdue</span>` : ""}
+            ${dueSoonCount ? `<span class="st-mm-legend-due"><span class="material-symbols-outlined">schedule</span><b>${dueSoonCount}</b> due soon</span>` : ""}
           </div>
         </div>
 
@@ -679,6 +755,8 @@ class ModuleManagement {
             <option value="Not Released" ${this.detailFilters.stage === "Not Released" ? "selected" : ""}>Not released</option>
             <option value="Released" ${this.detailFilters.stage === "Released" ? "selected" : ""}>Released</option>
             <option value="Returned" ${this.detailFilters.stage === "Returned" ? "selected" : ""}>Returned</option>
+            <option value="overdue" ${this.detailFilters.stage === "overdue" ? "selected" : ""}>Overdue (not returned)</option>
+            <option value="due_soon" ${this.detailFilters.stage === "due_soon" ? "selected" : ""}>Due soon (not returned)</option>
           </select>
           <select class="st-select" data-detail-modality-filter>
             <option value="all" ${this.detailFilters.modality === "all" ? "selected" : ""}>All modalities</option>
@@ -816,11 +894,27 @@ class ModuleManagement {
         <td class="checkbox-col" data-col="select">${stage === "Not Released" ? `<input type="checkbox" data-select-learner="${r.enrollmentId}" ${checked}>` : ""}</td>
         <td data-col="learner"><button type="button" class="st-qv-trigger st-learner-cell" data-learner-preview="${r.learnerId}" aria-haspopup="dialog" aria-label="Preview ${r.name}'s profile"><span class="st-avatar-initials">${Utils.initials(String(r.name || "?").replace(",", ""))}</span><span class="st-module-title">${r.name}</span></button></td>
         <td data-col="modality">${this.modalityPill(r.modality)}</td>
-        <td data-col="stage"><span class="st-badge st-badge-${badgeClass}">${stage === "Not Released" ? "Not released" : stage}</span></td>
-        <td data-col="dates"><div class="st-date-cell"><span>Released ${releaseDateHtml}</span><span class="st-muted">Returned ${r.returnDate || "—"}</span></div></td>
+        <td data-col="stage">${this.stageBadgeHtml(r, stage, badgeClass)}</td>
+        <td data-col="dates"><div class="st-date-cell"><span>Released ${releaseDateHtml}</span>${
+          stage === "Released" && r.plannedReturnDate ? `<span class="st-muted">Due ${r.plannedReturnDate}</span>` : ""
+        }<span class="st-muted">Returned ${r.returnDate || "—"}</span></div></td>
         <td data-col="actions" class="is-right">${actionHtml}</td>
       </tr>
     `;
+  }
+
+  // A released-but-unreturned module that's late or nearly due says so in
+  // the Stage column instead of a plain "Released".
+  static stageBadgeHtml(r, stage, badgeClass) {
+    if (r.overdue) {
+      const d = r.daysOverdue || 0;
+      return `<span class="st-badge st-badge-danger">Overdue · ${d} day${d === 1 ? "" : "s"}</span>`;
+    }
+    if (r.dueSoon) {
+      const d = r.daysUntilDue || 0;
+      return `<span class="st-badge st-badge-warning">${d === 0 ? "Due today" : `Due in ${d} day${d === 1 ? "" : "s"}`}</span>`;
+    }
+    return `<span class="st-badge st-badge-${badgeClass}">${stage === "Not Released" ? "Not released" : stage}</span>`;
   }
 
   // Same pill styling as the teacher dashboard's learner registry
