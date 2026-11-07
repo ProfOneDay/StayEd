@@ -171,18 +171,17 @@ class EarlyWarningPage {
   static renderSummary(allLearners) {
     const high = allLearners.filter((l) => l.risk === "High").length;
     const moderate = allLearners.filter((l) => l.risk === "Moderate").length;
-    const total = high + moderate;
     const low = allLearners.filter((l) => l.risk === "Low").length;
+    // Matches what the "show all" card lists: every assessed learner.
+    const total = high + moderate + low;
 
     this.countTo(document.querySelector("[data-ewa-total]"), total);
     this.countTo(document.querySelector("[data-ewa-high]"), high);
     this.countTo(document.querySelector("[data-ewa-moderate]"), moderate);
     this.countTo(document.querySelector("[data-ewa-low]"), low);
 
-    // Percentages are of all learners (allLearners.length), not of
-    // `total` (active alerts = high+moderate only) -- Low is deliberately
-    // excluded from the alert count but still shown in the legend, and
-    // dividing by `total` would push its percentage over 100%.
+    // Percentages are of all learners (allLearners.length), including the
+    // Not Yet Assessed ones, not of `total` (assessed learners only).
     const setPct = (selector, value) => {
       const el = document.querySelector(selector);
       if (el) el.textContent = `${Utils.pct(value, allLearners.length)}%`;
@@ -241,10 +240,10 @@ class EarlyWarningPage {
       );
     }
 
+    // "All risk levels" lists every assessed learner (High, Moderate and
+    // Low), still sorted highest probability first so High/Moderate stay on top.
     if (this.state.riskLevel) {
       rows = rows.filter((l) => l.risk === this.state.riskLevel);
-    } else {
-      rows = rows.filter((l) => l.risk === "High" || l.risk === "Moderate");
     }
 
     if (this.state.clc) {
@@ -255,7 +254,7 @@ class EarlyWarningPage {
 
     this.set(
       "[data-ewa-count]",
-      `${rows.length} alert${rows.length === 1 ? "" : "s"}`,
+      `${rows.length} learner${rows.length === 1 ? "" : "s"}`,
     );
 
     this.renderPage();
@@ -274,7 +273,7 @@ class EarlyWarningPage {
 
     if (!pageRows.length) {
       const clcSelected = this.state.clc;
-      const title = clcSelected ? "No learners requiring attention in this CLC." : "No active alerts";
+      const title = clcSelected ? "No assessed learners in this CLC." : "No assessed learners";
       const text = clcSelected
         ? "Try selecting a different CLC or clearing your filters."
         : "Try adjusting your search or filters.";
@@ -357,7 +356,7 @@ class EarlyWarningPage {
 
     this.set(
       "[data-ewa-info]",
-      `Showing ${start}\u2013${end} of ${total} alerts`,
+      `Showing ${start}\u2013${end} of ${total} learners`,
     );
 
     const container = document.querySelector("[data-ewa-pages]");
